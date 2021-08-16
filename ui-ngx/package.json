@@ -1,5 +1,5 @@
 {
-  "name": "thingsboard",
+  "name": "HS-IoT",
   "version": "3.3.0",
   "scripts": {
     "ng": "ng",

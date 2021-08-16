@@ -338,6 +338,11 @@
             <artifactId>Java-WebSocket</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-spring-boot-starter</artifactId>
+            <version>1.9.6</version>
+        </dependency>
     </dependencies>
 
     <build>

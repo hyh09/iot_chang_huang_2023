@@ -151,3 +151,20 @@ export function isCurrentPublicDashboardCustomer(dashboard: DashboardInfo, custo
     return false;
   }
 }
+
+
+
+export interface UIInfo {
+  applicationTitle?: string;
+  iconImageUrl?: string;
+  logoImageUrl?: string;
+  logoImageHeight?: string;
+  platformMainColor?: string;
+  platformTextMainColor?: string;
+  platformMenuColorActive?: string;
+  platformMenuColorHover?: string;
+  platformButtonColor?: string;
+  showNameVersion: boolean;
+  platformName?: string;
+  platformVersion?: string;
+}

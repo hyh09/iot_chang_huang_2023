@@ -25,7 +25,6 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { Authority } from '@shared/models/authority.enum';
 import { guid } from '@core/utils';
 import { AuthState } from '@core/auth/auth.models';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -240,6 +239,30 @@ export class MenuService {
       },
       {
         id: guid(),
+        name: 'my.biz',
+        type: 'toggle',
+        path: '/biz',
+        // height: '80px',
+        icon: 'touch_app',
+        pages: [
+          {
+            id: guid(),
+            name: 'my.biz1',
+            type: 'link',
+            path: '/biz/biz1',
+            icon: 'av_timer'
+          },
+          {
+            id: guid(),
+            name: 'my.biz2',
+            type: 'link',
+            path: '/biz/biz2',
+            icon: 'disc_full'
+          }
+        ]
+      },
+      {
+        id: guid(),
         name: 'rulechain.rulechains',
         type: 'link',
         path: '/ruleChains',
@@ -352,7 +375,7 @@ export class MenuService {
         name: 'admin.system-settings',
         type: 'toggle',
         path: '/settings',
-        height: '80px',
+        height: '120px',
         icon: 'settings',
         pages: [
           {
@@ -362,6 +385,14 @@ export class MenuService {
             path: '/settings/home',
             icon: 'settings_applications'
           },
+          {
+            id: guid(),
+            name: 'admin.custom-ui',
+            type: 'link',
+            path: '/settings/custom-ui',
+            icon: 'color_lens',
+          },
+
           {
             id: guid(),
             name: 'resource.resources-library',

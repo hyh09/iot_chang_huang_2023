@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { PageLink } from '@shared/models/page/page-link';
 import { PageData } from '@shared/models/page/page-data';
-import { Dashboard, DashboardInfo, HomeDashboard, HomeDashboardInfo } from '@shared/models/dashboard.models';
+import {Dashboard, DashboardInfo, HomeDashboard, HomeDashboardInfo, UIInfo} from '@shared/models/dashboard.models';
 import { WINDOW } from '@core/services/window.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, publishReplay, refCount } from 'rxjs/operators';
@@ -188,4 +188,15 @@ export class DashboardService {
       defaultHttpOptionsFromConfig(config));
   }
 
+
+  /**
+   * 租户自定义皮肤
+   * @param config
+   */
+  public getTenantUIInfo(config?: RequestConfig): Observable<UIInfo> {
+    return this.http.get<UIInfo>(`/api/tenant/ui/info`, defaultHttpOptionsFromConfig(config));
+  }
+  public saveTenantUIInfo(uiInfo: UIInfo, config?: RequestConfig) {
+    return this.http.post<UIInfo>('/api/tenant/ui/info', uiInfo, defaultHttpOptionsFromConfig(config));
+  }
 }

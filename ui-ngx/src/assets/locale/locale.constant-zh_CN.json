@@ -57,7 +57,13 @@
     "undo": "撤销",
     "update": "更新",
     "view": "查看",
-    "yes": "是"
+    "yes": "是",
+    "reset": "恢复默认"
+  },
+  "my": {
+    "biz": "设备监控",
+    "biz1": "实时状态",
+    "biz2": "报警管理"
   },
   "admin": {
     "aws-access-key-id": "AWS访问密钥ID",
@@ -2603,5 +2609,27 @@
       "update-timeseries": "更新 Timeseries",
       "value": "价值"
     }
+  },
+  "platform": {
+    "name": "平台名称",
+    "version": "平台版本",
+    "showNameVersion": "展示平台名称和版本",
+    "advancedCss": "高级CSS",
+    "logoHeight": "Logo高度",
+    "applicationTitle": "应用标题",
+    "appIcon": "网站图标",
+    "main-color": "主体颜色",
+    "main-color-text": "文字颜色",
+    "button-color": "按钮颜色",
+    "menu-color-active": "菜单栏激活颜色",
+    "menu-color-hover": "菜单栏悬停颜色"
+  },
+  "system-settings": {
+    "system-settings": "系统设置",
+    "home-settings": "首页设置",
+    "custom-menu": "自定义菜单",
+    "home-dashboard": "首页仪表板",
+    "hideHomeDashboardToolbar": "隐藏首页仪表板工具栏",
+    "custom-ui": "主题设置"
   }
 }

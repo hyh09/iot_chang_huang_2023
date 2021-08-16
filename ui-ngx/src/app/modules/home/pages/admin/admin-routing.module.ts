@@ -29,6 +29,7 @@ import { SmsProviderComponent } from '@home/pages/admin/sms-provider.component';
 import { HomeSettingsComponent } from '@home/pages/admin/home-settings.component';
 import { EntitiesTableComponent } from '@home/components/entity/entities-table.component';
 import { ResourcesLibraryTableConfigResolver } from '@home/pages/admin/resource/resources-library-table-config.resolve';
+import {CustomUiComponent} from "@home/pages/custom-ui/custom-ui.component";
 
 @Injectable()
 export class OAuth2LoginProcessingUrlResolver implements Resolve<string> {
@@ -143,6 +144,21 @@ const routes: Routes = [
           }
         }
       },
+
+      {
+        path: 'custom-ui',
+        component: CustomUiComponent,
+        canDeactivate: [ConfirmOnExitGuard],
+        data: {
+          auth: [Authority.TENANT_ADMIN],
+          title: 'admin.custom-ui',
+          breadcrumb: {
+            label: 'admin.custom-ui',
+            icon: 'color_lens'
+          }
+        }
+      },
+
       {
         path: 'resources-library',
         component: EntitiesTableComponent,

@@ -16,7 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '@core/auth/auth.service';
-import { Store } from '@ngrx/store';
+import {select, Store} from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { PageComponent } from '@shared/components/page.component';
 import { FormBuilder } from '@angular/forms';
@@ -24,6 +24,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Constants } from '@shared/models/constants';
 import { Router } from '@angular/router';
 import { OAuth2ClientInfo } from '@shared/models/oauth2.models';
+import {combineLatest} from "rxjs";
+import {selectAuthUser, selectIsUserLoaded} from "@core/auth/auth.selectors";
+import {distinctUntilChanged, filter, map, skip} from "rxjs/operators";
+import { ActionTenantUIChangeAll } from '@core/custom/tenant-ui.actions';
+import { DashboardService } from '@core/http/dashboard.service';
+import { Authority } from '@shared/models/authority.enum';
 
 @Component({
   selector: 'tb-login',
@@ -41,7 +47,8 @@ export class LoginComponent extends PageComponent implements OnInit {
   constructor(protected store: Store<AppState>,
               private authService: AuthService,
               public fb: FormBuilder,
-              private router: Router) {
+              private router: Router,
+              private dashboardService: DashboardService) {
     super(store);
   }
 
@@ -67,6 +74,24 @@ export class LoginComponent extends PageComponent implements OnInit {
         control.markAsTouched({onlySelf: true});
       });
     }
+  }
+
+  private loginCustomUI(): void{
+    combineLatest([
+      this.store.pipe(select(selectAuthUser)),
+      this.store.pipe(select(selectIsUserLoaded))]
+    ).pipe(
+      map(results => ({ authUser: results[0], isUserLoaded: results[1] })),
+      distinctUntilChanged(),
+      filter((data) => data.isUserLoaded),
+      skip(1)
+    ).subscribe((data) => {
+      if(data.authUser.authority === Authority.TENANT_ADMIN){
+        this.dashboardService.getTenantUIInfo().subscribe(ui => {
+          this.store.dispatch(new ActionTenantUIChangeAll(ui));
+        });
+      }
+    });
   }
 
 }

@@ -50,6 +50,11 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
 
   private requiredValue: boolean;
 
+  //添加图片格式验证
+  @Input()
+  imgSuffix: Array<string>;
+
+
   get required(): boolean {
     return this.requiredValue;
   }
@@ -151,5 +156,14 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
     this.imageUrl = null;
     this.safeImageUrl = null;
     this.updateModel();
+  }
+
+  //添加方法：获取允许的图片格式
+  getAcceptImg() {
+    if (this.imgSuffix) {
+      return { accept: this.imgSuffix.map((suffix) => 'image/' + suffix).join(',') };
+    } else {
+      return { accept: 'image/*' };
+    }
   }
 }

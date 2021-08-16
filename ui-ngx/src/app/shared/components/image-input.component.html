@@ -38,7 +38,9 @@
            flowDrop
            [flow]="flow.flowJs">
         <label for="{{inputId}}" translate>dashboard.drop-image</label>
-        <input class="file-input" flowButton type="file" [flow]="flow.flowJs" [flowAttributes]="{accept: 'image/*'}" id="{{inputId}}">
+        <input class="file-input" flowButton type="file" [flow]="flow.flowJs" [flowAttributes]="getAcceptImg()" id="{{inputId}}">
+<!--        <input class="file-input" flowButton type="file" [flow]="flow.flowJs" [flowAttributes]="{accept: 'image/*'}" id="{{inputId}}">-->
+
       </div>
     </div>
   </ng-container>
