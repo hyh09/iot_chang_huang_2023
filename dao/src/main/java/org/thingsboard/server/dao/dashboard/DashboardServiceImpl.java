@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 package org.thingsboard.server.dao.dashboard;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,11 +43,18 @@ import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.edge.EdgeDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
+import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.service.Validator;
+import org.thingsboard.server.dao.sql.tenant.JpaTenantDao;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
+import org.thingsboard.server.dao.tenant.TenantService;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
@@ -55,6 +64,12 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
 
     public static final String INCORRECT_DASHBOARD_ID = "Incorrect dashboardId ";
     public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
+
+    @Autowired
+    private JpaTenantDao jpaTenantDao;
+    @Autowired
+    protected TenantService tenantService;
+
     @Autowired
     private DashboardDao dashboardDao;
 
@@ -368,6 +383,92 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
             updateAssignedCustomer(customer.getTenantId(), new DashboardId(entity.getUuidId()), this.customer);
         }
 
+    }
+
+    /**
+     * 保存租户UI
+     * @param tenantId
+     * @param params
+     */
+    @Override
+    public void saveUIByTenantId(TenantId tenantId, Map<String, String> params) {
+        log.trace("Executing saveUIByTenantId, tenantId [{}]", tenantId);
+        Validator.validateId(tenantId, "Incorrect tenantId " + tenantId);
+        Tenant tenant = jpaTenantDao.findById(tenantId,tenantId.getId());
+//        Tenant tenant = tenantService.findTenantById(tenantId);
+
+        if (tenant == null) {
+            throw new DataValidationException("Can't save ui for non-existent tenant!");
+        }
+        ObjectNode additionalInfo = tenant.getAdditionalInfo().deepCopy();
+        checkAndPutAdditionalInfo(additionalInfo, "applicationTitle", params);
+        checkAndPutAdditionalInfo(additionalInfo, "iconImageUrl", params);
+        checkAndPutAdditionalInfo(additionalInfo, "logoImageUrl", params);
+        checkAndPutAdditionalInfo(additionalInfo, "logoImageHeight", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformMainColor", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformButtonColor", params);
+        checkAndPutAdditionalInfo(additionalInfo, "showNameVersion", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformName", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformVersion", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformTextMainColor", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformMenuColorActive", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformMenuColorHover", params);
+        try {
+            tenant.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
+            jpaTenantDao.save(tenantId, tenant);
+        } catch (IOException e) {
+            throw new IncorrectParameterException("Unable to save tenant ui.", e);
+        }
+    }
+
+    private void checkAndPutAdditionalInfo(ObjectNode additionalInfo, String fieldName, Map<String, String> params) {
+
+        if (params.get(fieldName) == null) {
+            if (additionalInfo.has(fieldName)) {
+                additionalInfo.remove(fieldName);
+            }
+        } else {
+            additionalInfo.put(fieldName, params.get(fieldName));
+        }
+    }
+
+
+    @Override
+    public Map<String, Object> getTenantUIInfo(TenantId tenantId) {
+        log.trace("Executing getTenantUIInfo, tenantId [{}]", tenantId);
+        Validator.validateId(tenantId, "Incorrect tenantId " + tenantId);
+        Tenant tenant = jpaTenantDao.findById(tenantId,tenantId.getId());
+//        Tenant tenant = tenantService.findTenantById(tenantId);
+        if (tenant == null) {
+            throw new DataValidationException("Can't find ui for non-existent tenant!");
+        }
+        JsonNode additionalInfo = tenant.getAdditionalInfo();
+        Map<String, Object> map = new HashMap<>();
+        String applicationTitle = additionalInfo.get("applicationTitle") != null ? additionalInfo.get("applicationTitle").asText() : null;
+        String iconImageUrl = additionalInfo.get("iconImageUrl") != null ? additionalInfo.get("iconImageUrl").asText() : null;
+        String logoImageUrl = additionalInfo.get("logoImageUrl") != null ? additionalInfo.get("logoImageUrl").asText() : null;
+        String logoImageHeight = additionalInfo.get("logoImageHeight") != null ? additionalInfo.get("logoImageHeight").asText() : null;
+        String platformMainColor = additionalInfo.get("platformMainColor") != null ? additionalInfo.get("platformMainColor").asText() : null;
+        String platformTextMainColor = additionalInfo.get("platformTextMainColor") != null ? additionalInfo.get("platformTextMainColor").asText() : null;
+        String platformButtonColor = additionalInfo.get("platformButtonColor") != null ? additionalInfo.get("platformButtonColor").asText() : null;
+        String platformMenuColorActive = additionalInfo.get("platformMenuColorActive") != null ? additionalInfo.get("platformMenuColorActive").asText() : null;
+        String platformMenuColorHover = additionalInfo.get("platformMenuColorHover") != null ? additionalInfo.get("platformMenuColorHover").asText() : null;
+        boolean showNameVersion = additionalInfo.get("showNameVersion") != null && additionalInfo.get("showNameVersion").asBoolean(false);
+        String platformName = additionalInfo.get("platformName") != null ? additionalInfo.get("platformName").asText() : null;
+        String platformVersion = additionalInfo.get("platformVersion") != null ? additionalInfo.get("platformVersion").asText() : null;
+        map.put("applicationTitle", applicationTitle);
+        map.put("iconImageUrl", iconImageUrl);
+        map.put("logoImageUrl", logoImageUrl);
+        map.put("logoImageHeight", logoImageHeight);
+        map.put("platformMainColor", platformMainColor);
+        map.put("platformTextMainColor", platformTextMainColor);
+        map.put("platformButtonColor", platformButtonColor);
+        map.put("platformMenuColorActive", platformMenuColorActive);
+        map.put("platformMenuColorHover", platformMenuColorHover);
+        map.put("showNameVersion", showNameVersion);
+        map.put("platformName", platformName);
+        map.put("platformVersion", platformVersion);
+        return map;
     }
 
 }

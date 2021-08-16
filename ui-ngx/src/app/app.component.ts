@@ -19,7 +19,7 @@ import 'hammerjs';
 import { Component, OnInit } from '@angular/core';
 
 import { environment as env } from '@env/environment';
-
+import cssjs from '@core/css/css';
 import { TranslateService } from '@ngx-translate/core';
 import { select, Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -27,9 +27,17 @@ import { LocalStorageService } from '@core/local-storage/local-storage.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
 import { combineLatest } from 'rxjs';
-import { selectIsAuthenticated, selectIsUserLoaded } from '@core/auth/auth.selectors';
+import { getCurrentAuthUser, selectIsAuthenticated, selectIsUserLoaded } from '@core/auth/auth.selectors';
 import { distinctUntilChanged, filter, map, skip } from 'rxjs/operators';
 import { AuthService } from '@core/auth/auth.service';
+import {DashboardService} from "@core/http/dashboard.service";
+import {TitleService} from "@core/services/title.service";
+import {Router} from "@angular/router";
+import {selectTenantUI} from "@core/custom/tenant-ui.selectors";
+import {ActionTenantUIChangeAll} from "@core/custom/tenant-ui.actions";
+import {TenantUIState} from "@core/custom/tenant-ui.models";
+import {Authority} from "@shared/models/authority.enum";
+import {hashCode} from "@core/utils";
 
 @Component({
   selector: 'tb-root',
@@ -43,9 +51,12 @@ export class AppComponent implements OnInit {
               private translate: TranslateService,
               private matIconRegistry: MatIconRegistry,
               private domSanitizer: DomSanitizer,
-              private authService: AuthService) {
+              private authService: AuthService,
+              private dashboardService: DashboardService,
+              private titleService: TitleService,
+              private router: Router) {
 
-    console.log(`ThingsBoard Version: ${env.tbVersion}`);
+    console.log(`HsIoT Version: ${env.tbVersion}`);
 
     this.matIconRegistry.addSvgIconSetInNamespace('mdi',
       this.domSanitizer.bypassSecurityTrustResourceUrl('./assets/mdi.svg'));
@@ -129,6 +140,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.subscribeUiState();
+    this.initUiInfo();
   }
 
   onActivateComponent($event: any) {
@@ -136,6 +149,85 @@ export class AppComponent implements OnInit {
     if (loadingElement.length) {
       loadingElement.remove();
     }
+  }
+  //订阅ui状态更改
+  subscribeUiState(){
+    this.store.pipe(select(selectTenantUI)).subscribe(ui => {
+      this.changeCss(ui);
+      if (ui) {
+        this.changeIcon(ui.iconImageUrl);
+        this.changeTitle(ui.applicationTitle);
+      }
+    });
+  }
+  //初始化ui信息
+  initUiInfo(){
+    this.store.pipe(select(selectIsAuthenticated)).subscribe( isAuthed => {
+      if(isAuthed){
+        if(getCurrentAuthUser(this.store).authority === Authority.TENANT_ADMIN){
+          this.dashboardService.getTenantUIInfo().subscribe(ui => {
+            this.store.dispatch(new ActionTenantUIChangeAll(ui));
+          });
+        }
+      }
+    });
+  }
+
+  //改变CSS样式
+  changeCss(ui: TenantUIState) {
+    let css = '.tb-default .mat-toolbar.mat-primary{';
+    const cssParser = new cssjs();
+    cssParser.testMode = false;
+    const namespace = 'global-ui-css-' + hashCode(css);
+    cssParser.cssPreviewNamespace = namespace;
+    if (ui.platformMainColor) {
+      css = css + 'background-color: ' + ui.platformMainColor + ' !important;';
+    }
+    if (ui.platformTextMainColor) {
+      css = css + 'color: ' + ui.platformTextMainColor + ' !important;';
+    }
+    css = css + '}';
+    if (ui.platformButtonColor) {
+      css = css + '.tb-default .mat-raised-button.mat-primary{background-color: ' + ui.platformButtonColor + ' !important;}';
+    }
+    if (ui.platformMenuColorActive) {
+      css = css + '.tb-default li.ng-star-inserted .mat-button.tb-active {background-color: ' + ui.platformMenuColorActive + ';}';
+    }
+    if (ui.platformMenuColorHover) {
+      css = css + '.tb-default li.ng-star-inserted .mat-button:hover {background-color: ' + ui.platformMenuColorHover + ';}';
+    }
+    cssParser.createStyleElement(namespace, css, 'nonamespace');
+  }
+
+  //改变应用标题
+  changeTitle(title: string) {
+    if (title) {
+      env.appTitle = title;
+    } else {
+      env.appTitle = 'ThingsBoard';
+    }
+    this.titleService.setTitle(
+      this.router.routerState.snapshot.root,
+      this.translate
+    );
+  }
+
+  //改变应用图标
+  changeIcon(icon: string) {
+    const __el = document.getElementById('custom-icon');
+    if (__el) {
+      __el.parentNode.removeChild(__el);
+    }
+    const link = document.createElement('link');
+    link.type = 'image/x-icon';
+    link.id = 'custom-icon';
+    link.rel = 'icon';
+    if (icon) {
+      link.href = icon;
+    } else {
+      link.href = ' thingsboard.ico';
+    }
+    document.getElementsByTagName('head')[0].appendChild(link);
   }
 
 }
