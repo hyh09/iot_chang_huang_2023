@@ -4,7 +4,7 @@ import { TenantUIActions, TenantUIActionTypes } from '@core/custom/tenant-ui.act
 import {environment as env} from '@env/environment.prod';
 
 export const initialState: TenantUIState = {
-  applicationTitle: 'ThingsBoard',
+  applicationTitle: '环思物联',
   iconImageUrl: null,
   logoImageUrl: null,
   logoImageHeight: null,

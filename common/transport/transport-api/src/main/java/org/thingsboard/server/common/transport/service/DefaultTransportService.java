@@ -905,6 +905,7 @@ public class DefaultTransportService implements TransportService {
     }
 
 
+    @Override
     public void onProfileUpdate(DeviceProfile deviceProfile) {
         long deviceProfileIdMSB = deviceProfile.getId().getId().getMostSignificantBits();
         long deviceProfileIdLSB = deviceProfile.getId().getId().getLeastSignificantBits();

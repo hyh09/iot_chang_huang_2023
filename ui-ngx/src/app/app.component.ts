@@ -111,6 +111,9 @@ export class AppComponent implements OnInit {
 
     this.setupTranslate();
     this.setupAuth();
+
+    this.subscribeUiState();
+    this.initUiInfo();
   }
 
   setupTranslate() {
@@ -140,8 +143,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.subscribeUiState();
-    this.initUiInfo();
+
   }
 
   onActivateComponent($event: any) {
@@ -153,6 +155,7 @@ export class AppComponent implements OnInit {
   //订阅ui状态更改
   subscribeUiState(){
     this.store.pipe(select(selectTenantUI)).subscribe(ui => {
+      console.log(ui)
       this.changeCss(ui);
       if (ui) {
         this.changeIcon(ui.iconImageUrl);
@@ -201,10 +204,11 @@ export class AppComponent implements OnInit {
 
   //改变应用标题
   changeTitle(title: string) {
+    console.log(title)
     if (title) {
       env.appTitle = title;
-    } else {
-      env.appTitle = 'ThingsBoard';
+    }else{
+      env.appTitle = "环思物联";
     }
     this.titleService.setTitle(
       this.router.routerState.snapshot.root,
