@@ -30,6 +30,13 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { AuthState } from '@core/auth/auth.models';
 import { WINDOW } from '@core/services/window.service';
 import { instanceOfSearchableComponent, ISearchableComponent } from '@home/models/searchable-component.models';
+import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
+import {
+  selectPlatformName,
+  selectPlatformVersion,
+  selectShowNameVersion,
+  selectTenantUI
+} from "@core/custom/tenant-ui.selectors";
 
 const screenfull = _screenfull as _screenfull.Screenfull;
 
@@ -50,7 +57,14 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   sidenavMode: 'over' | 'push' | 'side' = 'side';
   sidenavOpened = true;
 
-  logo = 'assets/logo_title_white.svg';
+  logo: string | SafeUrl = 'assets/logo_title_white.svg';
+
+  //custom ui 相关属性
+  logoHeight = 36;
+  name: string;
+  version: string;
+  showNameVersion: boolean;
+
 
   @ViewChild('sidenav')
   sidenav: MatSidenav;
@@ -69,8 +83,10 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
 
   constructor(protected store: Store<AppState>,
               @Inject(WINDOW) private window: Window,
-              public breakpointObserver: BreakpointObserver) {
+              public breakpointObserver: BreakpointObserver,
+              private sanitizer: DomSanitizer) {
     super(store);
+    this.initCustomUi();
   }
 
   ngOnInit() {
@@ -172,5 +188,21 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     if (this.searchableComponent) {
       this.searchableComponent.onSearchTextUpdated(this.searchText);
     }
+  }
+
+  private initCustomUi(){
+    //构造方法内添加下面代码
+    this.store.pipe(select(selectTenantUI)).subscribe(ui => {
+      if(ui){
+        this.logo = ui.logoImageUrl ? this.sanitizer.bypassSecurityTrustUrl(ui.logoImageUrl) : 'assets/logo_title_white.svg'
+        this.logoHeight = ui.logoImageHeight ? Number(ui.logoImageHeight) : 36
+      }else{
+        this.logo = 'assets/logo_title_white.svg';
+        this.logoHeight = 36;
+      }
+    })
+    this.store.pipe(select(selectPlatformName)).subscribe(res => this.name = res);
+    this.store.pipe(select(selectPlatformVersion)).subscribe(res => this.version = res);
+    this.store.pipe(select(selectShowNameVersion)).subscribe(res => this.showNameVersion = res);
   }
 }

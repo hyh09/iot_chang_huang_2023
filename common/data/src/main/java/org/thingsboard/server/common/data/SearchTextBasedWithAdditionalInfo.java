@@ -24,6 +24,7 @@ import org.thingsboard.server.common.data.id.UUIDBased;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -64,9 +65,15 @@ public abstract class SearchTextBasedWithAdditionalInfo<I extends UUIDBased> ext
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         SearchTextBasedWithAdditionalInfo<?> that = (SearchTextBasedWithAdditionalInfo<?>) o;
         return Arrays.equals(additionalInfoBytes, that.additionalInfoBytes);
     }
@@ -84,7 +91,10 @@ public abstract class SearchTextBasedWithAdditionalInfo<I extends UUIDBased> ext
             byte[] data = binaryData.get();
             if (data != null) {
                 try {
+                    String s = new String(data, StandardCharsets.UTF_8);
+                    System.out.println(s);
                     return mapper.readTree(new ByteArrayInputStream(data));
+
                 } catch (IOException e) {
                     log.warn("Can't deserialize json data: ", e);
                     return null;

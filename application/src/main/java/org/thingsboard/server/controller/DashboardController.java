@@ -56,6 +56,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -752,6 +753,44 @@ public class DashboardController extends BaseController {
                     nonFilteredResult.getTotalElements(),
                     nonFilteredResult.hasNext());
             return checkNotNull(filteredResult);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+
+    /**
+     * 保存租户自定义Ui
+     * @param params
+     * @throws ThingsboardException
+     */
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "tenant/ui/info", method = RequestMethod.POST)
+    public void saveTenantUIInfo(@RequestBody Map<String,String> params) throws ThingsboardException {
+        try {
+
+            Tenant tenant = tenantService.findTenantById(getTenantId());
+            JsonNode additionalInfo = tenant.getAdditionalInfo();
+
+            TenantId tenantId = getTenantId();
+            dashboardService.saveUIByTenantId(tenantId,params);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
+     * 获取租户自定UI信息
+     * @return
+     * @throws ThingsboardException
+     */
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "tenant/ui/info", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String,Object> getTenantUIInfo() throws ThingsboardException {
+        try {
+            TenantId tenantId = getCurrentUser().getTenantId();
+            return dashboardService.getTenantUIInfo(tenantId);
         } catch (Exception e) {
             throw handleException(e);
         }

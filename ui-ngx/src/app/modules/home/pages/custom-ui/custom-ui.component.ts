@@ -19,8 +19,8 @@ import {initialState} from "@core/custom/tenant-ui.reducer";
 })
 export class CustomUiComponent extends PageComponent implements OnInit, HasDirtyFlag,AfterViewInit {
   isDirty = false;
-  faviconMaxKBytes = 256;
-  logoMaxKBytes = 4096;
+  faviconMaxKBytes = 256000;
+  logoMaxKBytes = 4096000;
   customUiFormGroup: FormGroup;
   initData: any;
   previousData: any;
