@@ -6877,6 +6877,13 @@ ngx-hm-carousel@^2.0.0-rc.1:
     hammerjs "^2.0.8"
     resize-observer-polyfill "^1.5.1"
 
+ngx-icon-picker@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/ngx-icon-picker/-/ngx-icon-picker-1.7.0.tgz#713494368f1871023e919f0a528214d0a6574c5b"
+  integrity sha512-TUOj8790HNmIFZOMQCuMAcsyxOsLW5ZKSXAzF5djr+mckCyBDOVu1BhDNpvuGy/LWHZ7LmOtUgePCP9MiF0FSQ==
+  dependencies:
+    tslib "^2.0.0"
+
 ngx-sharebuttons@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/ngx-sharebuttons/-/ngx-sharebuttons-8.0.5.tgz#49481fcb8bf9541747fd72093eca6f4777c1d371"
