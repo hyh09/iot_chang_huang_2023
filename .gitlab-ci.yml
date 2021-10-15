@@ -12,7 +12,7 @@ before_script:
 package:
   stage: package
   retry: 1
-  image: ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/maven-openjdk11
+  image: adoptopenjdk/maven-openjdk11
   tags:
     - hsyl-iot.k8s.专用
   script:
