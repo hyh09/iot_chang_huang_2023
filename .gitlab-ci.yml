@@ -4,7 +4,9 @@ stages:
   - package
 
 before_script:
+  - docker version
   - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
+
 
 # 打包并构建镜像
 package:
