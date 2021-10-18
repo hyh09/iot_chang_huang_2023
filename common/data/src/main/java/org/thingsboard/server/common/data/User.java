@@ -34,6 +34,12 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private TenantId tenantId;
     private CustomerId customerId;
     private String email;
+
+    /**
+     * 添加一个手机号
+     */
+    private  String phoneNumber;
+
     private Authority authority;
     @NoXss
     private String firstName;
@@ -53,6 +59,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.tenantId = user.getTenantId();
         this.customerId = user.getCustomerId();
         this.email = user.getEmail();
+        this.phoneNumber = user.getPhoneNumber();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
@@ -80,6 +87,14 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override
@@ -126,6 +141,8 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         builder.append(customerId);
         builder.append(", email=");
         builder.append(email);
+        builder.append(", phoneNumber=");
+        builder.append(phoneNumber);
         builder.append(", authority=");
         builder.append(authority);
         builder.append(", firstName=");
