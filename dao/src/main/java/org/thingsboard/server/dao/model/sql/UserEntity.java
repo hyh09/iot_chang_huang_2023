@@ -60,6 +60,27 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     @Column(name = ModelConstants.USER_EMAIL_PROPERTY, unique = true)
     private String email;
 
+    /**
+     * 添加一个手机号
+     */
+    @Column(name = ModelConstants.USER_PHONE_NUMBER_PROPERTY, unique = true)
+    private  String phoneNumber;
+    /**
+     * 启用状态
+     */
+    @Column(name = ModelConstants.USER_ACTIVE_STATUS_PROPERTY)
+    private  String  activeStatus;
+    /**
+     * 用户编码
+     */
+    @Column(name = ModelConstants.USER_USERCODE_PROPERTY)
+    private  String userCode;
+    /**
+     * 用户名称
+     */
+    @Column(name = ModelConstants.USER_USER_NAME_PROPERTY)
+    private  String userName;
+
     @Column(name = ModelConstants.SEARCH_TEXT_PROPERTY)
     private String searchText;
 
@@ -92,6 +113,12 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.additionalInfo = user.getAdditionalInfo();
+
+        this.phoneNumber = user.getPhoneNumber();
+        this.activeStatus =user.getActiveStatus();
+        this.userCode = user.getUserCode();
+        this.userName = user.getUserName();
+
     }
 
     @Override

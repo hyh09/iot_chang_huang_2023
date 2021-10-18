@@ -18,8 +18,10 @@ package org.thingsboard.server.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,7 @@ import org.thingsboard.server.service.security.system.SystemSecurityService;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
@@ -81,6 +84,8 @@ public class UserController extends BaseController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
+
+
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
@@ -351,4 +356,32 @@ public class UserController extends BaseController {
         }
     }
 
+
+
+    @RequestMapping("/user/test")
+    @ResponseBody
+    public  String  get()
+    {
+        return "hello world";
+    }
+
+
+    /**
+     * 用户得添加接口
+     */
+    @RequestMapping(value = "/user/save", method = RequestMethod.POST)
+    @ResponseBody
+    public User save(@RequestBody User user) throws ThingsboardException {
+        try {
+            log.info("【用户管理模块.用户添加接口】入参{}", user);
+            User savedUser = checkNotNull(userService.save(user));
+            return  savedUser;
+        }
+        catch (Exception e){
+            logEntityAction(emptyId(EntityType.USER), user,
+                    null, user.getId() == null ? ActionType.ADDED : ActionType.UPDATED, e);
+            throw handleException(e);
+        }
+
+    }
 }

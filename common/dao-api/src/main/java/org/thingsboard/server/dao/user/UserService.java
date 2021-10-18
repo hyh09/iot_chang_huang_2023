@@ -35,6 +35,8 @@ public interface UserService {
 
 	User saveUser(User user);
 
+	User save(User user);
+
 	UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId);
 	
 	UserCredentials findUserCredentialsByActivateToken(TenantId tenantId, String activateToken);

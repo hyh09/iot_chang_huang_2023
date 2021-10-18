@@ -17,6 +17,7 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.EntityId;
@@ -26,6 +27,7 @@ import org.thingsboard.server.common.data.security.Authority;
 
 import org.thingsboard.server.common.data.validation.NoXss;
 
+@Data
 @EqualsAndHashCode(callSuper = true)
 public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements HasName, HasTenantId, HasCustomerId {
 
@@ -39,6 +41,19 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
      * 添加一个手机号
      */
     private  String phoneNumber;
+    /**
+     * 启用状态
+     */
+    private  String  activeStatus;
+    /**
+     * 用户编码
+     */
+    private  String userCode;
+    /**
+     * 用户名称
+     */
+    private  String userName;
+
 
     private Authority authority;
     @NoXss
@@ -60,6 +75,9 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.customerId = user.getCustomerId();
         this.email = user.getEmail();
         this.phoneNumber = user.getPhoneNumber();
+        this.activeStatus  = user.getActiveStatus();
+        this.userCode = user.getUserCode();
+        this.userName = user.getUserName();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
@@ -95,6 +113,14 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getActiveStatus() {
+        return activeStatus;
+    }
+
+    public void setActiveStatus(String activeStatus) {
+        this.activeStatus = activeStatus;
     }
 
     @Override

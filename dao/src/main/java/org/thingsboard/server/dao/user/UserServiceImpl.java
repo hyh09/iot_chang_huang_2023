@@ -142,6 +142,14 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         return savedUser;
     }
 
+
+    @Override
+    public User save(User user) {
+        log.info("【用户管理.用户添加的接口添加】"+user);
+        User savedUser = userDao.save(user.getTenantId(), user);
+        return savedUser;
+    }
+
     @Override
     public UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId) {
         log.trace("Executing findUserCredentialsByUserId [{}]", userId);
