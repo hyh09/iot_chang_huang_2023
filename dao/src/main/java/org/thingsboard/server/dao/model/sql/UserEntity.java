@@ -131,6 +131,10 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.searchText = searchText;
     }
 
+    /**
+     * 将实体类转换前后端交互的数据类
+     * @return
+     */
     @Override
     public User toData() {
         User user = new User(new UserId(this.getUuid()));
@@ -146,6 +150,12 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setAdditionalInfo(additionalInfo);
+
+        user.setPhoneNumber(phoneNumber);
+        user.setUserName(userName);
+        user.setUserCode(userCode);
+        user.setActiveStatus(activeStatus);
+
         return user;
     }
 
