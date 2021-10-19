@@ -373,6 +373,9 @@ public class UserController extends BaseController {
     @ResponseBody
     public User save(@RequestBody User user) throws ThingsboardException {
         try {
+//            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
+//                user.setTenantId(getCurrentUser().getTenantId());
+//            }
             log.info("【用户管理模块.用户添加接口】入参{}", user);
             User savedUser = checkNotNull(userService.save(user));
             return  savedUser;
