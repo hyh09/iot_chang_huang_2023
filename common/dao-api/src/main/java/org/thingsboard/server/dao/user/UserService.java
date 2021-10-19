@@ -33,6 +33,8 @@ public interface UserService {
 
 	User findUserByEmail(TenantId tenantId, String email);
 
+	User findByPhoneNumber(String phoneNumber);
+
 	User saveUser(User user);
 
 	User save(User user);

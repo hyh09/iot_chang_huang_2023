@@ -43,6 +43,8 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private  String phoneNumber;
     /**
      * 启用状态
+     *  1是启用
+     *  0是未启用
      */
     private  String  activeStatus;
     /**

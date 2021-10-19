@@ -111,6 +111,13 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     }
 
     @Override
+    public User findByPhoneNumber(String phoneNumber) {
+        log.trace(" Executing findByPhoneNumber 【{}】",phoneNumber);
+        validateString(phoneNumber, "Incorrect phoneNumber " + phoneNumber);
+         return userDao.findByPhoneNumber(phoneNumber);
+    }
+
+    @Override
     public User findUserById(TenantId tenantId, UserId userId) {
         log.trace("Executing findUserById [{}]", userId);
         validateId(userId, INCORRECT_USER_ID + userId);
