@@ -8,3 +8,11 @@ export interface DataDictionary extends BaseData<DataDictionaryId> {
   unit: string,
   comment: string
 }
+
+export interface DeviceDictionary extends BaseData<DataDictionaryId> {
+  code: string,
+  type: string,
+  supplier: string,
+  model: string,
+  version: string
+}

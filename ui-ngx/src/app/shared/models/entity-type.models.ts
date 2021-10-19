@@ -37,7 +37,8 @@ export enum EntityType {
   TB_RESOURCE = 'TB_RESOURCE',
   OTA_PACKAGE = 'OTA_PACKAGE',
   RPC = 'RPC',
-  DATA_DICTIONARY = 'DATA_DICTIONARY'
+  DATA_DICTIONARY = 'DATA_DICTIONARY',
+  DEVICE_DICTIONARY = 'DEVICE_DICTIONARY'
 }
 
 export enum AliasEntityType {
@@ -321,6 +322,19 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         search: 'device-mng.search',
         selectedEntities: 'device-mng.selected-data-dics'
       }
+    ],
+    [
+      EntityType.DEVICE_DICTIONARY,
+      {
+        type: 'entity.type-device-dic',
+        typePlural: 'entity.type-device-dics',
+        list: 'entity.list-of-device-dics',
+        nameStartsWith: 'entity.device-dic-name-starts-with',
+        details: 'device-mng.device-dic-details',
+        add: 'device-mng.add-device-dic',
+        noEntities: 'device-mng.no-device-dics-text',
+        selectedEntities: 'device-mng.selected-device-dics'
+      }
     ]
   ]
 );
@@ -415,6 +429,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       EntityType.DATA_DICTIONARY,
       {
         helpLinkId: 'dataDictionary'
+      }
+    ],
+    [
+      EntityType.DEVICE_DICTIONARY,
+      {
+        helpLinkId: 'deviceDictionary'
       }
     ]
   ]

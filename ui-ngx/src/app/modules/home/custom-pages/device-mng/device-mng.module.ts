@@ -6,6 +6,7 @@ import { DeviceManageRoutingModule } from './device-mng-routing.module';
 import { DataDictionaryComponent } from './data-dictionary/data-dictionary.component';
 import { DeviceDictionaryComponent } from './device-dictionary/device-dictionary.component';
 import { DataDictionaryFiltersComponent } from './data-dictionary/data-dictionary-filters.component';
+import { DeviceDictionaryFiltersComponent } from './device-dictionary/device-dictionary-filters.component';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import { DataDictionaryFiltersComponent } from './data-dictionary/data-dictionar
   declarations: [
     DataDictionaryComponent,
     DataDictionaryFiltersComponent,
-    DeviceDictionaryComponent
+    DeviceDictionaryComponent,
+    DeviceDictionaryFiltersComponent
   ]
 })
 export class DeviceManagementModule { }

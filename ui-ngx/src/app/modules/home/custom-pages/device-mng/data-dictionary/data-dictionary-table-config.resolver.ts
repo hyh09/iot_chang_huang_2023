@@ -28,7 +28,7 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.componentsData = {
       code: '',
       name: '',
-      dataType: ''
+      type: ''
     }
 
     this.config.deleteEntityTitle = dataDic => this.translate.instant('device-mng.delete-dic-title', {dataDicName: dataDic.name});
@@ -47,7 +47,7 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
       new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({icon}) => {
         return iconCell(icon)
       }),
-      new EntityTableColumn<DataDictionary>('dataType', 'device-mng.data-type', '150px'),
+      new EntityTableColumn<DataDictionary>('type', 'device-mng.type', '150px'),
       new EntityTableColumn<DataDictionary>('unit', 'device-mng.unit', '100px'),
       new DateEntityTableColumn<DataDictionary>('createdTime', 'common.created-time', this.datePipe, '150px')
     );

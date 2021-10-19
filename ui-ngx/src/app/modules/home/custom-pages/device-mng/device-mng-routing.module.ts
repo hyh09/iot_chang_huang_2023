@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
-import { AssetsTableConfigResolver } from '../../pages/asset/assets-table-config.resolver';
 import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictionary-table-config.resolver';
+import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
 
 const routes: Routes = [
   {
@@ -44,7 +44,7 @@ const routes: Routes = [
           }
         },
         resolve: {
-          entitiesTableConfig: AssetsTableConfigResolver
+          entitiesTableConfig: DeviceDictionaryTableConfigResolver
         }
       }
     ]
@@ -55,7 +55,8 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
-    DataDictionaryTableConfigResolver
+    DataDictionaryTableConfigResolver,
+    DeviceDictionaryTableConfigResolver
   ]
 })
 export class DeviceManageRoutingModule { }

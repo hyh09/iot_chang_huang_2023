@@ -10,7 +10,7 @@
   <mat-label>{{ 'device-mng.data-type' | translate }}</mat-label>
   <mat-select
     [ngModel]="entitiesTableConfig.componentsData.type"
-    (ngModelChange)="dataTypeChanged($event)"
+    (ngModelChange)="typeChanged($event)"
   >
     <mat-option [value]="''">全部</mat-option>
     <mat-option [value]="'数值型'">数值型</mat-option>

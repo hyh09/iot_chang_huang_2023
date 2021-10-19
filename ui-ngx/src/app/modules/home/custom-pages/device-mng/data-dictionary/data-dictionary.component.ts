@@ -9,8 +9,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'tb-data-dictionary',
-  templateUrl: './data-dictionary.component.html',
-  styleUrls: ['./data-dictionary.component.scss']
+  templateUrl: './data-dictionary.component.html'
 })
 export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
 
@@ -39,7 +38,7 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
   }
 
   updateForm(entity: DataDictionary) {
-    
+    this.entityForm.patchValue(entity)
   }
 
 }
