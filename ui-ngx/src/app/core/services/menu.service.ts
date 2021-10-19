@@ -242,21 +242,21 @@ export class MenuService {
         name: 'device-mng.device-mng',
         type: 'toggle',
         path: '/deviceManagement',
-        icon: 'home',
+        icon: 'devices',
         pages: [
           {
             id: guid(),
             name: 'device-mng.data-dic',
             type: 'link',
             path: '/deviceManagement/dataDictionary',
-            icon: 'av_timer'
+            icon: 'book'
           },
           {
             id: guid(),
             name: 'device-mng.device-dic',
             type: 'link',
             path: '/deviceManagement/deviceDictionary',
-            icon: 'av_timer'
+            icon: 'book'
           }
         ]
       },

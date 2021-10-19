@@ -10,7 +10,7 @@ const routes: Routes = [
     data: {
       breadcrumb: {
         label: 'device-mng.device-mng',
-        icon: 'mdi:alpha-d-box'
+        icon: 'devices'
       }
     },
     children: [
@@ -26,7 +26,7 @@ const routes: Routes = [
           title: 'device-mng.data-dic',
           breadcrumb: {
             label: 'device-mng.data-dic',
-            icon: 'mdi:alpha-d-box'
+            icon: 'book'
           }
         },
         resolve: {
@@ -40,7 +40,7 @@ const routes: Routes = [
           title: 'device-mng.device-dic',
           breadcrumb: {
             label: 'device-mng.device-dic',
-            icon: 'mdi:alpha-d-box'
+            icon: 'book'
           }
         },
         resolve: {
