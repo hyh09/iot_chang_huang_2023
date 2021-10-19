@@ -1,3 +1,38 @@
-<p>
-  数据字典
-</p>
+<div class="mat-padding" fxLayout="column">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.code</mat-label>
+        <input matInput formControlName="code" required>
+        <mat-error *ngIf="entityForm.get('code').hasError('required')">
+          {{ 'device-mng.code-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'device-mng.name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.data-type</mat-label>
+        <mat-select formControlName="dataType" required>
+          <mat-option [value]="'数值型'">数值型</mat-option>
+          <mat-option [value]="'布尔型'">布尔型</mat-option>
+        </mat-select>
+        <mat-error *ngIf="entityForm.get('dataType').hasError('required')">
+          {{ 'device-mng.data-type-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.unit</mat-label>
+        <input matInput formControlName="unit">
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.comment</mat-label>
+        <input matInput formControlName="comment">
+      </mat-form-field>
+    </fieldset>
+  </form>
+</div>

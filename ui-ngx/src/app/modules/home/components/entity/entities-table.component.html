@@ -121,7 +121,7 @@
             </button>
           </div>
         </mat-toolbar>
-        <div class="entity-filter-header">
+        <div class="entity-filter-header" [fxShow]="dataSource.selection.isEmpty()">
           <tb-anchor #entityFilterHeader></tb-anchor>
         </div>
         <mat-toolbar *ngIf="entitiesTableConfig.selectionEnabled" class="mat-table-toolbar" color="primary" [fxShow]="!dataSource.selection.isEmpty()">

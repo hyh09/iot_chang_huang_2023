@@ -5,7 +5,7 @@ import { AppState } from '@app/core/core.state';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { DataDictionary } from '@app/shared/models/custom/device-mng.models';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'tb-data-dictionary',
@@ -26,9 +26,16 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
   }
 
   buildForm(entity: DataDictionary): FormGroup {
-    return this.fb.group({
-
-    })
+    return this.fb.group(
+      {
+        code: [entity ? entity.code : '', [Validators.required]],
+        name: [entity ? entity.name : '', [Validators.required]],
+        dataType: [entity ? entity.type : null, [Validators.required]],
+        unit: [entity ? entity.unit : ''],
+        comment: [entity ? entity.comment : ''],
+        icon: [entity? entity.icon : '']
+      }
+    );
   }
 
   updateForm(entity: DataDictionary) {

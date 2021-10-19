@@ -2649,10 +2649,14 @@
     "icon": "图标",
     "data-type": "数据类型",
     "unit": "单位",
+    "comment": "备注",
     "data-dic-details": "数据字典详情",
     "add": "添加数据字典",
     "no-data-dics-text": "未找到数据字典",
     "search": "查找数据字典",
-    "selected-data-dics": "已选择 { count, plural, 1 {# 个数据字典} other {# 个数据字典} }"
+    "selected-data-dics": "已选择 { count, plural, 1 {# 个数据字典} other {# 个数据字典} }",
+    "code-required": "字典编码必填",
+    "name-required": "字典名称必填",
+    "data-type-required": "数据类型必填"
   }
 }
