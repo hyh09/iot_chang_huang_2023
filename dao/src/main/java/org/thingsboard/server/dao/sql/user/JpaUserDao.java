@@ -57,6 +57,17 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
         return DaoUtil.getData(userRepository.findByEmail(email));
     }
 
+
+    /**
+     *
+     * @param phoneNumber
+     * @return
+     */
+    @Override
+    public User findByPhoneNumber(String phoneNumber) {
+        return DaoUtil.getData(userRepository.findByPhoneNumber(phoneNumber));
+    }
+
     @Override
     public PageData<User> findByTenantId(UUID tenantId, PageLink pageLink) {
         return DaoUtil.toPageData(
