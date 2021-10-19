@@ -56,6 +56,8 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
      */
     private  String userName;
 
+    private String userCreator;
+
 
     private Authority authority;
     @NoXss
@@ -80,6 +82,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.activeStatus  = user.getActiveStatus();
         this.userCode = user.getUserCode();
         this.userName = user.getUserName();
+        this.userCreator=user.getUserCreator();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
@@ -171,6 +174,8 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         builder.append(email);
         builder.append(", phoneNumber=");
         builder.append(phoneNumber);
+        builder.append(", userCreator=");
+        builder.append(userCreator);
         builder.append(", authority=");
         builder.append(authority);
         builder.append(", firstName=");

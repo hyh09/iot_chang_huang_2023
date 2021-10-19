@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -373,17 +375,24 @@ public class UserController extends BaseController {
     @ResponseBody
     public User save(@RequestBody User user) throws ThingsboardException {
         try {
-//            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
-//                user.setTenantId(getCurrentUser().getTenantId());
-//            }
+            SecurityUser  securityUser =  getCurrentUser();
+            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
+                user.setTenantId(getCurrentUser().getTenantId());
+            }
+            log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
+
+            user.setUserCreator(securityUser.getId().toString());
+            log.info("当前的登录人:{}",securityUser.getEmail());
+
+
             log.info("【用户管理模块.用户添加接口】入参{}", user);
             User savedUser = checkNotNull(userService.save(user));
             return  savedUser;
         }
+
         catch (Exception e){
-            logEntityAction(emptyId(EntityType.USER), user,
-                    null, user.getId() == null ? ActionType.ADDED : ActionType.UPDATED, e);
-            throw handleException(e);
+
+            throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
         }
 
     }

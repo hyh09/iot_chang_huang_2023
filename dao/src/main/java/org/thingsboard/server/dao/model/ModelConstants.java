@@ -68,6 +68,8 @@ public class ModelConstants {
     public  static  final String  USER_ACTIVE_STATUS_PROPERTY ="active_status";
     public  static  final  String  USER_USERCODE_PROPERTY="user_code";
     public  static  final String USER_USER_NAME_PROPERTY="user_name";
+    public  static  final String USER_USER_CREATOR_PROPERTY="user_creator";
+
 
 
     public static final String USER_AUTHORITY_PROPERTY = "authority";

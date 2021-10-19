@@ -37,11 +37,11 @@ public class UserControllerTest  {
     public   void  saveTest001()
     {
         User  user1 = new User();
-        user1.setEmail("12345678@qq.com");
-        user1.setPhoneNumber("1234567");
+        user1.setEmail("123453333678@qq.com");
+        user1.setPhoneNumber("12333334567");
         user1.setAuthority(Authority.SYS_ADMIN);
         user1.setLastName("悟空");
-        user1.setUserCode("0001");
+        user1.setUserCode("0002");
         user1.setUserName("孙悟空");
         User  user = userService.saveUser(user1);
         System.out.println("打印当前的数据:"+user);
