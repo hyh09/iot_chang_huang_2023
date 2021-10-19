@@ -6,3 +6,12 @@
   <mat-label>{{ 'device-mng.name' | translate }}</mat-label>
   <input type="text" matInput [ngModel]="entitiesTableConfig.componentsData.name" />
 </mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'device-mng.supplier' | translate }}</mat-label>
+  <input type="text" matInput [ngModel]="entitiesTableConfig.componentsData.supplier" />
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

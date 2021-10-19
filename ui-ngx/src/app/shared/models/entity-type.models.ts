@@ -317,7 +317,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         list: 'entity.list-of-data-dics',
         nameStartsWith: 'entity.data-dic-name-starts-with',
         details: 'device-mng.data-dic-details',
-        add: 'device-mng.add',
+        add: 'device-mng.add-data-dic',
         noEntities: 'device-mng.no-data-dics-text',
         search: 'device-mng.search',
         selectedEntities: 'device-mng.selected-data-dics'

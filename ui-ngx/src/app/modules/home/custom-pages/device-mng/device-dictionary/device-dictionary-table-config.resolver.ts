@@ -19,11 +19,11 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     private datePipe: DatePipe,
     private deviceDictionaryService: DeviceDictionaryService
   ) {
-    this.config.entityType = EntityType.DATA_DICTIONARY;
+    this.config.entityType = EntityType.DEVICE_DICTIONARY;
     this.config.entityComponent = DeviceDictionaryComponent;
     this.config.filterComponent = DeviceDictionaryFiltersComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.DATA_DICTIONARY);
-    this.config.entityResources = entityTypeResources.get(EntityType.DATA_DICTIONARY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.DEVICE_DICTIONARY);
+    this.config.entityResources = entityTypeResources.get(EntityType.DEVICE_DICTIONARY);
 
     this.config.componentsData = {
       code: '',
