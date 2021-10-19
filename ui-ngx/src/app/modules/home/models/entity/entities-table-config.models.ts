@@ -31,6 +31,7 @@ import { EntityTableHeaderComponent } from '@home/components/entity/entity-table
 import { ActivatedRoute } from '@angular/router';
 import { EntityTabsComponent } from '../../components/entity/entity-tabs.component';
 import { DAY, historyInterval } from '@shared/models/time/time.models';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 
 export type EntityBooleanFunction<T extends BaseData<HasId>> = (entity: T) => boolean;
 export type EntityStringFunction<T extends BaseData<HasId>> = (entity: T) => string;
@@ -146,6 +147,7 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   tableTitle = '';
   selectionEnabled = true;
   searchEnabled = true;
+  refreshEnabled = true;
   addEnabled = true;
   entitiesDeleteEnabled = true;
   detailsPanelEnabled = true;
@@ -165,6 +167,7 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   headerActionDescriptors: Array<HeaderActionDescriptor> = [];
   addActionDescriptors: Array<HeaderActionDescriptor> = [];
   headerComponent: Type<EntityTableHeaderComponent<T, P, L>>;
+  filterComponent: Type<EntityTableHeaderComponent<T, P, L>>;
   addEntity: CreateEntityOperation<T> = null;
   dataSource: (dataLoadedFunction: (col?: number, row?: number) => void)
     => EntitiesDataSource<L> = (dataLoadedFunction: (col?: number, row?: number) => void) => {
@@ -191,4 +194,8 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
 
 export function checkBoxCell(value: boolean): string {
   return `<mat-icon class="material-icons mat-icon">${value ? 'check_box' : 'check_box_outline_blank'}</mat-icon>`;
+}
+
+export function iconCell(iconName: string): string {
+  return `<mat-icon class="material-icons mat-icon">${iconName}</mat-icon>`
 }

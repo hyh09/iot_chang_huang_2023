@@ -36,7 +36,8 @@ export enum EntityType {
   API_USAGE_STATE = 'API_USAGE_STATE',
   TB_RESOURCE = 'TB_RESOURCE',
   OTA_PACKAGE = 'OTA_PACKAGE',
-  RPC = 'RPC'
+  RPC = 'RPC',
+  DATA_DICTIONARY = 'DATA_DICTIONARY'
 }
 
 export enum AliasEntityType {
@@ -306,6 +307,20 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         search: 'ota-update.search',
         selectedEntities: 'ota-update.selected-package'
       }
+    ],
+    [
+      EntityType.DATA_DICTIONARY,
+      {
+        type: 'entity.type-data-dic',
+        typePlural: 'entity.type-data-dics',
+        list: 'entity.list-of-data-dics',
+        nameStartsWith: 'entity.data-dic-name-starts-with',
+        details: 'device-mng.data-dic-details',
+        add: 'device-mng.add',
+        noEntities: 'device-mng.no-data-dics-text',
+        search: 'device-mng.search',
+        selectedEntities: 'device-mng.selected-data-dics'
+      }
     ]
   ]
 );
@@ -394,6 +409,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       EntityType.OTA_PACKAGE,
       {
         helpLinkId: 'otaUpdates'
+      }
+    ],
+    [
+      EntityType.DATA_DICTIONARY,
+      {
+        helpLinkId: 'dataDictionary'
       }
     ]
   ]

@@ -239,6 +239,29 @@ export class MenuService {
       },
       {
         id: guid(),
+        name: 'device-mng.device-mng',
+        type: 'toggle',
+        path: '/deviceManagement',
+        icon: 'home',
+        pages: [
+          {
+            id: guid(),
+            name: 'device-mng.data-dic',
+            type: 'link',
+            path: '/deviceManagement/dataDictionary',
+            icon: 'av_timer'
+          },
+          {
+            id: guid(),
+            name: 'device-mng.device-dic',
+            type: 'link',
+            path: '/deviceManagement/deviceDictionary',
+            icon: 'av_timer'
+          }
+        ]
+      },
+      {
+        id: guid(),
         name: 'my.biz',
         type: 'toggle',
         path: '/biz',

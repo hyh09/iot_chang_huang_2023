@@ -1,0 +1,25 @@
+<mat-form-field>
+  <mat-label>{{ 'device-mng.code' | translate }}</mat-label>
+  <input type="text" matInput [ngModel]="entitiesTableConfig.componentsData.code" />
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'device-mng.name' | translate }}</mat-label>
+  <input type="text" matInput [ngModel]="entitiesTableConfig.componentsData.name" />
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'device-mng.data-type' | translate }}</mat-label>
+  <mat-select
+    [ngModel]="entitiesTableConfig.componentsData.dataType"
+    (ngModelChange)="dataTypeChanged($event)"
+  >
+    <mat-option [value]="''">全部</mat-option>
+  <!-- <mat-option *ngFor="let food of foods" [value]="food.value">
+    {{food.viewValue}}
+  </mat-option> -->
+  </mat-select>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

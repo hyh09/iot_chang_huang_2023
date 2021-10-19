@@ -39,6 +39,26 @@
         text-overflow: ellipsis;
       }
 
+      .entity-filter-header {
+        padding: 0 19px;
+        ::ng-deep {
+          .mat-form-field {
+            width: 200px;
+            padding: 0 5px;
+          }
+          .action-btns {
+            display: inline-block;
+            padding: 0 5px;
+            button {
+              min-width: 84px;
+              & + button {
+                margin-left: 16px;
+              }
+            }
+          }
+        }
+      }
+
       .table-container {
         overflow: auto;
       }

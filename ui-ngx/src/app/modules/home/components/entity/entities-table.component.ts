@@ -111,6 +111,8 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
 
   @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: TbAnchorComponent;
 
+  @ViewChild('entityFilterHeader', {static: true}) entityFilterHeaderAnchor: TbAnchorComponent;
+
   @ViewChild('searchInput') searchInputField: ElementRef;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -160,6 +162,15 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       const componentRef = viewContainerRef.createComponent(componentFactory);
       const headerComponent = componentRef.instance;
       headerComponent.entitiesTableConfig = this.entitiesTableConfig;
+    }
+
+    if (this.entitiesTableConfig.filterComponent) {
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.entitiesTableConfig.filterComponent);
+      const viewContainerRef = this.entityFilterHeaderAnchor.viewContainerRef;
+      viewContainerRef.clear();
+      const componentRef = viewContainerRef.createComponent(componentFactory);
+      const filterComponent = componentRef.instance;
+      filterComponent.entitiesTableConfig = this.entitiesTableConfig;
     }
 
     this.entitiesTableConfig.table = this;

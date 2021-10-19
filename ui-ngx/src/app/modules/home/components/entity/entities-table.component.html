@@ -87,7 +87,8 @@
                     (click)="actionDescriptor.onAction($event)">
               <mat-icon>{{actionDescriptor.icon}}</mat-icon>
             </button>
-            <button mat-icon-button [disabled]="isLoading$ | async" (click)="updateData()"
+            <button *ngIf="entitiesTableConfig.refreshEnabled"
+                    mat-icon-button [disabled]="isLoading$ | async" (click)="updateData()"
                     matTooltip="{{ 'action.refresh' | translate }}"
                     matTooltipPosition="above">
               <mat-icon>refresh</mat-icon>
@@ -120,6 +121,9 @@
             </button>
           </div>
         </mat-toolbar>
+        <div class="entity-filter-header">
+          <tb-anchor #entityFilterHeader></tb-anchor>
+        </div>
         <mat-toolbar *ngIf="entitiesTableConfig.selectionEnabled" class="mat-table-toolbar" color="primary" [fxShow]="!dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
             <span class="tb-entity-table-info">
