@@ -33,6 +33,8 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     private static final long serialVersionUID = 8250339805336035966L;
 
+    private  String strId;
+
     private TenantId tenantId;
     private CustomerId customerId;
     private String email;
@@ -165,32 +167,50 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("User [tenantId=");
-        builder.append(tenantId);
-        builder.append(", customerId=");
-        builder.append(customerId);
-        builder.append(", email=");
-        builder.append(email);
-        builder.append(", phoneNumber=");
-        builder.append(phoneNumber);
-        builder.append(", userCreator=");
-        builder.append(userCreator);
-        builder.append(", authority=");
-        builder.append(authority);
-        builder.append(", firstName=");
-        builder.append(firstName);
-        builder.append(", lastName=");
-        builder.append(lastName);
-        builder.append(", additionalInfo=");
-        builder.append(getAdditionalInfo());
-        builder.append(", createdTime=");
-        builder.append(createdTime);
-        builder.append(", id=");
-        builder.append(id);
-        builder.append("]");
-        return builder.toString();
+        return "User{" +
+                "strId='" + strId + '\'' +
+                ", tenantId=" + tenantId +
+                ", customerId=" + customerId +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", activeStatus='" + activeStatus + '\'' +
+                ", userCode='" + userCode + '\'' +
+                ", userName='" + userName + '\'' +
+                ", userCreator='" + userCreator + '\'' +
+                ", authority=" + authority +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
     }
+
+    //    @Override
+//    public String toString() {
+//        StringBuilder builder = new StringBuilder();
+//        builder.append("User [tenantId=");
+//        builder.append(tenantId);
+//        builder.append(", customerId=");
+//        builder.append(customerId);
+//        builder.append(", email=");
+//        builder.append(email);
+//        builder.append(", phoneNumber=");
+//        builder.append(phoneNumber);
+//        builder.append(", userCreator=");
+//        builder.append(userCreator);
+//        builder.append(", authority=");
+//        builder.append(authority);
+//        builder.append(", firstName=");
+//        builder.append(firstName);
+//        builder.append(", lastName=");
+//        builder.append(lastName);
+//        builder.append(", additionalInfo=");
+//        builder.append(getAdditionalInfo());
+//        builder.append(", createdTime=");
+//        builder.append(createdTime);
+//        builder.append(", id=");
+//        builder.append(id);
+//        builder.append("]");
+//        return builder.toString();
+//    }
 
     @JsonIgnore
     public boolean isSystemAdmin() {

@@ -18,6 +18,7 @@ package org.thingsboard.server.dao.model.sql;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.thingsboard.server.common.data.User;
@@ -41,6 +42,7 @@ import java.util.UUID;
  * Created by Valerii Sosliuk on 4/21/2017.
  */
 @Data
+@ToString
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @TypeDef(name = "json", typeClass = JsonStringType.class)

@@ -337,6 +337,8 @@ public abstract class BaseController {
         }
     }
 
+
+
     void checkArrayParameter(String name, String[] params) throws ThingsboardException {
         if (params == null || params.length == 0) {
             throw new ThingsboardException("Parameter '" + name + "' can't be empty!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);

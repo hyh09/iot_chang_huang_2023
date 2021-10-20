@@ -25,6 +25,8 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.UserCredentials;
 
+import java.util.Map;
+
 public interface UserService {
 	
 	User findUserById(TenantId tenantId, UserId userId);
@@ -38,6 +40,10 @@ public interface UserService {
 	User saveUser(User user);
 
 	User save(User user,String  encodePassword );
+
+	int  update(User user);
+
+
 
 	UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId);
 	
@@ -72,4 +78,6 @@ public interface UserService {
 	void onUserLoginSuccessful(TenantId tenantId, UserId userId);
 
 	int onUserLoginIncorrectCredentials(TenantId tenantId, UserId userId);
+
+	Object findAll(Map<String, Object> queryParam,PageLink pageLink);
 }

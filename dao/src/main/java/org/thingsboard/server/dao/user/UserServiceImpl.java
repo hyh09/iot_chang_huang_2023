@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -49,10 +50,12 @@ import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
+import org.thingsboard.server.dao.util.sql.Pagination;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -164,6 +167,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
             saveUserCredentialsAndPasswordHistory(user.getTenantId(), userCredentials);
         }
         return savedUser;
+    }
+
+    @Override
+    public int update(User user) {
+         return userDao.update( user);
     }
 
     @Override
@@ -362,6 +370,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         int failedLoginAttempts = increaseFailedLoginAttempts(user);
         saveUser(user);
         return failedLoginAttempts;
+    }
+
+
+    @Override
+    public Object findAll(Map<String, Object> queryParam, PageLink pageLink) {
+        return userDao.findAll(queryParam,pageLink);
     }
 
     private int increaseFailedLoginAttempts(User user) {

@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -66,6 +67,7 @@ import org.thingsboard.server.service.security.system.SystemSecurityService;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -381,6 +383,7 @@ public class UserController extends BaseController {
     @ResponseBody
     public User save(@RequestBody User user) throws ThingsboardException {
         try {
+
             SecurityUser  securityUser =  getCurrentUser();
             if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
                 user.setTenantId(getCurrentUser().getTenantId());
@@ -398,6 +401,7 @@ public class UserController extends BaseController {
         }
 
         catch (Exception e){
+            e.printStackTrace();
 
             throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
         }
@@ -418,6 +422,37 @@ public class UserController extends BaseController {
         }
         userService.deleteUser(getTenantId(),userId);
         return "success";
+    }
+
+    /**
+     * 编辑用户
+     */
+    @RequestMapping(value="/user/update",method = RequestMethod.POST)
+    @ResponseBody
+    public String update(@RequestBody User user) throws ThingsboardException {
+        log.info("打印更新用户的入参:{}",user);
+        checkParameter(USER_ID, user.getStrId());
+        SecurityUser  securityUser =  getCurrentUser();
+        user.setUserCreator(securityUser.getId().toString());
+        user.setId( UserId.fromString(user.getStrId()));
+        return (userService.update(user)>0?"succeeded":"fail");
+
+    }
+
+    /**
+     * 用户管理的查询接口
+     * findAll
+     */
+    @RequestMapping(value = "/user/findAll",method = RequestMethod.POST)
+    @ResponseBody
+    public  Object  findAll(@RequestBody  Map<String, Object> queryParam) throws ThingsboardException {
+       int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
+        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
+        String  textSearch = (String) queryParam.get("textSearch");
+        String  sortProperty = (String) queryParam.get("sortProperty");
+        String  sortOrder = (String) queryParam.get("sortOrder");
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        return userService.findAll( queryParam, pageLink);
     }
 
 

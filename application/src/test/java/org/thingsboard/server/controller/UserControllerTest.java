@@ -10,6 +10,7 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.dao.user.UserService;
 
@@ -23,9 +24,9 @@ public class UserControllerTest  {
     public  void  Test001()
     {
         TenantId tenantId = new TenantId(EntityId.NULL_UUID);
-        UserId userId = new UserId(EntityId.NULL_UUID);
-        User user = userService.findUserById(tenantId, userId);
+        PageLink pageLink = new PageLink(10,1);
 
+        userService.findUsersByTenantId(tenantId,pageLink);
 
     }
 

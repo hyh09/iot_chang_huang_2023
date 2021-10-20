@@ -16,6 +16,8 @@
 package org.thingsboard.server.dao.sql.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.User;
@@ -27,7 +29,11 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.user.UserDao;
+import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
+import org.thingsboard.server.dao.util.sql.Pagination;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,6 +56,11 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
     @Override
     protected CrudRepository<UserEntity, UUID> getCrudRepository() {
         return userRepository;
+    }
+
+    @Override
+    public int update(User user) {
+         return  userRepository.update(user);
     }
 
     @Override
@@ -107,4 +118,13 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
     public Long countByTenantId(TenantId tenantId) {
         return userRepository.countByTenantId(tenantId.getId());
     }
+
+
+    public Page<UserEntity> findAll(Map<String, Object> queryParam, PageLink pageLink) {
+        Page<UserEntity> list = this.userRepository.findAll(JpaQueryHelper.createQueryByMap(queryParam,UserEntity.class ),  DaoUtil.toPageable(pageLink));
+        System.out.println("打印当前的数据:"+list);
+  return  list;
+    }
+
+
 }

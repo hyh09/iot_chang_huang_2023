@@ -67,6 +67,9 @@ public abstract class JpaAbstractDao<E extends BaseEntity<D>, D>
         return DaoUtil.getData(entity);
     }
 
+
+
+
     @Override
     public D findById(TenantId tenantId, UUID key) {
         log.debug("Get entity by key {}", key);
