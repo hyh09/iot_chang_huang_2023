@@ -877,7 +877,13 @@ mat-label {
       }
       .mat-dialog-actions {
         margin-bottom: 0;
-        padding: 8px;
+        padding: 8px 24px;
+        button {
+          min-width: 84px;
+          & + button {
+            margin-left: 16px;
+          }
+        }
       }
     }
   }
@@ -1057,5 +1063,11 @@ mat-label {
 
   .tb-toast-panel {
     pointer-events: none !important;
+  }
+}
+
+button {
+  &.mat-primary:not(.mat-button):not(.mat-button-disabled) {
+    background-color: #2367fa !important;
   }
 }

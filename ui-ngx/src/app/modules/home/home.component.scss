@@ -34,6 +34,7 @@
   }
   mat-sidenav.tb-site-sidenav {
     width: 250px;
+    box-shadow: none;
     @media (max-width:456px) {
       width: calc(100% - 56px);
     }
@@ -48,7 +49,8 @@
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
-        border-bottom: 1px solid rgba(0, 0, 0, .12);
+        border-right: 1px solid #dee6f2;
+        border-bottom: 1px solid #dee6f2;
         background-color: #fff;
         & > div {
           height: 64px;
@@ -70,6 +72,15 @@
   }
   .tb-primary-toolbar {
     z-index: 2;
+    background-color: #fff;
+    box-shadow: none;
+    border-bottom: 1px solid #dee6f2;
+    height: 66px;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.8);
+    button {
+      color: rgba(0, 0, 0, 0.8);
+    }
     h1 {
       font-size: 24px !important;
       font-weight: 400 !important;

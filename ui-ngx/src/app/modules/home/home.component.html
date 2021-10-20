@@ -39,7 +39,7 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <div fxLayout="column" role="main" style="height: 100%;">
-      <mat-toolbar fxLayout="row" color="primary" class="mat-elevation-z1 tb-primary-toolbar">
+      <mat-toolbar fxLayout="row" class="mat-elevation-z1 tb-primary-toolbar">
         <button [fxShow]="!forceFullscreen" mat-icon-button id="main"
                 [ngClass]="{'tb-invisible': displaySearchMode()}"
                 fxHide.gt-sm (click)="sidenav.toggle()">
