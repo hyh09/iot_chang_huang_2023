@@ -66,6 +66,7 @@
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
     "mousetrap": "1.6.3",
+    "ng-zorro-antd": "11.4.2",
     "ngx-clipboard": "^14.0.1",
     "ngx-color-picker": "^11.0.0",
     "ngx-daterangepicker-material": "^4.0.1",

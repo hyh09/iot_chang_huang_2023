@@ -69,6 +69,7 @@
             ],
             "styles": [
               "src/styles.scss",
+              "src/styles.less",
               "node_modules/jquery.terminal/css/jquery.terminal.min.css",
               "node_modules/tooltipster/dist/css/tooltipster.bundle.min.css",
               "node_modules/tooltipster/dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-shadow.min.css",
@@ -78,7 +79,8 @@
               "node_modules/leaflet/dist/leaflet.css",
               "src/app/modules/home/components/widget/lib/maps/markers.scss",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
-              "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css"
+              "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
