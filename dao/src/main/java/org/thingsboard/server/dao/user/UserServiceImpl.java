@@ -249,14 +249,20 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         return saveUserCredentialsAndPasswordHistory(tenantId, userCredentials);
     }
 
+
+    /**
+     * Delete User
+     * @param tenantId
+     * @param userId  用户id
+     */
     @Override
     public void deleteUser(TenantId tenantId, UserId userId) {
         log.trace("Executing deleteUser [{}]", userId);
         validateId(userId, INCORRECT_USER_ID + userId);
-        UserCredentials userCredentials = userCredentialsDao.findByUserId(tenantId, userId.getId());
-        userCredentialsDao.removeById(tenantId, userCredentials.getUuidId());
-        deleteEntityRelations(tenantId, userId);
-        userDao.removeById(tenantId, userId.getId());
+        UserCredentials userCredentials = userCredentialsDao.findByUserId(tenantId, userId.getId());//tenantId
+        userCredentialsDao.removeById(tenantId, userCredentials.getUuidId());//也没哟用到tenantId
+        deleteEntityRelations(tenantId, userId);//tenantId
+        userDao.removeById(tenantId, userId.getId());//tenantId
         eventPublisher.publishEvent(new UserAuthDataChangedEvent(userId));
     }
 

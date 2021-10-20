@@ -405,4 +405,20 @@ public class UserController extends BaseController {
     }
 
 
+    @RequestMapping(value = "/user/delete",method = RequestMethod.DELETE)
+    @ResponseBody
+    public String    delete(@RequestParam(USER_ID) String strUserId) throws ThingsboardException {
+        log.info("【delete User's input parameter ID:{}】",strUserId);
+        checkParameter(USER_ID, strUserId);
+        UserId userId = new UserId(toUUID(strUserId));
+        User user = userService.findUserById(getCurrentUser().getTenantId(), userId);
+        checkNotNull(user);
+        if(user.getAuthority().equals(Authority.SYS_ADMIN)){
+            throw new ThingsboardException("You do not have permission to delete!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        userService.deleteUser(getTenantId(),userId);
+        return "success";
+    }
+
+
 }
