@@ -14,7 +14,7 @@ package:
   retry: 1
   image: adoptopenjdk/maven-openjdk11
   tags:
-    - hsyl-iot.k8s.专用
+    - k8s.test.iot.hangzhou
   script:
     - echo "打包并构建镜像"
     - date -R
