@@ -572,6 +572,25 @@ public class ModelConstants {
     public static final String TS_COLUMN = "ts";
 
     /**
+     * 通用
+     */
+    public static final String GENERAL_CREATED_USER = "created_user";
+    public static final String GENERAL_UPDATED_TIME = "updated_time";
+    public static final String GENERAL_UPDATED_USER = "updated_user";
+
+    /**
+     * 数据字典
+     */
+    public static final String DICT_DATA_TABLE_NAME = "hs_dict_data";
+    public static final String DICT_DATA_CODE = "code";
+    public static final String DICT_DATA_NAME = "name";
+    public static final String DICT_DATA_TYPE = "type";
+    public static final String DICT_DATA_UNIT = "unit";
+    public static final String DICT_DATA_COMMENT = "comment";
+    public static final String DICT_DATA_ICON = "icon";
+    public static final String DICT_DATA_PICTURE = "picture";
+
+    /**
      * Main names of cassandra key-value columns storage.
      */
     public static final String BOOLEAN_VALUE_COLUMN = "bool_v";
