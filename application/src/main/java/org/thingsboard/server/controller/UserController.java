@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +74,8 @@ import java.util.List;
 @RequestMapping("/api")
 public class UserController extends BaseController {
 
+    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
+
     public static final String USER_ID = "userId";
     public static final String YOU_DON_T_HAVE_PERMISSION_TO_PERFORM_THIS_OPERATION = "You don't have permission to perform this operation!";
     public static final String ACTIVATE_URL_PATTERN = "%s/api/noauth/activate?activateToken=%s";
@@ -80,6 +83,8 @@ public class UserController extends BaseController {
     @Value("${security.user_token_access_enabled}")
     @Getter
     private boolean userTokenAccessEnabled;
+
+    private final BCryptPasswordEncoder passwordEncoder;
 
     private final MailService mailService;
     private final JwtTokenFactory tokenFactory;
@@ -246,10 +251,11 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.DELETE)
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
+        System.out.println("当前的入参:"+strUserId);
         checkParameter(USER_ID, strUserId);
         try {
             UserId userId = new UserId(toUUID(strUserId));
@@ -338,7 +344,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}/userCredentialsEnabled", method = RequestMethod.POST)
     @ResponseBody
     public void setUserCredentialsEnabled(@PathVariable(USER_ID) String strUserId,
@@ -386,7 +392,8 @@ public class UserController extends BaseController {
 
 
             log.info("【用户管理模块.用户添加接口】入参{}", user);
-            User savedUser = checkNotNull(userService.save(user));
+            String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
+            User savedUser = checkNotNull(userService.save(user,encodePassword));
             return  savedUser;
         }
 
@@ -396,4 +403,6 @@ public class UserController extends BaseController {
         }
 
     }
+
+
 }

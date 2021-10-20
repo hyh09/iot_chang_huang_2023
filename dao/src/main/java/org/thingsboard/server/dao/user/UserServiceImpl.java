@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Customer;
@@ -151,14 +152,15 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
 
     @Override
-    public User save(User user) {
+    public User save(User user,String  encodePassword ) {
         log.info("【用户管理.用户添加的接口添加】"+user);
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
-            userCredentials.setEnabled(false);
+            userCredentials.setEnabled(user.getActiveStatus().equals("1")?true:false);
             userCredentials.setActivateToken(RandomStringUtils.randomAlphanumeric(DEFAULT_TOKEN_LENGTH));
             userCredentials.setUserId(new UserId(savedUser.getUuidId()));
+            userCredentials.setPassword(encodePassword);
             saveUserCredentialsAndPasswordHistory(user.getTenantId(), userCredentials);
         }
         return savedUser;

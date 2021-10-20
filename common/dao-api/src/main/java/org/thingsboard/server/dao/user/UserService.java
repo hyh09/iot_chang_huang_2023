@@ -37,7 +37,7 @@ public interface UserService {
 
 	User saveUser(User user);
 
-	User save(User user);
+	User save(User user,String  encodePassword );
 
 	UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId);
 	
