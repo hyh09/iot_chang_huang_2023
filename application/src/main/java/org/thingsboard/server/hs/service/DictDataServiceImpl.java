@@ -9,6 +9,9 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,13 +60,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         // 动态条件查询
         Specification<DictDataEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
-
-//            predicates.add(cb.equal(root.<UUID>get("tenant_id"), tenantId));
-            predicates.add(cb.equal(root.get("tenant_id"), tenantId.toString()));
-
-            var es = cb.equal(root.<UUID>get("id"), UUID.fromString("f49de470-2d98-11ec-a27f-7f2b294bf65d"));
-//            var es = cb.equal(root.<UUID>get("id"), UUID.fromString("f49de470-2d98-11ec-a27f-7f2b294bf65d"));
+            var es = cb.equal(root.<UUID>get("tenantId"), UUID.fromString(tenantId.toString()));
 
             if (dictDataListQuery != null) {
                 if (!StringUtils.isBlank(dictDataListQuery.getName())) {
@@ -81,14 +78,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
             predicates.add(es);
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        var t = this.dictDataRepository.findAll(specification);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~");
-        System.out.println(t);
-//        PageRequest pageRequest = PageRequest.of(pageLink.getPage(), pageLink.getPageSize(),Sort.by(Sort.Direction.DESC,"created_time"));
-//        Converter<String, String> converter = CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE, pageLink.getSortOrder().getProperty());
-//        var s = this.dictDataRepository.findAll(specification, pageRequest);
-//        System.out.println("~~~~~~~~~~~~~~~~~~~~");
-//        System.out.println(s);
+//        Pageable pageable = PageRequest.of(pageLink.getPage(), pageLink.getPageSize(), pageLink.getSortOrder());
+//        var t = this.dictDataRepository.findAll(specification, pageable);
         return null;
     }
 
@@ -120,6 +111,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
             UUID timeBased = Uuids.timeBased();
             dictData.setId(timeBased.toString());
             dictData.setCreatedTime(Uuids.unixTimestamp(timeBased));
+            dictData.setUpdatedTime(Uuids.unixTimestamp(timeBased));
             dictData.setTenantId(tenantId.toString());
 
             dictData.setName(dictDataQuery.getName());
@@ -167,6 +159,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public DictData getDictDataDetail(String id, TenantId tenantId) throws ThingsboardException {
+        var s = this.dictDataRepository.findById(UUID.fromString(id));
         DictData dictData = this.dictDataRepository.findById(UUID.fromString(id)).get().toData();
         if (!dictData.getTenantId().equals(tenantId.toString())) {
             throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
