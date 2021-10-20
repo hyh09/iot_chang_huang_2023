@@ -25,9 +25,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.security.Authority;
-import org.thingsboard.server.dao.model.sql.EdgeEventEntity;
 import org.thingsboard.server.dao.model.sql.UserEntity;
-import org.thingsboard.server.dao.util.sql.Pagination;
 
 import javax.transaction.Transactional;
 import java.util.UUID;

@@ -30,7 +30,6 @@ import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.user.UserDao;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
-import org.thingsboard.server.dao.util.sql.Pagination;
 
 import java.util.List;
 import java.util.Map;
