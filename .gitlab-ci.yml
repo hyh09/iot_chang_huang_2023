@@ -3,9 +3,8 @@ image: docker:latest
 stages:
   - package
 
-before_script:
-  - docker version
-  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
+#before_script:
+#  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
 
 # 打包并构建镜像
@@ -19,7 +18,7 @@ package:
     - echo "打包并构建镜像"
     - date -R
     - cd msa
-    - mvn clean install -Ddockerfile.skip=false
+    - mvn clean install -Ddockerfile.skip=true
   only:
     - dev
   after_script:
