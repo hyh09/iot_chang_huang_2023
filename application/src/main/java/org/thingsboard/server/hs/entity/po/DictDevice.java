@@ -1,22 +1,24 @@
 package org.thingsboard.server.hs.entity.po;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * 数据字典
+ * 设备字典
  *
  * @author wwj
- * @since 2021.10.18
+ * @since 2021.10.21
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class DictData extends BasePO {
+public class DictDevice extends BasePO {
 
-    private static final long serialVersionUID = 4934987555236873700L;
+    private static final long serialVersionUID = 4934987555236873701L;
     /**
-     * 数据字典Id
+     * 设备字典Id
      */
     private String id;
+
     /**
      * 租户Id
      */
@@ -38,9 +40,24 @@ public class DictData extends BasePO {
     private String type;
 
     /**
-     * 单位
+     * 供应商
      */
-    private String unit;
+    private String supplier;
+
+    /**
+     * 型号
+     */
+    private String model;
+
+    /**
+     * 版本号
+     */
+    private String version;
+
+    /**
+     * 保修期
+     */
+    private String warrantyPeriod;
 
     /**
      * 备注
