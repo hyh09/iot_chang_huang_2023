@@ -141,6 +141,12 @@ public class ModelConstants {
     public static final String CUSTOMER_BY_TENANT_AND_TITLE_VIEW_NAME = "customer_by_tenant_and_title";
 
     /**
+     * Cassandra menu constants.
+     */
+    public static final String MENU_COLUMN_FAMILY_NAME = "tb_menu";
+    public static final String TENANT_MENU_COLUMN_FAMILY_NAME = "tb_tenant_menu";
+
+    /**
      * Cassandra device constants.
      */
     public static final String DEVICE_COLUMN_FAMILY_NAME = "device";

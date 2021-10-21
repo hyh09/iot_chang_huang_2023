@@ -40,7 +40,9 @@ public enum Resource {
     TB_RESOURCE(EntityType.TB_RESOURCE),
     OTA_PACKAGE(EntityType.OTA_PACKAGE),
     EDGE(EntityType.EDGE),
-    RPC(EntityType.RPC);
+    RPC(EntityType.RPC),
+    MENU(EntityType.MENU),
+    TENANT_MENU(EntityType.TENANT_MENU);
 
     private final EntityType entityType;
 

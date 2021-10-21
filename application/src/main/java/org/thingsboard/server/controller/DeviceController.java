@@ -134,8 +134,8 @@ public class DeviceController extends BaseController {
             Device savedDevice = checkNotNull(deviceService.saveDeviceWithAccessToken(device, accessToken));
 
             tbClusterService.onDeviceUpdated(savedDevice, oldDevice);
-
-            logEntityAction(savedDevice.getId(), savedDevice,
+            savedDevice
+            logEntityAction(.getId(), savedDevice,
                     savedDevice.getCustomerId(),
                     created ? ActionType.ADDED : ActionType.UPDATED, null);
 
