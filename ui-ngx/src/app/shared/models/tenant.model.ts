@@ -119,3 +119,7 @@ export interface Tenant extends ContactBased<TenantId> {
 export interface TenantInfo extends Tenant {
   tenantProfileName: string;
 }
+
+export interface TentMenus {
+  
+}

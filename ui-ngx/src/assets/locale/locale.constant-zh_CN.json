@@ -21,6 +21,7 @@
     "clear-search": "清除查询",
     "close": "关闭",
     "continue": "继续",
+    "confirm": "确认",
     "copy": "复制",
     "copy-reference": "复制引用",
     "create": "创建",
@@ -562,7 +563,7 @@
     "phone": "电话",
     "postal-code": "邮政编码",
     "postal-code-invalid": "只允许数字。",
-    "state": "州"
+    "state": "省"
   },
   "content-type": {
     "binary": "Binary (Base64)",
@@ -2141,6 +2142,7 @@
     "delete-tenant-profiles-title": "确定要删除 { count, plural, 1 {# 个租户配置} other {# 个租户配置} }?",
     "description": "说明",
     "edit": "编辑租户配置",
+    "export": "导出租户配置",
     "idCopiedMessage": "租户配置Id已复制到剪贴板",
     "max-d-p-storage-days": "最大日存储数据点数（0-无限制）",
     "max-d-p-storage-days-range": "最大日存储数据点数不能为负数",
@@ -2232,6 +2234,7 @@
     "search": "查找租户",
     "select-tenant": "选择租户",
     "selected-tenants": "已选择 { count, plural, 1 {# 个租户} other {# 个租户} }",
+    "set-tenant-menus": "配置租户菜单",
     "tenant": "租户",
     "tenant-details": "租客详情",
     "tenant-required": "租户必填",

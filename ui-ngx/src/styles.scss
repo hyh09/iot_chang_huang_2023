@@ -866,6 +866,9 @@ mat-label {
   .tb-dialog {
     .mat-dialog-container {
       padding: 0;
+      h2 {
+        color: #fff;
+      }
       > *:first-child, form {
         max-width: 100%;
         min-width: 100%;
