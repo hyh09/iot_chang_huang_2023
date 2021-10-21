@@ -25,7 +25,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
     /**
      * 获得当前用户
      *
-     * @return 当前用户名
+     * @return 当前用户
      */
     @Override
     public Optional<String> getCurrentAuditor() {

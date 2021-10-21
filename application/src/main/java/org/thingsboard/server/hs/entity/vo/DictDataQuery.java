@@ -2,7 +2,7 @@ package org.thingsboard.server.hs.entity.vo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.thingsboard.server.hs.entity.enums.DictDataType;
+import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
 
 /**
  * 数据字典
@@ -28,7 +28,7 @@ public class DictDataQuery {
     /**
      * 类型
      */
-    private DictDataType type;
+    private DictDataTypeEnum type;
 
     /**
      * 单位

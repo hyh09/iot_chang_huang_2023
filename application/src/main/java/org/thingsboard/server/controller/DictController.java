@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
-import org.thingsboard.server.hs.entity.enums.DictDataType;
+import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
 import org.thingsboard.server.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -34,6 +34,20 @@ public class DictController extends BaseController {
 
     @Autowired
     DictDataService dictDataService;
+
+    /**
+     * 获得数据字典界面资源
+     *
+     * @return 数据字典列表
+     */
+    @GetMapping("/dict/data/resource")
+    public DictDataResource listDictDataResource() throws ThingsboardException {
+        try {
+            return new DictDataResource().setDictDataTypeMap(DictDataTypeEnum.BOOLEAN.toLinkMap());
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
 
     /**
      * 获得数据字典列表
@@ -114,19 +128,4 @@ public class DictController extends BaseController {
         this.dictDataService.deleteDictDataById(id, tenantId);
     }
 
-    /**
-     * 获得数据字典界面资源
-     *
-     * @return 数据字典列表
-     */
-    @GetMapping("/dict/data/resource")
-    public DictDataResource listDictDataResource() throws ThingsboardException {
-        try {
-            return new DictDataResource().setDictDataTypeMap(DictDataType.BOOLEAN.toLinkMap());
-        } catch (Exception e) {
-            throw handleException(e);
-        }
-    }
-
-    
 }

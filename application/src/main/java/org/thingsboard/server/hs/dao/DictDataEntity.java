@@ -5,68 +5,70 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 import org.thingsboard.server.hs.entity.po.DictData;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
 @TypeDef(name = "json", typeClass = JsonStringType.class)
-@Table(name = ModelConstants.DICT_DATA_TABLE_NAME)
+@Table(name = HsModelConstants.DICT_DATA_TABLE_NAME)
 @EntityListeners(AuditingEntityListener.class)
 public class DictDataEntity extends BasePgEntity<DictDataEntity> implements ToData<DictData> {
     /**
      * 租户Id
      */
-    @Column(name = ModelConstants.DEVICE_TENANT_ID_PROPERTY, columnDefinition = "uuid")
+    @Column(name = HsModelConstants.GENERAL_TENANT_ID, columnDefinition = "uuid")
     @Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID tenantId;
 
     /**
      * 编码
      */
-    @Column(name = ModelConstants.DICT_DATA_CODE)
+    @Column(name = HsModelConstants.DICT_DATA_CODE)
     private String code;
 
     /**
      * 名称
      */
-    @Column(name = ModelConstants.DICT_DATA_NAME)
+    @Column(name = HsModelConstants.DICT_DATA_NAME)
     private String name;
 
     /**
      * 类型
      */
-    @Column(name = ModelConstants.DICT_DATA_TYPE)
+    @Column(name = HsModelConstants.DICT_DATA_TYPE)
     private String type;
 
     /**
      * 单位
      */
-    @Column(name = ModelConstants.DICT_DATA_UNIT)
+    @Column(name = HsModelConstants.DICT_DATA_UNIT)
     private String unit;
 
     /**
      * 备注
      */
-    @Column(name = ModelConstants.DICT_DATA_COMMENT)
+    @Column(name = HsModelConstants.DICT_DATA_COMMENT)
     private String comment;
 
     /**
      * 图标
      */
-    @Column(name = ModelConstants.DICT_DATA_ICON)
+    @Column(name = HsModelConstants.DICT_DATA_ICON)
     private String icon;
 
     /**
      * 图片
      */
-    @Column(name = ModelConstants.DICT_DATA_PICTURE)
+    @Column(name = HsModelConstants.DICT_DATA_PICTURE)
     private String picture;
 
     public DictDataEntity() {
@@ -86,13 +88,9 @@ public class DictDataEntity extends BasePgEntity<DictDataEntity> implements ToDa
         this.picture = dictData.getPicture();
 
         this.createdUser = dictData.getCreatedUser();
-        if (dictData.getCreatedTime() != null) {
-            this.setCreatedTime(dictData.getCreatedTime());
-        }
+        this.setCreatedTime(dictData.getCreatedTime());
         this.createdUser = dictData.getCreatedUser();
-        if (dictData.getUpdatedTime() != null) {
-            this.setUpdatedTime(dictData.getUpdatedTime());
-        }
+        this.setUpdatedTime(dictData.getUpdatedTime());
     }
 
     /**
@@ -104,17 +102,18 @@ public class DictDataEntity extends BasePgEntity<DictDataEntity> implements ToDa
         if (tenantId != null) {
             dictData.setTenantId(tenantId.toString());
         }
-        dictData.setCreatedTime(createdTime);
         dictData.setCode(code);
         dictData.setName(name);
         dictData.setType(type);
         dictData.setUnit(unit);
         dictData.setComment(comment);
+        dictData.setIcon(icon);
+        dictData.setPicture(picture);
+
+        dictData.setCreatedTime(createdTime);
         dictData.setCreatedUser(createdUser);
         dictData.setUpdatedTime(updatedTime);
         dictData.setUpdatedUser(updatedUser);
-        dictData.setIcon(icon);
-        dictData.setPicture(picture);
         return dictData;
     }
 }

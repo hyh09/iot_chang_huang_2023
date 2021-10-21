@@ -14,7 +14,7 @@ import java.util.Map;
  * @since 2021.10.18
  */
 @Getter
-public enum DictDataType {
+public enum DictDataTypeEnum {
     FLOAT("FLOAT", "浮点型"),
     BOOLEAN("BOOLEAN","布尔型"),
     NUMBER("NUMBER", "数值型"),
@@ -24,14 +24,14 @@ public enum DictDataType {
     private final String code;
     private final String name;
 
-    DictDataType(String code, String name){
+    DictDataTypeEnum(String code, String name){
         this.code = code;
         this.name = name;
     }
 
     public Map<String, String> toLinkMap() {
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        Arrays.stream(DictDataType.values()).forEach(e->{
+        Arrays.stream(DictDataTypeEnum.values()).forEach(e->{
             map.put(e.getName(), e.getCode());
         });
         return map;
