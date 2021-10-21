@@ -1,17 +1,8 @@
 package org.thingsboard.server.hs.service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-
-import com.datastax.oss.driver.api.core.uuid.Uuids;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +11,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.hs.dao.DictDataEntity;
 import org.thingsboard.server.hs.dao.DictDataRepository;
@@ -73,20 +65,20 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
                     predicates.add(cb.equal(root.get("type"), dictDataListQuery.getDictDataType().trim()));
                 }
             }
-            if (predicates.size() == 0)
+            if (predicates.isEmpty())
                 return es;
             predicates.add(es);
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-//        Pageable pageable = PageRequest.of(pageLink.getPage(), pageLink.getPageSize(), pageLink.getSortOrder());
-//        var t = this.dictDataRepository.findAll(specification, pageable);
-        return null;
+
+        // 查询数据
+        return DaoUtil.toPageData(this.dictDataRepository.findAll(specification, DaoUtil.toPageable(pageLink)));
     }
 
     /**
      * 更新或保存数据字典
      *
-     * @param tenantId 租户Id
+     * @param tenantId      租户Id
      * @param dictDataQuery 数据字典参数
      */
     @Override
@@ -108,12 +100,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
             // 新增
             dictData = new DictData();
 
-            UUID timeBased = Uuids.timeBased();
-            dictData.setId(timeBased.toString());
-            dictData.setCreatedTime(Uuids.unixTimestamp(timeBased));
-            dictData.setUpdatedTime(Uuids.unixTimestamp(timeBased));
             dictData.setTenantId(tenantId.toString());
-
             dictData.setName(dictDataQuery.getName());
             dictData.setComment(dictDataQuery.getComment());
             dictData.setIcon(dictDataQuery.getIcon());
@@ -123,12 +110,12 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
 
             // 设置编码
             if (!StringUtils.isBlank(dictData.getCode())) {
-                if (!dictData.getCode().startsWith("SJZD")) {
+                if (!dictData.getCode().startsWith("SJZD")) {  // TODO 需要再完善一下
                     throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
                 }
                 dictData.setCode(dictData.getCode());
             } else {
-                var codes = this.dictDataRepository.findCodes();
+                var codes = this.dictDataRepository.findCodesByTenantId(tenantId.getId());
                 if (codes.isEmpty()) {
                     dictData.setCode("SJZD0001");
                 } else {

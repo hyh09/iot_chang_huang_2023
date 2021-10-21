@@ -1,6 +1,7 @@
 package org.thingsboard.server.hs.entity.po;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 数据字典

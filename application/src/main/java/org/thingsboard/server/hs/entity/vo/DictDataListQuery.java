@@ -1,7 +1,10 @@
 package org.thingsboard.server.hs.entity.vo;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 数据字典页面请求
@@ -10,8 +13,10 @@ import lombok.experimental.Accessors;
  * @since 2021.10.19
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class DictDataListQuery{
+@Builder
+public class DictDataListQuery extends PageAndSortQuery{
     /**
      * 编码
      */

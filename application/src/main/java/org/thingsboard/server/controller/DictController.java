@@ -1,8 +1,8 @@
 package org.thingsboard.server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.hs.dao.DictDataEntity;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
@@ -47,7 +47,7 @@ public class DictController extends BaseController {
      * @param dictDataType 数据类型
      * @return 数据字典列表
      */
-//    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data")
     public PageData<DictData> listDictData(
             @RequestParam int pageSize,
@@ -56,9 +56,12 @@ public class DictController extends BaseController {
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String dictDataType)
+            @RequestParam(required = false) String dictDataType
+    )
             throws ThingsboardException {
         try {
+            DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
+                    .code(code).name(name).dictDataType(dictDataType).build();
             SecurityUser user = getCurrentUser();
             TenantId tenantId = user.getTenantId();
             PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
@@ -66,9 +69,7 @@ public class DictController extends BaseController {
             validatePageLink(pageLink);
 
             // 查询数据字典列表
-            return this.dictDataService.listDictDataByQuery(tenantId,
-                    new DictDataListQuery().setDictDataType(dictDataType).setCode(code).setName(name)
-                    , pageLink);
+            return this.dictDataService.listDictDataByQuery(tenantId, dictDataListQuery, pageLink);
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -79,6 +80,7 @@ public class DictController extends BaseController {
      *
      * @param dictDataQuery 数据字典参数
      */
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @PostMapping("/dict/data")
     public void updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
@@ -91,6 +93,7 @@ public class DictController extends BaseController {
      *
      * @param id 数据字典Id
      */
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data/{id}")
     public DictData getDictDataDetail(@PathVariable("id") String id) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
@@ -103,6 +106,7 @@ public class DictController extends BaseController {
      *
      * @param id 数据字典Id
      */
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/dict/data/{id}")
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
@@ -123,4 +127,6 @@ public class DictController extends BaseController {
             throw handleException(e);
         }
     }
+
+    
 }

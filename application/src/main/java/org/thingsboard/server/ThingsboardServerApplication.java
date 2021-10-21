@@ -19,6 +19,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 @ComponentScan({"org.thingsboard.server"})
 @EnableJpaRepositories(basePackages = "org.thingsboard.server.hs")
 @EntityScan(basePackages = "org.thingsboard.server.hs")
+@EnableJpaAuditing
 public class ThingsboardServerApplication {
 
     private static final String SPRING_CONFIG_NAME_KEY = "--spring.config.name";

@@ -4,45 +4,22 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.thingsboard.server.dao.model.BasePgEntity;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 import org.thingsboard.server.hs.entity.po.DictData;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @Entity
-//@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @Table(name = ModelConstants.DICT_DATA_TABLE_NAME)
-public class DictDataEntity implements Serializable {
-    @Id
-    @Column(name = ModelConstants.ID_PROPERTY, columnDefinition = "uuid")
-    protected UUID id;
-
-    @Column(name = ModelConstants.CREATED_TIME_PROPERTY)
-    protected long createdTime;
-
-    /**
-     * 创建人
-     */
-    @Column(name = ModelConstants.GENERAL_CREATED_USER)
-    protected String createdUser;
-
-    /**
-     * 创建时间
-     */
-    @Column(name = ModelConstants.GENERAL_UPDATED_TIME)
-    protected long updatedTime;
-
-    /**
-     * 更新人
-     */
-    @Column(name = ModelConstants.GENERAL_UPDATED_USER)
-    protected String updatedUser;
+@EntityListeners(AuditingEntityListener.class)
+public class DictDataEntity extends BasePgEntity<DictDataEntity> implements ToData<DictData> {
     /**
      * 租户Id
      */
@@ -92,17 +69,6 @@ public class DictDataEntity implements Serializable {
     @Column(name = ModelConstants.DICT_DATA_PICTURE)
     private String picture;
 
-//    public void setCreatedTime(long createdTime) {
-//        if (createdTime > 0) {
-//            this.createdTime = createdTime;
-//        }
-//    }
-//    public void setUpdatedTime(long updatedTime) {
-//        if (updatedTime > 0) {
-//            this.updatedTime = updatedTime;
-//        }
-//    }
-
     public DictDataEntity() {
     }
 
@@ -132,7 +98,6 @@ public class DictDataEntity implements Serializable {
     /**
      * to data
      */
-//    @Override
     public DictData toData() {
         DictData dictData = new DictData();
         dictData.setId(id.toString());
