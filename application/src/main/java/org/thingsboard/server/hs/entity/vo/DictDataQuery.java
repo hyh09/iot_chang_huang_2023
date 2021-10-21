@@ -1,52 +1,39 @@
 package org.thingsboard.server.hs.entity.vo;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
 
-/**
- * 数据字典
- */
+import javax.validation.constraints.NotNull;
+
 @Data
 @Accessors(chain = true)
+@ApiModel(value = "数据字典请求参数实体类")
 public class DictDataQuery {
-    /**
-     * 数据字典Id,null则为新增
-     */
+    @ApiModelProperty(value = "数据字典Id,null或空则为新增")
     private String id;
 
-    /**
-     * 编码
-     */
+    @ApiModelProperty(value = "编码")
     private String code;
 
-    /**
-     * 名称
-     */
+    @NotNull
+    @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 类型
-     */
+    @ApiModelProperty(value = "类型")
     private DictDataTypeEnum type;
 
-    /**
-     * 单位
-     */
+    @ApiModelProperty(value = "单位")
     private String unit;
 
-    /**
-     * 备注
-     */
+    @ApiModelProperty(value = "备注")
     private String comment;
 
-    /**
-     * 图标
-     */
+    @ApiModelProperty(value = "图标")
     private String icon;
 
-    /**
-     * 图片
-     */
+    @ApiModelProperty(value = "图片")
     private String picture;
 }

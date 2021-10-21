@@ -61,8 +61,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
                 if (!StringUtils.isBlank(dictDataListQuery.getCode())) {
                     predicates.add(cb.like(root.get("code"), "%" + dictDataListQuery.getCode().trim() + "%"));
                 }
-                if (!StringUtils.isBlank(dictDataListQuery.getDictDataType())) {
-                    predicates.add(cb.equal(root.get("type"), dictDataListQuery.getDictDataType().trim()));
+                if (dictDataListQuery.getDictDataType() != null) {
+                    predicates.add(cb.equal(root.get("type"), dictDataListQuery.getDictDataType().toString()));
                 }
             }
             if (predicates.isEmpty())
@@ -102,6 +102,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
 
             dictData.setTenantId(tenantId.toString());
             dictData.setName(dictDataQuery.getName());
+            dictData.setCode(dictDataQuery.getCode());
             dictData.setComment(dictDataQuery.getComment());
             dictData.setIcon(dictDataQuery.getIcon());
             dictData.setType(dictDataQuery.getType().toString());
@@ -135,7 +136,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
                 }
             }
         }
-
+        var s = new DictDataEntity(dictData);
         this.dictDataRepository.save(new DictDataEntity(dictData));
     }
 

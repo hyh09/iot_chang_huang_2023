@@ -52,10 +52,10 @@ public class DictDeviceGroupEntity extends BasePgEntity<DictDeviceGroupEntity> i
 
         this.name = common.getName();
 
-        this.createdUser = common.getCreatedUser();
-        this.setCreatedTime(common.getCreatedTime());
-        this.createdUser = common.getCreatedUser();
-        this.setUpdatedTime(common.getUpdatedTime());
+//        this.createdUser = common.getCreatedUser();
+//        this.setCreatedTime(common.getCreatedTime());
+//        this.createdUser = common.getCreatedUser();
+//        this.setUpdatedTime(common.getUpdatedTime());
     }
 
     /**

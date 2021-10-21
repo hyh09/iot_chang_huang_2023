@@ -87,10 +87,10 @@ public class DictDataEntity extends BasePgEntity<DictDataEntity> implements ToDa
         this.icon = dictData.getIcon();
         this.picture = dictData.getPicture();
 
-        this.createdUser = dictData.getCreatedUser();
-        this.setCreatedTime(dictData.getCreatedTime());
-        this.createdUser = dictData.getCreatedUser();
-        this.setUpdatedTime(dictData.getUpdatedTime());
+//        this.createdUser = dictData.getCreatedUser();
+//        this.setCreatedTime(dictData.getCreatedTime());
+//        this.createdUser = dictData.getCreatedUser();
+//        this.setUpdatedTime(dictData.getUpdatedTime());
     }
 
     /**

@@ -1,5 +1,7 @@
 package org.thingsboard.server.hs.entity.po;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 /**
@@ -10,50 +12,35 @@ import lombok.*;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@ApiModel(value = "数据字典")
 public class DictData extends BasePO {
 
     private static final long serialVersionUID = 4934987555236873700L;
-    /**
-     * 数据字典Id
-     */
+
+    @ApiModelProperty(value = "数据字典Id")
     private String id;
-    /**
-     * 租户Id
-     */
+
+    @ApiModelProperty(value = "租户Id")
     private String tenantId;
 
-    /**
-     * 编码
-     */
+    @ApiModelProperty(value = "编码")
     private String code;
 
-    /**
-     * 名称
-     */
+    @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 类型
-     */
+    @ApiModelProperty(value = "类型")
     private String type;
 
-    /**
-     * 单位
-     */
+    @ApiModelProperty(value = "单位")
     private String unit;
 
-    /**
-     * 备注
-     */
+    @ApiModelProperty(value = "备注")
     private String comment;
 
-    /**
-     * 图标
-     */
+    @ApiModelProperty(value = "图标")
     private String icon;
 
-    /**
-     * 图片
-     */
+    @ApiModelProperty(value = "图片")
     private String picture;
 }
