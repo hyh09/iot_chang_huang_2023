@@ -58,6 +58,7 @@ import org.thingsboard.server.dao.tenant.TenantDao;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -380,7 +381,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
     @Override
     public Object changeOthersPassword(PasswordVo vo) {
-        return (userCredentialsDao.updatePassword(vo.getUserId(), vo.getPassword())>0?"success":"fail");
+        return (userCredentialsDao.updatePassword(UUID.fromString(vo.getUserId()), vo.getPassword())>0?"success":"fail");
     }
 
     private int increaseFailedLoginAttempts(User user) {

@@ -384,10 +384,10 @@ public class UserController extends BaseController {
 
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
-    public Object  changeOthersPassword(@Validated @RequestBody PasswordVo vo)
+    public Object  changeOthersPassword( @RequestBody PasswordVo vo)
     {
-
-           return  null;
+           log.info("【changeOthersPassword】打印当前的入参{}",vo);
+           return  userService.changeOthersPassword(vo);
     }
 
 

@@ -34,8 +34,9 @@ public interface UserCredentialsRepository extends CrudRepository<UserCredential
 
     UserCredentialsEntity findByResetToken(String resetToken);
 
-    @Modifying
-    @Query("update UserCredentialsEntity m set m.password=?2 where  m.userId=?1")
+    @Transactional
+    @Modifying(clearAutomatically = true)
+   @Query("update UserCredentialsEntity m set m.password=?2 where  m.userId=?1")
     int  updatePassword(UUID userId, String password);
 
 
