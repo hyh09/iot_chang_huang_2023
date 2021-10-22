@@ -31,15 +31,15 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       supplier: ''
     }
 
-    this.config.deleteEntityTitle = dataDic => this.translate.instant('device-mng.delete-dic-title', {dataDicName: dataDic.name});
-    this.config.deleteEntityContent = () => this.translate.instant('device-mng.delete-dic-text');
-    this.config.deleteEntitiesTitle = count => this.translate.instant('device-mng.delete-dics-title', {count});
-    this.config.deleteEntitiesContent = () => this.translate.instant('device-mng.delete-dics-text');
+    this.config.deleteEntityTitle = deviceDic => this.translate.instant('device-mng.delete-device-dic-title', {deviceDicName: deviceDic.name});
+    this.config.deleteEntityContent = () => this.translate.instant('device-mng.delete-device-dic-text');
+    this.config.deleteEntitiesTitle = count => this.translate.instant('device-mng.delete-device-dics-title', {count});
+    this.config.deleteEntitiesContent = () => this.translate.instant('device-mng.delete-device-dics-text');
 
-    this.config.entitiesFetchFunction = pageLink => this.deviceDictionaryService.getDeviceDictionaries(pageLink);
-    this.config.loadEntity = id => this.deviceDictionaryService.getDeviceDictionary(id.id);
+    this.config.entitiesFetchFunction = pageLink => this.deviceDictionaryService.getDeviceDictionaries(pageLink, this.config.componentsData);
+    this.config.loadEntity = id => this.deviceDictionaryService.getDeviceDictionary(id);
     this.config.saveEntity = dataDictionary => this.deviceDictionaryService.saveDeviceDictionary(dataDictionary);
-    this.config.deleteEntity = id => this.deviceDictionaryService.deleteDeviceDictionary(id.id);
+    this.config.deleteEntity = id => this.deviceDictionaryService.deleteDeviceDictionary(id);
 
     this.config.columns.push(
       new EntityTableColumn<DeviceDictionary>('code', 'device-mng.code', '50%'),

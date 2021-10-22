@@ -25,14 +25,17 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
   }
 
   buildForm(entity: DataDictionary): FormGroup {
+    console.log(this.entitiesTableConfig.componentsData.availableCode)
     return this.fb.group(
       {
-        code: [entity ? entity.code : '', [Validators.required]],
+        id:  [entity ? entity.id : ''],
+        code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, [Validators.required]],
         name: [entity ? entity.name : '', [Validators.required]],
-        dataType: [entity ? entity.type : null, [Validators.required]],
+        type: [entity ? entity.type : null, [Validators.required]],
         unit: [entity ? entity.unit : ''],
         comment: [entity ? entity.comment : ''],
-        icon: [entity? entity.icon : '']
+        icon: [entity ? entity.icon : ''],
+        picture: [entity ? entity.picture : '']
       }
     );
   }

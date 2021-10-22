@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 
 import { Resolve, Router } from '@angular/router';
 
-import { TenantInfo, TentMenus } from '@shared/models/tenant.model';
+import { TenantInfo, TenantMenus } from '@shared/models/tenant.model';
 import {
   DateEntityTableColumn,
   EntityTableColumn,
@@ -102,7 +102,7 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
     if ($event) {
       $event.stopPropagation();
     }
-    this.dialog.open<SetTenantMenusComponent, SetMenusDialogData, TentMenus>(SetTenantMenusComponent, {
+    this.dialog.open<SetTenantMenusComponent, SetMenusDialogData, TenantMenus>(SetTenantMenusComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: tenant

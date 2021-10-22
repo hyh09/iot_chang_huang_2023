@@ -6,7 +6,8 @@ export interface DataDictionary extends BaseData<DataDictionaryId> {
   icon: string,
   type: string,
   unit: string,
-  comment: string
+  comment: string,
+  picture: string
 }
 
 export interface DeviceDictionary extends BaseData<DataDictionaryId> {

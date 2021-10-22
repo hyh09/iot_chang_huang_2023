@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
+import { DataDictionaryService } from '@app/core/http/custom/data-dictionary.service';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
 import { DataDictionary } from '@app/shared/models/custom/device-mng.models';
 import { Store } from '@ngrx/store';
@@ -18,9 +19,9 @@ export class DataDictionaryFiltersComponent extends EntityTableHeaderComponent<D
     super(store);
   }
 
-  typeChanged(dataType: string) {
-    this.entitiesTableConfig.componentsData.dataType = dataType;
-    this.entitiesTableConfig.table.resetSortAndFilter(true);
+  onClear(param: string): void {
+    this.entitiesTableConfig.componentsData[param] = '';
+    this.entitiesTableConfig.table.updateData();
   }
 
 }

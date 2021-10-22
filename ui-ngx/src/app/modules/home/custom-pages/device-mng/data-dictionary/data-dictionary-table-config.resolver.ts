@@ -1,3 +1,4 @@
+import { map } from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
 import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig, iconCell } from "@app/modules/home/models/entity/entities-table-config.models";
@@ -28,18 +29,16 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.componentsData = {
       code: '',
       name: '',
-      type: ''
+      dictDataType: '',
+      dataTypeList: [],
+      dataTypeMap: {},
+      availableCode: ''
     }
 
-    this.config.deleteEntityTitle = dataDic => this.translate.instant('device-mng.delete-dic-title', {dataDicName: dataDic.name});
-    this.config.deleteEntityContent = () => this.translate.instant('device-mng.delete-dic-text');
-    this.config.deleteEntitiesTitle = count => this.translate.instant('device-mng.delete-dics-title', {count});
-    this.config.deleteEntitiesContent = () => this.translate.instant('device-mng.delete-dics-text');
-
-    this.config.entitiesFetchFunction = pageLink => this.dataDictionaryService.getDataDictionaries(pageLink);
-    this.config.loadEntity = id => this.dataDictionaryService.getDataDictionary(id.id);
-    this.config.saveEntity = dataDictionary => this.dataDictionaryService.saveDataDictionary(dataDictionary);
-    this.config.deleteEntity = id => this.dataDictionaryService.deleteDataDictionary(id.id);
+    this.config.deleteEntityTitle = dataDic => this.translate.instant('device-mng.delete-data-dic-title', {dataDicName: dataDic.name});
+    this.config.deleteEntityContent = () => this.translate.instant('device-mng.delete-data-dic-text');
+    this.config.deleteEntitiesTitle = count => this.translate.instant('device-mng.delete-data-dics-title', {count});
+    this.config.deleteEntitiesContent = () => this.translate.instant('device-mng.delete-data-dics-text');
 
     this.config.columns.push(
       new EntityTableColumn<DataDictionary>('code', 'device-mng.code', '50%'),
@@ -47,17 +46,53 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
       new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({icon}) => {
         return iconCell(icon)
       }),
-      new EntityTableColumn<DataDictionary>('type', 'device-mng.data-type', '150px'),
+      new EntityTableColumn<DataDictionary>('type', 'device-mng.data-type', '150px', ({type}) => {
+        if (this.config.componentsData.dataTypeMap[type]) {
+          return this.translate.instant(this.config.componentsData.dataTypeMap[type]);
+        }
+        return '';
+      }),
       new EntityTableColumn<DataDictionary>('unit', 'device-mng.unit', '100px'),
       new DateEntityTableColumn<DataDictionary>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }
 
   resolve(): EntityTableConfig<DataDictionary> {
+    this.dataDictionaryService.getDataType().subscribe(res => {
+      this.config.componentsData.dataTypeList = res;
+      res.forEach(({name, code}) => {
+        this.config.componentsData.dataTypeMap[code] = `device-mng.${name}`;
+      });
+    });
+
+    this.setAvailableCode();
+
     this.config.tableTitle = this.translate.instant('device-mng.data-dic');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+
+    this.config.entitiesFetchFunction = pageLink => this.dataDictionaryService.getDataDictionaries(pageLink, this.config.componentsData);
+    this.config.loadEntity = id => this.dataDictionaryService.getDataDictionary(id);
+    this.config.saveEntity = dataDictionary => {
+      return this.dataDictionaryService.saveDataDictionary(dataDictionary);
+    }
+    this.config.entityAdded = () => {
+      this.setAvailableCode();
+    }
+    this.config.deleteEntity = id => {
+      return this.dataDictionaryService.deleteDataDictionary(id).pipe(map(result => {
+        this.setAvailableCode();
+        return result;
+      }));
+    }
+
     return this.config;
+  }
+
+  setAvailableCode(): void {
+    this.dataDictionaryService.getAvailableCode().subscribe(code => {
+      this.config.componentsData.availableCode = code
+    });
   }
 
 }

@@ -17,8 +17,8 @@
 import { ContactBased } from '@shared/models/contact-based.model';
 import { TenantId } from './id/tenant-id';
 import { TenantProfileId } from '@shared/models/id/tenant-profile-id';
-import { BaseData } from '@shared/models/base-data';
-import {Validators} from "@angular/forms";
+import { BaseData, CustomBaseData } from '@shared/models/base-data';
+import { TreeNode } from '@app/core/services/utils.service';
 
 export enum TenantProfileType {
   DEFAULT = 'DEFAULT'
@@ -120,6 +120,44 @@ export interface TenantInfo extends Tenant {
   tenantProfileName: string;
 }
 
-export interface TentMenus {
-  
+export enum MenuType {
+  PC = 'PC',
+  APP = 'APP'
 }
+
+export interface TenantMenu extends CustomBaseData, TreeNode {
+  additionalInfo: string,
+  level: number,
+  menuType: MenuType,
+  parentId: string,
+  region: string,
+  sort: number,
+  sysMenuCode: string,
+  sysMenuId: string,
+  sysMenuName: string,
+  tenantId: string,
+  tenantMenuCode: string,
+  tenantMenuName: string,
+  tenatMenuIcon: string,
+  tenentMenuImages: string,
+  url: string
+}
+
+export class TenantMenus extends Array<TenantMenu> {}
+
+export interface SysMenu extends CustomBaseData, TreeNode {
+  associatedTenant: boolean,
+  code: string,
+  level: number,
+  menuIcon: string,
+  menuImages: string,
+  menuType: MenuType,
+  name: string,
+  parentId: string,
+  region: string,
+  sort: number,
+  sysMenuId: string,
+  url: string
+}
+
+export class SysMenus extends Array<SysMenu> {}

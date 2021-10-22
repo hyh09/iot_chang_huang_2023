@@ -17,11 +17,13 @@
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.data-type</mat-label>
-        <mat-select formControlName="dataType" required>
-          <mat-option [value]="'数值型'">数值型</mat-option>
-          <mat-option [value]="'布尔型'">布尔型</mat-option>
+        <mat-select formControlName="type" required>
+          <mat-option
+            *ngFor="let option of entitiesTableConfig.componentsData.dataTypeList"
+            [value]="option.code"
+          >{{ 'device-mng.' + option.name | translate }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="entityForm.get('dataType').hasError('required')">
+        <mat-error *ngIf="entityForm.get('type').hasError('required')">
           {{ 'device-mng.data-type-required' | translate }}
         </mat-error>
       </mat-form-field>

@@ -18,4 +18,9 @@ export class DeviceDictionaryFiltersComponent extends EntityTableHeaderComponent
     super(store);
   }
 
+  onClear(param: string): void {
+    this.entitiesTableConfig.componentsData[param] = '';
+    this.entitiesTableConfig.table.updateData();
+  }
+
 }
