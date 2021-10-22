@@ -1,7 +1,6 @@
 package org.thingsboard.server.hs.entity.po;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * 设备字典-分组
@@ -11,6 +10,9 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DictDeviceGroup extends BasePO {
 
     private static final long serialVersionUID = 4934987555236873704L;

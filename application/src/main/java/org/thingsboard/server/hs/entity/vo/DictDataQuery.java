@@ -15,6 +15,7 @@ public class DictDataQuery {
     @ApiModelProperty(value = "数据字典Id,null或空则为新增")
     private String id;
 
+    @NotNull
     @ApiModelProperty(value = "编码")
     private String code;
 

@@ -1,25 +1,22 @@
 package org.thingsboard.server.hs.entity.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
 
 /**
- * 数据字典页面请求
+ * 设备字典页面请求
  *
  * @author wwj
- * @since 2021.10.19
+ * @since 2021.10.22
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class DictDataListQuery extends PageAndSortQuery{
+public class DictDeviceListQuery extends PageAndSortQuery{
     /**
      * 编码
      */
@@ -29,7 +26,7 @@ public class DictDataListQuery extends PageAndSortQuery{
      */
     private String name;
     /**
-     * 数据类型
+     * 供应商
      */
-    private DictDataTypeEnum dictDataType;
+    private String supplier;
 }

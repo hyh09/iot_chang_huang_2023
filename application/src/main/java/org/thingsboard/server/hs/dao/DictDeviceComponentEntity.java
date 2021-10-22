@@ -110,9 +110,9 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
         if (common.getId() != null)
             this.id = UUID.fromString(common.getId());
         if (common.getDictDeviceId() != null)
-            this.id = UUID.fromString(common.getDictDeviceId());
+            this.dictDeviceId = UUID.fromString(common.getDictDeviceId());
         if (common.getParentId() != null)
-            this.id = UUID.fromString(common.getParentId());
+            this.parentId = UUID.fromString(common.getParentId());
         this.code = common.getCode();
         this.name = common.getName();
         this.type = common.getType();
@@ -135,7 +135,9 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
      */
     public DictDeviceComponent toData() {
         DictDeviceComponent common = new DictDeviceComponent();
-        common.setId(id.toString());
+        if (id != null) {
+            common.setId(id.toString());
+        }
         if (parentId != null) {
             common.setParentId(parentId.toString());
         }

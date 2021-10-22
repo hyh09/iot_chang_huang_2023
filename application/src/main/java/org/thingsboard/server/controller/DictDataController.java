@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
@@ -48,7 +49,20 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "获得数据字典界面资源")
     @GetMapping("/dict/data/resource")
     public DictDataResource listDictDataResource() throws ThingsboardException {
-        return new DictDataResource().setDictDataTypeMap(DictDataTypeEnum.BOOLEAN.toLinkMap());
+        return new DictDataResource().setDictDataTypeList(DictDataTypeEnum.toResourceList());
+    }
+
+    /**
+     * 获得当前可用数据字典编码
+     *
+     * @return 数据字典编码
+     */
+    @ApiOperation(value = "获得当前可用数据字典编码")
+    @GetMapping("/dict/data/availableCode")
+    public String getAvailableCode() throws ThingsboardException {
+        SecurityUser user = getCurrentUser();
+        TenantId tenantId = user.getTenantId();
+        return this.dictDataService.getAvailableCode(tenantId);
     }
 
     /**
@@ -103,11 +117,23 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "更新或新增数据字典")
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @PostMapping("/dict/data")
-    public void updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
+    @PostMapping(value = "/dict/data")
+    public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
         TenantId tenantId = user.getTenantId();
+        if (!dictDataQuery.getCode().startsWith("SJZD")) {
+            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+        }
+        try {
+            int intV = Integer.parseInt(dictDataQuery.getCode().split("SJZD")[1]);
+            if (intV < 1 || intV > 9999) {
+                throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+            }
+        } catch (Exception ignore) {
+            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+        }
         this.dictDataService.updateOrSaveDictData(dictDataQuery, tenantId);
+        return dictDataQuery;
     }
 
     /**

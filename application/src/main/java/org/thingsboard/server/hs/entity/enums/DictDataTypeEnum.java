@@ -3,9 +3,7 @@ package org.thingsboard.server.hs.entity.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 数据字典类型
@@ -15,10 +13,10 @@ import java.util.Map;
  */
 @Getter
 public enum DictDataTypeEnum {
-    FLOAT("FLOAT", "浮点型"),
-    BOOLEAN("BOOLEAN","布尔型"),
-    NUMBER("NUMBER", "数值型"),
-    CHARACTER("CHARACTER", "字符型");
+    FLOAT("FLOAT", "type-float"),
+    BOOLEAN("BOOLEAN","type-boolean"),
+    NUMBER("NUMBER", "type-number"),
+    CHARACTER("CHARACTER", "type-character");
 
     @JsonValue
     private final String code;
@@ -29,11 +27,14 @@ public enum DictDataTypeEnum {
         this.name = name;
     }
 
-    public Map<String, String> toLinkMap() {
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+    public static List<Map<String, String>> toResourceList() {
+        List<Map<String, String>> list = new ArrayList<>();
         Arrays.stream(DictDataTypeEnum.values()).forEach(e->{
-            map.put(e.getName(), e.getCode());
+            LinkedHashMap<String, String> map = new LinkedHashMap<>();
+            map.put("name", e.getName());
+            map.put("code", e.getCode());
+            list.add(map);
         });
-        return map;
+        return list;
     }
 }
