@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -27,6 +28,7 @@ import org.thingsboard.server.common.data.security.Authority;
 
 import org.thingsboard.server.common.data.validation.NoXss;
 
+@ToString
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements HasName, HasTenantId, HasCustomerId {
@@ -165,23 +167,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         return getEmail();
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "strId='" + strId + '\'' +
-                ", tenantId=" + tenantId +
-                ", customerId=" + customerId +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", activeStatus='" + activeStatus + '\'' +
-                ", userCode='" + userCode + '\'' +
-                ", userName='" + userName + '\'' +
-                ", userCreator='" + userCreator + '\'' +
-                ", authority=" + authority +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                '}';
-    }
+
 
     //    @Override
 //    public String toString() {

@@ -45,6 +45,7 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
@@ -374,6 +375,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public Object findAll(Map<String, Object> queryParam, PageLink pageLink) {
         return userDao.findAll(queryParam,pageLink);
+    }
+
+
+    @Override
+    public Object changeOthersPassword(PasswordVo vo) {
+        return (userCredentialsDao.updatePassword(vo.getUserId(), vo.getPassword())>0?"success":"fail");
     }
 
     private int increaseFailedLoginAttempts(User user) {

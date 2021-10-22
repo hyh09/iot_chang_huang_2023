@@ -15,9 +15,12 @@
  */
 package org.thingsboard.server.dao.sql.user;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.thingsboard.server.dao.model.sql.UserCredentialsEntity;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 /**
@@ -30,4 +33,11 @@ public interface UserCredentialsRepository extends CrudRepository<UserCredential
     UserCredentialsEntity findByActivateToken(String activateToken);
 
     UserCredentialsEntity findByResetToken(String resetToken);
+
+    @Modifying
+    @Query("update UserCredentialsEntity m set m.password=?2 where  m.userId=?1")
+    int  updatePassword(UUID userId, String password);
+
+
+
 }

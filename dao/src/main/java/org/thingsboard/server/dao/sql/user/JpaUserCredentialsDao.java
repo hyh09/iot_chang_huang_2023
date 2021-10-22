@@ -60,4 +60,10 @@ public class JpaUserCredentialsDao extends JpaAbstractDao<UserCredentialsEntity,
     public UserCredentials findByResetToken(TenantId tenantId, String resetToken) {
         return DaoUtil.getData(userCredentialsRepository.findByResetToken(resetToken));
     }
+
+
+    @Override
+    public int updatePassword(UUID userId, String password) {
+        return userCredentialsRepository.updatePassword(userId,password);
+    }
 }

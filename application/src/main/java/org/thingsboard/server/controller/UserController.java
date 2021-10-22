@@ -24,11 +24,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PSQLException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +57,10 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
+import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
+import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -376,6 +382,15 @@ public class UserController extends BaseController {
     }
 
 
+    @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
+    @ResponseBody
+    public Object  changeOthersPassword(@Validated @RequestBody PasswordVo vo)
+    {
+
+           return  null;
+    }
+
+
     /**
      * 用户得添加接口
      */
@@ -454,6 +469,12 @@ public class UserController extends BaseController {
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return userService.findAll( queryParam, pageLink);
     }
+
+
+
+    @Autowired  private UserMenuRoleService userMenuRoleService;
+
+
 
 
 }

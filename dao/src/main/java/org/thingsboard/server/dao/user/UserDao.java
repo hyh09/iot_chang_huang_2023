@@ -81,5 +81,5 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
     /**
      * 单表的分页查询
      */
-    Page<UserEntity> findAll(Map<String, Object> queryParam, PageLink pageLink);
+    PageData<User> findAll(Map<String, Object> queryParam, PageLink pageLink);
 }

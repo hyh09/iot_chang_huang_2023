@@ -119,10 +119,10 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
     }
 
 
-    public Page<UserEntity> findAll(Map<String, Object> queryParam, PageLink pageLink) {
+    public PageData<User> findAll(Map<String, Object> queryParam, PageLink pageLink) {
         Page<UserEntity> list = this.userRepository.findAll(JpaQueryHelper.createQueryByMap(queryParam,UserEntity.class ),  DaoUtil.toPageable(pageLink));
         System.out.println("打印当前的数据:"+list);
-  return  list;
+        return  DaoUtil.toPageData(list);
     }
 
 

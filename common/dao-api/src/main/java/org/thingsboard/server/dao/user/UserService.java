@@ -24,6 +24,7 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.UserCredentials;
+import org.thingsboard.server.common.data.vo.PasswordVo;
 
 import java.util.Map;
 
@@ -80,4 +81,7 @@ public interface UserService {
 	int onUserLoginIncorrectCredentials(TenantId tenantId, UserId userId);
 
 	Object findAll(Map<String, Object> queryParam,PageLink pageLink);
+
+
+	Object  changeOthersPassword(PasswordVo vo);
 }
