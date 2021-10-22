@@ -24,7 +24,7 @@
   <mat-label>{{ 'device-mng.data-type' | translate }}</mat-label>
   <mat-select
     [(ngModel)]="entitiesTableConfig.componentsData.dictDataType"
-    (ngModelChange)="entitiesTableConfig.table.updateData()"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
   >
     <mat-option value="">全部</mat-option>
     <mat-option
@@ -34,7 +34,7 @@
   </mat-select>
 </mat-form-field>
 <div class="action-btns">
-  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.updateData()">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
     {{ 'action.search' | translate }}
   </button>
 </div>
