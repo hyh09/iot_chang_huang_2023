@@ -1,49 +1,60 @@
 package org.thingsboard.server.common.data.memu;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.UUID;
 
+@ApiModel("MenuInfo")
 @Data
 public class MenuInfo {
-    private UUID id;
+    @ApiModelProperty(name = "菜单标识")
+    public UUID id;
 
-    private UUID sysMenuId;
+    @ApiModelProperty(name = "菜单编码")
+    public String code;
 
-    private String code;
+    @ApiModelProperty("系统菜单名称")
+    public String name;
 
-    private String name;
+    @ApiModelProperty("层级")
 
-    private Integer level;
+    public Integer level;
+    @ApiModelProperty("排序")
+    public Integer sort;
 
-    private Integer sort;
+    @ApiModelProperty("页面链接")
+    public String url;
 
-    private String url;
+    @ApiModelProperty("系统菜单图标")
+    public String menuIcon;
 
-    private UUID parentId;
+    @ApiModelProperty("系统菜单自定义图片")
+    public String menuImages;
 
-    private String menuIcon;
+    @ApiModelProperty("父级租户菜单")
+    public UUID parentId;
 
-    private String menuImages;
+    @ApiModelProperty("菜单类型（PC/APP）")
+    public String menuType;
 
-    private UUID createdUser;
-
-    private long updatedTime;
-
-    private UUID updatedUser;
-
-    private String region;
-
-    private String menuType;
-
-    //该系统菜单是否被租户关联
+    @ApiModelProperty("创建人标识")
+    public UUID createdUser;
+    @ApiModelProperty("创建时间")
+    public long createdTime;
+    @ApiModelProperty("修改时间")
+    public long updatedTime;
+    @ApiModelProperty("修改人")
+    public UUID updatedUser;
+    @ApiModelProperty("区域")
+    public String region;
+    @ApiModelProperty("该系统菜单是否被租户关联(true/fasle)")
     private Boolean associatedTenant;
-
-    private Long createdTime;
 
     public MenuInfo(){}
 
-    public MenuInfo(Menu menu ){
+    public MenuInfo(Menu menu){
         if (menu.getId() != null) {
             this.id= menu.getId().getId();
         }

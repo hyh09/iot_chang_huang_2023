@@ -52,7 +52,7 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
      * @return
      */
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.parentId = :parentId AND t.sort > :sort ORDER BY t.sort ASC")
-    List<TenantMenuEntity> findRearList(Integer sort, UUID parentId);
+    List<TenantMenuEntity> findRearList(@Param("sort")Integer sort, @Param("parentId")UUID parentId);
 
     /**
      * 查询租户PC/APP菜单列表
@@ -61,9 +61,9 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
      * @return
      */
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId ORDER BY t.sort ASC")
-    List<TenantMenuEntity> getTenantMenuList(String menuType, String tenantId);
+    List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId);
 
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName = :tenantMenuName ORDER BY t.sort ASC")
-    List<TenantMenuEntity> getTenantMenuList(String menuType, String tenantId,String tenantMenuName);
+    List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")String tenantId,@Param("tenantMenuName")String tenantMenuName);
 
 }

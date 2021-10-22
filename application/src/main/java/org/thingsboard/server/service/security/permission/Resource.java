@@ -42,7 +42,10 @@ public enum Resource {
     EDGE(EntityType.EDGE),
     RPC(EntityType.RPC),
     MENU(EntityType.MENU),
-    TENANT_MENU(EntityType.TENANT_MENU);
+    TENANT_MENU(EntityType.TENANT_MENU),
+    FACTORY(EntityType.FACTORY),
+    WORKSHOP(EntityType.WORKSHOP),
+    PRODUCTION_LINE(EntityType.PRODUCTION_LINE);
 
     private final EntityType entityType;
 

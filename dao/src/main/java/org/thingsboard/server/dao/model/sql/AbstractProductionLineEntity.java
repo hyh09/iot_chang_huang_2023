@@ -1,0 +1,147 @@
+/**
+ * Copyright © 2016-2021 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.thingsboard.server.dao.model.sql;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.TypeDef;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.dao.model.BaseSqlEntity;
+import org.thingsboard.server.dao.util.mapping.JsonStringType;
+
+import javax.persistence.Column;
+import javax.persistence.EntityListeners;
+import javax.persistence.MappedSuperclass;
+import java.util.UUID;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+@TypeDef(name = "json", typeClass = JsonStringType.class)
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class AbstractProductionLineEntity<T extends ProductionLine> extends BaseSqlEntity<T>{
+
+    @ApiModelProperty("车间标识")
+    @Column(name = "workshop_id")
+    private UUID workshopId;
+
+    @ApiModelProperty("生产线编码")
+    @Column(name = "code")
+    private String code;
+
+    @ApiModelProperty("生产线名称")
+    @Column(name = "name")
+    private String name;
+
+    @ApiModelProperty("logo图标")
+    @Column(name = "logo_icon")
+    private String logoIcon;
+
+    @ApiModelProperty("logo图片")
+    @Column(name = "logo_images")
+    private String logoImages;
+
+    @ApiModelProperty(name = "备注")
+    @Column(name = "remark")
+    private String remark;
+
+    @ApiModelProperty(name = "租户")
+    @Column(name = "tenant_id")
+    private UUID tenantId;
+
+    @CreatedDate
+    @Column(name = "created_time")
+    private long createdTime;
+
+    @CreatedBy
+    @Column(name = "created_user")
+    private UUID createdUser;
+
+    @CreatedDate
+    @Column(name = "updated_time")
+    private long updatedTime;
+
+    @CreatedBy
+    @Column(name = "updated_user")
+    private UUID updatedUser;
+
+    @ApiModelProperty("删除标记（A-未删除；D-已删除）")
+    @Column(name = "del_flag")
+    private String delFlag = "A";
+
+    public AbstractProductionLineEntity() {
+        super();
+    }
+
+    public AbstractProductionLineEntity(AbstractProductionLineEntity<T> abstractProdutionLineEntity){
+        if (abstractProdutionLineEntity.getId() != null) {
+            this.setUuid(abstractProdutionLineEntity.getId());
+        }
+        this.workshopId = abstractProdutionLineEntity.getWorkshopId();
+        this.code = abstractProdutionLineEntity.getCode();
+        this.name = abstractProdutionLineEntity.getName();
+        this.logoIcon = abstractProdutionLineEntity.getLogoIcon();
+        this.logoImages = abstractProdutionLineEntity.getLogoImages();
+        this.remark = abstractProdutionLineEntity.getRemark();
+        this.tenantId = abstractProdutionLineEntity.getTenantId();
+        this.createdTime = abstractProdutionLineEntity.getUpdatedTime();
+        this.createdUser = abstractProdutionLineEntity.getCreatedUser();
+        this.updatedTime = abstractProdutionLineEntity.getUpdatedTime();
+        this.updatedUser = abstractProdutionLineEntity.getUpdatedUser();
+        this.delFlag = abstractProdutionLineEntity.getDelFlag();
+    }
+
+    public AbstractProductionLineEntity(ProductionLine productionLine) {
+        if (productionLine.getId() != null) {
+            this.setUuid(productionLine.getId().getId());
+        }
+        this.workshopId = productionLine.getWorkshopId();
+        this.code = productionLine.getCode();
+        this.name = productionLine.getName();
+        this.logoIcon = productionLine.getLogoIcon();
+        this.logoImages = productionLine.getLogoImages();
+        this.remark = productionLine.getRemark();
+        this.tenantId = productionLine.getTenantId();
+        this.createdTime = productionLine.getUpdatedTime();
+        this.createdUser = productionLine.getCreatedUser();
+        this.updatedTime = productionLine.getUpdatedTime();
+        this.updatedUser = productionLine.getUpdatedUser();
+        this.delFlag = productionLine.getDelFlag();
+    }
+
+    public ProductionLine toProductionLine(){
+        ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getUuid()));
+        productionLine.setWorkshopId(workshopId);
+        productionLine.setCode(code);
+        productionLine.setName(name);
+        productionLine.setLogoIcon(logoIcon);
+        productionLine.setLogoImages(logoImages);
+        productionLine.setRemark(remark);
+        productionLine.setTenantId(tenantId);
+        productionLine.setCreatedTime(createdTime);
+        productionLine.setCreatedUser(createdUser);
+        productionLine.setUpdatedTime(updatedTime);
+        productionLine.setUpdatedUser(updatedUser);
+        productionLine.setDelFlag(delFlag);
+        return productionLine;
+    }
+
+}

@@ -71,11 +71,13 @@ import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
+import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
 import org.thingsboard.server.dao.oauth2.OAuth2Service;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
@@ -86,6 +88,9 @@ import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
+import org.thingsboard.server.dao.workshop.WorkshopService;
+import org.thingsboard.server.entity.menu.dto.AddMenuDto;
+import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
 import org.thingsboard.server.exception.ThingsboardErrorResponseHandler;
 import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.provider.TbQueueProducerProvider;
@@ -246,6 +251,15 @@ public abstract class BaseController {
 
     @Autowired
     protected TenantMenuService tenantMenuService;
+
+    @Autowired
+    protected FactoryService factoryService;
+
+    @Autowired
+    protected WorkshopService workshopService;
+
+    @Autowired
+    protected ProductionLineService productionLineService;
 
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
@@ -434,6 +448,20 @@ public abstract class BaseController {
             throw handleException(e, false);
         }
     }
+    Menu checkAddMenuList(AddMenuDto addMenuDto) throws ThingsboardException{
+        if(addMenuDto == null){
+            throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        return checkMenu(addMenuDto.toMenu());
+    }
+    Menu checkMenu(Menu menu) throws ThingsboardException{
+        checkNotNull(menu);
+        checkParameter("tenant",menu.getTenantId());
+        checkParameter("level",menu.getLevel());
+        checkParameter("menuType",menu.getMenuType());
+        return menu;
+    }
+
     void checkTenantMenuList(List<TenantMenu> tenantMenu) throws ThingsboardException{
         if(CollectionUtils.isEmpty(tenantMenu)){
             throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
@@ -450,8 +478,37 @@ public abstract class BaseController {
             }
         });
     }
+    List<TenantMenu> checkAddTenantMenuList(List<AddTenantMenuDto> addTenantMenuDtos) throws ThingsboardException{
+        if(CollectionUtils.isEmpty(addTenantMenuDtos)){
+            throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        List<TenantMenu> tenantMenu = new ArrayList<>();
+        addTenantMenuDtos.forEach(i->{
+            try {
+                checkTenantMenu(i);
+                tenantMenu.add(i.toTenantMenu());
+            } catch (ThingsboardException e) {
+                e.printStackTrace();
+            }
+        });
+        return tenantMenu;
+    }
 
     void checkTenantMenu(TenantMenu tenantMenu) throws ThingsboardException {
+        try {
+            checkNotNull(tenantMenu);
+            checkParameter("tenant",tenantMenu.getTenantId());
+            checkParameter("sysMenuId",tenantMenu.getSysMenuId());
+            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
+            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
+            checkParameter("tenantMenuName",tenantMenu.getTenantMenuName());
+            checkParameter("level",tenantMenu.getLevel());
+            checkParameter("menuType",tenantMenu.getMenuType());
+        } catch (Exception e) {
+            throw handleException(e, false);
+        }
+    }
+    void checkTenantMenu(AddTenantMenuDto tenantMenu) throws ThingsboardException {
         try {
             checkNotNull(tenantMenu);
             checkParameter("tenant",tenantMenu.getTenantId());

@@ -1,5 +1,6 @@
 package org.thingsboard.server.common.data.memu;
 
+import io.swagger.annotations.ApiModel;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.HasCustomerId;
 import org.thingsboard.server.common.data.HasName;
@@ -12,6 +13,7 @@ import org.thingsboard.server.common.data.validation.NoXss;
 
 import java.util.UUID;
 
+@ApiModel("Menu")
 @EqualsAndHashCode(callSuper = true)
 public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements HasName, HasTenantId, HasCustomerId {
     @NoXss
@@ -32,6 +34,7 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
     private String menuImages;
     @NoXss
     private String menuType;
+    private String path;
     @NoXss
     private UUID createdUser;
     @NoXss
@@ -152,6 +155,14 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
 
     public void setMenuType(String menuType) {
         this.menuType = menuType;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

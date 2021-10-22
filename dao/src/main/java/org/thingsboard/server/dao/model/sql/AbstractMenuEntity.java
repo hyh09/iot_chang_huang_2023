@@ -18,6 +18,9 @@ package org.thingsboard.server.dao.model.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
@@ -25,6 +28,7 @@ import org.thingsboard.server.dao.model.SearchTextEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Column;
+import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import java.util.UUID;
 
@@ -32,6 +36,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T> implements SearchTextEntity<T> {
 
     @Column(name = "code")
@@ -64,15 +69,22 @@ public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T
     @Column(name = "menu_type")
     private String menuType;
 
+    @Column(name = "path")
+    private String path;
+
+    @CreatedDate
     @Column(name = "created_time")
     private long createdTime;
 
+    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
+    @CreatedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
+    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
@@ -95,6 +107,7 @@ public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T
         this.menuImages = menu.getMenuImages();
         this.parentId = menu.getParentId();
         this.menuType = menu.getMenuType();
+        this.path = menu.getPath();
         this.createdTime = menu.getUpdatedTime();
         this.createdUser = menu.getCreatedUser();
         this.updatedTime = menu.getUpdatedTime();
@@ -113,6 +126,7 @@ public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T
         this.menuIcon = menuEntity.getMenuIcon();
         this.menuImages = menuEntity.getMenuImages();
         this.menuType = menuEntity.getMenuType();
+        this.path = menuEntity.getPath();
         this.parentId = menuEntity.getParentId();
         this.createdTime = menuEntity.getUpdatedTime();
         this.createdUser = menuEntity.getCreatedUser();
@@ -133,6 +147,7 @@ public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T
         menu.setMenuImages(menuImages);
         menu.setParentId(parentId);
         menu.setMenuType(menuType);
+        menu.setPath(path);
         menu.setCreatedTime(createdTime);
         menu.setCreatedUser(createdUser);
         menu.setUpdatedTime(updatedTime);

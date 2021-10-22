@@ -1,45 +1,54 @@
 package org.thingsboard.server.common.data.tenantmenu;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
-import org.thingsboard.server.common.data.validation.NoXss;
+
 import java.util.UUID;
 
+@Data
+@ApiModel("TenantMenu")
 @EqualsAndHashCode(callSuper = true)
 public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
 
+    @ApiModelProperty("租户单标识")
     private UUID tenantId;
+    @ApiModelProperty("系统单标识")
     private UUID sysMenuId;
-    @NoXss
+    @ApiModelProperty("系统菜单编码")
     private String sysMenuCode;
-    @NoXss
+    @ApiModelProperty("系统菜单名称")
     private String sysMenuName;
-    @NoXss
+    @ApiModelProperty("租户菜单名称")
     private String tenantMenuName;
-    @NoXss
+    @ApiModelProperty("租户菜单编码")
     private String tenantMenuCode;
-    @NoXss
+    @ApiModelProperty("层级")
     private Integer level;
-    @NoXss
+    @ApiModelProperty("排序")
     private Integer sort;
-    @NoXss
+    @ApiModelProperty("页面链接")
     private String url;
-    @NoXss
+    @ApiModelProperty("父级租户菜单")
     private UUID parentId;
-    @NoXss
-    private String tenatMenuIcon;
-    @NoXss
-    private String tenentMenuImages;
-    @NoXss
+    @ApiModelProperty("租户菜单图标")
+    private String tenantMenuIcon;
+    @ApiModelProperty("租户菜单自定义图片")
+    private String tenantMenuImages;
+    @ApiModelProperty("菜单类型（PC/APP）")
     private String menuType;
-    @NoXss
+    @ApiModelProperty("创建人标识")
     private UUID createdUser;
-    @NoXss
+    @ApiModelProperty("创建时间")
+    private long createdTime;
+    @ApiModelProperty("修改时间")
     private long updatedTime;
-    @NoXss
+    @ApiModelProperty("修改人")
     private UUID updatedUser;
-    @NoXss
+    @ApiModelProperty("区域")
     private String region;
 
     public TenantMenu() {
@@ -55,139 +64,4 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
         return null;
     }
 
-    public UUID getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(UUID tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public UUID getSysMenuId() {
-        return sysMenuId;
-    }
-
-    public void setSysMenuId(UUID sysMenuId) {
-        this.sysMenuId = sysMenuId;
-    }
-
-    public String getSysMenuCode() {
-        return sysMenuCode;
-    }
-
-    public void setSysMenuCode(String sysMenuCode) {
-        this.sysMenuCode = sysMenuCode;
-    }
-
-    public String getSysMenuName() {
-        return sysMenuName;
-    }
-
-    public void setSysMenuName(String sysMenuName) {
-        this.sysMenuName = sysMenuName;
-    }
-
-    public String getTenantMenuName() {
-        return tenantMenuName;
-    }
-
-    public void setTenantMenuName(String tenantMenuName) {
-        this.tenantMenuName = tenantMenuName;
-    }
-
-    public String getTenantMenuCode() {
-        return tenantMenuCode;
-    }
-
-    public void setTenantMenuCode(String tenantMenuCode) {
-        this.tenantMenuCode = tenantMenuCode;
-    }
-
-    public Integer getLevel() {
-        return level;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
-
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public UUID getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(UUID parentId) {
-        this.parentId = parentId;
-    }
-
-    public String getTenatMenuIcon() {
-        return tenatMenuIcon;
-    }
-
-    public void setTenatMenuIcon(String tenatMenuIcon) {
-        this.tenatMenuIcon = tenatMenuIcon;
-    }
-
-    public String getTenentMenuImages() {
-        return tenentMenuImages;
-    }
-
-    public void setTenentMenuImages(String tenentMenuImages) {
-        this.tenentMenuImages = tenentMenuImages;
-    }
-
-    public UUID getCreatedUser() {
-        return createdUser;
-    }
-
-    public void setCreatedUser(UUID createdUser) {
-        this.createdUser = createdUser;
-    }
-
-    public long getUpdatedTime() {
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(long updatedTime) {
-        this.updatedTime = updatedTime;
-    }
-
-    public UUID getUpdatedUser() {
-        return updatedUser;
-    }
-
-    public void setUpdatedUser(UUID updatedUser) {
-        this.updatedUser = updatedUser;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public String getMenuType() {
-        return menuType;
-    }
-
-    public void setMenuType(String menuType) {
-        this.menuType = menuType;
-    }
 }

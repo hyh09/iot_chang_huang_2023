@@ -122,7 +122,7 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         if(StringUtils.isNotEmpty(tenantMenuName)){
             tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,tenantId,tenantMenuName);
         }else {
-            tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,tenantId);
+            tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,UUID.fromString(tenantId));
         }
         if(!CollectionUtils.isEmpty(tenantMenuEntityList)){
             tenantMenuEntityList.forEach(tenantMenuEntity->{

@@ -43,7 +43,7 @@ public interface TenantMenuService {
      * @param tenantId
      * @return
      */
-    List<TenantMenu> getTenantMenuList(String menuType,String tenantId,String tenentMenuName);
+    List<TenantMenu> getTenantMenuList(String menuType, String tenantId, String tenentMenuName);
 
     TenantMenu findById(UUID tenantMenuId);
 

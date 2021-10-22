@@ -18,12 +18,16 @@ package org.thingsboard.server.dao.model.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Column;
+import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import java.util.UUID;
 
@@ -31,6 +35,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends BaseSqlEntity<T>{
 
     @Column(name = "tenant_id")
@@ -75,15 +80,19 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     @Column(name = "menu_type")
     private String menuType;
 
+    @CreatedDate
     @Column(name = "created_time")
     private long createdTime;
 
+    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
+    @CreatedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
+    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
@@ -129,8 +138,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.level = tenantMenu.getLevel();
         this.sort = tenantMenu.getSort();
         this.url = tenantMenu.getUrl();
-        this.tenantMenuIcon = tenantMenu.getTenatMenuIcon();
-        this.tenantMenuImages = tenantMenu.getTenentMenuImages();
+        this.tenantMenuIcon = tenantMenu.getTenantMenuIcon();
+        this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
         this.menuType = tenantMenu.getMenuType();
         this.createdTime = tenantMenu.getUpdatedTime();
@@ -151,8 +160,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         tenantMenu.setLevel(level);
         tenantMenu.setSort(sort);
         tenantMenu.setUrl(url);
-        tenantMenu.setTenatMenuIcon(tenantMenuIcon);
-        tenantMenu.setTenentMenuImages(tenantMenuImages);
+        tenantMenu.setTenantMenuIcon(tenantMenuIcon);
+        tenantMenu.setTenantMenuImages(tenantMenuImages);
         tenantMenu.setParentId(parentId);
         tenantMenu.setMenuType(menuType);
         tenantMenu.setCreatedTime(createdTime);

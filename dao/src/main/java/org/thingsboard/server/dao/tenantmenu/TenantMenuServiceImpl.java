@@ -137,9 +137,9 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
      * @return
      */
     @Override
-    public List<TenantMenu> getTenantMenuList(String menuType,String tenantId,String tenentMenuName){
+    public List<TenantMenu> getTenantMenuList(String menuType, String tenantId, String tenentMenuName){
         log.trace("Executing getTenantMenuList [{}]", menuType,tenantId);
-        return tenantMenuDao.getTenantMenuList(menuType,tenantId,tenentMenuName);
+        return tenantMenuDao.getTenantMenuList(menuType, tenantId, tenentMenuName);
     }
 
     @Override

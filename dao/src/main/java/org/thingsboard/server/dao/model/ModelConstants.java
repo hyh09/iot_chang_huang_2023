@@ -141,11 +141,23 @@ public class ModelConstants {
     public static final String CUSTOMER_BY_TENANT_AND_TITLE_VIEW_NAME = "customer_by_tenant_and_title";
 
     /**
-     * Cassandra menu constants.
+     * 菜单表.
      */
     public static final String MENU_COLUMN_FAMILY_NAME = "tb_menu";
     public static final String TENANT_MENU_COLUMN_FAMILY_NAME = "tb_tenant_menu";
 
+    /**
+     * 工厂表.
+     */
+    public static final String FACTORY_COLUMN_FAMILY_NAME = "hs_factory";
+    /**
+     * 车间表.
+     */
+    public static final String WORKSHOP_COLUMN_FAMILY_NAME = "hs_workshop";
+    /**
+     * 生产线表.
+     */
+    public static final String PRODUCTION_LINE_COLUMN_FAMILY_NAME = "hs_production_line";
     /**
      * Cassandra device constants.
      */
