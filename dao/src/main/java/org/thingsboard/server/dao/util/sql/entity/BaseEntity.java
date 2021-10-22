@@ -26,4 +26,26 @@ public  class BaseEntity   implements Serializable {
     @Column(name = ModelConstants.CREATED_TIME_PROPERTY)
     protected long createdTime;
 
+    /**
+     * 修改时间
+     */
+    @Column(name="updated_time")
+    private long updatedTime;
+
+    /**
+     * 创建人标识
+     */
+    @Column(name="created_user")
+    private UUID createdUser;
+
+    /**
+     * 修改人标识
+     */
+    @Column(name="updated_user")
+    private UUID updatedUser;
+
+
+
+
+
 }

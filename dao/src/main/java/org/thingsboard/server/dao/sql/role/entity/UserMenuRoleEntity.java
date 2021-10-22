@@ -28,46 +28,22 @@ public class UserMenuRoleEntity  extends BaseEntity implements Serializable {
 	
   	private static final long serialVersionUID = 1L;	
 
-//
-//    @Id
-//    @Column(name = ModelConstants.ID_PROPERTY, columnDefinition = "uuid")
-////    @Type(type = "org.hibernate.type.PostgresUUIDType")
-//    private UUID id;
     /**	
      * 用户标识	
      */	
     @Column(name="user_id")	
-    private String userId;	
+    private UUID userId;
     /**	
      * 租户系统角色标识	
      */	
     @Column(name="tenant_sys_role_id")	
-    private String tenantSysRoleId;	
+    private UUID tenantSysRoleId;
     /**	
      * 备注	
      */	
     @Column(name="remark")	
     private String remark;	
-//    /**
-//     * 创建时间
-//     */
-//    @Column(name="created_time")
-//    private String createdTime;
-    /**	
-     * 创建人标识	
-     */	
-    @Column(name="created_user")	
-    private String createdUser;	
-    /**	
-     * 修改时间	
-     */	
-    @Column(name="updated_time")	
-    private String updatedTime;	
-    /**	
-     * 修改人标识	
-     */	
-    @Column(name="updated_user")	
-    private String updatedUser;
+
 
 
 

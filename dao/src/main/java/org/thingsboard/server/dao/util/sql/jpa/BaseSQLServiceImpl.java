@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.util.sql.jpa;
 
 
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
@@ -34,6 +35,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 
 public abstract class BaseSQLServiceImpl<T extends BaseEntity, ID extends Serializable, D extends BaseSqlDao<T, ID>> implements BaseSQLService<T, ID, D>  {
@@ -80,6 +82,14 @@ public abstract class BaseSQLServiceImpl<T extends BaseEntity, ID extends Serial
 
 	@Override
 	public T save(T entity) {
+		if (entity.getId() == null) {
+			UUID uuid = Uuids.timeBased();
+			entity.setId(uuid);
+			entity.setCreatedTime(Uuids.unixTimestamp(uuid));
+		}else {
+			UUID uuid = Uuids.timeBased();
+			entity.setUpdatedTime(Uuids.unixTimestamp(uuid));
+		}
 		return dao.save(entity);
 	}
 
