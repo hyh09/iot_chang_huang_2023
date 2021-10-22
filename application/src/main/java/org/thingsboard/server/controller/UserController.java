@@ -387,6 +387,7 @@ public class UserController extends BaseController {
     public Object  changeOthersPassword( @RequestBody PasswordVo vo)
     {
            log.info("【changeOthersPassword】打印当前的入参{}",vo);
+           vo.setPassword(passwordEncoder.encode(vo.getPassword()));
            return  userService.changeOthersPassword(vo);
     }
 
