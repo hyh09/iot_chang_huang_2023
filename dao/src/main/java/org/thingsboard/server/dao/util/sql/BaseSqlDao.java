@@ -1,8 +1,7 @@
 package org.thingsboard.server.dao.util.sql;
 
 
-import org.springframework.stereotype.Component;
-import org.thingsboard.server.dao.util.sql.entity.BaseEntity;
+import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 import org.thingsboard.server.dao.util.sql.jpa.BaseDao;
 import org.thingsboard.server.dao.util.sql.jpa.BaseRepository;
 
@@ -13,6 +12,6 @@ import java.io.Serializable;
  * @param <T>
  * @param <ID>
  */
-public interface BaseSqlDao<T extends BaseEntity, ID extends Serializable> extends BaseRepository<T, ID>, BaseDao<T,ID> {
+public interface BaseSqlDao<T extends TenantBaseEntity, ID extends Serializable> extends BaseRepository<T, ID>, BaseDao<T,ID> {
 
 }

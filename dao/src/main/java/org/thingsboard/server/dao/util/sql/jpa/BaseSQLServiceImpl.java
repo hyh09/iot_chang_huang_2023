@@ -3,34 +3,24 @@ package org.thingsboard.server.dao.util.sql.jpa;
 
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.query.Query;
-import org.hibernate.query.internal.NativeQueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
-import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
-import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.GenericsUtils;
 import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
-import org.thingsboard.server.dao.util.sql.entity.BaseEntity;
+import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-public abstract class BaseSQLServiceImpl<T extends BaseEntity, ID extends Serializable, D extends BaseSqlDao<T, ID>> implements BaseSQLService<T, ID, D>  {
+public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends Serializable, D extends BaseSqlDao<T, ID>> implements BaseSQLService<T, ID, D>  {
 	private static Logger logger = LoggerFactory.getLogger(BaseSQLServiceImpl.class.getName());
 
 	private Class<T> entityClass;

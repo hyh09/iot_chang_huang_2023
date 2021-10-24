@@ -2,7 +2,6 @@ package org.thingsboard.server.dao.util.sql.entity;
 
 import lombok.Data;
 import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.dao.model.sql.AbstractAlarmEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -17,7 +16,7 @@ import java.util.UUID;
  */
 @Data
 @MappedSuperclass
-public  class BaseEntity   implements Serializable {
+public  class TenantBaseEntity implements Serializable {
 
     @Id
     @Column(name = ModelConstants.ID_PROPERTY, columnDefinition = "uuid")
@@ -30,19 +29,19 @@ public  class BaseEntity   implements Serializable {
      * 修改时间
      */
     @Column(name="updated_time")
-    private long updatedTime;
+    protected long updatedTime;
 
     /**
      * 创建人标识
      */
     @Column(name="created_user")
-    private UUID createdUser;
+    protected UUID createdUser;
 
     /**
      * 修改人标识
      */
     @Column(name="updated_user")
-    private UUID updatedUser;
+    protected UUID updatedUser;
 
 
 
