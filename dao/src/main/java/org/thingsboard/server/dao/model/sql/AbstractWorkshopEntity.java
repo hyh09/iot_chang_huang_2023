@@ -1,0 +1,148 @@
+/**
+ * Copyright © 2016-2021 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.thingsboard.server.dao.model.sql;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.TypeDef;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
+import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.model.BaseSqlEntity;
+import org.thingsboard.server.dao.util.mapping.JsonStringType;
+
+import javax.persistence.Column;
+import javax.persistence.EntityListeners;
+import javax.persistence.MappedSuperclass;
+import java.util.UUID;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+@TypeDef(name = "json", typeClass = JsonStringType.class)
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSqlEntity<T>{
+
+    @ApiModelProperty("工厂标识")
+    @Column(name = "factory_id")
+    private UUID factoryId;
+
+    @ApiModelProperty("车间编码")
+    @Column(name = "code")
+    private String code;
+
+    @ApiModelProperty("车间名称")
+    @Column(name = "name")
+    private String name;
+
+    @ApiModelProperty("logo图标")
+    @Column(name = "logo_icon")
+    private String logoIcon;
+
+    @ApiModelProperty("logo图片")
+    @Column(name = "logo_images")
+    private String logoImages;
+
+    @ApiModelProperty(name = "备注")
+    @Column(name = "remark")
+    private String remark;
+
+    @ApiModelProperty(name = "租户")
+    @Column(name = "tenant_id")
+    private UUID tenantId;
+
+    @CreatedDate
+    @Column(name = "created_time")
+    private long createdTime;
+
+    @CreatedBy
+    @Column(name = "created_user")
+    private UUID createdUser;
+
+    @CreatedDate
+    @Column(name = "updated_time")
+    private long updatedTime;
+
+    @CreatedBy
+    @Column(name = "updated_user")
+    private UUID updatedUser;
+
+    @ApiModelProperty("删除标记（A-未删除；D-已删除）")
+    @Column(name = "del_flag")
+    private String delFlag = "A";
+
+
+    public AbstractWorkshopEntity() {
+        super();
+    }
+
+    public AbstractWorkshopEntity(AbstractWorkshopEntity<T> abstractWorkshopEntity){
+        if (abstractWorkshopEntity.getId() != null) {
+            this.setUuid(abstractWorkshopEntity.getId());
+        }
+        this.factoryId = abstractWorkshopEntity.getFactoryId();
+        this.code = abstractWorkshopEntity.getCode();
+        this.name = abstractWorkshopEntity.getName();
+        this.logoIcon = abstractWorkshopEntity.getLogoIcon();
+        this.logoImages = abstractWorkshopEntity.getLogoImages();
+        this.remark = abstractWorkshopEntity.getRemark();
+        this.tenantId = abstractWorkshopEntity.getTenantId();
+        this.createdTime = abstractWorkshopEntity.getUpdatedTime();
+        this.createdUser = abstractWorkshopEntity.getCreatedUser();
+        this.updatedTime = abstractWorkshopEntity.getUpdatedTime();
+        this.updatedUser = abstractWorkshopEntity.getUpdatedUser();
+        this.delFlag = abstractWorkshopEntity.getDelFlag();
+    }
+
+    public AbstractWorkshopEntity(Workshop workshop) {
+        if (workshop.getId() != null) {
+            this.setUuid(workshop.getId().getId());
+        }
+        this.factoryId = workshop.getFactoryId();
+        this.code = workshop.getCode();
+        this.name = workshop.getName();
+        this.logoIcon = workshop.getLogoIcon();
+        this.logoImages = workshop.getLogoImages();
+        this.remark = workshop.getRemark();
+        this.tenantId = workshop.getTenantId();
+        this.createdTime = workshop.getUpdatedTime();
+        this.createdUser = workshop.getCreatedUser();
+        this.updatedTime = workshop.getUpdatedTime();
+        this.updatedUser = workshop.getUpdatedUser();
+        this.delFlag = workshop.getDelFlag();
+    }
+
+    public Workshop toWorkshop(){
+        Workshop workshop = new Workshop(new WorkshopId(this.getUuid()));
+        workshop.setFactoryId(factoryId);
+        workshop.setCode(code);
+        workshop.setName(name);
+        workshop.setLogoIcon(logoIcon);
+        workshop.setLogoImages(logoImages);
+        workshop.setRemark(remark);
+        workshop.setTenantId(tenantId);
+        workshop.setCreatedTime(createdTime);
+        workshop.setCreatedUser(createdUser);
+        workshop.setUpdatedTime(updatedTime);
+        workshop.setUpdatedUser(updatedUser);
+        workshop.setDelFlag(delFlag);
+        return workshop;
+    }
+
+}
