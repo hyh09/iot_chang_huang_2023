@@ -398,9 +398,9 @@ public class UserController extends BaseController {
         try {
 
             SecurityUser  securityUser =  getCurrentUser();
-            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
-                user.setTenantId(getCurrentUser().getTenantId());
-            }
+            System.out.println("打印：getCurrentUser().getTenantId()"+getCurrentUser().getTenantId());
+            TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
+            user.setTenantId(tenantId);
             log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
 
             user.setUserCreator(securityUser.getId().toString());

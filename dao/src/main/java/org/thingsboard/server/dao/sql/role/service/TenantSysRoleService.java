@@ -50,14 +50,18 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
       *根据实体更新	
       * @param tenantSysRole	
       * @return TenantSysRoleEntity	
-      */	
+      */
+      @Transactional
       public TenantSysRoleEntity updateRecord(TenantSysRoleEntity tenantSysRole) throws ThingsboardException {
             if (tenantSysRole.getId() == null) {
-                throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                throw new ThingsboardException("Requested id wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
             }
-            return this.updateNonNull(tenantSysRole.getId(), tenantSysRole);
-        }	
-	
-	
-	
+            return updateNonNull(tenantSysRole.getId(), tenantSysRole);
+     }
+
+
+
+
+
+
 }	

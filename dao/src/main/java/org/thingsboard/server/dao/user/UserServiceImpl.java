@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -53,6 +54,7 @@ import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
+import org.thingsboard.server.dao.sql.user.UserCredentialsRepository;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
 
@@ -88,6 +90,9 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     private final CustomerDao customerDao;
     private final TbTenantProfileCache tenantProfileCache;
     private final ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private UserCredentialsRepository userCredentialsRepository;
 
     public UserServiceImpl(UserDao userDao,
                            UserCredentialsDao userCredentialsDao,
@@ -164,7 +169,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
             userCredentials.setActivateToken(RandomStringUtils.randomAlphanumeric(DEFAULT_TOKEN_LENGTH));
             userCredentials.setUserId(new UserId(savedUser.getUuidId()));
             userCredentials.setPassword(encodePassword);
-            saveUserCredentialsAndPasswordHistory(user.getTenantId(), userCredentials);
+            saveUserCredentialsAndPasswordHistoryNew(user.getTenantId(), userCredentials);
         }
         return savedUser;
     }
@@ -408,6 +413,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         return result;
     }
 
+
+    private UserCredentials saveUserCredentialsAndPasswordHistoryNew(TenantId tenantId, UserCredentials userCredentials) {
+        UserCredentials result = userCredentialsDao.save(tenantId, userCredentials);
+        return result;
+    }
+
     private void updatePasswordHistory(User user, UserCredentials userCredentials) {
         JsonNode additionalInfo = user.getAdditionalInfo();
         if (!(additionalInfo instanceof ObjectNode)) {
@@ -477,6 +488,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
                             }
                             break;
                         case TENANT_ADMIN:
+                            log.info("打印的tenantId.getId()"+tenantId.getId());
                             if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
                                 throw new DataValidationException("Tenant administrator should be assigned to tenant!");
                             } else if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {
