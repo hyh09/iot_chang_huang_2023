@@ -63,6 +63,15 @@ public class ModelConstants {
     public static final String USER_TENANT_ID_PROPERTY = TENANT_ID_PROPERTY;
     public static final String USER_CUSTOMER_ID_PROPERTY = CUSTOMER_ID_PROPERTY;
     public static final String USER_EMAIL_PROPERTY = "email";
+    //本次新增的字段
+    public  static   final String USER_PHONE_NUMBER_PROPERTY   ="phone_number";
+    public  static  final String  USER_ACTIVE_STATUS_PROPERTY ="active_status";
+    public  static  final  String  USER_USERCODE_PROPERTY="user_code";
+    public  static  final String USER_USER_NAME_PROPERTY="user_name";
+    public  static  final String USER_USER_CREATOR_PROPERTY="user_creator";
+
+
+
     public static final String USER_AUTHORITY_PROPERTY = "authority";
     public static final String USER_FIRST_NAME_PROPERTY = "first_name";
     public static final String USER_LAST_NAME_PROPERTY = "last_name";
