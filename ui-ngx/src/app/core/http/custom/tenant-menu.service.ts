@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { MenuType, SysMenus, TenantMenus } from '@shared/models/tenant.model';
+import { SysMenus, TenantMenus } from '@shared/models/tenant.model';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
+import { MenuType } from '@app/shared/models/custom/menu-mng.models';
 
 @Injectable({
   providedIn: 'root'

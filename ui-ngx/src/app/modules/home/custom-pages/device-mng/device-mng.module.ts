@@ -2,7 +2,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeComponentsModule } from '../../components/home-components.module';
-import { DeviceManageRoutingModule } from './device-mng-routing.module';
+import { DeviceMngRoutingModule } from './device-mng-routing.module';
 import { DataDictionaryComponent } from './data-dictionary/data-dictionary.component';
 import { DeviceDictionaryComponent } from './device-dictionary/device-dictionary.component';
 import { DataDictionaryFiltersComponent } from './data-dictionary/data-dictionary-filters.component';
@@ -13,7 +13,7 @@ import { DeviceDictionaryFiltersComponent } from './device-dictionary/device-dic
     CommonModule,
     SharedModule,
     HomeComponentsModule,
-    DeviceManageRoutingModule
+    DeviceMngRoutingModule
   ],
   declarations: [
     DataDictionaryComponent,

@@ -38,7 +38,8 @@ export enum EntityType {
   OTA_PACKAGE = 'OTA_PACKAGE',
   RPC = 'RPC',
   DATA_DICTIONARY = 'DATA_DICTIONARY',
-  DEVICE_DICTIONARY = 'DEVICE_DICTIONARY'
+  DEVICE_DICTIONARY = 'DEVICE_DICTIONARY',
+  MENU = 'MENU'
 }
 
 export enum AliasEntityType {
@@ -319,7 +320,6 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         details: 'device-mng.data-dic-details',
         add: 'device-mng.add-data-dic',
         noEntities: 'device-mng.no-data-dics-text',
-        search: 'device-mng.search',
         selectedEntities: 'device-mng.selected-data-dics'
       }
     ],
@@ -334,6 +334,19 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         add: 'device-mng.add-device-dic',
         noEntities: 'device-mng.no-device-dics-text',
         selectedEntities: 'device-mng.selected-device-dics'
+      }
+    ],
+    [
+      EntityType.MENU,
+      {
+        type: 'entity.type-menu',
+        typePlural: 'entity.type-menus',
+        list: 'entity.list-of-menus',
+        nameStartsWith: 'entity.menu-name-starts-with',
+        details: 'menu-mng.menu-details',
+        add: 'menu-mng.add-menu',
+        noEntities: 'menu-mng.no-menus-text',
+        selectedEntities: 'menu-mng.selected-menus'
       }
     ]
   ]
@@ -428,13 +441,19 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     [
       EntityType.DATA_DICTIONARY,
       {
-        helpLinkId: 'dataDictionary'
+        helpLinkId: ''
       }
     ],
     [
       EntityType.DEVICE_DICTIONARY,
       {
-        helpLinkId: 'deviceDictionary'
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.MENU,
+      {
+        helpLinkId: ''
       }
     ]
   ]

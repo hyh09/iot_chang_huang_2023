@@ -8,13 +8,13 @@ import { PageData } from '@app/shared/models/page/page-data';
 import { HasUUID } from '@app/shared/public-api';
 import { map } from 'rxjs/operators';
 
-export interface FetchListFilter {
+interface FetchListFilter {
   code: string,
   name: string,
   dictDataType: string
 }
 
-export interface DataType {
+interface DataType {
   name: string,
   code: string
 }

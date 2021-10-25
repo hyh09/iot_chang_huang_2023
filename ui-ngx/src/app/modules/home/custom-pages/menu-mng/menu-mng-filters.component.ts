@@ -1,15 +1,17 @@
 import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
-import { DataDictionary } from '@app/shared/models/custom/device-mng.models';
+import { Menu, MenuType } from '@app/shared/models/custom/menu-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-data-dictionary-filters',
-  templateUrl: './data-dictionary-filters.component.html'
+  selector: 'tb-menu-mng-filters',
+  templateUrl: './menu-mng-filters.component.html'
 })
-export class DataDictionaryFiltersComponent extends EntityTableHeaderComponent<DataDictionary> {
+export class MenuMngFiltersComponent extends EntityTableHeaderComponent<Menu> {
+
+  public menuType = MenuType;
 
   constructor(
     protected store: Store<AppState>,

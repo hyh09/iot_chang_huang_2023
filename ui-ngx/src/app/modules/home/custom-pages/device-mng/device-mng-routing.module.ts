@@ -59,4 +59,4 @@ const routes: Routes = [
     DeviceDictionaryTableConfigResolver
   ]
 })
-export class DeviceManageRoutingModule { }
+export class DeviceMngRoutingModule { }

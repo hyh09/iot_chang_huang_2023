@@ -9,8 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'tb-device-dictionary',
-  templateUrl: './device-dictionary.component.html',
-  styleUrls: ['./device-dictionary.component.scss']
+  templateUrl: './device-dictionary.component.html'
 })
 export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary> {
 

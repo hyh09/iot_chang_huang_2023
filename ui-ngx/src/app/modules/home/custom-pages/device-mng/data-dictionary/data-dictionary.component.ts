@@ -25,7 +25,6 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
   }
 
   buildForm(entity: DataDictionary): FormGroup {
-    console.log(this.entitiesTableConfig.componentsData.availableCode)
     return this.fb.group(
       {
         id:  [entity ? entity.id : ''],
@@ -41,7 +40,7 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
   }
 
   updateForm(entity: DataDictionary) {
-    this.entityForm.patchValue(entity)
+    this.entityForm.patchValue(entity);
   }
 
 }

@@ -20,7 +20,7 @@ export class DeviceDictionaryFiltersComponent extends EntityTableHeaderComponent
 
   onClear(param: string): void {
     this.entitiesTableConfig.componentsData[param] = '';
-    this.entitiesTableConfig.table.updateData();
+    this.entitiesTableConfig.table.resetSortAndFilter(true);
   }
 
 }

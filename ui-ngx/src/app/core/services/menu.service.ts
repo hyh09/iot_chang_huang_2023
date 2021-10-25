@@ -82,6 +82,13 @@ export class MenuService {
       },
       {
         id: guid(),
+        name: 'menu-mng.menu-mng',
+        type: 'link',
+        path: '/menuManagement',
+        icon: 'menu'
+      },
+      {
+        id: guid(),
         name: 'tenant.tenants',
         type: 'link',
         path: '/tenants',

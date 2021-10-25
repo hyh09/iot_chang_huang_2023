@@ -3,10 +3,11 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppState } from '@app/core/core.state';
 import { TenantMenuService } from '@app/core/http/custom/tenant-menu.service';
-import { TreeNode, UtilsService } from '@app/core/services/utils.service';
-import { DialogComponent, MenuType, SysMenus, TenantInfo, TenantMenus } from '@app/shared/public-api';
+import { UtilsService } from '@app/core/services/utils.service';
+import { MenuType } from '@app/shared/models/custom/menu-mng.models';
+import { DialogComponent, TenantInfo, TenantMenus } from '@app/shared/public-api';
 import { Store } from '@ngrx/store';
-import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
+import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 
 export interface SetMenusDialogData {
   
