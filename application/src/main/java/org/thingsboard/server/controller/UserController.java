@@ -18,12 +18,19 @@ package org.thingsboard.server.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.postgresql.util.PSQLException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +57,10 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
+import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
+import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -60,13 +71,18 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
 public class UserController extends BaseController {
+
+    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
 
     public static final String USER_ID = "userId";
     public static final String YOU_DON_T_HAVE_PERMISSION_TO_PERFORM_THIS_OPERATION = "You don't have permission to perform this operation!";
@@ -76,11 +92,15 @@ public class UserController extends BaseController {
     @Getter
     private boolean userTokenAccessEnabled;
 
+    private final BCryptPasswordEncoder passwordEncoder;
+
     private final MailService mailService;
     private final JwtTokenFactory tokenFactory;
     private final RefreshTokenRepository refreshTokenRepository;
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
+
+
 
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
@@ -239,10 +259,11 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.DELETE)
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
+        System.out.println("当前的入参:"+strUserId);
         checkParameter(USER_ID, strUserId);
         try {
             UserId userId = new UserId(toUUID(strUserId));
@@ -331,7 +352,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}/userCredentialsEnabled", method = RequestMethod.POST)
     @ResponseBody
     public void setUserCredentialsEnabled(@PathVariable(USER_ID) String strUserId,
@@ -350,5 +371,111 @@ public class UserController extends BaseController {
             throw handleException(e);
         }
     }
+
+
+
+    @RequestMapping("/user/test")
+    @ResponseBody
+    public  String  get()
+    {
+        return "hello world";
+    }
+
+
+    @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
+    @ResponseBody
+    public Object  changeOthersPassword( @RequestBody PasswordVo vo)
+    {
+           log.info("【changeOthersPassword】打印当前的入参{}",vo);
+           vo.setPassword(passwordEncoder.encode(vo.getPassword()));
+           return  userService.changeOthersPassword(vo);
+    }
+
+
+    /**
+     * 用户得添加接口
+     */
+    @RequestMapping(value = "/user/save", method = RequestMethod.POST)
+    @ResponseBody
+    public User save(@RequestBody User user) throws ThingsboardException {
+        try {
+
+            SecurityUser  securityUser =  getCurrentUser();
+            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
+                user.setTenantId(getCurrentUser().getTenantId());
+            }
+            log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
+
+            user.setUserCreator(securityUser.getId().toString());
+            log.info("当前的登录人:{}",securityUser.getEmail());
+
+
+            log.info("【用户管理模块.用户添加接口】入参{}", user);
+            String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
+            User savedUser = checkNotNull(userService.save(user,encodePassword));
+            return  savedUser;
+        }
+
+        catch (Exception e){
+            e.printStackTrace();
+
+            throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+
+    }
+
+
+    @RequestMapping(value = "/user/delete",method = RequestMethod.DELETE)
+    @ResponseBody
+    public String    delete(@RequestParam(USER_ID) String strUserId) throws ThingsboardException {
+        log.info("【delete User's input parameter ID:{}】",strUserId);
+        checkParameter(USER_ID, strUserId);
+        UserId userId = new UserId(toUUID(strUserId));
+        User user = userService.findUserById(getCurrentUser().getTenantId(), userId);
+        checkNotNull(user);
+        if(user.getAuthority().equals(Authority.SYS_ADMIN)){
+            throw new ThingsboardException("You do not have permission to delete!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        userService.deleteUser(getTenantId(),userId);
+        return "success";
+    }
+
+    /**
+     * 编辑用户
+     */
+    @RequestMapping(value="/user/update",method = RequestMethod.POST)
+    @ResponseBody
+    public String update(@RequestBody User user) throws ThingsboardException {
+        log.info("打印更新用户的入参:{}",user);
+        checkParameter(USER_ID, user.getStrId());
+        SecurityUser  securityUser =  getCurrentUser();
+        user.setUserCreator(securityUser.getId().toString());
+        user.setId( UserId.fromString(user.getStrId()));
+        return (userService.update(user)>0?"succeeded":"fail");
+
+    }
+
+    /**
+     * 用户管理的查询接口
+     * findAll
+     */
+    @RequestMapping(value = "/user/findAll",method = RequestMethod.POST)
+    @ResponseBody
+    public  Object  findAll(@RequestBody  Map<String, Object> queryParam) throws ThingsboardException {
+       int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
+        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
+        String  textSearch = (String) queryParam.get("textSearch");
+        String  sortProperty = (String) queryParam.get("sortProperty");
+        String  sortOrder = (String) queryParam.get("sortOrder");
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        return userService.findAll( queryParam, pageLink);
+    }
+
+
+
+    @Autowired  private UserMenuRoleService userMenuRoleService;
+
+
+
 
 }

@@ -29,7 +29,9 @@ public enum ThingsboardErrorCode {
     ITEM_NOT_FOUND(32),
     TOO_MANY_REQUESTS(33),
     TOO_MANY_UPDATES(34),
-    SUBSCRIPTION_VIOLATION(40);
+    SUBSCRIPTION_VIOLATION(40),
+    FAIL_VIOLATION(0);
+    ;
 
     private int errorCode;
 
