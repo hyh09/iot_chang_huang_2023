@@ -375,6 +375,7 @@ public class UserController extends BaseController {
     }
 
 
+    @ApiOperation(value = "用户管理界面下的修改密码")
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
     public Object  changeOthersPassword( @RequestBody PasswordVo vo)
