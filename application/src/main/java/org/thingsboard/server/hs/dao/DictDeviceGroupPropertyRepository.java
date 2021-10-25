@@ -24,5 +24,5 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
     void deleteByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 
     @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceGroupId in (?1)")
-    List<DictDeviceGroupPropertyEntity> findAllInDictDeviceGroupId(List<String> groupIdList);
+    List<DictDeviceGroupPropertyEntity> findAllInDictDeviceGroupId(List<UUID> groupIdList);
 }

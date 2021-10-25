@@ -124,10 +124,7 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
         this.icon = common.getIcon();
         this.picture = common.getPicture();
 
-//        this.createdUser = common.getCreatedUser();
-//        this.setCreatedTime(common.getCreatedTime());
-//        this.createdUser = common.getCreatedUser();
-//        this.setUpdatedTime(common.getUpdatedTime());
+        this.setCreatedTimeAndCreatedUser(common);
     }
 
     /**

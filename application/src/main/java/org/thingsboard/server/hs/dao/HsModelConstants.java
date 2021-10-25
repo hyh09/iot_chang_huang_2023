@@ -66,7 +66,7 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_PROPERTY_CONTENT = "content";
 
     public static final String DICT_DEVICE_GROUP_TABLE_NAME = "hs_dict_device_group";
-    public static final String DICT_DEVICE_GROUP_ID= "dict_group_id";
+    public static final String DICT_DEVICE_GROUP_ID= "dict_device_group_id";
     public static final String DICT_DEVICE_GROUP_NAME = "name";
 
     public static final String DICT_DEVICE_GROUP_PROPERTY_TABLE_NAME = "hs_dict_device_group_property";
