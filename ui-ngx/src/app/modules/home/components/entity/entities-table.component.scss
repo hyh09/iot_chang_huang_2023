@@ -48,6 +48,9 @@
             &:last-of-type {
               margin-right: 6px;
             }
+            .mat-form-field-wrapper {
+              padding-bottom: 1.5em;
+            }
           }
           .action-btns {
             display: inline-block;

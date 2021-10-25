@@ -7,6 +7,12 @@ import { PageLink } from '@app/shared/models/page/page-link';
 import { PageData } from '@app/shared/models/page/page-data';
 import { HasUUID } from '@app/shared/public-api';
 
+export interface FetchListFilter {
+  code: string,
+  name: string,
+  supplier: string
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,9 +21,13 @@ export class DeviceDictionaryService {
   constructor(
     private http: HttpClient
   ) { }
-  
-  public getDeviceDictionaries(pageLink: PageLink, config?: RequestConfig): Observable<PageData<DeviceDictionary>> {
-    return this.http.get<PageData<DeviceDictionary>>(`/api/tenant/assetInfos${pageLink.toQuery()}`, defaultHttpOptionsFromConfig(config));
+
+  // 获取数据字典列表
+  public getDeviceDictionaries(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<DeviceDictionary>> {
+    return this.http.get<PageData<DeviceDictionary>>(
+      `/api/dict/device${pageLink.toQuery()}&code=${filterParams.code}&name=${filterParams.name}&supplier=${filterParams.supplier}`,
+      defaultHttpOptionsFromConfig(config)
+    );
   }
 
   public getDeviceDictionary(dictionaryId: HasUUID, config?: RequestConfig): Observable<DeviceDictionary> {
