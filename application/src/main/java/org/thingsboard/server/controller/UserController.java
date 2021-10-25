@@ -460,6 +460,17 @@ public class UserController extends BaseController {
      * 用户管理的查询接口
      * findAll
      */
+    @ApiOperation(value = "查询用户【分页查询】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageSize", value = "每页大小，默认10"),
+            @ApiImplicitParam(name = "page", value = "当前页,起始页，【0开始】"),
+            @ApiImplicitParam(name = "textSearch", value = ""),
+            @ApiImplicitParam(name = "sortOrder", value = ""),
+            @ApiImplicitParam(name = "sortProperty", value = "")
+
+
+
+    })
     @RequestMapping(value = "/user/findAll",method = RequestMethod.POST)
     @ResponseBody
     public  Object  findAll(@RequestBody  Map<String, Object> queryParam) throws ThingsboardException {
