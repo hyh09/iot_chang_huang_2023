@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.entity;	
 	
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,7 +11,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;	
 import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;	
 	
-import javax.persistence.*;	
+import javax.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 /**	
   创建时间: 2021-10-22 18:05:08	
@@ -44,6 +47,11 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
      */
     @ApiModelProperty(value = "角色描述")
     @Column(name="role_desc")	
-    private String roleDesc;	
+    private String roleDesc;
+
+
+
+
+
 
  }	

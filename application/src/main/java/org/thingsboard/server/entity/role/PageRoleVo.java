@@ -10,4 +10,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 @ApiModel("角色的分页实体类")
 public class PageRoleVo   {
 
+    private String roleName;
+
+    private  String deptName111;
 }
