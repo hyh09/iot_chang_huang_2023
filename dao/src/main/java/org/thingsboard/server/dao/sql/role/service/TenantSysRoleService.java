@@ -25,15 +25,15 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
   	protected Logger logger = LoggerFactory.getLogger(this.getClass());	
 	
 	
-//    /**
-//     *根据实体保存
-//     * @param tenantSysRole
-//     * @return TenantSysRoleEntity
-//     */
-//    @Transactional
-//    public TenantSysRoleEntity save(TenantSysRoleEntity tenantSysRole){
-//            return this.dao.save(tenantSysRole);
-//    }
+    /**
+     *根据实体保存
+     * @param tenantSysRole
+     * @return TenantSysRoleEntity
+     */
+    @Transactional
+    public TenantSysRoleEntity save(TenantSysRoleEntity tenantSysRole){
+            return super.save(tenantSysRole);
+    }
 	
     /**	
      * 根据实体类的查询	

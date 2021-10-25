@@ -1,6 +1,8 @@
 package org.thingsboard.server.controller;
 
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +16,14 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/role")
+@Api(value = "用户角色模块", tags = {"角色相关的接口"})
 public class UserRoleController extends BaseController{
 
     @Autowired
     private TenantSysRoleService tenantSysRoleService;
 
-    @RequestMapping(value = "/user/save", method = RequestMethod.POST)
+    @ApiOperation(value = "角色的新增接口")
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity)
     {
