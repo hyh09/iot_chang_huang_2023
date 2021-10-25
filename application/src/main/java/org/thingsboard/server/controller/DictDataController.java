@@ -79,13 +79,13 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "获得数据字典列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序"),
-            @ApiImplicitParam(name = "code", value = "编码"),
-            @ApiImplicitParam(name = "name", value = "名称"),
-            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "数据字典枚举值")})
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
+            @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
+            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query")})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data")
     public PageData<DictData> listDictData(
@@ -143,7 +143,7 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "获得数据字典详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据字典id"),})
+            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path"),})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data/{id}")
     public DictData getDictDataDetail(@PathVariable("id") String id) throws ThingsboardException {
@@ -159,7 +159,7 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "删除数据字典")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据字典id"),})
+            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path"),})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/dict/data/{id}")
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -13,9 +14,9 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.hs.entity.po.DictDevice;
-import org.thingsboard.server.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.hs.entity.vo.PageAndSortQuery;
 import org.thingsboard.server.hs.service.DictDeviceService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -47,6 +48,7 @@ public class DictDeviceController extends BaseController {
      * @return 可用设备字典编码
      */
     @ApiOperation(value = "获得当前可用设备字典编码")
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/device/availableCode")
     public String getAvailableCode() throws ThingsboardException {
         SecurityUser user = getCurrentUser();
@@ -68,17 +70,18 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "获得设备字典列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序"),
-            @ApiImplicitParam(name = "code", value = "编码"),
-            @ApiImplicitParam(name = "name", value = "名称"),
-            @ApiImplicitParam(name = "supplier", value = "供应商")})
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
+            @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
+            @ApiImplicitParam(name = "supplier", value = "供应商", paramType = "query")})
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/device")
     public PageData<DictDevice> listDictDevice(
-            @RequestParam int pageSize,
             @RequestParam int page,
+            @RequestParam int pageSize,
             @RequestParam(required = false) String sortProperty,
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String code,
@@ -87,18 +90,21 @@ public class DictDeviceController extends BaseController {
     ) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
         TenantId tenantId = user.getTenantId();
-        DictDeviceListQuery dictDataListQuery = DictDeviceListQuery.builder()
+
+        DictDeviceListQuery dictDeviceListQuery = DictDeviceListQuery.builder()
                 .code(code).name(name).supplier(supplier).build();
+
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validatePageLink(pageLink);
-        return this.dictDeviceService.listDictDeviceByQuery(dictDataListQuery, tenantId, pageLink);
+        return this.dictDeviceService.listDictDeviceByQuery(dictDeviceListQuery, tenantId, pageLink);
     }
 
     /**
      * 新增或修改设备字典
      */
     @ApiOperation(value = "新增或修改设备字典")
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
@@ -130,7 +136,8 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "获得设备字典详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备字典id"),})
+            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path")})
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/device/{id}")
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
         SecurityUser user = getCurrentUser();
@@ -143,7 +150,8 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "删除设备字典")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备字典id"),})
+            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path"),})
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/dict/device/{id}")
     public void deleteDictDevice(@PathVariable("id") String id) throws ThingsboardException {
         SecurityUser user = getCurrentUser();

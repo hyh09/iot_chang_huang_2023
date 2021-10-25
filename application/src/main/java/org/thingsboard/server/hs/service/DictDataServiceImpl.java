@@ -150,7 +150,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        var codes = this.dataRepository.findCodesByTenantId(tenantId.getId());
+        var codes = this.dataRepository.findAllCodesByTenantId(tenantId.getId());
         if (codes.isEmpty()) {
             return "SJZD0001";
         } else {

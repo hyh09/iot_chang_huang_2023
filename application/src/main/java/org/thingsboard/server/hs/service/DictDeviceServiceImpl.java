@@ -18,7 +18,6 @@ import org.thingsboard.server.hs.entity.vo.*;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -54,7 +53,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        var codes = this.deviceRepository.findCodesByTenantId(tenantId.getId());
+        var codes = this.deviceRepository.findAllCodesByTenantId(tenantId.getId());
         if (codes.isEmpty()) {
             return "SBZD0001";
         } else {
@@ -122,7 +121,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
         }
 
         // 获得属性列表
-        var propertyList = DaoUtil.convertDataList(this.propertyRepository.findByDictDeviceId(UUID.fromString(dictDevice.getId())))
+        var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
         // 获得分组及分组属性列表
         var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())));
@@ -147,7 +146,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
 
         // 获得部件信息
         List<DictDeviceComponentVO> rList = new ArrayList<>();
-        var componentList = DaoUtil.convertDataList(this.componentRepository.findByDictDeviceId(UUID.fromString(dictDevice.getId())));
+        var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())));
         var componentVOList = componentList.stream().map(e -> DictDeviceComponentVO.builder()
                 .id(e.getId())
                 .parentId(e.getParentId())
