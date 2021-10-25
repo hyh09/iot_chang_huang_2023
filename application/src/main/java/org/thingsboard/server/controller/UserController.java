@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -420,6 +422,9 @@ public class UserController extends BaseController {
     }
 
 
+    @ApiOperation(value = "用户管理界面下的【删除用户接口】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = USER_ID, value = "用户id"),})
     @RequestMapping(value = "/user/delete",method = RequestMethod.DELETE)
     @ResponseBody
     public String    delete(@RequestParam(USER_ID) String strUserId) throws ThingsboardException {
@@ -438,6 +443,7 @@ public class UserController extends BaseController {
     /**
      * 编辑用户
      */
+    @ApiOperation(value = "用户管理的【编辑用户接口】")
     @RequestMapping(value="/user/update",method = RequestMethod.POST)
     @ResponseBody
     public String update(@RequestBody User user) throws ThingsboardException {
