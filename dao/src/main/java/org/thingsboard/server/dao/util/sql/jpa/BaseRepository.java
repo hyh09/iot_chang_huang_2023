@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.core.RepositoryInformation;
+import org.springframework.stereotype.Component;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 
 import javax.persistence.EntityManager;
@@ -20,7 +21,7 @@ import java.util.Map;
  * @param <ID>
  */
 @NoRepositoryBean
-public interface BaseRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, JpaSpecificationExecutor<T>, BaseDao<T, ID> {
+public interface BaseRepository<T, ID extends Serializable> extends JpaRepository<T, ID>, JpaSpecificationExecutor<T>, BaseDao<T, ID>{
 
     boolean support(String modelType);
 

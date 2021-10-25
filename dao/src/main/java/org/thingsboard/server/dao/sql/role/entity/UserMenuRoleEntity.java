@@ -5,9 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;	
 import org.hibernate.annotations.DynamicUpdate;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.Type;
-import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.dao.util.sql.entity.BaseEntity;
+import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -24,7 +22,7 @@ import java.util.UUID;
 @DynamicInsert	
 @DynamicUpdate	
 @JsonIgnoreProperties(value={"hibernateLazyInitializer","handler","fieldHandler"})
-public class UserMenuRoleEntity  extends BaseEntity implements Serializable {
+public class UserMenuRoleEntity  extends TenantBaseEntity implements Serializable {
 	
   	private static final long serialVersionUID = 1L;	
 

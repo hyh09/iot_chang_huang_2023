@@ -472,10 +472,4 @@ public class UserController extends BaseController {
     }
 
 
-
-    @Autowired  private UserMenuRoleService userMenuRoleService;
-
-
-
-
 }
