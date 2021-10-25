@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { Observable } from 'rxjs';
 import { DataDictionary } from '@app/shared/models/custom/device-mng.models';
