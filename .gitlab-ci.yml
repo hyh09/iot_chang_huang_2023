@@ -14,10 +14,11 @@ package:
   retry: 1
   image: adoptopenjdk/maven-openjdk11
   tags:
-    - k8s.test.iot.hangzhou
+    - hz-k8s-iot-runner
   script:
     - echo "打包并构建镜像"
     - date -R
+    - docker info
     - mvn clean install -Ddockerfile.skip=true
   only:
     - dev
