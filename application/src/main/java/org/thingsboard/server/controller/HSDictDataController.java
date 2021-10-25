@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.controller.BaseController;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
@@ -36,7 +37,7 @@ import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class DictDataController extends BaseController {
+public class HSDictDataController extends BaseController {
 
     @Autowired
     DictDataService dictDataService;

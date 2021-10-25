@@ -269,13 +269,6 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                         .content(e.getContent()).build()).collect(Collectors.toList());
         this.propertyRepository.saveAll(propertyList.stream().map(DictDevicePropertyEntity::new).collect(Collectors.toList()));
 
-//        // 设备字典分组及保存
-//        var groupList = dictDeviceVO.getGroupList().stream()
-//                .map(e -> DictDeviceGroup.builder()
-//                        .dictDeviceId(dictDeviceEntity.getId().toString())
-//                        .name(e.getName()).build()).collect(Collectors.toList());
-//        this.groupRepository.saveAll(groupList.stream().map(DictDeviceGroupEntity::new).collect(Collectors.toList()));
-
         // 设备字典分组、分组属性及保存
         var groupPropertyList = dictDeviceVO.getGroupList().stream().reduce(new ArrayList<DictDeviceGroupProperty>(), (r, e) -> {
             var dictDeviceGroup = DictDeviceGroup.builder()
