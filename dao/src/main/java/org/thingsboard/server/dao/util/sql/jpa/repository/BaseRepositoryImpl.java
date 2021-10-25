@@ -89,7 +89,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		CommonUtils.copyNonNullProperties(entity, e);
 		logger.info("打印当前的=====："+e);
 		entityManager.flush();
-   	entityManager.setFlushMode(FlushModeType.COMMIT);
+     	entityManager.setFlushMode(FlushModeType.COMMIT);
 		return e;
 	}
 

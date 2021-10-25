@@ -53,7 +53,7 @@ public abstract class JpaAbstractDao<E extends BaseEntity<D>, D>
         try {
             entity = getEntityClass().getConstructor(domain.getClass()).newInstance(domain);
         } catch (Exception e) {
-            log.error("Can't create entity for domain oblject {}", domain, e);
+            log.error("Can't create entity for domain object {}", domain, e);
             throw new IllegalArgumentException("Can't create entity for domain object {" + domain + "}", e);
         }
         setSearchText(entity);

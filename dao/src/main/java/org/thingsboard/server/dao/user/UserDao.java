@@ -15,12 +15,14 @@
  */
 package org.thingsboard.server.dao.user;
 
+import org.springframework.data.domain.Page;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.Dao;
 import org.thingsboard.server.dao.TenantEntityDao;
+import org.thingsboard.server.dao.model.sql.UserEntity;
 
 import java.util.Map;
 import java.util.UUID;

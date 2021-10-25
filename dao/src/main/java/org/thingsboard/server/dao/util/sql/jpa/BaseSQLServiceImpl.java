@@ -67,6 +67,8 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	@Override
 	@Transactional
 	public T updateNonNull(ID id, T entity){
+		UUID uuid = Uuids.timeBased();
+		entity.setUpdatedTime(Uuids.unixTimestamp(uuid));
 		return dao.updateNonNull(id, entity);
 	}
 

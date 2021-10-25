@@ -27,14 +27,18 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
 
 import org.thingsboard.server.common.data.validation.NoXss;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ToString
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "用户的请求参数实体类")
 public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements HasName, HasTenantId, HasCustomerId {
 
     private static final long serialVersionUID = 8250339805336035966L;
 
+    @ApiModelProperty(value = "数据字典Id,【用于接收编辑接口的用户id】")
     private  String strId;
 
     private TenantId tenantId;
@@ -44,20 +48,24 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     /**
      * 添加一个手机号
      */
+    @ApiModelProperty(value = "手机号")
     private  String phoneNumber;
     /**
      * 启用状态
      *  1是启用
      *  0是未启用
      */
+    @ApiModelProperty(value = "启用状态{1是启用,0是未启用}")
     private  String  activeStatus;
     /**
      * 用户编码
      */
+    @ApiModelProperty(value = "用户编码")
     private  String userCode;
     /**
      * 用户名称
      */
+    @ApiModelProperty(value = "用户名称")
     private  String userName;
 
     private String userCreator;
