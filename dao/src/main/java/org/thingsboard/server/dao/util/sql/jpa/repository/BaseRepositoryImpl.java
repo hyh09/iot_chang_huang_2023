@@ -1,9 +1,11 @@
 package org.thingsboard.server.dao.util.sql.jpa.repository;
 
 
+import org.hibernate.SQLQuery;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.query.internal.NativeQueryImpl;
+import org.hibernate.transform.Transformers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -94,6 +96,9 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 	}
 
 
+
+
+
 	public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql) {
 		boolean enablePage = false;
 		if(pageable != null ){
@@ -106,11 +111,13 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		Query query = null;
 		if(isNativeSql){
 			countQuery = entityManager.createNativeQuery(sqlCount).unwrap(NativeQuery.class);
+
 			query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
 			if(Map.class.isAssignableFrom(cls)){
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
 			} else {
-				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
 			}
 		} else {
 			countQuery = entityManager.createQuery(sqlCount).unwrap(Query.class);
@@ -131,7 +138,10 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 			totalObj = Long.parseLong(countQuery.getSingleResult().toString());
 			query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize() ).setMaxResults(pageable.getPageSize());
 		}
+
+//		List<T> list = query.getResultList();
 		List<T> list = query.getResultList();
+
 		Page<T> page = new PageImpl<>(list, pageable, totalObj);
 		//entityManager由entityManagerFactory统一管理，无需显示关闭
 		//entityManager.clear();

@@ -18,7 +18,7 @@ import java.util.UUID;
 */	
 @Data	
 @Entity	
-@Table(name="USER_MENU_ROLE")	
+@Table(name="TB_USER_MENU_ROLE")
 @DynamicInsert	
 @DynamicUpdate	
 @JsonIgnoreProperties(value={"hibernateLazyInitializer","handler","fieldHandler"})
