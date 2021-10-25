@@ -18,7 +18,6 @@ package:
   script:
     - echo "打包并构建镜像"
     - date -R
-    - cd msa
     - mvn clean install -Ddockerfile.skip=true
   only:
     - dev
