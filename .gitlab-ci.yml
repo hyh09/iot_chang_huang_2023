@@ -15,7 +15,7 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - mvn clean install
+    - mvn clean install -Dmaven.test.skip=true
     - ls application/target
   only:
     - dev
