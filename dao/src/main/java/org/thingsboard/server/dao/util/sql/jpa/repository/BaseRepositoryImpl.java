@@ -96,7 +96,10 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		return e;
 	}
 
-
+	/**
+	 * 有问题;
+	 * @param entity
+	 */
 	@Transactional
 	public void deleteByEntity(T entity) {
 		entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
