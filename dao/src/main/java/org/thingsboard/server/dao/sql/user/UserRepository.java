@@ -17,20 +17,27 @@ package org.thingsboard.server.dao.sql.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 /**
  * @author Valerii Sosliuk
  */
-public interface UserRepository extends PagingAndSortingRepository<UserEntity, UUID> {
+public interface UserRepository extends PagingAndSortingRepository<UserEntity, UUID>, JpaSpecificationExecutor<UserEntity> {
 
     UserEntity findByEmail(String email);
+
+    UserEntity  findByPhoneNumber(String phoneNumber);
 
     @Query("SELECT u FROM UserEntity u WHERE u.tenantId = :tenantId " +
             "AND u.customerId = :customerId AND u.authority = :authority " +
@@ -48,4 +55,20 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
                                     Pageable pageable);
 
     Long countByTenantId(UUID tenantId);
+
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "UPDATE tb_user  set " +
+            "phone_number = :#{#user.phoneNumber} ," +
+            "active_status = :#{#user.activeStatus} ," +
+            "user_code = :#{#user.userCode} ," +
+            "user_name =  :#{#user.userName} ," +
+            "user_creator =  :#{#user.userCreator} ," +
+            "email =  :#{#user.email}   " +
+            "  where id = :#{#user.uuidId} " , nativeQuery = true)
+    int update(@Param("user") User user);
+
+
+
 }

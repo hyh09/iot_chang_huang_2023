@@ -58,4 +58,7 @@ public interface UserCredentialsDao extends Dao<UserCredentials> {
      */
     UserCredentials findByResetToken(TenantId tenantId, String resetToken);
 
+
+    int  updatePassword(UUID userId,String password);
+
 }
