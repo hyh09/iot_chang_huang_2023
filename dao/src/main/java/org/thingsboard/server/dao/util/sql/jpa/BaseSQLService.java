@@ -25,6 +25,12 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 
 	void deleteById(ID id);
 
+	/**
+	 * 暂时未测试
+	 * @param entity
+	 */
+	void deleteByEntity(T entity);
+
 
 	/**  主键的查询 */
 	T findById(ID id);

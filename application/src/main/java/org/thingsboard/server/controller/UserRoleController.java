@@ -73,10 +73,11 @@ public class UserRoleController extends BaseController{
             @ApiImplicitParam(name = "roleId", value = "用户id"),})
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
     @ResponseBody
-    public   String   delete(@RequestParam("roleId") String roleId) throws ThingsboardException
+    public   Object   delete(@RequestParam("roleId") String roleId) throws ThingsboardException
     {
            log.info("删除角色的接口入参:{}",roleId);
            tenantSysRoleService.deleteById(strUuid(roleId));
+            userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
         return "success";
 
     }

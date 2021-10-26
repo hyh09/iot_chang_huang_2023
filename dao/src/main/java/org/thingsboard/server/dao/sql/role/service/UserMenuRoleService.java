@@ -76,6 +76,12 @@ public class UserMenuRoleService  extends BaseSQLServiceImpl<UserMenuRoleEntity,
     }
 
 
+    public  void deleteByTenantSysRoleId(UUID  roleId)
+    {
+        this.dao.deleteByTenantSysRoleId(roleId);
+    }
+
+
 	
 	
 	

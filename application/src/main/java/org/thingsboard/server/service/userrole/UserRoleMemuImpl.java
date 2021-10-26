@@ -38,7 +38,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
         try {
             log.info("【用户角色绑定接口 UserRoleMemuSvc.relationUser】入参:{}", vo);
             User user = userService.findUserById(null, new UserId(vo.getUserId()));
-            if (user == null || user.getActiveStatus().equals("0")) {
+            if (user == null ) {
                 return ResultVo.getFail("当前用户id不可用,或者不存在此用户!");
             }
             TenantSysRoleEntity roleEntity = roleService.findById(vo.getTenantSysRoleId());
@@ -46,7 +46,6 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
                 return ResultVo.getFail("当前传入得角色id[tenantSysRoleId]错误,请检查!");
             }
             UserMenuRoleEntity userMenuRoleEntity = JsonUtils.beanToBean(vo, UserMenuRoleEntity.class);
-
             List<UserMenuRoleEntity> list =  userMenuRoleService.queryByRoleIdAndUserId(userMenuRoleEntity);
 //            List<UserMenuRoleEntity> list = userMenuRoleService.findAllByUserMenuRoleEntity(userMenuRoleEntity);
             if (CollectionUtils.isNotEmpty(list)) {
@@ -56,6 +55,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
             return userMenuRoleService.saveEntity(userMenuRoleEntity);
         }catch (Exception e)
         {
+            e.printStackTrace();
             log.error("用户角色绑定接口 【入参】"+vo);
             log.error("用户角色绑定接口 【异常信息】"+e);
             return ResultVo.getFail("服务器异常!"+e);
@@ -93,6 +93,12 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
        log.info("删除此用户绑定的之前数据:{}",uuid);
         deleteRoleByUserId(uuid);
         relationUserBach(rId,uuid);
+    }
+
+    @Override
+    public void deleteRoleByRole(UUID roleId) {
+        log.info("删除此角色绑定得之前得用户关系数据:{}",roleId);
+        userMenuRoleService.deleteByTenantSysRoleId(roleId);
     }
 
 

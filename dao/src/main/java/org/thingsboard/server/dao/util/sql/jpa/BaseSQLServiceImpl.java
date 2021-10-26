@@ -72,6 +72,15 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		return dao.updateNonNull(id, entity);
 	}
 
+
+	@Override
+	@Transactional
+	public void deleteByEntity( T entity){
+		 dao.deleteByEntity( entity);
+	}
+
+
+
 	@Override
 	public T save(T entity) {
 		if (entity.getId() == null) {
@@ -89,6 +98,8 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	public void deleteById(ID id) {
 		dao.deleteById(id);
 	}
+
+
 
 	@Override
 	public List<T> findAll(Map<String, Object> queryParam) {
