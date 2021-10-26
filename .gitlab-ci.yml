@@ -1,5 +1,4 @@
 
-
 stages:
   - package
   - push
@@ -18,8 +17,10 @@ package:
   script:
     - echo "打包并构建镜像"
     - date -R
-    - docker info
-    - mvn clean install -Ddockerfile.skip=false
+    - docker version
+    - java --version
+    - mvn --version
+    #- mvn clean install -Ddockerfile.skip=false
   only:
     - dev
   after_script:
