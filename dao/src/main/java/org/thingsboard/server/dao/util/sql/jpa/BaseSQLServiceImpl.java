@@ -101,6 +101,7 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		if (sort == null) {
 			return this.dao.findAll(JpaQueryHelper.createQueryByMap(queryParam, entityClass));
 		} else {
+			System.out.println("findAll:queryParam-->"+queryParam);
 			return this.dao.findAll(JpaQueryHelper.createQueryByMap(queryParam, entityClass), sort);
 		}
 	}

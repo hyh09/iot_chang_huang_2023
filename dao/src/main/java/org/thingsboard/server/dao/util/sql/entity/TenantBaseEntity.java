@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.util.sql.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedBy;
 import org.thingsboard.server.dao.model.ModelConstants;
 
 import javax.persistence.Column;
@@ -34,6 +35,7 @@ public  class TenantBaseEntity implements Serializable {
     /**
      * 创建人标识
      */
+    @CreatedBy
     @Column(name="created_user")
     protected UUID createdUser;
 
