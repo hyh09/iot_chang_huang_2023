@@ -1,5 +1,3 @@
-image: docker:latest
-
 stages:
   - package
   - push
@@ -7,19 +5,20 @@ stages:
 #before_script:
 #  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
-
+    
 # 打包并构建镜像
 package:
   stage: package
   retry: 1
-  image: adoptopenjdk/maven-openjdk11
   tags:
-    - hz-k8s-iot-runner
+    - zhows-test
   script:
     - echo "打包并构建镜像"
-    - date -R
-    - docker info
-    - mvn clean install -Ddockerfile.skip=true
+    - ls /usr/local/
+    - docker version
+    #- java --version
+    - mvn --version
+    #- mvn clean install -Ddockerfile.skip=false
   only:
     - dev
   after_script:
@@ -31,7 +30,7 @@ push:
   stage: push
   retry: 1
   tags:
-    - k8s.test.iot.hangzhou
+    - zhows-test
   script:
     - echo "推送镜像"
     - docker info
