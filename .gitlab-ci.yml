@@ -9,6 +9,7 @@ variables:
 before_script:
   - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
+
 cache:
   paths:
     - .m2/repository/
