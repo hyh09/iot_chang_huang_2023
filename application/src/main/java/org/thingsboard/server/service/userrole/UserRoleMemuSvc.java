@@ -15,4 +15,7 @@ public interface UserRoleMemuSvc {
     //删除用户所关联的角色数据
     void  deleteRoleByUserId(UUID userId);
 
+    //更新用户得时候更新角色
+    void  updateRoleByUserId(List<UUID> rId,UUID uuid);
+
 }

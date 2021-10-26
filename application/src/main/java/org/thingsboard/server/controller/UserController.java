@@ -452,14 +452,18 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理的【编辑用户接口】")
     @RequestMapping(value="/user/update",method = RequestMethod.POST)
     @ResponseBody
-    public String update(@RequestBody User user) throws ThingsboardException {
+    public Object update(@RequestBody User user) throws ThingsboardException {
         log.info("打印更新用户的入参:{}",user);
         checkParameter(USER_ID, user.getStrId());
         SecurityUser  securityUser =  getCurrentUser();
         user.setUserCreator(securityUser.getId().toString());
         user.setId( UserId.fromString(user.getStrId()));
-        return (userService.update(user)>0?"succeeded":"fail");
-
+        int count =  userService.update(user);
+           if(count>0)
+           {
+               userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
+           }
+        return  (count>0?"succeeded":"fail");
     }
 
     /**

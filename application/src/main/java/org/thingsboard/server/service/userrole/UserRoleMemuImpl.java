@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
@@ -66,6 +67,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
      * 批量绑定
      */
     @Override
+    @Transactional
     public void  relationUserBach(List<UUID> rId, UUID uuid) {
         if(CollectionUtils.isEmpty(rId)){
             return ;
@@ -79,9 +81,18 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     }
 
     @Override
+    @Transactional
     public void deleteRoleByUserId(UUID userId) {
         log.info("删除用户的时候清空此用户对应的关系数据:{}",userId);
         userMenuRoleService.deleteByUserId(userId);
+    }
+
+    @Override
+    @Transactional
+    public void updateRoleByUserId(List<UUID> rId, UUID uuid) {
+       log.info("删除此用户绑定的之前数据:{}",uuid);
+        deleteRoleByUserId(uuid);
+        relationUserBach(rId,uuid);
     }
 
 
