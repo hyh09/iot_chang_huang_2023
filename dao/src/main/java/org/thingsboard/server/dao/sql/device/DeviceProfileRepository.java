@@ -17,16 +17,18 @@ package org.thingsboard.server.dao.sql.device;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.common.data.DeviceProfileInfo;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.dao.model.sql.DeviceProfileEntity;
+import org.thingsboard.server.dao.model.sql.EdgeEventEntity;
 
 import java.util.UUID;
 
-public interface DeviceProfileRepository extends PagingAndSortingRepository<DeviceProfileEntity, UUID> {
+public interface DeviceProfileRepository extends PagingAndSortingRepository<DeviceProfileEntity, UUID> , JpaSpecificationExecutor<DeviceProfileEntity> {
 
     @Query("SELECT new org.thingsboard.server.common.data.DeviceProfileInfo(d.id, d.name, d.image, d.defaultDashboardId, d.type, d.transportType) " +
             "FROM DeviceProfileEntity d " +

@@ -52,7 +52,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         // 动态条件查询
         Specification<DictDataEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            var es = cb.equal(root.<UUID>get("tenantId"), UUID.fromString(tenantId.toString()));
+            var es = cb.equal(root.<UUID>get("tenantId"), tenantId.getId());
 
             if (dictDataListQuery != null) {
                 if (!StringUtils.isBlank(dictDataListQuery.getName())) {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -44,6 +45,9 @@ public class DictDeviceServiceImpl implements DictDeviceService {
 
     @Autowired
     DictDeviceGroupPropertyRepository groupPropertyRepository;
+
+    @Autowired
+    DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
 
     /**
      * 获得当前可用设备字典编码
@@ -83,7 +87,8 @@ public class DictDeviceServiceImpl implements DictDeviceService {
         // 动态条件查询
         Specification<DictDeviceEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            var es = cb.equal(root.<UUID>get("tenantId"), UUID.fromString(tenantId.toString()));
+
+            var es = cb.equal(root.<UUID>get("tenantId"), tenantId.getId());
 
             if (dictDeviceListQuery != null) {
                 if (!StringUtils.isBlank(dictDeviceListQuery.getName())) {
@@ -96,6 +101,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                     predicates.add(cb.like(root.get("supplier"), "%" + dictDeviceListQuery.getSupplier().trim() + "%"));
                 }
             }
+
             if (predicates.isEmpty())
                 return es;
             predicates.add(es);
@@ -205,6 +211,16 @@ public class DictDeviceServiceImpl implements DictDeviceService {
         this.componentRepository.deleteByDictDeviceId(UUID.fromString(dictDevice.getId()));
         this.groupRepository.deleteByDictDeviceId(UUID.fromString(dictDevice.getId()));
         this.groupPropertyRepository.deleteByDictDeviceId(UUID.fromString(dictDevice.getId()));
+    }
+
+    /**
+     * 获得未配置设备配置的设备字典列表
+     *
+     * @param tenantId 租户Id
+     */
+    @Override
+    public List<DictDevice> listDictDeviceUnused(TenantId tenantId) {
+        return DaoUtil.convertDataList(this.deviceRepository.findAllDictDeviceUnusedByTenantId(tenantId.getId()));
     }
 
     /**

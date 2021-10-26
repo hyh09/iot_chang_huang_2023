@@ -1,12 +1,15 @@
 package org.thingsboard.server.hs.service;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.hs.entity.po.DictDevice;
 import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
+
+import java.util.List;
 
 /**
  * 设备字典接口
@@ -58,4 +61,11 @@ public interface DictDeviceService {
      * @param tenantId 租户Id
      */
     void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException;
+
+    /**
+     * 获得未配置设备配置的设备字典列表
+     *
+     * @param tenantId 租户Id
+     */
+    List<DictDevice> listDictDeviceUnused(TenantId tenantId);
 }

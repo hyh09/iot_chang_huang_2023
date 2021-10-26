@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
-import org.thingsboard.server.controller.BaseController;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
@@ -37,7 +36,7 @@ import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class HSDictDataController extends BaseController {
+public class DictDataController extends BaseController {
 
     @Autowired
     DictDataService dictDataService;
@@ -61,9 +60,7 @@ public class HSDictDataController extends BaseController {
     @ApiOperation(value = "获得当前可用数据字典编码")
     @GetMapping("/dict/data/availableCode")
     public String getAvailableCode() throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        return this.dictDataService.getAvailableCode(tenantId);
+        return this.dictDataService.getAvailableCode(getTenantId());
     }
 
     /**
@@ -101,14 +98,11 @@ public class HSDictDataController extends BaseController {
             throws ThingsboardException {
         DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
                 .code(code).name(name).dictDataType(dictDataType).build();
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
-        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validatePageLink(pageLink);
 
         // 查询数据字典列表
-        return this.dictDataService.listDictDataByQuery(tenantId, dictDataListQuery, pageLink);
+        return this.dictDataService.listDictDataByQuery(getTenantId(), dictDataListQuery, pageLink);
     }
 
     /**
@@ -120,8 +114,6 @@ public class HSDictDataController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
         if (!dictDataQuery.getCode().startsWith("SJZD")) {
             throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
         }
@@ -133,7 +125,7 @@ public class HSDictDataController extends BaseController {
         } catch (Exception ignore) {
             throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
         }
-        this.dictDataService.updateOrSaveDictData(dictDataQuery, tenantId);
+        this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
         return dictDataQuery;
     }
 
@@ -148,9 +140,7 @@ public class HSDictDataController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data/{id}")
     public DictData getDictDataDetail(@PathVariable("id") String id) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        return this.dictDataService.getDictDataDetail(id, tenantId);
+        return this.dictDataService.getDictDataDetail(id, getTenantId());
     }
 
     /**
@@ -164,8 +154,6 @@ public class HSDictDataController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/dict/data/{id}")
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        this.dictDataService.deleteDictDataById(id, tenantId);
+        this.dictDataService.deleteDictDataById(id, getTenantId());
     }
 }

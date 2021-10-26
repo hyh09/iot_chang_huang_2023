@@ -37,7 +37,7 @@ import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class HSDictDeviceController extends BaseController {
+public class DictDeviceController extends BaseController {
 
     @Autowired
     DictDeviceService dictDeviceService;
@@ -51,9 +51,7 @@ public class HSDictDeviceController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/device/availableCode")
     public String getAvailableCode() throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        return this.dictDeviceService.getAvailableCode(tenantId);
+        return this.dictDeviceService.getAvailableCode(getTenantId());
     }
 
     /**
@@ -88,16 +86,12 @@ public class HSDictDeviceController extends BaseController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String supplier
     ) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-
         DictDeviceListQuery dictDeviceListQuery = DictDeviceListQuery.builder()
                 .code(code).name(name).supplier(supplier).build();
 
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
-        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validatePageLink(pageLink);
-        return this.dictDeviceService.listDictDeviceByQuery(dictDeviceListQuery, tenantId, pageLink);
+        return this.dictDeviceService.listDictDeviceByQuery(dictDeviceListQuery, getTenantId(), pageLink);
     }
 
     /**
@@ -107,9 +101,6 @@ public class HSDictDeviceController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-
         if (!StringUtils.isBlank(dictDeviceVO.getCode())) {
             if (!dictDeviceVO.getCode().startsWith("SBZD")) {
                 throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
@@ -124,8 +115,7 @@ public class HSDictDeviceController extends BaseController {
             }
         }
 
-        // TODO 校验部件的编码
-        this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, tenantId);
+        this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
         return dictDeviceVO;
     }
 
@@ -140,9 +130,7 @@ public class HSDictDeviceController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/device/{id}")
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        return this.dictDeviceService.getDictDeviceDetail(id, tenantId);
+        return this.dictDeviceService.getDictDeviceDetail(id, getTenantId());
     }
 
     /**
@@ -154,10 +142,7 @@ public class HSDictDeviceController extends BaseController {
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/dict/device/{id}")
     public void deleteDictDevice(@PathVariable("id") String id) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-
-        this.dictDeviceService.deleteDictDevice(id, tenantId);
+        this.dictDeviceService.deleteDictDevice(id, getTenantId());
     }
 
 }
