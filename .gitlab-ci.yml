@@ -16,7 +16,7 @@ package:
     - echo "打包并构建镜像"
     - date -R
     - docker version
-    - java --version
+    #- java --version
     - mvn --version
     #- mvn clean install -Ddockerfile.skip=false
   only:
