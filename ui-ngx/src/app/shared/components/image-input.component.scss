@@ -47,7 +47,8 @@ $previewSize: 100px !default;
     height: $previewSize;
     margin-right: 12px;
     vertical-align: top;
-    border: solid 1px;
+    border: 1px solid rgba(0, 0, 0, 0.42);
+    color: rgba(0, 0, 0, 0.54);
 
     div {
       width: 100%;
@@ -72,6 +73,7 @@ $previewSize: 100px !default;
   }
 
   .tb-image-clear-btn {
+    color: rgba(0, 0, 0, 0.54);
     position: absolute !important;
     top: 50%;
     transform: translate(0%, -50%) !important;
@@ -85,7 +87,8 @@ $previewSize: 100px !default;
     position: relative;
     height: $previewSize;
     overflow: hidden;
-    border: dashed 2px;
+    border: 2px dashed rgba(0, 0, 0, 0.42);
+    color: rgba(0, 0, 0, 0.54);
 
     label {
       display: flex;
@@ -95,9 +98,10 @@ $previewSize: 100px !default;
       height: 100%;
       font-size: 16px;
       text-align: center;
+      cursor: pointer;
 
       @media #{$mat-gt-sm} {
-        font-size: 24px;
+        font-size: 18px;
       }
     }
   }

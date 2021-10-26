@@ -10,10 +10,18 @@ export interface DataDictionary extends BaseData<DataDictionaryId> {
   picture: string
 }
 
+export interface DeviceProperty {
+  name: string,
+  content: string
+}
+
 export interface DeviceDictionary extends BaseData<DataDictionaryId> {
   code: string,
   type: string,
   supplier: string,
   model: string,
-  version: string
+  version: string,
+  warrantyPeriod: string,
+  picture: string,
+  propertyList: Array<DeviceProperty>
 }

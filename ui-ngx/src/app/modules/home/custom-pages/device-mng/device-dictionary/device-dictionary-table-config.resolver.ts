@@ -8,6 +8,7 @@ import { DeviceDictionary } from "@app/shared/models/custom/device-mng.models";
 import { DeviceDictionaryService } from "@app/core/http/custom/device-dictionary.service";
 import { DeviceDictionaryComponent } from "./device-dictionary.component";
 import { DeviceDictionaryFiltersComponent } from "./device-dictionary-filters.component";
+import { map } from "rxjs/operators";
 
 @Injectable()
 export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DeviceDictionary>> {
@@ -28,7 +29,8 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     this.config.componentsData = {
       code: '',
       name: '',
-      supplier: ''
+      supplier: '',
+      availableCode: ''
     }
 
     this.config.deleteEntityTitle = deviceDic => this.translate.instant('device-mng.delete-device-dic-title', {deviceDicName: deviceDic.name});
@@ -44,7 +46,7 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     this.config.columns.push(
       new EntityTableColumn<DeviceDictionary>('code', 'device-mng.code', '50%'),
       new EntityTableColumn<DeviceDictionary>('name', 'device-mng.name', '50%'),
-      new EntityTableColumn<DeviceDictionary>('type', 'device-mng.type', '120px'),
+      new EntityTableColumn<DeviceDictionary>('type', 'device-mng.device-type', '120px'),
       new EntityTableColumn<DeviceDictionary>('supplier', 'device-mng.supplier', '150px'),
       new EntityTableColumn<DeviceDictionary>('model', 'device-mng.model', '120px'),
       new EntityTableColumn<DeviceDictionary>('version', 'device-mng.version', '100px'),
@@ -53,10 +55,32 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
   }
 
   resolve(): EntityTableConfig<DeviceDictionary> {
+    this.setAvailableCode();
+
     this.config.tableTitle = this.translate.instant('device-mng.device-dic');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+
+    this.config.entitiesFetchFunction = pageLink => this.deviceDictionaryService.getDeviceDictionaries(pageLink, this.config.componentsData);
+    this.config.loadEntity = id => this.deviceDictionaryService.getDeviceDictionary(id);
+    this.config.saveEntity = deviceDictionary => this.deviceDictionaryService.saveDeviceDictionary(deviceDictionary);
+    this.config.entityAdded = () => {
+      this.setAvailableCode();
+    }
+    this.config.deleteEntity = id => {
+      return this.deviceDictionaryService.deleteDeviceDictionary(id).pipe(map(result => {
+        this.setAvailableCode();
+        return result;
+      }));
+    }
+
     return this.config;
+  }
+
+  setAvailableCode(): void {
+    this.deviceDictionaryService.getAvailableCode().subscribe(code => {
+      this.config.componentsData.availableCode = code
+    });
   }
 
 }

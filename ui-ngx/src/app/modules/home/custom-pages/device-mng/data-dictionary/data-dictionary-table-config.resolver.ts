@@ -73,9 +73,7 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
 
     this.config.entitiesFetchFunction = pageLink => this.dataDictionaryService.getDataDictionaries(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.dataDictionaryService.getDataDictionary(id);
-    this.config.saveEntity = dataDictionary => {
-      return this.dataDictionaryService.saveDataDictionary(dataDictionary);
-    }
+    this.config.saveEntity = dataDictionary => this.dataDictionaryService.saveDataDictionary(dataDictionary);
     this.config.entityAdded = () => {
       this.setAvailableCode();
     }

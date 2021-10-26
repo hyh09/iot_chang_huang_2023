@@ -1,0 +1,13 @@
+.device-dict-wrapper {
+  .mat-expansion-panel-header.mat-expanded {
+    height: 48px;
+  }
+  .mat-expansion-panel {
+    &:first-of-type {
+      margin-top: 10px;
+    }
+    + .mat-expansion-panel {
+      margin-top: 20px;
+    }
+  }
+}

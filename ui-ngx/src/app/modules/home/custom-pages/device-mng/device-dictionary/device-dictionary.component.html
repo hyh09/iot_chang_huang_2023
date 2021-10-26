@@ -1,3 +1,92 @@
-<p>
-  设备字典
-</p>
+<div class="mat-padding device-dict-wrapper" fxLayout="column" style="min-width: 560px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.code</mat-label>
+        <input matInput formControlName="code" required>
+        <mat-error *ngIf="entityForm.get('code').hasError('required')">
+          {{ 'device-mng.code-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'device-mng.name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.basic-info' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.device-type</mat-label>
+          <input matInput formControlName="type">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.supplier</mat-label>
+          <input matInput formControlName="supplier">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.device-type</mat-label>
+          <input matInput formControlName="type">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.version</mat-label>
+          <input matInput formControlName="version">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.guarantee</mat-label>
+          <input matInput formControlName="warrantyPeriod">
+        </mat-form-field>
+        <tb-image-input
+          label="{{ 'device-mng.pciture' | translate }}"
+          maxSizeByte="524288"
+          formControlName="picture"
+        ></tb-image-input>
+      </mat-expansion-panel>
+      <mat-expansion-panel
+        [expanded]="customAttrExpanded"
+        (opened)="customAttrExpanded = true"
+        (closed)="customAttrExpanded = false"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.custom-attr' | translate }}</mat-panel-title>
+          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <mat-icon
+              *ngIf="customAttrExpanded"
+              class="material-icons"
+              matTooltip="{{ 'device-mng.add-custom-attr' | translate }}"
+              matTooltipPosition="above"
+              (click)="addCustomProperty($event)"
+            >add</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div 
+          *ngFor="let propertyControl of propertyFormArray().controls; let $index = index"
+          formArrayName="propertyList"
+          fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        >
+          <ng-container [formGroupName]="$index">
+            <mat-form-field class="mat-block">
+              <mat-label translate>device-mng.attr-name</mat-label>
+              <input matInput [formControl]="propertyControl.get('name')">
+            </mat-form-field>
+            <mat-form-field class="mat-block" fxFlex>
+              <mat-label translate>device-mng.attr-content</mat-label>
+              <input matInput [formControl]="propertyControl.get('content')">
+            </mat-form-field>
+            <button
+              mat-icon-button
+              matTooltip="{{ 'action.delete' | translate }}"
+              matTooltipPosition="above"
+              (click)="removeCustomProperty($index)"
+            >
+              <mat-icon class="material-icons" >delete</mat-icon>
+            </button>
+          </ng-container>
+        </div>
+      </mat-expansion-panel>
+    </fieldset>
+  </form>
+</div>

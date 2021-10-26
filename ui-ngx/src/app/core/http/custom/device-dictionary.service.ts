@@ -22,7 +22,7 @@ export class DeviceDictionaryService {
     private http: HttpClient
   ) { }
 
-  // 获取数据字典列表
+  // 获取设备字典列表
   public getDeviceDictionaries(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<DeviceDictionary>> {
     return this.http.get<PageData<DeviceDictionary>>(
       `/api/dict/device${pageLink.toQuery()}&code=${filterParams.code}&name=${filterParams.name}&supplier=${filterParams.supplier}`,
@@ -30,16 +30,24 @@ export class DeviceDictionaryService {
     );
   }
 
+  // 获取设备字典详情
   public getDeviceDictionary(dictionaryId: HasUUID, config?: RequestConfig): Observable<DeviceDictionary> {
-    return this.http.get<DeviceDictionary>(`/api/asset/info/${dictionaryId}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<DeviceDictionary>(`/api/dict/device/${dictionaryId}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 新增或修改设备字典
   public saveDeviceDictionary(dataDictionary: DeviceDictionary, config?: RequestConfig): Observable<DeviceDictionary> {
-    return this.http.post<DeviceDictionary>('/api/asset', dataDictionary, defaultHttpOptionsFromConfig(config));
+    return this.http.post<DeviceDictionary>('/api/dict/device', dataDictionary, defaultHttpOptionsFromConfig(config));
   }
 
+  // 删除设备字典
   public deleteDeviceDictionary(dictionaryId: HasUUID, config?: RequestConfig) {
-    return this.http.delete(`/api/asset/${dictionaryId}`, defaultHttpOptionsFromConfig(config));
+    return this.http.delete(`/api/dict/device/${dictionaryId}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取当前可用的设备字典编码
+  public getAvailableCode(): Observable<string> {
+    return this.http.get(`/api/dict/device/availableCode`, { responseType: 'text' });
   }
 
 }

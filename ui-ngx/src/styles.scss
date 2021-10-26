@@ -1071,7 +1071,12 @@ mat-label {
 }
 
 button {
-  &.mat-primary:not(.mat-button):not(.mat-button-disabled) {
+  &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-button-disabled) {
+    color: #fff;
     background-color: #2367fa !important;
   }
+}
+
+.mat-expansion-indicator::after {
+  margin-bottom: 5px;
 }
