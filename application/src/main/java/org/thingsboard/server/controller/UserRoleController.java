@@ -137,14 +137,6 @@ public class UserRoleController extends BaseController{
          return  list;
     }
 
-    @RequestMapping(value = "/test02", method = RequestMethod.POST)
-    public  void   test02 ()
-    {
-        UserMenuRoleEntity  entity = new UserMenuRoleEntity();
-        entity.setRemark("1");
-        userMenuRoleService.deleteByEntity(entity);
-    }
-
 
 
 
