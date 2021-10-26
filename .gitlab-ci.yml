@@ -2,8 +2,8 @@ stages:
   - package
   - push
 
-#before_script:
-#  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
+before_script:
+  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
     
 # 打包并构建镜像
