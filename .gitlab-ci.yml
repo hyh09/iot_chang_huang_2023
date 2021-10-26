@@ -3,8 +3,10 @@ stages:
   - push
   
 variables:
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=./.m2/repository"
+  #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+
   
 before_script:
   - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
@@ -12,10 +14,9 @@ before_script:
 
 cache:
   paths:
-    - ./.m2/repository
-    - application/target/
+    - .m2/repository
   # keep cache across branch
-  key: "$CI_BUILD_REF_NAME"
+  key: "$CI_JOB_NAME"
     
     
 # 打包并构建镜像
@@ -27,7 +28,7 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - mvn ${MAVEN_OPTS} clean install -Dmaven.test.skip=true
+    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true
     - ls application/target
   only:
     - dev
