@@ -14,7 +14,7 @@ package:
     - zhows-test
   script:
     - echo "打包并构建镜像"
-    - date -R
+    - ls /usr/local/
     - docker version
     #- java --version
     - mvn --version
