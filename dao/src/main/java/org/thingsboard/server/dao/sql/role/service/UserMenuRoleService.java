@@ -69,6 +69,13 @@ public class UserMenuRoleService  extends BaseSQLServiceImpl<UserMenuRoleEntity,
       return    this.dao.queryAllByUserIdAndTenantSysRoleId(userMenuRoleEntity.getUserId(),userMenuRoleEntity.getTenantSysRoleId());
 
     }
+
+    public  void deleteByUserId(UUID userId)
+    {
+        this.dao.deleteByUserId(userId);
+    }
+
+
 	
 	
 	

@@ -16,6 +16,7 @@ import org.thingsboard.server.entity.role.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -60,4 +61,28 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
         }
     }
+
+    /**
+     * 批量绑定
+     */
+    @Override
+    public void  relationUserBach(List<UUID> rId, UUID uuid) {
+        if(CollectionUtils.isEmpty(rId)){
+            return ;
+        }
+        rId.forEach(item ->{
+            UserMenuRoleEntity entity = new UserMenuRoleEntity();
+            entity.setUserId(uuid);
+            entity.setTenantSysRoleId(item);
+            userMenuRoleService.saveEntity(entity);
+        });
+    }
+
+    @Override
+    public void deleteRoleByUserId(UUID userId) {
+        log.info("删除用户的时候清空此用户对应的关系数据:{}",userId);
+        userMenuRoleService.deleteByUserId(userId);
+    }
+
+
 }

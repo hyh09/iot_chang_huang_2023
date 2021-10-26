@@ -1,6 +1,9 @@
 package org.thingsboard.server.dao.sql.role.dao;	
 	
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 
@@ -18,6 +21,10 @@ public interface UserMenuRoleDao extends BaseSqlDao<UserMenuRoleEntity,UUID> {
 	
 
      List<UserMenuRoleEntity> queryAllByUserIdAndTenantSysRoleId(UUID userId,UUID tenantSysRoleId);
-	
-	
-}	
+
+     @Modifying
+     @Transactional
+     @Query("delete from UserMenuRoleEntity where userId=:userId ")
+     void deleteByUserId( @Param("userId") UUID userId);
+
+}

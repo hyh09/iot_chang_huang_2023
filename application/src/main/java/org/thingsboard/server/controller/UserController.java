@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -64,6 +65,7 @@ import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
+import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -94,6 +96,8 @@ public class UserController extends BaseController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
+    @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+
 
 
 
@@ -410,6 +414,7 @@ public class UserController extends BaseController {
             log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
+            userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
             return  savedUser;
         }
 
@@ -437,6 +442,7 @@ public class UserController extends BaseController {
             throw new ThingsboardException("You do not have permission to delete!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         userService.deleteUser(getTenantId(),userId);
+        userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
         return "success";
     }
 
