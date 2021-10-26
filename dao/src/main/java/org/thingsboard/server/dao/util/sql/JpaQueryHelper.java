@@ -223,9 +223,7 @@ public class JpaQueryHelper {
 							}else  if(f.getType().isAssignableFrom(long.class) )
 							{
                                 if(value instanceof  Long){
-									System.out.println("====value===>"+value);
 									long l = ((Long) value).longValue();
-									System.out.println("====value===>"+value);
 									if(l>0){
 										pList.add(cb.equal(root.get(f.getName()), value));
 									}
@@ -252,12 +250,10 @@ public class JpaQueryHelper {
 				}
 				Predicate[] pArr = new Predicate[pList.size()];
 				p = cb.and(pList.toArray(pArr));
-				System.out.println("====p===>"+p);
 
 				return p;
 			}
 		};
-		System.out.println("打印===>"+spec);
 		return spec;
 	}
 
