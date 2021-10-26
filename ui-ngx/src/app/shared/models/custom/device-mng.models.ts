@@ -15,6 +15,16 @@ export interface DeviceProperty {
   content: string
 }
 
+export interface DeviceData {
+  name: string,
+  content: string
+}
+
+export interface DeviceDataGroup {
+  name: string,
+  groupPropertyList: Array<DeviceData>
+}
+
 export interface DeviceDictionary extends BaseData<DataDictionaryId> {
   code: string,
   type: string,
@@ -23,5 +33,6 @@ export interface DeviceDictionary extends BaseData<DataDictionaryId> {
   version: string,
   warrantyPeriod: string,
   picture: string,
-  propertyList: Array<DeviceProperty>
+  propertyList: Array<DeviceProperty>,
+  groupList: Array<DeviceDataGroup>
 }

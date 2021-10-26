@@ -146,6 +146,7 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CopyButtonComponent } from '@shared/components/button/copy-button.component';
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 
 @NgModule({
   providers: [
@@ -296,7 +297,8 @@ import { NzTreeModule } from 'ng-zorro-antd/tree';
     DndModule,
     NgxFlowModule,
     NgxFlowchartModule,
-    NzTreeModule
+    NzTreeModule,
+    NzTabsModule
   ],
   exports: [
     FooterComponent,
@@ -389,6 +391,7 @@ import { NzTreeModule } from 'ng-zorro-antd/tree';
     DndModule,
     NgxFlowchartModule,
     NzTreeModule,
+    NzTabsModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,

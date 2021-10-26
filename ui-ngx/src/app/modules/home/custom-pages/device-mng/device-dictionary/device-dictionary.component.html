@@ -46,24 +46,24 @@
         ></tb-image-input>
       </mat-expansion-panel>
       <mat-expansion-panel
-        [expanded]="customAttrExpanded"
-        (opened)="customAttrExpanded = true"
-        (closed)="customAttrExpanded = false"
+        [expanded]="customPropExpanded"
+        (opened)="customPropExpanded = true"
+        (closed)="customPropExpanded = false"
       >
         <mat-expansion-panel-header>
-          <mat-panel-title>{{ 'device-mng.custom-attr' | translate }}</mat-panel-title>
+          <mat-panel-title>{{ 'device-mng.device-prop' | translate }}</mat-panel-title>
           <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
             <mat-icon
-              *ngIf="customAttrExpanded"
+              *ngIf="customPropExpanded"
               class="material-icons"
-              matTooltip="{{ 'device-mng.add-custom-attr' | translate }}"
+              matTooltip="{{ 'device-mng.add-device-prop' | translate }}"
               matTooltipPosition="above"
-              (click)="addCustomProperty($event)"
+              (click)="addDeviceProperty($event)"
             >add</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
         <div 
-          *ngFor="let propertyControl of propertyFormArray().controls; let $index = index"
+          *ngFor="let propertyControl of devicePropFormArray().controls; let $index = index"
           formArrayName="propertyList"
           fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
         >
@@ -80,11 +80,38 @@
               mat-icon-button
               matTooltip="{{ 'action.delete' | translate }}"
               matTooltipPosition="above"
-              (click)="removeCustomProperty($index)"
+              (click)="removeDeviceProperty($index)"
             >
               <mat-icon class="material-icons" >delete</mat-icon>
             </button>
           </ng-container>
+        </div>
+        <div *ngIf="devicePropFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+          {{ 'device-mng.add-device-prop-tip' | translate }}
+        </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel
+        [expanded]="groupPropExpanded"
+        (opened)="groupPropExpanded = true"
+        (closed)="groupPropExpanded = false"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.device-data' | translate }}</mat-panel-title>
+          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <mat-icon
+              *ngIf="groupPropExpanded && deviceDataGroupFormArray().controls.length > 0"
+              class="material-icons"
+              matTooltip="{{ 'device-mng.add-device-data' | translate }}"
+              matTooltipPosition="above"
+              (click)="addDeviceData($event)"
+            >add</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <!-- <nz-tabset [(nzSelectedIndex)]="currentTabIndex" nzType="editable-card" (nzAdd)="addDeviceDataGroup()" (nzClose)="closeTab($event)">
+          <nz-tab *ngFor="let tab of tabs" nzClosable [nzTitle]="tab">Content of {{ tab }}</nz-tab>
+        </nz-tabset> -->
+        <div *ngIf="deviceDataGroupFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+          {{ 'device-mng.add-device-data-group-tip' | translate }}
         </div>
       </mat-expansion-panel>
     </fieldset>
