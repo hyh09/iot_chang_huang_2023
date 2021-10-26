@@ -11,13 +11,11 @@ package:
   stage: package
   retry: 1
   tags:
-    - zhows-test
+    - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
     - ls /usr/local/
     - docker version
-    #- java --version
-    - mvn --version
     #- mvn clean install -Ddockerfile.skip=false
   only:
     - dev
