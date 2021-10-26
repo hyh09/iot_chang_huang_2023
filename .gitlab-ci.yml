@@ -15,11 +15,8 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - ls /usr/local/
-    - docker images
-    - java --version
-    - mvn --version
-    #- mvn clean install -Ddockerfile.skip=false
+    - cd msa
+    - mvn clean install -Ddockerfile.skip=false
   only:
     - dev
   after_script:
