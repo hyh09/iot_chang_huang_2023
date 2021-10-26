@@ -1,4 +1,4 @@
-image: dockergitlabrunner_gitlab-runner:latest
+
 
 stages:
   - package
@@ -11,6 +11,7 @@ stages:
 # 打包并构建镜像
 package:
   stage: package
+  image: adoptopenjdk/maven-openjdk11
   retry: 1
   tags:
     - zhows-test
