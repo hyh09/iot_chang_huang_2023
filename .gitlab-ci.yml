@@ -9,6 +9,7 @@ before_script:
 # 打包并构建镜像
 package:
   stage: package
+  image: 47.110.145.204:8084/huansiyl/mvn-jdk11-docker:latest
   retry: 1
   tags:
     - hz-k8s-iot-test
@@ -16,6 +17,8 @@ package:
     - echo "打包并构建镜像"
     - ls /usr/local/
     - docker images
+    - java --version
+    - mvn --version
     #- mvn clean install -Ddockerfile.skip=false
   only:
     - dev
