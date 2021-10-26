@@ -6,8 +6,15 @@ stages:
 #  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
 services:
-  - docker:dind
-  
+    - name: docker:dind
+      entrypoint: ["env", "-u", "DOCKER_HOST"]
+      command: ["dockerd-entrypoint.sh"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+    # See https://github.com/docker-library/docker/pull/166
+    DOCKER_TLS_CERTDIR: ""
+    
 # 打包并构建镜像
 package:
   stage: package
