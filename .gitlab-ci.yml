@@ -4,7 +4,7 @@ stages:
   
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_OPTS: "-Dmaven.repo.local=./.m2/repository"
   
 before_script:
   - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
@@ -12,8 +12,10 @@ before_script:
 
 cache:
   paths:
-    - .m2/repository/
+    - ./.m2/repository
     - application/target/
+  # keep cache across branch
+  key: "$CI_BUILD_REF_NAME"
     
 # 打包并构建镜像
 package:
