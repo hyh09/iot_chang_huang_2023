@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Data
 @ToString
-@ApiModel(value = "用户和角色绑定对象实体类颠覆‘’‘")
+@ApiModel(value = "用户和角色绑定对象实体类")
 public class UserRoleVo implements Serializable {
 
     @NotNull(message = "[用户id]不能为空")

@@ -13,7 +13,7 @@ import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.util.JsonUtils;
-import org.thingsboard.server.entity.role.ResultVo;
+import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.thingsboard.server.entity.role;
+package org.thingsboard.server.entity;
 
 import lombok.Data;
 import lombok.ToString;
@@ -27,6 +27,16 @@ public class ResultVo {
         ResultVo  resultVo = new ResultVo();
         resultVo.setCode("0");
         resultVo.setMsg(msg);
+        return  resultVo;
+    }
+
+
+    public static ResultVo  getSuccessFul(Object  data)
+    {
+        ResultVo  resultVo = new ResultVo();
+        resultVo.setCode("1");
+        resultVo.setMsg("success");
+        resultVo.setData(data);
         return  resultVo;
     }
 }
