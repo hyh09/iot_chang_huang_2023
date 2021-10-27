@@ -39,8 +39,8 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
      * @return TenantSysRoleEntity
      */
     @Transactional
-    public TenantSysRoleEntity save(TenantSysRoleEntity tenantSysRole){
-            return super.save(tenantSysRole);
+    public TenantSysRoleEntity saveEntity(TenantSysRoleEntity tenantSysRole){
+            return save(tenantSysRole);
     }
 	
     /**	

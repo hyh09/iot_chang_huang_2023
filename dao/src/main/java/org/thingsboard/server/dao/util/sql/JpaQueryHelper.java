@@ -217,9 +217,20 @@ public class JpaQueryHelper {
 								}
 								pList.add(in);
 							} else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
-//								pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
-								pList.add(cb.equal(root.get(f.getName()), value));
-							} else {
+								pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
+							}else if(f.getType().isAssignableFrom(UUID.class) && f.getAnnotation(Id.class) == null){
+								pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
+							}else  if(f.getType().isAssignableFrom(long.class) )
+							{
+                                if(value instanceof  Long){
+									long l = ((Long) value).longValue();
+									if(l>0){
+										pList.add(cb.equal(root.get(f.getName()), value));
+									}
+								}
+
+							}
+							else {
 								pList.add(cb.equal(root.get(f.getName()), value));
 							}
 						}
@@ -239,6 +250,7 @@ public class JpaQueryHelper {
 				}
 				Predicate[] pArr = new Predicate[pList.size()];
 				p = cb.and(pList.toArray(pArr));
+
 				return p;
 			}
 		};

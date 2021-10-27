@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.core.RepositoryInformation;
+import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.sql.jpa.BaseRepository;
 import org.thingsboard.server.dao.util.sql.jpa.transform.CustomResultToBean;
@@ -93,6 +94,15 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		entityManager.flush();
      	entityManager.setFlushMode(FlushModeType.COMMIT);
 		return e;
+	}
+
+	/**
+	 * 有问题;
+	 * @param entity
+	 */
+	@Transactional
+	public void deleteByEntity(T entity) {
+		entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
 	}
 
 

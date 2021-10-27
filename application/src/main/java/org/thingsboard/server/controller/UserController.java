@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -64,6 +65,7 @@ import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
+import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -94,6 +96,8 @@ public class UserController extends BaseController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
+    @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+
 
 
 
@@ -389,7 +393,7 @@ public class UserController extends BaseController {
 
 
     /**
-     * 用户得添加接口 ###
+     * 用户得添加接口
      */
     @ApiOperation(value = "用户管理的添加接口")
     @RequestMapping(value = "/user/save", method = RequestMethod.POST)
@@ -398,6 +402,7 @@ public class UserController extends BaseController {
         try {
 
             SecurityUser  securityUser =  getCurrentUser();
+            System.out.println("打印：getCurrentUser().getTenantId()"+getCurrentUser().getTenantId());
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
             log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
@@ -409,6 +414,7 @@ public class UserController extends BaseController {
             log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
+            userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
             return  savedUser;
         }
 
@@ -436,6 +442,7 @@ public class UserController extends BaseController {
             throw new ThingsboardException("You do not have permission to delete!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         userService.deleteUser(getTenantId(),userId);
+        userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
         return "success";
     }
 
@@ -445,14 +452,18 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理的【编辑用户接口】")
     @RequestMapping(value="/user/update",method = RequestMethod.POST)
     @ResponseBody
-    public String update(@RequestBody User user) throws ThingsboardException {
+    public Object update(@RequestBody User user) throws ThingsboardException {
         log.info("打印更新用户的入参:{}",user);
         checkParameter(USER_ID, user.getStrId());
         SecurityUser  securityUser =  getCurrentUser();
         user.setUserCreator(securityUser.getId().toString());
         user.setId( UserId.fromString(user.getStrId()));
-        return (userService.update(user)>0?"succeeded":"fail");
-
+        int count =  userService.update(user);
+           if(count>0)
+           {
+               userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
+           }
+        return  (count>0?"succeeded":"fail");
     }
 
     /**

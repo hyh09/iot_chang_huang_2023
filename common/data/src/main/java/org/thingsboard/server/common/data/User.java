@@ -30,6 +30,9 @@ import org.thingsboard.server.common.data.validation.NoXss;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+import java.util.UUID;
+
 @ToString
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -69,6 +72,10 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private  String userName;
 
     private String userCreator;
+
+    //用户角色id
+    @ApiModelProperty(value = "用户所需要绑定的角色【角色di】 更新的时候为空会清理此角色")
+    private  List<UUID> roleIds;
 
 
     private Authority authority;

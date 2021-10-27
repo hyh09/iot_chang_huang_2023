@@ -34,6 +34,8 @@ public interface BaseRepository<T, ID extends Serializable> extends JpaRepositor
 
     public T updateNonNull(ID id, T entity);
 
+    void deleteByEntity( T entity);
+
     public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
 
 

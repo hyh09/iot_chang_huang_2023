@@ -63,6 +63,14 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		return opt.isPresent() ? opt.get(): null;
 	}
 
+	@Override
+	public List<T> findAllById(Iterable<ID> var1)
+	{
+		return  dao.findAllById(var1);
+	}
+
+
+
 
 	@Override
 	@Transactional
@@ -71,6 +79,15 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		entity.setUpdatedTime(Uuids.unixTimestamp(uuid));
 		return dao.updateNonNull(id, entity);
 	}
+
+
+	@Override
+	@Transactional
+	public void deleteByEntity( T entity){
+		 dao.deleteByEntity( entity);
+	}
+
+
 
 	@Override
 	public T save(T entity) {
@@ -90,6 +107,8 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		dao.deleteById(id);
 	}
 
+
+
 	@Override
 	public List<T> findAll(Map<String, Object> queryParam) {
 		return findAll(queryParam, Sort.unsorted());
@@ -101,6 +120,7 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		if (sort == null) {
 			return this.dao.findAll(JpaQueryHelper.createQueryByMap(queryParam, entityClass));
 		} else {
+			System.out.println("findAll:queryParam-->"+queryParam);
 			return this.dao.findAll(JpaQueryHelper.createQueryByMap(queryParam, entityClass), sort);
 		}
 	}
