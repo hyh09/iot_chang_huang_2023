@@ -1,13 +1,13 @@
 package org.thingsboard.server.dao.sql.role.dao;	
 	
-import org.thingsboard.server.dao.util.sql.BaseSqlDao;	
+import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.sql.role.entity.TenantMenuRoleEntity;	
 import org.springframework.data.jpa.repository.Modifying;	
 import org.springframework.data.jpa.repository.Query;	
-import org.springframework.data.repository.query.Param;	
-	
-import javax.transaction.Transactional;	
-import java.util.Collection;	
+import org.springframework.data.repository.query.Param;
+
+import java.util.Collection;
 import java.util.List;	
 import java.util.UUID;	
 	
@@ -20,7 +20,12 @@ import java.util.UUID;
 */	
 public interface TenantMenuRoleDao extends BaseSqlDao<TenantMenuRoleEntity,UUID> {	
 	
-	
+
+
+    @Modifying
+    @Transactional
+    @Query("delete from TenantMenuRoleEntity where tenantSysRoleId=:tenantSysRoleId ")
+    void deleteByTenantSysRoleId(@Param("tenantSysRoleId") UUID tenantSysRoleId);
 	
 	
 }	

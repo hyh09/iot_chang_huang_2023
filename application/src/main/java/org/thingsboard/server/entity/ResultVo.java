@@ -39,4 +39,14 @@ public class ResultVo {
         resultVo.setData(data);
         return  resultVo;
     }
+
+
+    public static ResultVo  getSuccessFul(Object  data,String msg)
+    {
+        ResultVo  resultVo = new ResultVo();
+        resultVo.setCode("1");
+        resultVo.setMsg(msg);
+        resultVo.setData(data);
+        return  resultVo;
+    }
 }

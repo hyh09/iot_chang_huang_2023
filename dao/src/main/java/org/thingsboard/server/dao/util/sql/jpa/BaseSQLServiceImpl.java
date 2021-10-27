@@ -81,6 +81,10 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	}
 
 
+	/**
+	 * 自测有问题
+	 * @param entity
+	 */
 	@Override
 	@Transactional
 	public void deleteByEntity( T entity){

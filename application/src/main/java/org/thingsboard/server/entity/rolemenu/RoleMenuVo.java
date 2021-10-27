@@ -22,9 +22,14 @@ public class RoleMenuVo {
     @ApiModelProperty(value = "角色id")
     private UUID  roleId;
 
-    @NotEmpty(message = "[菜单id]不能为空")
+//    @NotEmpty(message = "[菜单id]不能为空")
+//    @ApiModelProperty(value = "菜单入参id")
+//    private List<InputMenuVo> menuVoList;
+
+//    @NotEmpty(message = "[菜单id]不能为空")
     @ApiModelProperty(value = "菜单入参id")
-    private List<InputMenuVo> menuVoList;
+    private List<UUID>  menuVoList;
+
 
 
 

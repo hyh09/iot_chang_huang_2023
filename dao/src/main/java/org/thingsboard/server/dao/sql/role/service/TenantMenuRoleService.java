@@ -60,8 +60,15 @@ public class TenantMenuRoleService  extends BaseSQLServiceImpl<TenantMenuRoleEnt
           throw new ThingsboardException("Requested id wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);	
              }	
             return this.updateNonNull(tenantMenuRole.getId(), tenantMenuRole);	
-        }	
-	
-	
+        }
+
+    /**
+     * 删除该角色对应的菜单关系数据
+      * @param roleId 角色id
+     */
+    public  void  deleteByTenantSysRoleId(UUID roleId)
+      {
+          dao.deleteByTenantSysRoleId(roleId);
+      }
 	
 }	
