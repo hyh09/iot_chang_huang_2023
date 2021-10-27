@@ -26,26 +26,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.thingsboard.server.common.data.Customer;
-import org.thingsboard.server.common.data.Dashboard;
-import org.thingsboard.server.common.data.DashboardInfo;
-import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.DeviceInfo;
-import org.thingsboard.server.common.data.DeviceProfile;
-import org.thingsboard.server.common.data.EntityType;
-import org.thingsboard.server.common.data.EntityView;
-import org.thingsboard.server.common.data.EntityViewInfo;
-import org.thingsboard.server.common.data.HasName;
-import org.thingsboard.server.common.data.HasTenantId;
-import org.thingsboard.server.common.data.OtaPackage;
-import org.thingsboard.server.common.data.OtaPackageInfo;
-import org.thingsboard.server.common.data.TbResource;
-import org.thingsboard.server.common.data.TbResourceInfo;
-import org.thingsboard.server.common.data.Tenant;
-import org.thingsboard.server.common.data.TenantInfo;
-import org.thingsboard.server.common.data.TenantProfile;
-import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.cluster.TbClusterService;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.alarm.Alarm;
 import org.thingsboard.server.common.data.alarm.AlarmInfo;
 import org.thingsboard.server.common.data.asset.Asset;
@@ -57,26 +41,7 @@ import org.thingsboard.server.common.data.edge.EdgeEventType;
 import org.thingsboard.server.common.data.edge.EdgeInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.AlarmId;
-import org.thingsboard.server.common.data.id.AssetId;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DashboardId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
-import org.thingsboard.server.common.data.id.EntityId;
-import org.thingsboard.server.common.data.id.EntityIdFactory;
-import org.thingsboard.server.common.data.id.EntityViewId;
-import org.thingsboard.server.common.data.id.OtaPackageId;
-import org.thingsboard.server.common.data.id.RpcId;
-import org.thingsboard.server.common.data.id.RuleChainId;
-import org.thingsboard.server.common.data.id.RuleNodeId;
-import org.thingsboard.server.common.data.id.TbResourceId;
-import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.id.TenantProfileId;
-import org.thingsboard.server.common.data.id.UserId;
-import org.thingsboard.server.common.data.id.WidgetTypeId;
-import org.thingsboard.server.common.data.id.WidgetsBundleId;
+import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.page.PageDataIterableByTenantIdEntityId;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.SortOrder;
@@ -88,6 +53,7 @@ import org.thingsboard.server.common.data.rpc.Rpc;
 import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleChainType;
 import org.thingsboard.server.common.data.rule.RuleNode;
+import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
 import org.thingsboard.server.dao.asset.AssetService;
@@ -113,9 +79,11 @@ import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
+import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
+import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
 import org.thingsboard.server.exception.ThingsboardErrorResponseHandler;
 import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.provider.TbQueueProducerProvider;
@@ -139,12 +107,7 @@ import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
@@ -277,6 +240,14 @@ public abstract class BaseController {
     @Autowired
     protected RuleEngineEntityActionService ruleEngineEntityActionService;
 
+
+
+    @Autowired
+    protected TenantMenuService tenantMenuService;
+
+    @Autowired
+
+
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
     private boolean logControllerErrorStackTrace;
@@ -334,6 +305,12 @@ public abstract class BaseController {
     void checkParameter(String name, String param) throws ThingsboardException {
         if (StringUtils.isEmpty(param)) {
             throw new ThingsboardException("Parameter '" + name + "' can't be empty!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+        }
+    }
+    void checkParameter(String name, Object param) throws ThingsboardException {
+        if(param == null || StringUtils.isBlank(param.toString())){
+            throw new ThingsboardException("Parameter '" + name + "' can't be empty!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+
         }
     }
 
@@ -444,6 +421,52 @@ public abstract class BaseController {
             checkNotNull(user);
             accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
             return user;
+        } catch (Exception e) {
+            throw handleException(e, false);
+        }
+    }
+
+
+    List<TenantMenu> checkAddTenantMenuList(List<AddTenantMenuDto> addTenantMenuDtos) throws ThingsboardException{
+        if(CollectionUtils.isEmpty(addTenantMenuDtos)){
+            throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        List<TenantMenu> tenantMenu = new ArrayList<>();
+        addTenantMenuDtos.forEach(i->{
+            try {
+                checkTenantMenu(i);
+                tenantMenu.add(i.toTenantMenu());
+            } catch (ThingsboardException e) {
+                e.printStackTrace();
+            }
+        });
+        return tenantMenu;
+    }
+
+    void checkTenantMenu(TenantMenu tenantMenu) throws ThingsboardException {
+        try {
+            checkNotNull(tenantMenu);
+            checkParameter("tenant",tenantMenu.getTenantId());
+            checkParameter("sysMenuId",tenantMenu.getSysMenuId());
+            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
+            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
+            checkParameter("tenantMenuName",tenantMenu.getTenantMenuName());
+            checkParameter("level",tenantMenu.getLevel());
+            checkParameter("menuType",tenantMenu.getMenuType());
+        } catch (Exception e) {
+            throw handleException(e, false);
+        }
+    }
+    void checkTenantMenu(AddTenantMenuDto tenantMenu) throws ThingsboardException {
+        try {
+            checkNotNull(tenantMenu);
+            checkParameter("tenant",tenantMenu.getTenantId());
+            checkParameter("sysMenuId",tenantMenu.getSysMenuId());
+            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
+            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
+            checkParameter("tenantMenuName",tenantMenu.getTenantMenuName());
+            checkParameter("level",tenantMenu.getLevel());
+            checkParameter("menuType",tenantMenu.getMenuType());
         } catch (Exception e) {
             throw handleException(e, false);
         }
