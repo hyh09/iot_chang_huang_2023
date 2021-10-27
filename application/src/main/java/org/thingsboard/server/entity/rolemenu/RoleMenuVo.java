@@ -27,7 +27,7 @@ public class RoleMenuVo {
 //    private List<InputMenuVo> menuVoList;
 
 //    @NotEmpty(message = "[菜单id]不能为空")
-    @ApiModelProperty(value = "菜单入参id")
+    @ApiModelProperty(value = "菜单入参id;{注:为空视为解绑此角色下的菜单")
     private List<UUID>  menuVoList;
 
 
