@@ -35,6 +35,10 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 	/**  主键的查询 */
 	T findById(ID id);
 
+	/**批量查询方法*/
+	List<T> findAllById(Iterable<ID> var1);
+
+
 	T updateNonNull(ID id, T entity);
 
 	List<T> findAll(Map<String, Object>  queryParam);

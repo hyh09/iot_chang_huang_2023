@@ -63,6 +63,14 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		return opt.isPresent() ? opt.get(): null;
 	}
 
+	@Override
+	public List<T> findAllById(Iterable<ID> var1)
+	{
+		return  dao.findAllById(var1);
+	}
+
+
+
 
 	@Override
 	@Transactional
