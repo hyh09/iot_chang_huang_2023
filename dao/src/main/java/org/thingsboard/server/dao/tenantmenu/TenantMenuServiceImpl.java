@@ -59,7 +59,9 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         // TODO: 2021/10/14 本地上传图片
 
         TenantMenu newTenantMenu = tenantMenuDao.findById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId().getId());
-        tenantMenuDao.removeById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId().getId());
+        newTenantMenu.updTenantMenu(tenantMenu);
+        //id存在默认修改
+        //tenantMenuDao.removeById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId().getId());
         tenantMenuDao.save(new TenantId(tenantMenu.getTenantId()), newTenantMenu);
         //查询调整后的菜单列表
         List<TenantMenu> tenantMenus = tenantMenuDao.find( new TenantId(tenantMenu.getTenantId()));

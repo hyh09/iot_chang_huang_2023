@@ -15,7 +15,6 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
@@ -39,59 +38,45 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEntity<T>{
 
-    @ApiModelProperty("工厂编码")
     @Column(name = "code")
     private String code;
 
-    @ApiModelProperty("工厂名称")
     @Column(name = "name")
     private String name;
 
-    @ApiModelProperty("logo图标")
     @Column(name = "logo_icon")
     private String logoIcon;
 
-    @ApiModelProperty("logo图片")
     @Column(name = "logo_images")
     private String logoImages;
 
-    @ApiModelProperty("工厂地址")
     @Column(name = "adress")
     private String adress;
 
-    @ApiModelProperty("经度")
     @Column(name = "longitude")
     private String longitude;
 
-    @ApiModelProperty("纬度")
     @Column(name = "latitude")
     private String latitude;
 
-    @ApiModelProperty("邮政编码")
     @Column(name = "postal_code")
     private String postalCode;
 
-    @ApiModelProperty("手机号码")
     @Column(name = "mobile")
     private String mobile;
 
-    @ApiModelProperty("邮箱")
     @Column(name = "email")
     private String email;
 
-    @ApiModelProperty("工厂管理员用户标识")
     @Column(name = "admin_user_id")
     private UUID adminUserId;
 
-    @ApiModelProperty("工厂管理员用户标识")
     @Column(name = "admin_user_name")
     private String adminUserName;
 
-    @ApiModelProperty(name = "备注")
     @Column(name = "remark")
     private String remark;
 
-    @ApiModelProperty(name = "租户")
     @Column(name = "tenant_id")
     private UUID tenantId;
 
@@ -111,7 +96,6 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
     @Column(name = "updated_user")
     private UUID updatedUser;
 
-    @ApiModelProperty("删除标记（A-未删除；D-已删除）")
     @Column(name = "del_flag")
     private String delFlag = "A";
 

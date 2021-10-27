@@ -53,4 +53,37 @@ public interface MenuRepository extends PagingAndSortingRepository<MenuEntity, U
     @Query("SELECT t FROM MenuEntity t WHERE t.menuType = :menuType ")
     List<MenuEntity> findMenusByMenuType(@Param("menuType")String menuType);
 
+    /**
+     * 查询同级目录下最大排序值
+     * @param parentId
+     * @return
+     */
+    @Query("SELECT max(t.sort) FROM MenuEntity t WHERE t.parentId = :parentId ")
+    Integer getMaxSortByParentId(@Param("parentId") UUID parentId);
+
+    /**
+     * 查询同级下指定菜单后面所有菜单
+     * @param sort
+     * @param parentId
+     * @return
+     */
+    @Query("SELECT t FROM MenuEntity t WHERE t.parentId = :parentId AND t.sort > :sort ORDER BY t.sort ASC")
+    List<MenuEntity> findRearList(@Param("sort")Integer sort, @Param("parentId")UUID parentId);
+
+    /**
+     * 查询一级菜单
+     * @param menuType
+     * @return
+     */
+    @Query("SELECT t FROM MenuEntity t WHERE t.menuType = :menuType AND t.level = 1 ORDER BY t.sort ASC")
+    List<MenuEntity> getOneLevel(@Param("menuType")String menuType);
+
+    @Query(value = "SELECT t FROM MenuEntity t WHERE t.menuType = :menuType ",nativeQuery = true)
+    Page<MenuEntity> findByPage(@Param("menuType") String menuType,
+                                            Pageable pageable);
+
+    @Query(value = "SELECT t FROM MenuEntity t")
+    Page<MenuEntity> findByPage(Pageable pageable);
+
+
 }

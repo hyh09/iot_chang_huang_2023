@@ -18,8 +18,8 @@ package org.thingsboard.server.dao.model.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
@@ -37,7 +37,7 @@ import java.util.UUID;
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T> implements SearchTextEntity<T> {
+public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements SearchTextEntity<T> {
 
     @Column(name = "code")
     private String code;
@@ -76,15 +76,13 @@ public abstract class AbstractMenuEntity<T extends Menu> extends BaseSqlEntity<T
     @Column(name = "created_time")
     private long createdTime;
 
-    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
-    @CreatedDate
+    @LastModifiedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
-    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
