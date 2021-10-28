@@ -160,7 +160,35 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 	}
 
 
+    public <T> List<T> queryAllListSql(String sql,Map<String, Object> param, Class<T> cls,NameTransform trans, boolean isNativeSql)
+	{
+		Query query = null;
+		if(isNativeSql){
 
+			query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+			if(Map.class.isAssignableFrom(cls)){
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
+			} else {
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+			}
+		} else {
+			query = entityManager.createQuery(sql).unwrap(Query.class);
+		}
+		if(param!= null){
+			for(Map.Entry<String, ?> entry : param.entrySet()){
+				if(sql.indexOf(":" + entry.getKey()) > -1 ){
+					query.setParameter(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+		List<T> list = query.getResultList();
+		return  list;
+
+
+	}
 
 
 

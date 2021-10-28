@@ -62,6 +62,7 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 	 <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
 
 
+	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls);
 
 
 }

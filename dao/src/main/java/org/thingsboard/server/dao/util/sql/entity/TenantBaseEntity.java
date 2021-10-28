@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.util.sql.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedBy;
 import org.thingsboard.server.dao.model.ModelConstants;
 
 import javax.persistence.Column;

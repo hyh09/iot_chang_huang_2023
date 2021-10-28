@@ -81,6 +81,10 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	}
 
 
+	/**
+	 * 自测有问题
+	 * @param entity
+	 */
 	@Override
 	@Transactional
 	public void deleteByEntity( T entity){
@@ -135,6 +139,12 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	@Override
 	public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql){
 		return  this.dao.querySql(sql,param,cls,pageable,trans,isNativeSql);
+	}
+
+	@Override
+	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls)
+	{
+		return  this.dao.queryAllListSql(sql,param,cls,NameTransform.UN_CHANGE,true);
 	}
 
 

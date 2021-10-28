@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,8 @@ import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 import org.thingsboard.server.entity.role.PageRoleVo;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
+import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.entity.rolemenu.OutMenuByUserVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
@@ -158,6 +161,7 @@ public class UserRoleController extends BaseController{
 
         return  pageRoleVos;
     }
+
 
 
 
