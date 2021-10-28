@@ -1,4 +1,4 @@
-package org.thingsboard.server.service.userrole;
+package org.thingsboard.server.service.userrole.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,6 +15,7 @@ import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.util.JsonUtils;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
+import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import java.util.List;
 import java.util.UUID;

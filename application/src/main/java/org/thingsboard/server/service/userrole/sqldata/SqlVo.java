@@ -1,4 +1,4 @@
-package org.thingsboard.server.service.userrole;
+package org.thingsboard.server.service.userrole.sqldata;
 
 import lombok.Data;
 

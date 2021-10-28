@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
@@ -49,17 +50,16 @@ public class RoleMenuController extends BaseController{
     @RequestMapping(value = "/queryAll", method = RequestMethod.POST)
     @ResponseBody
     public Object queryAll(@RequestBody @Valid InMenuByUserVo vo) {
-//        if (result.hasErrors()) {
-//            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
-//        }
-        try {
-            SecurityUser  securityUser=  getCurrentUser();
-            vo.setUserId(securityUser.getUuidId());
-        } catch (ThingsboardException e) {
-            e.printStackTrace();
-            return ResultVo.getFail(e.getMessage());
-        }
+        if(!IS_TEST) {
 
+                try {
+                    SecurityUser securityUser = getCurrentUser();
+                    vo.setUserId(securityUser.getUuidId());
+                } catch (ThingsboardException e) {
+                    e.printStackTrace();
+                    return ResultVo.getFail(e.getMessage());
+                }
+        }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
         return   roleMenuSvc.queryAll(vo);
     }
