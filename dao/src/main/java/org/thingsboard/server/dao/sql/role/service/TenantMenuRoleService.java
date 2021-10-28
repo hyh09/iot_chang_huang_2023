@@ -70,5 +70,5 @@ public class TenantMenuRoleService  extends BaseSQLServiceImpl<TenantMenuRoleEnt
       {
           dao.deleteByTenantSysRoleId(roleId);
       }
-	
+
 }	

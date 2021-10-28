@@ -35,7 +35,6 @@ public  class TenantBaseEntity implements Serializable {
     /**
      * 创建人标识
      */
-    @CreatedBy
     @Column(name="created_user")
     protected UUID createdUser;
 
