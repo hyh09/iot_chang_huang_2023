@@ -7,9 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.entity.rolemenu.RoleMenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.validation.Valid;
@@ -39,6 +42,26 @@ public class RoleMenuController extends BaseController{
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
         return   roleMenuSvc.binding(vo);
+    }
+
+
+    @ApiOperation(value = "角色模块下的 【配置的权限菜单的查询】")
+    @RequestMapping(value = "/queryAll", method = RequestMethod.POST)
+    @ResponseBody
+    public Object queryAll(@RequestBody @Valid InMenuByUserVo vo, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
+        }
+        try {
+            SecurityUser  securityUser=  getCurrentUser();
+            //vo.setUserId(securityUser.getUuidId());
+        } catch (ThingsboardException e) {
+            e.printStackTrace();
+            return ResultVo.getFail(e.getMessage());
+        }
+
+        log.info("[角色用户绑定]打印得入参为:{}",vo);
+        return   roleMenuSvc.queryAll(vo);
     }
 
 

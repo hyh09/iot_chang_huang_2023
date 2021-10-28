@@ -141,6 +141,12 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		return  this.dao.querySql(sql,param,cls,pageable,trans,isNativeSql);
 	}
 
+	@Override
+	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls)
+	{
+		return  this.dao.queryAllListSql(sql,param,cls,NameTransform.UN_CHANGE,true);
+	}
+
 
 
 

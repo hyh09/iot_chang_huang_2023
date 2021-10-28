@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,8 @@ import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 import org.thingsboard.server.entity.role.PageRoleVo;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
+import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.entity.rolemenu.OutMenuByUserVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
@@ -159,6 +162,42 @@ public class UserRoleController extends BaseController{
         return  pageRoleVos;
     }
 
+
+    @RequestMapping(value = "/find02", method = RequestMethod.POST)
+    public   Object   find02(@RequestBody InMenuByUserVo vo )
+    {
+
+        //cast(usermenuro0_.user_id as varchar(255))
+        //(case when c1.id is not null then '1' else '0' end) as mark
+        log.info("打印入参:{}",vo);
+         String sql ="  select  cast(m1.id as varchar(255)) as id ,m1.sys_menu_name as sysMenuName ,(case when c1.id is not null then '1' else '0' end) as mark   " +
+                  "                   from  tb_user  t1  " +
+                  "                   left join tb_user_menu_role b1  on t1.id=b1.user_id  " +
+                  "                   left join tb_tenant_sys_role c1 on  c1.id =b1.tenant_sys_role_id  " +
+                  "                   left join  tb_tenant_menu_role r1  on r1.tenant_sys_role_id =c1.id  " +
+                  "                   left join  tb_tenant_menu m1   on m1.id = r1.tenant_menu_id where 1=1  ";
+          StringBuffer whereSql  = new StringBuffer().append(sql);
+
+        Map<String, Object> param= new HashMap<>();
+        if(StringUtils.isNoneBlank(vo.getTenantMenuName())){
+            whereSql.append(" and m1.tenant_menu_name =:tenantMenuName");
+            param.put("tenantMenuName",vo.getTenantMenuName());
+        }
+        if(StringUtils.isNoneBlank(vo.getMenuType())){
+            whereSql.append(" and m1.menu_type =:menuType");
+            param.put("menuType",vo.getMenuType());
+        }
+        //用于本地测试
+        if((vo.getUserId()) != null){
+            //cast(usermenuro0_.user_id as varchar(255))
+            whereSql.append(" and t1.id =:userId");  //cast(t1.id as varchar(255))
+            param.put("userId",vo.getUserId());
+        }
+
+       List<OutMenuByUserVo> list= tenantSysRoleService.queryAllListSqlLocal(whereSql.toString(),param, OutMenuByUserVo.class);
+        System.out.println("打印当前的数据:"+list);
+               return   ResultVo.getSuccessFul(list);
+    }
 
 
 
