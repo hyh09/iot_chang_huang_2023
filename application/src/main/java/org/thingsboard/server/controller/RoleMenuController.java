@@ -48,13 +48,13 @@ public class RoleMenuController extends BaseController{
     @ApiOperation(value = "角色模块下的 【配置的权限菜单的查询】")
     @RequestMapping(value = "/queryAll", method = RequestMethod.POST)
     @ResponseBody
-    public Object queryAll(@RequestBody @Valid InMenuByUserVo vo, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
-        }
+    public Object queryAll(@RequestBody @Valid InMenuByUserVo vo) {
+//        if (result.hasErrors()) {
+//            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
+//        }
         try {
             SecurityUser  securityUser=  getCurrentUser();
-            //vo.setUserId(securityUser.getUuidId());
+            vo.setUserId(securityUser.getUuidId());
         } catch (ThingsboardException e) {
             e.printStackTrace();
             return ResultVo.getFail(e.getMessage());
