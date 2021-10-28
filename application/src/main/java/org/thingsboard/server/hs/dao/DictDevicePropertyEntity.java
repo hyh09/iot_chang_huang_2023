@@ -7,7 +7,6 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
-import org.thingsboard.server.hs.entity.po.DictDevice;
 import org.thingsboard.server.hs.entity.po.DictDeviceProperty;
 
 import javax.persistence.Column;

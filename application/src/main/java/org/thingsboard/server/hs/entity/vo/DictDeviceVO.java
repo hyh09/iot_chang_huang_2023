@@ -23,11 +23,11 @@ public class DictDeviceVO {
     private String id;
 
     @NotNull
-    @ApiModelProperty(value = "编码")
+    @ApiModelProperty(value = "编码", required = true)
     private String code;
 
     @NotNull
-    @ApiModelProperty(value = "名称")
+    @ApiModelProperty(value = "名称", required = true)
     private String name;
 
     @ApiModelProperty(value = "类型")

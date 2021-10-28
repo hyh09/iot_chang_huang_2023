@@ -37,7 +37,7 @@ import java.util.Objects;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/deviceMonitor/alarmRule")
-public class AlarmRuleManageController extends BaseController {
+public class AlarmRuleController extends BaseController {
 
     @Autowired
     DictDeviceService dictDeviceService;

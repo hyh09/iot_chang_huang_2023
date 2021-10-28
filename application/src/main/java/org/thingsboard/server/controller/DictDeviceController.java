@@ -10,16 +10,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.controller.BaseController;
 import org.thingsboard.server.hs.entity.po.DictDevice;
 import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.hs.service.DictDeviceService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.service.security.model.SecurityUser;
 
 import javax.validation.Valid;
 

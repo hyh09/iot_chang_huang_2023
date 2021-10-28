@@ -1,13 +1,10 @@
 package org.thingsboard.server.hs.entity.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
-import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
+import org.thingsboard.server.hs.entity.enums.DictDataDataTypeEnum;
 
 /**
  * 数据字典页面请求
@@ -31,5 +28,5 @@ public class DictDataListQuery extends PageAndSortQuery{
     /**
      * 数据类型
      */
-    private DictDataTypeEnum dictDataType;
+    private DictDataDataTypeEnum dictDataType;
 }

@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;

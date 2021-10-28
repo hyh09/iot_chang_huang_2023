@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
 
 /**
  * 设备字典页面请求

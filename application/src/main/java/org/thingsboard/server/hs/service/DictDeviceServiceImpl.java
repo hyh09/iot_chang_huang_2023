@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -131,7 +130,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
         // 获得分组及分组属性列表
         var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())));
-        var groupUUIDList = groupList.stream().map(e->UUID.fromString(e.getId())).collect(Collectors.toList());
+        var groupUUIDList = groupList.stream().map(e -> UUID.fromString(e.getId())).collect(Collectors.toList());
         List<DictDeviceGroupProperty> groupPropertyList;
         if (groupUUIDList.isEmpty()) {
             groupPropertyList = new ArrayList<>();
@@ -168,7 +167,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                 .componentList(new ArrayList<>()).build()
         ).collect(Collectors.toList());
 
-        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e->e.getParentId() == null?"null":e.getParentId()));
+        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> e.getParentId() == null ? "null" : e.getParentId()));
 
         // 开始递归组装数据
         this.recursionPackageComponent(rList, pMap, "null");

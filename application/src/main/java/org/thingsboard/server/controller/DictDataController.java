@@ -11,19 +11,16 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
-import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
+import org.thingsboard.server.hs.entity.enums.DictDataDataTypeEnum;
 import org.thingsboard.server.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.hs.service.DictDataService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.service.security.model.SecurityUser;
 
 import javax.validation.Valid;
 
-import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
 /**
@@ -49,7 +46,7 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "获得数据字典界面资源")
     @GetMapping("/dict/data/resource")
     public DictDataResource listDictDataResource() throws ThingsboardException {
-        return new DictDataResource().setDictDataTypeList(DictDataTypeEnum.toResourceList());
+        return new DictDataResource().setDictDataTypeList(DictDataDataTypeEnum.toResourceList());
     }
 
     /**
@@ -93,7 +90,7 @@ public class DictDataController extends BaseController {
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) DictDataTypeEnum dictDataType
+            @RequestParam(required = false) DictDataDataTypeEnum dictDataType
     )
             throws ThingsboardException {
         DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
