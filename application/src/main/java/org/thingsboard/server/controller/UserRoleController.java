@@ -1,6 +1,7 @@
 package org.thingsboard.server.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -14,7 +15,9 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.entity.role.PageRoleVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -44,6 +47,7 @@ public class UserRoleController extends BaseController{
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
         SecurityUser securityUser =  getCurrentUser();
         entity.setCreatedUser(securityUser.getUuidId());
+        entity.setUpdatedUser(securityUser.getUuidId());
         return   tenantSysRoleService.saveEntity(entity);
     }
 
@@ -87,17 +91,31 @@ public class UserRoleController extends BaseController{
 //    })
     @RequestMapping(value = "/pageQuery", method = RequestMethod.POST)
     @ResponseBody
-    public   Object   pageQuery(@RequestBody Map<String, Object> queryParam) throws ThingsboardException
-    {
-        int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
-        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
-        String  textSearch = (String) queryParam.get("textSearch");
-        String  sortProperty = (String) queryParam.get("sortProperty");
-        String  sortOrder = (String) queryParam.get("sortOrder");
+
+//    public   Object   pageQuery(@RequestBody Map<String, Object> queryParam) throws ThingsboardException
+//    {
+//        int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
+//        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
+//        String  textSearch = (String) queryParam.get("textSearch");
+//        String  sortProperty = (String) queryParam.get("sortProperty");
+//        String  sortOrder = (String) queryParam.get("sortOrder");
+//        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+//        return tenantSysRoleService.pageQuery(queryParam,pageLink);
+//
+//    }
+    public  Object  pageQuery(@RequestBody PageRoleVo vo) throws Exception {
+        SecurityUser securityUser =  getCurrentUser();
+        Map  queryParam = BeanToMap.beanToMapByJacksonFilter(vo);
+        queryParam.put("updatedUser",securityUser.getUuidId());
+        int  pageSize =  vo.getPageSize();
+        int  page = vo.getPage();
+        String  textSearch = vo.getTextSearch();
+        String  sortProperty =vo.getSortProperty();
+        String  sortOrder = vo.getSortOrder();
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return tenantSysRoleService.pageQuery(queryParam,pageLink);
-
     }
+
 
 
     /**

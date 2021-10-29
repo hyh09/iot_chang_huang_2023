@@ -1,4 +1,4 @@
-package org.thingsboard.server.service.telemetry.exception.enums;
+package org.thingsboard.server.common.data.vo.enums;
 
 /**
  * @program: thingsboard

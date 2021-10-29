@@ -1,4 +1,4 @@
-package org.thingsboard.server.service.telemetry.exception;
+package org.thingsboard.server.common.data.vo;
 
 import lombok.Data;
 

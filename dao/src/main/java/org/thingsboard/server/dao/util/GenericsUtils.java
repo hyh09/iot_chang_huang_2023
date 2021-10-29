@@ -1,18 +1,21 @@
 package org.thingsboard.server.dao.util;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thingsboard.server.dao.util.anno.CustomValid;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
-
-public class GenericsUtils {  
+public class GenericsUtils {
 	@SuppressWarnings("unused")
 	private static Logger logger = LoggerFactory.getLogger(GenericsUtils.class.getName());
     /** 
@@ -166,5 +169,47 @@ public class GenericsUtils {
     @SuppressWarnings("rawtypes")
     public static Class getFieldGenericType(Field field) {
         return getFieldGenericType(field, 0);  
-    }  
+    }
+
+
+    /**
+     * 获取类上注解属性value
+     * @param cla
+     * @param clb
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static  String  getClassAnnotation(Class cla,Class clb)
+    {
+        if(clb.isAssignableFrom(JsonFilter.class) ){
+            JsonFilter anno = (JsonFilter) cla.getAnnotation(JsonFilter.class);
+            return anno.value();
+        }
+        return  null;
+
+    }
+
+
+    /**
+     * 获取自定义注解 CustomValid
+     * @param cls
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static Set<String> getFieldsAnnotation(Class cls)
+    {
+        Set<String> properties = new HashSet<>();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field f : fields) {
+            f.setAccessible(true);
+            CustomValid subFAnno = f.getAnnotation(CustomValid.class);
+            if(subFAnno != null)
+            {
+                properties.add(f.getName());
+            }
+
+        }
+        return  properties;
+
+    }
 }  

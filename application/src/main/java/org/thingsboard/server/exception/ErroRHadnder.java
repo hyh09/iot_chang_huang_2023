@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.thingsboard.server.entity.ResultVo;
-import org.thingsboard.server.service.telemetry.exception.CustomException;
+import org.thingsboard.server.common.data.vo.CustomException;
 
 import java.util.List;
 

@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.util.sql.entity;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.thingsboard.server.dao.model.ModelConstants;
@@ -36,12 +37,14 @@ public  class TenantBaseEntity implements Serializable {
      * 创建人标识
      */
     @Column(name="created_user")
+    @ApiModelProperty(value = "创建人标识")
     protected UUID createdUser;
 
     /**
      * 修改人标识
      */
     @Column(name="updated_user")
+    @ApiModelProperty(value = "修改人标识")
     protected UUID updatedUser;
 
 

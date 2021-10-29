@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.entity.user.UserVo;
-import org.thingsboard.server.service.telemetry.exception.CustomException;
-import org.thingsboard.server.service.telemetry.exception.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 
 import java.util.HashMap;
