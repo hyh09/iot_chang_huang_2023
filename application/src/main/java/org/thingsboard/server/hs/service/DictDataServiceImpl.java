@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class DictDataServiceImpl extends AbstractEntityService implements DictDataService {
 
     @Autowired
-    DictDataRepository dictDataRepository;
+    DictDataRepository dataRepository;
 
     /**
      * 查询数据字典列表
@@ -52,7 +52,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         // 动态条件查询
         Specification<DictDataEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            var es = cb.equal(root.<UUID>get("tenantId"), UUID.fromString(tenantId.toString()));
+            var es = cb.equal(root.<UUID>get("tenantId"), tenantId.getId());
 
             if (dictDataListQuery != null) {
                 if (!StringUtils.isBlank(dictDataListQuery.getName())) {
@@ -72,7 +72,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         };
 
         // 查询数据
-        return DaoUtil.toPageData(this.dictDataRepository.findAll(specification, DaoUtil.toPageable(pageLink)));
+        return DaoUtil.toPageData(this.dataRepository.findAll(specification, DaoUtil.toPageable(pageLink)));
     }
 
     /**
@@ -87,7 +87,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         DictData dictData;
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
             // 修改
-            dictData = this.dictDataRepository.findById(UUID.fromString(dictDataQuery.getId())).get().toData();
+            dictData = this.dataRepository.findById(UUID.fromString(dictDataQuery.getId())).get().toData();
             if (!dictData.getTenantId().equals(tenantId.toString())) {
                 throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
             }
@@ -108,36 +108,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
             dictData.setType(dictDataQuery.getType().toString());
             dictData.setUnit(dictDataQuery.getUnit());
             dictData.setComment(dictDataQuery.getComment());
-
-            // 设置编码
-            if (!StringUtils.isBlank(dictData.getCode())) {
-                if (!dictData.getCode().startsWith("SJZD")) {  // TODO 需要再完善一下
-                    throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
-                }
-                dictData.setCode(dictData.getCode());
-            } else {
-                var codes = this.dictDataRepository.findCodesByTenantId(tenantId.getId());
-                if (codes.isEmpty()) {
-                    dictData.setCode("SJZD0001");
-                } else {
-                    var ints = codes.stream().map(e -> Integer.valueOf(e.split("SJZD")[1])).sorted().collect(Collectors.toList());
-                    int start = 0;
-                    while (true) {
-                        if (ints.size() - 1 == start) {
-                            dictData.setCode("SJZD" + String.format("%04d", start + 2));
-                            break;
-                        }
-                        if (!ints.get(start).equals(start + 1)) {
-                            dictData.setCode("SJZD" + String.format("%04d", start + 1));
-                            break;
-                        }
-                        start += 1;
-                    }
-                }
-            }
         }
-        var s = new DictDataEntity(dictData);
-        this.dictDataRepository.save(new DictDataEntity(dictData));
+        this.dataRepository.save(new DictDataEntity(dictData));
     }
 
     /**
@@ -147,12 +119,12 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public DictData getDictDataDetail(String id, TenantId tenantId) throws ThingsboardException {
-        var s = this.dictDataRepository.findById(UUID.fromString(id));
-        DictData dictData = this.dictDataRepository.findById(UUID.fromString(id)).get().toData();
+        var s = this.dataRepository.findById(UUID.fromString(id));
+        DictData dictData = this.dataRepository.findById(UUID.fromString(id)).get().toData();
         if (!dictData.getTenantId().equals(tenantId.toString())) {
             throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
         }
-        return this.dictDataRepository.findById(UUID.fromString(id)).get().toData();
+        return this.dataRepository.findById(UUID.fromString(id)).get().toData();
     }
 
     /**
@@ -163,10 +135,36 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Override
     @Transactional
     public void deleteDictDataById(String id, TenantId tenantId) throws ThingsboardException {
-        DictData dictData = this.dictDataRepository.findById(UUID.fromString(id)).get().toData();
+        DictData dictData = this.dataRepository.findById(UUID.fromString(id)).get().toData();
         if (!dictData.getTenantId().equals(tenantId.toString())) {
             throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
         }
-        this.dictDataRepository.deleteById(UUID.fromString(id));
+        this.dataRepository.deleteById(UUID.fromString(id));
+    }
+
+    /**
+     * 获得当前可用数据字典编码
+     *
+     * @param tenantId 租户Id
+     * @return 当前可用数据字典编码
+     */
+    @Override
+    public String getAvailableCode(TenantId tenantId) {
+        var codes = this.dataRepository.findAllCodesByTenantId(tenantId.getId());
+        if (codes.isEmpty()) {
+            return "SJZD0001";
+        } else {
+            var ints = codes.stream().map(e -> Integer.valueOf(e.split("SJZD")[1])).sorted().collect(Collectors.toList());
+            int start = 0;
+            while (true) {
+                if (ints.size() - 1 == start) {
+                    return "SJZD" + String.format("%04d", start + 2);
+                }
+                if (!ints.get(start).equals(start + 1)) {
+                    return "SJZD" + String.format("%04d", start + 1);
+                }
+                start += 1;
+            }
+        }
     }
 }

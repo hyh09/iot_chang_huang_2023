@@ -12,6 +12,9 @@ import lombok.*;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(value = "数据字典")
 public class DictData extends BasePO {
 
