@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.service.telemetry.exception.CustomException;
 
 import java.util.List;
 
@@ -25,4 +26,21 @@ public class ErroRHadnder {
       return ResultVo.getFail("入参校验错误: " +msg);
 
     }
+
+
+    /**
+     * 全局自定义异常CustomException捕获类
+     * @param e
+     * @return
+     */
+    @ExceptionHandler({CustomException.class})
+    @ResponseBody
+    public ResultVo businessExceptionHandler(CustomException e) {
+        log.error(e.getCode(), e.getMessage());
+        log.error("系统异常", e);
+        return ResultVo.builderFail(e.getCode(), e.getMessage());
+    }
+
+
+
 }

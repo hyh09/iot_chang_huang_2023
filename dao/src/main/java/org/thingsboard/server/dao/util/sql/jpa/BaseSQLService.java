@@ -64,5 +64,7 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 
 	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls);
 
+	Long queryContListSqlLocal(String sql,Map<String, Object> param);
+
 
 }

@@ -192,6 +192,34 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 
 
 
+	public Long queryContListSqlLocal(String sqlCount, Map<String, Object> param, boolean isNativeSql) {
+
+		Query countQuery = null;
+		if(isNativeSql){
+			countQuery = entityManager.createNativeQuery(sqlCount).unwrap(NativeQuery.class);
+
+		} else {
+			countQuery = entityManager.createQuery(sqlCount).unwrap(Query.class);
+		}
+
+		if(param!= null){
+			for(Map.Entry<String, ?> entry : param.entrySet()){
+				if(sqlCount.indexOf(":" + entry.getKey()) > -1 ){
+					countQuery.setParameter(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+
+		Long	totalObj = Long.parseLong(countQuery.getSingleResult().toString());
+		return  totalObj;
+
+
+
+	}
+
+
+
+
 
 
 }

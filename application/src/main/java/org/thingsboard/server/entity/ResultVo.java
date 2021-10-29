@@ -31,6 +31,15 @@ public class ResultVo {
     }
 
 
+    public static ResultVo  builderFail(String code,String msg)
+    {
+        ResultVo  resultVo = new ResultVo();
+        resultVo.setCode(code);
+        resultVo.setMsg(msg);
+        return  resultVo;
+    }
+
+
     public static ResultVo  getSuccessFul(Object  data)
     {
         ResultVo  resultVo = new ResultVo();
