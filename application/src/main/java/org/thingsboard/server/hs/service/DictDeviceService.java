@@ -6,10 +6,12 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.hs.entity.po.DictDevice;
+import org.thingsboard.server.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 设备字典接口
@@ -68,4 +70,11 @@ public interface DictDeviceService {
      * @param tenantId 租户Id
      */
     List<DictDevice> listDictDeviceUnused(TenantId tenantId);
+
+    /**
+     * 获得设备字典分组及分组属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId);
 }

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.thingsboard.server.common.data.page.PageData;
 
 import java.util.List;
 
@@ -27,8 +28,8 @@ public class RTMonitorResult {
     /**
      * 设备列表
      */
-    @ApiModelProperty("设备列表")
-    private List<RTMonitorDeviceResult> deviceList;
+    @ApiModelProperty("设备分页列表")
+    private PageData<RTMonitorDeviceResult> devicePageData;
 
     /**
      * 在线设备数量

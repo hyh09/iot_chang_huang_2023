@@ -19,6 +19,9 @@ import java.util.List;
 @AllArgsConstructor
 public class DictDeviceGroupVO {
 
+    @ApiModelProperty(value = "id", notes = "新增或修改时均为null")
+    private String id;
+
     @ApiModelProperty(value = "名称")
     private String name;
 

@@ -40,4 +40,9 @@ public class DictDeviceGroupProperty extends BasePO {
      * 内容
      */
     private String content;
+
+    /**
+     * 标题
+     */
+    private String title;
 }

@@ -197,7 +197,7 @@ public class AlarmRuleController extends BaseController {
      * @param id 设备配置id
      * @see DeviceProfileController#setDefaultDeviceProfile(String)
      */
-    @ApiOperation(value = "删除设备配置")
+    @ApiOperation(value = "设备配置设为默认")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备配置id", dataType = "string", paramType = "path")})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")

@@ -74,7 +74,7 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_GROUP_PROPERTY_TABLE_NAME = "hs_dict_device_group_property";
     public static final String DICT_DEVICE_GROUP_PROPERTY_NAME = "name";
     public static final String DICT_DEVICE_GROUP_PROPERTY_CONTENT = "content";
-    public static final String DICT_DEVICE_GROUP_PROPERTY_TYPE = "type";
+    public static final String DICT_DEVICE_GROUP_PROPERTY_TITLE = "title";
 
     /**
      * 设备配置-设备字典关联表

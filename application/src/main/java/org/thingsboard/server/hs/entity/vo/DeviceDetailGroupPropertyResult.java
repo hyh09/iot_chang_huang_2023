@@ -35,14 +35,20 @@ public class DeviceDetailGroupPropertyResult {
     private String name;
 
     /**
+     * 分组属性描述
+     */
+    @ApiModelProperty("分组属性描述")
+    private String title;
+
+    /**
      * 分组属性数据
      */
     @ApiModelProperty("分组属性数据")
     private String data;
 
     /**
-     * 上传时间
+     * 创建时间
      */
-    @ApiModelProperty("上传时间")
-    private Long uploadTime;
+    @ApiModelProperty("创建时间")
+    private Long createdTime;
 }

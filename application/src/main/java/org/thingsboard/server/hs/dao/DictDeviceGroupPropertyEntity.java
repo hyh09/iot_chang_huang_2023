@@ -55,6 +55,12 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
     @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_CONTENT)
     private String content;
 
+    /**
+     * 标题
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_TITLE)
+    private String title;
+
     public DictDeviceGroupPropertyEntity() {
     }
 
@@ -68,6 +74,7 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
 
         this.name = common.getName();
         this.content = common.getContent();
+        this.title = common.getTitle();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -86,6 +93,7 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
         }
         common.setName(name);
         common.setContent(content);
+        common.setTitle(title);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

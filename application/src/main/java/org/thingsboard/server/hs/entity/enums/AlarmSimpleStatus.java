@@ -14,12 +14,26 @@ import java.util.*;
 @Getter
 public enum AlarmSimpleStatus {
     ANY("ANY", "type-any"),
-    UN_ACK("ACTIVE_UNACK", "type-unack"),
-    ACK("ACTIVE_ACK", "type-ack"),
-    CLEARED("CLEARED_ACK", "type-cleared");
+    ACTIVE_UNACK("ACTIVE_UNACK", "type-unack"),
+    ACTIVE_ACK("ACTIVE_ACK", "type-ack"),
+    CLEARED_ACK("CLEARED_ACK", "type-cleared");
 
     private final String code;
     private final String name;
+
+    public Boolean isCanBeClear() {
+        if (this.equals(ACTIVE_UNACK) || this.equals(ACTIVE_ACK)) {
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
+    public Boolean isCanBeConfirm() {
+        if (this.equals(ACTIVE_UNACK) ) {
+            return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
 
     AlarmSimpleStatus(String code, String name) {
         this.code = code;
@@ -41,11 +55,11 @@ public enum AlarmSimpleStatus {
     public static AlarmSimpleStatus toAlarmSimpleStatus(AlarmStatus alarmStatus) {
         switch (alarmStatus) {
             case ACTIVE_UNACK:
-                return UN_ACK;
+                return ACTIVE_UNACK;
             case ACTIVE_ACK:
-                return ACK;
+                return ACTIVE_ACK;
             case CLEARED_ACK:
-                return CLEARED;
+                return CLEARED_ACK;
             default:
                 return null;
         }

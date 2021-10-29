@@ -128,26 +128,9 @@ public class DictDeviceServiceImpl implements DictDeviceService {
         // 获得属性列表
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
+
         // 获得分组及分组属性列表
-        var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())));
-        var groupUUIDList = groupList.stream().map(e -> UUID.fromString(e.getId())).collect(Collectors.toList());
-        List<DictDeviceGroupProperty> groupPropertyList;
-        if (groupUUIDList.isEmpty()) {
-            groupPropertyList = new ArrayList<>();
-        } else {
-            groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllInDictDeviceGroupId(groupUUIDList));
-        }
-        var groupPropertyMap = groupPropertyList.stream()
-                .collect(Collectors.groupingBy(DictDeviceGroupProperty::getDictDeviceGroupId));
-        var groupVOList = groupList.stream().reduce(new ArrayList<DictDeviceGroupVO>(), (r, e) -> {
-            List<DictDeviceGroupPropertyVO> groupPropertyVOList = new ArrayList<>();
-            if (groupPropertyMap.containsKey(e.getId())) {
-                groupPropertyVOList = groupPropertyMap.get(e.getId()).stream()
-                        .map(g -> DictDeviceGroupPropertyVO.builder().name(g.getName()).content(g.getContent()).build()).collect(Collectors.toList());
-            }
-            r.add(DictDeviceGroupVO.builder().name(e.getName()).groupPropertyList(groupPropertyVOList).build());
-            return r;
-        }, (a, b) -> null);
+        var groupVOList = this.listDictDeviceGroup(UUID.fromString(dictDevice.getId()));
 
         // 获得部件信息
         List<DictDeviceComponentVO> rList = new ArrayList<>();
@@ -296,6 +279,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                     .dictDeviceGroupId(dictDeviceGroupEntity.getId().toString())
                     .dictDeviceId(dictDeviceEntity.getId().toString())
                     .name(t.getName())
+                    .title(t.getTitle())
                     .content(t.getContent()).build()).collect(Collectors.toList());
             r.addAll(dictDeviceGroupPropertyList);
             return r;
@@ -354,5 +338,36 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                 recursionPackageComponent(e.getComponentList(), pMap, e.getId());
             });
         }
+    }
+
+    /**
+     * 获得设备字典分组及分组属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId) {
+        // 获得分组及分组属性列表
+        var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(dictDeviceId));
+        var groupUUIDList = groupList.stream().map(e -> UUID.fromString(e.getId())).collect(Collectors.toList());
+        List<DictDeviceGroupProperty> groupPropertyList;
+        if (groupUUIDList.isEmpty()) {
+            groupPropertyList = new ArrayList<>();
+        } else {
+            groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllInDictDeviceGroupId(groupUUIDList));
+        }
+        var groupPropertyMap = groupPropertyList.stream()
+                .collect(Collectors.groupingBy(DictDeviceGroupProperty::getDictDeviceGroupId));
+        return groupList.stream().reduce(new ArrayList<DictDeviceGroupVO>(), (r, e) -> {
+            List<DictDeviceGroupPropertyVO> groupPropertyVOList = new ArrayList<>();
+            if (groupPropertyMap.containsKey(e.getId())) {
+                groupPropertyVOList = groupPropertyMap.get(e.getId()).stream()
+                        .map(g -> DictDeviceGroupPropertyVO.builder()
+                                .id(g.getId()).name(g.getName()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
+                                .build()).collect(Collectors.toList());
+            }
+            r.add(DictDeviceGroupVO.builder().id(e.getId()).name(e.getName()).groupPropertyList(groupPropertyVOList).build());
+            return r;
+        }, (a, b) -> null);
     }
 }
