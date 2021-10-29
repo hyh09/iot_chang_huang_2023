@@ -182,6 +182,10 @@ public class ModelConstants {
     public static final String DEVICE_DEVICE_DATA_PROPERTY = "device_data";
     public static final String DEVICE_FIRMWARE_ID_PROPERTY = "firmware_id";
     public static final String DEVICE_SOFTWARE_ID_PROPERTY = "software_id";
+    public static final String DEVICE_PRODUCTION_LINE_ID_PROPERTY = "production_line_id";
+    public static final String DEVICE_IMAGES_PROPERTY = "images";
+    public static final String DEVICE_ICON_PROPERTY = "icon";
+
 
     public static final String DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_and_search_text";
     public static final String DEVICE_BY_TENANT_BY_TYPE_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_by_type_and_search_text";

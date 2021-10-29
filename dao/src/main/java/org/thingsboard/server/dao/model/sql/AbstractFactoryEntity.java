@@ -18,8 +18,6 @@ package org.thingsboard.server.dao.model.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.factory.FactoryId;
@@ -29,6 +27,7 @@ import org.thingsboard.server.dao.util.mapping.JsonStringType;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.util.UUID;
 
 @Data
@@ -50,8 +49,8 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
     @Column(name = "logo_images")
     private String logoImages;
 
-    @Column(name = "adress")
-    private String adress;
+    @Column(name = "address")
+    private String address;
 
     @Column(name = "longitude")
     private String longitude;
@@ -80,24 +79,25 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
     @Column(name = "tenant_id")
     private UUID tenantId;
 
-    @CreatedDate
     @Column(name = "created_time")
     private long createdTime;
 
-    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
-    @CreatedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
-    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
     @Column(name = "del_flag")
     private String delFlag = "A";
+
+    //车间
+    //public List<WorkshopEntity> workshopEntityList;
+    @Transient
+    private AbstractWorkshopEntity workshopEntityList;
 
 
     public AbstractFactoryEntity() {
@@ -112,7 +112,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.name = abstractFactoryEntity.getName();
         this.logoIcon = abstractFactoryEntity.getLogoIcon();
         this.logoImages = abstractFactoryEntity.getLogoImages();
-        this.adress = abstractFactoryEntity.getAdress();
+        this.address = abstractFactoryEntity.getAddress();
         this.longitude = abstractFactoryEntity.getLongitude();
         this.latitude = abstractFactoryEntity.getLatitude();
         this.mobile = abstractFactoryEntity.getMobile();
@@ -136,7 +136,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.name = factory.getName();
         this.logoIcon = factory.getLogoIcon();
         this.logoImages = factory.getLogoImages();
-        this.adress = factory.getAdress();
+        this.address = factory.getAddress();
         this.longitude = factory.getLongitude();
         this.latitude = factory.getLatitude();
         this.mobile = factory.getMobile();
@@ -158,7 +158,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         factory.setName(name);
         factory.setLogoIcon(logoIcon);
         factory.setLogoImages(logoImages);
-        factory.setAdress(adress);
+        factory.setAddress(address);
         factory.setLongitude(longitude);
         factory.setLatitude(latitude);
         factory.setMobile(mobile);

@@ -31,6 +31,9 @@ public abstract class AbstractProductionLine{
     @ApiModelProperty("车间标识")
     public UUID workshopId;
 
+    @ApiModelProperty("工厂标识")
+    private UUID factoryId;
+
     @ApiModelProperty("生产线编码")
     public String code;
 
@@ -67,6 +70,7 @@ public abstract class AbstractProductionLine{
             this.setId(productionLine.getId().getId());
         }
         this.workshopId = productionLine.getWorkshopId();
+        this.factoryId = productionLine.getFactoryId();
         this.code = productionLine.getCode();
         this.name = productionLine.getName();
         this.logoIcon = productionLine.getLogoIcon();
@@ -83,6 +87,7 @@ public abstract class AbstractProductionLine{
     public ProductionLine toProductionLine(){
         ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getId()));
         productionLine.setWorkshopId(workshopId);
+         productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);
         productionLine.setName(name);
         productionLine.setLogoIcon(logoIcon);

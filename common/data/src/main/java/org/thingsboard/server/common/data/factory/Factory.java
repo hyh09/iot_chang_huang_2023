@@ -22,7 +22,7 @@ public class Factory extends SearchTextBasedWithAdditionalInfo<FactoryId> {
 
     private String logoImages;
 
-    private String adress;
+    private String address;
 
     private String longitude;
 
@@ -45,8 +45,17 @@ public class Factory extends SearchTextBasedWithAdditionalInfo<FactoryId> {
     private UUID createdUser;
     private long updatedTime;
     private UUID updatedUser;
-
     private String delFlag;
+
+    /**查询条件*/
+    //车间名称
+    public String workshopName;
+
+    //产线名称
+    public String productionlineName;
+
+    //产线名称
+    public String deviceName;
 
     public Factory() {
         super();

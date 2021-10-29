@@ -84,6 +84,24 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     @Column(name = ModelConstants.DEVICE_DEVICE_DATA_PROPERTY, columnDefinition = "jsonb")
     private JsonNode deviceData;
 
+    @Column(name = ModelConstants.DEVICE_PRODUCTION_LINE_ID_PROPERTY, columnDefinition = "uuid")
+    private UUID productionLineId;
+
+    @Column(name = ModelConstants.DEVICE_IMAGES_PROPERTY)
+    private String images;
+
+    @Column(name = ModelConstants.DEVICE_ICON_PROPERTY)
+    private String icon;
+
+    @Column(name = "workshop_id")
+    private UUID workshopId;
+
+    @Column(name = "factory_id")
+    private UUID factoryId;
+
+    @Column(name = "code")
+    private String code;
+
     public AbstractDeviceEntity() {
         super();
     }
@@ -113,6 +131,12 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.type = device.getType();
         this.label = device.getLabel();
         this.additionalInfo = device.getAdditionalInfo();
+        this.code = device.getCode();
+        this.factoryId = device.getFactoryId();
+        this.workshopId = device.getWorkshopId();
+        this.productionLineId = device.getProductionLineId();
+        this.images = device.getImages();
+        this.icon = device.getIcon();
     }
 
     public AbstractDeviceEntity(DeviceEntity deviceEntity) {
@@ -129,6 +153,12 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.additionalInfo = deviceEntity.getAdditionalInfo();
         this.firmwareId = deviceEntity.getFirmwareId();
         this.softwareId = deviceEntity.getSoftwareId();
+        this.code = deviceEntity.getCode();
+        this.factoryId = deviceEntity.getFactoryId();
+        this.workshopId = deviceEntity.getWorkshopId();
+        this.productionLineId = deviceEntity.getProductionLineId();
+        this.images = deviceEntity.getImages();
+        this.icon = deviceEntity.getIcon();
     }
 
     @Override
@@ -164,6 +194,13 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         device.setType(type);
         device.setLabel(label);
         device.setAdditionalInfo(additionalInfo);
+        device.setFactoryId(factoryId);
+        device.setWorkshopId(workshopId);
+        device.setProductionLineId(productionLineId);
+        device.setProductionLineId(productionLineId);
+        device.setImages(images);
+        device.setIcon(icon);
+        device.setCode(code);
         return device;
     }
 

@@ -13,6 +13,8 @@ public class ProductionLine extends SearchTextBasedWithAdditionalInfo<Production
 
     private UUID workshopId;
 
+    private UUID factoryId;
+
     private String code;
 
     private String name;

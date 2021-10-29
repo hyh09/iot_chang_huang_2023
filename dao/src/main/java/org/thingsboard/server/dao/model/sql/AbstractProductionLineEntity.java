@@ -18,8 +18,8 @@ package org.thingsboard.server.dao.model.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
@@ -40,6 +40,9 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     @Column(name = "workshop_id")
     private UUID workshopId;
+
+    @Column(name = "factory_id")
+    private UUID factoryId;
 
     @Column(name = "code")
     private String code;
@@ -63,15 +66,13 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     @Column(name = "created_time")
     private long createdTime;
 
-    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
-    @CreatedDate
+    @LastModifiedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
-    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
@@ -87,6 +88,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
             this.setUuid(abstractProdutionLineEntity.getId());
         }
         this.workshopId = abstractProdutionLineEntity.getWorkshopId();
+        this.factoryId = abstractProdutionLineEntity.getFactoryId();
         this.code = abstractProdutionLineEntity.getCode();
         this.name = abstractProdutionLineEntity.getName();
         this.logoIcon = abstractProdutionLineEntity.getLogoIcon();
@@ -105,6 +107,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
             this.setUuid(productionLine.getId().getId());
         }
         this.workshopId = productionLine.getWorkshopId();
+        this.factoryId = productionLine.getFactoryId();
         this.code = productionLine.getCode();
         this.name = productionLine.getName();
         this.logoIcon = productionLine.getLogoIcon();
@@ -121,6 +124,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     public ProductionLine toProductionLine(){
         ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getUuid()));
         productionLine.setWorkshopId(workshopId);
+        productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);
         productionLine.setName(name);
         productionLine.setLogoIcon(logoIcon);

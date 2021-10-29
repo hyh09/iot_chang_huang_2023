@@ -41,7 +41,7 @@ public abstract class AbstractFactory{
     public String logoImages;
 
     @ApiModelProperty("工厂地址")
-    public String adress;
+    public String address;
 
     @ApiModelProperty("经度")
     public String longitude;
@@ -95,7 +95,7 @@ public abstract class AbstractFactory{
         this.name = factory.getName();
         this.logoIcon = factory.getLogoIcon();
         this.logoImages = factory.getLogoImages();
-        this.adress = factory.getAdress();
+        this.address = factory.getAddress();
         this.longitude = factory.getLongitude();
         this.latitude = factory.getLatitude();
         this.mobile = factory.getMobile();
@@ -117,7 +117,7 @@ public abstract class AbstractFactory{
         factory.setName(name);
         factory.setLogoIcon(logoIcon);
         factory.setLogoImages(logoImages);
-        factory.setAdress(adress);
+        factory.setAddress(address);
         factory.setLongitude(longitude);
         factory.setLatitude(latitude);
         factory.setMobile(mobile);

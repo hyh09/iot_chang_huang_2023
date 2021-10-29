@@ -14,7 +14,7 @@ public interface MenuService {
 
     Menu saveMenu(Menu menu)throws ThingsboardException;
 
-    Menu updateMenu(Menu menu);
+    Menu updateMenu(Menu menu) throws ThingsboardException;
 
     void delMenu(UUID id);
     /**

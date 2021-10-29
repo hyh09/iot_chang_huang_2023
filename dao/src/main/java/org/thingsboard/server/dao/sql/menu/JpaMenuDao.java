@@ -69,10 +69,10 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
             menuEntity.setUuid(uuid);
             menuEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
         }else{
+            menuRepository.deleteById(menuEntity.getUuid());
             menuEntity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
         MenuEntity entity = menuRepository.save(menuEntity);
-        System.out.println("===>"+entity);
         if(entity != null){
             return entity.toData();
         }

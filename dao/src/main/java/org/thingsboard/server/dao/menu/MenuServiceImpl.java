@@ -65,13 +65,9 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
      * @return
      */
     @Override
-    public Menu updateMenu(Menu menu) {
+    public Menu updateMenu(Menu menu)  throws ThingsboardException{
         log.trace("Executing updateMenu [{}]", menu);
-        Menu byId = menuDao.findById(null, menu.getId().getId());
-        byId.updMenu(menu);
-        System.out.println(byId.toString());
-        Menu savedMenut = menuDao.save(null, byId);
-        return savedMenut;
+        return menuDao.saveMenu(null, menu);
     }
 
     public void delMenu(UUID id){

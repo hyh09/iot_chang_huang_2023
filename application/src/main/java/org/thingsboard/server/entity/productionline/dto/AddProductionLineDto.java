@@ -6,7 +6,7 @@ import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.entity.productionline.AbstractProductionLine;
 
 @Data
-@ApiModel("ProductionLineVo")
+@ApiModel("AddProductionLineDto")
 public class AddProductionLineDto extends AbstractProductionLine {
 
     public AddProductionLineDto(){super();}
