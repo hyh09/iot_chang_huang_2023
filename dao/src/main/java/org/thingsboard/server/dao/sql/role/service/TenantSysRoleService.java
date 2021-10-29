@@ -1,14 +1,10 @@
 package org.thingsboard.server.dao.sql.role.service;	
 	
 import org.springframework.data.domain.Page;
-import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.dao.DaoUtil;
-import org.thingsboard.server.dao.model.sql.UserEntity;
-import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 import org.thingsboard.server.dao.util.sql.jpa.BaseSQLServiceImpl;
 import org.thingsboard.server.dao.sql.role.dao.TenantSysRoleDao;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;	
@@ -62,8 +58,7 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
      * @throws Exception
      */
     public  PageData<TenantSysRoleEntity> pageQuery(Map<String, Object> queryParam, PageLink pageLink) {
-        Page<TenantSysRoleEntity> page = super.findAll(queryParam,  pageLink);
-        System.out.println("打印当前的数据:"+page);
+        Page<TenantSysRoleEntity> page = findAll(queryParam,  pageLink);
           return new PageData<TenantSysRoleEntity>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
