@@ -147,6 +147,8 @@ import { CopyButtonComponent } from '@shared/components/button/copy-button.compo
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzImageModule } from 'ng-zorro-antd/image';
 
 @NgModule({
   providers: [
@@ -298,7 +300,9 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
     NgxFlowModule,
     NgxFlowchartModule,
     NzTreeModule,
-    NzTabsModule
+    NzTabsModule,
+    NzTableModule,
+    NzImageModule
   ],
   exports: [
     FooterComponent,
@@ -392,6 +396,8 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
     NgxFlowchartModule,
     NzTreeModule,
     NzTabsModule,
+    NzTableModule,
+    NzImageModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,

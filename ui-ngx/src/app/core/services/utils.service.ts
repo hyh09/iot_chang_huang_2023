@@ -481,6 +481,11 @@ export class UtilsService {
     }
   }
 
+  /**
+   * @description 将平级树节点数组转换成层级树节点数组
+   * @param treeNodes 树节点平级数组
+   * @returns 层级树节点数组
+   */
   public formatTree(treeNodes: Array<TreeNode>): Array<TreeNode> {
     const arr: Array<TreeNode> = new Array<TreeNode>();
     const map = {};

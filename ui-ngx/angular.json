@@ -65,11 +65,15 @@
                 "glob": "**/*",
                 "input": "node_modules/material-design-icons/iconfont/",
                 "output": "assets/fonts"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@ant-design/icons-angular/src/inline-svg",
+                "output": "/assets/"
               }
             ],
             "styles": [
               "src/styles.scss",
-              "src/styles.less",
               "node_modules/jquery.terminal/css/jquery.terminal.min.css",
               "node_modules/tooltipster/dist/css/tooltipster.bundle.min.css",
               "node_modules/tooltipster/dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-shadow.min.css",
@@ -80,7 +84,8 @@
               "src/app/modules/home/components/widget/lib/maps/markers.scss",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css"
+              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.less"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
@@ -93,7 +98,11 @@
               "node_modules/systemjs/dist/system.js"
             ],
             "customWebpackConfig": {
-              "path": "./extra-webpack.config.js"
+              "path": "./extra-webpack.config.js",
+              "mergeStrategies": {
+                "module.rules": "append"
+              },
+              "replaceDuplicatePlugins": true
             },
             "allowedCommonJsDependencies": [
               "hammerjs",

@@ -34,10 +34,9 @@ $previewSize: 100px !default;
   }
 
   .tb-image-preview {
-    width: auto;
-    max-width: $previewSize - 2;
-    height: auto;
-    max-height: $previewSize - 2;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .tb-image-preview-container {

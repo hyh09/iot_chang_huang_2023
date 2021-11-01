@@ -17,12 +17,36 @@ export interface DeviceProperty {
 
 export interface DeviceData {
   name: string,
-  content: string
+  content: string,
+  title: string
 }
 
 export interface DeviceDataGroup {
   name: string,
   groupPropertyList: Array<DeviceData>
+}
+
+export interface DeviceComp {
+  code: string,
+  comment?: string,
+  componentList?: Array<DeviceComp>,
+  dictDeviceId?: string,
+  icon?: string,
+  id?: string,
+  model?: string,
+  name: string,
+  parentId?: string,
+  picture?: string,
+  supplier?: string,
+  type?: string,
+  version?: string,
+  warrantyPeriod?: string
+}
+
+export interface DeviceCompTreeNode extends DeviceComp {
+  level: number,
+  expand: boolean,
+  parent?: DeviceCompTreeNode
 }
 
 export interface DeviceDictionary extends BaseData<DataDictionaryId> {
@@ -33,6 +57,8 @@ export interface DeviceDictionary extends BaseData<DataDictionaryId> {
   version: string,
   warrantyPeriod: string,
   picture: string,
+  comment: string,
   propertyList: Array<DeviceProperty>,
-  groupList: Array<DeviceDataGroup>
+  groupList: Array<DeviceDataGroup>,
+  componentList: Array<DeviceComp>
 }
