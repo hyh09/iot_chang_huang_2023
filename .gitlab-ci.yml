@@ -1,25 +1,34 @@
-image: docker:latest
-
 stages:
   - package
   - push
+  
+variables:
+  #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 
-#before_script:
-#  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
+before_script:
+  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
 
+cache:
+  paths:
+    - .m2/repository
+  # keep cache across branch
+  key: "$CI_JOB_NAME"
+    
+    
 # 打包并构建镜像
 package:
   stage: package
+  image: 47.110.145.204:8084/huansiyl/mvn-jdk11-docker:latest
   retry: 1
-  image: adoptopenjdk/maven-openjdk11
   tags:
-    - k8s.test.iot.hangzhou
+    - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - date -R
-    - cd msa
-    - mvn clean install -Ddockerfile.skip=true
+    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true
+    - ls application/target
   only:
     - dev
   after_script:
@@ -31,7 +40,7 @@ push:
   stage: push
   retry: 1
   tags:
-    - k8s.test.iot.hangzhou
+    - zhows-test
   script:
     - echo "推送镜像"
     - docker info

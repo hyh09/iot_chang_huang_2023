@@ -18,6 +18,9 @@ public class HsModelConstants {
     public static final String GENERAL_UPDATED_TIME = "updated_time";
     public static final String GENERAL_UPDATED_USER = "updated_user";
 
+    public static final String DICT_DEVICE_ID = "dict_device_id";
+    public static final String DEVICE_PROFILE_ID = "device_profile_id";
+
 
     /**
      * 数据字典
@@ -34,7 +37,6 @@ public class HsModelConstants {
     /**
      * 设备字典
      */
-    public static final String DICT_DEVICE_ID = "dict_device_id";
 
     public static final String DICT_DEVICE_TABLE_NAME = "hs_dict_device";
     public static final String DICT_DEVICE_CODE = "code";
@@ -66,12 +68,16 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_PROPERTY_CONTENT = "content";
 
     public static final String DICT_DEVICE_GROUP_TABLE_NAME = "hs_dict_device_group";
-    public static final String DICT_DEVICE_GROUP_ID= "dict_group_id";
+    public static final String DICT_DEVICE_GROUP_ID= "dict_device_group_id";
     public static final String DICT_DEVICE_GROUP_NAME = "name";
 
     public static final String DICT_DEVICE_GROUP_PROPERTY_TABLE_NAME = "hs_dict_device_group_property";
     public static final String DICT_DEVICE_GROUP_PROPERTY_NAME = "name";
     public static final String DICT_DEVICE_GROUP_PROPERTY_CONTENT = "content";
+    public static final String DICT_DEVICE_GROUP_PROPERTY_TITLE = "title";
 
-
+    /**
+     * 设备配置-设备字典关联表
+     */
+    public static final String DEVICE_PROFILE_DICT_DEVICE_TABLE_NAME = "hs_device_profile_dict_device";
 }

@@ -18,6 +18,7 @@ package org.thingsboard.server.dao.model.sql;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.thingsboard.server.common.data.User;
@@ -41,6 +42,7 @@ import java.util.UUID;
  * Created by Valerii Sosliuk on 4/21/2017.
  */
 @Data
+@ToString
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @TypeDef(name = "json", typeClass = JsonStringType.class)
@@ -59,6 +61,36 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
 
     @Column(name = ModelConstants.USER_EMAIL_PROPERTY, unique = true)
     private String email;
+
+    /**
+     * 添加一个手机号
+     */
+    @Column(name = ModelConstants.USER_PHONE_NUMBER_PROPERTY, unique = true)
+    private  String phoneNumber;
+    /**
+     * 启用状态
+     */
+    @Column(name = ModelConstants.USER_ACTIVE_STATUS_PROPERTY)
+    private  String  activeStatus;
+    /**
+     * 用户编码
+     */
+    @Column(name = ModelConstants.USER_USERCODE_PROPERTY,unique = true)
+    private  String userCode;
+    /**
+     * 用户名称
+     */
+    @Column(name = ModelConstants.USER_USER_NAME_PROPERTY)
+    private  String userName;
+
+    /**
+     * 用户创建者
+     */
+    @Column(name = ModelConstants.USER_USER_CREATOR_PROPERTY)
+    private String userCreator;
+
+
+
 
     @Column(name = ModelConstants.SEARCH_TEXT_PROPERTY)
     private String searchText;
@@ -92,6 +124,13 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.additionalInfo = user.getAdditionalInfo();
+
+        this.phoneNumber = user.getPhoneNumber();
+        this.activeStatus =user.getActiveStatus();
+        this.userCode = user.getUserCode();
+        this.userName = user.getUserName();
+        this.userCreator = user.getUserCreator();
+
     }
 
     @Override
@@ -104,6 +143,10 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.searchText = searchText;
     }
 
+    /**
+     * 将实体类转换前后端交互的数据类
+     * @return
+     */
     @Override
     public User toData() {
         User user = new User(new UserId(this.getUuid()));
@@ -119,6 +162,13 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setAdditionalInfo(additionalInfo);
+
+        user.setPhoneNumber(phoneNumber);
+        user.setUserName(userName);
+        user.setUserCode(userCode);
+        user.setActiveStatus(activeStatus);
+        user.setUserCreator(userCreator);
+
         return user;
     }
 

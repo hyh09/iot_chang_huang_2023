@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +18,7 @@ import java.util.Map;
 @Accessors(chain = true)
 @ApiModel(value = "数据字典资源")
 public class DictDataResource {
-    @ApiModelProperty(value = "数据类型Map")
-    private Map<String, String> DictDataTypeMap;
+
+    @ApiModelProperty(value = "数据类型列表")
+    private List<Map<String, String>> dictDataTypeList;
 }

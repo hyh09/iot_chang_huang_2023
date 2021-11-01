@@ -74,23 +74,20 @@ public class DictDataEntity extends BasePgEntity<DictDataEntity> implements ToDa
     public DictDataEntity() {
     }
 
-    public DictDataEntity(DictData dictData) {
-        if (dictData.getId() != null)
-            this.id = UUID.fromString(dictData.getId());
-        if (dictData.getTenantId() != null)
-            this.tenantId = UUID.fromString(dictData.getTenantId());
-        this.code = dictData.getCode();
-        this.name = dictData.getName();
-        this.type = dictData.getType();
-        this.unit = dictData.getUnit();
-        this.comment = dictData.getComment();
-        this.icon = dictData.getIcon();
-        this.picture = dictData.getPicture();
+    public DictDataEntity(DictData common) {
+        if (common.getId() != null)
+            this.id = UUID.fromString(common.getId());
+        if (common.getTenantId() != null)
+            this.tenantId = UUID.fromString(common.getTenantId());
+        this.code = common.getCode();
+        this.name = common.getName();
+        this.type = common.getType();
+        this.unit = common.getUnit();
+        this.comment = common.getComment();
+        this.icon = common.getIcon();
+        this.picture = common.getPicture();
 
-//        this.createdUser = dictData.getCreatedUser();
-//        this.setCreatedTime(dictData.getCreatedTime());
-//        this.createdUser = dictData.getCreatedUser();
-//        this.setUpdatedTime(dictData.getUpdatedTime());
+        this.setCreatedTimeAndCreatedUser(common);
     }
 
     /**

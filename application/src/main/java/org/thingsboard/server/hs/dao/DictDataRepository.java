@@ -19,5 +19,5 @@ import java.util.UUID;
 public interface DictDataRepository extends PagingAndSortingRepository<DictDataEntity, UUID>, JpaSpecificationExecutor<DictDataEntity> {
 
     @Query("select d.code from DictDataEntity d where d.tenantId = :tenantId")
-    List<String> findCodesByTenantId(@Param("tenantId") UUID tenantId);
+    List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 }

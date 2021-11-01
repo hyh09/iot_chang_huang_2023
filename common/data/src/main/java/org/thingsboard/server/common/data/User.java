@@ -17,7 +17,9 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -25,15 +27,57 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
 
 import org.thingsboard.server.common.data.validation.NoXss;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+import java.util.UUID;
+
+@ToString
+@Data
 @EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "用户的请求参数实体类")
 public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements HasName, HasTenantId, HasCustomerId {
 
     private static final long serialVersionUID = 8250339805336035966L;
 
+    @ApiModelProperty(value = "数据字典Id,【用于接收编辑接口的用户id】")
+    private  String strId;
+
     private TenantId tenantId;
     private CustomerId customerId;
     private String email;
+
+    /**
+     * 添加一个手机号
+     */
+    @ApiModelProperty(value = "手机号")
+    private  String phoneNumber;
+    /**
+     * 启用状态
+     *  1是启用
+     *  0是未启用
+     */
+    @ApiModelProperty(value = "启用状态{1是启用,0是未启用}")
+    private  String  activeStatus;
+    /**
+     * 用户编码
+     */
+    @ApiModelProperty(value = "用户编码")
+    private  String userCode;
+    /**
+     * 用户名称
+     */
+    @ApiModelProperty(value = "用户名称")
+    private  String userName;
+
+    private String userCreator;
+
+    //用户角色id
+    @ApiModelProperty(value = "用户所需要绑定的角色【角色di】 更新的时候为空会清理此角色")
+    private  List<UUID> roleIds;
+
+
     private Authority authority;
     @NoXss
     private String firstName;
@@ -53,6 +97,11 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.tenantId = user.getTenantId();
         this.customerId = user.getCustomerId();
         this.email = user.getEmail();
+        this.phoneNumber = user.getPhoneNumber();
+        this.activeStatus  = user.getActiveStatus();
+        this.userCode = user.getUserCode();
+        this.userName = user.getUserName();
+        this.userCreator=user.getUserCreator();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
@@ -80,6 +129,22 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getActiveStatus() {
+        return activeStatus;
+    }
+
+    public void setActiveStatus(String activeStatus) {
+        this.activeStatus = activeStatus;
     }
 
     @Override
@@ -117,30 +182,36 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         return getEmail();
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("User [tenantId=");
-        builder.append(tenantId);
-        builder.append(", customerId=");
-        builder.append(customerId);
-        builder.append(", email=");
-        builder.append(email);
-        builder.append(", authority=");
-        builder.append(authority);
-        builder.append(", firstName=");
-        builder.append(firstName);
-        builder.append(", lastName=");
-        builder.append(lastName);
-        builder.append(", additionalInfo=");
-        builder.append(getAdditionalInfo());
-        builder.append(", createdTime=");
-        builder.append(createdTime);
-        builder.append(", id=");
-        builder.append(id);
-        builder.append("]");
-        return builder.toString();
-    }
+
+
+    //    @Override
+//    public String toString() {
+//        StringBuilder builder = new StringBuilder();
+//        builder.append("User [tenantId=");
+//        builder.append(tenantId);
+//        builder.append(", customerId=");
+//        builder.append(customerId);
+//        builder.append(", email=");
+//        builder.append(email);
+//        builder.append(", phoneNumber=");
+//        builder.append(phoneNumber);
+//        builder.append(", userCreator=");
+//        builder.append(userCreator);
+//        builder.append(", authority=");
+//        builder.append(authority);
+//        builder.append(", firstName=");
+//        builder.append(firstName);
+//        builder.append(", lastName=");
+//        builder.append(lastName);
+//        builder.append(", additionalInfo=");
+//        builder.append(getAdditionalInfo());
+//        builder.append(", createdTime=");
+//        builder.append(createdTime);
+//        builder.append(", id=");
+//        builder.append(id);
+//        builder.append("]");
+//        return builder.toString();
+//    }
 
     @JsonIgnore
     public boolean isSystemAdmin() {

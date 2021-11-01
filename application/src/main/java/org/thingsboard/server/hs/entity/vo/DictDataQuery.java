@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
+import org.thingsboard.server.hs.entity.enums.DictDataDataTypeEnum;
 
 import javax.validation.constraints.NotNull;
 
@@ -15,6 +15,7 @@ public class DictDataQuery {
     @ApiModelProperty(value = "数据字典Id,null或空则为新增")
     private String id;
 
+    @NotNull
     @ApiModelProperty(value = "编码")
     private String code;
 
@@ -23,7 +24,7 @@ public class DictDataQuery {
     private String name;
 
     @ApiModelProperty(value = "类型")
-    private DictDataTypeEnum type;
+    private DictDataDataTypeEnum type;
 
     @ApiModelProperty(value = "单位")
     private String unit;
