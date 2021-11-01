@@ -78,19 +78,22 @@ public class UserRoleController extends BaseController{
 
 
     @ApiOperation(value = "角色的分页查询")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "pageSize", value = "每页大小，默认10"),
-//            @ApiImplicitParam(name = "page", value = "当前页,起始页，【0开始】"),
-//            @ApiImplicitParam(name = "textSearch", value = ""),
-//            @ApiImplicitParam(name = "sortOrder", value = ""),
-//            @ApiImplicitParam(name = "sortProperty", value = ""),
-//            @ApiImplicitParam(name = "roleName", value = "角色名称"),
-//            @ApiImplicitParam(name = "roleCode", value = "角色编码"),
-//            @ApiImplicitParam(name = "roleDesc", value = "描述")
-//
-//    })
     @RequestMapping(value = "/pageQuery", method = RequestMethod.POST)
     @ResponseBody
+    public  Object  pageQuery(@RequestBody PageRoleVo vo) throws Exception {
+        SecurityUser securityUser =  getCurrentUser();
+        Map  queryParam = BeanToMap.beanToMapByJacksonFilter(vo);
+        queryParam.put("updatedUser",securityUser.getUuidId().toString());
+        int  pageSize =  vo.getPageSize();
+        int  page = vo.getPage();
+        String  textSearch = vo.getTextSearch();
+        String  sortProperty =vo.getSortProperty();
+        String  sortOrder = vo.getSortOrder();
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        return tenantSysRoleService.pageQuery(queryParam,pageLink);
+    }
+
+
 
 //    public   Object   pageQuery(@RequestBody Map<String, Object> queryParam) throws ThingsboardException
 //    {
@@ -103,18 +106,6 @@ public class UserRoleController extends BaseController{
 //        return tenantSysRoleService.pageQuery(queryParam,pageLink);
 //
 //    }
-    public  Object  pageQuery(@RequestBody PageRoleVo vo) throws Exception {
-        SecurityUser securityUser =  getCurrentUser();
-        Map  queryParam = BeanToMap.beanToMapByJacksonFilter(vo);
-        queryParam.put("updatedUser",securityUser.getUuidId());
-        int  pageSize =  vo.getPageSize();
-        int  page = vo.getPage();
-        String  textSearch = vo.getTextSearch();
-        String  sortProperty =vo.getSortProperty();
-        String  sortOrder = vo.getSortOrder();
-        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        return tenantSysRoleService.pageQuery(queryParam,pageLink);
-    }
 
 
 
