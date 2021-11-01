@@ -103,8 +103,7 @@ public class UserController extends BaseController {
 
 
 
-
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
     @ResponseBody
     public User getUserById(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
@@ -127,14 +126,14 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/tokenAccessEnabled", method = RequestMethod.GET)
     @ResponseBody
     public boolean isUserTokenAccessEnabled() {
         return userTokenAccessEnabled;
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}/token", method = RequestMethod.GET)
     @ResponseBody
     public JsonNode getUserToken(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
@@ -162,7 +161,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     @ResponseBody
     public User saveUser(@RequestBody User user,
@@ -210,7 +209,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/sendActivationMail", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
     public void sendActivationEmail(
@@ -236,7 +235,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}/activationLink", method = RequestMethod.GET, produces = "text/plain")
     @ResponseBody
     public String getActivationLink(
@@ -290,7 +289,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+//    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<User> getUsers(
@@ -312,7 +311,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
+//    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/tenant/{tenantId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<User> getTenantAdmins(
@@ -332,7 +331,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+//    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/customer/{customerId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<User> getCustomerUsers(
