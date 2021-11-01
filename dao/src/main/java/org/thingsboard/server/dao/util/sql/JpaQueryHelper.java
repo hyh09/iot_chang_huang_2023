@@ -218,7 +218,20 @@ public class JpaQueryHelper {
 								pList.add(in);
 							} else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
 								pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
-							}else if(f.getType().isAssignableFrom(UUID.class) && f.getAnnotation(Id.class) == null){
+							}else if(f.getType().isAssignableFrom(UUID.class) ){
+								if(value instanceof  UUID ){
+									System.out.println("=====>" + f.getType());
+									System.out.println("===value==>" + value);
+									System.out.println("==f.getName()=:"+f.getName());
+									System.out.println("==root.get(f.getName()=:"+root.get(f.getName()));
+
+
+								}
+								if(value instanceof  String ){
+									System.out.println("=====>" + f.getType());
+									System.out.println("===value==>" + value);
+
+								}
 								pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
 							}else  if(f.getType().isAssignableFrom(long.class) )
 							{

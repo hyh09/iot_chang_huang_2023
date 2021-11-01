@@ -183,6 +183,10 @@ public class GenericsUtils {
     {
         if(clb.isAssignableFrom(JsonFilter.class) ){
             JsonFilter anno = (JsonFilter) cla.getAnnotation(JsonFilter.class);
+            if(anno == null )
+            {
+                return  "";
+            }
             return anno.value();
         }
         return  null;

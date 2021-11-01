@@ -12,7 +12,6 @@ import javax.persistence.Column;
 @Data
 @ToString
 @ApiModel("角色查询实体类")
-@JsonFilter("pageRoleVo_01" )
 public class PageRoleVo   {
 
     private int pageSize;
