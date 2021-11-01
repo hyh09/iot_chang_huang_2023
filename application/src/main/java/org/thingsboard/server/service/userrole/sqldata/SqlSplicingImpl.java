@@ -4,10 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.entity.user.UserVo;
+import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -42,8 +46,44 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             param.put("userId",vo.getUserId());
         }
 
-        return  new  SqlVo(whereSql.toString(),param);
+        return new  SqlVo(whereSql.toString(),param);
 
 
     }
+
+    @Override
+    public SqlVo getCountUserSqlByVo(UserVo vo) {
+        String  sqlCount ="select count(1) from  tb_user t1 where 1=1 ";
+        StringBuffer whereSql  = new StringBuffer();
+        Map<String, Object> param= new HashMap<>();
+        if(StringUtils.isNoneBlank(vo.getEmail()))
+        {
+            whereSql.append(" and t1.email =:email ");
+            param.put("email",vo.getEmail());
+        }
+        if(StringUtils.isNoneBlank(vo.getPhoneNumber()))
+        {
+            whereSql.append(" and t1.phone_number =:phoneNumber ");
+            param.put("phoneNumber",vo.getPhoneNumber());
+        }
+
+        if(StringUtils.isNoneBlank(vo.getUserCode()))
+        {
+            whereSql.append(" and t1.user_code =:userCode ");
+            param.put("userCode",vo.getUserCode());
+        }
+        if(StringUtils.isNoneBlank(vo.getUserId()))
+        {
+
+            whereSql.append(" and t1.id !=:id ");
+            param.put("id", UUID.fromString(vo.getUserId()));
+        }
+        if(StringUtils.isEmpty(whereSql))
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"入参不能为空");
+        }
+        return  new  SqlVo(sqlCount+whereSql.toString(),param);
+    }
+
+
 }

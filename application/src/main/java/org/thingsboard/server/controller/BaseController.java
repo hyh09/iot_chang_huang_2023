@@ -110,6 +110,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
+import org.thingsboard.server.service.userrole.CheckSvc;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
@@ -270,6 +271,8 @@ public abstract class BaseController {
     @Value("${edges.enabled}")
     @Getter
     protected boolean edgesEnabled;
+
+    @Autowired protected CheckSvc checkSvc;
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {

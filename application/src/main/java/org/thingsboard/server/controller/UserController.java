@@ -57,6 +57,8 @@ import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
 import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.entity.user.UserVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -68,6 +70,7 @@ import org.thingsboard.server.service.security.system.SystemSecurityService;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -491,6 +494,13 @@ public class UserController extends BaseController {
         String  sortOrder = (String) queryParam.get("sortOrder");
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return userService.findAll( queryParam, pageLink);
+    }
+
+    @ApiOperation(value = "用户管理得 用户得重复数据校验")
+    @RequestMapping(value = "/user/check",method = RequestMethod.POST)
+    public  Object check(@RequestBody @Valid UserVo vo)
+    {
+          return ResultVo.getSuccessFul( checkSvc.checkValueByKey(vo));
     }
 
 

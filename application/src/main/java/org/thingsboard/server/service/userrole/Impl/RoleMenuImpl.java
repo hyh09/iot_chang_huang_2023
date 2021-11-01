@@ -30,8 +30,8 @@ public class RoleMenuImpl implements RoleMenuSvc {
     @Autowired  private TenantMenuRoleService tenantMenuRoleService;
     @Autowired private TenantSysRoleService roleService;
 
-    @Autowired private TenantMenuService  menuService;//租户菜单接口
-    @Autowired  private  SqlSplicingSvc splicingSvc;
+    @Autowired private TenantMenuService menuService;//租户菜单接口
+    @Autowired  private SqlSplicingSvc splicingSvc;
 
 
     @Override
@@ -84,7 +84,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         }
         tenantMenuRoleService.deleteByTenantSysRoleId(roleId);
         voList.forEach(id ->{
-            TenantMenuRoleEntity  entity  = new TenantMenuRoleEntity();
+            TenantMenuRoleEntity entity  = new TenantMenuRoleEntity();
             entity.setTenantSysRoleId(roleId);
             entity.setTenantMenuId(id);
             tenantMenuRoleService.saveEntity(entity);

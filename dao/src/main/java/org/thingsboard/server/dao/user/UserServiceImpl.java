@@ -162,6 +162,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public User save(User user,String  encodePassword ) {
         log.info("【用户管理.用户添加的接口添加】"+user);
+
+        if(user.getAuthority() == null)
+        {
+            user.setAuthority(Authority.TENANT_ADMIN);
+        }
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
