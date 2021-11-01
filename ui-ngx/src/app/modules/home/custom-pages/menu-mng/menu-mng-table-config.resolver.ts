@@ -31,7 +31,7 @@ export class MenuMngTableConfigResolver implements Resolve<EntityTableConfig<Men
     }
 
     this.config.deleteEntityTitle = menu => this.translate.instant('menu-mng.delete-menu-title', {menuName: menu.name});
-    this.config.deleteEntityContent = () => this.translate.instant(' menu-mng.delete-menu-text');
+    this.config.deleteEntityContent = () => this.translate.instant('menu-mng.delete-menu-text');
     this.config.deleteEntitiesTitle = count => this.translate.instant('menu-mng.delete-menus-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('menu-mng.delete-menus-text');
 

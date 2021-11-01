@@ -39,7 +39,9 @@ export enum EntityType {
   RPC = 'RPC',
   DATA_DICTIONARY = 'DATA_DICTIONARY',
   DEVICE_DICTIONARY = 'DEVICE_DICTIONARY',
-  MENU = 'MENU'
+  MENU = 'MENU',
+  USER_MNG = 'USER_MNG',
+  ROLE_MNG = 'ROLE_MNG'
 }
 
 export enum AliasEntityType {
@@ -348,6 +350,32 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         noEntities: 'menu-mng.no-menus-text',
         selectedEntities: 'menu-mng.selected-menus'
       }
+    ],
+    [
+      EntityType.USER_MNG,
+      {
+        type: 'entity.type-user',
+        typePlural: 'entity.type-user',
+        list: 'entity.list-of-user',
+        nameStartsWith: 'entity.user-name-starts-with',
+        details: 'user.user-details',
+        add: 'user.add',
+        noEntities: 'user.no-users-text',
+        selectedEntities: 'user.selected-users'
+      }
+    ],
+    [
+      EntityType.ROLE_MNG,
+      {
+        type: 'entity.type-role',
+        typePlural: 'entity.type-roles',
+        list: 'entity.list-of-role',
+        nameStartsWith: 'entity.role-name-starts-with',
+        details: 'auth-mng.role-details',
+        add: 'auth-mng.add-role',
+        noEntities: 'auth-mng.no-roles-text',
+        selectedEntities: 'auth-mng.selected-roles'
+      }
     ]
   ]
 );
@@ -452,6 +480,18 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.MENU,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.USER_MNG,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.ROLE_MNG,
       {
         helpLinkId: ''
       }

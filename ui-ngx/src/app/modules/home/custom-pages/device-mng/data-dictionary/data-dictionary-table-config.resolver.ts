@@ -44,7 +44,7 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
       new EntityTableColumn<DataDictionary>('code', 'device-mng.code', '50%'),
       new EntityTableColumn<DataDictionary>('name', 'device-mng.name', '50%'),
       new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({icon}) => {
-        return iconCell(icon)
+        return iconCell(icon);
       }),
       new EntityTableColumn<DataDictionary>('type', 'device-mng.data-type', '150px', ({type}) => {
         if (this.config.componentsData.dataTypeMap[type]) {

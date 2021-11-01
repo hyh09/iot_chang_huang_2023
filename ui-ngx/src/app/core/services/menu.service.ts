@@ -269,6 +269,29 @@ export class MenuService {
       },
       {
         id: guid(),
+        name: 'auth-mng.auth-mng',
+        type: 'toggle',
+        path: '/authManagement',
+        icon: 'verified_user',
+        pages: [
+          {
+            id: guid(),
+            name: 'auth-mng.user-mng',
+            type: 'link',
+            path: '/authManagement/userManagement',
+            icon: 'people'
+          },
+          {
+            id: guid(),
+            name: 'auth-mng.role-mng',
+            type: 'link',
+            path: '/authManagement/roleManagemnet',
+            icon: 'person'
+          }
+        ]
+      },
+      {
+        id: guid(),
         name: 'my.biz',
         type: 'toggle',
         path: '/biz',
