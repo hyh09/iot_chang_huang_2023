@@ -37,6 +37,13 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
     private UUID dictDeviceGroupId;
 
     /**
+     * 设备字典Id
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_ID, columnDefinition = "uuid")
+    @Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID dictDeviceId;
+
+    /**
      * 名称
      */
     @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_NAME)
@@ -48,6 +55,12 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
     @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_CONTENT)
     private String content;
 
+    /**
+     * 标题
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_TITLE)
+    private String title;
+
     public DictDeviceGroupPropertyEntity() {
     }
 
@@ -56,14 +69,14 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
             this.id = UUID.fromString(common.getId());
         if (common.getDictDeviceGroupId() != null)
             this.dictDeviceGroupId = UUID.fromString(common.getDictDeviceGroupId());
+        if (common.getDictDeviceId() != null)
+            this.dictDeviceId = UUID.fromString(common.getDictDeviceId());
 
         this.name = common.getName();
         this.content = common.getContent();
+        this.title = common.getTitle();
 
-//        this.createdUser = common.getCreatedUser();
-//        this.setCreatedTime(common.getCreatedTime());
-//        this.createdUser = common.getCreatedUser();
-//        this.setUpdatedTime(common.getUpdatedTime());
+        this.setCreatedTimeAndCreatedUser(common);
     }
 
     /**
@@ -75,8 +88,12 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
         if (dictDeviceGroupId != null) {
             common.setDictDeviceGroupId(dictDeviceGroupId.toString());
         }
+        if (dictDeviceId != null) {
+            common.setDictDeviceId(dictDeviceId.toString());
+        }
         common.setName(name);
         common.setContent(content);
+        common.setTitle(title);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

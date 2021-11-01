@@ -1,0 +1,112 @@
+package org.thingsboard.server.controller;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.hs.entity.vo.DeviceDetailGroupPropertyResult;
+import org.thingsboard.server.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.hs.entity.vo.RTMonitorResult;
+import org.thingsboard.server.hs.service.DeviceMonitorService;
+import org.thingsboard.server.queue.util.TbCoreComponent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 实时监控接口
+ *
+ * @author wwj
+ * @since 2021.10.27
+ */
+@Api(value = "实时监控接口", tags = {"实时监控接口"})
+@RestController
+@TbCoreComponent
+@RequestMapping("/api/deviceMonitor")
+public class RTMonitorController extends BaseController {
+
+    @Autowired
+    DeviceMonitorService deviceMonitorService;
+
+    /**
+     * 获得实时监控数据列表
+     */
+    @ApiOperation(value = "获得实时监控数据列表", notes = "默认显示第一个工厂")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+            @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
+            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
+            @ApiImplicitParam(name = "isUnAllocation", value = "是否选择未分配", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device")
+    public PageData<RTMonitorResult> listRTMonitor(
+            @RequestParam(required = false) String factoryId,
+            @RequestParam(required = false) String workShopId,
+            @RequestParam(required = false) String productionLineId,
+            @RequestParam(required = false) String deviceId,
+            @RequestParam(required = false) Boolean isUnAllocation) {
+        var query = new FactoryDeviceQuery(factoryId, workShopId, productionLineId, deviceId, isUnAllocation);
+        return null;
+    }
+
+
+    /**
+     * 查询设备详情-分组属性历史数据
+     */
+    @ApiOperation("查询设备详情-分组属性历史数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
+            @ApiImplicitParam(name = "groupId", value = "分组Id", paramType = "query"),
+            @ApiImplicitParam(name = "groupPropertyId", value = "分组属性Id", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device/groupProperty/history")
+    public List<DeviceDetailGroupPropertyResult> listRTMonitorGroupPropertyHistory(
+            @RequestParam(required = false) String deviceId,
+            @RequestParam(required = false) String groupId,
+            @RequestParam(required = false) String groupPropertyId) {
+        return new ArrayList<>();
+    }
+
+    /**
+     * 查询设备历史-表头，包含时间
+     */
+    @ApiOperation(value = "查询设备历史数据-表头",notes = "包含时间")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device/history/header")
+    public List<String> listRTMonitorHistory(@RequestParam(required = false) String deviceId) {
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * 查询设备历史数据
+     */
+    @ApiOperation("查询设备详情-分组属性历史数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+    })
+    @GetMapping("/rtMonitor/device/history")
+    public PageData<List<String>> listRTMonitorHistory(
+            @RequestParam(required = false) String deviceId,
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime
+    ) {
+        return new PageData<>();
+    }
+}

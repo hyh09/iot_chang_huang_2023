@@ -7,22 +7,20 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.hs.entity.po.DictData;
 import org.thingsboard.server.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.hs.entity.vo.DictDataResource;
-import org.thingsboard.server.hs.entity.enums.DictDataTypeEnum;
+import org.thingsboard.server.hs.entity.enums.DictDataDataTypeEnum;
 import org.thingsboard.server.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.hs.service.DictDataService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.service.security.model.SecurityUser;
 
 import javax.validation.Valid;
 
-import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
 /**
@@ -48,7 +46,18 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "获得数据字典界面资源")
     @GetMapping("/dict/data/resource")
     public DictDataResource listDictDataResource() throws ThingsboardException {
-        return new DictDataResource().setDictDataTypeMap(DictDataTypeEnum.BOOLEAN.toLinkMap());
+        return new DictDataResource().setDictDataTypeList(DictDataDataTypeEnum.toResourceList());
+    }
+
+    /**
+     * 获得当前可用数据字典编码
+     *
+     * @return 数据字典编码
+     */
+    @ApiOperation(value = "获得当前可用数据字典编码")
+    @GetMapping("/dict/data/availableCode")
+    public String getAvailableCode() throws ThingsboardException {
+        return this.dictDataService.getAvailableCode(getTenantId());
     }
 
     /**
@@ -65,13 +74,13 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "获得数据字典列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序"),
-            @ApiImplicitParam(name = "code", value = "编码"),
-            @ApiImplicitParam(name = "name", value = "名称"),
-            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "数据字典枚举值")})
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
+            @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
+            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query")})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data")
     public PageData<DictData> listDictData(
@@ -81,19 +90,16 @@ public class DictDataController extends BaseController {
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) DictDataTypeEnum dictDataType
+            @RequestParam(required = false) DictDataDataTypeEnum dictDataType
     )
             throws ThingsboardException {
         DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
                 .code(code).name(name).dictDataType(dictDataType).build();
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
-        validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validatePageLink(pageLink);
 
         // 查询数据字典列表
-        return this.dictDataService.listDictDataByQuery(tenantId, dictDataListQuery, pageLink);
+        return this.dictDataService.listDictDataByQuery(getTenantId(), dictDataListQuery, pageLink);
     }
 
     /**
@@ -103,11 +109,21 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "更新或新增数据字典")
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @PostMapping("/dict/data")
-    public void updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        this.dictDataService.updateOrSaveDictData(dictDataQuery, tenantId);
+    @PostMapping(value = "/dict/data")
+    public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
+        if (!dictDataQuery.getCode().startsWith("SJZD")) {
+            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+        }
+        try {
+            int intV = Integer.parseInt(dictDataQuery.getCode().split("SJZD")[1]);
+            if (intV < 1 || intV > 9999) {
+                throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+            }
+        } catch (Exception ignore) {
+            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+        }
+        this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
+        return dictDataQuery;
     }
 
     /**
@@ -117,13 +133,11 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "获得数据字典详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据字典id"),})
+            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path"),})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/dict/data/{id}")
     public DictData getDictDataDetail(@PathVariable("id") String id) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        return this.dictDataService.getDictDataDetail(id, tenantId);
+        return this.dictDataService.getDictDataDetail(id, getTenantId());
     }
 
     /**
@@ -133,12 +147,10 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "删除数据字典")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据字典id"),})
+            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path"),})
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/dict/data/{id}")
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
-        SecurityUser user = getCurrentUser();
-        TenantId tenantId = user.getTenantId();
-        this.dictDataService.deleteDictDataById(id, tenantId);
+        this.dictDataService.deleteDictDataById(id, getTenantId());
     }
 }

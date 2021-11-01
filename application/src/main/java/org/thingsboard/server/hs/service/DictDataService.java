@@ -28,7 +28,7 @@ public interface DictDataService {
     /**
      * 更新或保存数据字典
      *
-     * @param tenantId 租户Id
+     * @param tenantId      租户Id
      * @param dictDataQuery 数据字典参数
      */
     void updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException;
@@ -37,7 +37,7 @@ public interface DictDataService {
      * 获得数据字典详情
      *
      * @param tenantId 租户Id
-     * @param id 数据字典Id
+     * @param id       数据字典Id
      */
     DictData getDictDataDetail(String id, TenantId tenantId) throws ThingsboardException;
 
@@ -45,7 +45,15 @@ public interface DictDataService {
      * 删除数据字典
      *
      * @param tenantId 租户Id
-     * @param id 数据字典Id
+     * @param id       数据字典Id
      */
     void deleteDictDataById(String id, TenantId tenantId) throws ThingsboardException;
+
+    /**
+     * 获得当前可用数据字典编码
+     *
+     * @param tenantId 租户Id
+     * @return 当前可用数据字典编码
+     */
+    String getAvailableCode(TenantId tenantId);
 }

@@ -1,7 +1,6 @@
 package org.thingsboard.server.hs.entity.po;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * 设备字典-分组属性
@@ -11,6 +10,9 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DictDeviceGroupProperty extends BasePO {
 
     private static final long serialVersionUID = 4934987555236873705L;
@@ -25,6 +27,11 @@ public class DictDeviceGroupProperty extends BasePO {
     private String dictDeviceGroupId;
 
     /**
+     * 设备字典Id
+     */
+    private String dictDeviceId;
+
+    /**
      * 名称
      */
     private String name;
@@ -33,4 +40,9 @@ public class DictDeviceGroupProperty extends BasePO {
      * 内容
      */
     private String content;
+
+    /**
+     * 标题
+     */
+    private String title;
 }

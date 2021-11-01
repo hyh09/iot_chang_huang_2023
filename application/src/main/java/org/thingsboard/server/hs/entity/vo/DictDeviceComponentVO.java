@@ -1,95 +1,65 @@
-package org.thingsboard.server.hs.entity.po;
+package org.thingsboard.server.hs.entity.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-/**
- * 设备字典
- *
- * @author wwj
- * @since 2021.10.21
- */
-@EqualsAndHashCode(callSuper = true)
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
 @Data
+@Accessors(chain = true)
+@ApiModel(value = "设备字典部件实体类")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Accessors(chain = true)
-@ApiModel(value = "设备字典")
-public class DictDevice extends BasePO {
+public class DictDeviceComponentVO {
 
-    private static final long serialVersionUID = 4934987555236873701L;
-    /**
-     * 设备字典Id
-     */
-    @ApiModelProperty(value = "设备字典Id")
+    @ApiModelProperty(value = "主键id, 新增或修改时均为null")
     private String id;
 
-    /**
-     * 租户Id
-     */
-    @ApiModelProperty(value = "租户Id")
-    private String tenantId;
+    @ApiModelProperty(value = "父id, 新增或修改时均为null")
+    private String parentId;
 
-    /**
-     * 编码
-     */
+    @ApiModelProperty(value = "设备字典Id")
+    private String dictDeviceId;
+
+    @NotNull
     @ApiModelProperty(value = "编码")
     private String code;
 
-    /**
-     * 名称
-     */
+    @NotNull
     @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 类型
-     */
     @ApiModelProperty(value = "类型")
     private String type;
 
-    /**
-     * 供应商
-     */
     @ApiModelProperty(value = "供应商")
     private String supplier;
 
-    /**
-     * 型号
-     */
     @ApiModelProperty(value = "型号")
     private String model;
 
-    /**
-     * 版本号
-     */
     @ApiModelProperty(value = "版本号")
     private String version;
 
-    /**
-     * 保修期
-     */
     @ApiModelProperty(value = "保修期")
     private String warrantyPeriod;
 
-    /**
-     * 备注
-     */
     @ApiModelProperty(value = "备注")
     private String comment;
 
-    /**
-     * 图标
-     */
     @ApiModelProperty(value = "图标")
     private String icon;
 
-    /**
-     * 图片
-     */
     @ApiModelProperty(value = "图片")
     private String picture;
+
+    @ApiModelProperty(value = "子部件列表数据, 为null则该部件已经没有子部件, 数据结构同部件")
+    private List<DictDeviceComponentVO> componentList;
 }
