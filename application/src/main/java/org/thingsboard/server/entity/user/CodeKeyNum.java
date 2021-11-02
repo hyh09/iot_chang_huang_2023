@@ -7,9 +7,10 @@ package org.thingsboard.server.entity.user;
  * @create: 2021-11-01 16:20
  **/
 public enum CodeKeyNum {
-    key_user("1","YH","0001"),
+    key_user("1","YH","0001","%04d"),
 
-    key_role("2","","0");
+    //1-8为系统生成的默认角色
+    key_role("2","","9","%03d");
 
 
 
@@ -35,8 +36,22 @@ public enum CodeKeyNum {
     private  String  init;
 
 
+    private String  checkSing;
 
+    CodeKeyNum(String key, String value, String init, String checkSing) {
+        this.key = key;
+        this.value = value;
+        this.init = init;
+        this.checkSing = checkSing;
+    }
 
+    public String getCheckSing() {
+        return checkSing;
+    }
+
+    public void setCheckSing(String checkSing) {
+        this.checkSing = checkSing;
+    }
 
     public String getKey() {
         return key;
@@ -62,9 +77,5 @@ public enum CodeKeyNum {
         this.init = init;
     }
 
-    CodeKeyNum(String key, String value, String init) {
-        this.key = key;
-        this.value = value;
-        this.init = init;
-    }
+
 }

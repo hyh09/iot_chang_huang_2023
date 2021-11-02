@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.sql.role.dao;	
 	
-import org.thingsboard.server.dao.util.sql.BaseSqlDao;	
+import org.springframework.data.domain.Pageable;
+import org.thingsboard.server.dao.model.sql.AlarmEntity;
+import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;	
 import org.springframework.data.jpa.repository.Modifying;	
 import org.springframework.data.jpa.repository.Query;	
@@ -17,9 +19,11 @@ import java.util.UUID;
   创建人: HU.YUNHUI	
   描述: 【租户系统角色】 对应的dao层接口	
 */	
-public interface TenantSysRoleDao extends BaseSqlDao<TenantSysRoleEntity,UUID> {	
-	
-	
+public interface TenantSysRoleDao extends BaseSqlDao<TenantSysRoleEntity,UUID> {
+
+
+    @Query("SELECT a FROM TenantSysRoleEntity a ,UserMenuRoleEntity b  WHERE a.id = b.tenantSysRoleId AND b.userId = :userId ")
+    List<TenantSysRoleEntity> queryByUserId(@Param("userId") UUID userId);
 	
 	
 }	

@@ -30,6 +30,15 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
 
 
     /**
+     * 用户id查询角色数据
+     */
+    public List<TenantSysRoleEntity> queryRoleByUserId(UUID userId)
+    {
+      return   this.dao.queryByUserId(userId);
+    }
+
+
+    /**
      * 查询单调的
      */
     public  TenantSysRoleEntity  queryById(UUID id)

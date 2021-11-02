@@ -71,18 +71,8 @@ public class CheckImpl  implements CheckSvc {
             {
                 return codeKeyNum.getValue() + codeKeyNum.getInit();
             }
-           ;
-//            int index=code.indexOf(codeKeyNum.getValue());
-//            if(index<0){
-//                return codeKeyNum.getValue() + codeKeyNum.getInit();
-//            }
-//
-//           String codeNew =  code.substring(index);
-//            Integer a =  Integer.valueOf(codeNew)+1;
-//            vo.setCode( codeKeyNum.getValue()+a);
-//            log.info("codeVo=====================:{}",vo);
 
-            return ResultVo.getSuccessFul( codeKeyNum.getValue()+format(code));
+            return ResultVo.getSuccessFul( format(code,codeKeyNum));
         }catch (Exception e)
         {
              e.printStackTrace();
@@ -92,7 +82,7 @@ public class CheckImpl  implements CheckSvc {
     }
 
 
-    private String format(String str)
+    private String format(String str,  CodeKeyNum codeKeyNum)
     {
 //        String a="AH0001";
         String regEx="[^0-9]";
@@ -101,12 +91,12 @@ public class CheckImpl  implements CheckSvc {
         String m1=  m.replaceAll("").trim();
         if(StringUtils.isEmpty(m1))
         {
-            m1="001";
+            m1=codeKeyNum.getValue();
         }
         Integer integer  = Integer.valueOf(m1) +1;
-       String result = String.format("%03d", integer);
+       String result = String.format(codeKeyNum.getCheckSing(), integer);
         log.info("result=====================:{}",result);
-        return  result;
+        return  codeKeyNum.getValue()+result;
     }
 
 

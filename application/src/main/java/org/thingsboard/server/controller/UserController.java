@@ -408,8 +408,9 @@ public class UserController extends BaseController {
               return   this.update(user);
             }
 
+
+
             SecurityUser  securityUser =  getCurrentUser();
-            System.out.println("打印：getCurrentUser().getTenantId()"+getCurrentUser().getTenantId());
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
             log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
