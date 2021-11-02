@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.entity.user.CodeVo;
 import org.thingsboard.server.entity.user.UserVo;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -41,12 +42,11 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
         }
         //用于本地测试
         if((vo.getUserId()) != null){
-            //cast(usermenuro0_.user_id as varchar(255))
             whereSql.append(" and t1.id =:userId");  //cast(t1.id as varchar(255))
             param.put("userId",vo.getUserId());
         }
 
-        return new  SqlVo(whereSql.toString(),param);
+        return  new  SqlVo(whereSql.toString(),param);
 
 
     }
@@ -83,6 +83,39 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"入参不能为空");
         }
         return  new  SqlVo(sqlCount+whereSql.toString(),param);
+    }
+
+
+    /**
+     * 查询编码
+     * @param vo
+     * @return
+     */
+    @Override
+    public SqlVo getUserCode(CodeVo vo) {
+        Map<String, Object> param= new HashMap<>();
+
+
+
+        if(vo.getKey().equals("1"))
+        {
+            String  sql2 = " select  user_code as code from  tb_user where created_time in(  " +
+                    "select max(created_time) from   tb_user  " +
+                    " )  ";
+            return new  SqlVo(sql2.toString(),param);
+
+        }
+
+        if(vo.getKey().equals("2"))
+        {
+            String  sql = " select  role_code  as code  from  TB_TENANT_SYS_ROLE where created_time in(  " +
+                    "select max(created_time) from   TB_TENANT_SYS_ROLE " +
+                    " )  ";
+            return new  SqlVo(sql.toString(),param);
+
+        }
+
+        throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"入参不能为空");
     }
 
 

@@ -26,9 +26,19 @@ import java.util.List;
 @Service	
 public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntity, UUID, TenantSysRoleDao> {	
 	
-  	protected Logger logger = LoggerFactory.getLogger(this.getClass());	
-	
-	
+  	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+
+
+    /**
+     * 查询单调的
+     */
+    public  TenantSysRoleEntity  queryById(UUID id)
+    {
+        return findById(id);
+
+    }
+
+
     /**
      *根据实体保存
      * @param tenantSysRole
