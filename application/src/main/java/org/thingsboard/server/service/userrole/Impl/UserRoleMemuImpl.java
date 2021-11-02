@@ -2,21 +2,29 @@ package org.thingsboard.server.service.userrole.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.util.JsonUtils;
+import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
+import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
+import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +40,9 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     @Autowired  private UserMenuRoleService userMenuRoleService;
     @Autowired  private UserService userService;
     @Autowired private TenantSysRoleService roleService;
+    @Autowired private SqlSplicingSvc splicingSvc;
+    @Autowired private TenantSysRoleService tenantSysRoleService;
+
 
     /**
      * 用户角色关系数据的绑定
@@ -85,11 +96,16 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
         }
        List<UUID> userIdInDB= userIdS.stream().map(User::getUuidId).collect(Collectors.toList());
-        relationUserBach(userIdInDB,vo.getTenantSysRoleId());
+        relationUserBachByRole(userIdInDB,vo.getTenantSysRoleId());
         return   ResultVo.getSuccessFul(null);
 
     }
 
+    /**
+     * 解绑用户角色
+     * @param vo
+     * @return
+     */
     @Override
     public Object unboundUser(RoleBindUserVo vo) {
         log.info("解绑角色下的用户:{}",vo);
@@ -100,6 +116,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
     /**
      * 批量绑定
+     *  用户绑定角色
      */
     @Override
     @Transactional
@@ -111,6 +128,24 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
             UserMenuRoleEntity entity = new UserMenuRoleEntity();
             entity.setUserId(uuid);
             entity.setTenantSysRoleId(item);
+            userMenuRoleService.saveEntity(entity);
+        });
+    }
+
+
+
+    /**
+     * 批量绑定 一个角色
+     */
+    @Transactional
+    public void  relationUserBachByRole(List<UUID> userIds, UUID roleId) {
+        if(CollectionUtils.isEmpty(userIds)){
+            return ;
+        }
+        userIds.forEach(item ->{
+            UserMenuRoleEntity entity = new UserMenuRoleEntity();
+            entity.setUserId(item);
+            entity.setTenantSysRoleId(roleId);
             userMenuRoleService.saveEntity(entity);
         });
     }
@@ -135,6 +170,17 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
         log.info("删除此角色绑定得之前得用户关系数据:{}",roleId);
         userMenuRoleService.deleteByTenantSysRoleId(roleId);
     }
+
+    @Override
+   public Object getUserByInRole( QueryUserVo user, PageLink pageLink)
+    {
+        log.info("查询当前角色下的用户绑定数据",user);
+        SqlVo sqlVo =  splicingSvc.getUserByInRole(user);
+        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
+        return  page;
+
+    }
+
 
 
     private  List<User> getUserAc( List<UUID> userIds)

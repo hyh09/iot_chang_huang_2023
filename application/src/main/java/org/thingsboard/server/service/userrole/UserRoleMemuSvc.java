@@ -1,5 +1,8 @@
 package org.thingsboard.server.service.userrole;
 
+import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
 
@@ -31,6 +34,15 @@ public interface UserRoleMemuSvc {
      * 删除角色下得关系数据
      */
     void  deleteRoleByRole(UUID  roleId);
+
+
+ /**
+  * 查询当前角色下的用户
+  * @param user
+  * @param pageLink
+  * @return
+  */
+ Object getUserByInRole( QueryUserVo user, PageLink pageLink);
 
 
 }
