@@ -32,8 +32,6 @@ import java.util.Arrays;
 @EnableSwagger2
 @EnableScheduling
 @ComponentScan({"org.thingsboard.server"})
-@EnableJpaRepositories(basePackages = "org.thingsboard.server.hs")
-@EntityScan(basePackages = "org.thingsboard.server.hs")
 @EnableJpaAuditing
 public class ThingsboardServerApplication {
 

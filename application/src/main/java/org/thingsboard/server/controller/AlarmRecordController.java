@@ -10,22 +10,18 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.alarm.*;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.AlarmId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.TimePageLink;
-import org.thingsboard.server.hs.entity.enums.AlarmSimpleLevel;
-import org.thingsboard.server.hs.entity.enums.AlarmSimpleStatus;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordQuery;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordResource;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordResult;
-import org.thingsboard.server.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.hs.service.DeviceMonitorService;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
+import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordQuery;
+import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResource;
+import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResult;
+import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.permission.Operation;
-
-import java.util.*;
 
 /**
  * 报警记录接口
@@ -46,7 +42,7 @@ public class AlarmRecordController extends BaseController {
      * 报警记录查询界面资源
      */
     @ApiOperation("获得报警记录查询界面资源")
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/alarmRecord/resource")
     public AlarmRecordResource getAlarmRecordResource() {
         return new AlarmRecordResource().setAlarmStatusList(AlarmSimpleStatus.toResourceList())
@@ -61,10 +57,10 @@ public class AlarmRecordController extends BaseController {
      * @param id 报警信息Id
      * @see AlarmController#ackAlarm(String) (String)
      */
-    @ApiOperation("获得报警记录查询界面资源")
+    @ApiOperation("确认报警信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "报警信息Id", paramType = "path"),})
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/alarmRecord/{id}/ack")
     public void ackAlarm(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("alarmId", id);
@@ -97,7 +93,7 @@ public class AlarmRecordController extends BaseController {
     @ApiOperation("清除报警信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "报警信息Id", paramType = "path"),})
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/alarmRecord/{id}/clear")
     public void clearAlarm(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
@@ -121,7 +117,7 @@ public class AlarmRecordController extends BaseController {
      *
      * @see AlarmController#getAlarms
      */
-    @ApiOperation("获得报警记录列表")
+    @ApiOperation(value = "获得报警记录列表", notes = "必须选择一个工厂、车间、产线、设备、未分配中的一种")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
             @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
@@ -134,34 +130,29 @@ public class AlarmRecordController extends BaseController {
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
             @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
             @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
-            @ApiImplicitParam(name = "isUnAllocation", value = "是否选择未分配", paramType = "query")
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
     })
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/alarmRecord")
     public PageData<AlarmRecordResult> getAlarms(
             @RequestParam int page,
             @RequestParam int pageSize,
             @RequestParam(required = false) String sortProperty,
             @RequestParam(required = false) String sortOrder,
-            @RequestParam(required = false) AlarmSimpleStatus status,
-            @RequestParam(required = false) AlarmSimpleLevel level,
+            @RequestParam AlarmSimpleStatus status,
+            @RequestParam AlarmSimpleLevel level,
             @RequestParam(required = false) Long startTime,
             @RequestParam(required = false) Long endTime,
             @RequestParam(required = false) String factoryId,
             @RequestParam(required = false) String workShopId,
             @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId,
-            @RequestParam(required = false) Boolean isUnAllocation
+            @RequestParam(required = false) String deviceId
     ) throws ThingsboardException {
-        if (productionLineId == null && deviceId == null && !isUnAllocation) {
-            throw new ThingsboardException("请选择设备！", ThingsboardErrorCode.GENERAL);
-        }
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
 
         var query = AlarmRecordQuery.builder()
                 .alarmSimpleStatus(status).alarmSimpleLevel(level).build();
-        query.setDeviceId(deviceId).setIsUnAllocation(isUnAllocation).setProductionLineId(productionLineId)
+        query.setDeviceId(deviceId).setProductionLineId(productionLineId)
         .setFactoryId(factoryId).setWorkShopId(workShopId);
         return this.deviceMonitorService.listAlarmsRecord(getTenantId(), query, pageLink);
     }
