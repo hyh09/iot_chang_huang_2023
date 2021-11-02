@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.service;
 
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 
@@ -16,5 +17,7 @@ public interface UserRoleMenuSvc {
     //判断当人角色
     JudgeUserVo  decideUser(UserId userId);
 
-    //创建工厂管理的接口
+    //创建工厂管理员接口
+    User save(User user,User user1);
+
 }

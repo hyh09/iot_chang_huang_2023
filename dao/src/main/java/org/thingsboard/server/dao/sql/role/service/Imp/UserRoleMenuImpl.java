@@ -75,6 +75,11 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
     }
 
+    @Override
+    public User save(User user, User user1) {
+        return null;
+    }
+
 
     private  JudgeUserVo  getJudeUserVoById(List<TenantSysRoleEntity>  tenantSysRoleEntities1,UUID id)
     {

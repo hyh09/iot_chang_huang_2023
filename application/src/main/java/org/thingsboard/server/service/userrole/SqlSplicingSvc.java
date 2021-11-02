@@ -28,4 +28,10 @@ public interface SqlSplicingSvc {
      */
     SqlVo  getUserCode(CodeVo vo);
 
+
+    /**
+     * 查询角色下的用户
+     */
+    SqlVo  getUserByInRole();
+
 }

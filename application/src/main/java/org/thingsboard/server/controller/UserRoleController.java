@@ -16,6 +16,7 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -141,14 +142,30 @@ public class UserRoleController extends BaseController{
      */
     @ApiOperation(value = "角色用户绑定")
     @RequestMapping(value = "/relationUser", method = RequestMethod.POST)
-    public Object  relationUser(@RequestBody @Valid UserRoleVo  vo, BindingResult result)
+    public Object  relationUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result)
     {
         if (result.hasErrors()) {
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
-      return   userRoleMemuSvc.relationUser(vo);
+
+      return   userRoleMemuSvc.relationUserAndRole(vo);
     }
+
+
+
+    @ApiOperation(value = "角色用户解绑【一个角色解绑多个用户】")
+    @RequestMapping(value = "/unboundUser", method = RequestMethod.POST)
+    public Object  unboundUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result)
+    {
+        if (result.hasErrors()) {
+            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
+        }
+        log.info("[角色用户解绑]打印得入参为:{}",vo);
+
+        return   userRoleMemuSvc.unboundUser(vo);
+    }
+
 
 
 

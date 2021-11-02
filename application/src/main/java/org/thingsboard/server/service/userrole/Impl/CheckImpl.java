@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.user.CodeKeyNum;
 import org.thingsboard.server.entity.user.CodeVo;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 校验
@@ -29,6 +32,7 @@ public class CheckImpl  implements CheckSvc {
 
     @Autowired private SqlSplicingSvc splicingSvc;
     @Autowired private TenantSysRoleService tenantSysRoleService;
+    @Autowired private UserService userService;
 
     @Override
     public Boolean checkValueByKey(UserVo vo) {
@@ -80,11 +84,61 @@ public class CheckImpl  implements CheckSvc {
         }
     }
 
+    /**
+     * 查询用户 /角色编码
+     * @param vo
+     * @return
+     */
+    @Override
+    public Object queryCodeNew(CodeVo vo,TenantId tenantId) {
+          if(vo.getKey().equals(CodeKeyNum.key_user.getKey()))
+          {
+            return   getUserAvailableCode(tenantId);
+          }
+
+        return geRoleAvailableCode(tenantId);
+    }
+
+
+
+
+    public String getUserAvailableCode(TenantId tenantId) {
+        List<String> codes = userService.findAllCodesByTenantId(tenantId.getId());
+       if(CollectionUtils.isEmpty(codes))
+       {
+           return CodeKeyNum.key_user.getValue()+CodeKeyNum.key_user.getInit();
+       }
+
+      return  null;
+    }
+
+
+
+    public String geRoleAvailableCode(TenantId tenantId) {
+        var codes = tenantSysRoleService.findAllCodesByTenantId();
+        if (codes.isEmpty()) {
+            return "05";
+        } else {
+            var ints = codes.stream().map(e -> Integer.valueOf(e.split("")[1])).sorted().collect(Collectors.toList());
+            int start = 0;
+            while (true) {
+                if (ints.size() - 1 == start) {
+                    return "" + String.format("%04d", start + 2);
+                }
+                if (!ints.get(start).equals(start + 1)) {
+                    return "" + String.format("%04d", start + 1);
+                }
+                start += 1;
+            }
+        }
+    }
+
+
+
 
     private String format(String str,  CodeKeyNum codeKeyNum)
     {
 
-//        String a="AH0001";
         String regEx="[^0-9]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);

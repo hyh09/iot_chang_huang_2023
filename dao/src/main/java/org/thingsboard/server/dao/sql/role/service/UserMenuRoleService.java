@@ -29,6 +29,16 @@ public class UserMenuRoleService  extends BaseSQLServiceImpl<UserMenuRoleEntity,
 
 
 
+    public  List<UserMenuRoleEntity> queryRoleIdByUserId(UUID userId)
+    {
+       return     this.dao.queryRoleIdByUserId( userId);
+    }
+
+
+    public    void deleteBatch(List<UUID> ids,UUID tenantSysRoleId){
+       this.dao.deleteBatch(ids,tenantSysRoleId);
+    }
+
 
     /**
      *根据实体保存

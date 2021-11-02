@@ -118,5 +118,12 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
         throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"入参不能为空");
     }
 
+    @Override
+    public SqlVo getUserByInRole() {
+        String  sqlPre="";
+        String sql="";
+        return null;
+    }
+
 
 }
