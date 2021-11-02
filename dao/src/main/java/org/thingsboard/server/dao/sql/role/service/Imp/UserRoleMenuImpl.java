@@ -71,7 +71,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         {
             return  vo1;
         }
-        return  new JudgeUserVo();
+        return  new JudgeUserVo(false,false,null);
 
     }
 
@@ -83,7 +83,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
             long count=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
             if(count>0)
             {
-                return  new JudgeUserVo(true,null,id);
+                return  new JudgeUserVo(true,false,id);
             }
 
             long fCount=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();

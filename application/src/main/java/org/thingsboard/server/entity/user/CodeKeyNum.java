@@ -9,8 +9,8 @@ package org.thingsboard.server.entity.user;
 public enum CodeKeyNum {
     key_user("1","YH","0001","%04d"),
 
-    //1-8为系统生成的默认角色
-    key_role("2","","9","%03d");
+    //1-4为系统生成的默认角色
+    key_role("2","","005","%03d");
 
 
 

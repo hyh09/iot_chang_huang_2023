@@ -54,14 +54,13 @@ public class CheckImpl  implements CheckSvc {
             if (CollectionUtils.isEmpty(codeVos)) {
                 log.info("当前的库中没有数据,返回初始化的数据");
                 CodeKeyNum codeKeyNum = CodeKeyNum.getValueByKey(vo.getKey());
-                return codeKeyNum.getValue() + codeKeyNum.getInit();
+                return ResultVo.getSuccessFul( format("",codeKeyNum));
 
             }
             CodeKeyNum codeKeyNum = CodeKeyNum.getValueByKey(vo.getKey());
             if(codeKeyNum == null)
             {
                 return ResultVo.builderFail("0","入参key不在配置内");
-
             }
             log.info("打印当前数据:{},codeKeyNum{}",codeVos,codeKeyNum.getKey());
             log.info("打印当前数据codeVo:{}",codeVos.get(0));
@@ -69,7 +68,7 @@ public class CheckImpl  implements CheckSvc {
             log.info("打印当前数据,code{}",code);
             if(StringUtils.isEmpty(code))
             {
-                return codeKeyNum.getValue() + codeKeyNum.getInit();
+                return ResultVo.getSuccessFul( format("",codeKeyNum));
             }
 
             return ResultVo.getSuccessFul( format(code,codeKeyNum));
@@ -84,6 +83,7 @@ public class CheckImpl  implements CheckSvc {
 
     private String format(String str,  CodeKeyNum codeKeyNum)
     {
+
 //        String a="AH0001";
         String regEx="[^0-9]";
         Pattern p = Pattern.compile(regEx);
@@ -91,7 +91,7 @@ public class CheckImpl  implements CheckSvc {
         String m1=  m.replaceAll("").trim();
         if(StringUtils.isEmpty(m1))
         {
-            m1=codeKeyNum.getValue();
+            m1=codeKeyNum.getInit();
         }
         Integer integer  = Integer.valueOf(m1) +1;
        String result = String.format(codeKeyNum.getCheckSing(), integer);
