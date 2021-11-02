@@ -261,6 +261,21 @@ public class JpaQueryHelper {
 						pList.add(root.get(idField.getName()).in(ids).not());
 					}
 				}
+
+
+				if(idField != null && queryParam.containsKey("idlist") ){
+					Object idObjs = queryParam.get("idlist");
+					List<Object> ids = new ArrayList<Object>();
+					if(idObjs instanceof String){
+						ids = Arrays.asList(idObjs.toString().split(","));
+					} else if( idObjs instanceof List){
+						ids = (List<Object>) idObjs;
+					}
+					if(!ids.isEmpty()){
+						pList.add(root.get(idField.getName()).in(ids));
+					}
+				}
+
 				Predicate[] pArr = new Predicate[pList.size()];
 				p = cb.and(pList.toArray(pArr));
 

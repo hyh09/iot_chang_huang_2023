@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.user.CodeKeyNum;
 import org.thingsboard.server.entity.user.CodeVo;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 校验
@@ -29,6 +32,7 @@ public class CheckImpl  implements CheckSvc {
 
     @Autowired private SqlSplicingSvc splicingSvc;
     @Autowired private TenantSysRoleService tenantSysRoleService;
+    @Autowired private UserService userService;
 
     @Override
     public Boolean checkValueByKey(UserVo vo) {
@@ -54,14 +58,13 @@ public class CheckImpl  implements CheckSvc {
             if (CollectionUtils.isEmpty(codeVos)) {
                 log.info("当前的库中没有数据,返回初始化的数据");
                 CodeKeyNum codeKeyNum = CodeKeyNum.getValueByKey(vo.getKey());
-                return codeKeyNum.getValue() + codeKeyNum.getInit();
+                return ResultVo.getSuccessFul( format("",codeKeyNum));
 
             }
             CodeKeyNum codeKeyNum = CodeKeyNum.getValueByKey(vo.getKey());
             if(codeKeyNum == null)
             {
                 return ResultVo.builderFail("0","入参key不在配置内");
-
             }
             log.info("打印当前数据:{},codeKeyNum{}",codeVos,codeKeyNum.getKey());
             log.info("打印当前数据codeVo:{}",codeVos.get(0));
@@ -69,20 +72,10 @@ public class CheckImpl  implements CheckSvc {
             log.info("打印当前数据,code{}",code);
             if(StringUtils.isEmpty(code))
             {
-                return codeKeyNum.getValue() + codeKeyNum.getInit();
+                return ResultVo.getSuccessFul( format("",codeKeyNum));
             }
-           ;
-//            int index=code.indexOf(codeKeyNum.getValue());
-//            if(index<0){
-//                return codeKeyNum.getValue() + codeKeyNum.getInit();
-//            }
-//
-//           String codeNew =  code.substring(index);
-//            Integer a =  Integer.valueOf(codeNew)+1;
-//            vo.setCode( codeKeyNum.getValue()+a);
-//            log.info("codeVo=====================:{}",vo);
 
-            return ResultVo.getSuccessFul( codeKeyNum.getValue()+format(code));
+            return ResultVo.getSuccessFul( format(code,codeKeyNum));
         }catch (Exception e)
         {
              e.printStackTrace();
@@ -91,22 +84,73 @@ public class CheckImpl  implements CheckSvc {
         }
     }
 
+    /**
+     * 查询用户 /角色编码
+     * @param vo
+     * @return
+     */
+    @Override
+    public Object queryCodeNew(CodeVo vo,TenantId tenantId) {
+          if(vo.getKey().equals(CodeKeyNum.key_user.getKey()))
+          {
+            return   getUserAvailableCode(tenantId);
+          }
 
-    private String format(String str)
+        return geRoleAvailableCode(tenantId);
+    }
+
+
+
+
+    public String getUserAvailableCode(TenantId tenantId) {
+        List<String> codes = userService.findAllCodesByTenantId(tenantId.getId());
+       if(CollectionUtils.isEmpty(codes))
+       {
+           return CodeKeyNum.key_user.getValue()+CodeKeyNum.key_user.getInit();
+       }
+
+      return  null;
+    }
+
+
+
+    public String geRoleAvailableCode(TenantId tenantId) {
+        var codes = tenantSysRoleService.findAllCodesByTenantId();
+        if (codes.isEmpty()) {
+            return "05";
+        } else {
+            var ints = codes.stream().map(e -> Integer.valueOf(e.split("")[1])).sorted().collect(Collectors.toList());
+            int start = 0;
+            while (true) {
+                if (ints.size() - 1 == start) {
+                    return "" + String.format("%04d", start + 2);
+                }
+                if (!ints.get(start).equals(start + 1)) {
+                    return "" + String.format("%04d", start + 1);
+                }
+                start += 1;
+            }
+        }
+    }
+
+
+
+
+    private String format(String str,  CodeKeyNum codeKeyNum)
     {
-//        String a="AH0001";
+
         String regEx="[^0-9]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
         String m1=  m.replaceAll("").trim();
         if(StringUtils.isEmpty(m1))
         {
-            m1="001";
+            m1=codeKeyNum.getInit();
         }
         Integer integer  = Integer.valueOf(m1) +1;
-       String result = String.format("%03d", integer);
+       String result = String.format(codeKeyNum.getCheckSing(), integer);
         log.info("result=====================:{}",result);
-        return  result;
+        return  codeKeyNum.getValue()+result;
     }
 
 

@@ -1,7 +1,6 @@
 package org.thingsboard.server.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -14,14 +13,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.QueryUserVo;
+import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.PageRoleVo;
-import org.thingsboard.server.entity.role.UserRoleVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
@@ -141,14 +141,110 @@ public class UserRoleController extends BaseController{
      */
     @ApiOperation(value = "角色用户绑定")
     @RequestMapping(value = "/relationUser", method = RequestMethod.POST)
-    public Object  relationUser(@RequestBody @Valid UserRoleVo  vo, BindingResult result)
+    public Object  relationUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result)
     {
         if (result.hasErrors()) {
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
-      return   userRoleMemuSvc.relationUser(vo);
+
+      return   userRoleMemuSvc.relationUserAndRole(vo);
     }
+
+
+
+    @ApiOperation(value = "角色用户解绑【一个角色解绑多个用户】")
+    @RequestMapping(value = "/unboundUser", method = RequestMethod.POST)
+    public Object  unboundUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result)
+    {
+        if (result.hasErrors()) {
+            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
+        }
+        log.info("[角色用户解绑]打印得入参为:{}",vo);
+
+        return   userRoleMemuSvc.unboundUser(vo);
+    }
+
+
+    /**
+     * 角色查询用户已绑定的用户
+     * @return
+     */
+    @ApiOperation(value = "角色查询已绑定用户【分页查询】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色id"),
+            @ApiImplicitParam(name = "UserCode", value = "用户编码"),
+            @ApiImplicitParam(name = "UserCode", value = "用户编码"),
+    })
+    @RequestMapping(value = "/getUserByInRole/{roleId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public Object getUserByInRole(
+            @PathVariable("roleId") UUID roleId,
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String userCode,
+            @RequestParam(required = false) String userName
+
+            ) throws ThingsboardException {
+
+
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        QueryUserVo  vo = new QueryUserVo();
+        vo.setRoleId(roleId);
+        vo.setUserName(userName);
+        vo.setUserCode(userCode);
+        log.info("打印当前的入参:{}",vo);
+       return userRoleMemuSvc.getUserByInRole(vo,pageLink);
+
+    }
+
+
+
+
+    /**
+     * 角色查询用户已绑定的用户
+     * @return
+     */
+    @ApiOperation(value = "角色查询未绑定用户【分页查询】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色id"),
+            @ApiImplicitParam(name = "UserCode", value = "用户编码"),
+            @ApiImplicitParam(name = "UserCode", value = "用户编码"),
+    })
+    @RequestMapping(value = "/getUserByNotInRole/{roleId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public Object getUserByNotInRole(
+            @PathVariable("roleId") UUID roleId,
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String userCode,
+            @RequestParam(required = false) String userName
+
+    ) throws ThingsboardException {
+
+
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        QueryUserVo  vo = new QueryUserVo();
+        vo.setRoleId(roleId);
+        vo.setUserName(userName);
+        vo.setUserCode(userCode);
+        log.info("打印当前的入参:{}",vo);
+        return userRoleMemuSvc.getUserByNotInRole(vo,pageLink);
+
+    }
+
+
+
+
+
+
+
 
 
 

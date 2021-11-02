@@ -2,23 +2,35 @@ package org.thingsboard.server.service.userrole.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.QueryUserVo;
+import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.util.JsonUtils;
+import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
+import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
+import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,6 +40,9 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     @Autowired  private UserMenuRoleService userMenuRoleService;
     @Autowired  private UserService userService;
     @Autowired private TenantSysRoleService roleService;
+    @Autowired private SqlSplicingSvc splicingSvc;
+    @Autowired private TenantSysRoleService tenantSysRoleService;
+
 
     /**
      * 用户角色关系数据的绑定
@@ -48,7 +63,6 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
             }
             UserMenuRoleEntity userMenuRoleEntity = JsonUtils.beanToBean(vo, UserMenuRoleEntity.class);
             List<UserMenuRoleEntity> list =  userMenuRoleService.queryByRoleIdAndUserId(userMenuRoleEntity);
-//            List<UserMenuRoleEntity> list = userMenuRoleService.findAllByUserMenuRoleEntity(userMenuRoleEntity);
             if (CollectionUtils.isNotEmpty(list)) {
                 return ResultVo.getFail("当前的用户已经绑定了该角色!");
             }
@@ -65,7 +79,44 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     }
 
     /**
+     * 一个角色绑定多个用户
+     * @param vo
+     * @return
+     */
+    @Override
+    public Object relationUserAndRole(RoleBindUserVo vo) {
+        TenantSysRoleEntity roleEntity = roleService.findById(vo.getTenantSysRoleId());
+        if (roleEntity == null) {
+            return ResultVo.getFail("当前传入得角色id[tenantSysRoleId]错误,请检查!");
+        }
+        List<User>   userIdS =   getUserAc(vo.getUserIds());
+        if(CollectionUtils.isEmpty(userIdS))
+        {
+            return ResultVo.getFail("传入的用户id不存在!");
+
+        }
+       List<UUID> userIdInDB= userIdS.stream().map(User::getUuidId).collect(Collectors.toList());
+        relationUserBachByRole(userIdInDB,vo.getTenantSysRoleId());
+        return   ResultVo.getSuccessFul(null);
+
+    }
+
+    /**
+     * 解绑用户角色
+     * @param vo
+     * @return
+     */
+    @Override
+    public Object unboundUser(RoleBindUserVo vo) {
+        log.info("解绑角色下的用户:{}",vo);
+        userMenuRoleService.deleteBatch(vo.getUserIds(),vo.getTenantSysRoleId());
+        return ResultVo.getSuccessFul(null);
+    }
+
+
+    /**
      * 批量绑定
+     *  用户绑定角色
      */
     @Override
     @Transactional
@@ -77,6 +128,24 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
             UserMenuRoleEntity entity = new UserMenuRoleEntity();
             entity.setUserId(uuid);
             entity.setTenantSysRoleId(item);
+            userMenuRoleService.saveEntity(entity);
+        });
+    }
+
+
+
+    /**
+     * 批量绑定 一个角色
+     */
+    @Transactional
+    public void  relationUserBachByRole(List<UUID> userIds, UUID roleId) {
+        if(CollectionUtils.isEmpty(userIds)){
+            return ;
+        }
+        userIds.forEach(item ->{
+            UserMenuRoleEntity entity = new UserMenuRoleEntity();
+            entity.setUserId(item);
+            entity.setTenantSysRoleId(roleId);
             userMenuRoleService.saveEntity(entity);
         });
     }
@@ -100,6 +169,37 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     public void deleteRoleByRole(UUID roleId) {
         log.info("删除此角色绑定得之前得用户关系数据:{}",roleId);
         userMenuRoleService.deleteByTenantSysRoleId(roleId);
+    }
+
+    @Override
+   public Object getUserByInRole( QueryUserVo user, PageLink pageLink)
+    {
+        log.info("查询当前角色下的用户绑定数据",user);
+        SqlVo sqlVo =  splicingSvc.getUserByInRole(user);
+        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
+        return  page;
+
+    }
+
+    @Override
+    public Object getUserByNotInRole(QueryUserVo user, PageLink pageLink) {
+        log.info("查询当前角色下的用户绑定数据",user);
+        SqlVo sqlVo =  splicingSvc.getUserByNotInRole(user);
+        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
+        return  page;
+    }
+
+
+    private  List<User> getUserAc( List<UUID> userIds)
+    {
+
+        //ser user = userService.findAll(null, new UserId(vo.getUserId()));
+        Map<String, Object> queryParam  =new HashMap<>();
+        queryParam.put("idlist",userIds);
+        List<User>  userList=   userService.findAll(queryParam);
+        log.info("打印当前的查询结果:{}",userList);
+        return  userList;
+
     }
 
 

@@ -1,5 +1,6 @@
 package org.thingsboard.server.service.userrole;
 
+import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.entity.user.CodeVo;
 import org.thingsboard.server.entity.user.UserVo;
@@ -27,5 +28,14 @@ public interface SqlSplicingSvc {
      * 查询用户编码
      */
     SqlVo  getUserCode(CodeVo vo);
+
+
+    /**
+     * 查询角色下的用户
+     */
+    SqlVo  getUserByInRole(QueryUserVo vo);
+
+
+    SqlVo  getUserByNotInRole(QueryUserVo vo);
 
 }
