@@ -525,9 +525,9 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理得 {用户编码 或角色编码}得生成获取")
     @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
     public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
-        return  checkSvc.queryCode(vo);
-//        SecurityUser  securityUser =  getCurrentUser();
-//        return  checkSvc.queryCodeNew(vo,securityUser.getTenantId());
+        SecurityUser  securityUser =  getCurrentUser();
+        return  checkSvc.queryCodeNew(vo,securityUser.getTenantId());
+
     }
 
 

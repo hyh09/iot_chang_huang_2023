@@ -16,6 +16,8 @@ import org.thingsboard.server.service.userrole.CheckSvc;
 import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -93,45 +95,38 @@ public class CheckImpl  implements CheckSvc {
     public Object queryCodeNew(CodeVo vo,TenantId tenantId) {
           if(vo.getKey().equals(CodeKeyNum.key_user.getKey()))
           {
-            return   getUserAvailableCode(tenantId);
+
+              List<String> codes = userService.findAllCodesByTenantId(tenantId.getId());
+              return getUserAvailableCode(codes,CodeKeyNum.key_user);
           }
 
-        return geRoleAvailableCode(tenantId);
+        List<String> codes = tenantSysRoleService.findAllCodesByTenantId();
+        return getUserAvailableCode(codes,CodeKeyNum.key_user);
     }
 
 
 
 
-    public String getUserAvailableCode(TenantId tenantId) {
-        List<String> codes = userService.findAllCodesByTenantId(tenantId.getId());
+    public String getUserAvailableCode(List<String> codes,CodeKeyNum codeKeyNum) {
        if(CollectionUtils.isEmpty(codes))
        {
-           return CodeKeyNum.key_user.getValue()+CodeKeyNum.key_user.getInit();
+           return codeKeyNum.getValue()+codeKeyNum.getInit();
        }
-
-      return  null;
-    }
-
-
-
-    public String geRoleAvailableCode(TenantId tenantId) {
-        var codes = tenantSysRoleService.findAllCodesByTenantId();
-        if (codes.isEmpty()) {
-            return "05";
-        } else {
-            var ints = codes.stream().map(e -> Integer.valueOf(e.split("")[1])).sorted().collect(Collectors.toList());
-            int start = 0;
-            while (true) {
-                if (ints.size() - 1 == start) {
-                    return "" + String.format("%04d", start + 2);
-                }
-                if (!ints.get(start).equals(start + 1)) {
-                    return "" + String.format("%04d", start + 1);
-                }
-                start += 1;
-            }
+        List<Integer> list2 =  codes.stream().filter(s->!StringUtils.isEmpty(s) && s.startsWith(codeKeyNum.getValue())).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
+        if(CollectionUtils.isEmpty(list2))
+        {
+            return codeKeyNum.getValue()+codeKeyNum.getInit();
         }
+       List<Integer>  integerList =findRemoveNumber1(list2,list2.size());
+       if(CollectionUtils.isEmpty(integerList))
+       {
+           Integer integer=  (list2.get(list2.size() - 1)+1);
+           return format(integer+"",codeKeyNum);
+       }
+        Integer  i1=    integerList.get(0);
+       return format(i1+"",codeKeyNum);
     }
+
 
 
 
@@ -147,11 +142,27 @@ public class CheckImpl  implements CheckSvc {
         {
             m1=codeKeyNum.getInit();
         }
-        Integer integer  = Integer.valueOf(m1) +1;
+        Integer integer  = Integer.valueOf(m1);
        String result = String.format(codeKeyNum.getCheckSing(), integer);
         log.info("result=====================:{}",result);
         return  codeKeyNum.getValue()+result;
     }
 
+
+    private static List<Integer> findRemoveNumber1(List<Integer> numbers, int count) {
+        List<Integer> removeList = new ArrayList<>();
+        //将现有数加入BitSet
+        BitSet bitSet = new BitSet(count);
+        for (Integer number : numbers) {
+            bitSet.set(number);
+        }
+        //遍历查找
+        for (int i = 1; i <= count; i++) {
+            if (!bitSet.get(i)) {
+                removeList.add(i);
+            }
+        }
+        return removeList;
+    }
 
 }
