@@ -1,6 +1,7 @@
 package org.thingsboard.server.service.userrole;
 
 import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.entity.user.CodeVo;
 import org.thingsboard.server.entity.user.UserVo;
 import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
@@ -20,4 +21,11 @@ public interface SqlSplicingSvc {
 
 
     SqlVo  getCountUserSqlByVo(UserVo vo);
+
+
+    /**
+     * 查询用户编码
+     */
+    SqlVo  getUserCode(CodeVo vo);
+
 }

@@ -9,9 +9,12 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
@@ -24,6 +27,7 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,6 +49,10 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
+        if(entity.getId() != null)
+        {
+           return updateRecord(entity);
+        }
         SecurityUser securityUser =  getCurrentUser();
         entity.setCreatedUser(securityUser.getUuidId());
         entity.setUpdatedUser(securityUser.getUuidId());
@@ -54,12 +62,30 @@ public class UserRoleController extends BaseController{
     @ApiOperation(value = "角色的更新接口")
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     @ResponseBody
+    @Transactional
     public   TenantSysRoleEntity  updateRecord(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
         SecurityUser securityUser =  getCurrentUser();
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setRoleCode(null);
         return   tenantSysRoleService.updateRecord(entity);
     }
+
+    @ApiOperation(value = "角色id的详情的查询")
+    @RequestMapping(value = "/getRoleById/{roleId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Object getRoleById(@PathVariable("roleId") String roleId) throws ThingsboardException {
+        return   tenantSysRoleService.queryById(toUUID(roleId));
+    }
+
+
+    @ApiOperation(value = "角色模块的 无参查询全部数据")
+    @RequestMapping(value = "/findAll", method = RequestMethod.GET)
+    @ResponseBody
+    public Object findAll() throws ThingsboardException {
+        Map<String, Object> queryParam   = new HashMap<>();
+        return   tenantSysRoleService.findAll(queryParam);
+    }
+
 
     @ApiOperation(value = "角色的删除接口")
     @ApiImplicitParams({
