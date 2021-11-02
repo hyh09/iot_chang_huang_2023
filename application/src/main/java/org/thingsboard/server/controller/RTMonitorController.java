@@ -11,13 +11,12 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
-import org.thingsboard.server.hs.entity.vo.*;
-import org.thingsboard.server.hs.service.DeviceMonitorService;
-import org.thingsboard.server.hs.service.DictDeviceService;
-import org.thingsboard.server.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;

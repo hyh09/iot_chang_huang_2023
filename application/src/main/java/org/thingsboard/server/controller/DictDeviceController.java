@@ -12,10 +12,10 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.hs.entity.po.DictDevice;
-import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
-import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
-import org.thingsboard.server.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;

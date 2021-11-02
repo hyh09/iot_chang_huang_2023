@@ -10,22 +10,18 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.alarm.*;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.AlarmId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.TimePageLink;
-import org.thingsboard.server.hs.entity.enums.AlarmSimpleLevel;
-import org.thingsboard.server.hs.entity.enums.AlarmSimpleStatus;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordQuery;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordResource;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordResult;
-import org.thingsboard.server.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.hs.service.DeviceMonitorService;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
+import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordQuery;
+import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResource;
+import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResult;
+import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.permission.Operation;
-
-import java.util.*;
 
 /**
  * 报警记录接口
