@@ -3,24 +3,18 @@ package org.thingsboard.server.hs.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.alarm.Alarm;
-import org.thingsboard.server.common.data.alarm.AlarmSeverity;
 import org.thingsboard.server.common.data.alarm.AlarmStatus;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.AlarmId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.*;
+import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -28,23 +22,25 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.model.sql.AlarmEntity;
-import org.thingsboard.server.dao.model.sql.AlarmInfoEntity;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.model.sql.DeviceProfileEntity;
-import org.thingsboard.server.dao.model.sql.RelationEntity;
 import org.thingsboard.server.dao.sql.alarm.AlarmRepository;
+import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
+import org.thingsboard.server.dao.sql.device.DeviceRepository;
+import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import org.thingsboard.server.hs.dao.*;
-import org.thingsboard.server.hs.entity.po.DictData;
+import org.thingsboard.server.hs.entity.enums.AlarmSimpleLevel;
+import org.thingsboard.server.hs.entity.enums.AlarmSimpleStatus;
 import org.thingsboard.server.hs.entity.po.DictDevice;
 import org.thingsboard.server.hs.entity.vo.*;
+import org.thingsboard.server.hs.utils.CommonUtil;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -62,10 +58,22 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     DeviceProfileRepository deviceProfileRepository;
 
     @Autowired
+    DeviceRepository deviceRepository;
+
+    @Autowired
     AlarmRepository alarmRepository;
 
     @Autowired
+    AttributeKvRepository attributeKvRepository;
+
+    @Autowired
     DictDeviceRepository dictDeviceRepository;
+
+    @Autowired
+    TimeseriesService timeseriesService;
+
+    @Autowired
+    DictDeviceService dictDeviceService;
 
     @Autowired
     DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
@@ -83,7 +91,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public PageData<DeviceProfile> listDeviceProfile(TenantId tenantId, String name, PageLink pageLink) {
-        // 动态条件查询 TODO 增加@Type
+        // 动态条件查询
         Specification<DeviceProfileEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -148,13 +156,13 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         }
         switch (alarmStatus) {
             case ACTIVE_ACK:
-                if (!alarm.getStatus().equals(AlarmStatus.ACTIVE_UNACK)) {
+                if (AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).isCanBeConfirm()) {
                     throw new ThingsboardException("当前报警信息状态非未确认！", ThingsboardErrorCode.GENERAL);
                 }
                 alarm.setAckTs(ts);
                 break;
             case CLEARED_ACK:
-                if (!alarm.getStatus().equals(AlarmStatus.ACTIVE_ACK)) {
+                if (AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).isCanBeClear()) {
                     throw new ThingsboardException("当前报警信息状态非已确认！", ThingsboardErrorCode.GENERAL);
                 }
                 alarm.setClearTs(ts);
@@ -167,46 +175,106 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 获得报警记录列表
      *
-     * @param tenantId 租户Id
-     * @param query    查询条件
+     * @param tenantId     租户Id
+     * @param query        查询条件
      * @param timePageLink 分页排序参数
      * @return 报警记录列表
-     * @see AlarmRepository#findAlarms
+     * @see AlarmRepository#findAlarms 参考
      */
     @Override
     public PageData<AlarmRecordResult> listAlarmsRecord(TenantId tenantId, AlarmRecordQuery query, TimePageLink timePageLink) {
         var deviceList = this.listDevice(query);
-        var deviceIdList = deviceList.stream().map(Device::getId).collect(Collectors.toList());
+        var deviceIdMap = deviceList.stream().collect(Collectors.toMap(e -> e.getId().getId().toString(), Function.identity()));
+        var deviceIdList = deviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
 
-        // TODO
+        var result = this.alarmRepository.findAlarmsByDeviceIdList(tenantId.getId(), deviceIdList, EntityType.DEVICE.toString(),
+                timePageLink.getStartTime(), timePageLink.getEndTime(), query.getAlarmSimpleStatus().toAlarmStatusSet(),
+                query.getAlarmSimpleLevel().toAlarmSeveritySet(), DaoUtil.toPageable(timePageLink));
 
-        // 动态条件查询
-        Specification<AlarmEntity> specification = (root, query1, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            Join<AlarmEntity, RelationEntity> join = root.join("toId", JoinType.LEFT);
-            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
-            predicates.add(cb.equal(join.get("relationTypeGroup"), EntityType.ALARM.toString()));
-            predicates.add(cb.equal(join.get("toType"), EntityType.ALARM.toString()));
-            predicates.add(cb.in(join.get("fromId")).value(deviceIdList));
-            predicates.add(cb.equal(join.get("fromType"), EntityType.DEVICE.toString()));
-            predicates.add(cb.equal(join.get("fromType"), EntityType.DEVICE.toString()));
-            predicates.add(cb.or(cb.isNotNull(join.get("fromId")), cb.in(root.get("originatorId")).value(deviceIdList)));
-            if (timePageLink.getStartTime() !=null && timePageLink.getStartTime() > 0) {
-                predicates.add(cb.greaterThan(root.get("createdTime"), timePageLink.getStartTime()));
-            }
-            if (timePageLink.getEndTime() !=null && timePageLink.getEndTime() > 0) {
-                predicates.add(cb.lessThan(root.get("createdTime"), timePageLink.getEndTime()));
-            }
-            predicates.add(cb.in(root.get("status")).value(query.getAlarmSimpleStatus().toAlarmStatusSet()));
-            predicates.add(cb.in(root.get("severity")).value(query.getAlarmSimpleLevel().toAlarmSeveritySet()));
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+        var recordResultList = result.getContent().stream().map(e -> {
+            var device = deviceIdMap.get(e.getOriginatorId().toString());
+            var status = AlarmSimpleStatus.valueOf(e.getStatus().toString());
+            var level = AlarmSimpleLevel.valueOf(e.getSeverity().toString());
+            return AlarmRecordResult.builder()
+                    .name(device.getName())
+                    .id(e.getId().toString())
+                    .createTime(e.getCreatedTime())
+                    .title(e.getType())
+                    .status(status)
+                    .level(level)
+                    .statusStr(status.getName())
+                    .levelStr(level.getName())
+                    .isCanBeConfirm(status.isCanBeConfirm())
+                    .isCanBeClear(status.isCanBeClear())
+                    .info(e.getDetails() != null && e.getDetails().get("data") != null ? e.getDetails().get("data").toString() : null)
+                    .build();
+        }).collect(Collectors.toList());
 
-        // 查询数据
-        var r = DaoUtil.toPageData(this.alarmRepository.findAll(specification, DaoUtil.toPageable(timePageLink)));
+        return new PageData<>(recordResultList, result.getTotalPages(), result.getTotalElements(), result.hasNext());
+    }
 
-        // TODO 做数据的抽离分析
+    /**
+     * 获得实时监控数据列表
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @param pageLink 分页参数
+     * @return 实时监控数据列表
+     */
+    @Override
+    public RTMonitorResult getRTMonitorData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
         return null;
+    }
+
+    /**
+     * 查询设备详情
+     *
+     * @param tenantId 租户Id
+     * @param id       设备id
+     * @return 设备详情
+     */
+    @Override
+    public DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException {
+        return null;
+    }
+
+    /**
+     * 查询设备分组属性历史数据
+     *
+     * @param tenantId          租户Id
+     * @param deviceId          设备Id
+     * @param groupPropertyName 属性名称
+     * @param startTime         开始时间
+     * @return 设备分组属性历史数据
+     */
+    @Override
+    public List<DeviceDetailGroupPropertyResult> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime) throws ExecutionException, InterruptedException {
+        return null;
+    }
+
+    /**
+     * 查询设备遥测数据历史数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 设备遥测数据历史数据
+     */
+    @Override
+    public PageData<Map<String, Object>> listDeviceTelemetryHistory(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        return null;
+    }
+
+    /**
+     * 查询设备历史-表头，包含时间
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 查询设备历史-表头，包含时间
+     */
+    @Override
+    public List<DictDeviceGroupPropertyVO> listDictDeviceGroupPropertyTitle(TenantId tenantId, String deviceId) {
+       return null;
     }
 
     /**
@@ -229,9 +297,70 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
     /**
      * 查询设备Id列表
+     *
+     * @param t 查询设备参数实体
      */
     public <T extends FactoryDeviceQuery> List<Device> listDevice(T t) {
-        // TODO 查询设备列表
-        return new ArrayList<>();
+        // TODO 查询设备列表 delete
+        // TODO delete
+        Device device1 = new Device();
+        device1.setName("测试设备");
+        device1.setId(DeviceId.fromString("e3ca9a30-3559-11ec-9e0b-1178259bc7c9"));
+        Device device2 = new Device();
+        device2.setName("实际设备");
+        device2.setId(DeviceId.fromString("945353e0-3854-11ec-b4d5-2d3cef2c7846"));
+        return new ArrayList<>() {{
+            add(device1);
+            add(device2);
+        }};
+    }
+
+    /**
+     * 查询设备Id分页列表
+     *
+     * @param t 查询设备参数实体
+     */
+    public <T extends FactoryDeviceQuery> PageData<Device> listDevicePageData(T t, PageLink pageLink) {
+        // TODO 查询设备列表 delete
+        // TODO delete
+        Device device1 = new Device();
+        device1.setName("测试设备");
+        device1.setId(DeviceId.fromString("e3ca9a30-3559-11ec-9e0b-1178259bc7c9"));
+        Device device2 = new Device();
+        device2.setName("实际设备");
+        device2.setId(DeviceId.fromString("945353e0-3854-11ec-b4d5-2d3cef2c7846"));
+        var list = new ArrayList<Device>() {{
+            add(device1);
+            add(device2);
+        }};
+        return new PageData<>(list, 1, 2, false);
+    }
+
+    /**
+     * 获得近几个月报警次数
+     *
+     * @param tenantId        租户id
+     * @param allDeviceIdList 设备id列表
+     */
+    public List<AlarmTimesResult> listAlarmTimesResult(TenantId tenantId, List<UUID> allDeviceIdList) {
+        // 获得报警次数
+        var startTimeList = CommonUtil.listLatestMonthsStartTime(5);
+        var alarmList = this.alarmRepository.findAllAlarmsByStartTime(tenantId.getId(), allDeviceIdList, EntityType.DEVICE.toString(), startTimeList.get(0));
+        var alarmMap = alarmList.stream().collect(Collectors.groupingBy(e -> {
+            for (int i = 0; i <= startTimeList.size() - 1; i++) {
+                if (e.getCreatedTime() > startTimeList.get(i + 1)) {
+                    return startTimeList.get(i);
+                }
+            }
+            return startTimeList.get(0);
+        }));
+
+        return startTimeList.stream().map(e -> {
+            var t = LocalDateTime.ofInstant(Instant.ofEpochMilli(e), ZoneId.systemDefault());
+            var month = YearMonth.of(t.getYear(), t.getMonth()).toString();
+            return AlarmTimesResult.builder()
+                    .time(month)
+                    .num(alarmMap.get(e) != null ? alarmMap.get(e).size() : 0).build();
+        }).collect(Collectors.toList());
     }
 }

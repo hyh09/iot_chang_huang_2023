@@ -370,4 +370,18 @@ public class DictDeviceServiceImpl implements DictDeviceService {
             return r;
         }, (a, b) -> null);
     }
+
+    /**
+     * 获得设备字典分组属性，不包含分组
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId) {
+        var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        return groupPropertyList.stream()
+                .map(g -> DictDeviceGroupPropertyVO.builder()
+                        .id(g.getId()).name(g.getName()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
+                        .build()).collect(Collectors.toList());
+    }
 }

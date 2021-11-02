@@ -1,5 +1,6 @@
 package org.thingsboard.server.hs.utils;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -27,5 +28,12 @@ public class CommonUtil {
             temp.add(YearMonth.now().minusMonths(i).atDay(1).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli());
         }
         return temp;
+    }
+
+    /**
+     * 获得当天零点的时间
+     */
+    public static Long getTodayStartTime() {
+        return LocalDate.now().atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 }

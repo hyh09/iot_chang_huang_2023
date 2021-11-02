@@ -6,6 +6,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.hs.entity.po.DictDevice;
+import org.thingsboard.server.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
@@ -77,4 +78,12 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId);
+
+
+    /**
+     * 获得设备字典分组属性，不包含分组
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId);
 }

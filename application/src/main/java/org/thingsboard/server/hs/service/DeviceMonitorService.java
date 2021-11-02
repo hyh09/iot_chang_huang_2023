@@ -10,12 +10,11 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.hs.entity.po.DictDevice;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordQuery;
-import org.thingsboard.server.hs.entity.vo.AlarmRecordResult;
-import org.thingsboard.server.hs.entity.vo.DeviceProfileVO;
-import org.thingsboard.server.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.hs.entity.vo.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 设备监控接口
@@ -78,4 +77,53 @@ public interface DeviceMonitorService {
      * @return 报警记录列表
      */
     PageData<AlarmRecordResult> listAlarmsRecord(TenantId tenantId, AlarmRecordQuery query, TimePageLink pageLink);
+
+    /**
+     * 获得实时监控数据列表
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @param pageLink 分页参数
+     * @return 实时监控数据列表
+     */
+    RTMonitorResult getRTMonitorData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink);
+
+    /**
+     * 查询设备详情
+     *
+     * @param tenantId 租户Id
+     * @param id       设备id
+     * @return 设备详情
+     */
+    DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException;
+
+    /**
+     * 查询设备分组属性历史数据
+     *
+     * @param tenantId          租户Id
+     * @param deviceId          设备Id
+     * @param groupPropertyName 属性名称
+     * @param startTime         开始时间
+     * @return 设备分组属性历史数据
+     */
+    List<DeviceDetailGroupPropertyResult> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime) throws ExecutionException, InterruptedException;
+
+    /**
+     * 查询设备遥测数据历史数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 设备遥测数据历史数据
+     */
+    PageData<Map<String, Object>> listDeviceTelemetryHistory(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
+
+    /**
+     * 查询设备历史-表头，包含时间
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 查询设备历史-表头，包含时间
+     */
+    List<DictDeviceGroupPropertyVO> listDictDeviceGroupPropertyTitle(TenantId tenantId, String deviceId);
 }
