@@ -20,14 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.DeviceInfo;
-import org.thingsboard.server.common.data.DeviceTransportType;
-import org.thingsboard.server.common.data.EntitySubtype;
-import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
@@ -39,12 +36,8 @@ import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import javax.persistence.criteria.Predicate;
+import java.util.*;
 
 /**
  * Created by Valerii Sosliuk on 5/6/2017.
@@ -292,5 +285,21 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                         type,
                         Objects.toString(pageLink.getTextSearch(), ""),
                         DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
+    public List<DeviceEntity> findDeviceListBuyCdn(DeviceEntity deviceEntity){
+        if(deviceEntity != null){
+            Specification<DeviceEntity> specification = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.equal(root.get("tenantId"),deviceEntity.getTenantId()));
+                if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(deviceEntity.getName())){
+                    predicates.add(cb.like(root.get("name"),"%" + deviceEntity.getName().trim() + "%"));
+                }
+                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            };
+            return deviceRepository.findAll(specification);
+        }
+        return new ArrayList<>();
     }
 }

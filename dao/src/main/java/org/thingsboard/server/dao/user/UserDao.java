@@ -22,6 +22,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.Dao;
 import org.thingsboard.server.dao.TenantEntityDao;
 
+import java.util.Map;
 import java.util.UUID;
 
 public interface UserDao extends Dao<User>, TenantEntityDao {
@@ -34,6 +35,8 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
      */
     User save(TenantId tenantId, User user);
 
+    int  update(User user);
+
     /**
      * Find user by email.
      *
@@ -41,6 +44,8 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
      * @return the user entity
      */
     User findByEmail(TenantId tenantId, String email);
+
+    User  findByPhoneNumber(String phoneNumber);
 
     /**
      * Find users by tenantId and page link.
@@ -69,4 +74,9 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
      * @return the list of user entities
      */
     PageData<User> findCustomerUsers(UUID tenantId, UUID customerId, PageLink pageLink);
+
+    /**
+     * 单表的分页查询
+     */
+    PageData<User> findAll(Map<String, Object> queryParam, PageLink pageLink);
 }

@@ -63,6 +63,15 @@ public class ModelConstants {
     public static final String USER_TENANT_ID_PROPERTY = TENANT_ID_PROPERTY;
     public static final String USER_CUSTOMER_ID_PROPERTY = CUSTOMER_ID_PROPERTY;
     public static final String USER_EMAIL_PROPERTY = "email";
+    //本次新增的字段
+    public  static   final String USER_PHONE_NUMBER_PROPERTY   ="phone_number";
+    public  static  final String  USER_ACTIVE_STATUS_PROPERTY ="active_status";
+    public  static  final  String  USER_USERCODE_PROPERTY="user_code";
+    public  static  final String USER_USER_NAME_PROPERTY="user_name";
+    public  static  final String USER_USER_CREATOR_PROPERTY="user_creator";
+
+
+
     public static final String USER_AUTHORITY_PROPERTY = "authority";
     public static final String USER_FIRST_NAME_PROPERTY = "first_name";
     public static final String USER_LAST_NAME_PROPERTY = "last_name";
@@ -141,6 +150,24 @@ public class ModelConstants {
     public static final String CUSTOMER_BY_TENANT_AND_TITLE_VIEW_NAME = "customer_by_tenant_and_title";
 
     /**
+     * 菜单表.
+     */
+    public static final String MENU_COLUMN_FAMILY_NAME = "tb_menu";
+    public static final String TENANT_MENU_COLUMN_FAMILY_NAME = "tb_tenant_menu";
+
+    /**
+     * 工厂表.
+     */
+    public static final String FACTORY_COLUMN_FAMILY_NAME = "hs_factory";
+    /**
+     * 车间表.
+     */
+    public static final String WORKSHOP_COLUMN_FAMILY_NAME = "hs_workshop";
+    /**
+     * 生产线表.
+     */
+    public static final String PRODUCTION_LINE_COLUMN_FAMILY_NAME = "hs_production_line";
+    /**
      * Cassandra device constants.
      */
     public static final String DEVICE_COLUMN_FAMILY_NAME = "device";
@@ -155,6 +182,10 @@ public class ModelConstants {
     public static final String DEVICE_DEVICE_DATA_PROPERTY = "device_data";
     public static final String DEVICE_FIRMWARE_ID_PROPERTY = "firmware_id";
     public static final String DEVICE_SOFTWARE_ID_PROPERTY = "software_id";
+    public static final String DEVICE_PRODUCTION_LINE_ID_PROPERTY = "production_line_id";
+    public static final String DEVICE_IMAGES_PROPERTY = "images";
+    public static final String DEVICE_ICON_PROPERTY = "icon";
+
 
     public static final String DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_and_search_text";
     public static final String DEVICE_BY_TENANT_BY_TYPE_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_by_type_and_search_text";

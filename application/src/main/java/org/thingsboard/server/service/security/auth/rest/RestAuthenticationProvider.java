@@ -45,6 +45,8 @@ import org.thingsboard.server.service.security.system.SystemSecurityService;
 import ua_parser.Client;
 
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Component
@@ -88,7 +90,14 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
     }
 
     private Authentication authenticateByUsernameAndPassword(Authentication authentication, UserPrincipal userPrincipal, String username, String password) {
-        User user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
+        User user = new User();
+        if(isEmail(username)) {
+              user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
+         }else {
+            user = userService.findByPhoneNumber( username);
+        }
+
+        System.out.println("打印的结果:"+user);
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
@@ -198,5 +207,22 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         auditLogService.logEntityAction(
                 user.getTenantId(), user.getCustomerId(), user.getId(),
                 user.getName(), user.getId(), null, actionType, e, clientAddress, browser, os, device);
+    }
+
+
+
+    private static boolean isEmail(String string) {
+        log.info("【isEmail】打印当前得入参:{}",string);
+        if (string == null)
+            return false;
+        String regEx1 = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
+        Pattern p;
+        Matcher m;
+        p = Pattern.compile(regEx1);
+        m = p.matcher(string);
+        if (m.matches())
+            return true;
+        else
+            return false;
     }
 }
