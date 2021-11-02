@@ -35,4 +35,7 @@ public interface SqlSplicingSvc {
      */
     SqlVo  getUserByInRole(QueryUserVo vo);
 
+
+    SqlVo  getUserByNotInRole(QueryUserVo vo);
+
 }

@@ -204,6 +204,45 @@ public class UserRoleController extends BaseController{
 
 
 
+    /**
+     * 角色查询用户已绑定的用户
+     * @return
+     */
+    @ApiOperation(value = "角色查询未绑定用户【分页查询】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色id"),
+            @ApiImplicitParam(name = "UserCode", value = "用户编码"),
+            @ApiImplicitParam(name = "UserCode", value = "用户编码"),
+    })
+    @RequestMapping(value = "/getUserByNotInRole/{roleId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public Object getUserByNotInRole(
+            @PathVariable("roleId") UUID roleId,
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String userCode,
+            @RequestParam(required = false) String userName
+
+    ) throws ThingsboardException {
+
+
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        QueryUserVo  vo = new QueryUserVo();
+        vo.setRoleId(roleId);
+        vo.setUserName(userName);
+        vo.setUserCode(userCode);
+        log.info("打印当前的入参:{}",vo);
+        return userRoleMemuSvc.getUserByNotInRole(vo,pageLink);
+
+    }
+
+
+
+
+
 
 
 

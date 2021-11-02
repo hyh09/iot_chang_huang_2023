@@ -181,6 +181,13 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
     }
 
+    @Override
+    public Object getUserByNotInRole(QueryUserVo user, PageLink pageLink) {
+        log.info("查询当前角色下的用户绑定数据",user);
+        SqlVo sqlVo =  splicingSvc.getUserByNotInRole(user);
+        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
+        return  page;
+    }
 
 
     private  List<User> getUserAc( List<UUID> userIds)

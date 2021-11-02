@@ -44,5 +44,7 @@ public interface UserRoleMemuSvc {
   */
  Object getUserByInRole( QueryUserVo user, PageLink pageLink);
 
+ Object getUserByNotInRole( QueryUserVo user, PageLink pageLink);
+
 
 }

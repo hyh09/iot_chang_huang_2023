@@ -126,7 +126,7 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
         StringBuffer sql  = new StringBuffer();
 
         sql.append("select cast(t1.id as varchar(255)) as id ,t1.phone_number as phoneNumber, t1.active_status as activeStatus,t1.user_code as userCode ,t1.user_creator as userCreator," +
-                "   t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName,  " +
+                "   t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName    " +
                 "from  tb_user  t1  ");
         sql.append(" left join tb_user_menu_role b1  on t1.id=b1.user_id  where 1=1 ");
 
@@ -150,6 +150,37 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
 
         return  new  SqlVo(sql+whereSql.toString(),param);
 
+    }
+
+    @Override
+    public SqlVo getUserByNotInRole(QueryUserVo vo) {
+        Map<String, Object> param= new HashMap<>();
+
+        StringBuffer sql  = new StringBuffer();
+
+        sql.append("select cast(t1.id as varchar(255)) as id ,t1.phone_number as phoneNumber, t1.active_status as activeStatus,t1.user_code as userCode ,t1.user_creator as userCreator," +
+                "   t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName  " +
+                "from  tb_user  t1  where  1=1  ");
+
+       StringBuffer whereSql  = new StringBuffer();
+        if(vo.getRoleId() != null)
+        {
+
+            whereSql.append(" and  t1.id not in  (select b1.user_id  from tb_user_menu_role b1 where b1.tenant_sys_role_id =:roleId  ) ");
+            param.put("roleId", vo.getRoleId());
+        }
+        if(StringUtils.isNoneBlank(vo.getUserName()))
+        {
+            whereSql.append(" and t1.user_name =:userName ");
+            param.put("userName", vo.getUserName());
+        }
+        if(StringUtils.isNoneBlank(vo.getUserCode()))
+        {
+            whereSql.append(" and t1.user_code =:userCode ");
+            param.put("userCode", vo.getUserCode());
+        }
+
+        return  new  SqlVo(sql+whereSql.toString(),param);
     }
 
 
