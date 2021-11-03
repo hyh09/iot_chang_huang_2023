@@ -28,7 +28,7 @@ package:
   script:
     - echo "打包并构建镜像"
     - yarn -v
-    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2
+    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2 -X
     - ls application/target
   only:
     - dev
