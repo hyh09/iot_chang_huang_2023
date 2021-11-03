@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
@@ -177,8 +178,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
         log.info("查询当前角色下的用户绑定数据",user);
         SqlVo sqlVo =  splicingSvc.getUserByInRole(user);
         Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
-        return  page;
-
+        return new PageData<User>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     @Override
@@ -186,7 +186,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
         log.info("查询当前角色下的用户绑定数据",user);
         SqlVo sqlVo =  splicingSvc.getUserByNotInRole(user);
         Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
-        return  page;
+        return new PageData<User>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
 
