@@ -3,6 +3,7 @@ package org.thingsboard.server.common.data.vo.user;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.StringUtils;
 
 /**
  * @program: thingsboard
@@ -41,9 +42,18 @@ public class FindUserVo {
     private  String username;
 
 
-    @JsonProperty("createdTim")
-    private  long time;
+    private  String time;
 
+    private  long createTime;
 
+    public long getCreateTime() {
+        if(!StringUtils.isEmpty(time)) {
+            return Long.parseLong(time);
+        }
+        return  0;
+    }
 
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
 }
