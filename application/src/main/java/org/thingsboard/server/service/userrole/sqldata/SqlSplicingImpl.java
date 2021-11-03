@@ -29,7 +29,7 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
     public   SqlVo getSqlByVo(InMenuByUserVo vo)
     {
         //返回的字段
-        String sqlPre="select  cast(m1.parent_id as varchar(255)) as pid,cast(m1.id as varchar(255)) as id ,m1.sys_menu_name as name ,(case when c1.id is not null then '1' else '0' end) as mark   ";
+        String sqlPre="select  cast(m1.created_time as varchar) as time,cast(m1.parent_id as varchar(255)) as pid,cast(m1.id as varchar(255)) as id ,m1.sys_menu_name as name ,(case when c1.id is not null then '1' else '0' end) as mark   ";
         String fromPre="  from  tb_user  t1     " +
                 "   left join tb_user_menu_role b1  on t1.id=b1.user_id     " +
                 "   left join tb_tenant_sys_role c1 on  c1.id =b1.tenant_sys_role_id    " +
@@ -129,7 +129,7 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
         Map<String, Object> param= new HashMap<>();
 
         StringBuffer sql  = new StringBuffer();
-
+//        cast(t1.created_time as varchar(255))
         sql.append("select cast(t1.id as varchar(255)) as id ,t1.phone_number as phoneNumber, t1.active_status as activeStatus,t1.user_code as userCode ,t1.user_creator as userCreator,cast(t1.created_time as varchar(255))  as time, " +
                 "   t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName    " +
                 "from  tb_user  t1  ");

@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.util.BeanToMap;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.PageRoleVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -202,7 +203,7 @@ public class UserRoleController extends BaseController{
         vo.setUserName(userName);
         vo.setUserCode(userCode);
         log.info("打印当前的入参:{}",vo);
-       return userRoleMemuSvc.getUserByInRole(vo,pageLink);
+       return userRoleMemuSvc.getUserByInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
     }
 
@@ -210,7 +211,7 @@ public class UserRoleController extends BaseController{
 
 
     /**
-     * 角色查询用户已绑定的用户
+     * 角色查询用户mei绑定的用户
      * @return
      */
     @ApiOperation(value = "角色查询未绑定用户【分页查询】")
@@ -243,7 +244,8 @@ public class UserRoleController extends BaseController{
         SecurityUser securityUser =  getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
         vo.setCreateId(securityUser.getUuidId());
-        return userRoleMemuSvc.getUserByNotInRole(vo,pageLink);
+
+        return userRoleMemuSvc.getUserByNotInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
     }
 

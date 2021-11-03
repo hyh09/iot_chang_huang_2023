@@ -23,4 +23,6 @@ public class OutMenuByUserVo implements VoBeanConverSvc {
     @JsonProperty("flg")
     private  String mark;
 
+    private  String time;
+
 }
