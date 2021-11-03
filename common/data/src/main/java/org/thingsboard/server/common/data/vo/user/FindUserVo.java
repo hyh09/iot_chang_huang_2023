@@ -44,16 +44,19 @@ public class FindUserVo {
 
     private  String time;
 
-    private  long createTime;
+    private  long createdTime;
 
-    public long getCreateTime() {
+    public void setCreatedTime(long createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public long getCreatedTime() {
         if(!StringUtils.isEmpty(time)) {
             return Long.parseLong(time);
         }
         return  0;
     }
 
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
+
+
 }
