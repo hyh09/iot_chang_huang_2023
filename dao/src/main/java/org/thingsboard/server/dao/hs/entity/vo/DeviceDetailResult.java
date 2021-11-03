@@ -58,11 +58,23 @@ public class DeviceDetailResult {
      * 实时数据
      */
     @ApiModelProperty("实时数据")
-    private List<DeviceDetailGroupResult> resultList;
+    private List<DictDeviceGroupVO> resultList;
 
     /**
      * 预警次数列表，从远及近
      */
     @ApiModelProperty("预警次数列表，从远及近")
     private List<AlarmTimesResult> alarmTimesList;
+
+    /**
+     * 设备名称
+     */
+    @ApiModelProperty("设备名称")
+    private String name;
+
+    /**
+     * 设备是否在线
+     */
+    @ApiModelProperty("设备是否在线")
+    private Boolean isOnLine;
 }

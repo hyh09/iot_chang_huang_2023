@@ -16,6 +16,7 @@ import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
@@ -98,20 +99,7 @@ public class DictDeviceController extends BaseController {
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
-        if (!StringUtils.isBlank(dictDeviceVO.getCode())) {
-            if (!dictDeviceVO.getCode().startsWith("SBZD")) {
-                throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
-            }
-            try {
-                int intV = Integer.parseInt(dictDeviceVO.getCode().split("SBZD")[1]);
-                if (intV < 1 || intV > 9999) {
-                    throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
-                }
-            } catch (Exception ignore) {
-                throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
-            }
-        }
-
+        CommonUtil.checkCode(dictDeviceVO.getCode(), "SBZD");
         this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
         return dictDeviceVO;
     }

@@ -47,6 +47,12 @@ public class DictDevicePropertyEntity extends BasePgEntity<DictDevicePropertyEnt
     @Column(name = HsModelConstants.DICT_DEVICE_PROPERTY_CONTENT)
     private String content;
 
+    /**
+     * 排序
+     */
+    @Column(name = HsModelConstants.GENERAL_SORT)
+    private Integer sort;
+
     public DictDevicePropertyEntity() {
     }
 
@@ -58,6 +64,7 @@ public class DictDevicePropertyEntity extends BasePgEntity<DictDevicePropertyEnt
 
         this.name = common.getName();
         this.content = common.getContent();
+        this.sort = common.getSort();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -73,6 +80,7 @@ public class DictDevicePropertyEntity extends BasePgEntity<DictDevicePropertyEnt
         }
         common.setName(name);
         common.setContent(content);
+        common.setSort(sort);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);
