@@ -73,7 +73,8 @@
                     <workingDirectory>${basedir}</workingDirectory>
                 </configuration>
                 <executions>
-                    <execution>
+                    <!--提前准备好安装环境-->
+                    <!--<execution>
                         <id>install node and yarn</id>
                         <goals>
                             <goal>install-node-and-yarn</goal>
@@ -82,7 +83,7 @@
                             <nodeVersion>v12.16.1</nodeVersion>
                             <yarnVersion>v1.22.4</yarnVersion>
                         </configuration>
-                    </execution>
+                    </execution>-->
                     <execution>
                         <id>yarn install</id>
                         <goals>
