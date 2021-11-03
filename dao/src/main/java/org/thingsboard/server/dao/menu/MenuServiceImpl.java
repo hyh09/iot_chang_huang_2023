@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.menu;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
@@ -28,9 +29,9 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
 
     private static final String DEFAULT_TENANT_REGION = "Global";
     public static final String INCORRECT_MENU_ID = "Incorrect menuId ";
+    public static final int ONE = 1;
 
     private final MenuDao menuDao;
-
     private final TenantMenuDao tenantMenuDao;
 
     public MenuServiceImpl(MenuDao menuDao,TenantMenuDao tenantMenuDao){
@@ -45,10 +46,16 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
      * @return
      */
     @Override
-    public Menu saveMenu(Menu menu) {
+    public Menu saveMenu(Menu menu) throws ThingsboardException {
         log.trace("Executing saveMenu [{}]", menu);
         menu.setRegion(DEFAULT_TENANT_REGION);
-        Menu savedMenut = menuDao.save(null, menu);
+        menu.setRegion(DEFAULT_TENANT_REGION);
+        //生成租户菜单编码
+        menu.setCode(String.valueOf(System.currentTimeMillis()));
+        //生成租户菜单排序序号
+        Integer maxSort = menuDao.getMaxSortByParentId(menu.getParentId());
+        menu.setSort(maxSort == null ? ONE:maxSort);
+        Menu savedMenut = menuDao.saveMenu(null, menu);
         return savedMenut;
     }
 
@@ -58,12 +65,53 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
      * @return
      */
     @Override
-    public Menu updateMenu(Menu menu) {
+    public Menu updateMenu(Menu menu)  throws ThingsboardException{
         log.trace("Executing updateMenu [{}]", menu);
-        menu.setRegion(DEFAULT_TENANT_REGION);
-        Menu savedMenut = menuDao.save(null, menu);
-        return savedMenut;
+        return menuDao.saveMenu(null, menu);
     }
+
+    public void delMenu(UUID id){
+        menuDao.removeById(null,id);
+    }
+
+    /**
+     * 调整排序
+     * @param id
+     * @param frontId
+     * @return
+     */
+    @Override
+    public Menu updMenuSort(String id,String frontId){
+        log.trace("Executing updMenuSort [{}]",id, frontId);
+
+        Menu menuVo = new Menu();
+        Menu byId = menuDao.findById(null, UUID.fromString(id));
+        Menu byFrondId = menuDao.findById(null, UUID.fromString(frontId));
+        if(byFrondId != null ){
+            List<Menu> rearList = menuDao.findRearList(byFrondId.getSort(), byFrondId.getParentId());
+            if(!CollectionUtils.isEmpty(rearList)){
+                for (int i = 0; i<rearList.size() ;i++){
+                    if( i == ONE){
+                        byId.setSort(byFrondId.getSort() + ONE);
+                        menuVo = menuDao.save(null, byId);
+                        if(rearList.get(ONE).getSort() - byFrondId.getSort() > ONE){
+                            break;
+                        }else {
+                            continue;
+                        }
+                    }else {
+                        rearList.get(i).setSort(rearList.get(i).getSort() + ONE);
+                        menuVo = menuDao.save(null,rearList.get(i));
+                        if(rearList.get(i).getSort() - rearList.get(i-ONE).getSort() > ONE){
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return menuVo;
+    }
+
 
     @Override
     public PageData<Menu> findMenus(PageLink pageLink) {
@@ -101,11 +149,42 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         return resultList;
     }
 
+    /**
+     * 条件查询系统菜单列表
+     * @param menuType
+     * @param name
+     * @return
+     */
+    @Override
+    public List<Menu> getMenuListByCdn(String menuType,String name){
+        return menuDao.findMenusByName(menuType,name);
+    }
+
     @Override
     public Menu findMenuById(MenuId menuId) {
         log.trace("Executing findMenuById [{}]", menuId);
         validateId(menuId, INCORRECT_MENU_ID + menuId);
         return menuDao.findById(null, menuId.getId());
+    }
+
+    /**
+     * 查询一级菜单
+     * @param menuType
+     * @return
+     */
+    public List<Menu> getOneLevel(String menuType){
+        return menuDao.getOneLevel(menuType);
+    }
+
+    /**
+     * 查询系统菜单列表分页
+     * @param menu
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException {
+        return menuDao.getMenuPage(menu,pageLink);
     }
 
 }

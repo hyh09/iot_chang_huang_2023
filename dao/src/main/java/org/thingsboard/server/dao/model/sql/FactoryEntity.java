@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @Table(name = ModelConstants.FACTORY_COLUMN_FAMILY_NAME)
-public final class FactoryEntity extends AbstractFactoryEntity<Factory>  {
+public class FactoryEntity extends AbstractFactoryEntity<Factory>  {
 
     public FactoryEntity() {
         super();
@@ -29,4 +29,5 @@ public final class FactoryEntity extends AbstractFactoryEntity<Factory>  {
     public FactoryEntity(Factory factory){
         super(factory);
     }
+
 }

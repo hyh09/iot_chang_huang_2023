@@ -2,10 +2,10 @@ image: docker:latest
 
 stages:
   - package
+  - push
 
-before_script:
-  - docker version
-  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
+#before_script:
+#  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
 
 # 打包并构建镜像
@@ -14,12 +14,27 @@ package:
   retry: 1
   image: adoptopenjdk/maven-openjdk11
   tags:
-    - hsyl-iot.k8s.专用
+    - k8s.test.iot.hangzhou
   script:
     - echo "打包并构建镜像"
     - date -R
     - cd msa
-    - mvn clean install -Ddockerfile.skip=false
+    - mvn clean install -Ddockerfile.skip=true
+  only:
+    - dev
+  after_script:
+    - echo "镜像打包完毕,镜像如下:"
+    - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
+    
+# 打包并构建镜像
+push:
+  stage: push
+  retry: 1
+  tags:
+    - k8s.test.iot.hangzhou
+  script:
+    - echo "推送镜像"
+    - docker info
   only:
     - dev
   after_script:

@@ -135,31 +135,4 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         return tenantMenuList;
     }
 
-    @Override
-    public List<TenantMenu> findByIdIn(List<UUID> ids) {
-      return   listToVo(tenantMenuRepository.findByIdIn(ids));
-    }
-
-
-    /**
-     *
-     * @param entities
-     * @return
-     */
-    private  List<TenantMenu> listToVo(List<TenantMenuEntity>   entities)
-    {
-        List<TenantMenu> tenantMenuList = new ArrayList<>();
-
-        if(!CollectionUtils.isEmpty(entities)){
-            entities.forEach(tenantMenuEntity->{
-                if(tenantMenuEntity != null){
-                    tenantMenuList.add(tenantMenuEntity.toData());
-                }
-            });
-
-        }
-
-        return  tenantMenuList;
-    }
-
 }

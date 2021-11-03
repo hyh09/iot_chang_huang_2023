@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package org.thingsboard.server.dao.sql.alarm;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -165,4 +166,68 @@ public interface AlarmRepository extends CrudRepository<AlarmEntity, UUID> {
     @Query("SELECT a.id FROM AlarmEntity a WHERE a.tenantId = :tenantId AND a.createdTime < :time AND a.endTs < :time")
     Page<UUID> findAlarmsIdsByEndTsBeforeAndTenantId(@Param("time") Long time, @Param("tenantId") UUID tenantId, Pageable pageable);
 
+    @Query(value = "SELECT new org.thingsboard.server.dao.model.sql.AlarmInfoEntity(a) FROM AlarmEntity a " +
+            "LEFT JOIN RelationEntity re ON a.id = re.toId " +
+            "AND re.relationTypeGroup = 'ALARM' " +
+            "AND re.toType = 'ALARM' " +
+            "AND re.fromId in (:affectedEntityIds) " +
+            "AND re.fromType = :affectedEntityType " +
+            "WHERE a.tenantId = :tenantId " +
+            "AND (a.originatorId in (:affectedEntityIds) or re.fromId IS NOT NULL) " +
+            "AND (:startTime IS NULL OR a.createdTime >= :startTime) " +
+            "AND (:endTime IS NULL OR a.createdTime <= :endTime) " +
+            "AND ((:alarmStatuses) IS NULL OR a.status in (:alarmStatuses)) " +
+            "AND ((:alarmSeverities) IS NULL OR a.severity in (:alarmSeverities)) "
+            ,
+            countQuery = "" +
+                    "SELECT count(a) + " + //alarms with relations only
+                    " (SELECT count(a) FROM AlarmEntity a " + //alarms WITHOUT any relations
+                    "    LEFT JOIN RelationEntity re ON a.id = re.toId " +
+                    "    AND re.relationTypeGroup = 'ALARM' " +
+                    "    AND re.toType = 'ALARM' " +
+                    "    AND re.fromId in (:affectedEntityIds) " +
+                    "    AND re.fromType = :affectedEntityType " +
+                    "    WHERE a.tenantId = :tenantId " +
+                    "    AND (a.originatorId in (:affectedEntityIds) ) " +
+                    "    AND (re.fromId IS NULL) " + //anti join
+                    "    AND (:startTime IS NULL OR a.createdTime >= :startTime) " +
+                    "    AND (:endTime IS NULL OR a.createdTime <= :endTime) " +
+                    "    AND ((:alarmStatuses) IS NULL OR a.status in (:alarmStatuses)) " +
+                    "    AND ((:alarmSeverities) IS NULL OR a.severity in (:alarmSeverities)) " +
+                    " )" +
+                    "FROM AlarmEntity a " +
+                    "INNER JOIN RelationEntity re ON a.id = re.toId " +
+                    "AND re.relationTypeGroup = 'ALARM' " +
+                    "AND re.toType = 'ALARM' " +
+                    "AND re.fromId in (:affectedEntityIds) " +
+                    "AND re.fromType = :affectedEntityType " +
+                    "WHERE a.tenantId = :tenantId " +
+                    "AND (:startTime IS NULL OR a.createdTime >= :startTime) " +
+                    "AND (:endTime IS NULL OR a.createdTime <= :endTime) " +
+                    "AND ((:alarmStatuses) IS NULL OR a.status in (:alarmStatuses)) " +
+                    "AND ((:alarmSeverities) IS NULL OR a.severity in (:alarmSeverities)) "
+    )
+    Page<AlarmInfoEntity> findAlarmsByDeviceIdList(@Param("tenantId") UUID tenantId,
+                                                   @Param("affectedEntityIds") List<UUID> affectedEntityIds,
+                                                   @Param("affectedEntityType") String affectedEntityType,
+                                                   @Param("startTime") Long startTime,
+                                                   @Param("endTime") Long endTime,
+                                                   @Param("alarmStatuses") Set<AlarmStatus> alarmStatuses,
+                                                   @Param("alarmSeverities") Set<AlarmSeverity> alarmSeverities,
+                                                   Pageable pageable);
+
+    @Query(value = "SELECT a FROM AlarmEntity a " +
+            "LEFT JOIN RelationEntity re ON a.id = re.toId " +
+            "AND re.relationTypeGroup = 'ALARM' " +
+            "AND re.toType = 'ALARM' " +
+            "AND re.fromId in (:affectedEntityIds) " +
+            "AND re.fromType = :affectedEntityType " +
+            "WHERE a.tenantId = :tenantId " +
+            "AND (a.originatorId in (:affectedEntityIds) or re.fromId IS NOT NULL) " +
+            "AND (:startTime IS NULL OR a.createdTime >= :startTime) "
+    )
+    List<AlarmEntity> findAllAlarmsByStartTime(@Param("tenantId") UUID tenantId,
+                                               @Param("affectedEntityIds") List<UUID> affectedEntityIds,
+                                               @Param("affectedEntityType") String affectedEntityType,
+                                               @Param("startTime") Long startTime);
 }

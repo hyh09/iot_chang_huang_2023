@@ -40,7 +40,10 @@ public class AddMenuDto {
     private String path;
 
     public Menu toMenu(){
-        Menu menu = new Menu(new MenuId(this.getId()));
+        Menu menu = new Menu(new MenuId(null));
+        if(this.getId() != null){
+            menu.setId(new MenuId(this.getId()));
+        }
         menu.setName(name);
         menu.setLevel(level);
         menu.setUrl(url);

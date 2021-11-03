@@ -42,6 +42,8 @@ import org.thingsboard.server.common.data.edge.EdgeInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.*;
+import org.thingsboard.server.common.data.id.menu.MenuId;
+import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageDataIterableByTenantIdEntityId;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.SortOrder;
@@ -69,10 +71,13 @@ import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
+import org.thingsboard.server.dao.factory.FactoryService;
+import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
 import org.thingsboard.server.dao.oauth2.OAuth2Service;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
@@ -83,6 +88,8 @@ import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
+import org.thingsboard.server.dao.workshop.WorkshopService;
+import org.thingsboard.server.entity.menu.dto.AddMenuDto;
 import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
 import org.thingsboard.server.exception.ThingsboardErrorResponseHandler;
 import org.thingsboard.server.queue.discovery.PartitionService;
@@ -95,7 +102,6 @@ import org.thingsboard.server.service.edge.rpc.EdgeRpcService;
 import org.thingsboard.server.service.lwm2m.LwM2MServerSecurityInfoRepository;
 import org.thingsboard.server.service.ota.OtaPackageStateService;
 import org.thingsboard.server.service.profile.TbDeviceProfileCache;
-import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.service.resource.TbResourceService;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.AccessControlService;
@@ -241,13 +247,20 @@ public abstract class BaseController {
     @Autowired
     protected RuleEngineEntityActionService ruleEngineEntityActionService;
 
-
+    @Autowired
+    protected MenuService menuService;
 
     @Autowired
     protected TenantMenuService tenantMenuService;
 
     @Autowired
+    protected FactoryService factoryService;
 
+    @Autowired
+    protected WorkshopService workshopService;
+
+    @Autowired
+    protected ProductionLineService productionLineService;
 
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
@@ -427,7 +440,47 @@ public abstract class BaseController {
         }
     }
 
+    Menu checkMenuId(MenuId menuId, Operation operation) throws ThingsboardException {
+        try {
+            validateId(menuId, "Incorrect menuId " + menuId);
+            Menu menu = menuService.findMenuById(menuId);
+            checkNotNull(menu);
+            accessControlService.checkPermission(getCurrentUser(), Resource.MENU, operation, menuId, menu);
+            return menu;
+        } catch (Exception e) {
+            throw handleException(e, false);
+        }
+    }
+    Menu checkAddMenuList(AddMenuDto addMenuDto) throws ThingsboardException{
+        if(addMenuDto == null){
+            throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        return checkMenu(addMenuDto.toMenu());
+    }
+    Menu checkMenu(Menu menu) throws ThingsboardException{
+        checkNotNull(menu);
+        checkParameter("tenant",menu.getTenantId());
+        checkParameter("level",menu.getLevel());
+        checkParameter("menuType",menu.getMenuType());
+        return menu;
+    }
 
+    void checkTenantMenuList(List<TenantMenu> tenantMenu) throws ThingsboardException{
+        if(CollectionUtils.isEmpty(tenantMenu)){
+            throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        tenantMenu.forEach(i->{
+            try {
+                checkTenantMenu(i);
+                if(i.getId() != null && i.getId().getId() != null &&
+                        tenantMenuService.findById(i.getId().getId()) != null){
+                    throw new ThingsboardException("菜单已存在请勿重复添加！", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                }
+            } catch (ThingsboardException e) {
+                e.printStackTrace();
+            }
+        });
+    }
     List<TenantMenu> checkAddTenantMenuList(List<AddTenantMenuDto> addTenantMenuDtos) throws ThingsboardException{
         if(CollectionUtils.isEmpty(addTenantMenuDtos)){
             throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
@@ -436,7 +489,9 @@ public abstract class BaseController {
         addTenantMenuDtos.forEach(i->{
             try {
                 checkTenantMenu(i);
-                tenantMenu.add(i.toTenantMenu());
+                TenantMenu tenantMenu1 = i.toTenantMenu();
+                tenantMenu1.setCreatedUser(getCurrentUser().getUuidId());
+                tenantMenu.add(tenantMenu1);
             } catch (ThingsboardException e) {
                 e.printStackTrace();
             }
