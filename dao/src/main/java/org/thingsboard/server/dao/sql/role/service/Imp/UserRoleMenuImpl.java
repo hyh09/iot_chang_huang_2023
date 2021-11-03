@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,9 @@ import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
+import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.user.UserService;
 
@@ -29,6 +32,8 @@ import java.util.UUID;
 @Service
 public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
+    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
+
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserRoleMenuImpl() {
@@ -37,8 +42,12 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
     @Autowired  private UserService  userService;
     @Autowired  private TenantSysRoleService tenantSysRoleService;
+    @Autowired  private UserMenuRoleService userMenuRoleService;
 
 
+    {
+
+    }
 
     /**
      * 查询当前人的是否是 工厂管理角色 /组合角色
@@ -76,8 +85,35 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
     }
 
     @Override
-    public User save(User user, User user1) {
-        return null;
+    public User save(User user, User user1)  {
+        String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
+        user.setTenantId(user1.getTenantId());
+        user.setUserCreator(user1.getUuidId().toString());
+        User  rmUser= userService.save(user,encodePassword);
+
+
+      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+        if(entityBy != null)
+        {
+            UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
+            entityRR.setUserId(rmUser.getUuidId());
+            entityRR.setTenantSysRoleId(entityBy.getId());
+            userMenuRoleService.saveEntity(entityRR);
+            return rmUser;
+        }
+
+        TenantSysRoleEntity entity = new TenantSysRoleEntity();
+        entity.setCreatedUser(user1.getUuidId());
+        entity.setUpdatedUser(user1.getUuidId());
+        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
+        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
+
+        UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
+        entityRR.setUserId(rmUser.getUuidId());
+        entityRR.setTenantSysRoleId(rmEntity.getId());
+        userMenuRoleService.saveEntity(entityRR);
+        return rmUser;
     }
 
 

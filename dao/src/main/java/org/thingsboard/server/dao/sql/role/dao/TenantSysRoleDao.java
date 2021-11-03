@@ -28,6 +28,11 @@ public interface TenantSysRoleDao extends BaseSqlDao<TenantSysRoleEntity,UUID> {
 
     @Query("select d.roleCode  from TenantSysRoleEntity d ")
     List<String> findAllCodesByTenantId();
+
+
+    TenantSysRoleEntity  queryAllByRoleCode(String roleCode);
+
+
 	
 	
 }	

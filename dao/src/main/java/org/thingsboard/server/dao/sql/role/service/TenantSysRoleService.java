@@ -102,6 +102,15 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
      }
 
 
+    /**
+     * 查询用户编码的
+     */
+    public  TenantSysRoleEntity  queryEntityBy(String roleCode)
+    {
+       return   this.dao.queryAllByRoleCode(roleCode);
+    }
+
+
 
 
 

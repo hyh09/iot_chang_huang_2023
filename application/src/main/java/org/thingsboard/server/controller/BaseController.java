@@ -463,7 +463,6 @@ public abstract class BaseController {
     }
     Menu checkMenu(Menu menu) throws ThingsboardException{
         checkNotNull(menu);
-        checkParameter("tenant",menu.getTenantId());
         checkParameter("level",menu.getLevel());
         checkParameter("menuType",menu.getMenuType());
         return menu;
@@ -493,7 +492,9 @@ public abstract class BaseController {
         addTenantMenuDtos.forEach(i->{
             try {
                 checkTenantMenu(i);
-                tenantMenu.add(i.toTenantMenu());
+                TenantMenu tenantMenu1 = i.toTenantMenu();
+                tenantMenu1.setCreatedUser(getCurrentUser().getUuidId());
+                tenantMenu.add(tenantMenu1);
             } catch (ThingsboardException e) {
                 e.printStackTrace();
             }

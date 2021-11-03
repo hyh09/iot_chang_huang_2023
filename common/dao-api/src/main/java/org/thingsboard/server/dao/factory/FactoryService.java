@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.factory;
 
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.factory.FactoryListVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,5 +44,12 @@ public interface FactoryService {
      * @return
      */
     Factory findById(UUID id);
+
+    /**
+     * 条件查询工厂列表
+     * @param factory
+     * @return
+     */
+    FactoryListVo findFactoryListBuyCdn(Factory factory);
 
 }
