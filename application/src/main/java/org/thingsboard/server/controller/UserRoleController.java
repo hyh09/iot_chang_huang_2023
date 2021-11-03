@@ -138,19 +138,6 @@ public class UserRoleController extends BaseController{
 
 
 
-//    public   Object   pageQuery(@RequestBody Map<String, Object> queryParam) throws ThingsboardException
-//    {
-//        int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
-//        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
-//        String  textSearch = (String) queryParam.get("textSearch");
-//        String  sortProperty = (String) queryParam.get("sortProperty");
-//        String  sortOrder = (String) queryParam.get("sortOrder");
-//        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-//        return tenantSysRoleService.pageQuery(queryParam,pageLink);
-//
-//    }
-
-
 
     /**
      * 用户角色的绑定接口
@@ -177,6 +164,7 @@ public class UserRoleController extends BaseController{
         if (result.hasErrors()) {
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
+
         log.info("[角色用户解绑]打印得入参为:{}",vo);
 
         return   userRoleMemuSvc.unboundUser(vo);
@@ -252,6 +240,9 @@ public class UserRoleController extends BaseController{
         vo.setUserName(userName);
         vo.setUserCode(userCode);
         log.info("打印当前的入参:{}",vo);
+        SecurityUser securityUser =  getCurrentUser();
+        vo.setTenantId(securityUser.getTenantId().getId());
+        vo.setCreateId(securityUser.getUuidId());
         return userRoleMemuSvc.getUserByNotInRole(vo,pageLink);
 
     }

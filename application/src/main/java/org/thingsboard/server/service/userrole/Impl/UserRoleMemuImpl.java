@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.common.data.vo.user.FindUserVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
@@ -175,18 +176,26 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     @Override
    public Object getUserByInRole( QueryUserVo user, PageLink pageLink)
     {
-        log.info("查询当前角色下的用户绑定数据",user);
+        log.info("查询当前角色下的用户绑定数据{}",user);
         SqlVo sqlVo =  splicingSvc.getUserByInRole(user);
-        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
-        return new PageData<User>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+        Page<FindUserVo> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(), FindUserVo.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
+       List<FindUserVo> list = page.getContent();
+        log.info("查询当前角色下的用户绑定数据list{}",list);
+
+//        for(FindUserVo vo:list){
+//            log.info("vo{},vo{}",vo,vo.getPhonenumber());
+//
+//        }
+
+        return new PageData<FindUserVo>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     @Override
     public Object getUserByNotInRole(QueryUserVo user, PageLink pageLink) {
         log.info("查询当前角色下的用户绑定数据",user);
         SqlVo sqlVo =  splicingSvc.getUserByNotInRole(user);
-        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
-        return new PageData<User>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+        Page<FindUserVo> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),FindUserVo.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
+        return new PageData<FindUserVo>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
 

@@ -126,8 +126,9 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 			if(Map.class.isAssignableFrom(cls)){
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
 			} else {
-				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
 //				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
 			}
 		} else {
 			countQuery = entityManager.createQuery(sqlCount).unwrap(Query.class);
