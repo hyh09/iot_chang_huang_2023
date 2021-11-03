@@ -16,9 +16,12 @@
 package org.thingsboard.server.dao.sql.factory;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,5 +29,20 @@ import java.util.UUID;
  */
 public interface FactoryRepository extends PagingAndSortingRepository<FactoryEntity, UUID>, JpaSpecificationExecutor<FactoryEntity> {
 
+//    @Query("SELECT org.thingsboard.server.dao.model.sql.FactoryInfoEntity(f,w,p) " +
+//            "FROM FactoryEntity f " +
+//            "LEFT JOIN WorkshopEntity w on f.id = w.factoryId " +
+//            "LEFT JOIN ProductionLineEntity p on wp.id = p.workshopId " +
+//            "WHERE f.tenantId = :tenantId " +
+//            "AND f.name = :name " +
+//            "AND w.name = :workshopName " +
+//            "AND p.name = :productionLineName ")
+//    Page<FactoryInfoEntity> findFactoryListBuyCdn(@Param("tenantId") UUID tenantId,
+//                                               @Param("name") String name,
+//                                               @Param("workshopName") String workshopName,
+//                                               @Param("productionLineName") String productionLineName,
+//                                               Pageable pageable);
 
+    @Query(value = "select * from hs_factory where if(?1!='',name=?1,1=1) and if(?2!='',code=?2,1=1)" ,nativeQuery = true)
+    List<FactoryEntity> findFactoryListBuyCdn(@Param("name") String name,@Param("code") String code );
 }

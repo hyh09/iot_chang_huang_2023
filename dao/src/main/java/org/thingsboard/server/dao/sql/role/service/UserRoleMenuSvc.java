@@ -18,6 +18,14 @@ public interface UserRoleMenuSvc {
     JudgeUserVo  decideUser(UserId userId);
 
     //创建工厂管理员接口
-    User save(User user,User user1);
+
+    /**
+     * 创建工厂管理员接口
+     * @param user  用户对象
+     * @param user1  登录人信息(用户id:id，组合id:TenantId) 必传
+     * @return
+     * @throws Exception
+     */
+    User save(User user,User user1) ;
 
 }

@@ -493,7 +493,9 @@ public abstract class BaseController {
         addTenantMenuDtos.forEach(i->{
             try {
                 checkTenantMenu(i);
-                tenantMenu.add(i.toTenantMenu());
+                TenantMenu tenantMenu1 = i.toTenantMenu();
+                tenantMenu1.setCreatedUser(getCurrentUser().getUuidId());
+                tenantMenu.add(tenantMenu1);
             } catch (ThingsboardException e) {
                 e.printStackTrace();
             }

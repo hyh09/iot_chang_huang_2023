@@ -15,8 +15,10 @@ import javax.persistence.Table;
 @Entity
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @Table(name = ModelConstants.MENU_COLUMN_FAMILY_NAME)
-public final class MenuEntity extends AbstractMenuEntity<Menu>  {
+public class MenuEntity extends AbstractMenuEntity<Menu>  {
 
+    public MenuEntity(){super();}
+    public MenuEntity(Menu menu){super(menu);}
 
     @Override
     public Menu toData() {

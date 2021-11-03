@@ -31,11 +31,11 @@ public interface WorkshopService {
 
 
     /**
-     * 查询工厂列表
+     * 查询租户下所有车间列表
      * @param tenantId
      * @return
      */
-    List<Workshop> findWorkshopList(UUID tenantId);
+    List<Workshop> findWorkshopListByTenant(UUID tenantId,UUID factoryId);
 
     /**
      * 查询详情

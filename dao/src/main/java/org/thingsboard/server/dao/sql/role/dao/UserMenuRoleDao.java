@@ -33,9 +33,7 @@ public interface UserMenuRoleDao extends BaseSqlDao<UserMenuRoleEntity,UUID> {
      void deleteByTenantSysRoleId(@Param("tenantSysRoleId") UUID tenantSysRoleId);
 
 
-     @Modifying
-     @Transactional
-     @Query("delete from UserMenuRoleEntity where userId=:userId ")
+     @Query("select rm  from UserMenuRoleEntity  rm where rm.userId=:userId ")
      List<UserMenuRoleEntity> queryRoleIdByUserId(@Param("userId") UUID userId);
 
      @Modifying

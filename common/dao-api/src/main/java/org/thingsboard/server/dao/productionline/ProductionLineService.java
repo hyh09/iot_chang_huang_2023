@@ -31,11 +31,13 @@ public interface ProductionLineService {
 
 
     /**
-     * 查询工厂列表
+     * 查询租户/工厂/车间下所有生产线列表
      * @param tenantId
+     * @param workshopId
+     * @param factoryId
      * @return
      */
-    List<ProductionLine> findProductionLineList(UUID tenantId);
+    List<ProductionLine> findProductionLineList(UUID tenantId,UUID workshopId,UUID factoryId);
 
     /**
      * 查询详情

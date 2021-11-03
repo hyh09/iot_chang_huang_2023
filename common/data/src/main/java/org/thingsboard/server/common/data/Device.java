@@ -29,6 +29,7 @@ import org.thingsboard.server.common.data.validation.NoXss;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
@@ -51,6 +52,13 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     private OtaPackageId firmwareId;
     private OtaPackageId softwareId;
+
+    private UUID workshopId;
+    private UUID factoryId;
+    private String code;
+    private UUID productionLineId;
+    private String images;
+    private String icon;
 
     public Device() {
         super();
@@ -181,6 +189,54 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setSoftwareId(OtaPackageId softwareId) {
         this.softwareId = softwareId;
+    }
+
+    public UUID getProductionLineId() {
+        return productionLineId;
+    }
+
+    public void setProductionLineId(UUID productionLineId) {
+        this.productionLineId = productionLineId;
+    }
+
+    public String getImages() {
+        return images;
+    }
+
+    public void setImages(String images) {
+        this.images = images;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public UUID getWorkshopId() {
+        return workshopId;
+    }
+
+    public void setWorkshopId(UUID workshopId) {
+        this.workshopId = workshopId;
+    }
+
+    public UUID getFactoryId() {
+        return factoryId;
+    }
+
+    public void setFactoryId(UUID factoryId) {
+        this.factoryId = factoryId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override

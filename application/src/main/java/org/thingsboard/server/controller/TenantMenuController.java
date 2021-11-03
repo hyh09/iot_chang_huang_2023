@@ -86,7 +86,9 @@ public class TenantMenuController extends BaseController {
             checkParameter("tenantId",updTenantMenuDto.getTenantId());
             checkParameter("id",updTenantMenuDto.getId());
             checkParameter("menuType",updTenantMenuDto.getMenuType());
-            List<TenantMenu> tenantMenuList = tenantMenuService.updTenantMenu(updTenantMenuDto.toTenantMenu());
+            TenantMenu tenantMenu = updTenantMenuDto.toTenantMenu();
+            tenantMenu.setUpdatedUser(getCurrentUser().getUuidId());
+            List<TenantMenu> tenantMenuList = tenantMenuService.updTenantMenu(tenantMenu);
             tenantMenuList.forEach(i->{
                 tenantMenuVos.add(new TenantMenuVo(i));
             });
