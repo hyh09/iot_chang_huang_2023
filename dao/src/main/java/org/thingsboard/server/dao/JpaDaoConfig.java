@@ -22,15 +22,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-/**
- * @author Valerii Sosliuk
- */
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan({"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"})
-@EnableJpaRepositories({"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"})
-@EntityScan({"org.thingsboard.server.dao.model.sql", "org.thingsboard.server.dao.hs"})
+//@EnableJpaRepositories({"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"})
+@EntityScan({"org.thingsboard.server.dao.model.sql", "org.thingsboard.server.dao.hs","org.thingsboard.server.dao.sql.*.entity"})
+@EnableJpaRepositories(basePackages = {"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"},
+        repositoryFactoryBeanClass = org.thingsboard.server.dao.util.sql.jpa.repository.BaseRepositoryFactoryBean.class,
+        // 指定Repository的Base类
+        // repositoryBaseClass = DefaultRepositoryBaseClass.class,
+        // 实体管理工厂引用名称，对应到@Bean注解对应的方法
+        entityManagerFactoryRef = "entityManagerFactory",
+        // 事务管理工厂引用名称，对应到@Bean注解对应的方法
+        transactionManagerRef = "transactionManager",
+        // 是否考虑嵌套存储库
+        // considerNestedRepositories = false,
+        // 开启默认事务
+        enableDefaultTransactions = true
+)
 @EnableTransactionManagement
 public class JpaDaoConfig {
 
 }
+
+

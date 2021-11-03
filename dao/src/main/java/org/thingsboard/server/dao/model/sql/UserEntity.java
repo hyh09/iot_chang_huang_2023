@@ -75,7 +75,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     /**
      * 用户编码
      */
-    @Column(name = ModelConstants.USER_USERCODE_PROPERTY,unique = true)
+    @Column(name = ModelConstants.USER_USERCODE_PROPERTY)
     private  String userCode;
     /**
      * 用户名称

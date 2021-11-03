@@ -256,8 +256,6 @@ public abstract class BaseController {
     @Autowired
     protected FactoryService factoryService;
 
-    @Autowired
-    protected WorkshopService workshopService;
 
     @Autowired
     protected ProductionLineService productionLineService;

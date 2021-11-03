@@ -50,13 +50,15 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
+        SecurityUser securityUser =  getCurrentUser();
+        entity.setUpdatedUser(securityUser.getUuidId());
+        entity.setTenantId(securityUser.getTenantId().getId());
         if(entity.getId() != null)
         {
            return updateRecord(entity);
         }
-        SecurityUser securityUser =  getCurrentUser();
         entity.setCreatedUser(securityUser.getUuidId());
-        entity.setUpdatedUser(securityUser.getUuidId());
+
         return   tenantSysRoleService.saveEntity(entity);
     }
 
