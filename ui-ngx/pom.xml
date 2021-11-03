@@ -51,7 +51,7 @@
                 </configuration>
                 <executions>
                     <!--提前准备好安装环境-->
-                    <!--<execution>
+                    <execution>
                         <id>install node and npm</id>
                         <goals>
                             <goal>install-node-and-yarn</goal>
@@ -59,8 +59,10 @@
                         <configuration>
                             <nodeVersion>v12.16.1</nodeVersion>
                             <yarnVersion>v1.22.4</yarnVersion>
+                            <nodeDownloadRoot>https://npm.taobao.org/mirrors/node/</nodeDownloadRoot>
+<!--                            <yarnDownloadRoot>https://registry.npm.taobao.org/npm/</yarnDownloadRoot>-->
                         </configuration>
-                    </execution>-->
+                    </execution>
                     <execution>
                         <id>yarn install</id>
                         <goals>
