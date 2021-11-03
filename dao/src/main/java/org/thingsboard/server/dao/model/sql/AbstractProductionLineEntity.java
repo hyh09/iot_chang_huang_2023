@@ -21,7 +21,6 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
@@ -104,7 +103,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     public AbstractProductionLineEntity(ProductionLine productionLine) {
         if (productionLine.getId() != null) {
-            this.setUuid(productionLine.getId().getId());
+            this.setUuid(productionLine.getId());
         }
         this.workshopId = productionLine.getWorkshopId();
         this.factoryId = productionLine.getFactoryId();
@@ -122,7 +121,8 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     }
 
     public ProductionLine toProductionLine(){
-        ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getUuid()));
+        ProductionLine productionLine = new ProductionLine();
+        productionLine.setId(this.getUuid());
         productionLine.setWorkshopId(workshopId);
         productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);

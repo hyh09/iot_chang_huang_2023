@@ -25,8 +25,6 @@ import java.util.List;
 @RequestMapping("/api/factory")
 public class FactoryController extends BaseController  {
 
-    private FactoryVo factoryVo = new FactoryVo();
-
     /**
      * 新增/更新工厂
      * @param addFactoryDto

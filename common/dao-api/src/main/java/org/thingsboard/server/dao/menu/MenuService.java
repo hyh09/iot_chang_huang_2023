@@ -56,4 +56,6 @@ public interface MenuService {
      */
     List<Menu> getOneLevel(String menuType);
 
+    Menu getTenantById(UUID id);
+
 }

@@ -1,33 +1,25 @@
-package org.thingsboard.server.hs.entity.po;
+package org.thingsboard.server.common.data.devicecomponent;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-/**
- * 设备字典-部件
- *
- * @author wwj
- * @since 2021.10.21
- */
-@EqualsAndHashCode(callSuper = true)
+import java.util.UUID;
+
 @Data
-public class DictDeviceComponent extends BasePO {
-
-    private static final long serialVersionUID = 4934987555236873702L;
-    /**
-     * 设备字典-部件Id
-     */
-    private String id;
+public class DeviceComponent {
 
     /**
-     * 设备字典Id
+     * 部件Id
      */
-    private String dictDeviceId;
+    private UUID id;
+    /**
+     * 设备Id
+     */
+    private UUID deviceId;
 
     /**
-     * 部件父Id
+     * 父部件Id
      */
-    private String parentId;
+    private UUID parentId;
 
     /**
      * 编码
@@ -78,4 +70,14 @@ public class DictDeviceComponent extends BasePO {
      * 图片
      */
     private String picture;
+
+    private long createdTime;
+
+    private UUID createdUser;
+
+    private long updatedTime;
+
+    private UUID updatedUser;
+
+    public DeviceComponent(){}
 }
