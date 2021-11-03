@@ -45,4 +45,9 @@ public class DictDeviceGroupProperty extends BasePO {
      * 标题
      */
     private String title;
+
+    /**
+     * 排序
+     */
+    private Integer sort;
 }

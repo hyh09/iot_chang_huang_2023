@@ -245,10 +245,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      * @param deviceId          设备Id
      * @param groupPropertyName 属性名称
      * @param startTime         开始时间
+     * @param endTime           结束时间
      * @return 设备分组属性历史数据
      */
     @Override
-    public List<DeviceDetailGroupPropertyResult> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime) throws ExecutionException, InterruptedException {
+    public List<DictDeviceGroupPropertyVO> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException {
         return null;
     }
 
@@ -274,6 +275,32 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public List<DictDeviceGroupPropertyVO> listDictDeviceGroupPropertyTitle(TenantId tenantId, String deviceId) {
+        return null;
+    }
+
+    /**
+     * 【APP】获得实时监控列表数据
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控列表数据
+     */
+    @Override
+    public RTMonitorResult getRTMonitorAppData(TenantId tenantId, FactoryDeviceQuery query) {
+        return null;
+    }
+
+    /**
+     * 【APP】获得报警记录列表
+     *
+     * @param tenantId  租户Id
+     * @param query     查询参数
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 报警记录列表
+     */
+    @Override
+    public List<AlarmRecordResult> listAppAlarmsRecord(TenantId tenantId, FactoryDeviceQuery query, Long startTime, Long endTime) {
         return null;
     }
 
