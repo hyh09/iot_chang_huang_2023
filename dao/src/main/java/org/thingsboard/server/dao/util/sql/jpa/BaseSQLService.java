@@ -25,9 +25,19 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 
 	void deleteById(ID id);
 
+	/**
+	 * 暂时未测试
+	 * @param entity
+	 */
+	void deleteByEntity(T entity);
+
 
 	/**  主键的查询 */
 	T findById(ID id);
+
+	/**批量查询方法*/
+	List<T> findAllById(Iterable<ID> var1);
+
 
 	T updateNonNull(ID id, T entity);
 
@@ -52,6 +62,9 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 	 <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
 
 
+	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls);
+
+	Long queryContListSqlLocal(String sql,Map<String, Object> param);
 
 
 }

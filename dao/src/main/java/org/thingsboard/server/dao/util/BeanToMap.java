@@ -1,15 +1,18 @@
 package org.thingsboard.server.dao.util;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class BeanToMap {
 
@@ -69,6 +72,40 @@ public class BeanToMap {
     public  static  Map beanToMapByJackson(Object bean) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper(); //转换器
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        String json=mapper.writeValueAsString(bean);
+        Map m = mapper.readValue(json, Map.class);
+        return  m;
+    }
+
+
+    /**
+     * 提取需要的属性
+     * @param bean
+     * @param <T>
+     * @return
+     * @throws JsonProcessingException
+     */
+    public  static <T>  Map beanToMapByJacksonFilter(T bean ) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper(); //转换器
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        Set<String> properties =   GenericsUtils.getFieldsAnnotation(bean.getClass());
+        String id =  GenericsUtils.getClassAnnotation(bean.getClass(), JsonFilter.class);
+        if(StringUtils.isNoneBlank(id) && CollectionUtils.isEmpty(properties))
+        {
+            String name = bean.getClass().getName();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"后端java类配置异常:类名{"+name+"}不应该配置 @JsonFilter 注解!");
+        }
+
+
+
+        if(StringUtils.isNotBlank(id) && !CollectionUtils.isEmpty(properties))
+        {
+            SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+            filterProvider.addFilter(id, SimpleBeanPropertyFilter.filterOutAllExcept(properties));
+            mapper.setFilterProvider(filterProvider);
+        }
+
+
         String json=mapper.writeValueAsString(bean);
         Map m = mapper.readValue(json, Map.class);
         return  m;

@@ -28,6 +28,7 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -68,6 +69,11 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
             "email =  :#{#user.email}   " +
             "  where id = :#{#user.uuidId} " , nativeQuery = true)
     int update(@Param("user") User user);
+
+
+
+    @Query("select d.userCode  from UserEntity d where d.tenantId = :tenantId")
+    List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 
 
 

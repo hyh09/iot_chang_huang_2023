@@ -23,7 +23,7 @@ import org.thingsboard.common.util.AbstractListeningExecutor;
 public class JpaExecutorService extends AbstractListeningExecutor {
 
     @Value("${spring.datasource.hikari.maximumPoolSize}")
-    private int poolSize=16;
+    private int poolSize;
 
     @Override
     protected int getThreadPollSize() {

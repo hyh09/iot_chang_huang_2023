@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.core.RepositoryInformation;
+import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.sql.jpa.BaseRepository;
 import org.thingsboard.server.dao.util.sql.jpa.transform.CustomResultToBean;
@@ -95,6 +96,15 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		return e;
 	}
 
+	/**
+	 * 有问题;
+	 * @param entity
+	 */
+	@Transactional
+	public void deleteByEntity(T entity) {
+		entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
+	}
+
 
 
 
@@ -150,6 +160,62 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 	}
 
 
+    public <T> List<T> queryAllListSql(String sql,Map<String, Object> param, Class<T> cls,NameTransform trans, boolean isNativeSql)
+	{
+		Query query = null;
+		if(isNativeSql){
+
+			query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+			if(Map.class.isAssignableFrom(cls)){
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
+			} else {
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+			}
+		} else {
+			query = entityManager.createQuery(sql).unwrap(Query.class);
+		}
+		if(param!= null){
+			for(Map.Entry<String, ?> entry : param.entrySet()){
+				if(sql.indexOf(":" + entry.getKey()) > -1 ){
+					query.setParameter(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+		List<T> list = query.getResultList();
+		return  list;
+
+
+	}
+
+
+
+	public Long queryContListSqlLocal(String sqlCount, Map<String, Object> param, boolean isNativeSql) {
+
+		Query countQuery = null;
+		if(isNativeSql){
+			countQuery = entityManager.createNativeQuery(sqlCount).unwrap(NativeQuery.class);
+
+		} else {
+			countQuery = entityManager.createQuery(sqlCount).unwrap(Query.class);
+		}
+
+		if(param!= null){
+			for(Map.Entry<String, ?> entry : param.entrySet()){
+				if(sqlCount.indexOf(":" + entry.getKey()) > -1 ){
+					countQuery.setParameter(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+
+		Long	totalObj = Long.parseLong(countQuery.getSingleResult().toString());
+		return  totalObj;
+
+
+
+	}
 
 
 

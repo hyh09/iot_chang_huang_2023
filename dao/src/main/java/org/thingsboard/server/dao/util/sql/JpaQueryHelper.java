@@ -218,7 +218,20 @@ public class JpaQueryHelper {
 								pList.add(in);
 							} else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
 								pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
-							}else if(f.getType().isAssignableFrom(UUID.class) && f.getAnnotation(Id.class) == null){
+							}else if(f.getType().isAssignableFrom(UUID.class) ){
+								if(value instanceof  UUID ){
+									System.out.println("=====>" + f.getType());
+									System.out.println("===value==>" + value);
+									System.out.println("==f.getName()=:"+f.getName());
+									System.out.println("==root.get(f.getName()=:"+root.get(f.getName()));
+
+
+								}
+								if(value instanceof  String ){
+									System.out.println("=====>" + f.getType());
+									System.out.println("===value==>" + value);
+
+								}
 								pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
 							}else  if(f.getType().isAssignableFrom(long.class) )
 							{
@@ -248,6 +261,21 @@ public class JpaQueryHelper {
 						pList.add(root.get(idField.getName()).in(ids).not());
 					}
 				}
+
+
+				if(idField != null && queryParam.containsKey("idlist") ){
+					Object idObjs = queryParam.get("idlist");
+					List<Object> ids = new ArrayList<Object>();
+					if(idObjs instanceof String){
+						ids = Arrays.asList(idObjs.toString().split(","));
+					} else if( idObjs instanceof List){
+						ids = (List<Object>) idObjs;
+					}
+					if(!ids.isEmpty()){
+						pList.add(root.get(idField.getName()).in(ids));
+					}
+				}
+
 				Predicate[] pArr = new Predicate[pList.size()];
 				p = cb.and(pList.toArray(pArr));
 

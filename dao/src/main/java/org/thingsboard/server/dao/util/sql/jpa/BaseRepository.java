@@ -11,6 +11,7 @@ import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 
 import javax.persistence.EntityManager;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +35,24 @@ public interface BaseRepository<T, ID extends Serializable> extends JpaRepositor
 
     public T updateNonNull(ID id, T entity);
 
-    public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
+    void deleteByEntity( T entity);
 
+     <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
+
+    /**
+     * 自定义执行sql
+     * @param sql
+     * @param param
+     * @param cls
+     * @param trans
+     * @param isNativeSql
+     * @param <T>
+     * @return
+     */
+     <T> List<T> queryAllListSql(String sql, Map<String, Object> param, Class<T> cls, NameTransform trans, boolean isNativeSql);
+
+
+     //查询总数的count的通用sql
+     Long queryContListSqlLocal(String sql, Map<String, Object> param,boolean isNativeSql);
 
 }

@@ -63,6 +63,14 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		return opt.isPresent() ? opt.get(): null;
 	}
 
+	@Override
+	public List<T> findAllById(Iterable<ID> var1)
+	{
+		return  dao.findAllById(var1);
+	}
+
+
+
 
 	@Override
 	@Transactional
@@ -71,6 +79,19 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 		entity.setUpdatedTime(Uuids.unixTimestamp(uuid));
 		return dao.updateNonNull(id, entity);
 	}
+
+
+	/**
+	 * 自测有问题
+	 * @param entity
+	 */
+	@Override
+	@Transactional
+	public void deleteByEntity( T entity){
+		 dao.deleteByEntity( entity);
+	}
+
+
 
 	@Override
 	public T save(T entity) {
@@ -89,6 +110,8 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	public void deleteById(ID id) {
 		dao.deleteById(id);
 	}
+
+
 
 	@Override
 	public List<T> findAll(Map<String, Object> queryParam) {
@@ -117,6 +140,26 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql){
 		return  this.dao.querySql(sql,param,cls,pageable,trans,isNativeSql);
 	}
+
+	@Override
+	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls)
+	{
+		return  this.dao.queryAllListSql(sql,param,cls,NameTransform.UN_CHANGE,true);
+	}
+
+	/**
+	 *
+	 * @param sql
+	 * @param param
+	 * @return
+	 */
+	@Override
+	public Long queryContListSqlLocal(String sql,Map<String, Object> param)
+	{
+		return  this.dao.queryContListSqlLocal(sql,param,true);
+	}
+
+
 
 
 
