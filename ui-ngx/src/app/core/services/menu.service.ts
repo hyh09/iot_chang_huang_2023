@@ -286,7 +286,8 @@ export class MenuService {
             name: 'auth-mng.role-mng',
             type: 'link',
             path: '/authManagement/roleManagemnet',
-            icon: 'person'
+            icon: 'mdi:shield-account',
+            isMdiIcon: true
           }
         ]
       },

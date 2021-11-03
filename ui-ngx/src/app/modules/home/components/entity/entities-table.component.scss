@@ -67,8 +67,10 @@
 
       .table-container {
         overflow: auto;
-        .mat-row {
-          cursor: pointer;
+        &.has-detail {
+          .mat-row {
+            cursor: pointer;
+          }
         }
       }
 
@@ -76,6 +78,10 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      ::ng-deep .mat-paginator-container {
+        padding: 0 12px;
       }
     }
   }

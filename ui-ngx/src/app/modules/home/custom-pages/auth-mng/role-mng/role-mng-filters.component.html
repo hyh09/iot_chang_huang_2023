@@ -1,3 +1,27 @@
-<p>
-  role-mng-filters works!
-</p>
+<mat-form-field>
+  <mat-label>{{ 'auth-mng.role-code' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.roleCode" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.roleCode"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('roleCode')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'auth-mng.role-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.roleName" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.roleName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('roleName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

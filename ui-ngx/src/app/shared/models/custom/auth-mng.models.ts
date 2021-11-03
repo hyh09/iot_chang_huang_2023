@@ -12,5 +12,10 @@ export interface UserInfo extends BaseData<UserInfoId> {
 }
 
 export interface Role extends BaseData<RoleId> {
+  roleCode: string,
+  roleName: string
+}
 
+export interface rolePermissions {
+  
 }

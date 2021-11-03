@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
+import { BindUserTableConfigResolver } from './role-mng/bind-user-table-config.resolver';
+import { RoleMngTableConfigResolver } from './role-mng/role-mng-table-config.resolver';
 import { UserMngTableConfigResolver } from './user-mng/user-mng-table-config.resolver';
 
 const routes: Routes = [
@@ -34,17 +36,39 @@ const routes: Routes = [
       },
       {
         path: 'roleManagemnet',
-        component: EntitiesTableComponent,
         data: {
-          title: 'auth-mng.role-mng',
           breadcrumb: {
             label: 'auth-mng.role-mng',
-            icon: 'person'
+            icon: 'mdi:shield-account',
+            isMdiIcon: true
           }
         },
-        // resolve: {
-        //   entitiesTableConfig: 
-        // }
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'auth-mng.role-mng'
+            },
+            resolve: {
+              entitiesTableConfig: RoleMngTableConfigResolver
+            }
+          },
+          {
+            path: ':roleId/users',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'auth-mng.bind-users',
+              breadcrumb: {
+                label: 'auth-mng.bind-users',
+                icon: 'account_circle'
+              }
+            },
+            resolve: {
+              entitiesTableConfig: BindUserTableConfigResolver
+            }
+          }
+        ]
       }
     ]
   }
@@ -54,7 +78,9 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
-    UserMngTableConfigResolver
+    UserMngTableConfigResolver,
+    RoleMngTableConfigResolver,
+    BindUserTableConfigResolver
   ]
 })
 export class AuthMngRoutingModule { }

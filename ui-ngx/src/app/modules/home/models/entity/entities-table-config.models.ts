@@ -35,14 +35,14 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 
 export type EntityBooleanFunction<T extends BaseData<HasId>> = (entity: T) => boolean;
 export type EntityStringFunction<T extends BaseData<HasId>> = (entity: T) => string;
-export type EntityVoidFunction<T extends BaseData<HasId>> = (entity: T) => void;
+export type EntityVoidFunction<T extends BaseData<HasId>> = (entity: T | T[]) => void;
 export type EntityIdsVoidFunction<T extends BaseData<HasId>> = (ids: HasUUID[]) => void;
 export type EntityCountStringFunction = (count: number) => string;
 export type EntityTwoWayOperation<T extends BaseData<HasId>> = (entity: T, originalEntity?: T) => Observable<T>;
 export type EntityByIdOperation<T extends BaseData<HasId>> = (id: HasUUID) => Observable<T>;
 export type EntityIdOneWayOperation = (id: HasUUID) => Observable<any>;
 export type EntityActionFunction<T extends BaseData<HasId>> = (action: EntityAction<T>) => boolean;
-export type CreateEntityOperation<T extends BaseData<HasId>> = () => Observable<T>;
+export type CreateEntityOperation<T extends BaseData<HasId>> = () => Observable<T | T[]>;
 export type EntityRowClickFunction<T extends BaseData<HasId>> = (event: Event, entity: T) => boolean;
 
 export type CellContentFunction<T extends BaseData<HasId>> = (entity: T, key: string) => string;
@@ -190,6 +190,9 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   entityAdded: EntityVoidFunction<T> = () => {};
   entityUpdated: EntityVoidFunction<T> = () => {};
   entitiesDeleted: EntityIdsVoidFunction<T> = () => {};
+  padding: string;
+  titleVisible = true;
+  groupActionEnabled = true;
 }
 
 export function checkBoxCell(value: boolean): string {

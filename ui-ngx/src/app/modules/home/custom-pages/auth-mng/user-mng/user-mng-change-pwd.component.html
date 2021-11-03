@@ -13,18 +13,18 @@
     <form [formGroup]="form">
       <mat-form-field class="mat-block">
         <mat-label translate>auth-mng.password</mat-label>
-        <input matInput formControlName="password" required>
+        <input matInput formControlName="password" required validateEqual="confirmPwd" reverse="true">
         <mat-error *ngIf="form.get('password').hasError('required')">
           {{ 'auth-mng.password-required' | translate }}
         </mat-error>
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>auth-mng.confirm-pwd</mat-label>
-        <input matInput formControlName="confirmPwd" required>
+        <input matInput formControlName="confirmPwd" required validateEqual="password">
         <mat-error *ngIf="form.get('confirmPwd').hasError('required')">
           {{ 'auth-mng.confirm-pwd-required' | translate }}
         </mat-error>
-        <mat-error *ngIf="form.get('confirmPwd').hasError('pwdNotEqual')">
+        <mat-error *ngIf="form.get('confirmPwd').hasError('notEqual')">
           {{ 'auth-mng.pwd-not-equal' | translate }}
         </mat-error>
       </mat-form-field>

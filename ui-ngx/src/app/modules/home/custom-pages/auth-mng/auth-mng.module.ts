@@ -8,6 +8,9 @@ import { RoleMngComponent } from './role-mng/role-mng.component';
 import { UserMngFiltersComponent } from './user-mng/user-mng-filters.component';
 import { UserMngComponent } from './user-mng/user-mng.component';
 import { UserMngChangePwdComponent } from './user-mng/user-mng-change-pwd.component';
+import { EqualValidator } from '@app/core/directives/equal-validator.dierctive';
+import { SetPermissionsComponent } from './role-mng/set-permissions.component';
+import { SelectUsersComponent } from './user-mng/select-users.component';
 
 @NgModule({
   imports: [
@@ -17,11 +20,14 @@ import { UserMngChangePwdComponent } from './user-mng/user-mng-change-pwd.compon
     AuthMngRoutingModule
   ],
   declarations: [
+    EqualValidator,
     UserMngComponent,
     UserMngFiltersComponent,
+    UserMngChangePwdComponent,
+    SelectUsersComponent,
     RoleMngComponent,
     RoleMngFiltersComponent,
-    UserMngChangePwdComponent
+    SetPermissionsComponent
   ]
 })
 export class AuthMngModule { }

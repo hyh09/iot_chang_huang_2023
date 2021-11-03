@@ -1,3 +1,35 @@
-<p>
-  role-mng works!
-</p>
+
+<div style="min-width: 360px;">
+  <div [fxShow]="!isEdit" class="tb-details-buttons" fxLayout.xs="column">
+    <button
+      mat-raised-button color="primary"
+      [disabled]="(isLoading$ | async)"
+      (click)="onEntityAction($event, 'bindUsers')"
+    >{{'auth-mng.bind-users' | translate }}</button>
+    <button
+      mat-raised-button color="primary"
+      [disabled]="(isLoading$ | async)"
+      (click)="onEntityAction($event, 'setPermissions')"
+    >{{'auth-mng.set-permissions' | translate }}</button>
+  </div>
+  <div class="mat-padding" fxLayout="column">
+    <form [formGroup]="entityForm">
+      <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+        <mat-form-field class="mat-block">
+          <mat-label translate>auth-mng.role-code</mat-label>
+          <input matInput formControlName="roleCode" required>
+          <mat-error *ngIf="entityForm.get('roleCode').hasError('required')">
+            {{ 'auth-mng.role-code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>auth-mng.role-name</mat-label>
+          <input matInput formControlName="roleName" required>
+          <mat-error *ngIf="entityForm.get('roleName').hasError('required')">
+            {{ 'auth-mng.role-name-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
+    </form>
+  </div>
+</div>

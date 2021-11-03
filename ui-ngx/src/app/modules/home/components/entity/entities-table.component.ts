@@ -202,7 +202,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     const enabledGroupActionDescriptors =
       this.groupActionDescriptors.filter((descriptor) => descriptor.isEnabled);
 
-    this.selectionEnabled = this.entitiesTableConfig.selectionEnabled && enabledGroupActionDescriptors.length;
+    this.selectionEnabled = this.entitiesTableConfig.selectionEnabled || enabledGroupActionDescriptors.length;
 
     this.columnsUpdated();
 
@@ -355,7 +355,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   }
 
   addEntity($event: Event) {
-    let entity$: Observable<BaseData<HasId>>;
+    let entity$: Observable<BaseData<HasId> | BaseData<HasId>[]>;
     if (this.entitiesTableConfig.addEntity) {
       entity$ = this.entitiesTableConfig.addEntity();
     } else {
@@ -473,7 +473,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       this.paginator.pageIndex = 0;
     }
     const sortable = this.sort.sortables.get(this.entitiesTableConfig.defaultSortOrder.property);
-    this.sort.active = sortable.id;
+    this.sort.active = sortable ? sortable.id : '';
     this.sort.direction = this.entitiesTableConfig.defaultSortOrder.direction === Direction.ASC ? 'asc' : 'desc';
     if (update) {
       this.updateData();

@@ -4,6 +4,7 @@ import { RequestConfig, defaultHttpOptionsFromConfig } from "@app/core/public-ap
 import { UserInfo } from "@app/shared/models/custom/auth-mng.models";
 import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 
 interface FetchListFilter {
   userCode: string,
@@ -26,7 +27,7 @@ export class UserMngService {
 
   // 获取用户列表
   public getUsers(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<UserInfo>> {
-    return this.http.post<PageData<UserInfo>>(
+    return this.http.get<PageData<UserInfo>>(
       `/api/user/findAll${pageLink.toQuery()}&userCode=${filterParams.userCode}&userName=${filterParams.userName}`,
       defaultHttpOptionsFromConfig(config)
     );
@@ -54,7 +55,7 @@ export class UserMngService {
 
   // 获取当前可用的用户编码
   public getAvailableCode(): Observable<string> {
-    return this.http.get(`/api/dict/data/availableCode`, { responseType: 'text' });
+    return this.http.post(`/api/user/getCode`, { key: "1" }, { responseType: 'text' });
   }
 
 }

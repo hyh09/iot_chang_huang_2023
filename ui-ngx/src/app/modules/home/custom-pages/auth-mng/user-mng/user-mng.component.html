@@ -17,21 +17,27 @@
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>auth-mng.phone-number</mat-label>
-        <input matInput formControlName="phoneNumber">
+        <input matInput formControlName="phoneNumber" required>
+        <mat-error *ngIf="entityForm.get('phoneNumber').hasError('required')">
+          {{ 'auth-mng.phone-number-required' | translate }}
+        </mat-error>
         <mat-error *ngIf="entityForm.get('phoneNumber').hasError('pattern')">
           {{ 'auth-mng.phone-number-invalid' | translate }}
         </mat-error>
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>auth-mng.email</mat-label>
-        <input matInput formControlName="email">
+        <input matInput formControlName="email" required>
+        <mat-error *ngIf="entityForm.get('email').hasError('required')">
+          {{ 'auth-mng.email-required' | translate }}
+        </mat-error>
         <mat-error *ngIf="entityForm.get('email').hasError('email')">
           {{ 'auth-mng.email-invalid' | translate }}
         </mat-error>
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>auth-mng.roles</mat-label>
-        <mat-select formControlName="roleIds">
+        <mat-select formControlName="roleIds" multiple>
           <mat-option
             *ngFor="let role of entitiesTableConfig.componentsData.roleList"
             [value]="role.id"

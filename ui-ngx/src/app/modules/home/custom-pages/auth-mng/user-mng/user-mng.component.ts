@@ -27,13 +27,13 @@ export class UserMngComponent extends EntityComponent<UserInfo> {
   buildForm(entity: UserInfo): FormGroup {
     return this.fb.group(
       {
-        id:  [entity && entity.id ? entity.id : null],
+        id: [entity && entity.id ? entity.id : null],
         userCode: [entity && entity.userCode ? entity.userCode : this.entitiesTableConfig.componentsData.availableCode, Validators.required],
         userName: [entity ? entity.userName : '', Validators.required],
-        phoneNumber: [entity ? entity.phoneNumber : '', Validators.pattern(/^(1)\d{10}$/)],
-        email: [entity ? entity.email : '', Validators.email],
+        phoneNumber: [entity ? entity.phoneNumber : '', [Validators.required, Validators.pattern(/^(1)\d{10}$/)]],
+        email: [entity ? entity.email : '', [Validators.required, Validators.email]],
         roleIds: [entity && entity.roleIds ? entity.roleIds : []],
-        activeStatus: [entity ? entity.activeStatus : '1']
+        activeStatus: [entity && entity.activeStatus ? entity.activeStatus : '1']
       }
     );
   }
