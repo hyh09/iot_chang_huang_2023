@@ -18,7 +18,6 @@ package org.thingsboard.server.dao.model.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
@@ -84,7 +83,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     @Column(name = "created_time")
     private long createdTime;
 
-    @CreatedBy
+   // @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
@@ -92,7 +91,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     @Column(name = "updated_time")
     private long updatedTime;
 
-    @CreatedBy
+    //@CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 

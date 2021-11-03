@@ -26,6 +26,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.Dao;
 import org.thingsboard.server.dao.TenantEntityDao;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -247,4 +248,11 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return the list of device objects
      */
     PageData<Device> findDevicesByTenantIdAndEdgeIdAndType(UUID tenantId, UUID edgeId, String type, PageLink pageLink);
+
+    /**
+     * 多条件查询
+     * @param deviceEntity
+     * @return
+     */
+    List<DeviceEntity> findDeviceListBuyCdn(DeviceEntity deviceEntity);
 }

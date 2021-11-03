@@ -2,7 +2,6 @@ package org.thingsboard.server.dao.productionline;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 
@@ -30,9 +29,9 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
      */
     @Override
     public ProductionLine saveProductionLine(ProductionLine factory){
-        log.trace("Executing saveFactory [{}]", factory);
+        log.trace("Executing saveProductionLine [{}]", factory);
         factory.setCode(String.valueOf(System.currentTimeMillis()));
-        return productionLineDao.save(new TenantId(factory.getTenantId()), factory);
+        return productionLineDao.saveProductionLine(factory);
     }
 
     /**
@@ -42,8 +41,8 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
      */
     @Override
     public ProductionLine updProductionLine(ProductionLine factory){
-        log.trace("Executing updFactory [{}]", factory);
-        return productionLineDao.save(new TenantId(factory.getTenantId()), factory);
+        log.trace("Executing updProductionLine [{}]", factory);
+        return productionLineDao.saveProductionLine(factory);
     }
 
     /**
@@ -54,20 +53,22 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
      */
     @Override
     public void delProductionLine(UUID id){
-        log.trace("Executing delFactory [{}]", id);
+        log.trace("Executing delProductionLine [{}]", id);
         productionLineDao.removeById(null, id);
     }
 
 
     /**
-     * 查询工厂列表
+     * 询租户/工厂/车间下所有生产线列表
      * @param tenantId
+     * @param workshopId
+     * @param factoryId
      * @return
      */
     @Override
-    public List<ProductionLine> findProductionLineList(UUID tenantId){
-        log.trace("Executing findFactoryList [{}]", tenantId);
-        return productionLineDao.find(new TenantId(tenantId));
+    public List<ProductionLine> findProductionLineList(UUID tenantId,UUID workshopId,UUID factoryId){
+        log.trace("Executing findProductionLineList [{}]", tenantId);
+        return productionLineDao.findProductionLineList(tenantId,workshopId,factoryId);
     }
 
     /**

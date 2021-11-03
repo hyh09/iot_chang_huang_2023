@@ -2,7 +2,6 @@ package org.thingsboard.server.dao.workshop;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 
@@ -26,9 +25,9 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
      */
     @Override
     public Workshop saveWorkshop(Workshop workshop){
-        log.trace("Executing saveFactory [{}]", workshop);
+        log.trace("Executing saveWorkshop [{}]", workshop);
         workshop.setCode(String.valueOf(System.currentTimeMillis()));
-        return workshopDao.save(new TenantId(workshop.getTenantId()), workshop);
+        return workshopDao.saveWorkshop(workshop);
     }
 
     /**
@@ -38,8 +37,8 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
      */
     @Override
     public Workshop updWorkshop(Workshop workshop){
-        log.trace("Executing updFactory [{}]", workshop);
-        return workshopDao.save(new TenantId(workshop.getTenantId()), workshop);
+        log.trace("Executing updWorkshop [{}]", workshop);
+        return workshopDao.saveWorkshop(workshop);
     }
 
     /**
@@ -50,20 +49,20 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
      */
     @Override
     public void delWorkshop(UUID id){
-        log.trace("Executing delFactory [{}]", id);
+        log.trace("Executing delWorkshop [{}]", id);
         workshopDao.removeById(null, id);
     }
 
 
     /**
-     * 查询工厂列表
+     * 查询租户下所有车间列表
      * @param tenantId
      * @return
      */
     @Override
-    public List<Workshop> findWorkshopList(UUID tenantId){
-        log.trace("Executing findFactoryList [{}]", tenantId);
-        return workshopDao.find(new TenantId(tenantId));
+    public List<Workshop> findWorkshopListByTenant(UUID tenantId,UUID factoryId){
+        log.trace("Executing findWorkshopListByTenant [{}]", tenantId,factoryId);
+        return workshopDao.findWorkshopListByTenant(tenantId,factoryId);
     }
 
     /**

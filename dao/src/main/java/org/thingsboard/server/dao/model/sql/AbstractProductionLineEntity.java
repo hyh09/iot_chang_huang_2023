@@ -15,12 +15,11 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
@@ -39,31 +38,27 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractProductionLineEntity<T extends ProductionLine> extends BaseSqlEntity<T>{
 
-    @ApiModelProperty("车间标识")
     @Column(name = "workshop_id")
     private UUID workshopId;
 
-    @ApiModelProperty("生产线编码")
+    @Column(name = "factory_id")
+    private UUID factoryId;
+
     @Column(name = "code")
     private String code;
 
-    @ApiModelProperty("生产线名称")
     @Column(name = "name")
     private String name;
 
-    @ApiModelProperty("logo图标")
     @Column(name = "logo_icon")
     private String logoIcon;
 
-    @ApiModelProperty("logo图片")
     @Column(name = "logo_images")
     private String logoImages;
 
-    @ApiModelProperty(name = "备注")
     @Column(name = "remark")
     private String remark;
 
-    @ApiModelProperty(name = "租户")
     @Column(name = "tenant_id")
     private UUID tenantId;
 
@@ -71,19 +66,16 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     @Column(name = "created_time")
     private long createdTime;
 
-    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
-    @CreatedDate
+    @LastModifiedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
-    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
-    @ApiModelProperty("删除标记（A-未删除；D-已删除）")
     @Column(name = "del_flag")
     private String delFlag = "A";
 
@@ -96,6 +88,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
             this.setUuid(abstractProdutionLineEntity.getId());
         }
         this.workshopId = abstractProdutionLineEntity.getWorkshopId();
+        this.factoryId = abstractProdutionLineEntity.getFactoryId();
         this.code = abstractProdutionLineEntity.getCode();
         this.name = abstractProdutionLineEntity.getName();
         this.logoIcon = abstractProdutionLineEntity.getLogoIcon();
@@ -114,6 +107,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
             this.setUuid(productionLine.getId().getId());
         }
         this.workshopId = productionLine.getWorkshopId();
+        this.factoryId = productionLine.getFactoryId();
         this.code = productionLine.getCode();
         this.name = productionLine.getName();
         this.logoIcon = productionLine.getLogoIcon();
@@ -130,6 +124,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     public ProductionLine toProductionLine(){
         ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getUuid()));
         productionLine.setWorkshopId(workshopId);
+        productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);
         productionLine.setName(name);
         productionLine.setLogoIcon(logoIcon);

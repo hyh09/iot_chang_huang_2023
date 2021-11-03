@@ -47,11 +47,4 @@ public interface TenantMenuService {
 
     TenantMenu findById(UUID tenantMenuId);
 
-    /**
-     * id的批量查询
-     * @param ids
-     * @return
-     */
-     List<TenantMenu> findByIdIn(List<UUID> ids);
-
 }

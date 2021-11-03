@@ -15,12 +15,11 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.workshop.Workshop;
@@ -30,6 +29,7 @@ import org.thingsboard.server.dao.util.mapping.JsonStringType;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import java.util.UUID;
 
 @Data
@@ -39,31 +39,24 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSqlEntity<T>{
 
-    @ApiModelProperty("工厂标识")
     @Column(name = "factory_id")
     private UUID factoryId;
 
-    @ApiModelProperty("车间编码")
     @Column(name = "code")
     private String code;
 
-    @ApiModelProperty("车间名称")
     @Column(name = "name")
     private String name;
 
-    @ApiModelProperty("logo图标")
     @Column(name = "logo_icon")
     private String logoIcon;
 
-    @ApiModelProperty("logo图片")
     @Column(name = "logo_images")
     private String logoImages;
 
-    @ApiModelProperty(name = "备注")
     @Column(name = "remark")
     private String remark;
 
-    @ApiModelProperty(name = "租户")
     @Column(name = "tenant_id")
     private UUID tenantId;
 
@@ -71,21 +64,24 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
     @Column(name = "created_time")
     private long createdTime;
 
-    @CreatedBy
     @Column(name = "created_user")
     private UUID createdUser;
 
-    @CreatedDate
+    @LastModifiedDate
     @Column(name = "updated_time")
     private long updatedTime;
 
-    @CreatedBy
     @Column(name = "updated_user")
     private UUID updatedUser;
 
-    @ApiModelProperty("删除标记（A-未删除；D-已删除）")
+    //删除标记（A-未删除；D-已删除）
     @Column(name = "del_flag")
     private String delFlag = "A";
+
+    //产线
+    //public List<ProductionLineEntity> productionLineEntityList;
+    @Transient
+    private AbstractProductionLineEntity productionLineEntityList;
 
 
     public AbstractWorkshopEntity() {

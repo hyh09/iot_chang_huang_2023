@@ -2,10 +2,12 @@ package org.thingsboard.server.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.entity.workshop.dto.AddWorkshopDto;
@@ -29,18 +31,20 @@ public class WorkshopController extends BaseController  {
      * @throws ThingsboardException
      */
     @ApiOperation("新增/更新车间")
-    @ApiImplicitParam(name = "addWorkshopDtop",value = "入参实体",dataType = "AddWorkshopDtop",paramType="body")
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+    @ApiImplicitParam(name = "addWorkshopDto",value = "入参实体",dataType = "AddWorkshopDto",paramType="body")
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public WorkshopVo saveWorkshop(@RequestBody AddWorkshopDto addWorkshopDto) throws ThingsboardException {
         try {
             checkParameter("tenantId",addWorkshopDto.getTenantId());
-            Workshop workshop = new Workshop();
+            checkParameter("factoryId",addWorkshopDto.getFactoryId());
+            Workshop workshop = addWorkshopDto.toWorkshop();
             if(addWorkshopDto.getId() == null){
-                workshop = checkNotNull(workshopService.saveWorkshop(addWorkshopDto.toWorkshop()));
+                workshop.setCreatedUser(getCurrentUser().getUuidId());
+                workshop = checkNotNull(workshopService.saveWorkshop(workshop));
             }else {
-                workshop = checkNotNull(workshopService.updWorkshop(addWorkshopDto.toWorkshop()));
+                workshop.setUpdatedUser(getCurrentUser().getUuidId());
+                workshop = checkNotNull(workshopService.updWorkshop(workshop));
             }
             return new WorkshopVo(workshop);
         } catch (Exception e) {
@@ -69,21 +73,23 @@ public class WorkshopController extends BaseController  {
     }
 
     /**
-     * 查询租户下所有车间列表
+     * 查询租户/工厂下所有车间列表
      * @param tenantId
      * @return
      * @throws ThingsboardException
      */
     @ApiOperation("查询租户下所有车间列表")
-    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/findWorkshopList", method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true),
+            @ApiImplicitParam(name = "factoryId",value = "工厂标识",dataType = "string",paramType = "query")
+    })
+    @RequestMapping(value = "/findWorkshopListByTenant", method = RequestMethod.GET)
     @ResponseBody
-    public List<WorkshopVo> findWorkshopList(@RequestParam String tenantId) throws ThingsboardException {
+    public List<WorkshopVo> findWorkshopListByTenant(@RequestParam String tenantId,@RequestParam String factoryId) throws ThingsboardException {
         try {
             List<WorkshopVo> workshopVos = new ArrayList<>();
             checkParameter("tenantId",tenantId);
-            List<Workshop> workshops = checkNotNull(workshopService.findWorkshopList(toUUID(tenantId)));
+            List<Workshop> workshops = checkNotNull(workshopService.findWorkshopListByTenant(toUUID(tenantId), StringUtils.isNotEmpty(factoryId) ?toUUID(factoryId):null));
             workshops.forEach(i->{
                 workshopVos.add(new WorkshopVo(i));
             });

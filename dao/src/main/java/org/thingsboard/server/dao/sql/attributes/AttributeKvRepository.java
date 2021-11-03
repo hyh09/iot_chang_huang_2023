@@ -59,5 +59,12 @@ public interface AttributeKvRepository extends CrudRepository<AttributeKvEntity,
     @Query(value = "SELECT DISTINCT attribute_key FROM attribute_kv WHERE entity_type = :entityType " +
             "AND entity_id in :entityIds ORDER BY attribute_key", nativeQuery = true)
     List<String> findAllKeysByEntityIds(@Param("entityType") String entityType, @Param("entityIds") List<UUID> entityIds);
+
+    @Query ("SELECT a FROM AttributeKvEntity a WHERE a.id.entityType = :entityType " +
+            "AND a.id.entityId in (:entityIds) " +
+            "AND a.id.attributeKey = :attributeKey ")
+    List<AttributeKvEntity> findAllOneKeyByEntityIdList(@Param("entityType") EntityType entityType,
+                                                        @Param("entityIds") List<UUID> entityIds,
+                                                        @Param("attributeKey") String key);
 }
 
