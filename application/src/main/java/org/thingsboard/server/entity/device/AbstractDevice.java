@@ -13,117 +13,88 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.dao.model.sql;
+package org.thingsboard.server.entity.device;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.device.data.DeviceData;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.OtaPackageId;
-import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.dao.model.BaseSqlEntity;
-import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.dao.model.SearchTextEntity;
-import org.thingsboard.server.dao.util.mapping.JsonBinaryType;
-import org.thingsboard.server.dao.util.mapping.JsonStringType;
+import org.thingsboard.server.common.data.id.*;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@TypeDefs({
-        @TypeDef(name = "json", typeClass = JsonStringType.class),
-        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
-@MappedSuperclass
-public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEntity<T> implements SearchTextEntity<T> {
+public abstract class AbstractDevice{
+    @ApiModelProperty("设备标识")
+    private UUID id;
 
-    @Column(name = ModelConstants.DEVICE_TENANT_ID_PROPERTY, columnDefinition = "uuid")
+    @ApiModelProperty("租户标识")
     private UUID tenantId;
 
-    @Column(name = ModelConstants.DEVICE_CUSTOMER_ID_PROPERTY, columnDefinition = "uuid")
+    @ApiModelProperty("客户标识")
     private UUID customerId;
 
-    @Column(name = ModelConstants.DEVICE_TYPE_PROPERTY)
+    @ApiModelProperty("")
     private String type;
 
-    @Column(name = ModelConstants.DEVICE_NAME_PROPERTY)
+    @ApiModelProperty("设备名称")
     private String name;
 
-    @Column(name = ModelConstants.DEVICE_LABEL_PROPERTY)
+    @ApiModelProperty("标签")
     private String label;
 
-    @Column(name = ModelConstants.SEARCH_TEXT_PROPERTY)
     private String searchText;
 
-    @Type(type = "json")
-    @Column(name = ModelConstants.DEVICE_ADDITIONAL_INFO_PROPERTY)
     private JsonNode additionalInfo;
 
-    @Column(name = ModelConstants.DEVICE_DEVICE_PROFILE_ID_PROPERTY, columnDefinition = "uuid")
     private UUID deviceProfileId;
 
-    @Column(name = ModelConstants.DEVICE_FIRMWARE_ID_PROPERTY, columnDefinition = "uuid")
     private UUID firmwareId;
 
-    @Column(name = ModelConstants.DEVICE_SOFTWARE_ID_PROPERTY, columnDefinition = "uuid")
     private UUID softwareId;
 
-    @Type(type = "jsonb")
-    @Column(name = ModelConstants.DEVICE_DEVICE_DATA_PROPERTY, columnDefinition = "jsonb")
     private JsonNode deviceData;
 
-    @Column(name = ModelConstants.DEVICE_PRODUCTION_LINE_ID_PROPERTY, columnDefinition = "uuid")
+    @ApiModelProperty("产线标识")
     private UUID productionLineId;
 
-    @Column(name = ModelConstants.DEVICE_DICT_DEVICE_ID_PROPERTY, columnDefinition = "uuid")
-    private UUID dictDeviceId;
-
-    @Column(name = ModelConstants.DEVICE_IMAGES_PROPERTY)
-    private String images;
-
-    @Column(name = ModelConstants.DEVICE_ICON_PROPERTY)
-    private String icon;
-
-    @Column(name = "workshop_id")
+    @ApiModelProperty("车间标识")
     private UUID workshopId;
 
-    @Column(name = "factory_id")
+    @ApiModelProperty("工厂标识")
     private UUID factoryId;
 
-    @Column(name = "code")
+    @ApiModelProperty("设备字典标识")
+    private UUID dictDeviceId;
+
+    @ApiModelProperty("设备图片")
+    private String images;
+
+    @ApiModelProperty("设备图标")
+    private String icon;
+
+    @ApiModelProperty("设备编码")
     private String code;
 
-    @Column(name = "created_time")
-    private long createdTime;
+    public long createdTime;
 
-    @Column(name = "created_user")
-    private UUID createdUser;
+    public UUID createdUser;
 
-    @Column(name = "updated_time")
     private long updatedTime;
 
-    @Column(name = "updated_user")
     private UUID updatedUser;
 
-    public AbstractDeviceEntity() {
+    public AbstractDevice() {
         super();
     }
 
-    public AbstractDeviceEntity(Device device) {
+    public AbstractDevice(Device device) {
         if (device.getId() != null) {
-            this.setUuid(device.getUuidId());
+            this.setId(device.getUuidId());
         }
         this.setCreatedTime(device.getCreatedTime());
         if (device.getTenantId() != null) {
@@ -155,7 +126,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.dictDeviceId = device.getDictDeviceId();
     }
 
-    public AbstractDeviceEntity(DeviceEntity deviceEntity) {
+    public AbstractDevice(DeviceEntity deviceEntity) {
         this.setId(deviceEntity.getId());
         this.setCreatedTime(deviceEntity.getCreatedTime());
         this.tenantId = deviceEntity.getTenantId();
@@ -178,18 +149,8 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.dictDeviceId = deviceEntity.getDictDeviceId();
     }
 
-    @Override
-    public String getSearchTextSource() {
-        return name;
-    }
-
-    @Override
-    public void setSearchText(String searchText) {
-        this.searchText = searchText;
-    }
-
-    protected Device toDevice() {
-        Device device = new Device(new DeviceId(getUuid()));
+    public Device toDevice() {
+        Device device = new Device(new DeviceId(getId()));
         device.setCreatedTime(createdTime);
         if (tenantId != null) {
             device.setTenantId(new TenantId(tenantId));

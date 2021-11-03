@@ -156,6 +156,11 @@ public class ModelConstants {
     public static final String TENANT_MENU_COLUMN_FAMILY_NAME = "tb_tenant_menu";
 
     /**
+     * 设备构成
+     */
+    public static final String DEVICE_COMPONENT_COLUMN_FAMILY_NAME = "hs_device_component";
+
+    /**
      * 工厂表.
      */
     public static final String FACTORY_COLUMN_FAMILY_NAME = "hs_factory";
@@ -183,6 +188,7 @@ public class ModelConstants {
     public static final String DEVICE_FIRMWARE_ID_PROPERTY = "firmware_id";
     public static final String DEVICE_SOFTWARE_ID_PROPERTY = "software_id";
     public static final String DEVICE_PRODUCTION_LINE_ID_PROPERTY = "production_line_id";
+    public static final String DEVICE_DICT_DEVICE_ID_PROPERTY = "dict_device_id";
     public static final String DEVICE_IMAGES_PROPERTY = "images";
     public static final String DEVICE_ICON_PROPERTY = "icon";
 

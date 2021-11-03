@@ -22,6 +22,7 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.EntitySubtype;
 import org.thingsboard.server.common.data.device.DeviceSearchQuery;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
@@ -111,4 +112,25 @@ public interface DeviceService {
     PageData<Device> findDevicesByTenantIdAndEdgeIdAndType(TenantId tenantId, EdgeId edgeId, String type, PageLink pageLink);
 
     long countByTenantId(TenantId tenantId);
+
+    /**
+     * 保存/修改
+     * @param device
+     * @return
+     */
+    Device saveOrUpdDevice(Device device) throws ThingsboardException;
+
+    /**
+     * 分配产线设备
+     * @param device
+     * @throws ThingsboardException
+     */
+    void distributionDevice(Device device) throws ThingsboardException;
+
+    /**
+     * 移除产线设备
+     * @param device
+     * @throws ThingsboardException
+     */
+    void removeDevice(Device device) throws ThingsboardException;
 }

@@ -46,4 +46,8 @@ public interface MenuDao extends Dao<Menu>{
     PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException ;
 
     Menu saveMenu(TenantId tenantId, Menu menu)throws ThingsboardException;
+
+    void delMenu(UUID id);
+
+    Menu getTenantById(UUID id);
 }

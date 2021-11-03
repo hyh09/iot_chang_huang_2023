@@ -20,6 +20,7 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceInfo;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.EntitySubtype;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
@@ -255,4 +256,28 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return
      */
     List<DeviceEntity> findDeviceListBuyCdn(DeviceEntity deviceEntity);
+
+
+    /**
+     * 保存/修改
+     * @param device
+     * @return
+     */
+    Device saveOrUpdDevice(Device device);
+
+
+    /**
+     * 移除产线设备
+     * @param deviceIdList
+     * @throws ThingsboardException
+     */
+    void removeProductionLine(List<UUID> deviceIdList,UUID updatedUser) throws ThingsboardException;
+
+    /**
+     * 分配产线设备
+     * @param device
+     * @throws ThingsboardException
+     */
+    void addProductionLine(Device device) throws ThingsboardException;
+
 }

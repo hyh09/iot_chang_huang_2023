@@ -463,7 +463,6 @@ public abstract class BaseController {
     }
     Menu checkMenu(Menu menu) throws ThingsboardException{
         checkNotNull(menu);
-        checkParameter("tenant",menu.getTenantId());
         checkParameter("level",menu.getLevel());
         checkParameter("menuType",menu.getMenuType());
         return menu;

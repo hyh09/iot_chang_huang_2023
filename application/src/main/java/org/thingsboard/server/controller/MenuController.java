@@ -33,10 +33,10 @@ import org.thingsboard.server.entity.menu.dto.AddMenuDto;
 import org.thingsboard.server.entity.menu.qry.MenuQueryCdnQry;
 import org.thingsboard.server.entity.menu.vo.MenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.service.security.permission.Operation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Api(value="系统菜单Controller",tags={"系统菜单口"})
 @RequiredArgsConstructor
@@ -149,11 +149,10 @@ public class MenuController extends BaseController {
      * @throws ThingsboardException
      */
     @ApiOperation("删除菜单")
-    @ApiImplicitParam(name = "id",value = "当前菜单标识",dataType = "String",paramType="query",required = true)
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
-    @RequestMapping(value = "/delMenu", method = RequestMethod.DELETE)
+    @ApiImplicitParam(name = "id",value = "当前菜单标识",dataType = "String",paramType="path",required = true)
+    @RequestMapping(value = "/delMenu/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void delMenu(@RequestParam(required = true) String id) throws ThingsboardException {
+    public void delMenu(@PathVariable("id") String id) throws ThingsboardException {
         try {
             //校验参数
             checkParameter("id",id);
@@ -229,14 +228,14 @@ public class MenuController extends BaseController {
      */
     @ApiOperation(value="根据菜单标识查询菜单详情信息")
     @ApiImplicitParam(name = "id",value = "当前菜单id",dataType = "String",paramType="path",required = true)
-   // @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public MenuVo getTenantById(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
         try {
             MenuId menuId = new MenuId(toUUID(id));
-            Menu menu = checkMenuId(menuId, Operation.READ);
+            checkParameter("id",id);
+            Menu menu = menuService.getTenantById(UUID.fromString(id));
             return new MenuVo(menu);
         } catch (Exception e) {
             throw handleException(e);
@@ -300,7 +299,6 @@ public class MenuController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "menuType",value = "菜单类型（PC/APP）",dataType = "string",paramType = "query"),
             @ApiImplicitParam(name = "name",value = "菜单名称",dataType = "string",paramType = "query")})
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/getMenuListByCdn", method = RequestMethod.GET)
     @ResponseBody
     public List<MenuVo> getMenuListByCdn(@RequestParam String menuType,@RequestParam(required = false) String name)throws ThingsboardException{
