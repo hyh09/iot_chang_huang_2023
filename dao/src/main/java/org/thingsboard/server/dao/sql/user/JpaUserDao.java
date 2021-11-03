@@ -139,7 +139,7 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
 
     public  List<String> findAllCodesByTenantId( UUID tenantId)
     {
-        return this.userRepository.findAllCodesByTenantId(tenantId);
+        return this.userRepository.findAllCodesByTenantId();
     }
 
 

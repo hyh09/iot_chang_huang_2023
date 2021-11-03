@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
@@ -75,6 +76,7 @@ import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -487,31 +489,47 @@ public class UserController extends BaseController {
         return  user;
     }
 
-    /**
-     * 用户管理的查询接口
-     * findAll
-     */
-    @ApiOperation(value = "查询用户【分页查询】")
+
+
+
+    @ApiOperation(value = "查询用户 【分页查询】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageSize", value = "每页大小，默认10"),
             @ApiImplicitParam(name = "page", value = "当前页,起始页，【0开始】"),
             @ApiImplicitParam(name = "textSearch", value = ""),
             @ApiImplicitParam(name = "sortOrder", value = ""),
-            @ApiImplicitParam(name = "sortProperty", value = "")
-
+            @ApiImplicitParam(name = "sortProperty", value = ""),
+            @ApiImplicitParam(name = "userCode", value = "用户编码"),
+            @ApiImplicitParam(name = "sortProperty", value = "用户名称")
 
 
     })
-    @RequestMapping(value = "/user/findAll",method = RequestMethod.POST)
+    @RequestMapping(value = "/user/findAll",method = RequestMethod.GET)
     @ResponseBody
-    public  Object  findAll(@RequestBody  Map<String, Object> queryParam) throws ThingsboardException {
-       int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
-        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
-        String  textSearch = (String) queryParam.get("textSearch");
-        String  sortProperty = (String) queryParam.get("sortProperty");
-        String  sortOrder = (String) queryParam.get("sortOrder");
+    public Object pageQuery(
+            @RequestParam("userCode") String userCode,
+            @RequestParam("userName") String userName,
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder) throws ThingsboardException {
+
+        Map<String, Object> queryParam  =new HashMap<>();
+        if(!StringUtils.isEmpty(userCode))
+        {
+            queryParam.put("userCode", userCode);
+        }
+        if(!StringUtils.isEmpty(userName))
+        {
+            queryParam.put("userName", userName);
+        }
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        return userService.findAll( queryParam, pageLink);
+        SecurityUser  securityUser =  getCurrentUser();
+        queryParam.put("userCreator",securityUser.getUuidId());
+
+
+        return userService.findAll(queryParam,pageLink);
     }
 
     @ApiOperation(value = "用户管理得 用户得重复数据校验")
@@ -526,7 +544,7 @@ public class UserController extends BaseController {
     @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
     public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
         SecurityUser  securityUser =  getCurrentUser();
-        return  checkSvc.queryCodeNew(vo,securityUser.getTenantId());
+           return  checkSvc.queryCodeNew(vo,securityUser.getTenantId());
 
     }
 

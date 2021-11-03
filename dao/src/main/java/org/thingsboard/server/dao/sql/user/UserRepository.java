@@ -71,10 +71,12 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
     int update(@Param("user") User user);
 
 
+//
+//    @Query("select d.userCode  from UserEntity d where d.tenantId = :tenantId")
+//    List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 
-    @Query("select d.userCode  from UserEntity d where d.tenantId = :tenantId")
-    List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
-
+    @Query("select d.userCode  from UserEntity d ")
+    List<String> findAllCodesByTenantId();
 
 
 }
