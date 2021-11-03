@@ -101,7 +101,7 @@ public class CheckImpl  implements CheckSvc {
           }
 
         List<String> codes = tenantSysRoleService.findAllCodesByTenantId();
-        return getUserAvailableCode(codes,CodeKeyNum.key_user);
+        return getUserAvailableCode(codes,CodeKeyNum.key_role);
     }
 
 
@@ -112,7 +112,13 @@ public class CheckImpl  implements CheckSvc {
        {
            return codeKeyNum.getValue()+codeKeyNum.getInit();
        }
-        List<Integer> list2 =  codes.stream().filter(s->!StringUtils.isEmpty(s) && s.startsWith(codeKeyNum.getValue())).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
+        List<Integer> list2 = new ArrayList<>();
+       if(codeKeyNum == CodeKeyNum.key_user) {
+            list2 = codes.stream().filter(s -> !StringUtils.isEmpty(s) && s.startsWith(codeKeyNum.getValue())).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
+       }else {
+           list2 = codes.stream().filter(s -> !StringUtils.isEmpty(s) && isNumber(s)).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
+
+       }
         if(CollectionUtils.isEmpty(list2))
         {
             return codeKeyNum.getValue()+codeKeyNum.getInit();
@@ -165,4 +171,17 @@ public class CheckImpl  implements CheckSvc {
         return removeList;
     }
 
+
+    /**
+     * 判断一个字符串是否是数字。
+     *
+     * @param string
+     * @return
+     */
+    public static boolean isNumber(String string) {
+        if (string == null)
+            return false;
+        Pattern pattern = Pattern.compile("^-?\\d+(\\.\\d+)?$");
+        return pattern.matcher(string).matches();
+    }
 }
