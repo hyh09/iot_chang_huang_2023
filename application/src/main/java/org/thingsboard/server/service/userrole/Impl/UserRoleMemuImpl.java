@@ -181,12 +181,6 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
         Page<FindUserVo> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(), FindUserVo.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
        List<FindUserVo> list = page.getContent();
         log.info("查询当前角色下的用户绑定数据list{}",list);
-
-//        for(FindUserVo vo:list){
-//            log.info("vo{},vo{}",vo,vo.getPhonenumber());
-//
-//        }
-
         return new PageData<FindUserVo>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 

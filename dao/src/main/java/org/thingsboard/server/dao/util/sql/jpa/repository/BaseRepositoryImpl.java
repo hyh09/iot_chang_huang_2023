@@ -18,6 +18,7 @@ import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.sql.jpa.BaseRepository;
+import org.thingsboard.server.dao.util.sql.jpa.ct.VoBeanConverSvc;
 import org.thingsboard.server.dao.util.sql.jpa.transform.CustomResultToBean;
 import org.thingsboard.server.dao.util.sql.jpa.transform.CustomResultToMap;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
@@ -169,11 +170,10 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 			query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
 			if(Map.class.isAssignableFrom(cls)){
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
-
-//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
-			} else {
+			}if(VoBeanConverSvc.class.isAssignableFrom(cls)){
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+			}else {
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
-//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
 			}
 		} else {
 			query = entityManager.createQuery(sql).unwrap(Query.class);

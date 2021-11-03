@@ -40,16 +40,10 @@ public class FindUserVo {
     @JsonProperty("userName")
     private  String username;
 
-    //    {
-//        "usercreator": "9007cec0-3c4a-11ec-9ccb-3504b42aaeaf",
-//            "authority": "TENANT_ADMIN",
-//            "phonenumber": "12345674322",
-//            "tenantid": "94892bc0-3ad7-11ec-a910-51a6dac8d734",
-//            "id": "b87312d0-3c67-11ec-a746-759677c5ac72",
-//            "usercode": "YH0004",
-//            "email": "342@324.com",
-//            "activestatus": "0",
-//            "username": "用户5"
-//    }
+
+    @JsonProperty("createdTim")
+    private  long time;
+
+
 
 }
