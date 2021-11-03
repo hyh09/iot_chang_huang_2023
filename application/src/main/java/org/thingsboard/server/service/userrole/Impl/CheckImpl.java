@@ -93,6 +93,7 @@ public class CheckImpl  implements CheckSvc {
      */
     @Override
     public Object queryCodeNew(CodeVo vo,TenantId tenantId) {
+        log.info("打印当前得入参{}",tenantId);
           if(vo.getKey().equals(CodeKeyNum.key_user.getKey()))
           {
 
