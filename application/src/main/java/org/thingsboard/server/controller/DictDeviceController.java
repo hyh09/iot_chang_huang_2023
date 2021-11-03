@@ -12,10 +12,11 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.hs.entity.po.DictDevice;
-import org.thingsboard.server.hs.entity.vo.DictDeviceListQuery;
-import org.thingsboard.server.hs.entity.vo.DictDeviceVO;
-import org.thingsboard.server.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
@@ -45,7 +46,7 @@ public class DictDeviceController extends BaseController {
      * @return 可用设备字典编码
      */
     @ApiOperation(value = "获得当前可用设备字典编码")
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device/availableCode")
     public String getAvailableCode() throws ThingsboardException {
         return this.dictDeviceService.getAvailableCode(getTenantId());
@@ -72,7 +73,7 @@ public class DictDeviceController extends BaseController {
             @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
             @ApiImplicitParam(name = "supplier", value = "供应商", paramType = "query")})
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device")
     public PageData<DictDevice> listDictDevice(
             @RequestParam int page,
@@ -95,23 +96,10 @@ public class DictDeviceController extends BaseController {
      * 新增或修改设备字典
      */
     @ApiOperation(value = "新增或修改设备字典")
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
-        if (!StringUtils.isBlank(dictDeviceVO.getCode())) {
-            if (!dictDeviceVO.getCode().startsWith("SBZD")) {
-                throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
-            }
-            try {
-                int intV = Integer.parseInt(dictDeviceVO.getCode().split("SBZD")[1]);
-                if (intV < 1 || intV > 9999) {
-                    throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
-                }
-            } catch (Exception ignore) {
-                throw new ThingsboardException("设备字典编码不符合规则", ThingsboardErrorCode.GENERAL);
-            }
-        }
-
+        CommonUtil.checkCode(dictDeviceVO.getCode(), "SBZD");
         this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
         return dictDeviceVO;
     }
@@ -124,7 +112,7 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "获得设备字典详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path")})
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device/{id}")
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
         return this.dictDeviceService.getDictDeviceDetail(id, getTenantId());
@@ -136,7 +124,7 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "删除设备字典")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path"),})
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping("/dict/device/{id}")
     public void deleteDictDevice(@PathVariable("id") String id) throws ThingsboardException {
         this.dictDeviceService.deleteDictDevice(id, getTenantId());

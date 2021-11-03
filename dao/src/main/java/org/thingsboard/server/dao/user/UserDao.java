@@ -22,6 +22,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.Dao;
 import org.thingsboard.server.dao.TenantEntityDao;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -79,4 +80,9 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
      * 单表的分页查询
      */
     PageData<User> findAll(Map<String, Object> queryParam, PageLink pageLink);
+
+    List<User> findAll(Map<String, Object> queryParam);
+
+
+    public List<String> findAllCodesByTenantId(UUID tenantId);
 }

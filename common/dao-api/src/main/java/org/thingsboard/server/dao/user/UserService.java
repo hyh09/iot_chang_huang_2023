@@ -26,7 +26,9 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface UserService {
 	
@@ -82,6 +84,9 @@ public interface UserService {
 
 	Object findAll(Map<String, Object> queryParam,PageLink pageLink);
 
+	List<User> findAll(Map<String, Object> queryParam);
+
+	public List<String> findAllCodesByTenantId(UUID tenantId);
 
 	Object  changeOthersPassword(PasswordVo vo);
 }

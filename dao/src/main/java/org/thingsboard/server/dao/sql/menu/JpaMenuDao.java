@@ -15,11 +15,17 @@
  */
 package org.thingsboard.server.dao.sql.menu;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
-import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageData;
@@ -29,6 +35,7 @@ import org.thingsboard.server.dao.menu.MenuDao;
 import org.thingsboard.server.dao.model.sql.MenuEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,6 +61,61 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         return menuRepository;
     }
 
+    @Override
+    public Menu saveMenu(TenantId tenantId, Menu domain) throws ThingsboardException {
+        MenuEntity menuEntity = new MenuEntity(domain);
+        if (menuEntity.getUuid() == null) {
+            UUID uuid = Uuids.timeBased();
+            menuEntity.setUuid(uuid);
+            menuEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
+        }else{
+            menuRepository.deleteById(menuEntity.getUuid());
+            menuEntity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+        }
+        MenuEntity entity = menuRepository.save(menuEntity);
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询系统菜单列表分页
+     * @param menu
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException {
+        // 动态条件查询
+        Specification<MenuEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(menu != null){
+                if(StringUtils.isNotBlank(menu.getName())){
+                    predicates.add(cb.like(root.get("name"),"%" + menu.getName().trim() + "%"));
+                }
+                if(StringUtils.isNotBlank(menu.getMenuType())){
+                    predicates.add(cb.equal(root.get("menuType"),menu.getMenuType()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Pageable pageable = DaoUtil.toPageable(pageLink);
+        Page<MenuEntity> menuEntities = menuRepository.findAll(specification, pageable);
+        //转换数据
+        List<MenuEntity> content = menuEntities.getContent();
+
+        List<Menu> resultMenuList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(content)){
+            content.forEach(i->{
+                resultMenuList.add(i.toData());
+            });
+        }
+        PageData<Menu> resultPage = new PageData<>();
+        resultPage = new PageData<Menu>(resultMenuList,menuEntities.getTotalPages(),menuEntities.getTotalElements(),menuEntities.hasNext());
+        return resultPage;
+    }
+
 
     /**
      * 分页查询
@@ -73,18 +135,24 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
     }
     /**
      *根据菜单名称查询
-     * @param Name
+     * @param name
      * @return
      */
     @Override
-    public List<Menu> findMenusByName(String menuType,String Name) {
+    public List<Menu> findMenusByName(String menuType,String name) {
         List<Menu> menuList = new ArrayList<>();
         List<MenuEntity> menuEntityList = new ArrayList<>();
-        if(StringUtils.isNotEmpty(Name)){
-            menuEntityList = menuRepository.findMenusByName(menuType,Name);
-        }else{
-            menuEntityList = menuRepository.findMenusByMenuType(menuType);
-        }
+        Specification<MenuEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(StringUtils.isNotBlank(menuType)){
+                predicates.add(cb.equal(root.get("name"),menuType));
+            }
+            if(StringUtils.isNotBlank(name)){
+                predicates.add(cb.like(root.get("name"),"%" + name.trim() + "%"));
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        menuEntityList = menuRepository.findAll(specification);
         if(!CollectionUtils.isEmpty(menuEntityList)){
             for (MenuEntity menuEntity : menuEntityList){
                 menuList.add(menuEntity.toData());
@@ -93,5 +161,63 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         return menuList;
     }
 
+    /**
+     * 查询同级下指定菜单后面所有菜单
+     * @param sort
+     * @param parentId
+     * @return
+     */
+    @Override
+    public List<Menu> findRearList(Integer sort, UUID parentId){
+        List<Menu> menuList = new ArrayList<>();
+        List<MenuEntity> menuEntityList = menuRepository.findRearList(sort,parentId);
+        if(!org.springframework.util.CollectionUtils.isEmpty(menuEntityList)){
+            menuEntityList.forEach(tenantMenuEntity->{
+                if(tenantMenuEntity != null){
+                    menuList.add(tenantMenuEntity.toData());
+                }
+            });
+
+        }
+        return menuList;
+    }
+
+    /**
+     * 查询同级目录下最大排序值
+     * @param parentId
+     * @return
+     */
+    @Override
+    public Integer getMaxSortByParentId(UUID parentId){
+        return menuRepository.getMaxSortByParentId(parentId);
+    }
+
+    /**
+     * 查询一级菜单
+     * @param menuType
+     * @return
+     */
+    @Override
+    public List<Menu> getOneLevel(String menuType){
+        List<Menu> menuList = new ArrayList<>();
+        List<MenuEntity> menuEntityList = menuRepository.getOneLevel(menuType);
+        if(!CollectionUtils.isEmpty(menuEntityList)){
+            menuEntityList.forEach(i->{
+                menuList.add(i.toData());
+            });
+        }
+        return menuList;
+    }
+
+    @Override
+    public void delMenu(UUID id){
+        menuRepository.deleteById(id);
+    }
+
+
+    @Override
+    public Menu getTenantById(UUID id){
+        return menuRepository.findById(id).get().toData();
+    }
 
 }

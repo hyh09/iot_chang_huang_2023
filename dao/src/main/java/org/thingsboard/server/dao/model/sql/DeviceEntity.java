@@ -20,12 +20,14 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.util.mapping.JsonBinaryType;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -35,7 +37,7 @@ import javax.persistence.Table;
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
 @Table(name = ModelConstants.DEVICE_COLUMN_FAMILY_NAME)
-public final class DeviceEntity extends AbstractDeviceEntity<Device> {
+public class DeviceEntity extends AbstractDeviceEntity<Device> {
 
     public DeviceEntity() {
         super();
@@ -43,6 +45,14 @@ public final class DeviceEntity extends AbstractDeviceEntity<Device> {
 
     public DeviceEntity(Device device) {
         super(device);
+    }
+    public DeviceEntity (Factory factory){
+        this.setName(factory.getWorkshopName());
+        this.setTenantId(factory.getTenantId());
+    }
+
+    public DeviceEntity (UUID tenantId){
+        this.setTenantId(tenantId);
     }
 
     @Override

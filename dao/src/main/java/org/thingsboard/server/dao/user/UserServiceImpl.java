@@ -59,6 +59,7 @@ import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -162,6 +163,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public User save(User user,String  encodePassword ) {
         log.info("【用户管理.用户添加的接口添加】"+user);
+
+        if(user.getAuthority() == null)
+        {
+            user.setAuthority(Authority.TENANT_ADMIN);
+        }
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
@@ -377,12 +383,21 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         return failedLoginAttempts;
     }
 
+    @Override
+   public List<User> findAll(Map<String, Object> queryParam){
+        return userDao.findAll(queryParam);
 
+    }
     @Override
     public Object findAll(Map<String, Object> queryParam, PageLink pageLink) {
         return userDao.findAll(queryParam,pageLink);
     }
 
+    @Override
+    public List<String> findAllCodesByTenantId(UUID tenantId)
+    {
+        return userDao.findAllCodesByTenantId(tenantId);
+    }
 
     @Override
     public Object changeOthersPassword(PasswordVo vo) {

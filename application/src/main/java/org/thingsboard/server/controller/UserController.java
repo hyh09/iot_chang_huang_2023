@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +58,11 @@ import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
 import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
+import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
+import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.entity.user.CodeVo;
+import org.thingsboard.server.entity.user.UserVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -68,8 +74,11 @@ import org.thingsboard.server.service.security.system.SystemSecurityService;
 import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Api(value = "用户管理", tags = {"用户管理接口接口"})
 @Slf4j
@@ -97,11 +106,11 @@ public class UserController extends BaseController {
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
     @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired  private UserMenuRoleService userMenuRoleService;
 
 
 
-
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.GET)
     @ResponseBody
     public User getUserById(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
@@ -109,6 +118,12 @@ public class UserController extends BaseController {
         try {
             UserId userId = new UserId(toUUID(strUserId));
             User user = checkUserId(userId, Operation.READ);
+            List<UserMenuRoleEntity> entities =    userMenuRoleService.queryRoleIdByUserId(toUUID(strUserId));
+            if(!CollectionUtils.isEmpty(entities))
+            {
+                List<UUID> roleIds = entities.stream().map(UserMenuRoleEntity::getTenantSysRoleId).collect(Collectors.toList());
+                user.setRoleIds(roleIds);
+            }
             if(user.getAdditionalInfo().isObject()) {
                 ObjectNode additionalInfo = (ObjectNode) user.getAdditionalInfo();
                 processDashboardIdFromAdditionalInfo(additionalInfo, DEFAULT_DASHBOARD);
@@ -118,20 +133,21 @@ public class UserController extends BaseController {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
             }
+
             return user;
         } catch (Exception e) {
             throw handleException(e);
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/tokenAccessEnabled", method = RequestMethod.GET)
     @ResponseBody
     public boolean isUserTokenAccessEnabled() {
         return userTokenAccessEnabled;
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}/token", method = RequestMethod.GET)
     @ResponseBody
     public JsonNode getUserToken(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
@@ -159,7 +175,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     @ResponseBody
     public User saveUser(@RequestBody User user,
@@ -207,7 +223,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/sendActivationMail", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
     public void sendActivationEmail(
@@ -233,7 +249,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/user/{userId}/activationLink", method = RequestMethod.GET, produces = "text/plain")
     @ResponseBody
     public String getActivationLink(
@@ -287,7 +303,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
+//    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<User> getUsers(
@@ -309,7 +325,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
+//    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/tenant/{tenantId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<User> getTenantAdmins(
@@ -329,7 +345,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+//    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/customer/{customerId}/users", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<User> getCustomerUsers(
@@ -398,11 +414,14 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理的添加接口")
     @RequestMapping(value = "/user/save", method = RequestMethod.POST)
     @ResponseBody
-    public User save(@RequestBody User user) throws ThingsboardException {
+    public Object save(@RequestBody User user) throws ThingsboardException {
         try {
+            if(user.getId() != null){
+                user.setStrId(user.getUuidId().toString());
+              return   this.update(user);
+            }
 
             SecurityUser  securityUser =  getCurrentUser();
-            System.out.println("打印：getCurrentUser().getTenantId()"+getCurrentUser().getTenantId());
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
             log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
@@ -415,6 +434,7 @@ public class UserController extends BaseController {
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
+            savedUser.setRoleIds(user.getRoleIds());
             return  savedUser;
         }
 
@@ -463,7 +483,8 @@ public class UserController extends BaseController {
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
-        return  (count>0?"succeeded":"fail");
+        user.setRoleIds(user.getRoleIds());
+        return  user;
     }
 
     /**
@@ -492,6 +513,26 @@ public class UserController extends BaseController {
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return userService.findAll( queryParam, pageLink);
     }
+
+    @ApiOperation(value = "用户管理得 用户得重复数据校验")
+    @RequestMapping(value = "/user/check",method = RequestMethod.POST)
+    public  Object check(@RequestBody @Valid UserVo vo)
+    {
+          return ResultVo.getSuccessFul( checkSvc.checkValueByKey(vo));
+    }
+
+
+    @ApiOperation(value = "用户管理得 {用户编码 或角色编码}得生成获取")
+    @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
+    public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
+        SecurityUser  securityUser =  getCurrentUser();
+        return  checkSvc.queryCodeNew(vo,securityUser.getTenantId());
+
+    }
+
+
+
+
 
 
 }
