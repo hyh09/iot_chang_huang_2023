@@ -122,6 +122,8 @@ import static org.thingsboard.server.dao.service.Validator.validateId;
 @TbCoreComponent
 public abstract class BaseController {
 
+    protected  static  final  Boolean IS_TEST=true; //本地自测方便使用
+
     public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
     protected static final String DEFAULT_DASHBOARD = "defaultDashboardId";
     protected static final String HOME_DASHBOARD = "homeDashboardId";
@@ -269,6 +271,8 @@ public abstract class BaseController {
     @Value("${edges.enabled}")
     @Getter
     protected boolean edgesEnabled;
+
+    @Autowired protected CheckSvc checkSvc;
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {

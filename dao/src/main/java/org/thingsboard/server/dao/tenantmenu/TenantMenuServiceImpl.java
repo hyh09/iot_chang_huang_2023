@@ -150,4 +150,11 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         return tenantMenuDao.findById(null,tenantMenuId);
     }
 
+    @Override
+    public List<TenantMenu> findByIdIn(List<UUID> ids) {
+        log.trace(" --tenantMenuDao.findByIdIn 的入参{}",ids);
+        return tenantMenuDao.findByIdIn(ids);
+    }
+
+
 }
