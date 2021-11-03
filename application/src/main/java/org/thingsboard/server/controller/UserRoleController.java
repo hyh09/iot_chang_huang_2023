@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
@@ -49,13 +50,15 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
+        SecurityUser securityUser =  getCurrentUser();
+        entity.setUpdatedUser(securityUser.getUuidId());
+        entity.setTenantId(securityUser.getTenantId().getId());
         if(entity.getId() != null)
         {
            return updateRecord(entity);
         }
-        SecurityUser securityUser =  getCurrentUser();
         entity.setCreatedUser(securityUser.getUuidId());
-        entity.setUpdatedUser(securityUser.getUuidId());
+
         return   tenantSysRoleService.saveEntity(entity);
     }
 
@@ -104,17 +107,31 @@ public class UserRoleController extends BaseController{
 
 
     @ApiOperation(value = "角色的分页查询")
-    @RequestMapping(value = "/pageQuery", method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleCode", value = "角色编码支持模糊查询"),
+            @ApiImplicitParam(name = "roleName", value = "角色名称支持模糊查询"),
+    })
+    @RequestMapping(value = "/pageQuery", method = RequestMethod.GET)
     @ResponseBody
-    public  Object  pageQuery(@RequestBody PageRoleVo vo) throws Exception {
+    public Object pageQuery(
+            @RequestParam("roleCode") String roleCode,
+            @RequestParam("roleName") String roleName,
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder) throws ThingsboardException {
         SecurityUser securityUser =  getCurrentUser();
-        Map  queryParam = BeanToMap.beanToMapByJacksonFilter(vo);
+        Map<String, Object> queryParam  =new HashMap<>();
         queryParam.put("updatedUser",securityUser.getUuidId().toString());
-        int  pageSize =  vo.getPageSize();
-        int  page = vo.getPage();
-        String  textSearch = vo.getTextSearch();
-        String  sortProperty =vo.getSortProperty();
-        String  sortOrder = vo.getSortOrder();
+        if(!StringUtils.isEmpty(roleCode))
+        {
+            queryParam.put("roleCode", roleCode);
+        }
+        if(!StringUtils.isEmpty(roleName))
+        {
+            queryParam.put("roleName", roleName);
+        }
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return tenantSysRoleService.pageQuery(queryParam,pageLink);
     }

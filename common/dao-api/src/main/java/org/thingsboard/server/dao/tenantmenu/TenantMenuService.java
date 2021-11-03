@@ -52,6 +52,6 @@ public interface TenantMenuService {
      * @param ids
      * @return
      */
-     List<TenantMenu> findByIdIn(List<UUID> ids);
+    List<TenantMenu> findByIdIn(List<UUID> ids);
 
 }

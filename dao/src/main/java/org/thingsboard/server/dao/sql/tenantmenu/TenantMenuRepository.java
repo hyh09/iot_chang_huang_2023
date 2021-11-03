@@ -68,4 +68,6 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
 
 
     List<TenantMenuEntity> findByIdIn(List<UUID> ids);
+
+
 }
