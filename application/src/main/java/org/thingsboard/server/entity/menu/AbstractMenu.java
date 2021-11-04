@@ -94,6 +94,7 @@ public abstract class AbstractMenu {
         this.menuImages = menu.getMenuImages();
         this.isButton = menu.getIsButton();
         this.langKey = menu.getLangKey();
+        this.path = menu.getPath();
         this.parentId = menu.getParentId();
         this.menuType = menu.getMenuType();
         this.createdTime = menu.getUpdatedTime();
@@ -116,6 +117,7 @@ public abstract class AbstractMenu {
         this.menuType = menuEntity.getMenuType();
         this.isButton = menuEntity.getIsButton();
         this.langKey = menuEntity.getLangKey();
+        this.path = menuEntity.getPath();
         this.parentId = menuEntity.getParentId();
         this.createdTime = menuEntity.getUpdatedTime();
         this.createdUser = menuEntity.getCreatedUser();
@@ -138,6 +140,7 @@ public abstract class AbstractMenu {
         menu.setMenuType(menuType);
         menu.setIsButton(isButton);
         menu.setLangKey(langKey);
+        menu.setPath(path);
         menu.setCreatedTime(createdTime);
         menu.setCreatedUser(createdUser);
         menu.setUpdatedTime(updatedTime);

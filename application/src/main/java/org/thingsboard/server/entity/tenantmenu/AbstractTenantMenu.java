@@ -66,7 +66,7 @@ public abstract class AbstractTenantMenu{
     @ApiModelProperty("区域")
     public String region;
     @ApiModelProperty("多语言Key")
-    private String langKey;
+    public String langKey;
 
     public AbstractTenantMenu() {
     }
