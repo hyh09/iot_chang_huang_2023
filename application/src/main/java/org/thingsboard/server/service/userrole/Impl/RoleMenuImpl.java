@@ -77,6 +77,51 @@ public class RoleMenuImpl implements RoleMenuSvc {
     }
 
 
+    @Override
+    public List<TenantMenu> queryAllNew(InMenuByUserVo vo) throws Exception {
+        log.info("1.先查询租户下的所有菜单入参{}",vo);
+        List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
+        log.info("2.先查询租户下的所有菜单入参{}返回的结果{}",vo,menus);
+        if(CollectionUtils.isEmpty(menus))
+        {
+            return  menus;
+        }
+        if( (vo.getRoleId()) != null )
+        {
+            return  menus;
+
+        }
+        //2.用当前的角色查询所绑定的菜单：  tb_tenant_menu_role  TenantMenuRoleService
+        TenantMenuRoleEntity  entity= new TenantMenuRoleEntity();
+        entity.setTenantSysRoleId(vo.getRoleId());
+        List<TenantMenuRoleEntity> entityList= tenantMenuRoleService.findAllByTenantMenuRoleEntity(entity);
+        log.info("3.先查询租户下的所有菜单入参{}返回的结果{}",vo,entityList);
+        if(CollectionUtils.isEmpty(entityList))
+        {
+            return  menus;
+        }
+        for(TenantMenu menu:menus)
+        {
+            for(TenantMenuRoleEntity entity1:entityList)
+            {
+                if(menu.getId().equals(entity1.getTenantMenuId()))
+                {
+                    menu.setChecked(true);
+                }
+            }
+
+        }
+        log.info("4.先查询租户下的所有菜单入参{}返回的结果{}",vo,menus);
+        return menus;
+    }
+
+    @Override
+    public List<TenantMenu> queryByUser(InMenuByUserVo vo) throws Exception {
+        log.info("获取当前登录的人菜单:{}",vo);
+
+        return null;
+    }
+
     //具体的绑定的入库
     @Transactional
     public Object binding(UUID roleId, List<UUID> voList) {

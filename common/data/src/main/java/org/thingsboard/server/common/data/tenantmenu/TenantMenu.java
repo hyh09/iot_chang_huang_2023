@@ -34,6 +34,11 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
     //多语言Key
     private String langKey;
 
+    //额外加的逻辑字段配合前端
+    private  String name;
+
+    private  Boolean checked=false;
+
     public TenantMenu() {
         super();
     }
