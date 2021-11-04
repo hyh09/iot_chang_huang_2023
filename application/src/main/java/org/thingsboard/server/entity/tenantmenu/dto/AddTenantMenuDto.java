@@ -1,44 +1,22 @@
 package org.thingsboard.server.entity.tenantmenu.dto;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
+import org.thingsboard.server.entity.tenantmenu.AbstractTenantMenu;
 
+import java.util.List;
 import java.util.UUID;
 
 @ApiModel("AddTenantMenuDto")
 @Data
-public class AddTenantMenuDto {
+public class AddTenantMenuDto extends AbstractTenantMenu {
 
-    @ApiModelProperty("租户标识")
-    private UUID tenantId;
-    @ApiModelProperty("系统菜单标识")
-    private UUID sysMenuId;
-    @ApiModelProperty("系统菜单编码")
-    private String sysMenuCode;
-    @ApiModelProperty("系统菜单名称")
-    private String sysMenuName;
-    @ApiModelProperty("租户菜单名称")
-    private String tenantMenuName;
-    @ApiModelProperty("租户菜单编码")
-    private String tenantMenuCode;
-    @ApiModelProperty("层级")
-    private Integer level;
-    @ApiModelProperty("页面链接")
-    private String url;
-    @ApiModelProperty("父级租户菜单")
-    private UUID parentId;
-    @ApiModelProperty("租户菜单图标")
-    private String tenantMenuIcon;
-    @ApiModelProperty("租户菜单自定义图片")
-    private String tenantMenuImages;
-    @ApiModelProperty("菜单类型（PC/APP）")
-    private String menuType;
-    @ApiModelProperty("是按钮（true/false）")
-    public Boolean isButton;
-    @ApiModelProperty("多语言Key")
-    private String langKey;
+    @ApiModelProperty("子集菜单")
+    List<AddTenantMenuDto> children;
 
     public AddTenantMenuDto(){}
 
@@ -55,6 +33,8 @@ public class AddTenantMenuDto {
         this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
         this.menuType = tenantMenu.getMenuType();
+        this.isButton = tenantMenu.getIsButton();
+        this.langKey = tenantMenu.getLangKey();
     }
 
     public TenantMenu toTenantMenu(){
@@ -71,6 +51,38 @@ public class AddTenantMenuDto {
         tenantMenu.setTenantMenuImages(tenantMenuImages);
         tenantMenu.setParentId(parentId);
         tenantMenu.setMenuType(menuType);
+        tenantMenu.setIsButton(isButton);
+        tenantMenu.setLangKey(langKey);
+        if(tenantMenu.getId() == null || tenantMenu.getId().getId() == null ){
+            tenantMenu.setCreatedUser(id);
+            tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+        }
+        return tenantMenu;
+    }
+    public TenantMenu toTenantMenu(UUID loginUserId){
+        TenantMenu tenantMenu = new TenantMenu();
+        tenantMenu.setTenantId(tenantId);
+        tenantMenu.setSysMenuId(sysMenuId);
+        tenantMenu.setSysMenuCode(sysMenuCode);
+        tenantMenu.setSysMenuName(sysMenuName);
+        tenantMenu.setTenantMenuCode(tenantMenuCode);
+        tenantMenu.setTenantMenuName(tenantMenuName);
+        tenantMenu.setLevel(level);
+        tenantMenu.setUrl(url);
+        tenantMenu.setTenantMenuIcon(tenantMenuIcon);
+        tenantMenu.setTenantMenuImages(tenantMenuImages);
+        tenantMenu.setParentId(parentId);
+        tenantMenu.setMenuType(menuType);
+        tenantMenu.setIsButton(isButton);
+        tenantMenu.setLangKey(langKey);
+        if(tenantMenu.getId() != null && tenantMenu.getId().getId() != null ){
+            tenantMenu.setCreatedUser(loginUserId);
+            tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+        }else {
+            tenantMenu.setId(new TenantMenuId(Uuids.timeBased()));
+            tenantMenu.setUpdatedUser(loginUserId);
+            tenantMenu.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+        }
         return tenantMenu;
     }
 
