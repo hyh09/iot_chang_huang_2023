@@ -398,7 +398,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
 spec:
   rules:
-  - http:
+  - host: iot.textile-saas.huansi.net
+    http:
       paths:
       - path: /api/v1/.*
         backend:
