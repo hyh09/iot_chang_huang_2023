@@ -20,6 +20,8 @@ metadata:
   name: tb-db-setup
   namespace: hsyl-iot
 spec:
+  imagePullSecrets:
+    - name: zhowsregcred
   volumes:
   - name: tb-node-config
     configMap:

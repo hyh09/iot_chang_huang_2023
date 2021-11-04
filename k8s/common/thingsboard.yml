@@ -20,7 +20,7 @@ metadata:
   name: tb-js-executor
   namespace: hsyl-iot
 spec:
-  replicas: 20
+  replicas: 2
   selector:
     matchLabels:
       app: tb-js-executor
@@ -29,6 +29,8 @@ spec:
       labels:
         app: tb-js-executor
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       containers:
       - name: server
         imagePullPolicy: Always
@@ -65,6 +67,8 @@ spec:
       labels:
         app: tb-mqtt-transport
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       volumes:
         - name: tb-mqtt-transport-config
           configMap:
@@ -139,6 +143,8 @@ spec:
       labels:
         app: tb-http-transport
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       volumes:
         - name: tb-http-transport-config
           configMap:
@@ -212,6 +218,8 @@ spec:
       labels:
         app: tb-coap-transport
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       volumes:
         - name: tb-coap-transport-config
           configMap:
@@ -278,6 +286,8 @@ spec:
       labels:
         app: tb-lwm2m-transport
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       volumes:
         - name: tb-lwm2m-transport-config
           configMap:
@@ -344,6 +354,8 @@ spec:
       labels:
         app: tb-web-ui
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       containers:
       - name: server
         imagePullPolicy: Always

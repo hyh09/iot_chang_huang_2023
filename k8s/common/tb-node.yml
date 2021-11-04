@@ -29,6 +29,8 @@ spec:
       labels:
         app: tb-node
     spec:
+      imagePullSecrets:
+        - name: zhowsregcred
       volumes:
         - name: tb-node-config
           configMap:
