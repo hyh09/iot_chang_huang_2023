@@ -5,7 +5,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
+import org.thingsboard.server.common.data.vo.menu.QueryMenuByRoleVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantMenuRoleService;
@@ -71,7 +73,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         log.info("调用查询菜单列表的入参{}",vo);
         SqlVo sqlVo= splicingSvc.getSqlByVo(vo);
         List<OutMenuByUserVo> list= tenantMenuRoleService.queryAllListSqlLocal(sqlVo.getSql(),sqlVo.getParam(), OutMenuByUserVo.class);
-        return ResultVo.getSuccessFul(list);
+        return toList(list);
     }
 
 
@@ -91,6 +93,34 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
         });
         return ResultVo.getSuccessFul(null);
+    }
+
+
+    private List<QueryMenuByRoleVo> toList(List<OutMenuByUserVo> voList)
+    {
+        List<QueryMenuByRoleVo> result = voList.stream().map(temp -> {
+
+            QueryMenuByRoleVo meVo = new QueryMenuByRoleVo();
+
+            meVo.setChecked((StringUtils.isNotBlank(temp.getMark())&&temp.getMark().equals("1") )?true:false);
+            meVo.setCreatedTime(StringUtils.isNoneBlank(temp.getTime())?(Long.parseLong(temp.getTime())):0);
+            meVo.setId(temp.getId());
+            meVo.setParentId(temp.getPid());
+            meVo.setLangKey(temp.getLangkey());
+            meVo.setTenantMenuName(temp.getName());
+            meVo.setTenantMenuCode(temp.getCode());
+            if(!StringUtils.isEmpty(temp.getButton() ))
+            {
+               if(temp.getButton().equalsIgnoreCase("true"))
+               {
+                   meVo.setIsButton(true);
+               }
+            }
+            return meVo;
+
+        }).collect(Collectors.toList());
+
+        return  result;
     }
 
 

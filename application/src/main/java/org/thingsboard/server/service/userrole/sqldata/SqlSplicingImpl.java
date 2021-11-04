@@ -29,30 +29,51 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
     public   SqlVo getSqlByVo(InMenuByUserVo vo)
     {
         //返回的字段
-        String sqlPre="select  cast(m1.created_time as varchar) as time,cast(m1.parent_id as varchar(255)) as pid,cast(m1.id as varchar(255)) as id ,m1.sys_menu_name as name ,(case when c1.id is not null then '1' else '0' end) as mark   ";
-        String fromPre="  from  tb_user  t1     " +
-                "   left join tb_user_menu_role b1  on t1.id=b1.user_id     " +
-                "   left join tb_tenant_sys_role c1 on  c1.id =b1.tenant_sys_role_id    " +
-                "   left join  tb_tenant_menu_role r1  on r1.tenant_sys_role_id =c1.id                  " +
-                "   left join  tb_tenant_menu m1   on m1.id = r1.tenant_menu_id where 1=1  ";
-        StringBuffer whereSql  = new StringBuffer().append(sqlPre).append(fromPre);
+        String sqlPre="select m1.tenant_menu_code as code, cast(m1.is_button as varchar) as button, cast(m1.created_time as varchar) as time," +
+                "cast(m1.parent_id as varchar(255)) as pid,cast(m1.id as varchar(255)) as id ," +
+                "m1.sys_menu_name as name , cast (count(c1.id) as varchar  ) as mark " +
+                "  ";
+//        String sqlPre=" select cast(count(c1.id) as varchar ) as mark ,m1.created_time as time1 ,m1.id   " ;
+
+
+        String fromPre="  from tb_tenant_menu m1  " +
+                "   left join tb_tenant_menu_role r1 on m1.id = r1.tenant_menu_id  " +
+                "   left join tb_tenant_sys_role c1 on r1.tenant_sys_role_id =c1.id  " +
+                "   left join tb_user_menu_role b1  on  c1.id =b1.tenant_sys_role_id " +
+                "   left join tb_user  t1  on t1.id=b1.user_id  where 1=1  ";
+
+        StringBuffer whereSql = new StringBuffer().append(sqlPre).append(fromPre);
 
         Map<String, Object> param= new HashMap<>();
         if(StringUtils.isNoneBlank(vo.getTenantMenuName())){
             whereSql.append(" and m1.tenant_menu_name =:tenantMenuName");
             param.put("tenantMenuName",vo.getTenantMenuName());
         }
-        if(StringUtils.isNoneBlank(vo.getMenuType())){
-            whereSql.append(" and m1.menu_type =:menuType");
+        if(StringUtils.isNoneBlank(vo.getMenuType()))
+        {
+            whereSql.append(" and m1.menu_type =:menuType ");
             param.put("menuType",vo.getMenuType());
         }
-        //用于本地测试
-        if((vo.getUserId()) != null){
-            whereSql.append(" and t1.id =:userId");  //cast(t1.id as varchar(255))
-            param.put("userId",vo.getUserId());
+
+//        if((vo.getUserId()) != null){
+//            whereSql.append(" and t1.id =:userId");
+//            param.put("userId",vo.getUserId());
+//        }
+
+        if((vo.getRoleId()) != null){
+            whereSql.append(" and b1.tenant_sys_role_id =:roleId");
+            param.put("roleId",vo.getRoleId());
+        }
+        if((vo.getRoleId()) != null){
+            whereSql.append(" and b1.tenant_sys_role_id =:roleId");
+            param.put("roleId",vo.getRoleId());
+        }
+        if(vo.getTenantId() != null ){
+            whereSql.append(" and m1.tenant_id =:tenantId");
+            param.put("tenantId",vo.getTenantId());
         }
 
-        return  new  SqlVo(whereSql.toString(),param);
+        return  new  SqlVo(whereSql.toString()+" group by m1.id ",param);
 
 
     }
