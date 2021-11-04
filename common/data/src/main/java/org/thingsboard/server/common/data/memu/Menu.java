@@ -34,6 +34,11 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
     private String menuImages;
     @NoXss
     private String menuType;
+
+    //"是按钮（true/false）")
+    public Boolean isButton;
+    //多语言Key
+    private String langKey;
     private String path;
     @NoXss
     private UUID createdUser;

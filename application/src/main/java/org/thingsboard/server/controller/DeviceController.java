@@ -19,6 +19,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,6 +49,9 @@ import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.entity.device.dto.AddDeviceDto;
+import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
+import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.Operation;
@@ -69,6 +74,8 @@ public class DeviceController extends BaseController {
     private static final String DEVICE_ID = "deviceId";
     private static final String DEVICE_NAME = "deviceName";
     private static final String TENANT_ID = "tenantId";
+    public static final String SAVE_TYPE_ADD = "add ";
+    public static final String SAVE_TYPE_ADD_UPDATE = "update ";
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.GET)
@@ -757,4 +764,101 @@ public class DeviceController extends BaseController {
             throw handleException(e);
         }
     }
+    /*******************************************新增业务接口*******************************************/
+    /*******************************************新增业务接口*******************************************/
+    /*******************************************新增业务接口*******************************************/
+
+    /**
+     * 新增/更新设备
+     * @param addDeviceDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("新增/更新设备")
+    @ApiImplicitParam(name = "addDeviceDto",value = "入参实体",dataType = "AddDeviceDto",paramType="body")
+    @RequestMapping(value = "/saveOrUpdDevice", method = RequestMethod.POST)
+    @ResponseBody
+    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto,@RequestParam(name = "accessToken", required = false)String accessToken)throws ThingsboardException {
+        try {
+
+            checkNotNull(addDeviceDto);
+//
+//            if(addDeviceDto.getId() == null){
+//                device.setCreatedUser(getCurrentUser().getUuidId());
+//            }else {
+//                device.setUpdatedUser(getCurrentUser().getUuidId());
+//            }
+//
+            boolean created = addDeviceDto.getId() == null;
+            Device device = addDeviceDto.toDevice();
+            device.setTenantId(getCurrentUser().getTenantId());
+            Device oldDevice = null;
+            String saveType = null;
+            if (!created) {
+                oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
+                saveType = SAVE_TYPE_ADD_UPDATE;
+            } else {
+                checkEntity(null, device, Resource.DEVICE);
+                saveType = SAVE_TYPE_ADD;
+            }
+            //生成设备凭证
+            Device savedDevice = checkNotNull(deviceService.saveDeviceWithAccessToken(device, null));
+            tbClusterService.onDeviceUpdated(savedDevice, oldDevice);
+            logEntityAction(savedDevice.getId(), savedDevice,
+                    savedDevice.getCustomerId(),
+                    created ? ActionType.ADDED : ActionType.UPDATED, null);
+            //保存或修改设备构成
+            deviceService.saveOrUpdDeviceComponentList(addDeviceDto.toDevice(),savedDevice.getId().getId(),saveType);
+            return new DeviceVo(device);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
+     * 分配产线设备
+     * @param distributionDeviceDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("分配产线设备")
+    @ApiImplicitParam(name = "distributionDeviceDto",value = "入参实体",dataType = "DistributionDeviceDto",paramType="body")
+    @RequestMapping(value = "/distributionDevice", method = RequestMethod.POST)
+    @ResponseBody
+    public void distributionDevice(@RequestBody DistributionDeviceDto distributionDeviceDto) throws ThingsboardException {
+        try {
+            checkParameter("deviceId",distributionDeviceDto.getDeviceIdList());
+            checkParameter("productionLineId",distributionDeviceDto.getProductionLineId());
+            checkParameter("workshopId",distributionDeviceDto.getWorkshopId());
+            checkParameter("factoryId",distributionDeviceDto.getFactoryId());
+            Device device = distributionDeviceDto.toDevice();
+            device.setUpdatedUser(getCurrentUser().getUuidId());
+            deviceService.distributionDevice(device);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
+     * 移除产线设备
+     * @param distributionDeviceDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("移除产线设备")
+    @ApiImplicitParam(name = "distributionDeviceDto",value = "入参实体",dataType = "DistributionDeviceDto",paramType="body")
+    @RequestMapping(value = "/removeDevice", method = RequestMethod.POST)
+    @ResponseBody
+    public void removeDevice(@RequestBody DistributionDeviceDto distributionDeviceDto) throws ThingsboardException {
+        try {
+            checkParameter("deviceIdList",distributionDeviceDto.getDeviceIdList());
+            Device device = distributionDeviceDto.toDevice();
+            device.setUpdatedUser(getCurrentUser().getUuidId());
+            deviceService.removeDevice(device);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+
 }

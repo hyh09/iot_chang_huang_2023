@@ -79,6 +79,15 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         return null;
     }
 
+    @Override
+    public Menu findSameLevelName(UUID parentId,String name){
+        MenuEntity sameLevelName = menuRepository.findSameLevelName(parentId, name);
+        if(sameLevelName != null){
+            return sameLevelName.toData();
+        }
+        return null;
+    }
+
     /**
      * 查询系统菜单列表分页
      * @param menu
@@ -113,7 +122,6 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         }
         PageData<Menu> resultPage = new PageData<>();
         resultPage = new PageData<Menu>(resultMenuList,menuEntities.getTotalPages(),menuEntities.getTotalElements(),menuEntities.hasNext());
-        // 查询数据
         return resultPage;
     }
 
@@ -143,11 +151,17 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
     public List<Menu> findMenusByName(String menuType,String name) {
         List<Menu> menuList = new ArrayList<>();
         List<MenuEntity> menuEntityList = new ArrayList<>();
-        if(StringUtils.isNotBlank(name)){
-            menuEntityList = menuRepository.findMenusByName(menuType,name);
-        }else{
-            menuEntityList = menuRepository.findMenusByMenuType(menuType);
-        }
+        Specification<MenuEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(StringUtils.isNotBlank(menuType)){
+                predicates.add(cb.equal(root.get("name"),menuType));
+            }
+            if(StringUtils.isNotBlank(name)){
+                predicates.add(cb.like(root.get("name"),"%" + name.trim() + "%"));
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        menuEntityList = menuRepository.findAll(specification);
         if(!CollectionUtils.isEmpty(menuEntityList)){
             for (MenuEntity menuEntity : menuEntityList){
                 menuList.add(menuEntity.toData());
@@ -202,6 +216,17 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
             });
         }
         return menuList;
+    }
+
+    @Override
+    public void delMenu(UUID id){
+        menuRepository.deleteById(id);
+    }
+
+
+    @Override
+    public Menu getTenantById(UUID id){
+        return menuRepository.findById(id).get().toData();
     }
 
 }

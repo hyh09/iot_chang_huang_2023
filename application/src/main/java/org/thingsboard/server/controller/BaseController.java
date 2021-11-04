@@ -122,6 +122,8 @@ import static org.thingsboard.server.dao.service.Validator.validateId;
 @TbCoreComponent
 public abstract class BaseController {
 
+    protected  static  final  Boolean IS_TEST=true; //本地自测方便使用
+
     public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
     protected static final String DEFAULT_DASHBOARD = "defaultDashboardId";
     protected static final String HOME_DASHBOARD = "homeDashboardId";
@@ -256,6 +258,8 @@ public abstract class BaseController {
     @Autowired
     protected FactoryService factoryService;
 
+    @Autowired
+    protected WorkshopService workshopService;
 
     @Autowired
     protected ProductionLineService productionLineService;
@@ -267,6 +271,8 @@ public abstract class BaseController {
     @Value("${edges.enabled}")
     @Getter
     protected boolean edgesEnabled;
+
+    @Autowired protected CheckSvc checkSvc;
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {
@@ -457,7 +463,6 @@ public abstract class BaseController {
     }
     Menu checkMenu(Menu menu) throws ThingsboardException{
         checkNotNull(menu);
-        checkParameter("tenant",menu.getTenantId());
         checkParameter("level",menu.getLevel());
         checkParameter("menuType",menu.getMenuType());
         return menu;
@@ -1000,4 +1005,27 @@ public abstract class BaseController {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
     }
+
+    /**
+     * 校验同层级下系统菜单/按钮名称是否重复
+     * @return
+     */
+    public void checkSameLevelNameRepetition(AddMenuDto addMenuDto) throws ThingsboardException {
+        Boolean sameLevelNameRepetition = menuService.findSameLevelNameRepetition(addMenuDto.getId(), addMenuDto.getParentId(), addMenuDto.getName());
+        if(sameLevelNameRepetition){
+            log.warn("名称重复");
+            throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+    }
+    /**
+     * 校验同层级下租户菜单/按钮名称是否重复
+     * @return
+     */
+    /*public void checkSameLevelNameRepetition(AddMenuDto addMenuDto) throws ThingsboardException {
+        Boolean sameLevelNameRepetition = menuService.findSameLevelNameRepetition(addMenuDto.getId(), addMenuDto.getParentId(), addMenuDto.getName());
+        if(sameLevelNameRepetition){
+            log.warn("名称重复");
+            throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+    }*/
 }

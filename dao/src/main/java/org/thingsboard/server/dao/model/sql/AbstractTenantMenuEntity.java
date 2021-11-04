@@ -76,6 +76,13 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     @Column(name = "parent_id")
     private UUID parentId;
 
+    //"是按钮（true/false）")
+    @Column(name = "is_button")
+    public Boolean isButton;
+
+    @Column(name = "lang_key")
+    private String langKey;
+
     @Column(name = "menu_type")
     private String menuType;
 
@@ -117,6 +124,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.tenantMenuImages = abstractTenantMenuEntity.getTenantMenuImages();
         this.parentId = abstractTenantMenuEntity.getParentId();
         this.menuType = abstractTenantMenuEntity.getMenuType();
+        this.isButton = abstractTenantMenuEntity.getIsButton();
+        this.langKey = abstractTenantMenuEntity.getLangKey();
         this.createdTime = abstractTenantMenuEntity.getUpdatedTime();
         this.createdUser = abstractTenantMenuEntity.getCreatedUser();
         this.updatedTime = abstractTenantMenuEntity.getUpdatedTime();
@@ -141,6 +150,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
         this.menuType = tenantMenu.getMenuType();
+        this.isButton = tenantMenu.getIsButton();
+        this.langKey = tenantMenu.getLangKey();
         this.createdTime = tenantMenu.getUpdatedTime();
         this.createdUser = tenantMenu.getCreatedUser();
         this.updatedTime = tenantMenu.getUpdatedTime();
@@ -163,6 +174,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         tenantMenu.setTenantMenuImages(tenantMenuImages);
         tenantMenu.setParentId(parentId);
         tenantMenu.setMenuType(menuType);
+        tenantMenu.setIsButton(isButton);
+        tenantMenu.setLangKey(langKey);
         tenantMenu.setCreatedTime(createdTime);
         tenantMenu.setCreatedUser(createdUser);
         tenantMenu.setUpdatedTime(updatedTime);

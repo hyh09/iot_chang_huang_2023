@@ -36,8 +36,14 @@ public class AddMenuDto {
     @ApiModelProperty("菜单类型（PC/APP）")
     public String menuType;
 
+    @ApiModelProperty("是按钮（true/false）")
+    public Boolean isButton;
+
     @ApiModelProperty("路径")
     private String path;
+
+    @ApiModelProperty("多语言Key")
+    private String langKey;
 
     public Menu toMenu(){
         Menu menu = new Menu(new MenuId(null));
@@ -52,6 +58,7 @@ public class AddMenuDto {
         menu.setParentId(parentId);
         menu.setMenuType(menuType);
         menu.setPath(path);
+        menu.setLangKey(langKey);
         return menu;
     }
 }

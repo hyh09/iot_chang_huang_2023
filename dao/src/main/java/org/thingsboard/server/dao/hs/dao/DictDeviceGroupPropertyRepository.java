@@ -23,9 +23,9 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
     @Query("delete from DictDeviceGroupPropertyEntity d where d.dictDeviceId = :dictDeviceId")
     void deleteByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 
-    @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceGroupId in (?1)")
+    @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceGroupId in (?1) order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllInDictDeviceGroupId(List<UUID> groupIdList);
 
-    @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceId = :dictDeviceId")
+    @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 }

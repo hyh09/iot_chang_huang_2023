@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.hs.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +17,15 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static org.thingsboard.server.common.data.CacheConstants.DICT_DATA_CACHE;
+import static org.thingsboard.server.common.data.CacheConstants.DICT_DEVICE_CACHE;
 
 /**
  * 设备字典接口实现类
@@ -56,22 +63,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        var codes = this.deviceRepository.findAllCodesByTenantId(tenantId.getId());
-        if (codes.isEmpty()) {
-            return "SBZD0001";
-        } else {
-            var ints = codes.stream().map(e -> Integer.valueOf(e.split("SBZD")[1])).sorted().collect(Collectors.toList());
-            int start = 0;
-            while (true) {
-                if (ints.size() - 1 == start) {
-                    return "SBZD" + String.format("%04d", start + 2);
-                }
-                if (!ints.get(start).equals(start + 1)) {
-                    return "SBZD" + String.format("%04d", start + 1);
-                }
-                start += 1;
-            }
-        }
+        return CommonUtil.getAvailableCode(this.deviceRepository.findAllCodesByTenantId(tenantId.getId()), "SBZD");
     }
 
     /**
@@ -118,6 +110,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param tenantId 租户Id
      * @return 设备字典详情
      */
+    @Cacheable(cacheNames = DICT_DEVICE_CACHE, key = "{#tenantId, #id}", unless = "#result==null")
     @Override
     public DictDeviceVO getDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException {
         var dictDevice = this.deviceRepository.findById(UUID.fromString(id)).get().toData();
@@ -178,6 +171,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param id       设备字典id
      * @param tenantId 租户Id
      */
+    @CacheEvict(cacheNames = DICT_DATA_CACHE, key = "{#tenantId, #id}")
     @Override
     @Transactional
     public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
@@ -211,6 +205,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param dictDeviceVO 设备字典入参
      * @param tenantId     租户Id
      */
+    @CacheEvict(cacheNames = DICT_DATA_CACHE, key = "{#tenantId, #dictDeviceVO?.id}")
     @Override
     @Transactional
     public void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException {
@@ -252,7 +247,6 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                     .picture(dictDeviceVO.getPicture())
                     .icon(dictDeviceVO.getIcon())
                     .tenantId(tenantId.toString()).build();
-
         }
 
         // 保存设备字典
@@ -260,27 +254,40 @@ public class DictDeviceServiceImpl implements DictDeviceService {
         this.deviceRepository.save(dictDeviceEntity);
 
         // 设备字典属性及保存
+        AtomicInteger propertySort = new AtomicInteger();
         var propertyList = dictDeviceVO.getPropertyList().stream()
-                .map(e -> DictDeviceProperty.builder()
-                        .dictDeviceId(dictDeviceEntity.getId().toString())
-                        .name(e.getName())
-                        .content(e.getContent()).build()).collect(Collectors.toList());
+                .map(e -> {
+                    propertySort.addAndGet(1);
+                    return DictDeviceProperty.builder()
+                            .dictDeviceId(dictDeviceEntity.getId().toString())
+                            .name(e.getName())
+                            .sort(propertySort.get())
+                            .content(e.getContent()).build();
+                }).collect(Collectors.toList());
         this.propertyRepository.saveAll(propertyList.stream().map(DictDevicePropertyEntity::new).collect(Collectors.toList()));
 
         // 设备字典分组、分组属性及保存
+        AtomicInteger groupSort = new AtomicInteger();
+        AtomicInteger groupPropertySort = new AtomicInteger();
         var groupPropertyList = dictDeviceVO.getGroupList().stream().reduce(new ArrayList<DictDeviceGroupProperty>(), (r, e) -> {
             var dictDeviceGroup = DictDeviceGroup.builder()
                     .dictDeviceId(dictDeviceEntity.getId().toString())
+                    .sort(groupSort.get())
                     .name(e.getName()).build();
+            groupSort.addAndGet(1);
             var dictDeviceGroupEntity = new DictDeviceGroupEntity(dictDeviceGroup);
             this.groupRepository.save(dictDeviceGroupEntity);
 
-            var dictDeviceGroupPropertyList = e.getGroupPropertyList().stream().map(t -> DictDeviceGroupProperty.builder()
-                    .dictDeviceGroupId(dictDeviceGroupEntity.getId().toString())
-                    .dictDeviceId(dictDeviceEntity.getId().toString())
-                    .name(t.getName())
-                    .title(t.getTitle())
-                    .content(t.getContent()).build()).collect(Collectors.toList());
+            var dictDeviceGroupPropertyList = e.getGroupPropertyList().stream().map(t -> {
+                groupPropertySort.addAndGet(1);
+                return DictDeviceGroupProperty.builder()
+                        .dictDeviceGroupId(dictDeviceGroupEntity.getId().toString())
+                        .dictDeviceId(dictDeviceEntity.getId().toString())
+                        .name(t.getName())
+                        .sort(groupPropertySort.get())
+                        .title(t.getTitle())
+                        .content(t.getContent()).build();
+            }).collect(Collectors.toList());
             r.addAll(dictDeviceGroupPropertyList);
             return r;
         }, (a, b) -> null);
@@ -288,7 +295,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
 
         // 设备字典部件及保存
         if (dictDeviceVO.getComponentList() != null && !dictDeviceVO.getComponentList().isEmpty()) {
-            this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null);
+            this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null, 0);
         }
     }
 
@@ -298,8 +305,9 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param componentList 部件列表
      * @param dictDeviceId  设备字典Id
      * @param parentId      父部件Id
+     * @param sort          排序字段
      */
-    public void recursionSaveComponent(List<DictDeviceComponentVO> componentList, String dictDeviceId, String parentId) {
+    public void recursionSaveComponent(List<DictDeviceComponentVO> componentList, String dictDeviceId, String parentId, int sort) {
         for (DictDeviceComponentVO componentVO : componentList) {
             var dictDeviceComponent = DictDeviceComponent.builder()
                     .code(componentVO.getCode())
@@ -311,14 +319,16 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                     .warrantyPeriod(componentVO.getWarrantyPeriod())
                     .picture(componentVO.getPicture())
                     .parentId(parentId)
+                    .sort(sort)
                     .dictDeviceId(dictDeviceId)
                     .icon(componentVO.getIcon()).build();
+            sort += 1;
             var dictDeviceComponentEntity = new DictDeviceComponentEntity(dictDeviceComponent);
             this.componentRepository.save(dictDeviceComponentEntity);
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }
-            this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString());
+            this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString(), sort);
         }
     }
 

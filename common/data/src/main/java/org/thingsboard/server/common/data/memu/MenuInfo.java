@@ -25,7 +25,10 @@ public class MenuInfo {
     public UUID parentId;
 
     public String menuType;
-
+    //"是按钮（true/false）")
+    public Boolean isButton;
+    //多语言Key
+    private String langKey;
     public UUID createdUser;
     public long createdTime;
     public long updatedTime;

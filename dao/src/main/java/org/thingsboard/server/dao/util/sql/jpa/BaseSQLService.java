@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 
 import java.io.Serializable;
@@ -60,6 +61,9 @@ public interface BaseSQLService<T extends TenantBaseEntity, ID extends Serializa
 	 * @return
 	 */
 	 <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
+
+
+	<T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, SortRowName sortRowName);
 
 
 	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls);

@@ -30,6 +30,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     private static final String DEFAULT_TENANT_REGION = "Global";
     public static final String INCORRECT_MENU_ID = "Incorrect menuId ";
     public static final int ONE = 1;
+    public static final String XTCD = "XTCD"; //系统菜单首字母
 
     private final MenuDao menuDao;
     private final TenantMenuDao tenantMenuDao;
@@ -49,9 +50,8 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     public Menu saveMenu(Menu menu) throws ThingsboardException {
         log.trace("Executing saveMenu [{}]", menu);
         menu.setRegion(DEFAULT_TENANT_REGION);
-        menu.setRegion(DEFAULT_TENANT_REGION);
         //生成租户菜单编码
-        menu.setCode(String.valueOf(System.currentTimeMillis()));
+        menu.setCode(XTCD + String.valueOf(System.currentTimeMillis()));
         //生成租户菜单排序序号
         Integer maxSort = menuDao.getMaxSortByParentId(menu.getParentId());
         menu.setSort(maxSort == null ? ONE:maxSort);
@@ -70,8 +70,14 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         return menuDao.saveMenu(null, menu);
     }
 
+    /**
+     * 删除菜单
+     * @param id
+     */
     public void delMenu(UUID id){
-        menuDao.removeById(null,id);
+        // TODO: 2021/11/3 删除租户菜单
+
+        menuDao.delMenu(id);
     }
 
     /**
@@ -185,6 +191,46 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     @Override
     public PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException {
         return menuDao.getMenuPage(menu,pageLink);
+    }
+
+    @Override
+    public Menu getTenantById(UUID id){
+       return menuDao.getTenantById(id);
+    }
+
+    /**
+     * 查询同级菜单下是否存在
+     * @param id
+     * @param parentId
+     * @param name
+     * @return
+     */
+    @Override
+    public Boolean findSameLevelNameRepetition(UUID id, UUID parentId ,String name){
+        Menu sameLevelName = menuDao.findSameLevelName(parentId, name);
+        if(id == null){
+            if(sameLevelName != null){
+                //重复
+                return true;
+            }else {
+                //不重复
+                return false;
+            }
+        }else {
+            if(sameLevelName != null){
+                if(id.toString().equals(sameLevelName.getId().getId().toString())){
+                    //不重复
+                    return false;
+                }else {
+                    //重复
+                    return true;
+                }
+            }else {
+                //不重复
+                return false;
+            }
+        }
+
     }
 
 }

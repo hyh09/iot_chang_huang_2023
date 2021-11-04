@@ -55,8 +55,14 @@ public abstract class AbstractMenu {
     @ApiModelProperty("菜单类型（PC/APP）")
     public String menuType;
 
+    @ApiModelProperty("是按钮（true/false）")
+    public Boolean isButton;
+
     @ApiModelProperty("路径")
     private String path;
+
+    @ApiModelProperty("多语言Key")
+    private String langKey;
 
     @ApiModelProperty("创建人标识")
     public UUID createdUser;
@@ -86,6 +92,8 @@ public abstract class AbstractMenu {
         this.url = menu.getUrl();
         this.menuIcon = menu.getMenuIcon();
         this.menuImages = menu.getMenuImages();
+        this.isButton = menu.getIsButton();
+        this.langKey = menu.getLangKey();
         this.parentId = menu.getParentId();
         this.menuType = menu.getMenuType();
         this.createdTime = menu.getUpdatedTime();
@@ -106,6 +114,8 @@ public abstract class AbstractMenu {
         this.menuIcon = menuEntity.getMenuIcon();
         this.menuImages = menuEntity.getMenuImages();
         this.menuType = menuEntity.getMenuType();
+        this.isButton = menuEntity.getIsButton();
+        this.langKey = menuEntity.getLangKey();
         this.parentId = menuEntity.getParentId();
         this.createdTime = menuEntity.getUpdatedTime();
         this.createdUser = menuEntity.getCreatedUser();
@@ -126,6 +136,8 @@ public abstract class AbstractMenu {
         menu.setMenuImages(menuImages);
         menu.setParentId(parentId);
         menu.setMenuType(menuType);
+        menu.setIsButton(isButton);
+        menu.setLangKey(langKey);
         menu.setCreatedTime(createdTime);
         menu.setCreatedUser(createdUser);
         menu.setUpdatedTime(updatedTime);

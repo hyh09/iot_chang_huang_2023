@@ -29,6 +29,7 @@ import org.thingsboard.server.common.data.validation.NoXss;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -55,10 +56,23 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     private UUID workshopId;
     private UUID factoryId;
+    private UUID dictDeviceId;
     private String code;
     private UUID productionLineId;
     private String images;
     private String icon;
+    public long createdTime;
+
+    public UUID createdUser;
+
+    private long updatedTime;
+
+    private UUID updatedUser;
+
+    /********以下是查询条件********/
+    private List<UUID> deviceIdList;
+
+
 
     public Device() {
         super();
@@ -79,6 +93,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.setDeviceData(device.getDeviceData());
         this.firmwareId = device.getFirmwareId();
         this.softwareId = device.getSoftwareId();
+        this.dictDeviceId = device.getDictDeviceId();
     }
 
     public Device updateDevice(Device device) {
@@ -237,6 +252,56 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public UUID getDictDeviceId() {
+        return dictDeviceId;
+    }
+
+    public void setDictDeviceId(UUID dictDeviceId) {
+        this.dictDeviceId = dictDeviceId;
+    }
+
+    @Override
+    public long getCreatedTime() {
+        return createdTime;
+    }
+
+    @Override
+    public void setCreatedTime(long createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public UUID getCreatedUser() {
+        return createdUser;
+    }
+
+    public void setCreatedUser(UUID createdUser) {
+        this.createdUser = createdUser;
+    }
+
+    public long getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(long updatedTime) {
+        this.updatedTime = updatedTime;
+    }
+
+    public UUID getUpdatedUser() {
+        return updatedUser;
+    }
+
+    public void setUpdatedUser(UUID updatedUser) {
+        this.updatedUser = updatedUser;
+    }
+
+    public List<UUID> getDeviceIdList() {
+        return deviceIdList;
+    }
+
+    public void setDeviceIdList(List<UUID> deviceIdList) {
+        this.deviceIdList = deviceIdList;
     }
 
     @Override

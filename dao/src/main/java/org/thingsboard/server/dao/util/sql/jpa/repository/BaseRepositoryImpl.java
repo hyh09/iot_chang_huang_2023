@@ -8,15 +8,14 @@ import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.transform.Transformers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.dao.util.CommonUtils;
+import org.thingsboard.server.dao.util.GenericsUtils;
 import org.thingsboard.server.dao.util.sql.jpa.BaseRepository;
 import org.thingsboard.server.dao.util.sql.jpa.ct.VoBeanConverSvc;
 import org.thingsboard.server.dao.util.sql.jpa.transform.CustomResultToBean;
@@ -27,10 +26,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 有空再看把， EntityManager 这个这次使用报错
@@ -122,13 +118,10 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 		Query query = null;
 		if(isNativeSql){
 			countQuery = entityManager.createNativeQuery(sqlCount).unwrap(NativeQuery.class);
-
 			query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
 			if(Map.class.isAssignableFrom(cls)){
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
 			} else {
-//				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
-//				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
 			}
 		} else {
@@ -144,25 +137,63 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 				}
 			}
 		}
-
 		Long totalObj = 0l;
 		if(enablePage){
 			totalObj = Long.parseLong(countQuery.getSingleResult().toString());
 			query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize() ).setMaxResults(pageable.getPageSize());
 		}
-
-//		List<T> list = query.getResultList();
 		List<T> list = query.getResultList();
-
 		Page<T> page = new PageImpl<>(list, pageable, totalObj);
-		//entityManager由entityManagerFactory统一管理，无需显示关闭
-		//entityManager.clear();
-		//entityManager.close();
 		return page;
 	}
 
 
-    public <T> List<T> queryAllListSql(String sql,Map<String, Object> param, Class<T> cls,NameTransform trans, boolean isNativeSql)
+	public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql, SortRowName sortRowName) {
+		boolean enablePage = false;
+		if(pageable != null ){
+			if(pageable.getPageSize() != Integer.MAX_VALUE){
+				enablePage = true;
+			}
+		}
+		String sqlCount = "select count(*) from (" + sql + ") t_count_0";
+		Query countQuery = null;
+		Query query = null;
+		if(isNativeSql){
+			countQuery = entityManager.createNativeQuery(sqlCount).unwrap(NativeQuery.class);
+		   String sql01=	getSort(cls,sortRowName);
+		   logger.info("==sql+sql01=="+sql+sql01);
+			query = entityManager.createNativeQuery(sql+sql01).unwrap(NativeQuery.class);
+			if(Map.class.isAssignableFrom(cls)){
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToMap(trans));
+			} else {
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+			}
+		} else {
+			countQuery = entityManager.createQuery(sqlCount).unwrap(Query.class);
+			query = entityManager.createQuery(sql).unwrap(Query.class);
+		}
+
+		if(param!= null){
+			for(Map.Entry<String, ?> entry : param.entrySet()){
+				if(sql.indexOf(":" + entry.getKey()) > -1 ){
+					countQuery.setParameter(entry.getKey(), entry.getValue());
+					query.setParameter(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+		Long totalObj = 0l;
+		if(enablePage){
+			totalObj = Long.parseLong(countQuery.getSingleResult().toString());
+			query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize() ).setMaxResults(pageable.getPageSize());
+		}
+		List<T> list = query.getResultList();
+		Page<T> page = new PageImpl<>(list, pageable, totalObj);
+		return page;
+	}
+
+
+
+	public <T> List<T> queryAllListSql(String sql,Map<String, Object> param, Class<T> cls,NameTransform trans, boolean isNativeSql)
 	{
 		Query query = null;
 		if(isNativeSql){
@@ -218,6 +249,24 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 
 	}
 
+
+	private <T>  String getSort(Class<T> cls,SortRowName sortRowName)
+	{
+
+		if(StringUtils.isEmpty(sortRowName.getPreField()))
+		{
+			return "";
+		}
+		Hashtable<String,String>  hashtable= GenericsUtils.getRowNameHash(cls);
+		System.out.println("====>"+sortRowName);
+		logger.info("==hashtable===>"+hashtable);
+		String  sql =hashtable.get(sortRowName.getPreField());
+		if(StringUtils.isEmpty(sql))
+		{
+			return "";
+		}
+		return "ORDER BY "+sql+" "+sortRowName.getOrder()+" ";
+	}
 
 
 

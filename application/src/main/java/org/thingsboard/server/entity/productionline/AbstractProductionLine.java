@@ -17,7 +17,6 @@ package org.thingsboard.server.entity.productionline;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 
 import java.util.UUID;
@@ -46,6 +45,9 @@ public abstract class AbstractProductionLine{
     @ApiModelProperty("logo图片")
     public String logoImages;
 
+    @ApiModelProperty("看板背景图片")
+    private String bgImages;
+
     @ApiModelProperty(name = "备注")
     public String remark;
     @ApiModelProperty(name = "租户")
@@ -67,7 +69,7 @@ public abstract class AbstractProductionLine{
 
     public AbstractProductionLine(ProductionLine productionLine) {
         if (productionLine.getId() != null) {
-            this.setId(productionLine.getId().getId());
+            this.setId(productionLine.getId());
         }
         this.workshopId = productionLine.getWorkshopId();
         this.factoryId = productionLine.getFactoryId();
@@ -75,6 +77,7 @@ public abstract class AbstractProductionLine{
         this.name = productionLine.getName();
         this.logoIcon = productionLine.getLogoIcon();
         this.logoImages = productionLine.getLogoImages();
+        this.bgImages = productionLine.getBgImages();
         this.remark = productionLine.getRemark();
         this.tenantId = productionLine.getTenantId();
         this.createdTime = productionLine.getUpdatedTime();
@@ -85,13 +88,15 @@ public abstract class AbstractProductionLine{
     }
 
     public ProductionLine toProductionLine(){
-        ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getId()));
+        ProductionLine productionLine = new ProductionLine();
+        productionLine.setId(this.getId());
         productionLine.setWorkshopId(workshopId);
          productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);
         productionLine.setName(name);
         productionLine.setLogoIcon(logoIcon);
         productionLine.setLogoImages(logoImages);
+        productionLine.setBgImages(bgImages);
         productionLine.setRemark(remark);
         productionLine.setTenantId(tenantId);
         productionLine.setCreatedTime(createdTime);

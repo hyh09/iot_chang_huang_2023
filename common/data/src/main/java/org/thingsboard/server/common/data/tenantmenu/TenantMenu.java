@@ -24,11 +24,15 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
     private String tenantMenuIcon;
     private String tenantMenuImages;
     private String menuType;
+    //"是按钮（true/false）")
+    public Boolean isButton;
     private UUID createdUser;
     private long createdTime;
     private long updatedTime;
     private UUID updatedUser;
     private String region;
+    //多语言Key
+    private String langKey;
 
     public TenantMenu() {
         super();

@@ -8,6 +8,9 @@ import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 数据字典接口
  *
@@ -56,4 +59,21 @@ public interface DictDataService {
      * @return 当前可用数据字典编码
      */
     String getAvailableCode(TenantId tenantId);
+
+    /**
+     * 查询全部数据字典
+     *
+     * @param tenantId 租户Id
+     * @return 全部数据字典
+     */
+    List<DictData> listAllDictData(TenantId tenantId);
+
+    /**
+     * 按keys查询全部数据字典
+     *
+     * @param tenantId 租户Id
+     * @param keys key列表
+     * @return 数据字典map
+     */
+    Map<String, DictData> listDictDataByKeys(TenantId tenantId, List<String> keys);
 }

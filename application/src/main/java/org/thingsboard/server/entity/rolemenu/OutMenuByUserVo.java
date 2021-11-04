@@ -1,26 +1,22 @@
 package org.thingsboard.server.entity.rolemenu;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.dao.util.sql.jpa.ct.VoBeanConverSvc;
 
+import java.util.UUID;
 
 @Data
 @ToString
 @ApiModel(value = "角色管理模块-菜单 出参")
-public class OutMenuByUserVo implements VoBeanConverSvc {
+public class OutMenuByUserVo {
 
-    private  String id;
+    private  UUID id;
 
-    @JsonProperty("parentId")
-    private String pid;
+    private String parentId;
 
-    @JsonProperty("sysMenuName")
-    private String name;
+    private String sysMenuName;
 
-    @JsonProperty("flg")
     private  String mark;
 
 }

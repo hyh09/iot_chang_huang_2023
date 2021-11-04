@@ -73,6 +73,7 @@
                     <workingDirectory>${basedir}</workingDirectory>
                 </configuration>
                 <executions>
+                    <!--提前准备好安装环境-->
                     <execution>
                         <id>install node and yarn</id>
                         <goals>
@@ -81,6 +82,9 @@
                         <configuration>
                             <nodeVersion>v12.16.1</nodeVersion>
                             <yarnVersion>v1.22.4</yarnVersion>
+                            <nodeDownloadRoot>https://npm.taobao.org/mirrors/node/</nodeDownloadRoot>
+                            <yarnDownloadRoot>https://npm.taobao.org/mirrors/yarn/</yarnDownloadRoot>
+
                         </configuration>
                     </execution>
                     <execution>

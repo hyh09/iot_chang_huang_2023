@@ -16,6 +16,10 @@ public interface MenuService {
 
     Menu updateMenu(Menu menu) throws ThingsboardException;
 
+    /**
+     * 删除菜单
+     * @param id
+     */
     void delMenu(UUID id);
     /**
      * 调整排序
@@ -55,5 +59,16 @@ public interface MenuService {
      * @return
      */
     List<Menu> getOneLevel(String menuType);
+
+    Menu getTenantById(UUID id);
+
+    /**
+     * 查询同级菜单下是否存在
+     * @param id
+     * @param parentId
+     * @param name
+     * @return
+     */
+    Boolean findSameLevelNameRepetition(UUID id, UUID parentId ,String name);
 
 }

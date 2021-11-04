@@ -5,11 +5,13 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
@@ -25,7 +27,8 @@ import java.util.List;
 @RequestMapping("/api/factory")
 public class FactoryController extends BaseController  {
 
-    private FactoryVo factoryVo = new FactoryVo();
+    @Autowired
+    private UserRoleMenuSvc userRoleMenuSvc;
 
     /**
      * 新增/更新工厂
@@ -112,8 +115,9 @@ public class FactoryController extends BaseController  {
     @ResponseBody
     public FactoryListVo findFactoryListBuyCdn(QueryFactoryDto queryFactoryDto) throws ThingsboardException {
         try {
-            checkParameter("tenantId",queryFactoryDto.getTenantId());
-            return checkNotNull(factoryService.findFactoryListBuyCdn(queryFactoryDto.toFactory()));
+            checkParameter("没有获取到租户tenantId",getCurrentUser().getTenantId().getId());
+            queryFactoryDto.setTenantId(getCurrentUser().getTenantId().getId());
+            return checkNotNull(factoryService.findFactoryListBuyCdn(queryFactoryDto.toFactory(),userRoleMenuSvc.decideUser(getCurrentUser().getId())));
         } catch (Exception e) {
             throw handleException(e);
         }

@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -34,33 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.thingsboard.common.util.JacksonUtil;
-import org.thingsboard.server.common.data.Customer;
-import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.DeviceInfo;
-import org.thingsboard.server.common.data.DeviceProfile;
-import org.thingsboard.server.common.data.DeviceTransportType;
-import org.thingsboard.server.common.data.EntitySubtype;
-import org.thingsboard.server.common.data.EntityType;
-import org.thingsboard.server.common.data.EntityView;
-import org.thingsboard.server.common.data.OtaPackage;
-import org.thingsboard.server.common.data.Tenant;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.device.DeviceSearchQuery;
 import org.thingsboard.server.common.data.device.credentials.BasicMqttCredentials;
-import org.thingsboard.server.common.data.device.data.CoapDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.DefaultDeviceConfiguration;
-import org.thingsboard.server.common.data.device.data.DefaultDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.DeviceData;
-import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.Lwm2mDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.MqttDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.SnmpDeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.data.*;
+import org.thingsboard.server.common.data.devicecomponent.DeviceComponent;
 import org.thingsboard.server.common.data.edge.Edge;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
-import org.thingsboard.server.common.data.id.EntityId;
-import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -74,9 +56,12 @@ import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.device.provision.ProvisionFailedException;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
 import org.thingsboard.server.dao.device.provision.ProvisionResponseStatus;
+import org.thingsboard.server.dao.devicecomponent.DeviceComponentDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.dao.exception.DataValidationException;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentRepository;
 import org.thingsboard.server.dao.ota.OtaPackageService;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
@@ -84,23 +69,14 @@ import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.thingsboard.server.common.data.CacheConstants.DEVICE_CACHE;
 import static org.thingsboard.server.dao.DaoUtil.toUUIDs;
 import static org.thingsboard.server.dao.model.ModelConstants.NULL_UUID;
-import static org.thingsboard.server.dao.service.Validator.validateId;
-import static org.thingsboard.server.dao.service.Validator.validateIds;
-import static org.thingsboard.server.dao.service.Validator.validatePageLink;
-import static org.thingsboard.server.dao.service.Validator.validateString;
+import static org.thingsboard.server.dao.service.Validator.*;
 
 @Service
 @Slf4j
@@ -112,6 +88,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public static final String INCORRECT_CUSTOMER_ID = "Incorrect customerId ";
     public static final String INCORRECT_DEVICE_ID = "Incorrect deviceId ";
     public static final String INCORRECT_EDGE_ID = "Incorrect edgeId ";
+    public static final String SAVE_TYPE_ADD = "add ";
+    public static final String SAVE_TYPE_ADD_UPDATE = "update ";
 
     @Autowired
     private DeviceDao deviceDao;
@@ -140,6 +118,12 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
     @Autowired
     private OtaPackageService otaPackageService;
+
+    @Autowired
+    private DeviceComponentDao deviceComponentDao;
+
+    @Autowired
+    DictDeviceComponentRepository componentRepository;
 
     @Override
     public DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId) {
@@ -818,4 +802,107 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             unassignDeviceFromCustomer(tenantId, new DeviceId(entity.getUuidId()));
         }
     };
+
+
+
+    /**
+     * 保存/修改设备
+     * @param device
+     * @return
+     */
+    @Override
+    public Device saveOrUpdDevice(Device device) throws ThingsboardException {
+        //保存或修改设备信息
+        Device saveDevice = deviceDao.saveOrUpdDevice(device);
+        if(device.getId() == null || device.getId().getId() == null || StringUtils.isEmpty(device.getId().getId().toString())){
+            if(device.getDictDeviceId() != null && !StringUtils.isEmpty(device.getDictDeviceId().toString())){
+                //添加设备构成
+                this.saveDeviceComponentList(device,saveDevice.getId().getId(),this.SAVE_TYPE_ADD);
+            }
+        }else {
+            if(device.getDictDeviceId() != null){
+                //查询修改前设备信息
+                DeviceInfo BeforeUpdate = deviceDao.findDeviceInfoById(null, device.getId().getId());
+                if(BeforeUpdate != null && BeforeUpdate.getDictDeviceId() != null){
+                    if(!BeforeUpdate.getDictDeviceId().toString().equals(device.getDictDeviceId().toString())){
+                        //删除设备构成
+                        deviceComponentDao.delDeviceComponentByDeviceId(device.getDictDeviceId());
+                        //添加构成
+                        this.saveDeviceComponentList(device,saveDevice.getId().getId(),this.SAVE_TYPE_ADD_UPDATE);
+                    }
+                }else {
+                    //添加构成
+                    this.saveDeviceComponentList(device,saveDevice.getId().getId(),this.SAVE_TYPE_ADD);
+                }
+            }
+        }
+        return saveDevice;
+    }
+
+    /**
+     * 添加/更新设备构成
+     * @param device 请求数据
+     * @param deviceId 设备id
+     * @param saveType
+     */
+    private void saveDeviceComponentList(Device device,UUID deviceId,String saveType)  throws ThingsboardException{
+        List<DeviceComponent> deviceComponentList = new ArrayList<>();
+        //查询设备的构成
+        List<DictDeviceComponentEntity> allByDictDeviceId = componentRepository.findAllByDictDeviceId(device.getDictDeviceId());
+        if(!CollectionUtils.isEmpty(allByDictDeviceId)){
+            allByDictDeviceId.forEach(i->{
+                DeviceComponent deviceComponent = new DeviceComponent();
+                BeanUtils.copyProperties(i,deviceComponent);
+                deviceComponent.setDeviceId(deviceId);
+                if(saveType.equals(this.SAVE_TYPE_ADD)){
+                    deviceComponent.setCreatedUser(device.getCreatedUser());
+                }else {
+                    deviceComponent.setUpdatedUser(device.getUpdatedUser());
+                }
+                deviceComponentList.add(deviceComponent);
+            });
+        }
+        //保存设备构成
+        deviceComponentDao.saveDeviceComponentList(deviceComponentList);
+    }
+    @Override
+    public void saveOrUpdDeviceComponentList(Device device,UUID deviceId,String saveType) throws ThingsboardException{
+        this.saveDeviceComponentList(device,deviceId,saveType);
+    }
+
+    /**
+     * 分配产线设备
+     * @param device
+     * @throws ThingsboardException
+     */
+    @Override
+    public void distributionDevice(Device device) throws ThingsboardException{
+        //移除产线原先的设备（清空该设备的产线、车间、工厂数据）
+        deviceDao.removeProductionLine(device.getDeviceIdList(),device.getUpdatedUser());
+        //添加设备给指定产线
+        deviceDao.addProductionLine(device);
+    }
+
+    /**
+     * 移除产线设备
+     * @param device
+     * @throws ThingsboardException
+     */
+    @Override
+    public void removeDevice(Device device) throws ThingsboardException{
+        //移除产线原先的设备（清空该设备的产线、车间、工厂数据）
+        deviceDao.removeProductionLine(device.getDeviceIdList(),device.getUpdatedUser());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 }

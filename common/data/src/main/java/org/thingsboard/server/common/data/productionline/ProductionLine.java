@@ -1,15 +1,13 @@
 package org.thingsboard.server.common.data.productionline;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
-import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class ProductionLine extends SearchTextBasedWithAdditionalInfo<ProductionLineId> {
+public class ProductionLine{
+
+    private UUID id;
 
     private UUID workshopId;
 
@@ -22,6 +20,8 @@ public class ProductionLine extends SearchTextBasedWithAdditionalInfo<Production
     private String logoIcon;
 
     private String logoImages;
+
+    private String bgImages;
 
     private String adress;
 
@@ -46,20 +46,12 @@ public class ProductionLine extends SearchTextBasedWithAdditionalInfo<Production
     private UUID createdUser;
     private long updatedTime;
     private UUID updatedUser;
-
     private String delFlag;
+
+
 
     public ProductionLine() {
         super();
-    }
-
-    public ProductionLine(ProductionLineId id) {
-        super(id);
-    }
-
-    @Override
-    public String getSearchText() {
-        return null;
     }
 
 }

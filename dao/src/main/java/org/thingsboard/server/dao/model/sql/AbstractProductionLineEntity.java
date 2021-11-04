@@ -21,7 +21,6 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
@@ -55,6 +54,9 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     @Column(name = "logo_images")
     private String logoImages;
+
+    @Column(name = "bg_images")
+    private String bgImages;
 
     @Column(name = "remark")
     private String remark;
@@ -93,6 +95,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
         this.name = abstractProdutionLineEntity.getName();
         this.logoIcon = abstractProdutionLineEntity.getLogoIcon();
         this.logoImages = abstractProdutionLineEntity.getLogoImages();
+        this.bgImages = abstractProdutionLineEntity.getBgImages();
         this.remark = abstractProdutionLineEntity.getRemark();
         this.tenantId = abstractProdutionLineEntity.getTenantId();
         this.createdTime = abstractProdutionLineEntity.getUpdatedTime();
@@ -104,7 +107,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     public AbstractProductionLineEntity(ProductionLine productionLine) {
         if (productionLine.getId() != null) {
-            this.setUuid(productionLine.getId().getId());
+            this.setUuid(productionLine.getId());
         }
         this.workshopId = productionLine.getWorkshopId();
         this.factoryId = productionLine.getFactoryId();
@@ -112,6 +115,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
         this.name = productionLine.getName();
         this.logoIcon = productionLine.getLogoIcon();
         this.logoImages = productionLine.getLogoImages();
+        this.bgImages = productionLine.getBgImages();
         this.remark = productionLine.getRemark();
         this.tenantId = productionLine.getTenantId();
         this.createdTime = productionLine.getUpdatedTime();
@@ -122,13 +126,15 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     }
 
     public ProductionLine toProductionLine(){
-        ProductionLine productionLine = new ProductionLine(new ProductionLineId(this.getUuid()));
+        ProductionLine productionLine = new ProductionLine();
+        productionLine.setId(this.getUuid());
         productionLine.setWorkshopId(workshopId);
         productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);
         productionLine.setName(name);
         productionLine.setLogoIcon(logoIcon);
         productionLine.setLogoImages(logoImages);
+        productionLine.setBgImages(bgImages);
         productionLine.setRemark(remark);
         productionLine.setTenantId(tenantId);
         productionLine.setCreatedTime(createdTime);

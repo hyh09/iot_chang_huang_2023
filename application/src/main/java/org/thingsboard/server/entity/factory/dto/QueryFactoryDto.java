@@ -13,7 +13,7 @@ import java.util.UUID;
 @ApiModel("QueryFactoryDto")
 public class QueryFactoryDto{
 
-    @ApiModelProperty(name = "租户",required = true)
+    @ApiModelProperty(name = "租户")
     public UUID tenantId;
 
     @ApiModelProperty(name = "工厂名称")

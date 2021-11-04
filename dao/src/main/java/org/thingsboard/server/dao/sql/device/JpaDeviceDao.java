@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.sql.device;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.thingsboard.server.common.data.*;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
@@ -302,4 +304,71 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         }
         return new ArrayList<>();
     }
+
+    /**
+     * 保存/修改
+     * @param device
+     * @return
+     */
+    @Override
+    public Device saveOrUpdDevice(Device device){
+        DeviceEntity deviceEntity = new DeviceEntity(device);
+        if (deviceEntity.getUuid() == null) {
+            UUID uuid = Uuids.timeBased();
+            deviceEntity.setUuid(uuid);
+            deviceEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
+        }else{
+            deviceRepository.deleteById(deviceEntity.getUuid());
+            deviceEntity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+        }
+        DeviceEntity entity = deviceRepository.save(deviceEntity);
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
+    }
+
+    /**
+     * 移除产线设备
+     * @param deviceIdList
+     * @throws ThingsboardException
+     */
+    @Override
+    public void removeProductionLine(List<UUID> deviceIdList,UUID updatedUser) throws ThingsboardException{
+        deviceIdList.forEach(deviceId->{
+            if(deviceId != null){
+                DeviceEntity entity = new DeviceEntity();
+                entity.setId(deviceId);
+                entity.setFactoryId(null);
+                entity.setWorkshopId(null);
+                entity.setProductionLineId(null);
+                entity.setUpdatedUser(updatedUser);
+                entity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+                deviceRepository.save(entity);
+            }
+        });
+
+    }
+
+    /**
+     * 分配产线设备
+     * @param device
+     * @throws ThingsboardException
+     */
+    @Override
+    public void addProductionLine(Device device) throws ThingsboardException{
+        device.getDeviceIdList().forEach(deviceId->{
+            if(deviceId != null){
+                DeviceEntity entity = new DeviceEntity();
+                entity.setId(deviceId);
+                entity.setFactoryId(device.getFactoryId());
+                entity.setWorkshopId(device.getWorkshopId());
+                entity.setProductionLineId(device.getProductionLineId());
+                entity.setUpdatedUser(device.getUpdatedUser());
+                entity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+                deviceRepository.save(entity);
+            }
+        });
+    }
+
 }
