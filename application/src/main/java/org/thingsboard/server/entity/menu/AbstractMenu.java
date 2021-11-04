@@ -140,6 +140,7 @@ public abstract class AbstractMenu {
         menu.setMenuType(menuType);
         menu.setIsButton(isButton);
         menu.setLangKey(langKey);
+        menu.setPath(path);
         menu.setCreatedTime(createdTime);
         menu.setCreatedUser(createdUser);
         menu.setUpdatedTime(updatedTime);

@@ -50,11 +50,15 @@ public class RoleMenuController extends BaseController{
     @RequestMapping(value = "/queryAll", method = RequestMethod.POST)
     @ResponseBody
     public Object queryAll(@RequestBody @Valid InMenuByUserVo vo) {
-        if(!IS_TEST) {
+        if(IS_TEST) {
 
                 try {
                     SecurityUser securityUser = getCurrentUser();
-                    vo.setUserId(securityUser.getUuidId());
+                    if(StringUtils.isEmpty(securityUser.getUserCode())){
+                         vo.setRoleId(null);
+                    }
+//                    vo.setUserId(securityUser.getUuidId());
+
                 } catch (ThingsboardException e) {
                     e.printStackTrace();
                     return ResultVo.getFail(e.getMessage());

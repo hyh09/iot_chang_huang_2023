@@ -107,8 +107,11 @@ public class RoleMenuImpl implements RoleMenuSvc {
             meVo.setId(temp.getId());
             meVo.setParentId(temp.getPid());
             meVo.setLangKey(temp.getLangkey());
-            meVo.setTenantMenuName(temp.getName());
-            meVo.setTenantMenuCode(temp.getCode());
+            meVo.setName(temp.getName());
+            meVo.setLangKey(temp.getLangkey());
+            meVo.setPath(temp.getPath());
+//            meVo.setTenantMenuName(temp.getName());
+//            meVo.setTenantMenuCode(temp.getCode());
             if(!StringUtils.isEmpty(temp.getButton() ))
             {
                if(temp.getButton().equalsIgnoreCase("true"))

@@ -29,7 +29,7 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
     public   SqlVo getSqlByVo(InMenuByUserVo vo)
     {
         //返回的字段
-        String sqlPre="select m1.tenant_menu_code as code, cast(m1.is_button as varchar) as button, cast(m1.created_time as varchar) as time," +
+        String sqlPre="select m1.lang_key as langkey ,m1.tenant_menu_code as code, cast(m1.is_button as varchar) as button, cast(m1.created_time as varchar) as time," +
                 "cast(m1.parent_id as varchar(255)) as pid,cast(m1.id as varchar(255)) as id ," +
                 "m1.sys_menu_name as name , cast (count(c1.id) as varchar  ) as mark " +
                 "  ";

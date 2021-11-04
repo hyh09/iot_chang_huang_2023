@@ -30,6 +30,13 @@ public class OutMenuByUserVo  {
 
    private String button;
 
+
+
    private String langkey;
+
+   private String path;
+
+
+
 
 }
