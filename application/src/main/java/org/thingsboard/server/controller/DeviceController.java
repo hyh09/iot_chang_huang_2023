@@ -74,6 +74,8 @@ public class DeviceController extends BaseController {
     private static final String DEVICE_ID = "deviceId";
     private static final String DEVICE_NAME = "deviceName";
     private static final String TENANT_ID = "tenantId";
+    public static final String SAVE_TYPE_ADD = "add ";
+    public static final String SAVE_TYPE_ADD_UPDATE = "update ";
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.GET)
@@ -776,20 +778,37 @@ public class DeviceController extends BaseController {
     @ApiImplicitParam(name = "addDeviceDto",value = "入参实体",dataType = "AddDeviceDto",paramType="body")
     @RequestMapping(value = "/saveOrUpdDevice", method = RequestMethod.POST)
     @ResponseBody
-    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto) throws ThingsboardException {
+    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto,@RequestParam(name = "accessToken", required = false)String accessToken)throws ThingsboardException {
         try {
+
             checkNotNull(addDeviceDto);
-            checkParameter("tenantId",addDeviceDto.getTenantId());
+//
+//            if(addDeviceDto.getId() == null){
+//                device.setCreatedUser(getCurrentUser().getUuidId());
+//            }else {
+//                device.setUpdatedUser(getCurrentUser().getUuidId());
+//            }
+//
+            boolean created = addDeviceDto.getId() == null;
             Device device = addDeviceDto.toDevice();
-            if(addDeviceDto.getId() == null){
-                device.setCreatedUser(getCurrentUser().getUuidId());
-            }else {
-                device.setUpdatedUser(getCurrentUser().getUuidId());
+            device.setTenantId(getCurrentUser().getTenantId());
+            Device oldDevice = null;
+            String saveType = null;
+            if (!created) {
+                oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
+                saveType = SAVE_TYPE_ADD_UPDATE;
+            } else {
+                checkEntity(null, device, Resource.DEVICE);
+                saveType = SAVE_TYPE_ADD;
             }
             //生成设备凭证
             Device savedDevice = checkNotNull(deviceService.saveDeviceWithAccessToken(device, null));
-
-            device =  checkNotNull(deviceService.saveOrUpdDevice(device));
+            tbClusterService.onDeviceUpdated(savedDevice, oldDevice);
+            logEntityAction(savedDevice.getId(), savedDevice,
+                    savedDevice.getCustomerId(),
+                    created ? ActionType.ADDED : ActionType.UPDATED, null);
+            //保存或修改设备构成
+            deviceService.saveOrUpdDeviceComponentList(addDeviceDto.toDevice(),savedDevice.getId().getId(),saveType);
             return new DeviceVo(device);
         } catch (Exception e) {
             throw handleException(e);

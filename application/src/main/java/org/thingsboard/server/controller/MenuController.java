@@ -62,6 +62,7 @@ public class MenuController extends BaseController {
     public MenuVo saveMenu(@RequestBody AddMenuDto addMenuDto) throws ThingsboardException {
         try {
             checkNotNull(addMenuDto);
+            checkSameLevelNameRepetition(addMenuDto);
             Menu menu = addMenuDto.toMenu();
             if(addMenuDto.getId() != null){
                 checkParameter("id",addMenuDto.getId());

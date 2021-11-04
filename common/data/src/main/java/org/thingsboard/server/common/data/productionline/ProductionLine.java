@@ -21,6 +21,8 @@ public class ProductionLine{
 
     private String logoImages;
 
+    private String bgImages;
+
     private String adress;
 
     private String longitude;

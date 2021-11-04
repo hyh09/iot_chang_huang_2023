@@ -43,6 +43,9 @@ public abstract class AbstractWorkshop{
     @ApiModelProperty("logo图片")
     private String logoImages;
 
+    @ApiModelProperty("看板背景图片")
+    private String bgImages;
+
     @ApiModelProperty(name = "备注")
     private String remark;
     @ApiModelProperty(name = "租户")
@@ -72,6 +75,7 @@ public abstract class AbstractWorkshop{
         this.name = workshop.getName();
         this.logoIcon = workshop.getLogoIcon();
         this.logoImages = workshop.getLogoImages();
+        this.bgImages = workshop.getBgImages();
         this.remark = workshop.getRemark();
         this.tenantId = workshop.getTenantId();
         this.createdTime = workshop.getUpdatedTime();
@@ -88,6 +92,7 @@ public abstract class AbstractWorkshop{
         workshop.setName(name);
         workshop.setLogoIcon(logoIcon);
         workshop.setLogoImages(logoImages);
+        workshop.setBgImages(bgImages);
         workshop.setRemark(remark);
         workshop.setTenantId(tenantId);
         workshop.setCreatedTime(createdTime);

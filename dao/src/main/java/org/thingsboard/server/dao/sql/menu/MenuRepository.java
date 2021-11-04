@@ -85,5 +85,8 @@ public interface MenuRepository extends PagingAndSortingRepository<MenuEntity, U
     @Query(value = "SELECT t FROM MenuEntity t")
     Page<MenuEntity> findByPage(Pageable pageable);
 
+    @Query(value = "SELECT t FROM MenuEntity t WHERE t.parentId = :parentId AND t.name = :name ")
+    MenuEntity findSameLevelName(@Param("parentId") UUID parentId,@Param("name") String name);
+
 
 }

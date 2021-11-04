@@ -114,11 +114,18 @@ public interface DeviceService {
     long countByTenantId(TenantId tenantId);
 
     /**
-     * 保存/修改
+     * 保存/修改设备
      * @param device
      * @return
      */
     Device saveOrUpdDevice(Device device) throws ThingsboardException;
+
+    /**
+     * 保存/修改设备构成
+     * @param device
+     * @throws ThingsboardException
+     */
+    void saveOrUpdDeviceComponentList(Device device,UUID deviceId,String saveType)  throws ThingsboardException;
 
     /**
      * 分配产线设备

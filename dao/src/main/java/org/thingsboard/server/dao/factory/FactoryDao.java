@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.factory;
 
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
+import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.dao.Dao;
 
 import java.util.UUID;
@@ -14,7 +15,7 @@ public interface FactoryDao extends Dao<Factory>{
      * @param factory
      * @return
      */
-    FactoryListVo findFactoryListBuyCdn(Factory factory);
+    FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo);
 
     /**
      * 删除后刷新值(逻辑删除)

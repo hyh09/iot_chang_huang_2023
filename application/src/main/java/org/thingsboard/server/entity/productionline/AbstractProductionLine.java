@@ -45,6 +45,9 @@ public abstract class AbstractProductionLine{
     @ApiModelProperty("logo图片")
     public String logoImages;
 
+    @ApiModelProperty("看板背景图片")
+    private String bgImages;
+
     @ApiModelProperty(name = "备注")
     public String remark;
     @ApiModelProperty(name = "租户")
@@ -74,6 +77,7 @@ public abstract class AbstractProductionLine{
         this.name = productionLine.getName();
         this.logoIcon = productionLine.getLogoIcon();
         this.logoImages = productionLine.getLogoImages();
+        this.bgImages = productionLine.getBgImages();
         this.remark = productionLine.getRemark();
         this.tenantId = productionLine.getTenantId();
         this.createdTime = productionLine.getUpdatedTime();
@@ -92,6 +96,7 @@ public abstract class AbstractProductionLine{
         productionLine.setName(name);
         productionLine.setLogoIcon(logoIcon);
         productionLine.setLogoImages(logoImages);
+        productionLine.setBgImages(bgImages);
         productionLine.setRemark(remark);
         productionLine.setTenantId(tenantId);
         productionLine.setCreatedTime(createdTime);

@@ -21,6 +21,8 @@ public class Workshop extends SearchTextBasedWithAdditionalInfo<WorkshopId> {
 
     private String logoImages;
 
+    private String bgImages;
+
     private String remark;
 
     private UUID tenantId;

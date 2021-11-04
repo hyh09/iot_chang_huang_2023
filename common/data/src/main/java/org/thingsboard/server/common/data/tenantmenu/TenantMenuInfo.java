@@ -21,6 +21,10 @@ public class TenantMenuInfo{
     private String tenantMenuIcon;
     private String tenantMenuImages;
     private String menuType;
+    //"是按钮（true/false）")
+    public boolean isButton;
+    //多语言Key
+    private String langKey;
     private String path;
     private UUID createdUser;
     private long createdTime;
@@ -48,6 +52,7 @@ public class TenantMenuInfo{
         this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
         this.menuType = tenantMenu.getMenuType();
+        this.isButton = tenantMenu.getIsButton();
         this.createdTime = tenantMenu.getUpdatedTime();
         this.createdUser = tenantMenu.getCreatedUser();
         this.updatedTime = tenantMenu.getUpdatedTime();
