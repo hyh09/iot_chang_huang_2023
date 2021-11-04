@@ -85,4 +85,9 @@ public class DictDeviceComponent extends BasePO {
      * 图片
      */
     private String picture;
+
+    /**
+     * 排序
+     */
+    private Integer sort;
 }

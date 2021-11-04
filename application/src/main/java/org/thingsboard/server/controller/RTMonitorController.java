@@ -13,7 +13,6 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
-import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -37,9 +36,6 @@ public class RTMonitorController extends BaseController {
 
     @Autowired
     DeviceMonitorService deviceMonitorService;
-
-    @Autowired
-    DictDeviceService dictDeviceService;
 
     /**
      * 获得实时监控数据列表
@@ -97,10 +93,10 @@ public class RTMonitorController extends BaseController {
     })
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/rtMonitor/device/groupProperty/history")
-    public List<DeviceDetailGroupPropertyResult> listRTMonitorGroupPropertyHistory(
+    public List<DictDeviceGroupPropertyVO> listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
-        return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(),deviceId, groupPropertyName, CommonUtil.getTodayStartTime());
+        return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, CommonUtil.getTodayStartTime(), CommonUtil.getTodayCurrentTime());
     }
 
     /**

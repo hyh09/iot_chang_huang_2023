@@ -87,4 +87,16 @@ public class AlarmRecordResult {
     @ApiModelProperty("是否可确认")
     private Boolean isCanBeConfirm;
 
+    /**
+     * 车间
+     */
+    @ApiModelProperty("车间")
+    private String workShopStr;
+
+    /**
+     * 产线
+     */
+    @ApiModelProperty("产线")
+    private String productionLineStr;
+
 }

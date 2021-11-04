@@ -17,6 +17,7 @@ public class HsModelConstants {
     public static final String GENERAL_CREATED_USER = "created_user";
     public static final String GENERAL_UPDATED_TIME = "updated_time";
     public static final String GENERAL_UPDATED_USER = "updated_user";
+    public static final String GENERAL_SORT = "sort";
 
     public static final String DICT_DEVICE_ID = "dict_device_id";
     public static final String DEVICE_PROFILE_ID = "device_profile_id";
