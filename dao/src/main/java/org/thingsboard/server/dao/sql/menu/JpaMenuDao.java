@@ -79,6 +79,15 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         return null;
     }
 
+    @Override
+    public Menu findSameLevelName(UUID parentId,String name){
+        MenuEntity sameLevelName = menuRepository.findSameLevelName(parentId, name);
+        if(sameLevelName != null){
+            return sameLevelName.toData();
+        }
+        return null;
+    }
+
     /**
      * 查询系统菜单列表分页
      * @param menu

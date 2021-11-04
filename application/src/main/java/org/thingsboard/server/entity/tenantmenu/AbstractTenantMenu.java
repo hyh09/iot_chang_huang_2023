@@ -53,6 +53,8 @@ public abstract class AbstractTenantMenu{
     public String tenantMenuImages;
     @ApiModelProperty("菜单类型（PC/APP）")
     public String menuType;
+    @ApiModelProperty("是按钮（true/false）")
+    public Boolean isButton;
     @ApiModelProperty("创建人标识")
     public UUID createdUser;
     @ApiModelProperty("创建时间")
@@ -63,6 +65,8 @@ public abstract class AbstractTenantMenu{
     public UUID updatedUser;
     @ApiModelProperty("区域")
     public String region;
+    @ApiModelProperty("多语言Key")
+    private String langKey;
 
     public AbstractTenantMenu() {
     }
@@ -85,6 +89,7 @@ public abstract class AbstractTenantMenu{
         this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
         this.menuType = tenantMenu.getMenuType();
+        this.langKey = tenantMenu.getLangKey();
         this.createdTime = tenantMenu.getUpdatedTime();
         this.createdUser = tenantMenu.getCreatedUser();
         this.updatedTime = tenantMenu.getUpdatedTime();
@@ -107,6 +112,8 @@ public abstract class AbstractTenantMenu{
         tenantMenu.setTenantMenuImages(tenantMenuImages);
         tenantMenu.setParentId(parentId);
         tenantMenu.setMenuType(menuType);
+        tenantMenu.setIsButton(isButton);
+        tenantMenu.setLangKey(langKey);
         tenantMenu.setCreatedTime(createdTime);
         tenantMenu.setCreatedUser(createdUser);
         tenantMenu.setUpdatedTime(updatedTime);

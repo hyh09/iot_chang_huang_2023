@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.factory;
 
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
+import org.thingsboard.server.common.data.vo.JudgeUserVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,6 @@ public interface FactoryService {
      * @param factory
      * @return
      */
-    FactoryListVo findFactoryListBuyCdn(Factory factory);
+    FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo);
 
 }

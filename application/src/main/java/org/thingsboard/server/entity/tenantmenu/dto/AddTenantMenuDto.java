@@ -35,6 +35,10 @@ public class AddTenantMenuDto {
     private String tenantMenuImages;
     @ApiModelProperty("菜单类型（PC/APP）")
     private String menuType;
+    @ApiModelProperty("是按钮（true/false）")
+    public Boolean isButton;
+    @ApiModelProperty("多语言Key")
+    private String langKey;
 
     public AddTenantMenuDto(){}
 

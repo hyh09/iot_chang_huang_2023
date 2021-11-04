@@ -2,10 +2,14 @@ package org.thingsboard.server.dao.factory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,9 +19,11 @@ import java.util.UUID;
 public class FactoryServiceImpl extends AbstractEntityService implements FactoryService {
 
     private final FactoryDao factoryDao;
+    private final UserRoleMenuSvc userRoleMenuSvc;
 
-    public FactoryServiceImpl(FactoryDao factoryDao){
+    public FactoryServiceImpl(FactoryDao factoryDao,UserRoleMenuSvc userRoleMenuSvc){
         this.factoryDao = factoryDao;
+        this.userRoleMenuSvc = userRoleMenuSvc;
     }
 
 
@@ -29,6 +35,20 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public Factory saveFactory(Factory factory){
         log.trace("Executing saveFactory [{}]", factory);
+        if (factory != null && factory.getId() == null) {
+            //创建管理员账号
+            User adduser = new User();
+            adduser.setPhoneNumber(factory.getMobile());
+            adduser.setEmail(factory.getEmail());
+            adduser.setUserName(factory.getName());
+            User loginUser = new User();
+            loginUser.setId(new UserId(factory.getCreatedUser()));
+            loginUser.setTenantId(new TenantId(factory.getTenantId()));
+            User saveUser = userRoleMenuSvc.save(adduser,loginUser);
+
+            factory.setAdminUserId(saveUser.getId().getId());
+            factory.setAdminUserName(saveUser.getUserName());
+        }
         factory.setCode(String.valueOf(System.currentTimeMillis()));
         return factoryDao.saveFactory(factory);
     }
@@ -85,8 +105,8 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public FactoryListVo findFactoryListBuyCdn(Factory factory){
-        log.trace("Executing findFactoryListBuyCdn [{}]", factory);
-        return factoryDao.findFactoryListBuyCdn( factory);
+    public FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo){
+        log.trace("Executing findFactoryListBuyCdn [{}]", factory,judgeUserVo);
+        return factoryDao.findFactoryListBuyCdn( factory,judgeUserVo);
     }
 }
