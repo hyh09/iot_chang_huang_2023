@@ -32,4 +32,10 @@ public class QueryUserVo {
     @ApiModelProperty(value = "用名称")
     private  String userName;
 
+    private  UUID tenantId;
+
+
+    private  UUID createId;
+
+
 }

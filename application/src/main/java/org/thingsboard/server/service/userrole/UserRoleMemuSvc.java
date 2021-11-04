@@ -4,6 +4,7 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.entity.role.UserRoleVo;
 
 import java.util.List;
@@ -42,9 +43,9 @@ public interface UserRoleMemuSvc {
   * @param pageLink
   * @return
   */
- Object getUserByInRole( QueryUserVo user, PageLink pageLink);
+ Object getUserByInRole(QueryUserVo user, PageLink pageLink, SortRowName sortRowName);
 
- Object getUserByNotInRole( QueryUserVo user, PageLink pageLink);
+ Object getUserByNotInRole( QueryUserVo user, PageLink pageLink,SortRowName sortRowName);
 
 
 }
