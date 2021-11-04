@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
+import org.thingsboard.server.entity.tenantmenu.dto.SaveTenantMenuDto;
 import org.thingsboard.server.entity.tenantmenu.dto.UpdTenantMenuDto;
 import org.thingsboard.server.entity.tenantmenu.vo.TenantMenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
