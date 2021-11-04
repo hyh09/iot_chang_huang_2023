@@ -49,7 +49,6 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     public Menu saveMenu(Menu menu) throws ThingsboardException {
         log.trace("Executing saveMenu [{}]", menu);
         menu.setRegion(DEFAULT_TENANT_REGION);
-        menu.setRegion(DEFAULT_TENANT_REGION);
         //生成租户菜单编码
         menu.setCode(String.valueOf(System.currentTimeMillis()));
         //生成租户菜单排序序号
@@ -71,7 +70,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     }
 
     public void delMenu(UUID id){
-        menuDao.removeById(null,id);
+        menuDao.delMenu(id);
     }
 
     /**
@@ -185,6 +184,11 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     @Override
     public PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException {
         return menuDao.getMenuPage(menu,pageLink);
+    }
+
+    @Override
+    public Menu getTenantById(UUID id){
+       return menuDao.getTenantById(id);
     }
 
 }
