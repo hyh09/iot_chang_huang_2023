@@ -70,7 +70,11 @@ deployK8s:
   script:
     - echo "部署到k8s"
     - kubectl get pod --all-namespaces
+    - bash ./k8s/k8s-install-tb.sh --loadDemo
+    - bash ./k8s/k8s-deploy-thirdparty.sh
+    - bash ./k8s-deploy-resources.sh
   only:
-    - dev
+    - k8s-test
   after_script:
     - echo "k8s部署完成，立即生效执行阿里云k8s触发器。"
+    - kubectl get pods -l app=tb-node
