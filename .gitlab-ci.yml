@@ -33,7 +33,7 @@ package:
     - python -V
     - python3 -V
     - git --version
-    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2 -X
+    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2 -X
     - ls application/target
   only:
     - dev
