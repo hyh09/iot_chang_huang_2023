@@ -29,6 +29,8 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
+    - pkg-fetch node12 linux x64 
+    - pkg-fetch node12 win x64
     - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
     - ls application/target
   only:
