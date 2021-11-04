@@ -1,5 +1,6 @@
 package org.thingsboard.server.common.data.memu;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.HasCustomerId;
@@ -50,6 +51,10 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
     private String region;
 
     private UUID tenantId;
+
+    /*****非数据库字段*****/
+    @ApiModelProperty("上级菜单名称")
+    private String parentName;
 
     public Menu() {
         super();

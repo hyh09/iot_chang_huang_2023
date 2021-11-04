@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 /**
@@ -55,6 +56,32 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         return tenantMenuRepository;
     }
 
+    /**
+     *新增/修改租户菜单
+     * @param tenantMenuList
+     */
+    @Override
+    public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
+        tenantMenuRepository.saveAll(tenantMenuList.stream().map(e -> {
+            return new TenantMenuEntity(e);
+        }).collect(Collectors.toList()));
+    }
+    /**
+     * 保存租户菜单信息
+     * @param tenantMenu
+     * @return
+     */
+    @Override
+    public TenantMenu save(TenantMenu tenantMenu){
+        TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(tenantMenu);
+        if (tenantMenuEntity.getUuid() == null) {
+            UUID uuid = Uuids.timeBased();
+            tenantMenuEntity.setUuid(uuid);
+            tenantMenuEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
+        }
+        return tenantMenuRepository.save(tenantMenuEntity).toTenantMenu();
+    }
+
     @Override
     public PageData<TenantMenu> findTenantMenusByRegion(TenantMenuId tenantMenuId, String region, PageLink pageLink) {
         return DaoUtil.toPageData(tenantMenuRepository
@@ -72,21 +99,7 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         return tenantMenuRepository.getMaxSortByParentId(parentId);
     }
 
-    /**
-     * 保存租户菜单信息
-     * @param tenantMenu
-     * @return
-     */
-    @Override
-    public TenantMenu save(TenantMenu tenantMenu){
-        TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(tenantMenu);
-        if (tenantMenuEntity.getUuid() == null) {
-            UUID uuid = Uuids.timeBased();
-            tenantMenuEntity.setUuid(uuid);
-            tenantMenuEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
-        }
-        return tenantMenuRepository.save(tenantMenuEntity).toTenantMenu();
-    }
+
 
     /**
      * 查询同级下指定菜单后面所有菜单

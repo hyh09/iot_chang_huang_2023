@@ -7,6 +7,13 @@ import java.util.UUID;
 
 public interface TenantMenuService {
 
+    /**
+     *新增/修改租户菜单
+     * @param pcList
+     * @param appList
+     */
+    void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
+
     List<TenantMenu> saveTenantMenuList(List<TenantMenu> tenantMenu);
 
     /**

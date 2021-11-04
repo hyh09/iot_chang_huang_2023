@@ -18,6 +18,8 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     public static final String INCORRECT_MENU_ID = "Incorrect menuId ";
     public static final int ONE = 1;
     public static final String ZHCD = "ZHCD"; //系统菜单首字母
+    public static final String PC = "PC"; //PC菜单
+    public static final String APP = "APP"; //APP菜单
 
     private final TenantMenuDao tenantMenuDao;
 
@@ -25,6 +27,14 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         this.tenantMenuDao = tenantMenuDao;
     }
 
+    /**
+     * 新增/修改租户菜单
+     * @param tenantMenuList
+     */
+    @Override
+    public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
+        tenantMenuDao.saveOrUpdTenantMenu(tenantMenuList);
+    }
 
     /**
      * 保存系统菜单
@@ -152,6 +162,7 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         log.trace(" --tenantMenuDao.findByIdIn 的入参{}",ids);
         return tenantMenuDao.findByIdIn(ids);
     }
+
 
 
 }
