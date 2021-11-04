@@ -16,6 +16,11 @@
 package org.thingsboard.server.common.data;
 
 public class CacheConstants {
+
+    // HS
+    public static final String DICT_DATA_CACHE = "dictData";
+    public static final String DICT_DEVICE_CACHE = "dictDevice";
+
     public static final String DEVICE_CREDENTIALS_CACHE = "deviceCredentials";
     public static final String RELATIONS_CACHE = "relations";
     public static final String DEVICE_CACHE = "devices";

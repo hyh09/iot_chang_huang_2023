@@ -41,6 +41,12 @@ public class DictDeviceGroupEntity extends BasePgEntity<DictDeviceGroupEntity> i
     @Column(name = HsModelConstants.DICT_DEVICE_GROUP_NAME)
     private String name;
 
+    /**
+     * 排序
+     */
+    @Column(name = HsModelConstants.GENERAL_SORT)
+    private Integer sort;
+
     public DictDeviceGroupEntity() {
     }
 
@@ -51,6 +57,7 @@ public class DictDeviceGroupEntity extends BasePgEntity<DictDeviceGroupEntity> i
             this.dictDeviceId = UUID.fromString(common.getDictDeviceId());
 
         this.name = common.getName();
+        this.sort = common.getSort();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -65,6 +72,7 @@ public class DictDeviceGroupEntity extends BasePgEntity<DictDeviceGroupEntity> i
             common.setDictDeviceId(dictDeviceId.toString());
         }
         common.setName(name);
+        common.setSort(sort);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

@@ -20,4 +20,10 @@ public interface DictDataRepository extends PagingAndSortingRepository<DictDataE
 
     @Query("select d.code from DictDataEntity d where d.tenantId = :tenantId")
     List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
+
+    @Query("select d from DictDataEntity d where d.tenantId = :tenantId order by d.createdTime desc")
+    List<DictDataEntity> findAllByTenantId(@Param("tenantId") UUID tenantId);
+
+    @Query("select d from DictDataEntity d where d.tenantId = :tenantId and d.name in :keys order by d.createdTime desc")
+    List<DictDataEntity> findAllByTenantIdAndKeys(@Param("tenantId") UUID tenantId, @Param("keys") List<String> keys);
 }

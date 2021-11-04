@@ -102,6 +102,12 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
     @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_PICTURE)
     private String picture;
 
+    /**
+     * 排序
+     */
+    @Column(name = HsModelConstants.GENERAL_SORT)
+    private Integer sort;
+
     public DictDeviceComponentEntity() {
     }
 
@@ -122,6 +128,7 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
         this.comment = common.getComment();
         this.icon = common.getIcon();
         this.picture = common.getPicture();
+        this.sort = common.getSort();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -150,6 +157,7 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
         common.setComment(comment);
         common.setIcon(icon);
         common.setPicture(picture);
+        common.setSort(sort);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

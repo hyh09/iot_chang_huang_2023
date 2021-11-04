@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataResource;
@@ -17,6 +16,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.service.DictDataService;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
@@ -113,17 +113,7 @@ public class DictDataController extends BaseController {
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
-        if (!dictDataQuery.getCode().startsWith("SJZD")) {
-            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
-        }
-        try {
-            int intV = Integer.parseInt(dictDataQuery.getCode().split("SJZD")[1]);
-            if (intV < 1 || intV > 9999) {
-                throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
-            }
-        } catch (Exception ignore) {
-            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
-        }
+        CommonUtil.checkCode(dictDataQuery.getCode(), "SJZD");
         this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
         return dictDataQuery;
     }

@@ -104,9 +104,10 @@ public interface DeviceMonitorService {
      * @param deviceId          设备Id
      * @param groupPropertyName 属性名称
      * @param startTime         开始时间
+     * @param endTime           结束时间
      * @return 设备分组属性历史数据
      */
-    List<DeviceDetailGroupPropertyResult> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime) throws ExecutionException, InterruptedException;
+    List<DictDeviceGroupPropertyVO> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备遥测数据历史数据
@@ -126,4 +127,24 @@ public interface DeviceMonitorService {
      * @return 查询设备历史-表头，包含时间
      */
     List<DictDeviceGroupPropertyVO> listDictDeviceGroupPropertyTitle(TenantId tenantId, String deviceId);
+
+    /**
+     * 【APP】获得实时监控列表数据
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控列表数据
+     */
+    RTMonitorResult getRTMonitorAppData(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 【APP】获得报警记录列表
+     *
+     * @param tenantId  租户Id
+     * @param query     查询参数
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 报警记录列表
+     */
+    List<AlarmRecordResult> listAppAlarmsRecord(TenantId tenantId, FactoryDeviceQuery query, Long startTime, Long endTime);
 }

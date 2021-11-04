@@ -35,4 +35,9 @@ public class DictDeviceProperty extends BasePO {
      * 内容
      */
     private String content;
+
+    /**
+     * 排序
+     */
+    private Integer sort;
 }

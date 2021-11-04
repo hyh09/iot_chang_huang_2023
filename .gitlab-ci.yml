@@ -21,13 +21,14 @@ cache:
 # 打包并构建镜像
 package:
   stage: package
-  image: 47.110.145.204:8084/huansiyl/mvn-jdk11-docker:latest
+  image: 47.110.145.204:8084/huansiyl/jdk11-mvn-node-docker
   retry: 1
   tags:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true
+    - yarn -v
+    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2 -X
     - ls application/target
   only:
     - dev

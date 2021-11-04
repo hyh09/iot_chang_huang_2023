@@ -48,6 +48,13 @@ public  class TenantBaseEntity implements Serializable {
     protected UUID updatedUser;
 
 
+    /**
+     * 租户id
+     *
+     */
+    @Column(name = ModelConstants.USER_TENANT_ID_PROPERTY)
+    private UUID tenantId;
+
 
 
 
