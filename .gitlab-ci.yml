@@ -62,7 +62,8 @@ deployK8s:
   retry: 1
   image: roffe/kubectl
   tags:
-    - hz-k8s-iot-test
+    # - hz-k8s-iot-test
+    - k8s.test.hangzhou
   before_script:
     - mkdir -p /root/.kube
     - echo ${HS_CONFIG} | base64 -d > /root/.kube/config
