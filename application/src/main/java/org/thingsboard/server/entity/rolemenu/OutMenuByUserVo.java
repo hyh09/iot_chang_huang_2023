@@ -19,4 +19,6 @@ public class OutMenuByUserVo {
 
     private  String mark;
 
+    private  String time;
+
 }
