@@ -126,6 +126,6 @@ export abstract class EntityComponent<T extends BaseData<HasId>,
 
   abstract buildForm(entity: T): FormGroup;
 
-  abstract updateForm(entity: T);
+  abstract updateForm(entity: T): void;
 
 }

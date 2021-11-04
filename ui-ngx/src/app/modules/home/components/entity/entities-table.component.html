@@ -32,9 +32,9 @@
     </tb-entity-details-panel>
   </mat-drawer>
   <mat-drawer-content>
-    <div class="mat-padding tb-entity-table tb-absolute-fill">
+    <div class="mat-padding tb-entity-table tb-absolute-fill" [style.padding]="entitiesTableConfig.padding">
       <div fxLayout="column" class="mat-elevation-z1 tb-entity-table-content">
-        <mat-toolbar class="mat-table-toolbar" [fxShow]="!textSearchMode && dataSource.selection.isEmpty()">
+        <mat-toolbar class="mat-table-toolbar" [fxShow]="entitiesTableConfig.titleVisible && !textSearchMode && dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
             <div fxLayout="row" fxLayoutAlign="start center" fxLayout.xs="column" fxLayoutAlign.xs="center start" class="title-container">
               <span *ngIf="entitiesTableConfig.tableTitle" class="tb-entity-table-title">{{ entitiesTableConfig.tableTitle }}</span>
@@ -73,7 +73,7 @@
                             [disabled]="isLoading$ | async"
                             [fxShow]="actionDescriptor.isEnabled()"
                             (click)="actionDescriptor.onAction($event)">
-                      <mat-icon>{{actionDescriptor.icon}}</mat-icon>
+                      <mat-icon *ngIf="actionDescriptor.icon">{{actionDescriptor.icon}}</mat-icon>
                       <span>{{ actionDescriptor.name }}</span>
                     </button>
                   </mat-menu>
@@ -87,7 +87,8 @@
                     (click)="actionDescriptor.onAction($event)">
               <mat-icon>{{actionDescriptor.icon}}</mat-icon>
             </button>
-            <button mat-icon-button [disabled]="isLoading$ | async" (click)="updateData()"
+            <button *ngIf="entitiesTableConfig.refreshEnabled"
+                    mat-icon-button [disabled]="isLoading$ | async" (click)="updateData()"
                     matTooltip="{{ 'action.refresh' | translate }}"
                     matTooltipPosition="above">
               <mat-icon>refresh</mat-icon>
@@ -100,7 +101,7 @@
             </button>
           </div>
         </mat-toolbar>
-        <mat-toolbar class="mat-table-toolbar" [fxShow]="textSearchMode && dataSource.selection.isEmpty()">
+        <mat-toolbar class="mat-table-toolbar" [fxShow]="entitiesTableConfig.titleVisible && textSearchMode && dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
             <button mat-icon-button
                     matTooltip="{{ translations.search | translate }}"
@@ -110,8 +111,8 @@
             <mat-form-field fxFlex>
               <mat-label>&nbsp;</mat-label>
               <input #searchInput matInput
-                     [(ngModel)]="pageLink.textSearch"
-                     placeholder="{{ translations.search | translate }}"/>
+                    [(ngModel)]="pageLink.textSearch"
+                    placeholder="{{ translations.search | translate }}"/>
             </mat-form-field>
             <button mat-icon-button (click)="exitFilterMode()"
                     matTooltip="{{ 'action.close' | translate }}"
@@ -120,7 +121,10 @@
             </button>
           </div>
         </mat-toolbar>
-        <mat-toolbar *ngIf="entitiesTableConfig.selectionEnabled" class="mat-table-toolbar" color="primary" [fxShow]="!dataSource.selection.isEmpty()">
+        <div [fxShow]="!entitiesTableConfig.groupActionEnabled || dataSource.selection.isEmpty()" class="entity-filter-header">
+          <tb-anchor #entityFilterHeader></tb-anchor>
+        </div>
+        <mat-toolbar *ngIf="entitiesTableConfig.groupActionEnabled && entitiesTableConfig.selectionEnabled" class="mat-table-toolbar" color="primary" [fxShow]="!dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
             <span class="tb-entity-table-info">
               {{ translations.selectedEntities | translate:{count: dataSource.selection.selected.length} }}
@@ -135,7 +139,7 @@
             </button>
           </div>
         </mat-toolbar>
-        <div fxFlex class="table-container">
+        <div fxFlex class="table-container" [class.has-detail]="entitiesTableConfig.detailsPanelEnabled">
           <table mat-table [dataSource]="dataSource" [trackBy]="trackByEntityId"
                      matSort [matSortActive]="pageLink.sortOrder?.property" [matSortDirection]="pageLink.sortDirection()" matSortDisableClear>
             <ng-container matColumnDef="select" sticky>

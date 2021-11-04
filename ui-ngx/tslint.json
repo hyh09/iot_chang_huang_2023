@@ -117,8 +117,8 @@
     "use-life-cycle-interface": true,
     "use-pipe-transform-interface": true,
     "component-class-suffix": true,
-    "directive-class-suffix": true
-  ,    "variable-name": {
+    "directive-class-suffix": true,
+    "variable-name": {
       "options": [
         "ban-keywords",
         "check-format",
@@ -135,5 +135,10 @@
         "check-typecast"
       ]
     }
-}
+  },
+  "linterOptions": {
+    "exclude": [
+      "node_modules/**"
+    ]
+  }
 }

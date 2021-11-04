@@ -1,0 +1,50 @@
+.device-dict-wrapper {
+  .mat-expansion-panel-header.mat-expanded {
+    height: 48px;
+  }
+  .mat-expansion-panel {
+    &:first-of-type {
+      margin-top: 10px;
+    }
+    + .mat-expansion-panel {
+      margin-top: 20px;
+    }
+  }
+  ::ng-deep {
+    .ant-tabs-editable {
+      .ant-tabs-tab {
+        padding-right: 6px;
+        .ant-tabs-tab-remove {
+          display: none;
+        }
+        .mat-icon {
+          font-size: 18px;
+          line-height: 24px;
+          text-align: center;
+          color: rgba(0,0,0,0.54);
+        }
+        .mat-form-field-wrapper {
+          padding-bottom: 0;
+          width: 120px;
+          .mat-form-field-infix {
+            border-top: 0;
+            padding: 0 0 5px;
+          }
+          .mat-form-field-underline {
+            bottom: 0;
+          }
+        }
+      }
+    }
+  }
+  .image-wrapper {
+    width: 100px;
+    height: 100px;
+    img {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}

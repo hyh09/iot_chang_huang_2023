@@ -36,7 +36,12 @@ export enum EntityType {
   API_USAGE_STATE = 'API_USAGE_STATE',
   TB_RESOURCE = 'TB_RESOURCE',
   OTA_PACKAGE = 'OTA_PACKAGE',
-  RPC = 'RPC'
+  RPC = 'RPC',
+  DATA_DICTIONARY = 'DATA_DICTIONARY',
+  DEVICE_DICTIONARY = 'DEVICE_DICTIONARY',
+  MENU = 'MENU',
+  USER_MNG = 'USER_MNG',
+  ROLE_MNG = 'ROLE_MNG'
 }
 
 export enum AliasEntityType {
@@ -306,6 +311,71 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         search: 'ota-update.search',
         selectedEntities: 'ota-update.selected-package'
       }
+    ],
+    [
+      EntityType.DATA_DICTIONARY,
+      {
+        type: 'entity.type-data-dic',
+        typePlural: 'entity.type-data-dics',
+        list: 'entity.list-of-data-dics',
+        nameStartsWith: 'entity.data-dic-name-starts-with',
+        details: 'device-mng.data-dic-details',
+        add: 'device-mng.add-data-dic',
+        noEntities: 'device-mng.no-data-dics-text',
+        selectedEntities: 'device-mng.selected-data-dics'
+      }
+    ],
+    [
+      EntityType.DEVICE_DICTIONARY,
+      {
+        type: 'entity.type-device-dic',
+        typePlural: 'entity.type-device-dics',
+        list: 'entity.list-of-device-dics',
+        nameStartsWith: 'entity.device-dic-name-starts-with',
+        details: 'device-mng.device-dic-details',
+        add: 'device-mng.add-device-dic',
+        noEntities: 'device-mng.no-device-dics-text',
+        selectedEntities: 'device-mng.selected-device-dics'
+      }
+    ],
+    [
+      EntityType.MENU,
+      {
+        type: 'entity.type-menu',
+        typePlural: 'entity.type-menus',
+        list: 'entity.list-of-menus',
+        nameStartsWith: 'entity.menu-name-starts-with',
+        details: 'menu-mng.menu-details',
+        add: 'menu-mng.add-menu',
+        noEntities: 'menu-mng.no-menus-text',
+        selectedEntities: 'menu-mng.selected-menus'
+      }
+    ],
+    [
+      EntityType.USER_MNG,
+      {
+        type: 'entity.type-user',
+        typePlural: 'entity.type-user',
+        list: 'entity.list-of-user',
+        nameStartsWith: 'entity.user-name-starts-with',
+        details: 'user.user-details',
+        add: 'user.add',
+        noEntities: 'user.no-users-text',
+        selectedEntities: 'user.selected-users'
+      }
+    ],
+    [
+      EntityType.ROLE_MNG,
+      {
+        type: 'entity.type-role',
+        typePlural: 'entity.type-roles',
+        list: 'entity.list-of-role',
+        nameStartsWith: 'entity.role-name-starts-with',
+        details: 'auth-mng.role-details',
+        add: 'auth-mng.add-role',
+        noEntities: 'auth-mng.no-roles-text',
+        selectedEntities: 'auth-mng.selected-roles'
+      }
     ]
   ]
 );
@@ -394,6 +464,36 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       EntityType.OTA_PACKAGE,
       {
         helpLinkId: 'otaUpdates'
+      }
+    ],
+    [
+      EntityType.DATA_DICTIONARY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.DEVICE_DICTIONARY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.MENU,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.USER_MNG,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.ROLE_MNG,
+      {
+        helpLinkId: ''
       }
     ]
   ]

@@ -865,6 +865,9 @@ mat-label {
   .tb-dialog {
     .mat-dialog-container {
       padding: 0;
+      h2 {
+        color: #fff;
+      }
       > *:first-child, form {
         max-width: 100%;
         min-width: 100%;
@@ -877,7 +880,13 @@ mat-label {
       }
       .mat-dialog-actions {
         margin-bottom: 0;
-        padding: 8px;
+        padding: 8px 24px;
+        button {
+          min-width: 84px;
+          & + button {
+            margin-left: 16px;
+          }
+        }
       }
     }
   }
@@ -1057,5 +1066,40 @@ mat-label {
 
   .tb-toast-panel {
     pointer-events: none !important;
+  }
+}
+
+button {
+  &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-button-disabled) {
+    color: #fff;
+    background-color: #2367fa !important;
+  }
+}
+
+.mat-expansion-indicator::after {
+  margin-bottom: 5px;
+}
+
+// 覆盖antd样式
+.ant-tabs:not(.antd-tabs-card) {
+  .ant-tabs-tab {
+    padding: 12px 24px;
+    + .ant-tabs-tab {
+      margin: 0;
+    }
+  }
+}
+
+.ant-table {
+  th {
+    font-size: 12px;
+    height: 60px;
+  }
+  td {
+    font-size: 13px;
+    height: 52px;
+  }
+  .ant-table-row-indent + .ant-table-row-expand-icon {
+    margin-top: 1px;
   }
 }

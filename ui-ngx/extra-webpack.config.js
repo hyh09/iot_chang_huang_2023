@@ -68,5 +68,22 @@ module.exports = (config, options) => {
     config.optimization.minimizer.splice(1, 1);
     config.optimization.minimizer.push(new TerserPlugin(terserPluginOptions));
   }
+  config.module.rules.push({
+    test   : /\.less$/,
+    loader: 'less-loader',
+    options: {
+      modifyVars: { // 修改antd主题变量
+        'primary-color': '#36476C',
+        'border-color-split': 'rgba(0, 0, 0, 0.12)',
+        'table-header-bg': '#fff',
+        'table-header-color': 'rgba(0, 0, 0, 0.54)',
+        'table-row-hover-bg': '#f4f4f4',
+        'table-selected-row-bg': '#e9e9e9',
+        'table-padding-vertical': '0',
+        'table-padding-horizontal': '12px'
+      },
+      javascriptEnabled: true
+    }
+  });
   return config;
 };
