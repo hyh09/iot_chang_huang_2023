@@ -18,7 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tb-js-executor
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   replicas: 20
   selector:
@@ -32,7 +32,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: thingsboard/tb-js-executor:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-js-executor:latest
         env:
         - name: REMOTE_JS_EVAL_REQUEST_TOPIC
           value: "js_eval.requests"
@@ -54,7 +54,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tb-mqtt-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   replicas: 2
   selector:
@@ -77,7 +77,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: thingsboard/tb-mqtt-transport:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-mqtt-transport:latest
         ports:
         - containerPort: 1883
           name: mqtt
@@ -114,7 +114,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tb-mqtt-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   type: LoadBalancer
   selector:
@@ -128,7 +128,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tb-http-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   replicas: 2
   selector:
@@ -151,7 +151,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: thingsboard/tb-http-transport:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-http-transport:latest
         ports:
         - containerPort: 8080
           name: http
@@ -188,7 +188,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tb-http-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   type: ClusterIP
   selector:
@@ -201,7 +201,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tb-coap-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   replicas: 2
   selector:
@@ -224,7 +224,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: thingsboard/tb-coap-transport:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-coap-transport:latest
         ports:
         - containerPort: 5683
           name: coap
@@ -253,7 +253,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tb-coap-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   type: LoadBalancer
   selector:
@@ -267,7 +267,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tb-lwm2m-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   replicas: 2
   selector:
@@ -290,7 +290,7 @@ spec:
       containers:
         - name: server
           imagePullPolicy: Always
-          image: thingsboard/tb-lwm2m-transport:latest
+          image: 47.110.145.204:8084/huansiyl/thingsboard/tb-lwm2m-transport:latest
           ports:
             - containerPort: 5685
               name: lwm2m
@@ -319,7 +319,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tb-lwm2m-transport
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   type: LoadBalancer
   selector:
@@ -333,7 +333,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tb-web-ui
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   replicas: 2
   selector:
@@ -347,7 +347,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: thingsboard/tb-web-ui:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-web-ui:latest
         ports:
         - containerPort: 8080
           name: http
@@ -378,7 +378,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tb-web-ui
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   type: ClusterIP
   selector:
@@ -391,7 +391,7 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: tb-ingress
-  namespace: thingsboard
+  namespace: hsyl-iot
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
