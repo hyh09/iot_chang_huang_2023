@@ -3,16 +3,14 @@ package org.thingsboard.server.dao.util;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thingsboard.server.common.data.vo.RowName;
 import org.thingsboard.server.dao.util.anno.CustomValid;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public class GenericsUtils {
@@ -216,4 +214,24 @@ public class GenericsUtils {
         return  properties;
 
     }
-}  
+
+    public static Hashtable<String,String> getRowNameHash(Class cls)
+    {
+        Hashtable<String,String> properties = new Hashtable<>();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field f : fields) {
+            f.setAccessible(true);
+            RowName rowName = f.getAnnotation(RowName.class);
+            if(rowName != null)
+            {
+                properties.put(f.getName(),rowName.value());
+            }
+
+        }
+        return  properties;
+
+    }
+
+
+
+}

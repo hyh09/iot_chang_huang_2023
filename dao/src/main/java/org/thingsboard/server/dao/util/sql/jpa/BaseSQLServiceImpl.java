@@ -17,6 +17,7 @@ import org.thingsboard.server.dao.util.GenericsUtils;
 import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 
 
@@ -140,6 +141,11 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 	public <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql){
 		return  this.dao.querySql(sql,param,cls,pageable,trans,isNativeSql);
 	}
+
+	public  <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, SortRowName sortRowName){
+		return  this.dao.querySql(sql,param,cls,pageable,NameTransform.UN_CHANGE,true,sortRowName);
+	}
+
 
 	@Override
 	public <T> List<T> queryAllListSqlLocal(String sql,Map<String, Object> param, Class<T> cls)

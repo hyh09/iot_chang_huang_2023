@@ -26,7 +26,7 @@ public interface TenantSysRoleDao extends BaseSqlDao<TenantSysRoleEntity,UUID> {
     List<TenantSysRoleEntity> queryByUserId(@Param("userId") UUID userId);
 
 
-    @Query("select d.roleCode  from TenantSysRoleEntity d where  d.tenantId =: tenantId ")
+    @Query("select d.roleCode  from TenantSysRoleEntity d where  d.tenantId =:tenantId ")
     List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 
 

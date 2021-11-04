@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.user;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -164,10 +165,9 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     public User save(User user,String  encodePassword ) {
         log.info("【用户管理.用户添加的接口添加】"+user);
 
-        if(user.getAuthority() == null)
-        {
-            user.setAuthority(Authority.TENANT_ADMIN);
-        }
+
+            user.setAuthority(Authority.CUSTOMER_USER);
+
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
@@ -503,18 +503,19 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
                             }
                             break;
                         case TENANT_ADMIN:
-                            log.info("打印的tenantId.getId()"+tenantId.getId());
-//                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
-//                                throw new DataValidationException("Tenant administrator should be assigned to tenant!");
-//                            } else if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {
-//                                throw new DataValidationException("Tenant administrator can't be assigned to customer!");
-//                            }
+                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
+                                throw new DataValidationException("Tenant administrator should be assigned to tenant!");
+                            } else if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {
+                                throw new DataValidationException("Tenant administrator can't be assigned to customer!");
+                            }
                             break;
                         case CUSTOMER_USER:
-                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)
-                                    || customerId.getId().equals(ModelConstants.NULL_UUID)) {
-                                throw new DataValidationException("Customer user should be assigned to customer!");
-                            }
+                            log.info("====>打印当前的数据:{}",tenantId.getId());
+                            log.info("====>打印当前的数据ModelConstants.NULL_UUID:{}",ModelConstants.NULL_UUID);
+
+//                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
+//                                throw new DataValidationException("Customer user should be assigned to customer!");
+//                            }
                             break;
                         default:
                             break;
