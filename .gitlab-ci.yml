@@ -30,7 +30,7 @@ package:
     - yarn -v
     - mvn -v
     - python -V
-    - git -v
+    - python3 -V
     - git --version
     - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2 -X
     - ls application/target
