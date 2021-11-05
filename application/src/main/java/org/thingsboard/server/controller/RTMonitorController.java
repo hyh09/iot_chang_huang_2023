@@ -40,7 +40,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 获得实时监控数据列表
      */
-    @ApiOperation(value = "获得实时监控数据列表", notes = "默认显示第一个工厂")
+    @ApiOperation(value = "获得实时监控数据列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
             @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
@@ -131,10 +131,10 @@ public class RTMonitorController extends BaseController {
             @RequestParam(required = false) String deviceId,
             @RequestParam int page,
             @RequestParam int pageSize,
-            @RequestParam(required = false) String sortProperty,
-            @RequestParam(required = false) String sortOrder,
-            @RequestParam(required = false) Long startTime,
-            @RequestParam(required = false) Long endTime
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam Long startTime,
+            @RequestParam Long endTime
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
         return this.deviceMonitorService.listDeviceTelemetryHistory(getTenantId(), deviceId, pageLink);
