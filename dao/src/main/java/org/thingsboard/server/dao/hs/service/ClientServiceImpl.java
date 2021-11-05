@@ -1,8 +1,6 @@
 package org.thingsboard.server.dao.hs.service;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.MoreExecutors;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,7 +43,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
-public class ClientServiceImpl extends AbstractEntityService implements ClientService {
+public class ClientServiceImpl extends AbstractEntityService implements ClientService, CommonService {
 
     // 工厂Repository
     FactoryRepository factoryRepository;
@@ -74,10 +71,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
         return DeviceBaseDTO.builder()
-                .factory(DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getFactoryId()))))
-                .workshop(DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getWorkShopId()))))
-                .productionLine(DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getProductionLineId()))))
-                .device(DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getDeviceId()))))
+                .factory(DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))))
+                .workshop(DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkShopId()))))
+                .productionLine(DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getProductionLineId()))))
+                .device(DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getDeviceId()))))
                 .build();
     }
 
@@ -150,13 +147,13 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
 
             if (!StringUtils.isBlank(t.getDeviceId())) {
-                predicates.add(cb.equal(root.<UUID>get("id"), UUID.fromString(t.getDeviceId())));
+                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
             } else if (!StringUtils.isBlank(t.getProductionLineId())) {
-                predicates.add(cb.equal(root.<UUID>get("productionLineId"), UUID.fromString(t.getProductionLineId())));
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
             } else if (!StringUtils.isBlank(t.getWorkShopId())) {
-                predicates.add(cb.equal(root.<UUID>get("workShopId"), UUID.fromString(t.getWorkShopId())));
+                predicates.add(cb.equal(root.<UUID>get("workShopId"), toUUID(t.getWorkShopId())));
             } else if (!StringUtils.isBlank(t.getFactoryId())) {
-                predicates.add(cb.equal(root.<UUID>get("factoryId"), UUID.fromString(t.getFactoryId())));
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
             } else {
                 predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
             }

@@ -1,16 +1,12 @@
 package org.thingsboard.server.dao.hs.utils;
 
-import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -20,13 +16,6 @@ import java.util.stream.Collectors;
  * @since 2021.10.21
  */
 public class CommonUtil {
-
-    /**
-     * 判断设备是否是未分配
-     */
-    public static <T extends Device> Boolean isDeviceUnAllocation(T t) {
-        return t.getProductionLineId() == null;
-    }
 
     /**
      * 通用处理异步返回
@@ -44,22 +33,6 @@ public class CommonUtil {
      */
     public static <T> List<T> handleAsync(List<CompletableFuture<T>> t) {
         return t.stream().map(CompletableFuture::join).collect(Collectors.toList());
-    }
-
-    /**
-     * 获得近几个月的开始时间
-     *
-     * @param monthNum 月份数量
-     */
-    public static List<Long> listLatestMonthsStartTime(int monthNum) {
-        List<Long> temp = new ArrayList<>();
-        if (monthNum < 1) {
-            return new ArrayList<>();
-        }
-        for (int i = 0; i < monthNum; i++) {
-            temp.add(YearMonth.now().minusMonths(i).atDay(1).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli());
-        }
-        return temp;
     }
 
     /**
@@ -93,30 +66,6 @@ public class CommonUtil {
             }
         } catch (Exception ignore) {
             throw new ThingsboardException("code error", ThingsboardErrorCode.GENERAL);
-        }
-    }
-
-    /**
-     * 获得可用的编码
-     *
-     * @param codes  编码列表
-     * @param prefix 前缀
-     */
-    public static String getAvailableCode(List<String> codes, String prefix) {
-        if (codes.isEmpty()) {
-            return prefix + "0001";
-        } else {
-            var ints = codes.stream().map(e -> Integer.valueOf(e.split(prefix)[1])).sorted().collect(Collectors.toList());
-            int start = 0;
-            while (true) {
-                if (ints.size() - 1 == start) {
-                    return prefix + String.format("%04d", start + 2);
-                }
-                if (!ints.get(start).equals(start + 1)) {
-                    return prefix + String.format("%04d", start + 1);
-                }
-                start += 1;
-            }
         }
     }
 }

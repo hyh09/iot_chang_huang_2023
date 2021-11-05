@@ -114,8 +114,7 @@ public class DictDataController extends BaseController {
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
         CommonUtil.checkCode(dictDataQuery.getCode(), "SJZD");
-        this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
-        return dictDataQuery;
+        return this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
     }
 
     /**
