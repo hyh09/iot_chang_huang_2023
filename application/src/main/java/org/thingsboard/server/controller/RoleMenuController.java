@@ -37,7 +37,7 @@ import java.util.List;
 @Api(value = "角色菜单关系模块", tags = {"角色菜单关系相关的接口"})
 public class RoleMenuController extends BaseController{
 
-    @Autowired private RoleMenuSvc roleMenuSvc;
+
 
 
     @ApiOperation(value = "角色模块下的 【角色绑定菜单接口")
