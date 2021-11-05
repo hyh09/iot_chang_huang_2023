@@ -3,12 +3,9 @@ package org.thingsboard.server.dao.hs.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
@@ -17,15 +14,13 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static org.thingsboard.server.common.data.CacheConstants.DICT_DATA_CACHE;
-import static org.thingsboard.server.common.data.CacheConstants.DICT_DEVICE_CACHE;
 
 /**
  * 设备字典接口实现类
@@ -37,22 +32,22 @@ import static org.thingsboard.server.common.data.CacheConstants.DICT_DEVICE_CACH
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DictDeviceServiceImpl implements DictDeviceService {
-    @Autowired
+    // 设备字典Repository
     DictDeviceRepository deviceRepository;
 
-    @Autowired
+    // 设备字典部件Repository
     DictDeviceComponentRepository componentRepository;
 
-    @Autowired
+    // 设备字典属性Repository
     DictDevicePropertyRepository propertyRepository;
 
-    @Autowired
+    // 设备字典分组Repository
     DictDeviceGroupRepository groupRepository;
 
-    @Autowired
+    // 设备字典分组属性Repository
     DictDeviceGroupPropertyRepository groupPropertyRepository;
 
-    @Autowired
+    // 设备配置设备字典关系Repository
     DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
 
     /**
@@ -110,13 +105,9 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param tenantId 租户Id
      * @return 设备字典详情
      */
-    @Cacheable(cacheNames = DICT_DEVICE_CACHE, key = "{#tenantId, #id}", unless = "#result==null")
     @Override
     public DictDeviceVO getDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException {
-        var dictDevice = this.deviceRepository.findById(UUID.fromString(id)).get().toData();
-        if (!dictDevice.getTenantId().equals(tenantId.toString())) {
-            throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
-        }
+        var dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(id)).toData();
 
         // 获得属性列表
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(UUID.fromString(dictDevice.getId())))
@@ -143,7 +134,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                 .componentList(new ArrayList<>()).build()
         ).collect(Collectors.toList());
 
-        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> e.getParentId() == null ? "null" : e.getParentId()));
+        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse("null")));
 
         // 开始递归组装数据
         this.recursionPackageComponent(rList, pMap, "null");
@@ -171,16 +162,12 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param id       设备字典id
      * @param tenantId 租户Id
      */
-    @CacheEvict(cacheNames = DICT_DATA_CACHE, key = "{#tenantId, #id}")
     @Override
     @Transactional
     public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
-        DictDevice dictDevice = this.deviceRepository.findById(UUID.fromString(id)).get().toData();
-        if (!dictDevice.getTenantId().equals(tenantId.toString())) {
-            throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
-        }
+        DictDevice dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(id)).toData();
         // 删除设备
-        this.deviceRepository.deleteById(UUID.fromString(id));
+        this.deviceRepository.deleteById(UUID.fromString(dictDevice.getId()));
 
         // 删除其余旧数据
         this.propertyRepository.deleteByDictDeviceId(UUID.fromString(dictDevice.getId()));
@@ -205,7 +192,6 @@ public class DictDeviceServiceImpl implements DictDeviceService {
      * @param dictDeviceVO 设备字典入参
      * @param tenantId     租户Id
      */
-    @CacheEvict(cacheNames = DICT_DATA_CACHE, key = "{#tenantId, #dictDeviceVO?.id}")
     @Override
     @Transactional
     public void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException {
@@ -214,10 +200,7 @@ public class DictDeviceServiceImpl implements DictDeviceService {
         DictDeviceEntity dictDeviceEntity;
         if (!StringUtils.isBlank(dictDeviceVO.getId())) {
             // 修改
-            dictDevice = this.deviceRepository.findById(UUID.fromString(dictDeviceVO.getId())).get().toData();
-            if (!dictDevice.getTenantId().equals(tenantId.toString())) {
-                throw new ThingsboardException("租户Id不相等", ThingsboardErrorCode.GENERAL);
-            }
+            dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(dictDeviceVO.getId())).toData();
             dictDevice.setCode(dictDeviceVO.getCode())
                     .setName(dictDeviceVO.getName())
                     .setType(dictDeviceVO.getType())
@@ -393,5 +376,35 @@ public class DictDeviceServiceImpl implements DictDeviceService {
                 .map(g -> DictDeviceGroupPropertyVO.builder()
                         .id(g.getId()).name(g.getName()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
                         .build()).collect(Collectors.toList());
+    }
+
+    @Autowired
+    public void setDeviceRepository(DictDeviceRepository deviceRepository) {
+        this.deviceRepository = deviceRepository;
+    }
+
+    @Autowired
+    public void setComponentRepository(DictDeviceComponentRepository componentRepository) {
+        this.componentRepository = componentRepository;
+    }
+
+    @Autowired
+    public void setPropertyRepository(DictDevicePropertyRepository propertyRepository) {
+        this.propertyRepository = propertyRepository;
+    }
+
+    @Autowired
+    public void setGroupRepository(DictDeviceGroupRepository groupRepository) {
+        this.groupRepository = groupRepository;
+    }
+
+    @Autowired
+    public void setGroupPropertyRepository(DictDeviceGroupPropertyRepository groupPropertyRepository) {
+        this.groupPropertyRepository = groupPropertyRepository;
+    }
+
+    @Autowired
+    public void setDeviceProfileDictDeviceRepository(DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository) {
+        this.deviceProfileDictDeviceRepository = deviceProfileDictDeviceRepository;
     }
 }

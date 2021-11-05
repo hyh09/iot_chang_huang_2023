@@ -35,7 +35,7 @@ import { ThemeOptions } from '@material-ui/core/styles/createMuiTheme';
 import { PaletteOptions } from '@material-ui/core/styles/createPalette';
 import { mergeDeep } from '@core/utils';
 
-const PRIMARY_COLOR = '#305680';
+const PRIMARY_COLOR = '#36476c';
 const SECONDARY_COLOR = '#527dad';
 const HUE3_COLOR = '#a7c1de';
 

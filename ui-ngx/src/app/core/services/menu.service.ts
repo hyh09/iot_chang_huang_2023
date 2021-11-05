@@ -82,6 +82,13 @@ export class MenuService {
       },
       {
         id: guid(),
+        name: 'menu-mng.menu-mng',
+        type: 'link',
+        path: '/menuManagement',
+        icon: 'menu'
+      },
+      {
+        id: guid(),
         name: 'tenant.tenants',
         type: 'link',
         path: '/tenants',
@@ -236,6 +243,53 @@ export class MenuService {
         path: '/home',
         notExact: true,
         icon: 'home'
+      },
+      {
+        id: guid(),
+        name: 'device-mng.device-mng',
+        type: 'toggle',
+        path: '/deviceManagement',
+        icon: 'devices',
+        pages: [
+          {
+            id: guid(),
+            name: 'device-mng.data-dic',
+            type: 'link',
+            path: '/deviceManagement/dataDictionary',
+            icon: 'book'
+          },
+          {
+            id: guid(),
+            name: 'device-mng.device-dic',
+            type: 'link',
+            path: '/deviceManagement/deviceDictionary',
+            icon: 'book'
+          }
+        ]
+      },
+      {
+        id: guid(),
+        name: 'auth-mng.auth-mng',
+        type: 'toggle',
+        path: '/authManagement',
+        icon: 'verified_user',
+        pages: [
+          {
+            id: guid(),
+            name: 'auth-mng.user-mng',
+            type: 'link',
+            path: '/authManagement/userManagement',
+            icon: 'people'
+          },
+          {
+            id: guid(),
+            name: 'auth-mng.role-mng',
+            type: 'link',
+            path: '/authManagement/roleManagemnet',
+            icon: 'mdi:shield-account',
+            isMdiIcon: true
+          }
+        ]
       },
       {
         id: guid(),
