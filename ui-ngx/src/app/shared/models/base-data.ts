@@ -28,8 +28,8 @@ export interface BaseData<T extends HasId> {
 
 export interface CustomBaseData {
   id: string,
-  createdTime: number,
-  createdUser: string,
-  updatedTime: number,
-  updatedUser: string
+  createdTime?: number,
+  createdUser?: string,
+  updatedTime?: number,
+  updatedUser?: string
 }

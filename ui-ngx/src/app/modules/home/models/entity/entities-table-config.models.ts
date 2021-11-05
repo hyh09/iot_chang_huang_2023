@@ -166,6 +166,7 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   groupActionDescriptors: Array<GroupActionDescriptor<L>> = [];
   headerActionDescriptors: Array<HeaderActionDescriptor> = [];
   addActionDescriptors: Array<HeaderActionDescriptor> = [];
+  leftComponent: Type<EntityTableHeaderComponent<T, P, L>>
   headerComponent: Type<EntityTableHeaderComponent<T, P, L>>;
   filterComponent: Type<EntityTableHeaderComponent<T, P, L>>;
   addEntity: CreateEntityOperation<T> = null;
@@ -193,6 +194,8 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   padding: string;
   titleVisible = true;
   groupActionEnabled = true;
+  leftContentEnabled = false;
+  leftContentWidth: string = '300px';
 }
 
 export function checkBoxCell(value: boolean): string {
@@ -202,7 +205,7 @@ export function checkBoxCell(value: boolean): string {
 export function iconCell(iconName: string): string {
   if (iconName) {
     if (iconName.startsWith('mdi:')) {
-      return `<mat-icon class="material-icons mat-icon" svgIcon="${iconName}"></mat-icon>`
+      return `<mat-icon class="mat-icon" svgIcon="${iconName}"></mat-icon>`
     }
     return `<mat-icon class="material-icons mat-icon">${iconName}</mat-icon>`
   }

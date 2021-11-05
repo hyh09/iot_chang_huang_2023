@@ -42,6 +42,9 @@ export class MenuMngTableConfigResolver implements Resolve<EntityTableConfig<Men
       new EntityTableColumn<Menu>('menuIcon', 'menu-mng.icon', '80px', ({menuIcon}) => {
         return iconCell(menuIcon)
       }),
+      new EntityTableColumn<Menu>('isButton', 'menu-mng.is-button-or-not', '80px', ({isButton}) => {
+        return isButton ? this.translate.instant('action.yes') : this.translate.instant('action.no');
+      }),
       new DateEntityTableColumn<Menu>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }

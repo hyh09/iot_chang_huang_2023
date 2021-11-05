@@ -109,6 +109,8 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   isDetailsOpen = false;
   detailsPanelOpened = new EventEmitter<boolean>();
 
+  @ViewChild('entityLeftContent', {static: true}) entityLeftContentAnchor: TbAnchorComponent;
+
   @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: TbAnchorComponent;
 
   @ViewChild('entityFilterHeader', {static: true}) entityFilterHeaderAnchor: TbAnchorComponent;
@@ -155,6 +157,16 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   private init(entitiesTableConfig: EntityTableConfig<BaseData<HasId>>) {
     this.isDetailsOpen = false;
     this.entitiesTableConfig = entitiesTableConfig;
+    
+    if (this.entitiesTableConfig.leftComponent) {
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.entitiesTableConfig.leftComponent);
+      const viewContainerRef = this.entityLeftContentAnchor.viewContainerRef;
+      viewContainerRef.clear();
+      const componentRef = viewContainerRef.createComponent(componentFactory);
+      const leftComponent = componentRef.instance;
+      leftComponent.entitiesTableConfig = this.entitiesTableConfig;
+    }
+
     if (this.entitiesTableConfig.headerComponent) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.entitiesTableConfig.headerComponent);
       const viewContainerRef = this.entityTableHeaderAnchor.viewContainerRef;

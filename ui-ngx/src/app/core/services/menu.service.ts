@@ -269,6 +269,29 @@ export class MenuService {
       },
       {
         id: guid(),
+        name: 'device-monitor.device-monitor',
+        type: 'toggle',
+        path: '/deviceMonitor',
+        icon: 'touch_app',
+        pages: [
+          {
+            id: guid(),
+            name: 'device-monitor.real-time-monitor',
+            type: 'link',
+            path: '/deviceMonitor/realTimeMonitor',
+            icon: 'av_timer'
+          },
+          {
+            id: guid(),
+            name: 'device-monitor.alarm-record',
+            type: 'link',
+            path: '/deviceMonitor/alarmRecord',
+            icon: 'disc_full'
+          }
+        ]
+      },
+      {
+        id: guid(),
         name: 'auth-mng.auth-mng',
         type: 'toggle',
         path: '/authManagement',
@@ -288,30 +311,6 @@ export class MenuService {
             path: '/authManagement/roleManagemnet',
             icon: 'mdi:shield-account',
             isMdiIcon: true
-          }
-        ]
-      },
-      {
-        id: guid(),
-        name: 'my.biz',
-        type: 'toggle',
-        path: '/biz',
-        // height: '80px',
-        icon: 'touch_app',
-        pages: [
-          {
-            id: guid(),
-            name: 'my.biz1',
-            type: 'link',
-            path: '/biz/biz1',
-            icon: 'av_timer'
-          },
-          {
-            id: guid(),
-            name: 'my.biz2',
-            type: 'link',
-            path: '/biz/biz2',
-            icon: 'disc_full'
           }
         ]
       },

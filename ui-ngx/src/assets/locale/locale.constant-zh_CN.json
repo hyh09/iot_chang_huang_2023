@@ -547,7 +547,8 @@
     "enter-username": "输入用户名",
     "loading": "加载中...",
     "password": "密码",
-    "username": "用户名"
+    "username": "用户名",
+    "select-all": "全选"
   },
   "confirm-on-exit": {
     "html-message": "您有未保存的更改。<br/> 确定要离开此页面吗？",
@@ -2723,10 +2724,12 @@
   "menu-mng": {
     "menu-mng": "菜单运维",
     "name": "菜单名称",
+    "lang-key": "多语言key",
     "menu-type": "菜单类型",
     "pc-menu": "PC",
     "app-menu": "App",
     "parentName": "上级菜单",
+    "is-button-or-not": "是否按钮",
     "path": "路由",
     "icon": "图标",
     "parent-menu": "上级菜单",
@@ -2739,6 +2742,7 @@
     "delete-menus-title": "确定要删除 { count, plural, 1 {# 个菜单} other {# 个菜单} }?",
     "delete-menus-text": "请注意：确认后，所有选定的菜单将被删除，所有相关的数据将不可恢复。",
     "name-required": "菜单名称必填",
+    "lang-key-required": "多语言key必填",
     "menu-type-required": "菜单类型必填"
   },
   "auth-mng": {
@@ -2788,5 +2792,10 @@
     "unbind-user-title": "您确定要取消关联用户 '{{userName}}' 吗？",
     "unbind-users-title": "确定要取消关联 { count, plural, 1 {# 个用户} other {# 个用户} } 吗？",
     "add-users": "添加用户"
+  },
+  "device-monitor": {
+    "device-monitor": "设备监控",
+    "real-time-monitor": "实时监控",
+    "alarm-record": "报警记录"
   }
 }
