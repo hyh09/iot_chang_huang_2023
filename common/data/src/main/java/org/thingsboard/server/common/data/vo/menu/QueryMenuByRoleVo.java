@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.UUID;
-
 /**
  * @program: thingsboard
  * @description: 通过角色查询返回菜单实体类

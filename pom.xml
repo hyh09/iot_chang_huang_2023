@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
 
     <name>Thingsboard</name>
-    <url>https://thingsboard.io</url>
+
     <inceptionYear>2016</inceptionYear>
 
     <properties>
@@ -93,6 +93,7 @@
         <jar-plugin.version>3.0.2</jar-plugin.version>
         <springfox-swagger.version>2.6.1</springfox-swagger.version>
         <springfox-swagger-ui-rfc6570.version>1.0.0</springfox-swagger-ui-rfc6570.version>
+        <swagger-annotations.version>1.5.10</swagger-annotations.version>
         <spatial4j.version>0.7</spatial4j.version>
         <jts.version>1.15.0</jts.version>
         <bouncycastle.version>1.64</bouncycastle.version>
@@ -848,6 +849,12 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.7.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -1503,6 +1510,11 @@
                 <version>${springfox-swagger.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>${bouncycastle.version}</version>
@@ -1719,6 +1731,9 @@
         </dependencies>
     </dependencyManagement>
 
+    <!--
+    TODO 发布到本地私有仓库
+    -->
     <distributionManagement>
         <repository>
             <id>thingsboard-repo-deploy</id>

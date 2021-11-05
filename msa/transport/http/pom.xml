@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
 
     <name>ThingsBoard HTTP Transport Microservice</name>
-    <url>https://thingsboard.io</url>
+
     <description>ThingsBoard HTTP Transport Microservice</description>
 
     <properties>

@@ -1,6 +1,5 @@
 package org.thingsboard.server.common.data.vo.menu;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;

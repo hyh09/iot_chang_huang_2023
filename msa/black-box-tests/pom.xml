@@ -28,7 +28,7 @@
     <artifactId>black-box-tests</artifactId>
 
     <name>ThingsBoard Black Box Tests</name>
-    <url>https://thingsboard.io</url>
+
     <description>Project for ThingsBoard black box testing with using Docker</description>
 
     <properties>
