@@ -31,17 +31,18 @@ import { EntityTableHeaderComponent } from '@home/components/entity/entity-table
 import { ActivatedRoute } from '@angular/router';
 import { EntityTabsComponent } from '../../components/entity/entity-tabs.component';
 import { DAY, historyInterval } from '@shared/models/time/time.models';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 
 export type EntityBooleanFunction<T extends BaseData<HasId>> = (entity: T) => boolean;
 export type EntityStringFunction<T extends BaseData<HasId>> = (entity: T) => string;
-export type EntityVoidFunction<T extends BaseData<HasId>> = (entity: T) => void;
+export type EntityVoidFunction<T extends BaseData<HasId>> = (entity: T | T[]) => void;
 export type EntityIdsVoidFunction<T extends BaseData<HasId>> = (ids: HasUUID[]) => void;
 export type EntityCountStringFunction = (count: number) => string;
 export type EntityTwoWayOperation<T extends BaseData<HasId>> = (entity: T, originalEntity?: T) => Observable<T>;
 export type EntityByIdOperation<T extends BaseData<HasId>> = (id: HasUUID) => Observable<T>;
 export type EntityIdOneWayOperation = (id: HasUUID) => Observable<any>;
 export type EntityActionFunction<T extends BaseData<HasId>> = (action: EntityAction<T>) => boolean;
-export type CreateEntityOperation<T extends BaseData<HasId>> = () => Observable<T>;
+export type CreateEntityOperation<T extends BaseData<HasId>> = () => Observable<T | T[]>;
 export type EntityRowClickFunction<T extends BaseData<HasId>> = (event: Event, entity: T) => boolean;
 
 export type CellContentFunction<T extends BaseData<HasId>> = (entity: T, key: string) => string;
@@ -146,6 +147,7 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   tableTitle = '';
   selectionEnabled = true;
   searchEnabled = true;
+  refreshEnabled = true;
   addEnabled = true;
   entitiesDeleteEnabled = true;
   detailsPanelEnabled = true;
@@ -165,6 +167,7 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   headerActionDescriptors: Array<HeaderActionDescriptor> = [];
   addActionDescriptors: Array<HeaderActionDescriptor> = [];
   headerComponent: Type<EntityTableHeaderComponent<T, P, L>>;
+  filterComponent: Type<EntityTableHeaderComponent<T, P, L>>;
   addEntity: CreateEntityOperation<T> = null;
   dataSource: (dataLoadedFunction: (col?: number, row?: number) => void)
     => EntitiesDataSource<L> = (dataLoadedFunction: (col?: number, row?: number) => void) => {
@@ -187,8 +190,21 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   entityAdded: EntityVoidFunction<T> = () => {};
   entityUpdated: EntityVoidFunction<T> = () => {};
   entitiesDeleted: EntityIdsVoidFunction<T> = () => {};
+  padding: string;
+  titleVisible = true;
+  groupActionEnabled = true;
 }
 
 export function checkBoxCell(value: boolean): string {
   return `<mat-icon class="material-icons mat-icon">${value ? 'check_box' : 'check_box_outline_blank'}</mat-icon>`;
+}
+
+export function iconCell(iconName: string): string {
+  if (iconName) {
+    if (iconName.startsWith('mdi:')) {
+      return `<mat-icon class="material-icons mat-icon" svgIcon="${iconName}"></mat-icon>`
+    }
+    return `<mat-icon class="material-icons mat-icon">${iconName}</mat-icon>`
+  }
+  return ''
 }

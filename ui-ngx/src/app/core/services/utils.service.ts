@@ -43,6 +43,7 @@ import { WidgetInfo } from '@home/models/widget-component.models';
 import jsonSchemaDefaults from 'json-schema-defaults';
 import materialIconsCodepoints from '!raw-loader!material-design-icons/iconfont/codepoints';
 import { Observable, of, ReplaySubject } from 'rxjs';
+import { NzTreeNode } from 'ng-zorro-antd/tree';
 
 const i18nRegExp = new RegExp(`{${i18nPrefix}:[^{}]+}`, 'g');
 
@@ -79,6 +80,11 @@ const commonMaterialIcons: Array<string> = ['more_horiz', 'more_vert', 'open_in_
   'person', 'domain', 'devices_other', 'now_widgets', 'dashboards', 'map', 'pin_drop', 'my_location', 'extension', 'search',
   'settings', 'notifications', 'notifications_active', 'info', 'info_outline', 'warning', 'list', 'file_download', 'import_export',
   'share', 'add', 'edit', 'done'];
+
+export interface TreeNode extends NzTreeNode {
+  id: string,
+  parentId: string
+}
 
 // @dynamic
 @Injectable({
@@ -473,5 +479,31 @@ export class UtilsService {
     } else {
       return defaultValue;
     }
+  }
+
+  /**
+   * @description 将平级树节点数组转换成层级树节点数组
+   * @param treeNodes 树节点平级数组
+   * @returns 层级树节点数组
+   */
+  public formatTree(treeNodes: Array<TreeNode>): Array<TreeNode> {
+    const arr: Array<TreeNode> = new Array<TreeNode>();
+    const map = {};
+    if (treeNodes) {
+      treeNodes.forEach(node => {
+        map[node.id] = node;
+      })
+      treeNodes.forEach(node => {
+        if (!node.parentId || !map[node.parentId]) {
+          if (!node.children) {
+            node.children = new Array<TreeNode>();
+          }
+          arr.push(node);
+        } else {
+          (map[node.parentId] as TreeNode).children.push(node)
+        }
+      })
+    }
+    return arr;
   }
 }

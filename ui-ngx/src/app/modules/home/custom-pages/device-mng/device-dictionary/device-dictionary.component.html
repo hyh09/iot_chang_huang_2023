@@ -1,0 +1,291 @@
+<div class="mat-padding device-dict-wrapper" fxLayout="column" style="max-width: 1000px">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.code</mat-label>
+        <input matInput formControlName="code" required>
+        <mat-error *ngIf="entityForm.get('code').hasError('required')">
+          {{ 'device-mng.code-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'device-mng.name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <!--基本信息-->
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.basic-info' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.device-type</mat-label>
+          <input matInput formControlName="type">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.supplier</mat-label>
+          <input matInput formControlName="supplier">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.model</mat-label>
+          <input matInput formControlName="model">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.version</mat-label>
+          <input matInput formControlName="version">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.guarantee</mat-label>
+          <input matInput formControlName="warrantyPeriod">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.comment</mat-label>
+          <input matInput formControlName="comment">
+        </mat-form-field>
+        <tb-image-input
+          label="{{ 'device-mng.picture' | translate }}"
+          maxSizeByte="524288"
+          formControlName="picture"
+          [disabled]="!isEdit"
+        ></tb-image-input>
+      </mat-expansion-panel>
+      <!--设备属性-->
+      <mat-expansion-panel [expanded]="customPropExpanded" (opened)="customPropExpanded = true" (closed)="customPropExpanded = false">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.device-prop' | translate }}</mat-panel-title>
+          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <mat-icon
+              *ngIf="isEdit && customPropExpanded"
+              class="material-icons"
+              matTooltip="{{ 'device-mng.add-device-prop' | translate }}"
+              matTooltipPosition="above"
+              (click)="addDeviceProperty($event)"
+            >add</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div 
+          *ngFor="let item of devicePropFormArray().controls; let $index = index"
+          formArrayName="propertyList"
+          fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        >
+          <ng-container [formGroupName]="$index">
+            <mat-form-field class="mat-block">
+              <mat-label translate>device-mng.prop-name</mat-label>
+              <input matInput formControlName="name">
+            </mat-form-field>
+            <mat-form-field class="mat-block" fxFlex>
+              <mat-label translate>device-mng.prop-content</mat-label>
+              <input matInput formControlName="content">
+            </mat-form-field>
+            <button
+              *ngIf="isEdit"
+              mat-icon-button
+              type="button"
+              matTooltip="{{ 'action.delete' | translate }}"
+              matTooltipPosition="above"
+              (click)="removeDeviceProperty($index)"
+            >
+              <mat-icon class="material-icons" >delete</mat-icon>
+            </button>
+          </ng-container>
+        </div>
+        <div *ngIf="isEdit && devicePropFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+          {{ 'device-mng.add-device-prop-tip' | translate }}
+        </div>
+        <div *ngIf="!isEdit && devicePropFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+          {{ 'device-mng.device-prop-empty' | translate }}
+        </div>
+      </mat-expansion-panel>
+      <!--设备参数-->
+      <mat-expansion-panel [expanded]="groupDataExpanded" (opened)="groupDataExpanded = true" (closed)="groupDataExpanded = false">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.device-data' | translate }}</mat-panel-title>
+          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <mat-icon
+              *ngIf="isEdit && groupDataExpanded && deviceDataGroupFormArray().controls.length > 0"
+              class="material-icons"
+              matTooltip="{{ 'device-mng.add-device-data' | translate }}"
+              matTooltipPosition="above"
+              (click)="addDeviceData($event)"
+            >add</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <nz-tabset
+          [(nzSelectedIndex)]="currentTabIndex"
+          formArrayName="groupList"
+          [nzType]="isEdit ? 'editable-card' : 'line'"
+          (nzAdd)="addDeviceDataGroup()"
+        >
+          <nz-tab
+            *ngFor="let groupControl of deviceDataGroupFormArray().controls; let $index = index;"
+            [formGroupName]="$index"
+            nzClosable [nzTitle]="isEdit ? titleTemplate : groupControl.get('name').value"
+          >
+            <ng-template #titleTemplate>
+              <span *ngIf="!groupControl.get('isEdit').value && groupControl.get('name').value; else tabInput">
+                {{ groupControl.get('name').value }}
+              </span>
+              <mat-icon [matMenuTriggerFor]="tabMenu">more_vert</mat-icon>
+              <mat-menu #tabMenu="matMenu" xPosition="after">
+                <button mat-menu-item type="button" [disabled]="groupControl.get('isEdit').value" (click)="editDataGroupName(groupControl)">
+                  <mat-icon>edit</mat-icon>
+                  <span translate>action.rename</span>
+                </button>
+                <button mat-menu-item type="button" (click)="removeDeviceDataGroup($index)">
+                  <mat-icon>close</mat-icon>
+                  <span translate>action.delete</span>
+                </button>
+              </mat-menu>
+              <ng-template #tabInput>
+                <mat-form-field class="tab-input">
+                  <input
+                    id="tab-input-{{$index}}"
+                    matInput
+                    required
+                    [formControl]="groupControl.get('name')"
+                    (keyup.enter)="setDataGroupName(groupControl)"
+                    (blur)="setDataGroupName(groupControl)"
+                  >
+                </mat-form-field>
+              </ng-template>
+            </ng-template>
+            <div 
+              *ngFor="let dataControl of groupControl.get('groupPropertyList').controls; let $subIndex = index;"
+              formArrayName="groupPropertyList"
+              fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+            >
+              <ng-container [formGroupName]="$subIndex">
+                <mat-form-field class="mat-block">
+                  <mat-label translate>device-mng.device-data-name</mat-label>
+                  <input matInput formControlName="name">
+                </mat-form-field>
+                <mat-form-field class="mat-block" fxFlex>
+                  <mat-label translate>device-mng.device-data-content</mat-label>
+                  <input matInput formControlName="content">
+                </mat-form-field>
+                <mat-form-field class="mat-block" fxFlex>
+                  <mat-label translate>device-mng.device-data-desc</mat-label>
+                  <input matInput formControlName="title">
+                </mat-form-field>
+                <button
+                  *ngIf="isEdit"
+                  mat-icon-button
+                  type="button"
+                  matTooltip="{{ 'action.delete' | translate }}"
+                  matTooltipPosition="above"
+                  (click)="removeDeviceData($subIndex)"
+                >
+                  <mat-icon class="material-icons" >delete</mat-icon>
+                </button>
+              </ng-container>
+            </div>
+            <div *ngIf="isEdit && deviceDataFormArray($index).controls.length === 0" fxFlex fxLayoutAlign="center">
+              {{ 'device-mng.add-device-data-tip' | translate }}
+            </div>
+          </nz-tab>
+        </nz-tabset>
+        <div *ngIf="isEdit && deviceDataGroupFormArray().controls.length === 0" fxFlex fxLayoutAlign="center center">
+          <button mat-flat-button type="button" color="primary" (click)="addDeviceDataGroup()">
+            {{ 'device-mng.add-device-data-group' | translate }}
+          </button>
+        </div>
+        <div *ngIf="!isEdit && deviceDataGroupFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+          {{ 'device-mng.device-data-empty' | translate }}
+        </div>
+      </mat-expansion-panel>
+    </fieldset>
+    <!--部件信息-->
+    <mat-expansion-panel [expanded]="compExpanded" (opened)="compExpanded = true" (closed)="compExpanded = false">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'device-mng.device-comp' | translate }}</mat-panel-title>
+        <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+          <mat-icon
+            *ngIf="!(isLoading$ | async) && isEdit && compExpanded"
+            class="material-icons"
+            matTooltip="{{ 'device-mng.add-device-comp' | translate }}"
+            matTooltipPosition="above"
+            (click)="addDeviceComp($event)"
+          >add</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <nz-table
+        #compTable
+        [nzData]="compListFormArray().value"
+        nzTableLayout="fixed"
+        [nzShowPagination]="false"
+        [nzNoResult]="'device-mng.comp-empty' | translate"
+        [nzScroll]="{ x: '100%', y: '500px' }"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="200px" nzLeft>{{ 'device-mng.comp-name' | translate }}</th>
+            <th nzWidth="150px">{{ 'device-mng.comp-type' | translate }}</th>
+            <th nzWidth="250px">{{ 'device-mng.supplier' | translate }}</th>
+            <th nzWidth="100px">{{ 'device-mng.model' | translate }}</th>
+            <th nzWidth="150px">{{ 'device-mng.version' | translate }}</th>
+            <th nzWidth="150px">{{ 'device-mng.guarantee' | translate }}</th>
+            <th nzWidth="116px">{{ 'device-mng.comp-picture' | translate }}</th>
+            <th *ngIf="isEdit" nzWidth="150px" nzRight></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let data of compTable.data">
+            <ng-container *ngFor="let item of mapOfExpandedComp[data.code]">
+              <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+                <td
+                  nzBreakWord
+                  nzLeft
+                  [nzIndentSize]="item.level! * 5"
+                  [nzShowExpand]="!!item.componentList && item.componentList.length > 0"
+                  [(nzExpand)]="item.expand"
+                  (nzExpandChange)="collapse(mapOfExpandedComp[data.code], item, $event)"
+                >{{ item.name }}</td>
+                <td nzBreakWord>{{ item.type }}</td>
+                <td nzBreakWord>{{ item.supplier }}</td>
+                <td nzBreakWord>{{ item.model }}</td>
+                <td nzBreakWord>{{ item.version }}</td>
+                <td nzBreakWord>{{ item.warrantyPeriod }}</td>
+                <td>
+                  <div *ngIf="item.picture" fxFlex fxLayoutAlign="center center" class="image-wrapper">
+                    <img nz-image [nzSrc]="item.picture" />
+                  </div>
+                </td>
+                <td *ngIf="isEdit" nzRight>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="{{ 'device-mng.add-sub-device-comp' | translate }}"
+                    matTooltipPosition="above"
+                    (click)="addDeviceComp($event, item)"
+                  >
+                    <mat-icon class="material-icons" >add</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="{{ 'action.edit' | translate }}"
+                    matTooltipPosition="above"
+                    (click)="editDeviceComp(item)"
+                  >
+                    <mat-icon class="material-icons" >edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="{{ 'action.delete' | translate }}"
+                    matTooltipPosition="above"
+                    (click)="deleteDeviceComp(item)"
+                  >
+                    <mat-icon class="material-icons" >delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+          </ng-container>
+        </tbody>
+      </nz-table>
+    </mat-expansion-panel>
+  </form>
+</div>

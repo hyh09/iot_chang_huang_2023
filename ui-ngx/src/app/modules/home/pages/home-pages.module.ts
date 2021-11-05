@@ -39,6 +39,8 @@ import { OtaUpdateModule } from '@home/pages/ota-update/ota-update.module';
 
 import {MyBizModule} from './my-biz/my-biz.module'
 
+import { CustomPagesModule } from './../custom-pages/custom-pages.module';
+
 @NgModule({
   exports: [
     AdminModule,
@@ -59,7 +61,8 @@ import {MyBizModule} from './my-biz/my-biz.module'
     ApiUsageModule,
     OtaUpdateModule,
     UserModule,
-    MyBizModule
+    MyBizModule,
+    CustomPagesModule
   ],
   providers: [
     {

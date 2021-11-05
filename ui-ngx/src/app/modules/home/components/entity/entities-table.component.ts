@@ -111,6 +111,8 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
 
   @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: TbAnchorComponent;
 
+  @ViewChild('entityFilterHeader', {static: true}) entityFilterHeaderAnchor: TbAnchorComponent;
+
   @ViewChild('searchInput') searchInputField: ElementRef;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -162,6 +164,15 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       headerComponent.entitiesTableConfig = this.entitiesTableConfig;
     }
 
+    if (this.entitiesTableConfig.filterComponent) {
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.entitiesTableConfig.filterComponent);
+      const viewContainerRef = this.entityFilterHeaderAnchor.viewContainerRef;
+      viewContainerRef.clear();
+      const componentRef = viewContainerRef.createComponent(componentFactory);
+      const filterComponent = componentRef.instance;
+      filterComponent.entitiesTableConfig = this.entitiesTableConfig;
+    }
+
     this.entitiesTableConfig.table = this;
     this.translations = this.entitiesTableConfig.entityTranslations;
 
@@ -191,7 +202,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     const enabledGroupActionDescriptors =
       this.groupActionDescriptors.filter((descriptor) => descriptor.isEnabled);
 
-    this.selectionEnabled = this.entitiesTableConfig.selectionEnabled && enabledGroupActionDescriptors.length;
+    this.selectionEnabled = this.entitiesTableConfig.selectionEnabled || enabledGroupActionDescriptors.length;
 
     this.columnsUpdated();
 
@@ -344,7 +355,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   }
 
   addEntity($event: Event) {
-    let entity$: Observable<BaseData<HasId>>;
+    let entity$: Observable<BaseData<HasId> | BaseData<HasId>[]>;
     if (this.entitiesTableConfig.addEntity) {
       entity$ = this.entitiesTableConfig.addEntity();
     } else {
@@ -462,7 +473,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       this.paginator.pageIndex = 0;
     }
     const sortable = this.sort.sortables.get(this.entitiesTableConfig.defaultSortOrder.property);
-    this.sort.active = sortable.id;
+    this.sort.active = sortable ? sortable.id : '';
     this.sort.direction = this.entitiesTableConfig.defaultSortOrder.direction === Direction.ASC ? 'asc' : 'desc';
     if (update) {
       this.updateData();
