@@ -22,13 +22,11 @@ public class RoleMenuVo {
     @ApiModelProperty(value = "角色id")
     private UUID  roleId;
 
-//    @NotEmpty(message = "[菜单id]不能为空")
-//    @ApiModelProperty(value = "菜单入参id")
-//    private List<InputMenuVo> menuVoList;
-
-//    @NotEmpty(message = "[菜单id]不能为空")
-    @ApiModelProperty(value = "菜单入参id;{注:为空视为解绑此角色下的菜单")
+    @ApiModelProperty(value = "全选--菜单入参id;{注:为空视为解绑此角色下的菜单")
     private List<UUID>  menuVoList;
+
+    @ApiModelProperty(value = "半选--菜单入参id;{注:为空视为解绑此角色下的菜单}")
+    private List<UUID>  semiSelectList;
 
 
 
