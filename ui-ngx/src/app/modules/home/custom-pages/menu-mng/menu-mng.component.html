@@ -1,0 +1,45 @@
+<div class="mat-padding" fxLayout="column" style="min-width: 500px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'menu-mng.name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.menu-type</mat-label>
+        <mat-select
+          formControlName="menuType"
+          required
+          (selectionChange)="entityForm.get('parentId').setValue('');getSuperMenus()"
+        >
+          <mat-option [value]="menuType.PC">{{ 'menu-mng.pc-menu' | translate }}</mat-option>
+          <mat-option [value]="menuType.APP">{{ 'menu-mng.app-menu' | translate }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="entityForm.get('menuType').hasError('required')">
+          {{ 'menu-mng.menu-type-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.parent-menu</mat-label>
+        <mat-select
+          formControlName="parentId"
+          [disabled]="!entityForm.get('menuType').value || superMenus.length === 0"
+        >
+          <mat-option *ngFor="let menu of superMenus" [value]="menu.id">{{ menu.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.path</mat-label>
+        <input matInput formControlName="path">
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.icon</mat-label>
+        <input matInput formControlName="menuIcon">
+      </mat-form-field>
+      <!-- <tb-material-icon-select formControlName="menuIcon"></tb-material-icon-select> -->
+    </fieldset>
+  </form>
+</div>

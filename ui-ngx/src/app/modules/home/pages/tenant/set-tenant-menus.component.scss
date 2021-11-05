@@ -1,0 +1,32 @@
+.set-menus-wrapper {
+  min-width: 960px !important;
+  .mat-dialog-content {
+    padding: 0;
+    margin-top: -4px;
+    .menus-settings-wrapper {
+      padding: 16px 24px 12px;
+      .menus-wrapper {
+        width: calc((100% - 32px) / 2);
+        .tree-title {
+          margin-bottom: 10px;
+        }
+        .tree-wrapper {
+          height: 380px;
+          border: 1px solid #dee6f2;
+          border-radius: 3px;
+        }
+      }
+      .btns-wrapper {
+        button {
+          padding: 0;
+          min-width: 32px;
+          height: 32px;
+          line-height: 32px;
+          .mat-icon {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+}

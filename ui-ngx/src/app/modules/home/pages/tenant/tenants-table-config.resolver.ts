@@ -18,7 +18,7 @@ import { Injectable } from '@angular/core';
 
 import { Resolve, Router } from '@angular/router';
 
-import { TenantInfo } from '@shared/models/tenant.model';
+import { TenantInfo, TenantMenus } from '@shared/models/tenant.model';
 import {
   DateEntityTableColumn,
   EntityTableColumn,
@@ -32,16 +32,21 @@ import { TenantComponent } from '@modules/home/pages/tenant/tenant.component';
 import { EntityAction } from '@home/models/entity/entity-component.models';
 import { TenantTabsComponent } from '@home/pages/tenant/tenant-tabs.component';
 import { mergeMap } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { SetMenusDialogData, SetTenantMenusComponent } from './set-tenant-menus.component';
 
 @Injectable()
 export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<TenantInfo>> {
 
   private readonly config: EntityTableConfig<TenantInfo> = new EntityTableConfig<TenantInfo>();
 
-  constructor(private tenantService: TenantService,
-              private translate: TranslateService,
-              private datePipe: DatePipe,
-              private router: Router) {
+  constructor(
+    private tenantService: TenantService,
+    private translate: TranslateService,
+    private datePipe: DatePipe,
+    private router: Router,
+    public dialog: MatDialog
+  ) {
 
     this.config.entityType = EntityType.TENANT;
     this.config.entityComponent = TenantComponent;
@@ -59,6 +64,12 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
     );
 
     this.config.cellActionDescriptors.push(
+      {
+        name: this.translate.instant('tenant.set-tenant-menus'),
+        icon: 'menu',
+        isEnabled: () => true,
+        onAction: ($event, entity) => this.setTenantMenus($event, entity)
+      },
       {
         name: this.translate.instant('tenant.manage-tenant-admins'),
         icon: 'account_circle',
@@ -87,6 +98,17 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
     return this.config;
   }
 
+  setTenantMenus($event: Event, tenant: TenantInfo) {
+    if ($event) {
+      $event.stopPropagation();
+    }
+    this.dialog.open<SetTenantMenusComponent, SetMenusDialogData, TenantMenus>(SetTenantMenusComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: tenant
+    })
+  }
+
   manageTenantAdmins($event: Event, tenant: TenantInfo) {
     if ($event) {
       $event.stopPropagation();
@@ -96,6 +118,9 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
 
   onTenantAction(action: EntityAction<TenantInfo>): boolean {
     switch (action.action) {
+      case 'setTenantMenus':
+        this.setTenantMenus(action.event, action.entity);
+        return true;
       case 'manageTenantAdmins':
         this.manageTenantAdmins(action.event, action.entity);
         return true;

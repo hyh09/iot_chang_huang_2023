@@ -21,11 +21,13 @@ import { TenantComponent } from '@modules/home/pages/tenant/tenant.component';
 import { TenantRoutingModule } from '@modules/home/pages/tenant/tenant-routing.module';
 import { HomeComponentsModule } from '@modules/home/components/home-components.module';
 import { TenantTabsComponent } from '@home/pages/tenant/tenant-tabs.component';
+import { SetTenantMenusComponent } from '@home/pages/tenant/set-tenant-menus.component';
 
 @NgModule({
   declarations: [
     TenantComponent,
-    TenantTabsComponent
+    TenantTabsComponent,
+    SetTenantMenusComponent
   ],
   imports: [
     CommonModule,

@@ -26,6 +26,8 @@ import { HomeModule } from '@home/home.module';
 import { AppComponent } from './app.component';
 import { DashboardRoutingModule } from '@modules/dashboard/dashboard-routing.module';
 import { RouterModule, Routes } from '@angular/router';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { Paginator } from '@app/modules/home/components/paginator/paginator';
 
 const routes: Routes = [
   { path: '**',
@@ -55,7 +57,10 @@ export class PageNotFoundRoutingModule { }
     DashboardRoutingModule,
     PageNotFoundRoutingModule
   ],
-  providers: [],
+  providers: [{
+    provide: MatPaginatorIntl,
+    useValue: Paginator()
+  }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

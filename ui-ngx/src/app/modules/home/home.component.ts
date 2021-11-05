@@ -57,7 +57,7 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   sidenavMode: 'over' | 'push' | 'side' = 'side';
   sidenavOpened = true;
 
-  logo: string | SafeUrl = 'assets/logo_title_white.svg';
+  logo: string | SafeUrl = 'assets/logo_title_black.svg';
 
   //custom ui 相关属性
   logoHeight = 36;
@@ -194,10 +194,10 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     //构造方法内添加下面代码
     this.store.pipe(select(selectTenantUI)).subscribe(ui => {
       if(ui){
-        this.logo = ui.logoImageUrl ? this.sanitizer.bypassSecurityTrustUrl(ui.logoImageUrl) : 'assets/logo_title_white.svg'
+        this.logo = ui.logoImageUrl ? this.sanitizer.bypassSecurityTrustUrl(ui.logoImageUrl) : 'assets/logo_title_black.svg'
         this.logoHeight = ui.logoImageHeight ? Number(ui.logoImageHeight) : 36
       }else{
-        this.logo = 'assets/logo_title_white.svg';
+        this.logo = 'assets/logo_title_black.svg';
         this.logoHeight = 36;
       }
     })
