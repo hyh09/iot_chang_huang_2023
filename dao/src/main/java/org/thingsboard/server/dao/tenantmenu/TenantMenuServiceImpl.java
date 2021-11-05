@@ -173,4 +173,9 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     public List<TenantMenu> getTenantMenuListByTenantId(String menuType, UUID tenantId) {
         return tenantMenuDao.getTenantMenuListByTenantId(menuType,tenantId);
     }
+
+    @Override
+    public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> ids) {
+        return tenantMenuDao.getTenantMenuListByIds(menuType,tenantId,ids);
+    }
 }
