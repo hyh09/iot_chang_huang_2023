@@ -116,7 +116,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
             {
                 if(menu.getId().equals(entity1.getTenantMenuId()))
                 {
-                    menu.setChecked(true);
+                    menu.setFlg(true);
                 }
             }
 

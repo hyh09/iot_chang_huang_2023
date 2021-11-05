@@ -1,5 +1,6 @@
 package org.thingsboard.server.common.data.vo.menu;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
@@ -44,7 +45,7 @@ public class TenantMenuVo {
     //额外加的逻辑字段配合前端
     private  String name;
 
-    private  Boolean checked=false;
+    private  Boolean flg=false;
 
 
 }
