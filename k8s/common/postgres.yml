@@ -18,7 +18,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pv-claim
-  namespace: thingsboard
+  namespace: hsyl-iot
   labels:
     app: postgres
 spec:
@@ -32,7 +32,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: thingsboard
+  namespace: hsyl-iot
   labels:
     app: postgres
 spec:
@@ -57,7 +57,7 @@ spec:
           name: postgres
         env:
         - name: POSTGRES_DB
-          value: "thingsboard"
+          value: "hsthingsboard"
         - name: POSTGRES_PASSWORD
           value: "postgres"
         - name: PGDATA
@@ -91,7 +91,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: tb-database
-  namespace: thingsboard
+  namespace: hsyl-iot
 spec:
   type: ClusterIP
   selector:

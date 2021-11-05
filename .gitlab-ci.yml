@@ -1,10 +1,12 @@
 stages:
   - package
   - push
-
+  - deploy
+  
 variables:
   #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  #MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_JOB_NAME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 
 before_script:
@@ -27,8 +29,9 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - yarn -v
-    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2 -X
+    - npm i pkg-fetch -g
+    - npm i pkg -g
+    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
     - ls application/target
   only:
     - dev
@@ -41,7 +44,7 @@ push:
   stage: push
   retry: 1
   tags:
-    - zhows-test
+    - hz-k8s-iot-test
   script:
     - echo "推送镜像"
     - docker info
@@ -51,3 +54,27 @@ push:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
 
+# 部署到测试环境
+deployK8s:
+  stage: deploy
+  retry: 1
+  image: roffe/kubectl
+  tags:
+    # - hz-k8s-iot-test
+    - k8s.test.hangzhou
+  before_script:
+    - mkdir -p /root/.kube
+    - echo ${HS_CONFIG} | base64 -d > /root/.kube/config
+    - export KUBECONFIG=/root/.kube/config
+  script:
+    - echo "部署到k8s"
+    - kubectl get pod --all-namespaces
+    - cd ./k8s
+    - bash ./k8s-install-tb.sh --loadDemo
+    - bash ./k8s-deploy-thirdparty.sh
+    - bash ./k8s-deploy-resources.sh
+  only:
+    - k8s-test
+  after_script:
+    - echo "k8s部署完成，立即生效执行阿里云k8s触发器。"
+    - kubectl get pods -l app=tb-node
