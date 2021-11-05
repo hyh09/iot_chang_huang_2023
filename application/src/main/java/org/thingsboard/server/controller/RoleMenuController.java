@@ -73,7 +73,7 @@ public class RoleMenuController extends BaseController{
     })
     @RequestMapping(value = "/queryByUser", method = RequestMethod.POST)
     @ResponseBody
-    public List<TenantMenu> queryByUser(@RequestBody @Valid InMenuByUserVo vo) throws Exception {
+    public  List<TenantMenuVo> queryByUser(@RequestBody @Valid InMenuByUserVo vo) throws Exception {
         SecurityUser securityUser = getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
         vo.setUserId(securityUser.getUuidId());

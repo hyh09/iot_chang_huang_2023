@@ -23,6 +23,6 @@ public interface RoleMenuSvc {
 
     List<TenantMenuVo> queryAllNew(InMenuByUserVo vo) throws Exception;
 
-    List<TenantMenu> queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception;
+    List<TenantMenuVo> queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception;
 
 }

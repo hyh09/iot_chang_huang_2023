@@ -127,7 +127,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
     }
 
     @Override
-    public List<TenantMenu> queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception {
+    public List<TenantMenuVo>queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception {
         User user = userService.findUserById(tenantId, userId);
 
         log.info("=user===>{}",user);
@@ -136,22 +136,28 @@ public class RoleMenuImpl implements RoleMenuSvc {
             //返回系统菜单;
             return null;
         }
-        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isNotBlank(user.getUserCode()))
+        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
         {
             List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
-            return menus;
+            return listToVo(menus);
         }
-        List<TenantMenu>  menus = new ArrayList<>();
+        List<TenantMenuVo>  menusd = new ArrayList<>();
         log.info("获取当前登录的人菜单:{}",vo);
         List<TenantMenuRoleEntity> entityList =  tenantMenuRoleService.queryMenuIdByRole(vo.getUserId());
         //如果是系统管理员 或者租户管理员呢？ //先不考虑
         log.info("获取当前登录的人菜单查询到的角色数据:{}",entityList);
         if(CollectionUtils.isEmpty(entityList))
         {
-            return menus;
+            return menusd;
         }
         List<UUID> uuids= entityList.stream().map(TenantMenuRoleEntity::getId).collect(Collectors.toList());
-        return menuService.getTenantMenuListByIds(vo.getMenuType(),vo.getTenantId(),uuids);
+        List<TenantMenu>  menus1= menuService.getTenantMenuListByIds(vo.getMenuType(),vo.getTenantId(),uuids);
+        log.info("获取当前登录的人菜单TenantMenu:{}",menus1);
+
+        List<TenantMenuVo>  vos=   listToVo(menus1);
+        log.info("获取当前登录的人菜单TenantMenuVo:{}",vos);
+
+        return  vos;
     }
 
     //具体的绑定的入库
