@@ -75,4 +75,14 @@ public class TenantMenuRoleService  extends BaseSQLServiceImpl<TenantMenuRoleEnt
         return  dao.queryMenuIdByRole(userId);
       }
 
+
+    /**
+     * 批量删除
+      */
+    public  void deleteByMenuIds(List<UUID> menuIds)
+    {
+          dao.deleteByMenuIds(menuIds);
+
+    }
+
 }	

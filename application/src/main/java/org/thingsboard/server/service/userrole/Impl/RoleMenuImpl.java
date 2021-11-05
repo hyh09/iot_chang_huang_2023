@@ -181,6 +181,12 @@ public class RoleMenuImpl implements RoleMenuSvc {
     }
 
 
+    @Override
+    public void deleteMenuIdByIds(List<UUID> ids) {
+        log.info("当前批量删除角色绑定菜单的入参:{}",ids);
+        tenantMenuRoleService.deleteByMenuIds(ids);
+    }
+
     private List<QueryMenuByRoleVo> toList(List<OutMenuByUserVo> voList)
     {
         List<QueryMenuByRoleVo> result = voList.stream().map(temp -> {

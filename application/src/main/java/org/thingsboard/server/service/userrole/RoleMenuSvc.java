@@ -10,6 +10,7 @@ import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.entity.rolemenu.RoleMenuVo;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -25,5 +26,10 @@ public interface RoleMenuSvc {
     List<TenantMenuVo> queryAllNew(InMenuByUserVo vo) throws Exception;
 
     List<TenantMenuVo> queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception;
+
+    /**
+     * 删除批量角色 菜单关系
+     */
+    void deleteMenuIdByIds(List<UUID> ids);
 
 }
