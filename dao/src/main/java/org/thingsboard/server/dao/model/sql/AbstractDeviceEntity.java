@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
@@ -124,6 +125,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     public AbstractDeviceEntity(Device device) {
         if (device.getId() != null) {
             this.setUuid(device.getUuidId());
+            this.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
         this.setCreatedTime(device.getCreatedTime());
         if (device.getTenantId() != null) {
@@ -156,7 +158,10 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     }
 
     public AbstractDeviceEntity(DeviceEntity deviceEntity) {
-        this.setId(deviceEntity.getId());
+        if(deviceEntity.getId() != null){
+            this.setId(deviceEntity.getId());
+            this.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
+        }
         this.setCreatedTime(deviceEntity.getCreatedTime());
         this.tenantId = deviceEntity.getTenantId();
         this.customerId = deviceEntity.getCustomerId();
