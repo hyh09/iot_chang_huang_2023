@@ -25,3 +25,11 @@ export interface BaseData<T extends HasId> {
   name?: string;
   label?: string;
 }
+
+export interface CustomBaseData {
+  id: string,
+  createdTime: number,
+  createdUser: string,
+  updatedTime: number,
+  updatedUser: string
+}

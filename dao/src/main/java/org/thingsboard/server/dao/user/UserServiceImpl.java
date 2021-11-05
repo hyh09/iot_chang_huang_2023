@@ -503,11 +503,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
                             }
                             break;
                         case TENANT_ADMIN:
-                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
-                                throw new DataValidationException("Tenant administrator should be assigned to tenant!");
-                            } else if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {
-                                throw new DataValidationException("Tenant administrator can't be assigned to customer!");
-                            }
+//                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
+//                                throw new DataValidationException("Tenant administrator should be assigned to tenant!");
+//                            } else if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {
+//                                throw new DataValidationException("Tenant administrator can't be assigned to customer!");
+//                            }
                             break;
                         case CUSTOMER_USER:
                             log.info("====>打印当前的数据:{}",tenantId.getId());

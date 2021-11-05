@@ -17,7 +17,9 @@ package org.thingsboard.server.dao.sql.tenantmenu;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.StringUtils;
@@ -153,6 +155,22 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public List<TenantMenu> findByIdIn(List<UUID> ids) {
         return   listToVo(tenantMenuRepository.findByIdIn(ids));
     }
+
+    @Override
+    public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id) {
+        return  listToVo(tenantMenuRepository.getTenantMenuListByIds(menuType,tenantId,id));
+    }
+
+
+
+
+    @Override
+    public List<TenantMenu>  getTenantMenuListByTenantId(String menuType,UUID tenantId)
+    {
+        List<TenantMenuEntity>  tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,tenantId);
+        return listToVo(tenantMenuEntityList);
+    }
+
 
     /**
      *

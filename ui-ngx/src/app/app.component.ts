@@ -60,7 +60,6 @@ export class AppComponent implements OnInit {
 
     this.matIconRegistry.addSvgIconSetInNamespace('mdi',
       this.domSanitizer.bypassSecurityTrustResourceUrl('./assets/mdi.svg'));
-
     this.matIconRegistry.addSvgIconLiteral(
       'alpha-a-circle-outline',
       this.domSanitizer.bypassSecurityTrustHtml(

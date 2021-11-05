@@ -145,6 +145,10 @@ import { OtaPackageAutocompleteComponent } from '@shared/components/ota-package/
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CopyButtonComponent } from '@shared/components/button/copy-button.component';
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
+import { NzTreeModule } from 'ng-zorro-antd/tree';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzImageModule } from 'ng-zorro-antd/image';
 
 @NgModule({
   providers: [
@@ -294,7 +298,11 @@ import { TogglePasswordComponent } from '@shared/components/button/toggle-passwo
     NgxHmCarouselModule,
     DndModule,
     NgxFlowModule,
-    NgxFlowchartModule
+    NgxFlowchartModule,
+    NzTreeModule,
+    NzTabsModule,
+    NzTableModule,
+    NzImageModule
   ],
   exports: [
     FooterComponent,
@@ -386,6 +394,10 @@ import { TogglePasswordComponent } from '@shared/components/button/toggle-passwo
     NgxHmCarouselModule,
     DndModule,
     NgxFlowchartModule,
+    NzTreeModule,
+    NzTabsModule,
+    NzTableModule,
+    NzImageModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,

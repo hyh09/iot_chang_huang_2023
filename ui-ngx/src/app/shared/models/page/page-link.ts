@@ -117,6 +117,19 @@ export class PageLink {
     return query;
   }
 
+  public toParams(): { [key: string]: any } {
+    const params = {
+      pageSize: this.pageSize,
+      page: this.page,
+      sortOrder: this.sortOrder,
+      textSearch: this.textSearch
+    };
+    if (!this.textSearch) {
+      delete params.textSearch;
+    }
+    return params;
+  }
+
   public sort(item1: any, item2: any): number {
     if (this.sortOrder) {
       const sortProperty = this.sortOrder.property;

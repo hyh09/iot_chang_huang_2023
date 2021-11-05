@@ -204,7 +204,9 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 			}if(VoBeanConverSvc.class.isAssignableFrom(cls)){
 				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
 			}else {
-				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+//				query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+				query.unwrap(NativeQueryImpl.class).setResultTransformer(new CustomResultToBean(cls, trans));
+
 			}
 		} else {
 			query = entityManager.createQuery(sql).unwrap(Query.class);

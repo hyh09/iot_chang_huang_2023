@@ -817,7 +817,14 @@ class EntityDatasource implements DataSource<EntityData> {
   }
 
   public isCurrentEntity(entity: EntityData): boolean {
-    return (this.currentEntity && entity && this.currentEntity.id && entity.id) &&
-      (this.currentEntity.id.id === entity.id.id);
+    if (this.currentEntity && entity && this.currentEntity.id && entity.id) {
+      if (this.currentEntity.id === entity.id) {
+        return true;
+      } else if (this.currentEntity.id.id && entity.id.id && this.currentEntity.id.id === entity.id.id) {
+        return true;
+      }
+      return false;
+    }
+    return false;
   }
 }
