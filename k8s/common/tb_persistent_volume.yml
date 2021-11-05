@@ -1,0 +1,40 @@
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: hsyl-pv
+#spec:
+#  capacity:
+#    storage: 10Gi
+#  accessModes:
+#    - ReadWriteOnce
+#  hostPath:
+#    path: "/mnt/data"
+#
+#---
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: hsyl-pv-fast
+#spec:
+#  storageClassName: "fast"
+#  capacity:
+#    storage: 10Gi
+#  accessModes:
+#    - ReadWriteOnce
+#  hostPath:
+#    path: "/mnt/fast_data"
+#
+#---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: fast
+  namespace: hsyl-iot
+spec:
+  storageClassName: "fast"
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/fast_data"

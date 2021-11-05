@@ -29,7 +29,7 @@
     <packaging>pom</packaging>
 
     <name>ThingsBoard SNMP Transport Microservice</name>
-    <url>https://thingsboard.io</url>
+
     <description>ThingsBoard SNMP Transport Microservice</description>
 
     <properties>

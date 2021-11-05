@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
@@ -20,6 +21,7 @@ import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.util.BeanToMap;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.PageRoleVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -49,13 +51,15 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
+        SecurityUser securityUser =  getCurrentUser();
+        entity.setUpdatedUser(securityUser.getUuidId());
+        entity.setTenantId(securityUser.getTenantId().getId());
         if(entity.getId() != null)
         {
            return updateRecord(entity);
         }
-        SecurityUser securityUser =  getCurrentUser();
         entity.setCreatedUser(securityUser.getUuidId());
-        entity.setUpdatedUser(securityUser.getUuidId());
+
         return   tenantSysRoleService.saveEntity(entity);
     }
 
@@ -104,34 +108,35 @@ public class UserRoleController extends BaseController{
 
 
     @ApiOperation(value = "角色的分页查询")
-    @RequestMapping(value = "/pageQuery", method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleCode", value = "角色编码支持模糊查询"),
+            @ApiImplicitParam(name = "roleName", value = "角色名称支持模糊查询"),
+    })
+    @RequestMapping(value = "/pageQuery", method = RequestMethod.GET)
     @ResponseBody
-    public  Object  pageQuery(@RequestBody PageRoleVo vo) throws Exception {
+    public Object pageQuery(
+            @RequestParam("roleCode") String roleCode,
+            @RequestParam("roleName") String roleName,
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder) throws ThingsboardException {
         SecurityUser securityUser =  getCurrentUser();
-        Map  queryParam = BeanToMap.beanToMapByJacksonFilter(vo);
+        Map<String, Object> queryParam  =new HashMap<>();
         queryParam.put("updatedUser",securityUser.getUuidId().toString());
-        int  pageSize =  vo.getPageSize();
-        int  page = vo.getPage();
-        String  textSearch = vo.getTextSearch();
-        String  sortProperty =vo.getSortProperty();
-        String  sortOrder = vo.getSortOrder();
+        if(!StringUtils.isEmpty(roleCode))
+        {
+            queryParam.put("roleCode", roleCode);
+        }
+        if(!StringUtils.isEmpty(roleName))
+        {
+            queryParam.put("roleName", roleName);
+        }
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return tenantSysRoleService.pageQuery(queryParam,pageLink);
     }
 
-
-
-//    public   Object   pageQuery(@RequestBody Map<String, Object> queryParam) throws ThingsboardException
-//    {
-//        int  pageSize =  ((queryParam.get("pageSize"))==null ?10:(int) queryParam.get("pageSize"));
-//        int  page =  ((queryParam.get("page"))==null ?0:(int) queryParam.get("page"));
-//        String  textSearch = (String) queryParam.get("textSearch");
-//        String  sortProperty = (String) queryParam.get("sortProperty");
-//        String  sortOrder = (String) queryParam.get("sortOrder");
-//        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-//        return tenantSysRoleService.pageQuery(queryParam,pageLink);
-//
-//    }
 
 
 
@@ -160,6 +165,7 @@ public class UserRoleController extends BaseController{
         if (result.hasErrors()) {
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
+
         log.info("[角色用户解绑]打印得入参为:{}",vo);
 
         return   userRoleMemuSvc.unboundUser(vo);
@@ -197,7 +203,7 @@ public class UserRoleController extends BaseController{
         vo.setUserName(userName);
         vo.setUserCode(userCode);
         log.info("打印当前的入参:{}",vo);
-       return userRoleMemuSvc.getUserByInRole(vo,pageLink);
+       return userRoleMemuSvc.getUserByInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
     }
 
@@ -205,7 +211,7 @@ public class UserRoleController extends BaseController{
 
 
     /**
-     * 角色查询用户已绑定的用户
+     * 角色查询用户mei绑定的用户
      * @return
      */
     @ApiOperation(value = "角色查询未绑定用户【分页查询】")
@@ -235,7 +241,11 @@ public class UserRoleController extends BaseController{
         vo.setUserName(userName);
         vo.setUserCode(userCode);
         log.info("打印当前的入参:{}",vo);
-        return userRoleMemuSvc.getUserByNotInRole(vo,pageLink);
+        SecurityUser securityUser =  getCurrentUser();
+        vo.setTenantId(securityUser.getTenantId().getId());
+        vo.setCreateId(securityUser.getUuidId());
+
+        return userRoleMemuSvc.getUserByNotInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
     }
 

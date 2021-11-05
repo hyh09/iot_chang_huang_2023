@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.stereotype.Component;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 
 import javax.persistence.EntityManager;
@@ -38,6 +39,9 @@ public interface BaseRepository<T, ID extends Serializable> extends JpaRepositor
     void deleteByEntity( T entity);
 
      <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql);
+
+    <T> Page<T> querySql(String sql, Map<String, Object> param, Class<T> cls, Pageable pageable, NameTransform trans, boolean isNativeSql, SortRowName sortRowName);
+
 
     /**
      * 自定义执行sql

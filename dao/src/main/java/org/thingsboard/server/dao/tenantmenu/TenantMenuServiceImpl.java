@@ -17,6 +17,9 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     private static final String DEFAULT_TENANT_REGION = "Global";
     public static final String INCORRECT_MENU_ID = "Incorrect menuId ";
     public static final int ONE = 1;
+    public static final String ZHCD = "ZHCD"; //系统菜单首字母
+    public static final String PC = "PC"; //PC菜单
+    public static final String APP = "APP"; //APP菜单
 
     private final TenantMenuDao tenantMenuDao;
 
@@ -24,6 +27,14 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         this.tenantMenuDao = tenantMenuDao;
     }
 
+    /**
+     * 新增/修改租户菜单
+     * @param tenantMenuList
+     */
+    @Override
+    public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
+        tenantMenuDao.saveOrUpdTenantMenu(tenantMenuList);
+    }
 
     /**
      * 保存系统菜单
@@ -37,7 +48,7 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         tenantMenuList.forEach(tenantMenu->{
             tenantMenu.setRegion(DEFAULT_TENANT_REGION);
             //生成租户菜单编码
-            tenantMenu.setTenantMenuCode(String.valueOf(System.currentTimeMillis()));
+            tenantMenu.setTenantMenuCode(ZHCD + String.valueOf(System.currentTimeMillis()));
             //生成租户菜单排序序号
             Integer maxSort = tenantMenuDao.getMaxSortByParentId(tenantMenu.getParentId());
             tenantMenu.setSort(maxSort == null ? 0:maxSort);
@@ -56,13 +67,9 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     @Override
     public List<TenantMenu> updTenantMenu(TenantMenu tenantMenu){
         log.trace("Executing updTenantMenu [{}]", tenantMenu);
-        // TODO: 2021/10/14 本地上传图片
-
         TenantMenu newTenantMenu = tenantMenuDao.findById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId().getId());
         newTenantMenu.updTenantMenu(tenantMenu);
-        //id存在默认修改
-        //tenantMenuDao.removeById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId().getId());
-        tenantMenuDao.save(new TenantId(tenantMenu.getTenantId()), newTenantMenu);
+        tenantMenuDao.save(newTenantMenu);
         //查询调整后的菜单列表
         List<TenantMenu> tenantMenus = tenantMenuDao.find( new TenantId(tenantMenu.getTenantId()));
         return tenantMenus;
@@ -155,6 +162,7 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         log.trace(" --tenantMenuDao.findByIdIn 的入参{}",ids);
         return tenantMenuDao.findByIdIn(ids);
     }
+
 
 
 }

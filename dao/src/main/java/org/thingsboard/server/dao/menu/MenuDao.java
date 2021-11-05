@@ -50,4 +50,12 @@ public interface MenuDao extends Dao<Menu>{
     void delMenu(UUID id);
 
     Menu getTenantById(UUID id);
+
+    /**
+     * 查询同级别下菜单
+     * @param parentId
+     * @param name
+     * @return
+     */
+    Menu findSameLevelName(UUID parentId,String name);
 }

@@ -93,6 +93,7 @@ public class CheckImpl  implements CheckSvc {
      */
     @Override
     public Object queryCodeNew(CodeVo vo,TenantId tenantId) {
+        log.info("打印当前得入参{}",tenantId);
           if(vo.getKey().equals(CodeKeyNum.key_user.getKey()))
           {
 
@@ -100,7 +101,7 @@ public class CheckImpl  implements CheckSvc {
               return getUserAvailableCode(codes,CodeKeyNum.key_user);
           }
 
-        List<String> codes = tenantSysRoleService.findAllCodesByTenantId();
+        List<String> codes = tenantSysRoleService.findAllCodesByTenantId(tenantId.getId());
         return getUserAvailableCode(codes,CodeKeyNum.key_role);
     }
 
@@ -113,12 +114,12 @@ public class CheckImpl  implements CheckSvc {
            return codeKeyNum.getValue()+codeKeyNum.getInit();
        }
         List<Integer> list2 = new ArrayList<>();
-       if(codeKeyNum == CodeKeyNum.key_user) {
+//       if(codeKeyNum == CodeKeyNum.key_user) {
             list2 = codes.stream().filter(s -> !StringUtils.isEmpty(s) && s.startsWith(codeKeyNum.getValue())).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
-       }else {
-           list2 = codes.stream().filter(s -> !StringUtils.isEmpty(s) && isNumber(s)).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
-
-       }
+//       }else {
+//           list2 = codes.stream().filter(s -> !StringUtils.isEmpty(s) && isNumber(s)).map(e -> Integer.valueOf(e.split(codeKeyNum.getValue())[1])).sorted().collect(Collectors.toList());
+//
+//       }
         if(CollectionUtils.isEmpty(list2))
         {
             return codeKeyNum.getValue()+codeKeyNum.getInit();

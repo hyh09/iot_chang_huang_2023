@@ -865,6 +865,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         //保存设备构成
         deviceComponentDao.saveDeviceComponentList(deviceComponentList);
     }
+    @Override
+    public void saveOrUpdDeviceComponentList(Device device,UUID deviceId,String saveType) throws ThingsboardException{
+        this.saveDeviceComponentList(device,deviceId,saveType);
+    }
 
     /**
      * 分配产线设备

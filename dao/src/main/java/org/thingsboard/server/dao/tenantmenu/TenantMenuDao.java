@@ -11,6 +11,13 @@ import java.util.UUID;
 
 public interface TenantMenuDao extends Dao<TenantMenu>{
 
+    /**
+     *新增/修改租户菜单
+     * @param pcList
+     * @param appList
+     */
+    void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
+
     PageData<TenantMenu> findTenantMenusByRegion(TenantMenuId tenantMenuId, String region, PageLink pageLink);
 
     /**
@@ -33,4 +40,5 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
     List<TenantMenu> getTenantMenuList(String menuType,String tenantId,String tenantMenuName);
 
     List<TenantMenu>  findByIdIn(List<UUID> ids);
+
 }

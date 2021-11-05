@@ -62,18 +62,18 @@ public class MenuController extends BaseController {
     public MenuVo saveMenu(@RequestBody AddMenuDto addMenuDto) throws ThingsboardException {
         try {
             checkNotNull(addMenuDto);
-            Menu menu = addMenuDto.toMenu();
-            if(addMenuDto.getId() != null){
-                checkParameter("id",addMenuDto.getId());
+            checkSameLevelNameRepetition(addMenuDto);
+            Menu menu = checkAddMenuList(addMenuDto);
+            if(addMenuDto.getId() == null){
                 menu.setCreatedUser(getCurrentUser().getUuidId());
-                menu = checkNotNull(menuService.updateMenu(menu));
+                menu = checkNotNull(menuService.saveMenu(menu));
                 if(menu != null){
                     menuVo = new MenuVo(menu);
                 }
             }else {
-                menu = checkAddMenuList(addMenuDto);
+                checkParameter("id",addMenuDto.getId());
                 menu.setUpdatedUser(getCurrentUser().getUuidId());
-                menu = checkNotNull(menuService.saveMenu(menu));
+                menu = checkNotNull(menuService.updateMenu(menu));
                 if(menu != null){
                     menuVo = new MenuVo(menu);
                 }
@@ -193,7 +193,7 @@ public class MenuController extends BaseController {
      */
     @ApiOperation("查询系统菜单列表分页")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "menuQueryCdn",value = "多条件入参",dataType = "MenuQueryCdn",paramType = "query"),
+            @ApiImplicitParam(name = "menuQueryCdnQry",value = "多条件入参",dataType = "MenuQueryCdnQry",paramType = "query"),
             @ApiImplicitParam(name = "sortProperty",value = "排序字段",dataType = "string",paramType = "query",required = true),
             @ApiImplicitParam(name = "sortOrder",value = "排序方式（DESC/ASC）",dataType = "string",paramType = "query")})
     @RequestMapping(value = "/getMenuPage", params = {"pageSize", "page"}, method = RequestMethod.GET)

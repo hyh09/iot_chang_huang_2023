@@ -29,9 +29,9 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
   	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-  	public  List<String> findAllCodesByTenantId()
+  	public  List<String> findAllCodesByTenantId(UUID tenantId)
     {
-      return   this.dao.findAllCodesByTenantId();
+      return   this.dao.findAllCodesByTenantId(tenantId);
     }
 
 

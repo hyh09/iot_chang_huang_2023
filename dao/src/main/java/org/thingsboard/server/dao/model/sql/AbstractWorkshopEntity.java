@@ -54,6 +54,9 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
     @Column(name = "logo_images")
     private String logoImages;
 
+    @Column(name = "bg_images")
+    private String bgImages;
+
     @Column(name = "remark")
     private String remark;
 
@@ -97,6 +100,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         this.name = abstractWorkshopEntity.getName();
         this.logoIcon = abstractWorkshopEntity.getLogoIcon();
         this.logoImages = abstractWorkshopEntity.getLogoImages();
+        this.bgImages = abstractWorkshopEntity.getBgImages();
         this.remark = abstractWorkshopEntity.getRemark();
         this.tenantId = abstractWorkshopEntity.getTenantId();
         this.createdTime = abstractWorkshopEntity.getUpdatedTime();
@@ -115,6 +119,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         this.name = workshop.getName();
         this.logoIcon = workshop.getLogoIcon();
         this.logoImages = workshop.getLogoImages();
+        this.bgImages = workshop.getBgImages();
         this.remark = workshop.getRemark();
         this.tenantId = workshop.getTenantId();
         this.createdTime = workshop.getUpdatedTime();
@@ -131,6 +136,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         workshop.setName(name);
         workshop.setLogoIcon(logoIcon);
         workshop.setLogoImages(logoImages);
+        workshop.setBgImages(bgImages);
         workshop.setRemark(remark);
         workshop.setTenantId(tenantId);
         workshop.setCreatedTime(createdTime);

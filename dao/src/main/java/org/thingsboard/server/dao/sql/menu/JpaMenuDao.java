@@ -79,6 +79,15 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         return null;
     }
 
+    @Override
+    public Menu findSameLevelName(UUID parentId,String name){
+        MenuEntity sameLevelName = menuRepository.findSameLevelName(parentId, name);
+        if(sameLevelName != null){
+            return sameLevelName.toData();
+        }
+        return null;
+    }
+
     /**
      * 查询系统菜单列表分页
      * @param menu
@@ -108,7 +117,14 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         List<Menu> resultMenuList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(content)){
             content.forEach(i->{
-                resultMenuList.add(i.toData());
+                Menu resultMenu = i.toData();
+                if(i.getParentId() != null){
+                    MenuEntity perentEntity = menuRepository.findById(i.getId()).get();
+                    if(perentEntity != null && StringUtils.isNotBlank(perentEntity.getName())){
+                        resultMenu.setParentName(perentEntity.getName());
+                    }
+                }
+                resultMenuList.add(resultMenu);
             });
         }
         PageData<Menu> resultPage = new PageData<>();

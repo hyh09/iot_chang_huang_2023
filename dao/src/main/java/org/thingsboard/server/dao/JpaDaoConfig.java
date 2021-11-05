@@ -22,12 +22,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-/**
- * @author Valerii Sosliuk
- */
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan({"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"})
+//@EnableJpaRepositories({"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"})
+@EntityScan({"org.thingsboard.server.dao.model.sql", "org.thingsboard.server.dao.hs","org.thingsboard.server.dao.sql.*.entity"})
 @EnableJpaRepositories(basePackages = {"org.thingsboard.server.dao.sql", "org.thingsboard.server.dao.hs"},
         repositoryFactoryBeanClass = org.thingsboard.server.dao.util.sql.jpa.repository.BaseRepositoryFactoryBean.class,
         // 指定Repository的Base类
@@ -41,8 +40,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         // 开启默认事务
         enableDefaultTransactions = true
 )
-@EntityScan(value = {"org.thingsboard.server.dao.model.sql","org.thingsboard.server.dao.sql.*.entity", "org.thingsboard.server.dao.hs"})
 @EnableTransactionManagement
 public class JpaDaoConfig {
 
 }
+
+

@@ -69,6 +69,14 @@ public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements 
     @Column(name = "menu_type")
     private String menuType;
 
+    //"是按钮（true/false）")
+    @Column(name = "is_button")
+    public Boolean isButton;
+
+    //"多语言Key")
+    @Column(name = "lang_key")
+    private String langKey;
+
     @Column(name = "path")
     private String path;
 
@@ -105,6 +113,8 @@ public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements 
         this.menuImages = menu.getMenuImages();
         this.parentId = menu.getParentId();
         this.menuType = menu.getMenuType();
+        this.isButton = menu.getIsButton();
+        this.langKey = menu.getLangKey();
         this.path = menu.getPath();
         this.createdTime = menu.getUpdatedTime();
         this.createdUser = menu.getCreatedUser();
@@ -124,6 +134,8 @@ public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements 
         this.menuIcon = menuEntity.getMenuIcon();
         this.menuImages = menuEntity.getMenuImages();
         this.menuType = menuEntity.getMenuType();
+        this.isButton = menuEntity.getIsButton();
+        this.langKey = menuEntity.getLangKey();
         this.path = menuEntity.getPath();
         this.parentId = menuEntity.getParentId();
         this.createdTime = menuEntity.getUpdatedTime();
@@ -145,6 +157,8 @@ public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements 
         menu.setMenuImages(menuImages);
         menu.setParentId(parentId);
         menu.setMenuType(menuType);
+        menu.setIsButton(isButton);
+        menu.setLangKey(langKey);
         menu.setPath(path);
         menu.setCreatedTime(createdTime);
         menu.setCreatedUser(createdUser);

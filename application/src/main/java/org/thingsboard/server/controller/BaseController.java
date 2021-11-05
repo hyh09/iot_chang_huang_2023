@@ -1005,4 +1005,17 @@ public abstract class BaseController {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
     }
+
+    /**
+     * 校验同层级下系统菜单/按钮名称是否重复
+     * @return
+     */
+    public void checkSameLevelNameRepetition(AddMenuDto addMenuDto) throws ThingsboardException {
+        Boolean sameLevelNameRepetition = menuService.findSameLevelNameRepetition(addMenuDto.getId(), addMenuDto.getParentId(), addMenuDto.getName());
+        if(sameLevelNameRepetition){
+            log.warn("名称重复");
+            throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+    }
+
 }

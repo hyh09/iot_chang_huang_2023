@@ -26,6 +26,7 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
@@ -35,6 +36,7 @@ import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.Predicate;
@@ -58,6 +60,8 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     private ProductionLineDao productionLineDao;
     @Autowired
     private DeviceDao deviceDao;
+    @Autowired
+    private UserRoleMenuSvc userRoleMenuSvc;
 
     @Override
     protected Class<FactoryEntity> getEntityClass() {
@@ -105,13 +109,14 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * @return
      */
     @Override
-    public FactoryListVo findFactoryListBuyCdn(Factory factory){
+    public FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo){
         List<FactoryEntity> factoryEntityList = new ArrayList<>();
         List<WorkshopEntity> workshopEntityList = new ArrayList<>();
         List<ProductionLineEntity> productionLineEntityList = new ArrayList<>();
         List<DeviceEntity> deviceEntityList = new ArrayList<>();
 
         // TODO: 2021/10/29 工厂管理员及工厂用户只能看工厂数据 待开发
+
 
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
@@ -126,6 +131,10 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 predicates.add(cb.equal(root.get("tenantId"),factory.getTenantId()));
                 if(notBlankFactoryName){
                     predicates.add(cb.like(root.get("name"),"%" + factory.getName().trim() + "%"));
+                }
+                //工厂管理员及工厂用户只能看工厂数据
+                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag()){
+                    predicates.add(cb.equal(root.get("id"), judgeUserVo.getUserId()));
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
