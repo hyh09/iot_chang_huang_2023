@@ -45,7 +45,7 @@ public class TenantMenuVo {
     //额外加的逻辑字段配合前端
     private  String name;
 
-    private  Boolean flg=false;
+    private  Boolean checked=false;
 
 
 }

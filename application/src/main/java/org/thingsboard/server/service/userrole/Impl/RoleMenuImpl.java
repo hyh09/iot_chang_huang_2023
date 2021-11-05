@@ -58,7 +58,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         }
         tenantMenuRoleService.deleteByTenantSysRoleId(vo.getRoleId());
         binding(vo.getRoleId(),vo.getMenuVoList(),MenuCheckEnum.SELECT_ALL);
-        binding(vo.getRoleId(),vo.getMenuVoList(),MenuCheckEnum.SEMI_SELECTION);
+        binding(vo.getRoleId(),vo.getSemiSelectList(),MenuCheckEnum.SEMI_SELECTION);
     }
 
 
@@ -94,42 +94,38 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
     @Override
     public List<TenantMenuVo> queryAllNew(InMenuByUserVo vo) throws Exception {
-        log.info("1.先查询租户下的所有菜单入参{}",vo);
-        List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
-        List<TenantMenuVo> vos=  listToVo(menus);
-        log.info("2.先查询租户下的所有菜单入参{}返回的结果{}",vo,menus);
-        if(CollectionUtils.isEmpty(menus))
-        {
-            return  vos;
-        }
-        if( (vo.getRoleId()) != null )
-        {
-            return  vos;
-
-        }
-        //2.用当前的角色查询所绑定的菜单：  tb_tenant_menu_role
-        TenantMenuRoleEntity  entity= new TenantMenuRoleEntity();
-        entity.setTenantSysRoleId(vo.getRoleId());
-        List<TenantMenuRoleEntity> entityList= tenantMenuRoleService.findAllByTenantMenuRoleEntity(entity);
-        log.info("3.先查询租户下的所有菜单入参{}返回的结果{}",vo,entityList);
-        if(CollectionUtils.isEmpty(entityList))
-        {
-            return  vos;
-        }
-        for(TenantMenuVo menu:vos)
-        {
-            for(TenantMenuRoleEntity entity1:entityList)
-            {
-                if(menu.getId().equals(entity1.getTenantMenuId() )  && entity.getFlg().equals(MenuCheckEnum.SELECT_ALL.getRoleCode()) )
-                {
-                    menu.setFlg(true);
-                }
+        try {
+            log.info("1.先查询租户下的所有菜单入参{}", vo);
+            List<TenantMenu> menus = menuService.getTenantMenuListByTenantId(vo.getMenuType(), vo.getTenantId());
+            List<TenantMenuVo> vos = listToVo(menus);
+            log.info("2.先查询租户下的所有菜单入参{}返回的结果{}", vo, menus);
+            if (CollectionUtils.isEmpty(menus)) {
+                return vos;
             }
+            //2.用当前的角色查询所绑定的菜单：  tb_tenant_menu_role
+            TenantMenuRoleEntity entity = new TenantMenuRoleEntity();
+            entity.setTenantSysRoleId(vo.getRoleId());
+            List<TenantMenuRoleEntity> entityList = tenantMenuRoleService.findAllByTenantMenuRoleEntity(entity);
+            log.info("3.先查询租户下的所有菜单入参{}返回的结果{}", vo, entityList);
+            if (CollectionUtils.isEmpty(entityList)) {
+                return vos;
+            }
+            for (TenantMenuVo menu : vos) {
+                for (TenantMenuRoleEntity entity1 : entityList) {
+                    if (menu.getId().equals(entity1.getTenantMenuId()) && entity1.getFlg().equals(MenuCheckEnum.SELECT_ALL.getRoleCode())) {
+                        menu.setChecked(true);
+                    }
+                }
 
 
+            }
+            log.info("4.先查询租户下的所有菜单入参{}返回的结果{}", vo, menus);
+            return vos;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return  null;
         }
-        log.info("4.先查询租户下的所有菜单入参{}返回的结果{}",vo,menus);
-        return vos;
     }
 
     @Override
@@ -173,7 +169,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
             return ;
 
         }
-        tenantMenuRoleService.deleteByTenantSysRoleId(roleId);
+//        tenantMenuRoleService.deleteByTenantSysRoleId(roleId);
         voList.forEach(id ->{
             TenantMenuRoleEntity  entity  = new TenantMenuRoleEntity();
             entity.setTenantSysRoleId(roleId);
