@@ -43,6 +43,13 @@ public class TenantMenuRoleEntity  extends TenantBaseEntity {
      *中文描述: 备注	
      */	
     @Column(name="remark")	
-    private String remark;	
+    private String remark;
+
+    /**
+     * 1是全选
+     * 0是半选
+     */
+    @Column(name = "flg")
+    private String flg;
 
  }	

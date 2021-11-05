@@ -1,5 +1,6 @@
 package org.thingsboard.server.service.userrole;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 public interface RoleMenuSvc {
 
-    Object  binding(RoleMenuVo  vo);
+    void   binding(RoleMenuVo  vo) throws ThingsboardException;
 
     //搞复杂了
     Object  queryAll(InMenuByUserVo vo);

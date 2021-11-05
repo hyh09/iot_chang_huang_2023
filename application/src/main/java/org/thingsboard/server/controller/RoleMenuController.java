@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
@@ -42,12 +43,13 @@ public class RoleMenuController extends BaseController{
     @ApiOperation(value = "角色模块下的 【角色绑定菜单接口")
     @RequestMapping(value = "/binding", method = RequestMethod.POST)
     @ResponseBody
-    public Object binding(@RequestBody @Valid RoleMenuVo vo, BindingResult result) {
+    public String binding(@RequestBody @Valid RoleMenuVo vo, BindingResult result) throws ThingsboardException {
         if (result.hasErrors()) {
-            return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
+            throw new ThingsboardException("There is a problem with the request for input!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
-        return   roleMenuSvc.binding(vo);
+           roleMenuSvc.binding(vo);
+           return  "success";
     }
 
 
