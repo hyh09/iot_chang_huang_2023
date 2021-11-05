@@ -41,4 +41,8 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
 
     List<TenantMenu>  findByIdIn(List<UUID> ids);
 
+     List<TenantMenu>  getTenantMenuListByTenantId(String menuType,UUID tenantId);
+
+     List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id);
+
 }
