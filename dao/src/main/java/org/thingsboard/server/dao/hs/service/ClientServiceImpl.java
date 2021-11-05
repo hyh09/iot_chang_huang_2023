@@ -21,7 +21,6 @@ import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
@@ -74,7 +73,12 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
-        return null;
+        return DeviceBaseDTO.builder()
+                .factory(DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getFactoryId()))))
+                .workshop(DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getWorkShopId()))))
+                .productionLine(DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getProductionLineId()))))
+                .device(DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(t.getDeviceId()))))
+                .build();
     }
 
     /**
@@ -85,7 +89,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> List<Device> listDeviceByQuery(TenantId tenantId, T t) {
-        return null;
+        return DaoUtil.convertDataList(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t)));
     }
 
     /**
@@ -97,7 +101,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> PageData<Device> listDevicePageByQuery(TenantId tenantId, T t, PageLink pageLink) {
-        return null;
+        // 查询数据
+        return DaoUtil.toPageData(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t), DaoUtil.toPageable(pageLink)));
     }
 
     /**
@@ -107,7 +112,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Map<String, Boolean> listAllDeviceOnlineStatus(List<UUID> allDeviceIdList) {
-        return null;
+        return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, "active")
+                .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
+
     }
 
     /**
@@ -117,7 +124,18 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public DeviceListAffiliationDTO getDeviceListAffiliation(List<Device> deviceList) {
-        return null;
+        List<UUID> factoryIds = deviceList.stream().map(Device::getFactoryId).distinct().collect(Collectors.toList());
+        List<UUID> workshopIds = deviceList.stream().map(Device::getWorkshopId).distinct().collect(Collectors.toList());
+        List<UUID> productionLineIds = deviceList.stream().map(Device::getProductionLineId).distinct().collect(Collectors.toList());
+
+        return DeviceListAffiliationDTO.builder()
+                .factoryMap(DaoUtil.convertDataList(Lists.newArrayList(this.factoryRepository.findAllById(factoryIds))).stream()
+                        .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity(), (a, b) -> a)))
+                .workshopMap(DaoUtil.convertDataList(Lists.newArrayList(this.workshopRepository.findAllById(workshopIds))).stream()
+                        .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity(), (a, b) -> a)))
+                .productionLineMap(DaoUtil.convertDataList(Lists.newArrayList(this.productionLineRepository.findAllById(productionLineIds))).stream()
+                        .collect(Collectors.toMap(ProductionLine::getId, Function.identity(), (a, b) -> a)))
+                .build();
     }
 
     /**
@@ -127,7 +145,24 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param t        extends FactoryDeviceQuery
      */
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
-        return null;
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+
+            if (!StringUtils.isBlank(t.getDeviceId())) {
+                predicates.add(cb.equal(root.<UUID>get("id"), UUID.fromString(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), UUID.fromString(t.getProductionLineId())));
+            } else if (!StringUtils.isBlank(t.getWorkShopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workShopId"), UUID.fromString(t.getWorkShopId())));
+            } else if (!StringUtils.isBlank(t.getFactoryId())) {
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), UUID.fromString(t.getFactoryId())));
+            } else {
+                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+            }
+            query.orderBy(cb.desc(root.get("createdTime")));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     @Autowired
