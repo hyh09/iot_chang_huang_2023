@@ -176,7 +176,11 @@
                         [matTooltip]="cellTooltip(entity, column, row)"
                         matTooltipPosition="above"
                         [ngStyle]="cellStyle(entity, column, row)">
-                <span [innerHTML]="cellContent(entity, column, row)"></span>
+                <ng-container *ngIf="column.isIconColumn">
+                  <mat-icon *ngIf="isMdiIcon(entity[column.key])" [svgIcon]="entity[column.key]" class="material-icons mat-icon"></mat-icon>
+                  <mat-icon *ngIf="!isMdiIcon(entity[column.key])" class="material-icons mat-icon">{{entity[column.key]}}</mat-icon>
+                </ng-container>
+                <span *ngIf="!column.isIconColumn" [innerHTML]="cellContent(entity, column, row)"></span>
                 <ng-template [ngIf]="column.actionCell">
                   <ng-container [ngSwitch]="column.actionCell.type">
                     <ng-template [ngSwitchCase]="cellActionType.COPY_BUTTON">

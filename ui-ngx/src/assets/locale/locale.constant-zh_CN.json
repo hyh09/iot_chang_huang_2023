@@ -2252,7 +2252,9 @@
     "tenant-required": "租户必填",
     "tenants": "租户",
     "title": "标题",
-    "title-required": "标题必填。"
+    "title-required": "标题必填。",
+    "sys-menus": "系统菜单",
+    "tenant-menus": "租户菜单"
   },
   "timeinterval": {
     "advanced": "高级",

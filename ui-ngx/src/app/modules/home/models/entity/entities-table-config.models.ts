@@ -31,7 +31,6 @@ import { EntityTableHeaderComponent } from '@home/components/entity/entity-table
 import { ActivatedRoute } from '@angular/router';
 import { EntityTabsComponent } from '../../components/entity/entity-tabs.component';
 import { DAY, historyInterval } from '@shared/models/time/time.models';
-import { MatPaginatorIntl } from '@angular/material/paginator';
 
 export type EntityBooleanFunction<T extends BaseData<HasId>> = (entity: T) => boolean;
 export type EntityStringFunction<T extends BaseData<HasId>> = (entity: T) => string;
@@ -101,7 +100,8 @@ export class EntityTableColumn<T extends BaseData<HasId>> extends BaseEntityTabl
               public headerCellStyleFunction: HeaderCellStyleFunction<T> = () => ({}),
               public cellTooltipFunction: CellTooltipFunction<T> = () => undefined,
               public isNumberColumn: boolean = false,
-              public actionCell: CellActionDescriptor<T> = null) {
+              public actionCell: CellActionDescriptor<T> = null,
+              public isIconColumn: boolean = false) {
     super('content', key, title, width, sortable);
   }
 }
@@ -205,7 +205,7 @@ export function checkBoxCell(value: boolean): string {
 export function iconCell(iconName: string): string {
   if (iconName) {
     if (iconName.startsWith('mdi:')) {
-      return `<mat-icon class="mat-icon" svgIcon="${iconName}"></mat-icon>`
+      return `<mat-icon class="material-icons mat-icon" svgIcon="${iconName}"></mat-icon>`
     }
     return `<mat-icon class="material-icons mat-icon">${iconName}</mat-icon>`
   }

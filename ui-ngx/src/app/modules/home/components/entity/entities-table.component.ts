@@ -552,13 +552,24 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       const index = row * this.entitiesTableConfig.columns.length + col;
       let res = this.cellContentCache[index];
       if (isUndefined(res)) {
-        res = this.domSanitizer.bypassSecurityTrustHtml(column.cellContentFunction(entity, column.key));
+        if (!column.isIconColumn) {
+          res = this.domSanitizer.bypassSecurityTrustHtml(column.cellContentFunction(entity, column.key));
+        } else {
+          res = column.cellContentFunction(entity, column.key);
+        }
         this.cellContentCache[index] = res;
       }
       return res;
     } else {
       return '';
     }
+  }
+
+  isMdiIcon(iconName: string) {
+    if (iconName) {
+      return iconName.startsWith('mdi:');
+    }
+    return false;
   }
 
   cellTooltip(entity: BaseData<HasId>, column: EntityColumn<BaseData<HasId>>, row: number) {
