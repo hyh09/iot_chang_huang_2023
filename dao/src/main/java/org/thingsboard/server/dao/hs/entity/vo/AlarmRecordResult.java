@@ -68,7 +68,6 @@ public class AlarmRecordResult {
     @ApiModelProperty("级别")
     private AlarmSimpleLevel level;
 
-
     /**
      * 级别显示值
      */
@@ -86,6 +85,12 @@ public class AlarmRecordResult {
      */
     @ApiModelProperty("是否可确认")
     private Boolean isCanBeConfirm;
+
+    /**
+     * 工厂
+     */
+    @ApiModelProperty("工厂")
+    private String factoryStr;
 
     /**
      * 车间

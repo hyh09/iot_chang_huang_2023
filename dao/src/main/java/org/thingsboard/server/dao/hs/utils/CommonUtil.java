@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hs.utils;
 
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 
@@ -21,6 +22,13 @@ import java.util.stream.Collectors;
 public class CommonUtil {
 
     /**
+     * 判断设备是否是未分配
+     */
+    public static <T extends Device> Boolean isDeviceUnAllocation(T t) {
+        return t.getProductionLineId() == null;
+    }
+
+    /**
      * 通用处理异步返回
      * <p>
      * TODO 增加处理
@@ -29,6 +37,11 @@ public class CommonUtil {
         return t.join();
     }
 
+    /**
+     * 通用处理异步返回
+     * <p>
+     * TODO 增加处理
+     */
     public static <T> List<T> handleAsync(List<CompletableFuture<T>> t) {
         return t.stream().map(CompletableFuture::join).collect(Collectors.toList());
     }
@@ -43,7 +56,7 @@ public class CommonUtil {
         if (monthNum < 1) {
             return new ArrayList<>();
         }
-        for (int i = 1; i <= monthNum; i++) {
+        for (int i = 0; i < monthNum; i++) {
             temp.add(YearMonth.now().minusMonths(i).atDay(1).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli());
         }
         return temp;
@@ -71,15 +84,15 @@ public class CommonUtil {
      */
     public static void checkCode(String code, String prefix) throws ThingsboardException {
         if (code == null || !code.startsWith(prefix)) {
-            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+            throw new ThingsboardException("code error", ThingsboardErrorCode.GENERAL);
         }
         try {
             int intV = Integer.parseInt(code.split(prefix)[1]);
             if (intV < 1 || intV > 9999) {
-                throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+                throw new ThingsboardException("code error", ThingsboardErrorCode.GENERAL);
             }
         } catch (Exception ignore) {
-            throw new ThingsboardException("编码不符合规则", ThingsboardErrorCode.GENERAL);
+            throw new ThingsboardException("code error", ThingsboardErrorCode.GENERAL);
         }
     }
 

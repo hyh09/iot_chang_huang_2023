@@ -30,4 +30,7 @@ public class DictDeviceGroupPropertyVO {
 
     @ApiModelProperty(value = "创建时间")
     private Long createdTime;
+
+    @ApiModelProperty(value = "单位", notes = "仅用于遥测数据展示")
+    private String unit;
 }

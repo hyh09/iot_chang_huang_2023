@@ -1,5 +1,6 @@
 package org.thingsboard.server.common.data.factory;
 
+import kotlin.jvm.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;

@@ -18,6 +18,7 @@ package org.thingsboard.server.dao.sql.productionline;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
+import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 
 import java.util.UUID;
 
@@ -26,5 +27,5 @@ import java.util.UUID;
  */
 public interface ProductionLineRepository extends PagingAndSortingRepository<ProductionLineEntity, UUID>, JpaSpecificationExecutor<ProductionLineEntity> {
 
-
+    ProductionLineEntity findByTenantIdAndId(UUID tenantId, UUID id);
 }

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
+import org.thingsboard.server.entity.tenantmenu.dto.SaveTenantMenuDto;
 import org.thingsboard.server.entity.tenantmenu.dto.UpdTenantMenuDto;
 import org.thingsboard.server.entity.tenantmenu.vo.TenantMenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -42,6 +43,30 @@ public class TenantMenuController extends BaseController {
     public static final String TENANT_MENU_ID = "tenantMenuId";
     public static final String MENU_TYPE = "menuType";
     private List<TenantMenuVo> tenantMenuVos = new ArrayList<>();
+
+
+    /**
+     * 新增/修改租户菜单
+     * @param saveTenantMenuDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("新增/修改租户菜单")
+    @ApiImplicitParam(name = "saveTenantMenuDto",value = "入参实体",dataType = "SaveTenantMenuDto",paramType="body")
+    @PreAuthorize("hasAuthority('SYS_ADMIN')")
+    @RequestMapping(value = "/saveOrUpdTenantMenu", method = RequestMethod.POST)
+    @ResponseBody
+    public void saveOrUpdTenantMenu(@RequestBody SaveTenantMenuDto saveTenantMenuDto) throws ThingsboardException {
+        checkNotNull(saveTenantMenuDto);
+        if(saveTenantMenuDto.getPcList() == null && saveTenantMenuDto.getAppList() == null){
+            return;
+        }
+        checkNotNull(saveTenantMenuDto);
+        checkNotNull(saveTenantMenuDto);
+        List<TenantMenu> tenantMenuList = saveTenantMenuDto.toTenantMenuListBySave(getCurrentUser().getId().getId(), null);
+        tenantMenuService.saveOrUpdTenantMenu(tenantMenuList);
+    }
+
 
     /**
      * 新增租户菜单

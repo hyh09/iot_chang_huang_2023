@@ -117,7 +117,7 @@ public class AlarmRecordController extends BaseController {
      *
      * @see AlarmController#getAlarms
      */
-    @ApiOperation(value = "获得报警记录列表", notes = "必须选择一个工厂、车间、产线、设备、未分配中的一种")
+    @ApiOperation(value = "获得报警记录列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
             @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),

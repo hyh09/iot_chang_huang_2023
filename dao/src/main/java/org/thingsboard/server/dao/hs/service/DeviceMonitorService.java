@@ -133,18 +133,36 @@ public interface DeviceMonitorService {
      *
      * @param tenantId 租户Id
      * @param query    查询参数
+     * @param pageLink 分页参数
      * @return 实时监控列表数据
      */
-    RTMonitorResult getRTMonitorAppData(TenantId tenantId, FactoryDeviceQuery query);
+    RTMonitorResult getRTMonitorAppData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink);
 
     /**
      * 【APP】获得报警记录列表
      *
-     * @param tenantId  租户Id
-     * @param query     查询参数
-     * @param startTime 开始时间
-     * @param endTime   结束时间
+     * @param tenantId 租户Id
+     * @param query    查询条件
+     * @param pageLink 分页排序参数
      * @return 报警记录列表
      */
-    List<AlarmRecordResult> listAppAlarmsRecord(TenantId tenantId, FactoryDeviceQuery query, Long startTime, Long endTime);
+    PageData<AlarmRecordResult> listAppAlarmsRecord(TenantId tenantId, AlarmRecordQuery query, TimePageLink pageLink);
+
+    /**
+     * 获得报警记录统计信息
+     *
+     * @param tenantId 租户Id
+     * @param query    请求参数
+     * @return 报警记录统计信息
+     */
+    List<AlarmTimesResult> listAppAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 获得在线设备情况
+     *
+     * @param tenantId 租户Id
+     * @param query 查询参数
+     * @return 在线设备情况
+     */
+    DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query);
 }

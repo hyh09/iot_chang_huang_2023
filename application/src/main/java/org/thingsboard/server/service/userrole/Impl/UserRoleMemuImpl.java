@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.common.data.vo.user.FindUserVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
@@ -19,6 +21,7 @@ import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.util.JsonUtils;
+import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
 import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.role.UserRoleVo;
@@ -172,21 +175,22 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
     }
 
     @Override
-   public Object getUserByInRole( QueryUserVo user, PageLink pageLink)
+   public Object getUserByInRole( QueryUserVo user, PageLink pageLink,SortRowName sortRowName )
     {
-        log.info("查询当前角色下的用户绑定数据",user);
+        log.info("查询当前角色下的用户绑定数据{}",user);
         SqlVo sqlVo =  splicingSvc.getUserByInRole(user);
-        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
-        return  page;
-
+        Page<FindUserVo> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(), FindUserVo.class,DaoUtil.toPageable(pageLink),sortRowName);
+       List<FindUserVo> list = page.getContent();
+        log.info("查询当前角色下的用户绑定数据list{}",list);
+        return new PageData<FindUserVo>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     @Override
-    public Object getUserByNotInRole(QueryUserVo user, PageLink pageLink) {
+    public Object getUserByNotInRole(QueryUserVo user, PageLink pageLink,SortRowName sortRowName) {
         log.info("查询当前角色下的用户绑定数据",user);
         SqlVo sqlVo =  splicingSvc.getUserByNotInRole(user);
-        Page<User> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(),User.class,DaoUtil.toPageable(pageLink),NameTransform.UN_CHANGE,true);
-        return  page;
+        Page<FindUserVo> page=  userMenuRoleService.querySql(sqlVo.getSql(),sqlVo.getParam(), FindUserVo.class,DaoUtil.toPageable(pageLink),sortRowName);
+        return new PageData<FindUserVo>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
 
