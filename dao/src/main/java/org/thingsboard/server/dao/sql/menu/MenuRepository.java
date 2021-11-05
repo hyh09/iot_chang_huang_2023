@@ -75,7 +75,7 @@ public interface MenuRepository extends PagingAndSortingRepository<MenuEntity, U
      * @param menuType
      * @return
      */
-    @Query("SELECT t FROM MenuEntity t WHERE t.menuType = :menuType AND t.level = 1 ORDER BY t.sort ASC")
+    @Query("SELECT t FROM MenuEntity t WHERE t.menuType = :menuType AND t.level = 0 ORDER BY t.sort ASC")
     List<MenuEntity> getOneLevel(@Param("menuType")String menuType);
 
     @Query(value = "SELECT t FROM MenuEntity t WHERE t.menuType = :menuType ",nativeQuery = true)

@@ -22,5 +22,6 @@ public class MenuVo extends AbstractMenu {
     }
     public MenuVo(Menu menu) {
         super(menu);
+        this.parentName = menu.getParentName();
     }
 }

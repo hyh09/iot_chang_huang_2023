@@ -59,6 +59,7 @@ public class AddMenuDto {
         menu.setMenuType(menuType);
         menu.setPath(path);
         menu.setLangKey(langKey);
+        menu.setIsButton(isButton);
         return menu;
     }
 }

@@ -117,7 +117,14 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         List<Menu> resultMenuList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(content)){
             content.forEach(i->{
-                resultMenuList.add(i.toData());
+                Menu resultMenu = i.toData();
+                if(i.getParentId() != null){
+                    MenuEntity perentEntity = menuRepository.findById(i.getId()).get();
+                    if(perentEntity != null && StringUtils.isNotBlank(perentEntity.getName())){
+                        resultMenu.setParentName(perentEntity.getName());
+                    }
+                }
+                resultMenuList.add(resultMenu);
             });
         }
         PageData<Menu> resultPage = new PageData<>();
