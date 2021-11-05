@@ -85,4 +85,4 @@ public class TenantMenuRoleService  extends BaseSQLServiceImpl<TenantMenuRoleEnt
 
     }
 
-}	
+}

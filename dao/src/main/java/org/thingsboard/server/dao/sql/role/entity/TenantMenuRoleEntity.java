@@ -52,4 +52,4 @@ public class TenantMenuRoleEntity  extends TenantBaseEntity {
     @Column(name = "flg")
     private String flg;
 
- }	
+ }
