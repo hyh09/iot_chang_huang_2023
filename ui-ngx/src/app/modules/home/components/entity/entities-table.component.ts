@@ -109,6 +109,8 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   isDetailsOpen = false;
   detailsPanelOpened = new EventEmitter<boolean>();
 
+  @ViewChild('entityLeftContent', {static: true}) entityLeftContentAnchor: TbAnchorComponent;
+
   @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: TbAnchorComponent;
 
   @ViewChild('entityFilterHeader', {static: true}) entityFilterHeaderAnchor: TbAnchorComponent;
@@ -155,6 +157,16 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   private init(entitiesTableConfig: EntityTableConfig<BaseData<HasId>>) {
     this.isDetailsOpen = false;
     this.entitiesTableConfig = entitiesTableConfig;
+    
+    if (this.entitiesTableConfig.leftComponent) {
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.entitiesTableConfig.leftComponent);
+      const viewContainerRef = this.entityLeftContentAnchor.viewContainerRef;
+      viewContainerRef.clear();
+      const componentRef = viewContainerRef.createComponent(componentFactory);
+      const leftComponent = componentRef.instance;
+      leftComponent.entitiesTableConfig = this.entitiesTableConfig;
+    }
+
     if (this.entitiesTableConfig.headerComponent) {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.entitiesTableConfig.headerComponent);
       const viewContainerRef = this.entityTableHeaderAnchor.viewContainerRef;
@@ -540,13 +552,24 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       const index = row * this.entitiesTableConfig.columns.length + col;
       let res = this.cellContentCache[index];
       if (isUndefined(res)) {
-        res = this.domSanitizer.bypassSecurityTrustHtml(column.cellContentFunction(entity, column.key));
+        if (!column.isIconColumn) {
+          res = this.domSanitizer.bypassSecurityTrustHtml(column.cellContentFunction(entity, column.key));
+        } else {
+          res = column.cellContentFunction(entity, column.key);
+        }
         this.cellContentCache[index] = res;
       }
       return res;
     } else {
       return '';
     }
+  }
+
+  isMdiIcon(iconName: string) {
+    if (iconName) {
+      return iconName.startsWith('mdi:');
+    }
+    return false;
   }
 
   cellTooltip(entity: BaseData<HasId>, column: EntityColumn<BaseData<HasId>>, row: number) {

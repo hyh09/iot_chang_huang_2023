@@ -18,7 +18,7 @@ import { ContactBased } from '@shared/models/contact-based.model';
 import { TenantId } from './id/tenant-id';
 import { TenantProfileId } from '@shared/models/id/tenant-profile-id';
 import { BaseData, CustomBaseData } from '@shared/models/base-data';
-import { TreeNode } from '@app/core/services/utils.service';
+import { TreeNodeOptions } from '@app/core/services/utils.service';
 import { MenuType } from './custom/menu-mng.models';
 
 export enum TenantProfileType {
@@ -121,7 +121,7 @@ export interface TenantInfo extends Tenant {
   tenantProfileName: string;
 }
 
-export interface TenantMenu extends CustomBaseData, TreeNode {
+export interface TenantMenu extends CustomBaseData, TreeNodeOptions {
   additionalInfo: string,
   level: number,
   menuType: MenuType,
@@ -141,7 +141,7 @@ export interface TenantMenu extends CustomBaseData, TreeNode {
 
 export class TenantMenus extends Array<TenantMenu> {}
 
-export interface SysMenu extends CustomBaseData, TreeNode {
+export interface SysMenu extends CustomBaseData, TreeNodeOptions {
   associatedTenant: boolean,
   code: string,
   level: number,

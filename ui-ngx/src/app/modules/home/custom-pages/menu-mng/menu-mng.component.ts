@@ -37,21 +37,26 @@ export class MenuMngComponent extends EntityComponent<Menu> {
         menuIcon: [entity ? entity.menuIcon : ''],
         menuImages: [entity ? entity.menuImages : ''],
         name: [entity ? entity.name : '', [Validators.required]],
+        langKey: [entity ? entity.langKey : '', [Validators.required]], 
         menuType: [entity ? entity.menuType: '', [Validators.required]],
         parentId: [entity ? entity.parentId : ''],
         path: [entity ? entity.path : ''],
-        url: [entity ? entity.url : '']
+        url: [entity ? entity.url : ''],
+        isButton: [entity && !!entity.isButton]
       }
     );
   }
 
   updateForm(entity: Menu) {
-    this.entityForm.patchValue(entity);
+    this.getSuperMenus(entity.menuType, () => {
+      this.entityForm.patchValue(entity);
+    });
   }
 
-  getSuperMenus() {
-    this.menuMngService.getSuperMenus(this.entityForm.get('menuType').value).subscribe(menus => {
+  getSuperMenus(menuType?: MenuType, callFn?: Function) {
+    this.menuMngService.getSuperMenus(menuType || this.entityForm.get('menuType').value).subscribe(menus => {
       this.superMenus = menus;
+      callFn && callFn();
     });
   }
 

@@ -1,0 +1,15 @@
+<mat-form-field>
+  <mat-label>{{ 'action.search' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="searchValue" />
+  <button
+    *ngIf="searchValue; else searchIcon"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="searchValue = ''"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+  <ng-container #searchIcon>
+    <mat-icon matSuffix class="material-icons">search</mat-icon>
+  </ng-container>
+</mat-form-field>
+<nz-tree [nzData]="factories" [nzSearchValue]="searchValue" (nzClick)="onClickNode($event)"></nz-tree>

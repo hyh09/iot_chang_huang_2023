@@ -47,14 +47,13 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
           menu.title = menu.name;
           menu.key = menu.id;
         });
-        if (menuType = MenuType.PC) {
+        if (menuType === MenuType.PC) {
           this.pcSysMenus = this.utils.formatTree(menus);
-          console.log(this.pcSysMenus)
-        } else if (menuType = MenuType.APP) {
+        } else if (menuType === MenuType.APP) {
           this.appSysMenus = this.utils.formatTree(menus);
         }
       }
-    })
+    });
     this.tenantMenuService.getTenantMenuList(menuType, this.tenantInfo.id.id, name).subscribe(menus => {
       if (menus) {
         menus.forEach(menu => {
@@ -63,12 +62,11 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
         });
         if (menuType = MenuType.PC) {
           this.pcTenantMenus = this.utils.formatTree(menus);
-          console.log(this.pcTenantMenus)
         } else if (menuType = MenuType.APP) {
           this.appTenantMenus = this.utils.formatTree(menus);
         }
       }
-    })
+    });
   }
 
   cancel() {
