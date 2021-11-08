@@ -85,7 +85,7 @@ public class TenantMenu{
         tenantMenu.setUpdatedTime(menu.getUpdatedTime());
         tenantMenu.setUpdatedUser(menu.getUpdatedUser());
         tenantMenu.setName(menu.getName());
-        tenantMenu.setId(menu.getUuidId());
+        tenantMenu.setId(menu.getId());
         return tenantMenu;
     }
 

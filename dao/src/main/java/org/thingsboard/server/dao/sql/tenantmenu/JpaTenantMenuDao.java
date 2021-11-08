@@ -177,11 +177,21 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public List<TenantMenu> findByIdIn(List<UUID> ids) {
         return   listToVo(tenantMenuRepository.findByIdIn(ids));
     }
-    /**
-     * 自定义查询菜单列表
-     * @param tenantMenu
-     * @return
-     */
+
+    @Override
+    public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id) {
+        return  listToVo(tenantMenuRepository.getTenantMenuListByIds(menuType,tenantId,id));
+    }
+
+
+
+
+    @Override
+    public List<TenantMenu>  getTenantMenuListByTenantId(String menuType,UUID tenantId)
+    {
+        List<TenantMenuEntity>  tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,tenantId);
+        return listToVo(tenantMenuEntityList);
+    }
     @Override
     public List<TenantMenu> findAllByCdn(TenantMenu tenantMenu){
         return this.commonCondition(tenantMenu);
@@ -217,6 +227,7 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         }
         return resultTenantMenu;
     }
+
 
     /**
      *
