@@ -505,5 +505,5 @@ CREATE TABLE IF NOT EXISTS public.tb_user_menu_role
 )
 
 --新增字段 是否树节点（true/false）
-ALTER TABLE public.tb_menu
+ALTER TABLE public.tb_tenant_menu
     ADD COLUMN has_children boolean DEFAULT false;
