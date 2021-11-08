@@ -503,3 +503,7 @@ CREATE TABLE IF NOT EXISTS public.tb_user_menu_role
     tenant_id uuid,
     CONSTRAINT tb_user_menu_role_pkey PRIMARY KEY (id)
 )
+
+--新增字段 是否树节点（true/false）
+ALTER TABLE public.tb_menu
+    ADD COLUMN has_children boolean DEFAULT false;

@@ -53,6 +53,12 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         tenantMenu.setMenuType(menuType);
         tenantMenu.setIsButton(isButton);
         tenantMenu.setLangKey(langKey);
+        tenantMenu.setPath(path);
+        if(hasChildren == null){
+            tenantMenu.setHasChildren(false);
+        }else {
+            tenantMenu.setHasChildren(hasChildren);
+        }
         if(tenantMenu.getId() == null || tenantMenu.getId() == null ){
             tenantMenu.setCreatedUser(id);
             tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
@@ -87,6 +93,12 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
             tenantMenu.setIsButton(isButton);
         }
         tenantMenu.setLangKey(langKey);
+        tenantMenu.setPath(path);
+        if(hasChildren == null){
+            tenantMenu.setHasChildren(false);
+        }else {
+            tenantMenu.setHasChildren(hasChildren);
+        }
         if(tenantMenu.getId() != null && tenantMenu.getId() != null ){
             tenantMenu.setCreatedUser(loginUserId);
             tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));

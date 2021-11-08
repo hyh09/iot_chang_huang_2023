@@ -32,6 +32,11 @@ public class TenantMenu{
     private String region;
     //多语言Key
     private String langKey;
+    //("路径")
+    private String path;
+    //("是否树节点（true/false）")
+    private Boolean hasChildren;
+
 
     //额外加的逻辑字段配合前端
     private  String name;
@@ -80,6 +85,8 @@ public class TenantMenu{
         tenantMenu.setMenuType(menu.getMenuType());
         tenantMenu.setIsButton(menu.getIsButton());
         tenantMenu.setLangKey(menu.getLangKey());
+        tenantMenu.setPath(menu.getPath());
+        tenantMenu.setHasChildren(menu.getHasChildren());
         tenantMenu.setCreatedTime(menu.getCreatedTime());
         tenantMenu.setCreatedUser(menu.getCreatedUser());
         tenantMenu.setUpdatedTime(menu.getUpdatedTime());

@@ -1,8 +1,8 @@
 package org.thingsboard.server.common.data.vo.menu;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 
 import java.util.UUID;
 
@@ -40,7 +40,10 @@ public class TenantMenuVo {
     private String region;
     //多语言Key
     private String langKey;
-
+    @ApiModelProperty("路径")
+    private String path;
+    @ApiModelProperty("是否树节点（true/false）")
+    private Boolean hasChildren;
     //额外加的逻辑字段配合前端
     private  String name;
 

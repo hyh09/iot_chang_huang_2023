@@ -430,6 +430,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     });
                 });
                 //筛选，一个工厂只保留一个最新版本的网关设备
+
+
+
+
+
                 Iterator<Device> iterator = gatewayList.iterator();
                 gatewayList.forEach(i->{
                     while (iterator.hasNext()){
