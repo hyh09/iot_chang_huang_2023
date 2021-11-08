@@ -35,15 +35,14 @@ public interface MenuService {
     /**
      *查询系统菜单列表（标记被当前租户绑定过的）
      */
-    List<MenuInfo> getTenantMenuListByTenantId(String menuType,String tenantId,String name);
+    List<MenuInfo> getTenantMenuListByTenantId(String menuType,UUID tenantId,String name);
 
     /**
      * 条件查询系统菜单列表
-     * @param menuType
-     * @param name
+     * @param menu
      * @return
      */
-    List<Menu> getMenuListByCdn(String menuType,String name);
+    List<Menu> getMenuListByCdn(Menu menu);
 
     /**
      * 查询系统菜单列表分页
@@ -70,5 +69,6 @@ public interface MenuService {
      * @return
      */
     Boolean findSameLevelNameRepetition(UUID id, UUID parentId ,String name);
+
 
 }

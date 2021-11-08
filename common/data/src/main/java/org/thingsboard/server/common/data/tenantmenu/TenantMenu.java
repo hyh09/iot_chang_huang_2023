@@ -1,17 +1,15 @@
 package org.thingsboard.server.common.data.tenantmenu;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
 
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
+public class TenantMenu{
 
+    private UUID id;
     private UUID tenantId;
     private UUID sysMenuId;
     private String sysMenuCode;
@@ -41,16 +39,15 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
     private  Boolean checked=false;
 
     public TenantMenu() {
-        super();
     }
 
     public TenantMenu(TenantMenuId id) {
-        super(id);
+        this.id = id.getId();
     }
 
-    @Override
-    public String getSearchText() {
-        return null;
+    public TenantMenu(UUID tenantId,Boolean isButton) {
+        this.tenantId = tenantId;
+        this.isButton = isButton;
     }
 
     public void updTenantMenu(TenantMenu tenantMenu){

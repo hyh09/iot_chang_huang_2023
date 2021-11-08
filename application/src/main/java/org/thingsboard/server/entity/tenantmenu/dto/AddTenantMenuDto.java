@@ -4,7 +4,7 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.entity.tenantmenu.AbstractTenantMenu;
 
@@ -53,19 +53,27 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         tenantMenu.setMenuType(menuType);
         tenantMenu.setIsButton(isButton);
         tenantMenu.setLangKey(langKey);
-        if(tenantMenu.getId() == null || tenantMenu.getId().getId() == null ){
+        if(tenantMenu.getId() == null || tenantMenu.getId() == null ){
             tenantMenu.setCreatedUser(id);
             tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
         return tenantMenu;
     }
-    public TenantMenu toTenantMenu(UUID loginUserId){
+    public TenantMenu toTenantMenu(UUID loginUserId,UUID tenantId){
         TenantMenu tenantMenu = new TenantMenu();
-        tenantMenu.setTenantId(tenantId);
+        if(this.tenantId == null){
+            tenantMenu.setTenantId(tenantId);
+        }else {
+            tenantMenu.setTenantId(this.tenantId);
+        }
         tenantMenu.setSysMenuId(sysMenuId);
         tenantMenu.setSysMenuCode(sysMenuCode);
         tenantMenu.setSysMenuName(sysMenuName);
-        tenantMenu.setTenantMenuCode(tenantMenuCode);
+        if(StringUtils.isNotEmpty(this.tenantMenuCode)){
+            tenantMenu.setTenantMenuCode(tenantMenuCode);
+        }else {
+            tenantMenu.setTenantMenuCode("ZHCD"+String.valueOf(System.currentTimeMillis()));
+        }
         tenantMenu.setTenantMenuName(tenantMenuName);
         tenantMenu.setLevel(level);
         tenantMenu.setUrl(url);
@@ -73,13 +81,17 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         tenantMenu.setTenantMenuImages(tenantMenuImages);
         tenantMenu.setParentId(parentId);
         tenantMenu.setMenuType(menuType);
-        tenantMenu.setIsButton(isButton);
+        if(isButton == null){
+            tenantMenu.setIsButton(false);
+        }else {
+            tenantMenu.setIsButton(isButton);
+        }
         tenantMenu.setLangKey(langKey);
-        if(tenantMenu.getId() != null && tenantMenu.getId().getId() != null ){
+        if(tenantMenu.getId() != null && tenantMenu.getId() != null ){
             tenantMenu.setCreatedUser(loginUserId);
             tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }else {
-            tenantMenu.setId(new TenantMenuId(Uuids.timeBased()));
+            tenantMenu.setId(Uuids.timeBased());
             tenantMenu.setUpdatedUser(loginUserId);
             tenantMenu.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }

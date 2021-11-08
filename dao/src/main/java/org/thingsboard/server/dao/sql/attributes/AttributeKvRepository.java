@@ -66,5 +66,18 @@ public interface AttributeKvRepository extends CrudRepository<AttributeKvEntity,
     List<AttributeKvEntity> findAllOneKeyByEntityIdList(@Param("entityType") EntityType entityType,
                                                         @Param("entityIds") List<UUID> entityIds,
                                                         @Param("attributeKey") String key);
+
+    /**
+     * 根据设备标识以及属性类型查询属性
+     * @param entityIds
+     * @param attributeType
+     * @return
+     */
+    @Query(value = "SELECT * FROM attribute_kv WHERE entity_id in :entityIds " +
+            "AND attribute_key = :attributeKey AND attribute_type = :attributeType ", nativeQuery = true)
+    List<AttributeKvEntity> findAllByEntityIds(@Param("entityIds") List<UUID> entityIds,@Param("attributeType") String attributeType,@Param("attributeKey") String attributeKey);
+
 }
+
+
 

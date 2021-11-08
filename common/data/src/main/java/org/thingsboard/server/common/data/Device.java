@@ -69,9 +69,9 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     private UUID updatedUser;
 
-    /********以下是查询条件********/
+    /********以下是非数据库字段********/
     private List<UUID> deviceIdList;
-
+    private String gatewayVersion;
 
 
     public Device() {
@@ -302,6 +302,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setDeviceIdList(List<UUID> deviceIdList) {
         this.deviceIdList = deviceIdList;
+    }
+
+    public String getGatewayVersion() {
+        return gatewayVersion;
+    }
+
+    public void setGatewayVersion(String gatewayVersion) {
+        this.gatewayVersion = gatewayVersion;
     }
 
     @Override

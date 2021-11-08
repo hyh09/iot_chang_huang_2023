@@ -18,7 +18,6 @@ package org.thingsboard.server.entity.factory;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.thingsboard.server.common.data.factory.Factory;
-import org.thingsboard.server.common.data.id.factory.FactoryId;
 
 import java.util.UUID;
 
@@ -89,7 +88,7 @@ public abstract class AbstractFactory{
 
     public AbstractFactory(Factory factory) {
         if (factory.getId() != null) {
-            this.setId(factory.getId().getId());
+            this.setId(factory.getId());
         }
         this.code = factory.getCode();
         this.name = factory.getName();
@@ -112,7 +111,7 @@ public abstract class AbstractFactory{
     }
 
     public Factory toFactory(){
-        Factory factory = new Factory(new FactoryId(this.getId()));
+        Factory factory = new Factory(this.id);
         factory.setCode(code);
         factory.setName(name);
         factory.setLogoIcon(logoIcon);

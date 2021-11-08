@@ -71,7 +71,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
             return ;
         }
         //能查询到就用查询到的id来
-        List<UUID> idsNew = menus.stream().map(TenantMenu::getUuidId).collect(Collectors.toList());
+        List<UUID> idsNew = menus.stream().map(TenantMenu::getId).collect(Collectors.toList());
         log.info("在系统中存在的ids条数:{} 传入的条数{}",idsNew.size(),ids.size());
          bindingData(roleId,idsNew,checkEnum);
     }

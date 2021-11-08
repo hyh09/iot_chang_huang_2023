@@ -12,9 +12,20 @@ import java.util.UUID;
 public interface TenantMenuDao extends Dao<TenantMenu>{
 
     /**
+     * 根据租户删除菜单
+     * @param tenantId
+     */
+    void deletedByTenant(UUID tenantId);
+
+    /**
+     * 根据系统菜单删除菜单
+     * @param menuId
+     */
+    void delByMenuId(UUID menuId);
+
+    /**
      *新增/修改租户菜单
-     * @param pcList
-     * @param appList
+     * @param tenantMenuList
      */
     void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
 
@@ -41,8 +52,11 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
 
     List<TenantMenu>  findByIdIn(List<UUID> ids);
 
-     List<TenantMenu>  getTenantMenuListByTenantId(String menuType,UUID tenantId);
-
-     List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id);
+    /**
+     * 自定义查询菜单列表
+     * @param tenantMenu
+     * @return
+     */
+    List<TenantMenu> findAllByCdn(TenantMenu tenantMenu);
 
 }

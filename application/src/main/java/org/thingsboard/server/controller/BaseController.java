@@ -42,7 +42,6 @@ import org.thingsboard.server.common.data.edge.EdgeInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.*;
-import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageDataIterableByTenantIdEntityId;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -446,18 +445,6 @@ public abstract class BaseController {
             throw handleException(e, false);
         }
     }
-
-    Menu checkMenuId(MenuId menuId, Operation operation) throws ThingsboardException {
-        try {
-            validateId(menuId, "Incorrect menuId " + menuId);
-            Menu menu = menuService.findMenuById(menuId);
-            checkNotNull(menu);
-            accessControlService.checkPermission(getCurrentUser(), Resource.MENU, operation, menuId, menu);
-            return menu;
-        } catch (Exception e) {
-            throw handleException(e, false);
-        }
-    }
     Menu checkAddMenuList(AddMenuDto addMenuDto) throws ThingsboardException{
         if(addMenuDto == null){
             throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
@@ -478,8 +465,8 @@ public abstract class BaseController {
         tenantMenu.forEach(i->{
             try {
                 checkTenantMenu(i);
-                if(i.getId() != null && i.getId().getId() != null &&
-                        tenantMenuService.findById(i.getId().getId()) != null){
+                if(i.getId() != null && i.getId() != null &&
+                        tenantMenuService.findById(i.getId()) != null){
                     throw new ThingsboardException("菜单已存在请勿重复添加！", ThingsboardErrorCode.ITEM_NOT_FOUND);
                 }
             } catch (ThingsboardException e) {
