@@ -127,14 +127,18 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
       const checkedNodeOptions = this.utils.expandTreeNodeOptions(nodeOptions).filter(options => (checkedNodeIds.includes(options.key)));
       checkedNodeOptions.forEach(options => {
         options.checked = false;
+        options.disabled = false;
         options.sysMenuId = options.id;
+        options.tenantMenuIcon = options.menuIcon;
+        options.tenantMenuImages = options.menuImages;
+        options.tenantMenuName = options.name;
       });
       allNodes.forEach(_node => {
         if (_node.isChecked) {
           _node.isDisabled = true;
         }
       });
-      const existMenuIndex = this[tenantMenus].findIndex(menu => (menu.key === node.key));
+      const existMenuIndex = (this[tenantMenus] as NzTreeNodeOptions[]).findIndex(menu => (menu.sysMenuId === node.key));
       if (existMenuIndex >= 0) {
         this[tenantMenus][existMenuIndex] = this.utils.formatTree(checkedNodeOptions)[0];
       } else {
@@ -165,13 +169,13 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     checkedNodes.forEach(node => {
       const _checkedNodes = this.utils.expandTreeNode(node).filter(_node => (_node.isHalfChecked || _node.isChecked));
       _checkedNodes.forEach(_node => {
-        (this[sysTree] as NzTreeComponent).getTreeNodeByKey(_node.key).isDisabled = false;
+        (this[sysTree] as NzTreeComponent).getTreeNodeByKey(_node.origin.sysMenuId).isDisabled = false;
       })
     });
     
     const checkedNodeList: NzTreeNode[] = (this[tree] as NzTreeComponent).getCheckedNodeList();
     checkedNodeList.forEach(node => {
-      (this[sysTree] as NzTreeComponent).getTreeNodeByKey(node.key).setSyncChecked(false);
+      (this[sysTree] as NzTreeComponent).getTreeNodeByKey(node.origin.sysMenuId).setSyncChecked(false);
       if (node.level === 0) {
         this[tenantMenus] = (this[tenantMenus] as NzTreeNodeOptions[]).filter(options => (options.key !== node.key));
       } else {

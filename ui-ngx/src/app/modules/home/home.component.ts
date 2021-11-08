@@ -37,6 +37,8 @@ import {
   selectShowNameVersion,
   selectTenantUI
 } from "@core/custom/tenant-ui.selectors";
+import { ActivatedRoute, Router } from '@angular/router';
+import { MenuService } from '@app/core/public-api';
 
 const screenfull = _screenfull as _screenfull.Screenfull;
 
@@ -84,12 +86,25 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   constructor(protected store: Store<AppState>,
               @Inject(WINDOW) private window: Window,
               public breakpointObserver: BreakpointObserver,
-              private sanitizer: DomSanitizer) {
+              private sanitizer: DomSanitizer,
+              public route: ActivatedRoute,
+              protected router: Router,
+              private menuService: MenuService) {
     super(store);
     this.initCustomUi();
   }
 
   ngOnInit() {
+
+    // 缓存权限数据
+    this.route.data.subscribe(({ permissions }) => {
+      if (permissions) {
+        sessionStorage.setItem('permissions', JSON.stringify(permissions.menuSections));
+        sessionStorage.setItem('menuBtnMap', JSON.stringify(permissions.menuBtnMap));
+        this.menuService.buildMenu();
+        this.router.navigateByUrl(permissions.firstPath);
+      }
+    });
 
     this.authUser$ = this.store.pipe(select(selectAuthUser));
     this.userDetails$ = this.store.pipe(select(selectUserDetails));

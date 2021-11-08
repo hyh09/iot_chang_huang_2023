@@ -15,7 +15,6 @@
 ///
 
 import { Injectable } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 import { select, Store } from '@ngrx/store';
 import { AppState } from '../core.state';
 import { selectAuth, selectIsAuthenticated } from '../auth/auth.selectors';
@@ -33,7 +32,9 @@ export class MenuService {
   menuSections$: Subject<Array<MenuSection>> = new BehaviorSubject<Array<MenuSection>>([]);
   homeSections$: Subject<Array<HomeSection>> = new BehaviorSubject<Array<HomeSection>>([]);
 
-  constructor(private store: Store<AppState>, private authService: AuthService) {
+  constructor(
+    private store: Store<AppState>
+  ) {
     this.store.pipe(select(selectIsAuthenticated)).subscribe(
       (authenticated: boolean) => {
         if (authenticated) {
@@ -43,31 +44,37 @@ export class MenuService {
     );
   }
 
-  private buildMenu() {
-    this.store.pipe(select(selectAuth), take(1)).subscribe(
-      (authState: AuthState) => {
-        if (authState.authUser) {
-          let menuSections: Array<MenuSection>;
-          let homeSections: Array<HomeSection>;
-          switch (authState.authUser.authority) {
-            case Authority.SYS_ADMIN:
-              menuSections = this.buildSysAdminMenu(authState);
-              homeSections = this.buildSysAdminHome(authState);
-              break;
-            case Authority.TENANT_ADMIN:
-              menuSections = this.buildTenantAdminMenu(authState);
-              homeSections = this.buildTenantAdminHome(authState);
-              break;
-            case Authority.CUSTOMER_USER:
-              menuSections = this.buildCustomerUserMenu(authState);
-              homeSections = this.buildCustomerUserHome(authState);
-              break;
-          }
+  public buildMenu() {
+    this.store.pipe(select(selectAuth), take(1)).subscribe((authState: AuthState) => {
+      if (authState.authUser) {
+        if (authState.authUser.authority !== Authority.SYS_ADMIN) {
+          const menuSections: MenuSection[] = JSON.parse(sessionStorage.getItem('permissions')) || [];
           this.menuSections$.next(menuSections);
-          this.homeSections$.next(homeSections);
+          this.homeSections$.next([]);
+        } else {
+          this.menuSections$.next(this.buildSysAdminMenu(authState));
+          this.homeSections$.next(this.buildSysAdminHome(authState));
         }
+        // let menuSections: Array<MenuSection>;
+        // let homeSections: Array<HomeSection>;
+        // switch (authState.authUser.authority) {
+        //   case Authority.SYS_ADMIN:
+        //     menuSections = this.buildSysAdminMenu(authState);
+        //     homeSections = this.buildSysAdminHome(authState);
+        //     break;
+        //   case Authority.TENANT_ADMIN:
+        //     menuSections = this.buildTenantAdminMenu(authState);
+        //     homeSections = this.buildTenantAdminHome(authState);
+        //     break;
+        //   case Authority.CUSTOMER_USER:
+        //     menuSections = this.buildCustomerUserMenu(authState);
+        //     homeSections = this.buildCustomerUserHome(authState);
+        //     break;
+        // }
+        // this.menuSections$.next(menuSections);
+        // this.homeSections$.next(homeSections);
       }
-    );
+    });
   }
 
   private buildSysAdminMenu(authState: AuthState): Array<MenuSection> {
