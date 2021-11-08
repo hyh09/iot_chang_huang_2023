@@ -167,7 +167,6 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         log.trace(" --tenantMenuDao.findByIdIn 的入参{}",ids);
         return tenantMenuDao.findByIdIn(ids);
     }
-
     /**
      * 获取租户下的菜单
      * @param menuType
@@ -183,4 +182,6 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> ids) {
         return tenantMenuDao.getTenantMenuListByIds(menuType,tenantId,ids);
     }
+
+
 }
