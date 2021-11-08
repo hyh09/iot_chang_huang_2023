@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
 
     <name>ThingsBoard Web UI Microservice</name>
-    <url>https://thingsboard.io</url>
+
     <description>Service for hosting ThingsBoard Web UI</description>
 
     <properties>

@@ -180,6 +180,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         tenantMenu.setCreatedUser(createdUser);
         tenantMenu.setUpdatedTime(updatedTime);
         tenantMenu.setUpdatedUser(updatedUser);
+        tenantMenu.setName(tenantMenuName);
         return tenantMenu;
     }
 

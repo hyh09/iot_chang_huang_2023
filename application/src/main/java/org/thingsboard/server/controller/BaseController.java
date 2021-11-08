@@ -110,6 +110,7 @@ import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
 import org.thingsboard.server.service.userrole.CheckSvc;
+import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
@@ -262,6 +263,8 @@ public abstract class BaseController {
 
     @Autowired
     protected ProductionLineService productionLineService;
+
+    @Autowired protected RoleMenuSvc roleMenuSvc;
 
     @Value("${server.log_controller_error_stack_trace}")
     @Getter

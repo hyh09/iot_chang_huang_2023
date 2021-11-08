@@ -28,7 +28,7 @@
     <packaging>jar</packaging>
 
     <name>Thingsboard Server Common Data</name>
-    <url>https://thingsboard.io</url>
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -97,6 +97,11 @@
             <version>1.5.22</version>
             <scope>compile</scope>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.swagger</groupId>-->
+<!--            <artifactId>swagger-annotations</artifactId>-->
+<!--            <version>1.5.22</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

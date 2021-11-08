@@ -40,7 +40,7 @@
     <packaging>pom</packaging>
 
     <name>ThingsBoard Transport Microservices</name>
-    <url>https://thingsboard.io</url>
+
 
     <properties>
         <main.dir>${basedir}/../..</main.dir>
