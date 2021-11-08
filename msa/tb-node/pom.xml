@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
 
     <name>ThingsBoard Node Microservice</name>
-    <url>https://thingsboard.io</url>
+
     <description>ThingsBoard Node Microservice</description>
 
     <properties>

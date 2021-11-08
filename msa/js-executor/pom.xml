@@ -28,7 +28,7 @@
     <packaging>pom</packaging>
 
     <name>ThingsBoard JavaScript Executor Microservice</name>
-    <url>https://thingsboard.io</url>
+
     <description>Service executing JavaScript functions in sandboxed environment</description>
 
     <properties>
