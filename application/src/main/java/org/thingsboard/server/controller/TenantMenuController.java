@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
@@ -53,7 +52,6 @@ public class TenantMenuController extends BaseController {
      */
     @ApiOperation("新增/修改租户菜单")
     @ApiImplicitParam(name = "saveTenantMenuDto",value = "入参实体",dataType = "SaveTenantMenuDto",paramType="body")
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/saveOrUpdTenantMenu", method = RequestMethod.POST)
     @ResponseBody
     public void saveOrUpdTenantMenu(@RequestBody SaveTenantMenuDto saveTenantMenuDto) throws ThingsboardException {
@@ -63,8 +61,9 @@ public class TenantMenuController extends BaseController {
         }
         checkNotNull(saveTenantMenuDto);
         checkNotNull(saveTenantMenuDto);
-        List<TenantMenu> tenantMenuList = saveTenantMenuDto.toTenantMenuListBySave(getCurrentUser().getId().getId(), null);
-        tenantMenuService.saveOrUpdTenantMenu(tenantMenuList);
+        checkParameter("租户id不能为空",saveTenantMenuDto.getTenantId());
+        List<TenantMenu> tenantMenuList = saveTenantMenuDto.toTenantMenuListBySave(saveTenantMenuDto.getPcList(),saveTenantMenuDto.getAppList(),getCurrentUser().getId().getId(), null,saveTenantMenuDto.getTenantId());
+        tenantMenuService.saveOrUpdTenantMenu(tenantMenuList,saveTenantMenuDto.getTenantId());
     }
 
 
@@ -76,11 +75,11 @@ public class TenantMenuController extends BaseController {
      */
     @ApiOperation("新增租户菜单")
     @ApiImplicitParam(name = "addTenantMenuDtos",value = "入参实体",dataType = "AddTenantMenuDto",paramType="body",allowMultiple = true)
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/saveTenantMenus", method = RequestMethod.POST)
     @ResponseBody
     public List<TenantMenuVo> saveTenantMenus(@RequestBody List<AddTenantMenuDto> addTenantMenuDtos) throws ThingsboardException {
         try {
+            tenantMenuVos = new ArrayList<>();
             //校验参数
             List<TenantMenu> tenantMenuList = checkAddTenantMenuList(addTenantMenuDtos);
             tenantMenuList = checkNotNull(tenantMenuService.saveTenantMenuList(tenantMenuList));
@@ -101,11 +100,11 @@ public class TenantMenuController extends BaseController {
      */
     @ApiOperation("修改租户菜单")
     @ApiImplicitParam(name = "updTenantMenuDto",value = "入参实体",dataType = "UpdTenantMenuDto",paramType="body")
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/updTenantMenu", method = RequestMethod.PUT)
     @ResponseBody
     public List<TenantMenuVo> updTenantMenu(@RequestBody UpdTenantMenuDto updTenantMenuDto) throws ThingsboardException {
         try {
+            tenantMenuVos = new ArrayList<>();
             //校验参数
             checkNotNull(updTenantMenuDto);
             checkParameter("tenantId",updTenantMenuDto.getTenantId());
@@ -133,11 +132,11 @@ public class TenantMenuController extends BaseController {
     @ApiOperation("修改租户菜单排序")
     @ApiImplicitParams({@ApiImplicitParam(name = "id",value = "当前菜单",dataType = "String",paramType="query",required = true),
                     @ApiImplicitParam(name = "frontId",value = "移动到指定位置后，前面一个菜单标识",dataType = "String",paramType="query")})
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/updTenantMenuSort", method = RequestMethod.PUT)
     @ResponseBody
     public List<TenantMenuVo> updTenantMenuSort(@RequestParam String id,@RequestParam String frontId) throws ThingsboardException {
         try {
+            tenantMenuVos = new ArrayList<>();
             //校验参数
             checkParameter("id",id);
             checkParameter("前面一个菜单",frontId);
@@ -160,11 +159,11 @@ public class TenantMenuController extends BaseController {
     @ApiOperation("删除租户菜单")
     @ApiImplicitParams({@ApiImplicitParam(name = "id",value = "当前菜单",dataType = "String",paramType="query",required = true),
             @ApiImplicitParam(name = "tenantId",value = "租户标识")})
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/delTenantMenu", method = RequestMethod.DELETE)
     @ResponseBody
     public List<TenantMenuVo> delTenantMenu(@RequestParam(required = true) String id,@RequestParam(required = true) String tenantId) throws ThingsboardException {
         try {
+            tenantMenuVos = new ArrayList<>();
             //校验参数
             checkParameter("id",id);
             checkParameter("tenantId",tenantId);
@@ -188,11 +187,11 @@ public class TenantMenuController extends BaseController {
             @ApiImplicitParam(name = "menuType",value = "菜单类型（PC/APP）",required = true,dataType = "String",paramType="query"),
             @ApiImplicitParam(name = "tenantId",value = "租户标识",required = true,dataType = "String",paramType="query"),
             @ApiImplicitParam(name = "name",value = "菜单名称",dataType = "String",paramType="query")})
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/getTenantMenuList", method = RequestMethod.GET)
     @ResponseBody
     public List<TenantMenuVo> getTenantMenuList(@RequestParam String menuType, @RequestParam String tenantId, @RequestParam(required = false) String name)throws ThingsboardException{
         try {
+            tenantMenuVos = new ArrayList<>();
             checkParameter(TENANT_MENU_ID,tenantId);
             checkParameter(MENU_TYPE,menuType);
             List<TenantMenu> tenantMenuList = checkNotNull(tenantMenuService.getTenantMenuList(menuType,tenantId,name));
@@ -210,7 +209,6 @@ public class TenantMenuController extends BaseController {
      */
     @ApiOperation(value="根据菜单标识查询菜单详情信息")
     @ApiImplicitParam(name = "id",value = "当前菜单id",dataType = "String",paramType="path",required = true)
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public TenantMenuVo getTenantById(@PathVariable("id") String id) throws ThingsboardException {

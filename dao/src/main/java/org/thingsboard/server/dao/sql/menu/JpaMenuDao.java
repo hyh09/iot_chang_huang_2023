@@ -25,7 +25,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageData;
@@ -36,6 +35,7 @@ import org.thingsboard.server.dao.model.sql.MenuEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
 import javax.persistence.criteria.Predicate;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +46,9 @@ import java.util.UUID;
  * Created by Valerii Sosliuk on 4/30/2017.
  */
 @Component
+@Transactional
 public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> implements MenuDao {
+    private final static Boolean FALSE = false;
 
     @Autowired
     private MenuRepository menuRepository;
@@ -62,7 +64,8 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
     }
 
     @Override
-    public Menu saveMenu(TenantId tenantId, Menu domain) throws ThingsboardException {
+    public Menu saveMenu(Menu domain) throws ThingsboardException {
+        Menu resultMenu = new Menu();
         MenuEntity menuEntity = new MenuEntity(domain);
         if (menuEntity.getUuid() == null) {
             UUID uuid = Uuids.timeBased();
@@ -74,9 +77,9 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         }
         MenuEntity entity = menuRepository.save(menuEntity);
         if(entity != null){
-            return entity.toData();
+            resultMenu = entity.toData();
         }
-        return null;
+        return resultMenu;
     }
 
     @Override
@@ -119,7 +122,7 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
             content.forEach(i->{
                 Menu resultMenu = i.toData();
                 if(i.getParentId() != null){
-                    MenuEntity perentEntity = menuRepository.findById(i.getId()).get();
+                    MenuEntity perentEntity = menuRepository.findById(i.getParentId()).get();
                     if(perentEntity != null && StringUtils.isNotBlank(perentEntity.getName())){
                         resultMenu.setParentName(perentEntity.getName());
                     }
@@ -132,7 +135,45 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         return resultPage;
     }
 
-
+    /**
+     * 条件查询系统菜单列表
+     * @param menu
+     * @return
+     */
+    @Override
+    public List<Menu> getMenuListByCdn(Menu menu){
+        return this.commonCondition(menu);
+    }
+    /**
+     * 构造查询条件,需要家条件在这里面加
+     * @param menu
+     * @return
+     */
+    private List<Menu> commonCondition(Menu menu){
+        List<Menu> resultTenantMenu = new ArrayList<>();
+        Specification<MenuEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(menu != null){
+                if(menu.getTenantId() != null){
+                    predicates.add(cb.equal(root.get("tenantId"),menu.getTenantId()));
+                }
+                if(menu.getIsButton() != null){
+                    predicates.add(cb.equal(root.get("isButton"),menu.getIsButton()));
+                }
+                if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(menu.getMenuType())){
+                    predicates.add(cb.equal(root.get("menuType"),menu.getMenuType()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        List<MenuEntity> all = menuRepository.findAll(specification);
+        if(CollectionUtils.isNotEmpty(all)){
+            all.forEach(i->{
+                resultTenantMenu.add(i.toData());
+            });
+        }
+        return resultTenantMenu;
+    }
     /**
      * 分页查询
      * @param menuId
@@ -160,8 +201,10 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
         List<MenuEntity> menuEntityList = new ArrayList<>();
         Specification<MenuEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            //排除掉按钮
+            predicates.add(cb.equal(root.get("isButton"),FALSE));
             if(StringUtils.isNotBlank(menuType)){
-                predicates.add(cb.equal(root.get("name"),menuType));
+                predicates.add(cb.equal(root.get("menuType"),menuType));
             }
             if(StringUtils.isNotBlank(name)){
                 predicates.add(cb.like(root.get("name"),"%" + name.trim() + "%"));
@@ -235,5 +278,6 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
     public Menu getTenantById(UUID id){
         return menuRepository.findById(id).get().toData();
     }
+
 
 }

@@ -1,24 +1,17 @@
 package org.thingsboard.server.entity.menu.qry;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.thingsboard.server.common.data.memu.Menu;
+import org.thingsboard.server.entity.menu.AbstractMenu;
 
 @ApiModel("MenuQueryCdnQry")
 @Data
-public class MenuQueryCdnQry {
+public class MenuQueryCdnQry extends AbstractMenu {
 
-    @ApiModelProperty("菜单名称")
-    private String name;
-
-    @ApiModelProperty("菜单类型")
-    private String menuType;
+    public MenuQueryCdnQry(){}
 
     public Menu toMenu(){
-        Menu menu = new Menu();
-        menu.setName(name);
-        menu.setMenuType(menuType);
-        return menu;
+        return super.toMenu();
     }
 }

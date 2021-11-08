@@ -49,9 +49,10 @@ public class ProductionLine{
     private String delFlag;
 
 
-
-    public ProductionLine() {
-        super();
+    public ProductionLine(){
+    }
+    public ProductionLine(UUID id) {
+        this.id = id;
     }
 
 }

@@ -39,10 +39,7 @@ import org.thingsboard.server.dao.sql.TbSqlBlockingQueueWrapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -150,6 +147,18 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
     public List<String> findAllKeysByEntityIds(TenantId tenantId, EntityType entityType, List<EntityId> entityIds) {
         return attributeKvRepository
                 .findAllKeysByEntityIds(entityType.name(), entityIds.stream().map(EntityId::getId).collect(Collectors.toList()));
+    }
+
+    /**
+     * 根据设备标识以及属性类型查询属性
+     * @param entityIds
+     * @param attributeType
+     * @param attributeKey
+     * @return
+     */
+    @Override
+    public List<AttributeKvEntity> findAllByEntityIds(List<UUID> entityIds, String attributeType,String attributeKey){
+        return attributeKvRepository.findAllByEntityIds(entityIds, attributeType,attributeKey);
     }
 
     @Override

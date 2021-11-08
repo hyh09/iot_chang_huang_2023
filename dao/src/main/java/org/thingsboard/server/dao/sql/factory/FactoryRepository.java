@@ -19,7 +19,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 
 import java.util.List;
@@ -48,4 +48,20 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
 
     @Query(value = "select * from hs_factory where if(?1!='',name=?1,1=1) and if(?2!='',code=?2,1=1)" ,nativeQuery = true)
     List<FactoryEntity> findFactoryListBuyCdn(@Param("name") String name,@Param("code") String code );
+
+    /**
+     * 根据工厂管理员查询
+     * @param factoryAdminId
+     * @return
+     */
+    @Query("SELECT t FROM FactoryEntity t WHERE t.adminUserId = :factoryAdminId ")
+    Factory findFactoryByAdmin(@Param("factoryAdminId")UUID factoryAdminId);
+
+    /**
+     * 根据租户查询
+     * @param tenantId
+     * @return
+     */
+    @Query("SELECT t FROM FactoryEntity t WHERE t.tenantId = :tenantId ")
+    List<Factory> findFactoryByTenantId(@Param("tenantId")UUID tenantId);
 }

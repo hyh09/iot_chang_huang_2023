@@ -894,8 +894,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         deviceDao.removeProductionLine(device.getDeviceIdList(),device.getUpdatedUser());
     }
 
-
-
+    /**
+     * 查询工厂下具有最新版本的一个网关设备
+     * @param factoryIds
+     * @return
+     */
+    @Override
+    public List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException{
+        return deviceDao.findGatewayNewVersionByFactory(factoryIds);
+    }
 
 
 

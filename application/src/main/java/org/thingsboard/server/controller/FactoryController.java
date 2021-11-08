@@ -13,7 +13,9 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
+import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
 import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
+import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -116,8 +118,10 @@ public class FactoryController extends BaseController  {
     public FactoryListVo findFactoryListBuyCdn(QueryFactoryDto queryFactoryDto) throws ThingsboardException {
         try {
             checkParameter("没有获取到租户tenantId",getCurrentUser().getTenantId().getId());
-            queryFactoryDto.setTenantId(getCurrentUser().getTenantId().getId());
-            return checkNotNull(factoryService.findFactoryListBuyCdn(queryFactoryDto.toFactory(),userRoleMenuSvc.decideUser(getCurrentUser().getId())));
+            Factory factory = queryFactoryDto.toFactory();
+            factory.setTenantId(getCurrentUser().getTenantId().getId());
+            factory.setLoginUserId(getCurrentUser().getId().getId());
+            return checkNotNull(factoryService.findFactoryListBuyCdn(factory));
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -138,6 +142,35 @@ public class FactoryController extends BaseController  {
         try {
             checkParameter("id",id);
             return new FactoryVo(checkNotNull(factoryService.findById(toUUID(id))));
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
+     * 查询工厂最新版本
+     * @param queryFactoryDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("查询工厂最新版本")
+    @ApiImplicitParam(name = "queryFactoryDto",value = "入参对象",dataType = "FactoryVersionDto",paramType = "query")
+    @RequestMapping(value = "/findFactoryVersion", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FactoryVersionVo> findFactoryVersion(FactoryVersionDto queryFactoryDto) throws ThingsboardException {
+        try {
+            List<FactoryVersionVo> resultVo = new ArrayList<>();
+            checkParameter("没有获取到登录人所在租户tenantId",getCurrentUser().getTenantId().getId());
+            Factory factory = queryFactoryDto.toFactory();
+            factory.setTenantId(getCurrentUser().getTenantId().getId());
+            factory.setLoginUserId(getCurrentUser().getId().getId());
+            List<Factory> factoryList = factoryService.findFactoryVersion(factory);
+            if(CollectionUtils.isNotEmpty(factoryList)){
+                factoryList.forEach(i->{
+                    resultVo.add(new FactoryVersionVo(i));
+                });
+            }
+            return resultVo;
         } catch (Exception e) {
             throw handleException(e);
         }
