@@ -60,7 +60,7 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
         };
         const checkedKeys: string[] = [];
         menus.forEach(menu => {
-          menu.title = this.translate.instant(menu.langKey);
+          menu.title = this.translate.instant(menu.langKey || '');
           menu.key = menu.id;
           menu.checked && checkedKeys.push(menu.key);
         });
@@ -87,11 +87,11 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
     // 获取选中的节点id
     const pcCheckedNodes: NzTreeNode[] = [];
     this.pcTree.getCheckedNodeList().forEach(node => {
-      pcCheckedNodes.push(...(this.utils.expandTree(node).filter(_node => (_node.key !== '-1'))));
+      pcCheckedNodes.push(...(this.utils.expandTreeNode(node).filter(_node => (_node.key !== '-1'))));
     });
     const appCheckedNodes: NzTreeNode[] = [];
     this.appTree.getCheckedNodeList().forEach(node => {
-      appCheckedNodes.push(...(this.utils.expandTree(node).filter(_node => (_node.key !== '-1'))));
+      appCheckedNodes.push(...(this.utils.expandTreeNode(node).filter(_node => (_node.key !== '-1'))));
     });
     const pcCheckedIds: string[] = pcCheckedNodes.map(node => (node.key));
     const appCheckedIds: string[] = appCheckedNodes.map(node => (node.key));
@@ -99,11 +99,11 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
     // 获取半选中的节点id
     const pcHalfCheckedNodes: NzTreeNode[] = [];
     this.pcTree.getHalfCheckedNodeList().forEach(node => {
-      pcHalfCheckedNodes.push(...(this.utils.expandTree(node).filter(_node => (_node.key !== '-1' && _node.isHalfChecked))));
+      pcHalfCheckedNodes.push(...(this.utils.expandTreeNode(node).filter(_node => (_node.key !== '-1' && _node.isHalfChecked))));
     });
     const appHalfCheckedNodes: NzTreeNode[] = [];
     this.appTree.getHalfCheckedNodeList().forEach(node => {
-      appHalfCheckedNodes.push(...(this.utils.expandTree(node).filter(_node => (_node.key !== '-1' && _node.isHalfChecked))));
+      appHalfCheckedNodes.push(...(this.utils.expandTreeNode(node).filter(_node => (_node.key !== '-1' && _node.isHalfChecked))));
     });
     const pcHalfCheckedIds: string[] = pcHalfCheckedNodes.map(node => (node.key));
     const appHalfCheckedIds: string[] = appHalfCheckedNodes.map(node => (node.key));
