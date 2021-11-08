@@ -63,4 +63,5 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
      * @return
      */
     List<TenantMenu> findAllByCdn(TenantMenu tenantMenu);
+
 }

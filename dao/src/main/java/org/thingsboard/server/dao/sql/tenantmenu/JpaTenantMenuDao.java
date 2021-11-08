@@ -77,7 +77,6 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         //删除菜单角色
         // TODO: 2021/11/4  删除菜单角色
     }
-
     /**
      *新增/修改租户菜单
      * @param tenantMenuList
@@ -177,6 +176,11 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public List<TenantMenu> findByIdIn(List<UUID> ids) {
         return   listToVo(tenantMenuRepository.findByIdIn(ids));
     }
+    /**
+     * 自定义查询菜单列表
+     * @param tenantMenu
+     * @return
+     */
 
     @Override
     public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id) {
@@ -227,7 +231,6 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         }
         return resultTenantMenu;
     }
-
 
     /**
      *
