@@ -1,16 +1,13 @@
 package org.thingsboard.server.common.data.workshop;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
-import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Workshop extends SearchTextBasedWithAdditionalInfo<WorkshopId> {
+public class Workshop{
 
+    private UUID id;
     private UUID factoryId;
     
     private String code;
@@ -37,13 +34,8 @@ public class Workshop extends SearchTextBasedWithAdditionalInfo<WorkshopId> {
         super();
     }
 
-    public Workshop(WorkshopId id) {
-        super(id);
-    }
-
-    @Override
-    public String getSearchText() {
-        return null;
+    public Workshop(UUID id) {
+        this.id = id;
     }
 
 }

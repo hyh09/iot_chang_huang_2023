@@ -17,7 +17,6 @@ package org.thingsboard.server.entity.workshop;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.workshop.Workshop;
 
 import java.util.UUID;
@@ -68,7 +67,7 @@ public abstract class AbstractWorkshop{
 
     public AbstractWorkshop(Workshop workshop) {
         if (workshop.getId() != null) {
-            this.setId(workshop.getId().getId());
+            this.setId(workshop.getId());
         }
         this.factoryId = workshop.getFactoryId();
         this.code = workshop.getCode();
@@ -86,7 +85,7 @@ public abstract class AbstractWorkshop{
     }
 
     public Workshop toWorkshop(){
-        Workshop workshop = new Workshop(new WorkshopId(this.getId()));
+        Workshop workshop = new Workshop(this.id);
         workshop.setFactoryId(factoryId);
         workshop.setCode(code);
         workshop.setName(name);
