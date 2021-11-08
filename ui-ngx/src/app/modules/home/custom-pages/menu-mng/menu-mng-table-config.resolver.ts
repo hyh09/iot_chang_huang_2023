@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig, iconCell } from "@app/modules/home/models/entity/entities-table-config.models";
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { MenuMngComponent } from "./menu-mng.component";
 import { MenuMngFiltersComponent } from "./menu-mng-filters.component";
@@ -39,8 +39,9 @@ export class MenuMngTableConfigResolver implements Resolve<EntityTableConfig<Men
       new EntityTableColumn<Menu>('name', 'menu-mng.name', '33.333333%'),
       new EntityTableColumn<Menu>('parentName', 'menu-mng.parentName', '33.333333%'),
       new EntityTableColumn<Menu>('path', 'menu-mng.path', '33.333333%'),
-      new EntityTableColumn<Menu>('menuIcon', 'menu-mng.icon', '80px', ({menuIcon}) => {
-        return iconCell(menuIcon)
+      new EntityTableColumn<Menu>('menuIcon', 'menu-mng.icon', '80px', ({ menuIcon }) => (menuIcon), () => ({}), false, () => ({}), () => undefined, false, null, true),
+      new EntityTableColumn<Menu>('isButton', 'menu-mng.is-button-or-not', '80px', ({isButton}) => {
+        return isButton ? this.translate.instant('action.yes') : this.translate.instant('action.no');
       }),
       new DateEntityTableColumn<Menu>('createdTime', 'common.created-time', this.datePipe, '150px')
     );

@@ -11,9 +11,11 @@
           margin-bottom: 10px;
         }
         .tree-wrapper {
-          height: 380px;
           border: 1px solid #dee6f2;
           border-radius: 3px;
+          .cdk-virtual-scroll-content-wrapper {
+            padding: 12px 5px;
+          }
         }
       }
       .btns-wrapper {

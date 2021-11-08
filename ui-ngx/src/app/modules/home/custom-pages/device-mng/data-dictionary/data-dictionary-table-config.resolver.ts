@@ -1,7 +1,7 @@
 import { map } from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig, iconCell } from "@app/modules/home/models/entity/entities-table-config.models";
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { DataDictionaryComponent } from "./data-dictionary.component";
 import { TranslateService } from '@ngx-translate/core';
@@ -43,9 +43,7 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.columns.push(
       new EntityTableColumn<DataDictionary>('code', 'device-mng.code', '50%'),
       new EntityTableColumn<DataDictionary>('name', 'device-mng.name', '50%'),
-      new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({icon}) => {
-        return iconCell(icon);
-      }),
+      new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({ icon }) => (icon), () => ({}), false, () => ({}), () => undefined, false, null, true),
       new EntityTableColumn<DataDictionary>('type', 'device-mng.data-type', '150px', ({type}) => {
         if (this.config.componentsData.dataTypeMap[type]) {
           return this.translate.instant(this.config.componentsData.dataTypeMap[type]);

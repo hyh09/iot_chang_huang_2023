@@ -32,7 +32,15 @@
     </tb-entity-details-panel>
   </mat-drawer>
   <mat-drawer-content>
-    <div class="mat-padding tb-entity-table tb-absolute-fill" [style.padding]="entitiesTableConfig.padding">
+    <div
+      fxLayout="row"
+      fxLayoutGap="16px"
+      class="mat-padding tb-entity-table tb-absolute-fill"
+      [style.padding]="entitiesTableConfig.padding"
+    >
+      <div *ngIf="entitiesTableConfig.leftContentEnabled" class="tb-entity-left-content" [style.width]="entitiesTableConfig.leftContentWidth">
+        <tb-anchor #entityLeftContent></tb-anchor>
+      </div>
       <div fxLayout="column" class="mat-elevation-z1 tb-entity-table-content">
         <mat-toolbar class="mat-table-toolbar" [fxShow]="entitiesTableConfig.titleVisible && !textSearchMode && dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
@@ -168,7 +176,11 @@
                         [matTooltip]="cellTooltip(entity, column, row)"
                         matTooltipPosition="above"
                         [ngStyle]="cellStyle(entity, column, row)">
-                <span [innerHTML]="cellContent(entity, column, row)"></span>
+                <ng-container *ngIf="column.isIconColumn">
+                  <mat-icon *ngIf="isMdiIcon(entity[column.key])" [svgIcon]="entity[column.key]" class="material-icons mat-icon"></mat-icon>
+                  <mat-icon *ngIf="!isMdiIcon(entity[column.key])" class="material-icons mat-icon">{{entity[column.key]}}</mat-icon>
+                </ng-container>
+                <span *ngIf="!column.isIconColumn" [innerHTML]="cellContent(entity, column, row)"></span>
                 <ng-template [ngIf]="column.actionCell">
                   <ng-container [ngSwitch]="column.actionCell.type">
                     <ng-template [ngSwitchCase]="cellActionType.COPY_BUTTON">

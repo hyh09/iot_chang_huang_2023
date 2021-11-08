@@ -31,7 +31,6 @@ import { EntityTableHeaderComponent } from '@home/components/entity/entity-table
 import { ActivatedRoute } from '@angular/router';
 import { EntityTabsComponent } from '../../components/entity/entity-tabs.component';
 import { DAY, historyInterval } from '@shared/models/time/time.models';
-import { MatPaginatorIntl } from '@angular/material/paginator';
 
 export type EntityBooleanFunction<T extends BaseData<HasId>> = (entity: T) => boolean;
 export type EntityStringFunction<T extends BaseData<HasId>> = (entity: T) => string;
@@ -101,7 +100,8 @@ export class EntityTableColumn<T extends BaseData<HasId>> extends BaseEntityTabl
               public headerCellStyleFunction: HeaderCellStyleFunction<T> = () => ({}),
               public cellTooltipFunction: CellTooltipFunction<T> = () => undefined,
               public isNumberColumn: boolean = false,
-              public actionCell: CellActionDescriptor<T> = null) {
+              public actionCell: CellActionDescriptor<T> = null,
+              public isIconColumn: boolean = false) {
     super('content', key, title, width, sortable);
   }
 }
@@ -166,6 +166,7 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   groupActionDescriptors: Array<GroupActionDescriptor<L>> = [];
   headerActionDescriptors: Array<HeaderActionDescriptor> = [];
   addActionDescriptors: Array<HeaderActionDescriptor> = [];
+  leftComponent: Type<EntityTableHeaderComponent<T, P, L>>
   headerComponent: Type<EntityTableHeaderComponent<T, P, L>>;
   filterComponent: Type<EntityTableHeaderComponent<T, P, L>>;
   addEntity: CreateEntityOperation<T> = null;
@@ -193,18 +194,10 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   padding: string;
   titleVisible = true;
   groupActionEnabled = true;
+  leftContentEnabled = false;
+  leftContentWidth: string = '300px';
 }
 
 export function checkBoxCell(value: boolean): string {
   return `<mat-icon class="material-icons mat-icon">${value ? 'check_box' : 'check_box_outline_blank'}</mat-icon>`;
-}
-
-export function iconCell(iconName: string): string {
-  if (iconName) {
-    if (iconName.startsWith('mdi:')) {
-      return `<mat-icon class="material-icons mat-icon" svgIcon="${iconName}"></mat-icon>`
-    }
-    return `<mat-icon class="material-icons mat-icon">${iconName}</mat-icon>`
-  }
-  return ''
 }

@@ -1,5 +1,6 @@
-import { BaseData } from './../base-data';
+import { BaseData, CustomBaseData } from './../base-data';
 import { MenuId } from '../id/custom/menu-mng-id';
+import { TreeNodeOptions } from '@app/core/public-api';
 
 export enum MenuType {
   PC = 'PC',
@@ -12,6 +13,7 @@ export enum MenuLevel {
 }
 
 export interface Menu extends BaseData<MenuId> {
+  langKey: string,
   level: MenuLevel,
   parentId: string,
   parentName: string,
@@ -19,5 +21,20 @@ export interface Menu extends BaseData<MenuId> {
   path: string,
   menuIcon: string,
   menuImages: string,
-  url: string
+  url: string,
+  isButton: boolean
+}
+
+export interface MenuTreeNodeOptions extends CustomBaseData, TreeNodeOptions {
+  name?: string,
+  langKey?: string,
+  level?: MenuLevel,
+  parentId: string,
+  parentName?: string,
+  menuType?: MenuType,
+  path?: string,
+  menuIcon?: string,
+  menuImages?: string,
+  url?: string,
+  isButton?: boolean
 }

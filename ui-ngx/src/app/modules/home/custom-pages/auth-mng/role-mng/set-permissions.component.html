@@ -1,4 +1,4 @@
-<div style="min-width: 360px;">
+<div class="set-permissions-wrapper">
   <mat-toolbar color="primary">
     <h2 translate>auth-mng.set-permissions</h2>
     <span fxFlex></span>
@@ -10,6 +10,34 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content>
+    <mat-tab-group>
+      <mat-tab label="PC">
+        <div class="tree-wrapper">
+          <nz-tree
+            #pcTree
+            [nzData]="pcMenus"
+            [nzCheckedKeys]="pcCheckedKeys"
+            [nzExpandedKeys]="pcExpandedKeys"
+            nzVirtualHeight="380px"
+            nzCheckable
+            nzMultiple
+          ></nz-tree>
+        </div>
+      </mat-tab>
+      <mat-tab label="App">
+        <div class="tree-wrapper">
+          <nz-tree
+            #appTree
+            [nzData]="appMenus"
+            [nzCheckedKeys]="appCheckedKeys"
+            [nzExpandedKeys]="appExpandedKeys"
+            nzVirtualHeight="380px"
+            nzCheckable
+            nzMultiple
+          ></nz-tree>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </div>
   <div mat-dialog-actions fxLayoutAlign="end center">
     <button
