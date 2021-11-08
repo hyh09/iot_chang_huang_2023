@@ -91,4 +91,7 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
     @Query("DELETE FROM TenantMenuEntity t WHERE t.sysMenuId = :sysMenuId")
     void delByMenuId(@Param("sysMenuId")UUID sysMenuId);
 
+    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName in (:ids) ORDER BY t.sort ASC")
+    List<TenantMenuEntity> getTenantMenuListByIds(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId, @Param("ids") List<UUID> ids);
+
 }
