@@ -25,7 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.DeviceId;
@@ -388,6 +388,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
      */
     @Override
     public List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException {
+        //返回工厂最新版本网管
         List<Device> resultList = new ArrayList<>();
         //1.查询工厂关联的所有设备
         Specification<DeviceEntity> specification = (root, query, cb) -> {
@@ -429,23 +430,34 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                         }
                     });
                 });
-                //筛选，一个工厂只保留一个最新版本的网关设备
-
-
-
-
-
-                Iterator<Device> iterator = gatewayList.iterator();
+                //筛选，一个工厂只保留一个最新版本的网关设备。双重自循环筛选最大值
+                //存放最大值
+                Iterator<Device> gatewayIterator = gatewayList.iterator();
                 gatewayList.forEach(i->{
-                    while (iterator.hasNext()){
-                        Device device = iterator.next();
-                        if(device.getFactoryId().toString().equals(i.getFactoryId().toString()) && !device.getId().toString().equals(i.getId().toString())){
-                            if(StringUtils.isNotEmpty(device.getGatewayVersion()) && StringUtils.isNotEmpty(i.getGatewayVersion())){
-                                if(this.compareVersion(i.getGatewayVersion(),device.getGatewayVersion()) != 1){
-                                    iterator.remove();
-                                    continue;
+                    while (gatewayIterator.hasNext()){
+                        Device gateway = gatewayIterator.next();
+                        if(gateway.getFactoryId().toString().equals(i.getFactoryId().toString()) && !gateway.getId().toString().equals(i.getId().toString())){
+                            if(StringUtils.isNotEmpty(gateway.getGatewayVersion()) && StringUtils.isNotEmpty(i.getGatewayVersion())){
+                                if(this.compareVersion(gateway.getGatewayVersion(),i.getGatewayVersion()) == -1){
+                                        //小于或等于要过滤掉
+                                        gatewayIterator.remove();
                                 }else {
-                                    resultList.add(device);
+                                    //大于，重新筛选最大值
+                                    if(CollectionUtils.isNotEmpty(resultList)){
+                                        Iterator<Device> it = resultList.iterator();
+                                        while (it.hasNext()){
+                                            Device gatewayMax = it.next();
+                                            if(gatewayMax.getFactoryId().toString().equals(gateway.getFactoryId().toString())){
+                                                if(this.compareVersion(gateway.getGatewayVersion(),gatewayMax.getGatewayVersion()) == 1){
+                                                    it.remove();
+                                                    resultList.add(gateway);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    resultList.add(gateway);
+                                    //
                                 }
                             }
 
