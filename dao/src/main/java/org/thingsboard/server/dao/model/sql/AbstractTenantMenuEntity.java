@@ -134,7 +134,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
 
     public AbstractTenantMenuEntity(TenantMenu tenantMenu) {
         if (tenantMenu.getId() != null) {
-            this.setUuid(tenantMenu.getId().getId());
+            this.setUuid(tenantMenu.getId());
         }
         this.tenantId = tenantMenu.getTenantId();
         this.sysMenuId = tenantMenu.getSysMenuId();

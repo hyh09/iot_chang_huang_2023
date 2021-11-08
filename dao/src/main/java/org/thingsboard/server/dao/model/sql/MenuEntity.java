@@ -24,14 +24,4 @@ public class MenuEntity extends AbstractMenuEntity<Menu>  {
     public Menu toData() {
         return super.toMenu();
     }
-
-    @Override
-    public String getSearchTextSource() {
-        return null;
-    }
-
-    @Override
-    public void setSearchText(String searchText) {
-
-    }
 }

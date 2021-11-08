@@ -104,6 +104,22 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     }
 
     /**
+     * 根据工厂管理员查询
+     * @param factoryAdminId
+     * @return
+     */
+    @Override
+    public Factory findFactoryByAdmin(UUID factoryAdminId){return factoryRepository.findFactoryByAdmin(factoryAdminId);}
+
+    /**
+     * 根据租户查询
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Factory>  findFactoryByTenantId(UUID tenantId){return factoryRepository.findFactoryByTenantId(tenantId);}
+
+    /**
      * 条件查询工厂列表
      * @param factory
      * @return
@@ -114,9 +130,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         List<WorkshopEntity> workshopEntityList = new ArrayList<>();
         List<ProductionLineEntity> productionLineEntityList = new ArrayList<>();
         List<DeviceEntity> deviceEntityList = new ArrayList<>();
-
-        // TODO: 2021/10/29 工厂管理员及工厂用户只能看工厂数据 待开发
-
 
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
@@ -240,7 +253,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 }
 
             }
-            //返回结果
         }
         return this.toFactoryListVo(factoryEntityList,workshopEntityList,productionLineEntityList,deviceEntityList);
     }

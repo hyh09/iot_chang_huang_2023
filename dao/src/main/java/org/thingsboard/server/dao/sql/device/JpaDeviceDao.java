@@ -16,6 +16,7 @@
 package org.thingsboard.server.dao.sql.device;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,22 +25,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Valerii Sosliuk on 5/6/2017.
@@ -48,8 +53,13 @@ import java.util.*;
 @Slf4j
 public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device> implements DeviceDao {
 
+    public static final String ATTRIBUTE_VERSION = "version";
+
     @Autowired
     private DeviceRepository deviceRepository;
+
+    @Autowired
+    private AttributesDao attributesDao;
 
     @Override
     protected Class<DeviceEntity> getEntityClass() {
@@ -369,6 +379,109 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 deviceRepository.save(entity);
             }
         });
+    }
+
+    /**
+     * 查询工厂下具有最新版本的一个网关设备
+     * @param factoryIds 工厂标识
+     * @return
+     */
+    @Override
+    public List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException {
+        List<Device> resultList = new ArrayList<>();
+        //1.查询工厂关联的所有设备
+        Specification<DeviceEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(factoryIds != null && factoryIds.size() > 0){
+                predicates.add(cb.in(root.get("factoryId").in(factoryIds)));
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        List<DeviceEntity> deviceEntityList = deviceRepository.findAll(specification);
+        //2.筛选出网关设备
+        List<Device> gatewayList = new ArrayList<>();
+        if(gatewayList != null && gatewayList.size() > 0){
+            //筛选出网关设备
+            Iterator<DeviceEntity> iterator = deviceEntityList.listIterator();
+            while (iterator.hasNext()){
+                DeviceEntity deviceEntity = iterator.next();
+                JsonNode gateway = deviceEntity.getAdditionalInfo().get("gateway");
+                if(gateway != null && gateway.asBoolean()){
+                    gatewayList.add(deviceEntity.toData());
+                    continue;
+                }else {
+                    iterator.remove();
+                }
+            }
+        }
+        //3.查询网关设备“版本”共享属性值
+        if(gatewayList != null && gatewayList.size() > 0){
+            List<UUID> deviceIds = gatewayList.stream().map(Device::getId).collect(Collectors.toList()).stream().map(DeviceId::getId).collect(Collectors.toList());
+            List<AttributeKvEntity> attributeKvEntities = attributesDao.findAllByEntityIds(deviceIds, DataConstants.SHARED_SCOPE,this.ATTRIBUTE_VERSION);
+            if(!CollectionUtils.isEmpty(attributeKvEntities)){
+                gatewayList.forEach(i->{
+                    attributeKvEntities.forEach(j->{
+                        UUID entityId = j.getId().getEntityId();
+                        String attributeKey = j.getId().getAttributeKey();
+                        if(i.getId().getId().toString().equals(entityId.toString()) && this.ATTRIBUTE_VERSION.equals(attributeKey)){
+                            i.setGatewayVersion(j.getStrValue());
+                            return;
+                        }
+                    });
+                });
+                //筛选，一个工厂只保留一个最新版本的网关设备
+                Iterator<Device> iterator = gatewayList.iterator();
+                gatewayList.forEach(i->{
+                    while (iterator.hasNext()){
+                        Device device = iterator.next();
+                        if(device.getFactoryId().toString().equals(i.getFactoryId().toString()) && !device.getId().toString().equals(i.getId().toString())){
+                            if(StringUtils.isNotEmpty(device.getGatewayVersion()) && StringUtils.isNotEmpty(i.getGatewayVersion())){
+                                if(this.compareVersion(i.getGatewayVersion(),device.getGatewayVersion()) != 1){
+                                    iterator.remove();
+                                    continue;
+                                }else {
+                                    resultList.add(device);
+                                }
+                            }
+
+                        }
+                    }
+                });
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 比较版本号大小
+     * source大于target,返回值为1
+     * source等于target,返回值为0
+     * source小于target,返回值为-1
+     * @param source
+     * @param target
+     * @return
+     */
+    private Integer compareVersion(String source,String target){
+        Integer result = null;
+        String[] sourceArray = source.split("\\.");
+        String[] targetArray = target.split("\\.");
+        int sourceLength = sourceArray.length;
+        int targetLength = targetArray.length;
+        for (int i =0; i < (sourceLength >targetLength?sourceLength:targetLength);i++){
+            Integer v1 = 0;
+            Integer v2 = 0;
+            if(i < sourceLength){
+                v1 = Integer.parseInt(sourceArray[i]);
+            }
+            if(i < targetLength){
+                v2 = Integer.parseInt(targetArray[i]);
+            }
+            result = Integer.compare(v1,v2);
+            if(result != 0){
+                break;
+            }
+        }
+        return result;
     }
 
 }

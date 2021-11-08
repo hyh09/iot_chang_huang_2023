@@ -20,7 +20,6 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.factory.Factory;
-import org.thingsboard.server.common.data.id.factory.FactoryId;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
@@ -106,7 +105,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
 
     public AbstractFactoryEntity(AbstractFactoryEntity<T> abstractFactoryEntity){
         if (abstractFactoryEntity.getId() != null) {
-            this.setUuid(abstractFactoryEntity.getId());
+            this.setId(abstractFactoryEntity.getId());
         }
         this.code = abstractFactoryEntity.getCode();
         this.name = abstractFactoryEntity.getName();
@@ -130,7 +129,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
 
     public AbstractFactoryEntity(Factory factory) {
         if (factory.getId() != null) {
-            this.setUuid(factory.getId().getId());
+            this.setId(factory.getId());
         }
         this.code = factory.getCode();
         this.name = factory.getName();
@@ -153,7 +152,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
     }
 
     public Factory toFactory(){
-        Factory factory = new Factory(new FactoryId(this.getUuid()));
+        Factory factory = new Factory(id);
         factory.setCode(code);
         factory.setName(name);
         factory.setLogoIcon(logoIcon);

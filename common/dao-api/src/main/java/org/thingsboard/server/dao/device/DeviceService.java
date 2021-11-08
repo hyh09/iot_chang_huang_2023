@@ -140,4 +140,12 @@ public interface DeviceService {
      * @throws ThingsboardException
      */
     void removeDevice(Device device) throws ThingsboardException;
+
+    /**
+     * 查询工厂下具有最新版本的一个网关设备
+     * @param factoryId
+     * @return
+     */
+    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryId) throws ThingsboardException ;
+
 }

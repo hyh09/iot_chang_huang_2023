@@ -2,21 +2,14 @@ package org.thingsboard.server.common.data.memu;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.thingsboard.server.common.data.HasCustomerId;
-import org.thingsboard.server.common.data.HasName;
-import org.thingsboard.server.common.data.HasTenantId;
-import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.validation.NoXss;
 
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements HasName, HasTenantId, HasCustomerId {
+public class Menu{
+    private UUID id;
     @NoXss
     private String code;
     @NoXss
@@ -41,6 +34,7 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
     //多语言Key
     private String langKey;
     private String path;
+    private long createdTime;
     @NoXss
     private UUID createdUser;
     @NoXss
@@ -61,12 +55,15 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
     }
 
     public Menu(MenuId id) {
-        super(id);
+        this.id = id.getId();
+    }
+    public Menu(UUID id) {
+        this.id = id;
     }
 
     public void updMenu(Menu menu){
         this.id = menu.getId();
-        this.tenantId = menu.getTenantId().getId();
+        this.tenantId = menu.getTenantId();
         this.name = menu.getName();
         this.path = menu.getPath();
         this.menuIcon= menu.getMenuIcon();
@@ -74,20 +71,5 @@ public class Menu extends SearchTextBasedWithAdditionalInfo<MenuId> implements H
         this.parentId = menu.getParentId();
     }
 
-
-    @Override
-    public String getSearchText() {
-        return null;
-    }
-
-    @Override
-    public CustomerId getCustomerId() {
-        return null;
-    }
-
-    @Override
-    public TenantId getTenantId() {
-        return this.getTenantId();
-    }
 }
 

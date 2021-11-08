@@ -2,7 +2,6 @@ package org.thingsboard.server.dao.factory;
 
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
-import org.thingsboard.server.common.data.vo.JudgeUserVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +50,14 @@ public interface FactoryService {
      * @param factory
      * @return
      */
-    FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo);
+    FactoryListVo findFactoryListBuyCdn(Factory factory);
+
+    /**
+     * 查询工厂最新版本
+     * @param factory
+     * @return
+     */
+    List<Factory> findFactoryVersion(Factory factory) throws Exception;
+
 
 }

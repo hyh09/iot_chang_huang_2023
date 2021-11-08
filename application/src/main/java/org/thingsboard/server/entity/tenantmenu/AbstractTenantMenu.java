@@ -73,7 +73,7 @@ public abstract class AbstractTenantMenu{
 
     public AbstractTenantMenu(TenantMenu tenantMenu) {
         if (tenantMenu.getId() != null) {
-            this.setId(tenantMenu.getId().getId());
+            this.setId(tenantMenu.getId());
         }
         this.tenantId = tenantMenu.getTenantId();
         this.sysMenuId = tenantMenu.getSysMenuId();
@@ -88,6 +88,7 @@ public abstract class AbstractTenantMenu{
         this.tenantMenuIcon = tenantMenu.getTenantMenuIcon();
         this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
+        this.isButton = tenantMenu.getIsButton();
         this.menuType = tenantMenu.getMenuType();
         this.langKey = tenantMenu.getLangKey();
         this.createdTime = tenantMenu.getUpdatedTime();

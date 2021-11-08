@@ -1,20 +1,15 @@
 package org.thingsboard.server.common.data.factory;
 
-import kotlin.jvm.Transient;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
-import org.thingsboard.server.common.data.id.factory.FactoryId;
 
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Factory extends SearchTextBasedWithAdditionalInfo<FactoryId> {
+public class Factory {
 
-//    @ApiModelProperty("工厂标识")
-//    private UUID id;
-
+    //("工厂标识")
+    private UUID id;
     private String code;
 
     private String name;
@@ -58,17 +53,19 @@ public class Factory extends SearchTextBasedWithAdditionalInfo<FactoryId> {
     //产线名称
     public String deviceName;
 
+    @ApiModelProperty("发布时间")
+    private long publishTime;
+    @ApiModelProperty("登录用户")
+    private UUID loginUserId;
+    @ApiModelProperty("工厂版本")
+    private String factoryVersion;
+
+
     public Factory() {
-        super();
-    }
 
-    public Factory(FactoryId id) {
-        super(id);
     }
-
-    @Override
-    public String getSearchText() {
-        return null;
+    public Factory(UUID id) {
+        this.id = id;
     }
 
 }
