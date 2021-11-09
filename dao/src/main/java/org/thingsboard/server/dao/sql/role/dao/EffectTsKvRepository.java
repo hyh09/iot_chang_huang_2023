@@ -70,7 +70,7 @@ public class EffectTsKvRepository {
         sql.append(" and table1.entity_id = :entity_id  ");
         sql.append(" and table1.key = 17  ");
         System.out.println("====>"+sql);
-        param.put("entity_id", UUID.fromString("09947810-3098-11ec-b734-d72539cb2bb2"));
+        param.put("entity_id", UUID.fromString("9689acb0-2c9f-11ec-a563-6f6ff066531c"));
 
         query= entityManager.createNativeQuery(sql.toString(),"result001");
         System.out.println("==param==>"+param);
