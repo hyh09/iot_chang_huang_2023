@@ -35,6 +35,20 @@ public class StringUtilToll {
     }
 
 
+    /**
+     * 加法
+     * @param value1
+     * @param value2
+     * @return
+     */
+    public static double add(String value1,String value2){
+        BigDecimal b1 = new BigDecimal(value1);
+        BigDecimal b2 = new BigDecimal(value2);
+        return b1.add(b2).doubleValue();
+    }
+
+
+
 
 
 }

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -36,4 +37,12 @@ public class QueryTsKvVo {
 
     @ApiModelProperty("工厂id  UUID类型")
     private UUID factoryId;
+
+    @ApiModelProperty("当前要传的属性 数组类型")
+    private String key;
+
+    @ApiModelProperty("分页参数大小 不传默认是2")
+    private  int pageSize=2;
+    @ApiModelProperty("起始页  不传默认是0")
+    private  int page=0;
 }

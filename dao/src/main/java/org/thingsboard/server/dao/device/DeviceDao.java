@@ -287,4 +287,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      */
    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException ;
 
+
+    List<DeviceEntity>  queryAllByIds(List<UUID> ids);
+
 }
