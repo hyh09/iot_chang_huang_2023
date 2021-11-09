@@ -16,6 +16,7 @@
 package org.thingsboard.server.dao.sql.tenantmenu;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,8 +28,10 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.menu.MenuDao;
 import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
+import org.thingsboard.server.dao.sql.role.dao.TenantMenuRoleDao;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
 
 import javax.persistence.criteria.Predicate;
@@ -47,7 +50,10 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
 
     @Autowired
     private TenantMenuRepository tenantMenuRepository;
-
+    @Autowired
+    private TenantMenuRoleDao tenantMenuRoleDao;
+    @Autowired
+    private MenuDao menuDao;
     @Override
     protected Class<TenantMenuEntity> getEntityClass() {
         return TenantMenuEntity.class;
@@ -75,7 +81,7 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public void delByMenuId(UUID sysMenuId){
         tenantMenuRepository.delByMenuId(sysMenuId);
         //删除菜单角色
-        // TODO: 2021/11/4  删除菜单角色
+        tenantMenuRoleDao.deleteByMenuIds(Lists.newArrayList(sysMenuId));
     }
     /**
      *新增/修改租户菜单
@@ -87,6 +93,22 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
             TenantMenuEntity entity = new TenantMenuEntity(e);
             return entity;
         }).collect(Collectors.toList());
+        //查询出系统菜单的按钮，并保存
+//        List<UUID> sysMenuIds = collect.stream().filter(e -> e.getSysMenuId() != null).map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList());
+//        if(CollectionUtils.isNotEmpty(sysMenuIds)){
+//            List<Menu> buttonListByIds = menuDao.getButtonListByIds(sysMenuIds);
+//            if(CollectionUtils.isNotEmpty(buttonListByIds)){
+//                collect.forEach(i->{
+//                    buttonListByIds.forEach(j->{
+//                        if(){
+//
+//                        }
+//                        collect.add(new TenantMenuEntity(j));
+//                    });
+//                });
+//            }
+//        }
+
         tenantMenuRepository.saveAll(collect);
     }
     /**
@@ -156,7 +178,7 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         List<TenantMenu> tenantMenuList = new ArrayList<>();
         List<TenantMenuEntity> tenantMenuEntityList = new ArrayList<>();
         if(StringUtils.isNotEmpty(tenantMenuName)){
-            tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,tenantId,tenantMenuName);
+            tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,UUID.fromString(tenantId),tenantMenuName);
         }else {
             tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,UUID.fromString(tenantId));
         }

@@ -67,7 +67,7 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
     List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId);
 
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName = :tenantMenuName ORDER BY t.sort ASC")
-    List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")String tenantId,@Param("tenantMenuName")String tenantMenuName);
+    List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId,@Param("tenantMenuName")String tenantMenuName);
 
 
     List<TenantMenuEntity> findByIdIn(List<UUID> ids);
