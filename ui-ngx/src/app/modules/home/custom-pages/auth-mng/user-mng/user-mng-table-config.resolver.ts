@@ -12,6 +12,7 @@ import { map } from "rxjs/operators";
 import { RoleMngService } from "@app/core/http/custom/role-mng.service";
 import { MatDialog } from "@angular/material/dialog";
 import { UserMngChangePwdComponent } from "./user-mng-change-pwd.component";
+import { UtilsService } from "@app/core/public-api";
 
 @Injectable()
 export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<UserInfo>>  {
@@ -23,7 +24,8 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     private datePipe: DatePipe,
     private userMngService: UserMngService,
     private roleMngService: RoleMngService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private utils: UtilsService
   ) {
     this.config.entityType = EntityType.USER_MNG;
     this.config.entityComponent = UserMngComponent;
@@ -53,6 +55,12 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
   resolve(): EntityTableConfig<UserInfo> {
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.afterResolved = () => {
+      this.config.addEnabled = this.utils.hasPermission('user.add');
+      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+      this.config.cellActionDescriptors = this.configureCellActions();
+    }
     this.roleMngService.getAllRoles().subscribe(res => {
       this.config.componentsData.roleList = res;
     });
@@ -64,8 +72,6 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     this.config.deleteEntityContent = () => this.translate.instant('auth-mng.delete-user-text');
     this.config.deleteEntitiesTitle = count => this.translate.instant('auth-mng.delete-users-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('auth-mng.delete-users-text');
-
-    this.config.cellActionDescriptors = this.configureCellActions();
 
     this.config.entitiesFetchFunction = pageLink => this.userMngService.getUsers(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.userMngService.getUser(id.id);
@@ -85,12 +91,14 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
 
   configureCellActions(): Array<CellActionDescriptor<UserInfo>> {
     const actions: Array<CellActionDescriptor<UserInfo>> = [];
-    actions.push({
-      name: this.translate.instant('auth-mng.change-pwd'),
-      mdiIcon: 'mdi:pwd-key',
-      isEnabled: (entity) => (!!(entity && entity.id && entity.id.id)),
-      onAction: ($event, entity) => this.changePwd($event, entity.id.id)
-    });
+    if (this.utils.hasPermission('auth-mng.change-pwd')) {
+      actions.push({
+        name: this.translate.instant('auth-mng.change-pwd'),
+        mdiIcon: 'mdi:pwd-key',
+        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id)),
+        onAction: ($event, entity) => this.changePwd($event, entity.id.id)
+      });
+    }
     return actions;
   }
 

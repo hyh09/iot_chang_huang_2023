@@ -9,6 +9,7 @@ import { DeviceDictionaryService } from "@app/core/http/custom/device-dictionary
 import { DeviceDictionaryComponent } from "./device-dictionary.component";
 import { DeviceDictionaryFiltersComponent } from "./device-dictionary-filters.component";
 import { map } from "rxjs/operators";
+import { UtilsService } from "@app/core/public-api";
 
 @Injectable()
 export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DeviceDictionary>> {
@@ -18,7 +19,8 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
-    private deviceDictionaryService: DeviceDictionaryService
+    private deviceDictionaryService: DeviceDictionaryService,
+    private utils: UtilsService
   ) {
     this.config.entityType = EntityType.DEVICE_DICTIONARY;
     this.config.entityComponent = DeviceDictionaryComponent;
@@ -60,6 +62,11 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     this.config.tableTitle = this.translate.instant('device-mng.device-dic');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.afterResolved = () => {
+      this.config.addEnabled = this.utils.hasPermission('device-mng.add-device-dic');
+      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+    }
 
     this.config.entitiesFetchFunction = pageLink => this.deviceDictionaryService.getDeviceDictionaries(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.deviceDictionaryService.getDeviceDictionary(id);

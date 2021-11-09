@@ -48,13 +48,13 @@ export class MenuMngComponent extends EntityComponent<Menu> {
   }
 
   updateForm(entity: Menu) {
-    this.getSuperMenus(entity.menuType, () => {
+    this.getSuperMenus(entity.menuType, entity.id + '', () => {
       this.entityForm.patchValue(entity);
     });
   }
 
-  getSuperMenus(menuType?: MenuType, callFn?: Function) {
-    this.menuMngService.getSuperMenus(menuType || this.entityForm.get('menuType').value).subscribe(menus => {
+  getSuperMenus(menuType?: MenuType, currId?: string, callFn?: Function) {
+    this.menuMngService.getSuperMenus(menuType || this.entityForm.get('menuType').value, currId || '').subscribe(menus => {
       this.superMenus = menus;
       callFn && callFn();
     });

@@ -20,6 +20,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { StoreModule } from '@ngrx/store';
+import { PermissionResolver } from './permission.resolver';
 
 const routes: Routes = [
   { path: '',
@@ -32,6 +33,9 @@ const routes: Routes = [
     },
     canActivate: [AuthGuard],
     canActivateChild: [AuthGuard],
+    resolve: {
+      permissions: PermissionResolver
+    },
     loadChildren: () => import('./pages/home-pages.module').then(m => m.HomePagesModule)
   }
 ];
@@ -40,6 +44,9 @@ const routes: Routes = [
   imports: [
     StoreModule,
     RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [
+    PermissionResolver
+  ]
 })
 export class HomeRoutingModule { }

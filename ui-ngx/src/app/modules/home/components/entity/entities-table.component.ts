@@ -139,7 +139,9 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     if (this.entitiesTableConfig) {
       this.init(this.entitiesTableConfig);
     } else {
-      this.init(this.route.snapshot.data.entitiesTableConfig);
+      const config = this.route.snapshot.data.entitiesTableConfig;
+      config.afterResolved();
+      this.init(config);
     }
   }
 
@@ -214,7 +216,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     const enabledGroupActionDescriptors =
       this.groupActionDescriptors.filter((descriptor) => descriptor.isEnabled);
 
-    this.selectionEnabled = this.entitiesTableConfig.selectionEnabled || enabledGroupActionDescriptors.length;
+    this.selectionEnabled = this.entitiesTableConfig.selectionAlwaysEnabled || this.entitiesTableConfig.selectionEnabled && enabledGroupActionDescriptors.length;
 
     this.columnsUpdated();
 

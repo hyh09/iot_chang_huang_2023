@@ -9,6 +9,7 @@ import { DatePipe } from '@angular/common';
 import { DataDictionaryService } from '@app/core/http/custom/data-dictionary.service';
 import { DataDictionary } from '@app/shared/models/custom/device-mng.models';
 import { DataDictionaryFiltersComponent } from "./data-dictionary-filters.component";
+import { UtilsService } from '@app/core/public-api';
 
 @Injectable()
 export class DataDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DataDictionary>> {
@@ -18,7 +19,8 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
-    private dataDictionaryService: DataDictionaryService
+    private dataDictionaryService: DataDictionaryService,
+    private utils: UtilsService
   ) {
     this.config.entityType = EntityType.DATA_DICTIONARY;
     this.config.entityComponent = DataDictionaryComponent;
@@ -68,6 +70,11 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.tableTitle = this.translate.instant('device-mng.data-dic');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.afterResolved = () => {
+      this.config.addEnabled = this.utils.hasPermission('device-mng.add-data-dic');
+      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+    }
 
     this.config.entitiesFetchFunction = pageLink => this.dataDictionaryService.getDataDictionaries(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.dataDictionaryService.getDataDictionary(id);

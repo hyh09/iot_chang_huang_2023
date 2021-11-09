@@ -43,7 +43,7 @@ export class SelectUsersComponent extends DialogComponent<SelectUsersComponent, 
     this.config.titleVisible = false;
     this.config.groupActionEnabled = false;
     this.config.entitiesDeleteEnabled = false;
-    this.config.entitySelectionEnabled = () => { return true }
+    this.config.selectionAlwaysEnabled = true;
 
     this.config.componentsData = {
       userCode: '',

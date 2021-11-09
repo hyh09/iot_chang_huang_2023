@@ -196,6 +196,8 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   groupActionEnabled = true;
   leftContentEnabled = false;
   leftContentWidth: string = '300px';
+  afterResolved = () => {};
+  selectionAlwaysEnabled = false;
 }
 
 export function checkBoxCell(value: boolean): string {

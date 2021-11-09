@@ -13,7 +13,20 @@
         .tree-wrapper {
           border: 1px solid #dee6f2;
           border-radius: 3px;
-          .cdk-virtual-scroll-content-wrapper {
+          .mat-form-field {
+            width: 100%;
+            padding: 12px 12px 0;
+            ::ng-deep .mat-form-field-wrapper {
+              padding-bottom: 0;
+              .mat-form-field-infix {
+                border-top-width: 3px;
+              }
+              .mat-form-field-underline {
+                bottom: 0;
+              }
+            }
+          }
+          ::ng-deep .cdk-virtual-scroll-content-wrapper {
             padding: 12px 5px;
           }
         }
