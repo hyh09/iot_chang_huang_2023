@@ -18,11 +18,13 @@ import { HasUUID } from '@shared/models/id/has-uuid';
 
 export declare type MenuSectionType = 'link' | 'toggle';
 
-export interface MenuSection extends HasUUID{
+export interface MenuSection extends HasUUID {
   name: string;
   type: MenuSectionType;
   path: string;
   icon: string;
+  isLeaf?: boolean;
+  parentId?: string;
   notExact?: boolean;
   isMdiIcon?: boolean;
   height?: string;

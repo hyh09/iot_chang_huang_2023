@@ -44,6 +44,7 @@ import jsonSchemaDefaults from 'json-schema-defaults';
 import materialIconsCodepoints from '!raw-loader!material-design-icons/iconfont/codepoints';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
+import { Router } from '@angular/router';
 
 const i18nRegExp = new RegExp(`{${i18nPrefix}:[^{}]+}`, 'g');
 
@@ -118,7 +119,8 @@ export class UtilsService {
 
   constructor(@Inject(WINDOW) private window: Window,
               private zone: NgZone,
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private router: Router) {
     let frame: Element = null;
     try {
       frame = window.frameElement;
@@ -513,18 +515,52 @@ export class UtilsService {
   /**
    * @description 将层级树节点数组转换成平级树节点数组
    * @param treeNodes 树节点层级数组 NzTreeNode[]
-   * @returns 平级树节点数组
+   * @returns 平级树节点数组 NzTreeNode[]
    */
-  public expandTree(treeNode: NzTreeNode): NzTreeNode[] {
+  public expandTreeNode(treeNode: NzTreeNode): NzTreeNode[] {
     const arr: NzTreeNode[] = [];
     if (treeNode) {
       arr.push(treeNode);
       if (treeNode.children && treeNode.children.length > 0) {
         treeNode.children.forEach(node => {
-          arr.push(...this.expandTree(node));
+          arr.push(...this.expandTreeNode(node));
         });
       }
     }
     return arr;
+  }
+
+  /**
+   * @description 将层级树节点数据数组转换成平级树节点数组
+   * @param treeNodeOptions 树节点层级数组 NzTreeNodeOptions[]
+   * @param keepChildren 是否保留children boolean
+   * @returns 平级树节点数据数组 TreeNodeOptions[]
+   */
+   public expandTreeNodeOptions(treeNodeOptions: NzTreeNodeOptions, keepChildren?: boolean): TreeNodeOptions[] {
+    const arr: TreeNodeOptions[] = [];
+    if (treeNodeOptions) {
+      const { id, parentId } = treeNodeOptions;
+      if (keepChildren) {
+        arr.push({ ...treeNodeOptions, id, parentId });
+      } else {
+        arr.push({ ...treeNodeOptions, id, parentId, children: undefined });
+      }
+      if (treeNodeOptions.children && treeNodeOptions.children.length > 0) {
+        treeNodeOptions.children.forEach(nodeOptions => {
+          arr.push(...this.expandTreeNodeOptions(nodeOptions));
+        });
+      }
+    }
+    return arr;
+  }
+
+  public hasPermission(btnLangKey: string, path?: string): boolean {
+    const btnMap: { [key: string]: string[] } = JSON.parse(sessionStorage.getItem('menuBtnMap') || '') || {};
+    const currPath = path || this.router.url;
+    if (btnMap[currPath]) {
+      return btnMap[currPath].includes(btnLangKey);
+    } else {
+      return true;
+    }
   }
 }

@@ -2254,7 +2254,10 @@
     "title": "标题",
     "title-required": "标题必填。",
     "sys-menus": "系统菜单",
-    "tenant-menus": "租户菜单"
+    "tenant-menus": "租户菜单",
+    "set-tenant-menus-success": "菜单配置成功",
+    "search-sys-menus": "查询系统菜单",
+    "search-tenant-menus": "查询租户菜单"
   },
   "timeinterval": {
     "advanced": "高级",
