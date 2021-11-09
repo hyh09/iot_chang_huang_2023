@@ -44,7 +44,7 @@ import jsonSchemaDefaults from 'json-schema-defaults';
 import materialIconsCodepoints from '!raw-loader!material-design-icons/iconfont/codepoints';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
-import { id } from 'date-fns/locale';
+import { Router } from '@angular/router';
 
 const i18nRegExp = new RegExp(`{${i18nPrefix}:[^{}]+}`, 'g');
 
@@ -119,7 +119,8 @@ export class UtilsService {
 
   constructor(@Inject(WINDOW) private window: Window,
               private zone: NgZone,
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private router: Router) {
     let frame: Element = null;
     try {
       frame = window.frameElement;
@@ -551,5 +552,15 @@ export class UtilsService {
       }
     }
     return arr;
+  }
+
+  public hasPermission(btnLangKey: string, path?: string): boolean {
+    const btnMap: { [key: string]: string[] } = JSON.parse(sessionStorage.getItem('menuBtnMap') || '') || {};
+    const currPath = path || this.router.url;
+    if (btnMap[currPath]) {
+      return btnMap[currPath].includes(btnLangKey);
+    } else {
+      return true;
+    }
   }
 }

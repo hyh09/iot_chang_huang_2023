@@ -4,6 +4,7 @@ import { TenantMenuService } from "@app/core/http/custom/tenant-menu.service";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { MenuSection } from "@app/core/public-api";
+import { TenantMenu } from "@app/shared/public-api";
 
 interface Permissions {
   firstPath: string;
@@ -22,11 +23,12 @@ export class PermissionResolver implements Resolve<Permissions>  {
     return this.tenantMenuService.getUserMenus().pipe(map(menus => {
       let firstPath: string = '';
       const menuSections: MenuSection[] = [];
+      const menuMap: { [key: string]: TenantMenu } = {};
       const menuBtnMap: { [key: string]: string[] } = {};
-      console.log(menus)
       if (menus) {
-        menus.filter(menu => (!menu.isButton)).forEach(menu => {
-          menuBtnMap[menu.id] = [];
+        menus.filter(menu => (!menu.isButton && menu.path)).forEach(menu => {
+          menuMap[menu.id] = menu;
+          menuBtnMap[menu.path] = [];
           if (menu.path && !firstPath) {
             firstPath = menu.path;
           }
@@ -43,7 +45,7 @@ export class PermissionResolver implements Resolve<Permissions>  {
           };
           menuSections.push(menuSection);
           if (menu.isButton) {
-            menuBtnMap[menu.parentId].push(menu.langKey);
+            menuBtnMap[menuMap[menu.parentId].path].push(menu.langKey);
           }
         });
       }

@@ -55,24 +55,6 @@ export class MenuService {
           this.menuSections$.next(this.buildSysAdminMenu(authState));
           this.homeSections$.next(this.buildSysAdminHome(authState));
         }
-        // let menuSections: Array<MenuSection>;
-        // let homeSections: Array<HomeSection>;
-        // switch (authState.authUser.authority) {
-        //   case Authority.SYS_ADMIN:
-        //     menuSections = this.buildSysAdminMenu(authState);
-        //     homeSections = this.buildSysAdminHome(authState);
-        //     break;
-        //   case Authority.TENANT_ADMIN:
-        //     menuSections = this.buildTenantAdminMenu(authState);
-        //     homeSections = this.buildTenantAdminHome(authState);
-        //     break;
-        //   case Authority.CUSTOMER_USER:
-        //     menuSections = this.buildCustomerUserMenu(authState);
-        //     homeSections = this.buildCustomerUserHome(authState);
-        //     break;
-        // }
-        // this.menuSections$.next(menuSections);
-        // this.homeSections$.next(homeSections);
       }
     });
   }

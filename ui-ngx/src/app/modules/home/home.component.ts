@@ -20,10 +20,10 @@ import { select, Store } from '@ngrx/store';
 import { debounceTime, distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { User } from '@shared/models/user.model';
+import { AuthUser, User } from '@shared/models/user.model';
 import { PageComponent } from '@shared/components/page.component';
 import { AppState } from '@core/core.state';
-import { getCurrentAuthState, selectAuthUser, selectUserDetails } from '@core/auth/auth.selectors';
+import { getCurrentAuthState, getCurrentAuthUser, selectAuthUser, selectUserDetails } from '@core/auth/auth.selectors';
 import { MediaBreakpoints } from '@shared/models/constants';
 import * as _screenfull from 'screenfull';
 import { MatSidenav } from '@angular/material/sidenav';
@@ -39,6 +39,7 @@ import {
 } from "@core/custom/tenant-ui.selectors";
 import { ActivatedRoute, Router } from '@angular/router';
 import { MenuService } from '@app/core/public-api';
+import { Authority } from '@app/shared/public-api';
 
 const screenfull = _screenfull as _screenfull.Screenfull;
 
@@ -83,6 +84,8 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   showSearch = false;
   searchText = '';
 
+  private readonly authUser: AuthUser;
+
   constructor(protected store: Store<AppState>,
               @Inject(WINDOW) private window: Window,
               public breakpointObserver: BreakpointObserver,
@@ -92,6 +95,7 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
               private menuService: MenuService) {
     super(store);
     this.initCustomUi();
+    this.authUser = getCurrentAuthUser(this.store);
   }
 
   ngOnInit() {
@@ -102,7 +106,9 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
         sessionStorage.setItem('permissions', JSON.stringify(permissions.menuSections));
         sessionStorage.setItem('menuBtnMap', JSON.stringify(permissions.menuBtnMap));
         this.menuService.buildMenu();
-        this.router.navigateByUrl(permissions.firstPath);
+        if (window.location.pathname === '/home' && permissions.firstPath) {
+          this.router.navigateByUrl(permissions.firstPath);
+        }
       }
     });
 
@@ -220,4 +226,9 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     this.store.pipe(select(selectPlatformVersion)).subscribe(res => this.version = res);
     this.store.pipe(select(selectShowNameVersion)).subscribe(res => this.showNameVersion = res);
   }
+
+  hideUserHome(): boolean {
+    return this.authUser.authority !== Authority.SYS_ADMIN && window.location.pathname === '/home';
+  }
+  
 }
