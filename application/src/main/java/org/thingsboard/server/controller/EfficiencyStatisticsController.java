@@ -36,15 +36,7 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryCapacity", method = RequestMethod.POST)
     @ResponseBody
     public ResultCapAppVo queryCapacity(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        try {
-            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-            log.info("【app端查询产能接口】异常{}"+e);
-        }
-
-        return null;
+        return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
     }
 
 
