@@ -177,22 +177,22 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
             }
         }
         //代表最大 最小就是自己
-        else {
-
-            if (longV2 != null) {
-                subtractLong = ((longV2>0)?longV2:0) ;
-            }
-            if(doubleValue2 != null)
-            {
-                subtractDouble= (doubleValue2 >0?doubleValue2:0.00);
-            }
-            if(StringUtilToll.isNumber(strV2))
-            {
-                Double d1=  Double.valueOf(strV2);
-                subtractDouble= (d1>0)?d1:0.00;
-            }
-
-        }
+//        else {
+//
+//            if (longV2 != null) {
+//                subtractLong = ((longV2>0)?longV2:0) ;
+//            }
+//            if(doubleValue2 != null)
+//            {
+//                subtractDouble= (doubleValue2 >0?doubleValue2:0.00);
+//            }
+//            if(StringUtilToll.isNumber(strV2))
+//            {
+//                Double d1=  Double.valueOf(strV2);
+//                subtractDouble= (d1>0)?d1:0.00;
+//            }
+//
+//        }
 
     }
 }

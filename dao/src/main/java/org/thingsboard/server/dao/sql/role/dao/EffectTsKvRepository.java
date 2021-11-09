@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,6 @@ import javax.persistence.Query;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -21,7 +21,7 @@ import java.util.UUID;
  * @author: HU.YUNHUI
  * @create: 2021-11-09 09:28
  **/
-//@Component
+@Slf4j
 @Repository
 //@TimescaleDBTsOrTsLatestDao
 public class EffectTsKvRepository {
@@ -118,14 +118,14 @@ public class EffectTsKvRepository {
         }
 
         List<EffectTsKvEntity> entityList=query.getResultList();
-        System.out.println("==打印的结果:==>"+entityList);
+        log.debug("==打印的结果:==>"+entityList);
         entityList.stream().forEach(EffectTsKvEntity -> {
             if(EffectTsKvEntity.isNotEmpty())
             {
                 EffectTsKvEntity.subtraction();
 
             }
-            System.out.println("====>" + EffectTsKvEntity.getOnlyKeyId() + "##############" + EffectTsKvEntity.getEntityId()+"@@@@数字差:"+EffectTsKvEntity.getSubtractDouble()+"Long:====>"+EffectTsKvEntity.getSubtractLong());
+            log.debug("====>" + EffectTsKvEntity.getOnlyKeyId() + "##############" + EffectTsKvEntity.getEntityId()+"@@@@数字差:"+EffectTsKvEntity.getSubtractDouble()+"Long:====>"+EffectTsKvEntity.getSubtractLong());
 
         });
 
