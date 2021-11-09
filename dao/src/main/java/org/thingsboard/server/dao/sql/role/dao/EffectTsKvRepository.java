@@ -91,7 +91,7 @@ public class EffectTsKvRepository {
         if(queryTsKvVo.getFactoryId() != null)
         {
             sql.append(QUERY_factory__ID);
-            param.put("factoryId", queryTsKvVo.getKey());
+            param.put("factoryId", queryTsKvVo.getFactoryId());
         }
 
         if(queryTsKvVo.getWorkshopId() != null)

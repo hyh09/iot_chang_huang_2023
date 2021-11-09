@@ -6,12 +6,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.device.DeviceDao;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
@@ -40,7 +44,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Autowired  private EffectTsKvRepository effectTsKvRepository;
     @Autowired  private DeviceDao deviceDao;
-    @Autowired  private FactoryRepository factoryRepository;
+    @Autowired  private FactoryDao factoryDao;
     @Autowired  private WorkshopDao workshopDao;
     @Autowired  private ProductionLineDao productionLineDao;
 
@@ -53,6 +57,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     public ResultCapAppVo queryCapApp(QueryTsKvVo vo, TenantId tenantId) {
         ResultCapAppVo  resultCapAppVo = new ResultCapAppVo();
         log.info("app的产能分析接口入参:{}",vo);
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
         List<EffectTsKvEntity> effectTsKvEntities = effectTsKvRepository.queryEntity(vo);
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
@@ -96,6 +104,24 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return resultCapAppVo;
     }
 
+
+    /**
+     * 获取当前租户的第一个工厂id
+     * @param tenantId 当前登录人的租户
+     * @return
+     */
+    public  UUID  getFirstFactory(TenantId  tenantId)
+    {
+        FactoryEntity  factory = factoryDao.findFactoryByTenantIdFirst(tenantId.getId());
+        log.info("查询当前租户{}的第一个工厂{}",tenantId.getId(),factory);
+        if(factory == null)
+        {
+            log.error("查询当前租户{}没有工厂,不能查询效能分析之产能数据");
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"当前租户没有工厂");
+
+        }
+        return factory.getId();
+    }
 
 
 
