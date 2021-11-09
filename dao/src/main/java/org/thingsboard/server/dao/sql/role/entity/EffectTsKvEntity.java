@@ -1,10 +1,10 @@
-package org.thingsboard.server.dao.model.sqlts.timescale.ts;
+package org.thingsboard.server.dao.sql.role.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.annotations.Proxy;
 import org.thingsboard.server.dao.model.sql.AbstractTsKvEntity;
-import org.thingsboard.server.dao.model.sqlts.ts.TsKvCompositeKey;
+import org.thingsboard.server.dao.model.sqlts.timescale.ts.TimescaleTsKvCompositeKey;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import javax.persistence.*;
@@ -16,7 +16,11 @@ import java.util.UUID;
  * @author: HU.YUNHUI
  * @create: 2021-11-09 09:18
  **/
-
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "ts_kv")
+@IdClass(TimescaleTsKvCompositeKey.class)
 @SqlResultSetMappings({
         @SqlResultSetMapping(
                 name = "result001",
@@ -49,11 +53,6 @@ import java.util.UUID;
         )
 
 })
-@Proxy(lazy = false)
-@Data
-@Entity
-@Table(name = "ts_kv")
-@IdClass(TsKvCompositeKey.class)
 @ToString
 public class EffectTsKvEntity extends AbstractTsKvEntity {
 
