@@ -27,10 +27,7 @@ import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,10 +68,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
         return DeviceBaseDTO.builder()
-                .factory(DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))))
-                .workshop(DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkShopId()))))
-                .productionLine(DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getProductionLineId()))))
-                .device(DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getDeviceId()))))
+                .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
+                .workshop(t.getWorkShopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkShopId()))) : null)
+                .productionLine(t.getProductionLineId() != null ? DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getProductionLineId()))) : null)
+                .device(t.getDeviceId() != null ? DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getDeviceId()))) : null)
                 .build();
     }
 
@@ -98,7 +95,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> PageData<Device> listDevicePageByQuery(TenantId tenantId, T t, PageLink pageLink) {
-        // 查询数据
         return DaoUtil.toPageData(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t), DaoUtil.toPageable(pageLink)));
     }
 

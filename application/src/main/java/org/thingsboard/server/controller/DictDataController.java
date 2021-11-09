@@ -76,25 +76,26 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "获得数据字典列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
-            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query")})
+            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query", required = true)})
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/data")
     public PageData<DictData> listDictData(
             @RequestParam int pageSize,
             @RequestParam int page,
-            @RequestParam(required = false) String sortProperty,
-            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) DictDataDataTypeEnum dictDataType
+            @RequestParam DictDataDataTypeEnum dictDataType
     )
             throws ThingsboardException {
+        checkParameter("dictDataType", dictDataType);
         DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
                 .code(code).name(name).dictDataType(dictDataType).build();
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
@@ -124,10 +125,11 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "获得数据字典详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path"),})
+            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path", required = true),})
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/data/{id}")
     public DictData getDictDataDetail(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
         return this.dictDataService.getDictDataDetail(id, getTenantId());
     }
 
@@ -138,10 +140,11 @@ public class DictDataController extends BaseController {
      */
     @ApiOperation(value = "删除数据字典")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path"),})
+            @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path", required = true),})
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping("/dict/data/{id}")
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
         this.dictDataService.deleteDictDataById(id, getTenantId());
     }
 }

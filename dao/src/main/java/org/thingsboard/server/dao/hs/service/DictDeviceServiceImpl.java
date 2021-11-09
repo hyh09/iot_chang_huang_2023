@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -15,7 +17,6 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
-import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
@@ -97,16 +98,14 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public DictDeviceVO getDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException {
-        var dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).toData();
+        var dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
+                .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
 
-        // 获得属性列表
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
 
-        // 获得分组及分组属性列表
         var groupVOList = this.listDictDeviceGroup(toUUID(dictDevice.getId()));
 
-        // 获得部件信息
         List<DictDeviceComponentVO> rList = new ArrayList<>();
         var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())));
         var componentVOList = componentList.stream()
@@ -119,10 +118,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
         var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse("null")));
 
-        // 开始递归组装数据
         this.recursionPackageComponent(rList, pMap, "null");
 
-        //返回数据
         DictDeviceVO dictDeviceVO = DictDeviceVO.builder()
                 .propertyList(propertyList)
                 .groupList(groupVOList)
@@ -140,11 +137,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional
     public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
-        DictDevice dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).toData();
-        // 删除设备
+        DictDevice dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
+                .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
         this.deviceRepository.deleteById(toUUID(dictDevice.getId()));
 
-        // 删除其余旧数据
         this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         this.componentRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
@@ -170,30 +166,25 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional
     public void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException {
-        // 设备字典基础
         DictDevice dictDevice = new DictDevice();
         DictDeviceEntity dictDeviceEntity;
         if (!StringUtils.isBlank(dictDeviceVO.getId())) {
-            // 修改
-            dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDeviceVO.getId())).toData();
+            dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDeviceVO.getId())).map(DictDeviceEntity::toData)
+                    .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));;
             BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
 
-            // 删除其余旧数据
             this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.componentRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
-            // 新增
             BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
             dictDevice.setTenantId(tenantId.toString());
         }
 
-        // 保存设备字典
         dictDeviceEntity = new DictDeviceEntity(dictDevice);
         this.deviceRepository.save(dictDeviceEntity);
 
-        // 设备字典属性及保存
         AtomicInteger propertySort = new AtomicInteger();
         var propertyList = dictDeviceVO.getPropertyList().stream()
                 .map(e -> {
@@ -206,7 +197,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 }).collect(Collectors.toList());
         this.propertyRepository.saveAll(propertyList.stream().map(DictDevicePropertyEntity::new).collect(Collectors.toList()));
 
-        // 设备字典分组、分组属性及保存
         AtomicInteger groupSort = new AtomicInteger();
         AtomicInteger groupPropertySort = new AtomicInteger();
         var groupPropertyList = dictDeviceVO.getGroupList().stream().reduce(new ArrayList<DictDeviceGroupProperty>(), (r, e) -> {
@@ -233,7 +223,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         }, (a, b) -> null);
         this.groupPropertyRepository.saveAll(groupPropertyList.stream().map(DictDeviceGroupPropertyEntity::new).collect(Collectors.toList()));
 
-        // 设备字典部件及保存
         if (dictDeviceVO.getComponentList() != null && !dictDeviceVO.getComponentList().isEmpty()) {
             this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null, 0);
         }
@@ -287,7 +276,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId) {
-        // 获得分组及分组属性列表
         var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(dictDeviceId));
         var groupUUIDList = groupList.stream().map(e -> toUUID(e.getId())).collect(Collectors.toList());
         List<DictDeviceGroupProperty> groupPropertyList;
@@ -323,6 +311,29 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 .map(g -> DictDeviceGroupPropertyVO.builder()
                         .id(g.getId()).name(g.getName()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
                         .build()).collect(Collectors.toList());
+    }
+
+    /**
+     * 批量获得设备字典绑定的设备配置Id
+     *
+     * @param dictDeviceIdList 设备字典Id列表
+     */
+    @Override
+    public Map<UUID, DeviceProfileId> listDeviceProfileIdsByDictDeviceIdList(List<UUID> dictDeviceIdList) {
+        return this.deviceProfileDictDeviceRepository.findAllByDictDeviceIdIn(dictDeviceIdList)
+                .stream()
+                .collect(Collectors.toMap(DeviceProfileDictDeviceEntity::getDictDeviceId, e -> DeviceProfileId.fromString(e.getDeviceProfileId().toString()), (a, b) -> a));
+    }
+
+    /**
+     * 获得设备字典绑定的设备配置Id
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId) {
+        var entity = this.deviceProfileDictDeviceRepository.findByDictDeviceId(dictDeviceId);
+        return entity.map(deviceProfileDictDeviceEntity -> DeviceProfileId.fromString(deviceProfileDictDeviceEntity.getDeviceProfileId().toString())).orElse(null);
     }
 
     @Autowired

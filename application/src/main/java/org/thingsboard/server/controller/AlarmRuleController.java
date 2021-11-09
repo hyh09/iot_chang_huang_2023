@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.EntityType;
@@ -26,6 +25,8 @@ import org.thingsboard.server.service.security.permission.Resource;
 
 import java.util.List;
 import java.util.Objects;
+
+import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
 /**
  * 报警规则管理接口
@@ -49,7 +50,6 @@ public class AlarmRuleController extends BaseController {
      * 获得未配置设备配置的设备字典列表，默认按创建时间倒排
      */
     @ApiOperation(value = "获得未配置设备配置的设备字典列表")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/dictDevice/unused")
     public List<DictDevice> listDictDeviceUnused() throws ThingsboardException {
         return this.dictDeviceService.listDictDeviceUnused(getTenantId());
@@ -62,19 +62,19 @@ public class AlarmRuleController extends BaseController {
      */
     @ApiOperation(value = "获得设备配置列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query")})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/device/profile")
     public PageData<DeviceProfile> listDeviceProfile(@RequestParam int pageSize,
                                                      @RequestParam int page,
                                                      @RequestParam(required = false) String name,
-                                                     @RequestParam(required = false) String sortProperty,
-                                                     @RequestParam(required = false) String sortOrder) throws ThingsboardException {
+                                                     @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+                                                     @RequestParam(required = false, defaultValue = "desc") String sortOrder) throws ThingsboardException {
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
+        validatePageLink(pageLink);
         return deviceMonitorService.listDeviceProfile(getTenantId(), name, pageLink);
     }
 
@@ -86,10 +86,10 @@ public class AlarmRuleController extends BaseController {
      */
     @ApiOperation(value = "获得设备配置详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备配置id", dataType = "string", paramType = "path")})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+            @ApiImplicitParam(name = "id", value = "设备配置id", dataType = "string", paramType = "path", required = true)})
     @GetMapping(value = "/device/profile/{id}")
     public DeviceProfileVO getDeviceProfileDetail(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
         DeviceProfileId deviceProfileId = new DeviceProfileId(toUUID(id));
         return this.deviceMonitorService.getDeviceProfileDetail(getTenantId(), deviceProfileId);
     }
@@ -103,8 +103,8 @@ public class AlarmRuleController extends BaseController {
      * @see DeviceProfileController#saveDeviceProfile(DeviceProfile)
      */
     @ApiOperation(value = "新增或修改设备配置,包括报警规则")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/device/profile")
+    @SuppressWarnings("Duplicates")
     public DeviceProfileVO saveDeviceProfile(@RequestBody DeviceProfileVO deviceProfileVO) throws ThingsboardException {
         DeviceProfile deviceProfile = deviceProfileVO.getDeviceProfile();
         try {
@@ -162,7 +162,6 @@ public class AlarmRuleController extends BaseController {
     @ApiOperation(value = "删除设备配置")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备配置id", dataType = "string", paramType = "path")})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping(value = "/device/profile/{id}")
     public void deleteDeviceProfile(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
@@ -200,8 +199,8 @@ public class AlarmRuleController extends BaseController {
     @ApiOperation(value = "设备配置设为默认")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备配置id", dataType = "string", paramType = "path")})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/device/profile/{id}/default")
+    @SuppressWarnings("Duplicates")
     public DeviceProfile updateDeviceProfileDefault(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
         try {

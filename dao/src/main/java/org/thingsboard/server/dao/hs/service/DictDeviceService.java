@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.service;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -11,6 +12,7 @@ import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -78,11 +80,24 @@ public interface DictDeviceService {
      */
     List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId);
 
-
     /**
      * 获得设备字典分组属性，不包含分组
      *
      * @param dictDeviceId 设备字典Id
      */
     List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId);
+
+    /**
+     * 批量获得设备字典绑定的设备配置Id
+     *
+     * @param dictDeviceIdList 设备字典Id列表
+     */
+    Map<UUID, DeviceProfileId> listDeviceProfileIdsByDictDeviceIdList(List<UUID> dictDeviceIdList);
+
+    /**
+     * 获得设备字典绑定的设备配置Id
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
 }

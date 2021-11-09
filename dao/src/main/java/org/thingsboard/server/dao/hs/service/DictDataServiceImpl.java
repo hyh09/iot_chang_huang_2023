@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
@@ -18,7 +19,6 @@ import org.thingsboard.server.dao.hs.dao.DictDataRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
-import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
@@ -78,7 +78,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         DictData dictData = new DictData();
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
             // Modify
-            dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDataQuery.getId())).toData();
+            dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDataQuery.getId())).map(DictDataEntity::toData)
+                    .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));;
             BeanUtils.copyProperties(dictDataQuery, dictData, "id", "code");
             dictData.setType(dictDataQuery.getType().toString());
         } else {
@@ -101,7 +102,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public DictData getDictDataDetail(String id, TenantId tenantId) throws ThingsboardException {
-        return this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).toData();
+        return this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
+                .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));
     }
 
     /**
@@ -112,7 +114,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Override
     @Transactional
     public void deleteDictDataById(String id, TenantId tenantId) throws ThingsboardException {
-        var dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).toData();
+        var dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
+                .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));
         this.dataRepository.deleteById(toUUID(dictData.getId()));
     }
 

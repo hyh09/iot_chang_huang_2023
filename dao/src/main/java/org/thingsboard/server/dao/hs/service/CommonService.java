@@ -6,8 +6,10 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 抽离一些公共方法
@@ -16,6 +18,42 @@ import java.util.stream.Collectors;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 计算Map里value为ture的数量
+     *
+     * @param map Map<String, Boolean>
+     */
+    default int calculateValueInMap(Map<String, Boolean> map) {
+        if (map == null || map.isEmpty()) return 0;
+        return map.values().stream().reduce(0, (r, e) -> {
+            if (e)
+                return r + 1;
+            return r;
+        }, (a, b) -> null);
+    }
+
+    /**
+     * 获得Map里的值
+     *
+     * @param map Map<String, Boolean>
+     */
+    default Boolean calculateValueInMap(Map<String, Boolean> map, String str) {
+        if (map == null || map.isEmpty()) return Boolean.FALSE;
+        return map.get(str);
+    }
+
+    /**
+     * 判断是否数值型
+     */
+    default boolean isNumberData(Object o) {
+        try {
+            Double.valueOf(o.toString());
+            return true;
+        } catch (Exception ignore) {
+            return false;
+        }
+    }
 
     /**
      * 转换成UUID
@@ -34,7 +72,7 @@ public interface CommonService {
     default List<Long> listLatestMonthsStartTime(int monthNum) {
         List<Long> temp = new ArrayList<>();
         if (monthNum < 1) {
-            return new ArrayList<>();
+            return temp;
         }
         for (int i = 0; i < monthNum; i++) {
             temp.add(YearMonth.now().minusMonths(i).atDay(1).atStartOfDay().toInstant(ZoneOffset.of("+8")).toEpochMilli());
@@ -45,7 +83,7 @@ public interface CommonService {
     /**
      * 判断设备是否是未分配
      */
-    default  <T extends Device> Boolean isDeviceUnAllocation(T t) {
+    default <T extends Device> Boolean isDeviceUnAllocation(T t) {
         return t.getProductionLineId() == null;
     }
 
@@ -56,20 +94,8 @@ public interface CommonService {
      * @param prefix 前缀
      */
     default String getAvailableCode(List<String> codes, String prefix) {
-        if (codes.isEmpty()) {
-            return prefix + "0001";
-        } else {
-            var ints = codes.stream().map(e -> Integer.valueOf(e.split(prefix)[1])).sorted().collect(Collectors.toList());
-            int start = 0;
-            while (true) {
-                if (ints.size() - 1 == start) {
-                    return prefix + String.format("%04d", start + 2);
-                }
-                if (!ints.get(start).equals(start + 1)) {
-                    return prefix + String.format("%04d", start + 1);
-                }
-                start += 1;
-            }
-        }
+        var ints = codes.stream().map(e -> Integer.valueOf(e.split(prefix)[1])).sorted().collect(Collectors.toList());
+        return IntStream.iterate(1, k -> k + 1).boxed().filter(e -> !ints.contains(e)).findFirst()
+                .map(e -> prefix + String.format("%04d", e)).orElse(null);
     }
 }
