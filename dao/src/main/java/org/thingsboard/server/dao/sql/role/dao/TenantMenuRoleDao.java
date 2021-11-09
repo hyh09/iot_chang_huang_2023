@@ -30,5 +30,12 @@ public interface TenantMenuRoleDao extends BaseSqlDao<TenantMenuRoleEntity,UUID>
 
     @Query("select  t from TenantMenuRoleEntity t ,UserMenuRoleEntity b where t.tenantSysRoleId = b.tenantSysRoleId and b.userId =:userId")
     List<TenantMenuRoleEntity> queryMenuIdByRole(@Param("userId") UUID userId);
-	
-}	
+
+
+    @Modifying
+    @Transactional
+    @Query("delete from TenantMenuRoleEntity where tenantMenuId in (:MenuIds) ")
+    void deleteByMenuIds(@Param("MenuIds") List<UUID> MenuIds);
+
+
+}

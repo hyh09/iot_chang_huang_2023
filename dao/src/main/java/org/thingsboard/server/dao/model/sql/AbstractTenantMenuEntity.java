@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
@@ -86,6 +87,12 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     @Column(name = "menu_type")
     private String menuType;
 
+    @Column(name = "path")
+    private String path;
+
+    @ApiModelProperty("has_Children")
+    private Boolean hasChildren;
+
     @CreatedDate
     @Column(name = "created_time")
     private long createdTime;
@@ -126,6 +133,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.menuType = abstractTenantMenuEntity.getMenuType();
         this.isButton = abstractTenantMenuEntity.getIsButton();
         this.langKey = abstractTenantMenuEntity.getLangKey();
+        this.path = abstractTenantMenuEntity.getPath();
+        this.hasChildren = abstractTenantMenuEntity.getHasChildren();
         this.createdTime = abstractTenantMenuEntity.getUpdatedTime();
         this.createdUser = abstractTenantMenuEntity.getCreatedUser();
         this.updatedTime = abstractTenantMenuEntity.getUpdatedTime();
@@ -134,7 +143,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
 
     public AbstractTenantMenuEntity(TenantMenu tenantMenu) {
         if (tenantMenu.getId() != null) {
-            this.setUuid(tenantMenu.getId().getId());
+            this.setUuid(tenantMenu.getId());
         }
         this.tenantId = tenantMenu.getTenantId();
         this.sysMenuId = tenantMenu.getSysMenuId();
@@ -152,6 +161,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.menuType = tenantMenu.getMenuType();
         this.isButton = tenantMenu.getIsButton();
         this.langKey = tenantMenu.getLangKey();
+        this.path = tenantMenu.getPath();
+        this.hasChildren = tenantMenu.getHasChildren();
         this.createdTime = tenantMenu.getUpdatedTime();
         this.createdUser = tenantMenu.getCreatedUser();
         this.updatedTime = tenantMenu.getUpdatedTime();
@@ -176,6 +187,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         tenantMenu.setMenuType(menuType);
         tenantMenu.setIsButton(isButton);
         tenantMenu.setLangKey(langKey);
+        tenantMenu.setPath(path);
+        tenantMenu.setHasChildren(hasChildren);
         tenantMenu.setCreatedTime(createdTime);
         tenantMenu.setCreatedUser(createdUser);
         tenantMenu.setUpdatedTime(updatedTime);

@@ -87,7 +87,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     public AbstractProductionLineEntity(AbstractProductionLineEntity<T> abstractProdutionLineEntity){
         if (abstractProdutionLineEntity.getId() != null) {
-            this.setUuid(abstractProdutionLineEntity.getId());
+            this.setId(abstractProdutionLineEntity.getId());
         }
         this.workshopId = abstractProdutionLineEntity.getWorkshopId();
         this.factoryId = abstractProdutionLineEntity.getFactoryId();
@@ -107,7 +107,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     public AbstractProductionLineEntity(ProductionLine productionLine) {
         if (productionLine.getId() != null) {
-            this.setUuid(productionLine.getId());
+            this.setId(productionLine.getId());
         }
         this.workshopId = productionLine.getWorkshopId();
         this.factoryId = productionLine.getFactoryId();
@@ -127,7 +127,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
 
     public ProductionLine toProductionLine(){
         ProductionLine productionLine = new ProductionLine();
-        productionLine.setId(this.getUuid());
+        productionLine.setId(id);
         productionLine.setWorkshopId(workshopId);
         productionLine.setFactoryId(factoryId);
         productionLine.setCode(code);

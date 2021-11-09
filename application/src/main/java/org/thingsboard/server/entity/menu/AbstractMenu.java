@@ -81,7 +81,7 @@ public abstract class AbstractMenu {
 
     public AbstractMenu(Menu menu) {
         if (menu.getId() != null) {
-            this.setId(menu.getId().getId());
+            this.setId(menu.getId());
         }
         this.setCreatedTime(menu.getCreatedTime());
         this.code = menu.getCode();
@@ -130,7 +130,7 @@ public abstract class AbstractMenu {
         menu.setCreatedTime(createdTime);
         menu.setCode(code);
         menu.setRegion(region);
-        menu.setName(name);
+        menu.setName(this.name);
         menu.setLevel(level);
         menu.setSort(sort);
         menu.setUrl(url);

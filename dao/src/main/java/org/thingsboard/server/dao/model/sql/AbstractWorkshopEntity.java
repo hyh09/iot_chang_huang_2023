@@ -21,7 +21,6 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
@@ -93,7 +92,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
 
     public AbstractWorkshopEntity(AbstractWorkshopEntity<T> abstractWorkshopEntity){
         if (abstractWorkshopEntity.getId() != null) {
-            this.setUuid(abstractWorkshopEntity.getId());
+            this.setId(abstractWorkshopEntity.getId());
         }
         this.factoryId = abstractWorkshopEntity.getFactoryId();
         this.code = abstractWorkshopEntity.getCode();
@@ -112,7 +111,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
 
     public AbstractWorkshopEntity(Workshop workshop) {
         if (workshop.getId() != null) {
-            this.setUuid(workshop.getId().getId());
+            this.setId(workshop.getId());
         }
         this.factoryId = workshop.getFactoryId();
         this.code = workshop.getCode();
@@ -130,7 +129,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
     }
 
     public Workshop toWorkshop(){
-        Workshop workshop = new Workshop(new WorkshopId(this.getUuid()));
+        Workshop workshop = new Workshop(id);
         workshop.setFactoryId(factoryId);
         workshop.setCode(code);
         workshop.setName(name);

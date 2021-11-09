@@ -1,11 +1,10 @@
 package org.thingsboard.server.dao.menu;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.EntityId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.memu.MenuInfo;
@@ -29,6 +28,8 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
 
     private static final String DEFAULT_TENANT_REGION = "Global";
     public static final String INCORRECT_MENU_ID = "Incorrect menuId ";
+    public static final Boolean IS_BUTTON_TRUE = true;
+    public static final Boolean IS_BUTTON_FALSE = false;
     public static final int ONE = 1;
     public static final String XTCD = "XTCD"; //系统菜单首字母
 
@@ -55,7 +56,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         //生成租户菜单排序序号
         Integer maxSort = menuDao.getMaxSortByParentId(menu.getParentId());
         menu.setSort(maxSort == null ? ONE:maxSort);
-        Menu savedMenut = menuDao.saveMenu(null, menu);
+        Menu savedMenut = menuDao.saveMenu(menu);
         return savedMenut;
     }
 
@@ -67,7 +68,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     @Override
     public Menu updateMenu(Menu menu)  throws ThingsboardException{
         log.trace("Executing updateMenu [{}]", menu);
-        return menuDao.saveMenu(null, menu);
+        return menuDao.saveMenu(menu);
     }
 
     /**
@@ -75,9 +76,10 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
      * @param id
      */
     public void delMenu(UUID id){
-        // TODO: 2021/11/3 删除租户菜单
-
+        //删除系统菜单
         menuDao.delMenu(id);
+        //删除租户菜单
+        tenantMenuDao.delByMenuId(id);
     }
 
     /**
@@ -130,26 +132,31 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
      *查询系统菜单列表（标记被当前租户绑定过的）
      */
     @Override
-    public List<MenuInfo> getTenantMenuListByTenantId(String menuType,String tenantId,String name) {
+    public List<MenuInfo> getTenantMenuListByTenantId(String menuType,UUID tenantId,String name) {
         log.trace("Executing getTenantMenuListByTenantId [{}]", tenantId);
         List<MenuInfo> resultList = new ArrayList<>();
+
         List<Menu> menuList = menuDao.findMenusByName(menuType,name);
-        List<TenantMenu> tenantMenuList = tenantMenuDao.find(new TenantId(UUID.fromString(tenantId)));
+        List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(new TenantMenu(tenantId,this.IS_BUTTON_FALSE));
+
         Iterator<TenantMenu> it = tenantMenuList.iterator();
         if(!CollectionUtils.isEmpty(menuList)){
             if(!CollectionUtils.isEmpty(tenantMenuList)){
-                for (Menu menu :menuList ){
-                    MenuInfo menuInfo = new MenuInfo(menu);
-                    while(it.hasNext()) {
-                        TenantMenu tenantMenu = it.next();
-                        if (menu.getId().getId().equals(tenantMenu.getSysMenuId())) {
+                menuList.forEach(i->{
+                    MenuInfo menuInfo = new MenuInfo(i);
+                    tenantMenuList.forEach(j->{
+                        if (i.getId().equals(j.getSysMenuId())) {
                             menuInfo.setAssociatedTenant(true);
-                            it.remove();
-                            break;
+                            return;
                         }
-                    }
+                    });
                     resultList.add(menuInfo);
-                }
+                });
+            }else {
+                menuList.forEach(i->{
+                    MenuInfo menuInfo = new MenuInfo(i);
+                    resultList.add(menuInfo);
+                });
             }
         }
         return resultList;
@@ -157,13 +164,12 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
 
     /**
      * 条件查询系统菜单列表
-     * @param menuType
-     * @param name
+     * @param menu
      * @return
      */
     @Override
-    public List<Menu> getMenuListByCdn(String menuType,String name){
-        return menuDao.findMenusByName(menuType,name);
+    public List<Menu> getMenuListByCdn(Menu menu){
+        return menuDao.getMenuListByCdn(menu);
     }
 
     @Override
@@ -218,7 +224,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
             }
         }else {
             if(sameLevelName != null){
-                if(id.toString().equals(sameLevelName.getId().getId().toString())){
+                if(id.toString().equals(sameLevelName.getId().toString())){
                     //不重复
                     return false;
                 }else {

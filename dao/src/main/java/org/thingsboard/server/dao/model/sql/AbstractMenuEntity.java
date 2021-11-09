@@ -24,7 +24,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
-import org.thingsboard.server.dao.model.SearchTextEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Column;
@@ -37,7 +36,7 @@ import java.util.UUID;
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements SearchTextEntity<T> {
+public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T>{
 
     @Column(name = "code")
     private String code;
@@ -100,7 +99,7 @@ public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements 
 
     public AbstractMenuEntity(Menu menu) {
         if (menu.getId() != null) {
-            this.setUuid(menu.getId().getId());
+            this.setUuid(menu.getId());
         }
         this.setCreatedTime(menu.getCreatedTime());
         this.code = menu.getCode();
@@ -146,7 +145,6 @@ public abstract class AbstractMenuEntity<T> extends BaseSqlEntity<T> implements 
 
     protected Menu toMenu(){
         Menu menu = new Menu(new MenuId(this.getUuid()));
-        menu.setCreatedTime(createdTime);
         menu.setCode(code);
         menu.setRegion(region);
         menu.setName(name);

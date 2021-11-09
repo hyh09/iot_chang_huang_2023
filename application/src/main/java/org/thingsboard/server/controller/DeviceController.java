@@ -828,9 +828,10 @@ public class DeviceController extends BaseController {
     public void distributionDevice(@RequestBody DistributionDeviceDto distributionDeviceDto) throws ThingsboardException {
         try {
             checkParameter("deviceId",distributionDeviceDto.getDeviceIdList());
-            checkParameter("productionLineId",distributionDeviceDto.getProductionLineId());
-            checkParameter("workshopId",distributionDeviceDto.getWorkshopId());
-            checkParameter("factoryId",distributionDeviceDto.getFactoryId());
+            //支持分配工厂/产线
+//            checkParameter("productionLineId",distributionDeviceDto.getProductionLineId());
+//            checkParameter("workshopId",distributionDeviceDto.getWorkshopId());
+//            checkParameter("factoryId",distributionDeviceDto.getFactoryId());
             Device device = distributionDeviceDto.toDevice();
             device.setUpdatedUser(getCurrentUser().getUuidId());
             deviceService.distributionDevice(device);
@@ -859,6 +860,8 @@ public class DeviceController extends BaseController {
             throw handleException(e);
         }
     }
+
+
 
 
 }

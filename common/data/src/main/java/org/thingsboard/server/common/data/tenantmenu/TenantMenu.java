@@ -1,17 +1,15 @@
 package org.thingsboard.server.common.data.tenantmenu;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.thingsboard.server.common.data.SearchTextBasedWithAdditionalInfo;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
 
 import java.util.UUID;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
+public class TenantMenu{
 
+    private UUID id;
     private UUID tenantId;
     private UUID sysMenuId;
     private String sysMenuCode;
@@ -34,6 +32,11 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
     private String region;
     //多语言Key
     private String langKey;
+    //("路径")
+    private String path;
+    //("是否树节点（true/false）")
+    private Boolean hasChildren;
+
 
     //额外加的逻辑字段配合前端
     private  String name;
@@ -41,16 +44,15 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
     private  Boolean checked=false;
 
     public TenantMenu() {
-        super();
     }
 
     public TenantMenu(TenantMenuId id) {
-        super(id);
+        this.id = id.getId();
     }
 
-    @Override
-    public String getSearchText() {
-        return null;
+    public TenantMenu(UUID tenantId,Boolean isButton) {
+        this.tenantId = tenantId;
+        this.isButton = isButton;
     }
 
     public void updTenantMenu(TenantMenu tenantMenu){
@@ -83,12 +85,14 @@ public class TenantMenu extends SearchTextBasedWithAdditionalInfo<TenantMenuId>{
         tenantMenu.setMenuType(menu.getMenuType());
         tenantMenu.setIsButton(menu.getIsButton());
         tenantMenu.setLangKey(menu.getLangKey());
+        tenantMenu.setPath(menu.getPath());
+        tenantMenu.setHasChildren(menu.getHasChildren());
         tenantMenu.setCreatedTime(menu.getCreatedTime());
         tenantMenu.setCreatedUser(menu.getCreatedUser());
         tenantMenu.setUpdatedTime(menu.getUpdatedTime());
         tenantMenu.setUpdatedUser(menu.getUpdatedUser());
         tenantMenu.setName(menu.getName());
-        tenantMenu.setId(menu.getUuidId());
+        tenantMenu.setId(menu.getId());
         return tenantMenu;
     }
 
