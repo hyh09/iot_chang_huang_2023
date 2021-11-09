@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
@@ -34,14 +35,14 @@ public class EffectTsKvRepository {
             " row_number() OVER (PARTITION BY (CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar )) ORDER BY ts )  rn, " +
             "CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar ) id, " +
             "a1.entity_id,a1.key,a1.ts,a1.long_v ,a1.dbl_v,a1.json_v,a1.bool_v, a1.str_v  " +
-            "from ts_kv  a1";
+            "from ts_kv  a1  where  a1.ts >=:startTime  and  a1.ts<= :endTime";
 
 
     public static  String FIND_SON_QUERY_02="select  " +
             " row_number() OVER (PARTITION BY (CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar )) ORDER BY ts desc )  rn, " +
             "CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar ) id, " +
             "a1.entity_id,a1.key,a1.ts,a1.long_v ,a1.dbl_v,a1.json_v,a1.bool_v, a1.str_v  " +
-            "from ts_kv  a1 ";
+            "from ts_kv  a1  where  a1.ts >=:startTime  and  a1.ts<= :endTime ";
 
 
     public  static  String FIND_WITH_SQL=" ";
@@ -54,7 +55,16 @@ public class EffectTsKvRepository {
     public  static  String  WHERE_QUERY="  where table1.id=table2.id and  table1.rn = table2.rn and  table1.rn='1' ";
 
 
-    public  List<EffectTsKvEntity>  queryEntity(QueryTsKvVo vo)
+
+    public  static  String QUERY_KEY_ID=" and table2.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key = :key ) ";
+    //工厂id
+    public  static  String QUERY_factory__ID=" and table2.entity_id in ( select id  from  device  where  factory_id =:factoryId )  ";
+    public  static  String QUERY_workshop__ID=" and table2.entity_id in ( select id  from  device  where  workshop_id =:workshopId )  ";
+    public  static  String QUERY_productionLine__ID=" and table2.entity_id in ( select id  from  device  where  production_line_id = :lineId )  ";
+
+
+
+    public  List<EffectTsKvEntity>  queryEntity(QueryTsKvVo queryTsKvVo)
     {
 
         StringBuffer  sql = new StringBuffer();
@@ -67,10 +77,37 @@ public class EffectTsKvRepository {
 
         Query query = null;
         Map<String, Object> param = new HashMap<>();
-        sql.append(" and table1.entity_id = :entity_id  ");
-        sql.append(" and table1.key = 17  ");
-        System.out.println("====>"+sql);
-        param.put("entity_id", UUID.fromString("9689acb0-2c9f-11ec-a563-6f6ff066531c"));
+
+        if(StringUtils.isNotBlank(queryTsKvVo.getKey()))
+        {
+            sql.append(QUERY_KEY_ID);
+            param.put("key", queryTsKvVo.getKey());
+        }
+        if(queryTsKvVo.getDeviceId() != null)
+        {
+            sql.append(" and table1.entity_id = :entity_id  ");
+            param.put("entity_id", queryTsKvVo.getDeviceId());
+        }
+        if(queryTsKvVo.getFactoryId() != null)
+        {
+            sql.append(QUERY_factory__ID);
+            param.put("factoryId", queryTsKvVo.getKey());
+        }
+
+        if(queryTsKvVo.getWorkshopId() != null)
+        {
+            sql.append(QUERY_workshop__ID);
+            param.put("workshopId", queryTsKvVo.getWorkshopId());
+        }
+
+        if(queryTsKvVo.getProductionLineId() != null)
+        {
+            sql.append(QUERY_productionLine__ID);
+            param.put("lineId", queryTsKvVo.getProductionLineId());
+        }
+        param.put("startTime",queryTsKvVo.getStartTime());
+        param.put("endTime",queryTsKvVo.getEndTime());
+
 
         query= entityManager.createNativeQuery(sql.toString(),"result001");
         System.out.println("==param==>"+param);
