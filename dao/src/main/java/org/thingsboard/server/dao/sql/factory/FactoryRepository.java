@@ -64,4 +64,12 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
      */
     @Query("SELECT t FROM FactoryEntity t WHERE t.tenantId = :tenantId ")
     List<Factory> findFactoryByTenantId(@Param("tenantId")UUID tenantId);
+
+    /**
+     * 查询租户的第一条工厂数据
+     */
+    @Query(value = "SELECT * FROM hs_factory t WHERE t.tenant_id = :tenantId limit 1 ",nativeQuery = true)
+    FactoryEntity findFactoryByTenantIdFirst(@Param("tenantId")UUID tenantId);
+
+
 }

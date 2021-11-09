@@ -119,6 +119,16 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     @Override
     public List<Factory>  findFactoryByTenantId(UUID tenantId){return factoryRepository.findFactoryByTenantId(tenantId);}
 
+
+    /**
+     * 只查询租户下的第一条工厂
+     */
+    @Override
+    public  FactoryEntity findFactoryByTenantIdFirst(UUID tenantId){
+        return factoryRepository.findFactoryByTenantIdFirst(tenantId);
+    }
+
+
     /**
      * 条件查询工厂列表
      * @param factory
