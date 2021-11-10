@@ -57,6 +57,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     public ResultCapAppVo queryCapApp(QueryTsKvVo vo, TenantId tenantId) {
         ResultCapAppVo  resultCapAppVo = new ResultCapAppVo();
         log.info("app的产能分析接口入参:{}",vo);
+        /***************暂时写死的 ***/
         if(StringUtils.isNotBlank(vo.getKey()))
         {
             vo.setKey("tmpFailed");//先写死定死
@@ -115,6 +116,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     public ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId) {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
+
+        /*********************************   暂时写死的*/
+        List<String>  keys1 = new ArrayList<>();
+        keys1.add("totalMsgs");
+        keys1.add("successfulMsgs");
+        keys1.add("failedMsgs");
+        vo.setKeys(keys1);
 
         if(vo.getFactoryId() == null)
         {

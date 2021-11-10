@@ -48,15 +48,8 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryEnergy", method = RequestMethod.POST)
     @ResponseBody
     public ResultEnergyAppVo queryEnergy(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        try {
             return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
-        }catch (Exception e)
-        {
-            e.printStackTrace();
         }
-
-        return  null;
-    }
 
 
 
