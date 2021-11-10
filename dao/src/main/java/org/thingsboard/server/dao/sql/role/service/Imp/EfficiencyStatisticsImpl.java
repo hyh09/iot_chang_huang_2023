@@ -137,6 +137,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 //        Map<UUID,List<EffectTsKvEntity>>  entityMap=   listToMap(effectTsKvEntities);
         log.info("查询到的数据转换为设备维度:{}",map);
         appVo.setAppDeviceCapVoList(getEntityKeyValue(map,tenantId));
+        //总的
+        appVo.setTotalWaterValue(getTotalValue(effectTsKvEntities,18));
+        appVo.setTotalElectricValue(getTotalValue(effectTsKvEntities,19));
+        appVo.setTotalAirValue(getTotalValue(effectTsKvEntities,20));
+
         return appVo;
     }
 
@@ -192,80 +197,19 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
-    /**
-     *将数据转换为
-     *  设备id维度 {key }
-     * @param effectTsKvEntities
-     */
-    private  Map<UUID,List<EffectTsKvEntity>>  listToMap( List<EffectTsKvEntity>  effectTsKvEntities )
+    private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,int key)
     {
-        Map<UUID,List<EffectTsKvEntity>> listMap = new HashMap<>();
-        effectTsKvEntities.stream().forEach(e->{
-            if(CollectionUtils.isEmpty(listMap.get(e.getEntityId().toString())))
-            {
-                List<EffectTsKvEntity>  effectTsKvEntities1 = new ArrayList<>();
-                effectTsKvEntities1.add(e);
-                listMap.put(e.getEntityId(),effectTsKvEntities1);
-            }else {
-                List<EffectTsKvEntity>  effectTsKvEntities1 = listMap.get(e.getEntityId().toString());
-                effectTsKvEntities1.add(e);
-                listMap.put(e.getEntityId(),effectTsKvEntities1);
-            }
-        });
-        return  listMap;
+
+        Double  totalSku =
+                effectTsKvEntities.stream().filter(entity -> entity.getKey()== key).mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
+
+        Long  totalSku2 =
+                effectTsKvEntities.stream().filter(entity -> entity.getKey()== key).mapToLong(EffectTsKvEntity::getSubtractLong).sum();
+        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
+        return dvalue+"";
     }
 
-
-    /**
-     * 暂时写死的
-     * @param listMap
-     * @return
-     */
-    public  List<AppDeviceEnergyVo>  getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap, Map<UUID,DeviceEntity> map1,TenantId tenantId)
-    {
-        List<AppDeviceEnergyVo> appList  = new ArrayList<>();
-
-        listMap.forEach((key,value)->{
-            AppDeviceEnergyVo appDeviceEnergyVo  = new  AppDeviceEnergyVo();
-            appDeviceEnergyVo.setDeviceId(key.toString());
-              DeviceEntity  entity1 = map1.get(key);
-              if(entity1 != null) {
-
-                  if (entity1.getWorkshopId() != null) {
-                      Workshop workshop = workshopDao.findById(tenantId, entity1.getWorkshopId());
-                      appDeviceEnergyVo.setWorkshopName(workshop.getName());
-                  }
-
-                  if (entity1.getProductionLineId() != null) {
-                      ProductionLine productionLine = productionLineDao.findById(tenantId, entity1.getProductionLineId());
-                      appDeviceEnergyVo.setProductionName(productionLine.getName());
-                  }
-                  value.stream().forEach(effectTsKvEntity -> {
-                      //水
-                      if (effectTsKvEntity.getKey() == 18) {
-                          appDeviceEnergyVo.setWaterValue(effectTsKvEntity.getValue());
-                      }
-
-                      //电
-                      if (effectTsKvEntity.getKey() == 19) {
-                          appDeviceEnergyVo.setWaterValue(effectTsKvEntity.getValue());
-                      }
-
-                      //气
-                      if (effectTsKvEntity.getKey() == 20) {
-                          appDeviceEnergyVo.setWaterValue(effectTsKvEntity.getValue());
-                      }
-                  });
-              }
-
-            appList.add(appDeviceEnergyVo);
-        });
-
-        return  appList;
-    }
-
-
-    /**
+ /**
      * 暂时写死的
      * @param listMap
      * @return

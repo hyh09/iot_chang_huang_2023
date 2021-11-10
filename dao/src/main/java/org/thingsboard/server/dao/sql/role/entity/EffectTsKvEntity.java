@@ -9,6 +9,7 @@ import org.thingsboard.server.dao.model.sqlts.timescale.ts.TimescaleTsKvComposit
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -245,4 +246,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
         }
         return  "0";
     }
+
+
+
 }
