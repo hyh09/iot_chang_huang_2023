@@ -1,7 +1,7 @@
 import { map } from 'rxjs/operators';
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig, iconCell } from "@app/modules/home/models/entity/entities-table-config.models";
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { DataDictionaryComponent } from "./data-dictionary.component";
 import { TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { DatePipe } from '@angular/common';
 import { DataDictionaryService } from '@app/core/http/custom/data-dictionary.service';
 import { DataDictionary } from '@app/shared/models/custom/device-mng.models';
 import { DataDictionaryFiltersComponent } from "./data-dictionary-filters.component";
+import { UtilsService } from '@app/core/public-api';
 
 @Injectable()
 export class DataDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DataDictionary>> {
@@ -18,7 +19,8 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
-    private dataDictionaryService: DataDictionaryService
+    private dataDictionaryService: DataDictionaryService,
+    private utils: UtilsService
   ) {
     this.config.entityType = EntityType.DATA_DICTIONARY;
     this.config.entityComponent = DataDictionaryComponent;
@@ -43,9 +45,7 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.columns.push(
       new EntityTableColumn<DataDictionary>('code', 'device-mng.code', '50%'),
       new EntityTableColumn<DataDictionary>('name', 'device-mng.name', '50%'),
-      new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({icon}) => {
-        return iconCell(icon);
-      }),
+      new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({ icon }) => (icon), () => ({}), false, () => ({}), () => undefined, false, null, true),
       new EntityTableColumn<DataDictionary>('type', 'device-mng.data-type', '150px', ({type}) => {
         if (this.config.componentsData.dataTypeMap[type]) {
           return this.translate.instant(this.config.componentsData.dataTypeMap[type]);
@@ -70,6 +70,11 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.tableTitle = this.translate.instant('device-mng.data-dic');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.afterResolved = () => {
+      this.config.addEnabled = this.utils.hasPermission('device-mng.add-data-dic');
+      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+    }
 
     this.config.entitiesFetchFunction = pageLink => this.dataDictionaryService.getDataDictionaries(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.dataDictionaryService.getDataDictionary(id);

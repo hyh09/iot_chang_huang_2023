@@ -1,6 +1,6 @@
 <mat-form-field>
   <mat-label>{{ 'auth-mng.user-code' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.userCode" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.userCode" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.userCode"
     matSuffix mat-icon-button aria-label="Clear"
@@ -11,7 +11,7 @@
 </mat-form-field>
 <mat-form-field>
   <mat-label>{{ 'auth-mng.user-name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.userName" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.userName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.userName"
     matSuffix mat-icon-button aria-label="Clear"

@@ -49,6 +49,7 @@ export class BindUserTableConfigResolver implements Resolve<EntityTableConfig<Us
     this.roleId = route.params.roleId;
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.detailsPanelEnabled = false;
     this.config.componentsData.roleId = this.roleId;
     this.config.tableTitle = this.translate.instant('auth-mng.bind-users');
     this.config.deleteEntityTitle = userInfo => this.translate.instant('auth-mng.unbind-user-title', {userName: userInfo.userName});

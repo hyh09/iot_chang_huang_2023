@@ -1,6 +1,6 @@
 <mat-form-field>
   <mat-label>{{ 'device-mng.code' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.code" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.code" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.code"
     matSuffix mat-icon-button aria-label="Clear"
@@ -11,7 +11,7 @@
 </mat-form-field>
 <mat-form-field>
   <mat-label>{{ 'device-mng.name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.name" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.name" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.name"
     matSuffix mat-icon-button aria-label="Clear"
