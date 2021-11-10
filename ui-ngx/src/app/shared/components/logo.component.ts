@@ -24,6 +24,6 @@ import { Component } from '@angular/core';
 export class LogoComponent {
 
   logo = 'assets/logo.svg';
-  logoTitle = "assets/logo_text.svg";
+  logoTitle = "assets/logo_text.png";
 
 }
