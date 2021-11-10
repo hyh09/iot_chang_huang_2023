@@ -26,7 +26,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 10Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -57,7 +57,9 @@ spec:
           name: postgres
         env:
         - name: POSTGRES_DB
-          value: "hsthingsboard"
+          value: "thingsboard"
+        - name: POSTGRES_USER
+          value: "postgres"
         - name: POSTGRES_PASSWORD
           value: "postgres"
         - name: PGDATA
@@ -94,9 +96,11 @@ metadata:
   namespace: hsyl-iot
 spec:
   type: ClusterIP
+#  type: NodePort
   selector:
     app: postgres
   ports:
   - port: 5432
+#    nodePort: 30682
     name: postgres
 ---
