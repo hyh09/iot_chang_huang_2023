@@ -5,27 +5,38 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.DeviceInfo;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
+import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
+import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
+import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
+import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.util.StringUtilToll;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
@@ -42,11 +53,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
-    @Autowired  private EffectTsKvRepository effectTsKvRepository;
-    @Autowired  private DeviceDao deviceDao;
-    @Autowired  private FactoryDao factoryDao;
-    @Autowired  private WorkshopDao workshopDao;
-    @Autowired  private ProductionLineDao productionLineDao;
+    @Autowired private EffectTsKvRepository effectTsKvRepository;
+    @Autowired private DeviceDao deviceDao;
+    @Autowired  private DeviceRepository deviceRepository;
+    @Autowired private FactoryDao factoryDao;
+    @Autowired private WorkshopDao workshopDao;
+    @Autowired private ProductionLineDao productionLineDao;
+    @Autowired private TsKvRepository tsKvRepository;
+    @Autowired private DictDeviceService dictDeviceService;
+    @Autowired private TsKvDictionaryRepository dictionaryRepository;
 
 
     /**
@@ -151,6 +166,46 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         appVo.setTotalAirValue(getTotalValue(effectTsKvEntities,20));
 
         return appVo;
+    }
+
+    /**
+     * dictDeviceId
+     * @param vo
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) {
+             log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
+         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
+           log.info("查询当前的设备信息{}",deviceInfo);
+          List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
+             log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
+           List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
+            log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
+           List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
+             log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
+           List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
+           Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
+                     log.info("查询到的当前设备{}的配置的keys属性:{}###mapDict:{}",vo.getDeviceId(),keys,mapDict);
+           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndTime(vo.getDeviceId(),keys,vo.getStartTime(),vo.getEndTime());
+                log.info("查询到的当前设备{}的配置的entities属性:{}",vo.getDeviceId(),entities);
+           List<TsKvEntry> tsKvEntries  = new ArrayList<>();
+            entities.stream().forEach(tsKvEntity -> {
+                tsKvEntity.setStrKey(mapDict.get(tsKvEntity.getKey()));
+              tsKvEntries.add(tsKvEntity.toData());
+            });
+            List<ResultRunStatusByDeviceVo>  voList = new ArrayList<>();
+            voList =  tsKvEntries.stream().map(TsKvEntry ->{
+                      ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
+                      byDeviceVo.setKeyName(TsKvEntry.getKey());
+                      byDeviceVo.setValue(TsKvEntry.getValue().toString());
+                      byDeviceVo.setTime(TsKvEntry.getTs());
+                      return     byDeviceVo;
+            }).collect(Collectors.toList());
+       Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
+      log.info("查询到的当前的数据:{}",map);
+        return map;
     }
 
     /**
