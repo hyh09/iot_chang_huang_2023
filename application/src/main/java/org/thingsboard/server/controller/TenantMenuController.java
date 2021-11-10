@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
@@ -31,6 +32,8 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Api(value="租户菜单Controller",tags={"租户菜单列表口"})
 @RequiredArgsConstructor
@@ -64,6 +67,11 @@ public class TenantMenuController extends BaseController {
         checkParameter("租户id不能为空",saveTenantMenuDto.getTenantId());
         List<TenantMenu> tenantMenuList = saveTenantMenuDto.toTenantMenuListBySave(saveTenantMenuDto.getPcList(),saveTenantMenuDto.getAppList(),getCurrentUser().getId().getId(), null,saveTenantMenuDto.getTenantId());
         tenantMenuService.saveOrUpdTenantMenu(tenantMenuList,saveTenantMenuDto.getTenantId());
+        //批量删除角色菜单接口
+        List<UUID> collect = tenantMenuList.stream().filter(s -> s.getCreatedUser() != null).map(TenantMenu::getId).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(collect)){
+            roleMenuSvc.deleteMenuIdByIds(collect);
+        }
     }
 
 

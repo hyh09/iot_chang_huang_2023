@@ -56,6 +56,7 @@ public class SaveTenantMenuDto {
                 if(CollectionUtils.isEmpty(addTenantMenuDto.getChildren()) || addTenantMenuDto.getChildren().size() == 0){
                     continue;
                 }else {
+                    tenantMenu.setHasChildren(true);
                     if(menuType.equals("APP")){
                         this.toTenantMenuListBySave(null,addTenantMenuDto.getChildren(),loginUserId,tenantMenu.getId(),tenantId);
                     }else {

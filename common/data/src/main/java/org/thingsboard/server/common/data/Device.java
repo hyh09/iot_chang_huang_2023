@@ -71,7 +71,10 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     /********以下是非数据库字段********/
     private List<UUID> deviceIdList;
+    //网关版本
     private String gatewayVersion;
+    //网关版本更新时间
+    private Long gatewayUpdateTs;
 
 
     public Device() {
@@ -310,6 +313,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setGatewayVersion(String gatewayVersion) {
         this.gatewayVersion = gatewayVersion;
+    }
+
+    public Long getGatewayUpdateTs() {
+        return gatewayUpdateTs;
+    }
+
+    public void setGatewayUpdateTs(Long gatewayUpdateTs) {
+        this.gatewayUpdateTs = gatewayUpdateTs;
     }
 
     @Override
