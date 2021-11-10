@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Repository
 public interface DictDataRepository extends PagingAndSortingRepository<DictDataEntity, UUID>, JpaSpecificationExecutor<DictDataEntity> {
 
-    DictDataEntity findByTenantIdAndId(UUID tenantId, UUID id);
+    Optional<DictDataEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     @Query("select d.code from DictDataEntity d where d.tenantId = :tenantId")
     List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);

@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.alarm.*;
 import org.thingsboard.server.common.data.audit.ActionType;
@@ -22,6 +21,8 @@ import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResult;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.permission.Operation;
+
+import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
 /**
  * 报警记录接口
@@ -42,7 +43,6 @@ public class AlarmRecordController extends BaseController {
      * 报警记录查询界面资源
      */
     @ApiOperation("获得报警记录查询界面资源")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/alarmRecord/resource")
     public AlarmRecordResource getAlarmRecordResource() {
         return new AlarmRecordResource().setAlarmStatusList(AlarmSimpleStatus.toResourceList())
@@ -59,8 +59,7 @@ public class AlarmRecordController extends BaseController {
      */
     @ApiOperation("确认报警信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "报警信息Id", paramType = "path"),})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+            @ApiImplicitParam(name = "id", value = "报警信息Id", paramType = "path", required = true),})
     @PostMapping(value = "/alarmRecord/{id}/ack")
     public void ackAlarm(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("alarmId", id);
@@ -92,8 +91,7 @@ public class AlarmRecordController extends BaseController {
      */
     @ApiOperation("清除报警信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "报警信息Id", paramType = "path"),})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+            @ApiImplicitParam(name = "id", value = "报警信息Id", paramType = "path", required = true),})
     @PostMapping(value = "/alarmRecord/{id}/clear")
     public void clearAlarm(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
@@ -119,12 +117,12 @@ public class AlarmRecordController extends BaseController {
      */
     @ApiOperation(value = "获得报警记录列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
-            @ApiImplicitParam(name = "status", value = "状态", paramType = "query"),
-            @ApiImplicitParam(name = "level", value = "级别", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "status", value = "状态", paramType = "query", required = true),
+            @ApiImplicitParam(name = "level", value = "级别", paramType = "query", required = true),
             @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
             @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
@@ -132,13 +130,12 @@ public class AlarmRecordController extends BaseController {
             @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
     })
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/alarmRecord")
     public PageData<AlarmRecordResult> getAlarms(
             @RequestParam int page,
             @RequestParam int pageSize,
-            @RequestParam(required = false) String sortProperty,
-            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam AlarmSimpleStatus status,
             @RequestParam AlarmSimpleLevel level,
             @RequestParam(required = false) Long startTime,
@@ -149,7 +146,7 @@ public class AlarmRecordController extends BaseController {
             @RequestParam(required = false) String deviceId
     ) throws ThingsboardException {
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
-
+        validatePageLink(pageLink);
         var query = AlarmRecordQuery.builder()
                 .alarmSimpleStatus(status).alarmSimpleLevel(level).build();
         query.setDeviceId(deviceId).setProductionLineId(productionLineId)

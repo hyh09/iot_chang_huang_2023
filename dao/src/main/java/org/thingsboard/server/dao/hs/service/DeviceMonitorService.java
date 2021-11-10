@@ -95,7 +95,7 @@ public interface DeviceMonitorService {
      * @param id       设备id
      * @return 设备详情
      */
-    DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException;
+    DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException, ThingsboardException;
 
     /**
      * 查询设备分组属性历史数据
@@ -108,6 +108,18 @@ public interface DeviceMonitorService {
      * @return 设备分组属性历史数据
      */
     List<DictDeviceGroupPropertyVO> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException;
+
+    /**
+     * 【APP】查询设备分组属性历史数据
+     *
+     * @param tenantId          租户Id
+     * @param deviceId          设备Id
+     * @param groupPropertyName 属性名称
+     * @param startTime         开始时间
+     * @param endTime           结束时间
+     * @return 设备分组属性历史数据
+     */
+    AppHistoryVO listAppGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备遥测数据历史数据
@@ -164,5 +176,4 @@ public interface DeviceMonitorService {
      * @param query 查询参数
      * @return 在线设备情况
      */
-    DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query);
-}
+    DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query);}

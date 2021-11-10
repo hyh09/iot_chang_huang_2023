@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
@@ -42,22 +41,21 @@ public class RTMonitorController extends BaseController {
      */
     @ApiOperation(value = "获得实时监控数据列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
             @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
             @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
     })
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/rtMonitor/device")
     public RTMonitorResult getRTMonitorData(
             @RequestParam int page,
             @RequestParam int pageSize,
-            @RequestParam(required = false) String sortProperty,
-            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String factoryId,
             @RequestParam(required = false) String workShopId,
             @RequestParam(required = false) String productionLineId,
@@ -75,11 +73,11 @@ public class RTMonitorController extends BaseController {
      */
     @ApiOperation("查询设备详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "path")
+            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "path", required = true)
     })
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("id", id);
         return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
     }
 
@@ -88,14 +86,15 @@ public class RTMonitorController extends BaseController {
      */
     @ApiOperation(value = "查询设备详情-分组属性历史数据", notes = "默认一天")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
-            @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query")
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true)
     })
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/rtMonitor/device/groupProperty/history")
     public List<DictDeviceGroupPropertyVO> listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("groupPropertyName", groupPropertyName);
         return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, CommonUtil.getTodayStartTime(), CommonUtil.getTodayCurrentTime());
     }
 
@@ -104,11 +103,11 @@ public class RTMonitorController extends BaseController {
      */
     @ApiOperation(value = "查询设备历史数据-表头", notes = "包含时间")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true)
     })
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/rtMonitor/device/history/header")
-    public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam(required = false) String deviceId) throws ThingsboardException {
+    public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId) throws ThingsboardException {
+        checkParameter("deviceId", deviceId);
         return this.deviceMonitorService.listDictDeviceGroupPropertyTitle(getTenantId(), deviceId);
     }
 
@@ -117,18 +116,17 @@ public class RTMonitorController extends BaseController {
      */
     @ApiOperation("查询设备详情-分组属性历史数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
-            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true),
     })
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/rtMonitor/device/history")
     public PageData<Map<String, Object>> listRTMonitorHistory(
-            @RequestParam(required = false) String deviceId,
+            @RequestParam String deviceId,
             @RequestParam int page,
             @RequestParam int pageSize,
             @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
@@ -136,7 +134,11 @@ public class RTMonitorController extends BaseController {
             @RequestParam Long startTime,
             @RequestParam Long endTime
     ) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("startTime", startTime);
+        checkParameter("endTime", endTime);
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
+        validatePageLink(pageLink);
         return this.deviceMonitorService.listDeviceTelemetryHistory(getTenantId(), deviceId, pageLink);
     }
 }
