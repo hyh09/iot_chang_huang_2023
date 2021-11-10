@@ -17,12 +17,14 @@ public class JudgeUserVo {
 
     /**
      *是否是租户管理员
+     * //租户管理员/租户有菜单权限的用户，拥有全部数据权限
      *
      */
     private  Boolean tenantFlag;
 
     /**
      * 是否是工厂管理员
+     * 工厂管理员/工厂用户，拥有所属工厂数据权限
      */
     private  Boolean factoryManagementFlag;
 
