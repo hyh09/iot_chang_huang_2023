@@ -16,6 +16,7 @@
 package org.thingsboard.server.dao.model.sql;
 
 import lombok.Data;
+import lombok.ToString;
 import org.thingsboard.server.common.data.kv.BasicTsKvEntry;
 import org.thingsboard.server.common.data.kv.BooleanDataEntry;
 import org.thingsboard.server.common.data.kv.DoubleDataEntry;
@@ -43,6 +44,7 @@ import static org.thingsboard.server.dao.model.ModelConstants.TS_COLUMN;
 
 @Data
 @MappedSuperclass
+@ToString
 public abstract class AbstractTsKvEntity implements ToData<TsKvEntry> {
 
     protected static final String SUM = "SUM";

@@ -1,3 +1,4 @@
+import { MenuTreeNodeOptions, MenuType } from '@app/shared/models/custom/menu-mng.models';
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { RequestConfig, defaultHttpOptionsFromConfig } from "@app/core/public-api";
@@ -82,6 +83,16 @@ export class RoleMngService {
       `/api/role/getUserByNotInRole/${params.roleId}/users${pageLink.toQuery()}&userCode=${params.userCode}&userName=${params.userName}`,
       defaultHttpOptionsFromConfig(config)
     );
+  }
+
+  // 根据菜单类型和角色获取菜单列表
+  public getMenusByRole(menuType: MenuType, roleId?: string, config?: RequestConfig): Observable<MenuTreeNodeOptions[]> {
+    return this.http.post<MenuTreeNodeOptions[]>(`/api/roleMenu/queryAll`, { menuType, roleId }, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 配置角色下的菜单及按钮权限
+  public setRolePermissions(menuVoList: string[], semiSelectList: string[], roleId: string) {
+    return this.http.post(`/api/roleMenu/binding`, { menuVoList, semiSelectList, roleId }, { responseType: 'text' });
   }
 
 }

@@ -14,28 +14,115 @@
       <mat-tab label="PC">
         <div fxLayout="row" fxLayoutGap="16px" class="menus-settings-wrapper">
           <div class="menus-wrapper">
-            <div class="tree-title">系统菜单</div>
+            <div class="tree-title">{{ 'tenant.sys-menus' | translate }}</div>
             <div class="tree-wrapper">
-
+              <mat-form-field>
+                <mat-label>{{ 'tenant.search-sys-menus' | translate }}</mat-label>
+                <input type="text" matInput [(ngModel)]="pcSysSearch" />
+                <button *ngIf="pcSysSearch" matSuffix mat-icon-button aria-label="Clear" (click)="pcSysSearch = ''">
+                  <mat-icon class="material-icons">close</mat-icon>
+                </button>
+              </mat-form-field>
+              <nz-tree
+                #pcSysTree
+                [nzData]="pcSysMenus"
+                [nzSearchValue]="pcSysSearch"
+                nzVirtualHeight="380px"
+                nzCheckable
+                nzMultiple
+                (nzCheckBoxChange)="sysCheckChange($event, menuType.PC)"
+              ></nz-tree>
             </div>
           </div>
           <div fxLayout="column" fxLayoutGap="16px" fxLayoutAlign="center center" class="btns-wrapper">
-            <button mat-flat-button color="primary">
+            <button mat-flat-button color="primary" [disabled]="!pcRightEnabled" (click)="toTenant(menuType.PC)">
               <mat-icon>chevron_right</mat-icon>
             </button>
-            <button mat-flat-button color="primary">
+            <button mat-flat-button color="primary" [disabled]="!pcLeftEnabled" (click)="toSys(menuType.PC)">
               <mat-icon>chevron_left</mat-icon>
             </button>
           </div>
           <div class="menus-wrapper">
-            <div class="tree-title">租户菜单</div>
+            <div class="tree-title">{{ 'tenant.tenant-menus' | translate }}</div>
             <div class="tree-wrapper">
-              
+              <mat-form-field>
+                <mat-label>{{ 'tenant.search-tenant-menus' | translate }}</mat-label>
+                <input type="text" matInput [(ngModel)]="pcTenantSearch" />
+                <button *ngIf="pcTenantSearch" matSuffix mat-icon-button aria-label="Clear" (click)="pcTenantSearch = ''">
+                  <mat-icon class="material-icons">close</mat-icon>
+                </button>
+              </mat-form-field>
+              <nz-tree
+                #pcTenantTree
+                [nzData]="pcTenantMenus"
+                [nzSearchValue]="pcTenantSearch"
+                nzVirtualHeight="380px"
+                nzCheckable
+                nzMultiple
+                nzDraggable
+                [nzBeforeDrop]="beforeDrop"
+                (nzCheckBoxChange)="pcLeftEnabled = $event.checkedKeys.length > 0"
+              ></nz-tree>
             </div>
           </div>
         </div>
       </mat-tab>
-      <mat-tab label="App"></mat-tab>
+      <mat-tab label="App">
+        <div fxLayout="row" fxLayoutGap="16px" class="menus-settings-wrapper">
+          <div class="menus-wrapper">
+            <div class="tree-title">{{ 'tenant.sys-menus' | translate }}</div>
+            <div class="tree-wrapper">
+              <mat-form-field>
+                <mat-label>{{ 'tenant.search-sys-menus' | translate }}</mat-label>
+                <input type="text" matInput [(ngModel)]="appSysSearch" />
+                <button *ngIf="appSysSearch" matSuffix mat-icon-button aria-label="Clear" (click)="appSysSearch = ''">
+                  <mat-icon class="material-icons">close</mat-icon>
+                </button>
+              </mat-form-field>
+              <nz-tree
+                #appSysTree
+                [nzData]="appSysMenus"
+                [nzSearchValue]="appSysSearch"
+                nzVirtualHeight="380px"
+                nzCheckable
+                nzMultiple
+                (nzCheckBoxChange)="sysCheckChange($event, menuType.APP)"
+              ></nz-tree>
+            </div>
+          </div>
+          <div fxLayout="column" fxLayoutGap="16px" fxLayoutAlign="center center" class="btns-wrapper">
+            <button mat-flat-button color="primary" [disabled]="!appRightEnabled" (click)="toTenant(menuType.APP)">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button mat-flat-button color="primary" [disabled]="!appLeftEnabled" (click)="toSys(menuType.APP)">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+          </div>
+          <div class="menus-wrapper">
+            <div class="tree-title">{{ 'tenant.tenant-menus' | translate }}</div>
+            <div class="tree-wrapper">
+              <mat-form-field>
+                <mat-label>{{ 'tenant.search-tenant-menus' | translate }}</mat-label>
+                <input type="text" matInput [(ngModel)]="appTenantSearch" />
+                <button *ngIf="appTenantSearch" matSuffix mat-icon-button aria-label="Clear" (click)="appTenantSearch = ''">
+                  <mat-icon class="material-icons">close</mat-icon>
+                </button>
+              </mat-form-field>
+              <nz-tree
+                #appTenantTree
+                [nzData]="appTenantMenus"
+                [nzSearchValue]="appTenantSearch"
+                nzVirtualHeight="380px"
+                nzCheckable
+                nzMultiple
+                nzDraggable
+                [nzBeforeDrop]="beforeDrop"
+                (nzCheckBoxChange)="appLeftEnabled = $event.checkedKeys.length > 0"
+              ></nz-tree>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
     </mat-tab-group>
   </div>
   <div mat-dialog-actions fxLayoutAlign="end center">

@@ -1,3 +1,4 @@
+import { filter, map } from 'rxjs/operators';
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
@@ -20,9 +21,11 @@ export class MenuMngService {
     private http: HttpClient
   ) { }
 
-  // 获取所有一级菜单
-  public getSuperMenus(menuType: MenuType, config?: RequestConfig): Observable<Array<Menu>> {
-    return this.http.get<Array<Menu>>(`/api/menu/getOneLevel?menuType=${menuType}`, defaultHttpOptionsFromConfig(config));
+  // 获取除按钮外的所有菜单
+  public getSuperMenus(menuType: MenuType, currMenuId?: string, config?: RequestConfig): Observable<Array<Menu>> {
+    return this.http.get<Array<Menu>>(`/api/menu/getMenuListByCdn?menuType=${menuType}&isButton=false`, defaultHttpOptionsFromConfig(config)).pipe(map(menus => {
+      return menus.filter(menu => (menu.id + '' !== currMenuId));
+    }));
   }
 
   // 获取菜单列表
