@@ -100,7 +100,7 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
                     for (TenantMenuEntity entity:collect){
                         for (Menu menu:buttons) {
                             if (entity.getSysMenuId() != null && entity.getSysMenuId().toString().equals(menu.getParentId().toString())) {
-                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(menu, entity.getLevel() + 1, menu.getCreatedUser());
+                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(menu, entity.getLevel() + 1, menu.getCreatedUser(),entity.getId());
                                 tenantMenuEntity.setTenantId(entity.getTenantId());
                                 collectButton.add(tenantMenuEntity);
                                 System.out.println(tenantMenuEntity.getTenantMenuName());
