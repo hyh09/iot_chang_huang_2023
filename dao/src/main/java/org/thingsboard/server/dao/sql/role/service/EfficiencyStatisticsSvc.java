@@ -24,4 +24,11 @@ public interface EfficiencyStatisticsSvc {
      * 能耗的查询
      */
     ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+
+
+
+
+
+
+
 }
