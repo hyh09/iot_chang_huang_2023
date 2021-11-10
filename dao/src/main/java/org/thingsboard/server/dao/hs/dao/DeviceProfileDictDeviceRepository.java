@@ -7,7 +7,9 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -27,4 +29,8 @@ public interface DeviceProfileDictDeviceRepository extends PagingAndSortingRepos
             "left join DictDeviceEntity p on d.dictDeviceId = p.id " +
             "where d.deviceProfileId =:deviceProfileId")
     List<DictDeviceEntity> findAllBindDeviceProfile(@Param("deviceProfileId") UUID deviceProfileId);
+
+    List<DeviceProfileDictDeviceEntity> findAllByDictDeviceIdIn(List<UUID> dictDeviceIds);
+
+    Optional<DeviceProfileDictDeviceEntity> findByDictDeviceId(UUID dictDeviceId);
 }

@@ -77,8 +77,6 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         tenantMenu.setSysMenuName(sysMenuName);
         if(StringUtils.isNotEmpty(this.tenantMenuCode)){
             tenantMenu.setTenantMenuCode(tenantMenuCode);
-        }else {
-            tenantMenu.setTenantMenuCode("ZHCD"+String.valueOf(System.currentTimeMillis()));
         }
         tenantMenu.setTenantMenuName(tenantMenuName);
         tenantMenu.setLevel(level);
@@ -89,8 +87,14 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         tenantMenu.setMenuType(menuType);
         if(isButton == null){
             tenantMenu.setIsButton(false);
+            if(StringUtils.isEmpty(tenantMenu.getTenantMenuCode())){
+                tenantMenu.setTenantMenuCode("ZHCD"+String.valueOf(System.currentTimeMillis()));
+            }
         }else {
             tenantMenu.setIsButton(isButton);
+            if(StringUtils.isEmpty(tenantMenu.getTenantMenuCode())){
+                tenantMenu.setTenantMenuCode("ZHAN"+String.valueOf(System.currentTimeMillis()));
+            }
         }
         tenantMenu.setLangKey(langKey);
         tenantMenu.setPath(path);

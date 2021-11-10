@@ -92,6 +92,24 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
     }
 
     /**
+     * 根据菜单id,查询菜单下按钮
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Menu> getButtonListByIds(List<UUID> ids){
+        List<Menu> resultMenuList = new ArrayList<>();
+        List<MenuEntity> entityList = menuRepository.getButtonListByIds(ids);
+        if(CollectionUtils.isNotEmpty(entityList)){
+            entityList.forEach(i->{
+                resultMenuList.add(i.toData());
+            });
+        }
+        return resultMenuList;
+    }
+
+
+    /**
      * 查询系统菜单列表分页
      * @param menu
      * @param pageLink
