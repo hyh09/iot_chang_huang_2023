@@ -32,7 +32,7 @@ public final class TenantMenuEntity extends AbstractTenantMenuEntity<TenantMenu>
         super(tenantMenu);
     }
 
-    public TenantMenuEntity(Menu menu, int level, UUID createdUser){
-        super(menu,level,createdUser);
+    public TenantMenuEntity(Menu menu, int level, UUID createdUser,UUID parentId){
+        super(menu,level,createdUser,parentId);
     }
 }

@@ -199,7 +199,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         return tenantMenu;
     }
 
-    public AbstractTenantMenuEntity(Menu menu,int level,UUID createdUser) {
+    public AbstractTenantMenuEntity(Menu menu,int level,UUID createdUser,UUID parentId) {
         this.id = Uuids.timeBased();
         this.tenantId = menu.getTenantId();
         this.sysMenuId = menu.getId();
@@ -213,7 +213,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.url = menu.getUrl();
         this.tenantMenuIcon = menu.getMenuIcon();
         this.tenantMenuImages = menu.getMenuImages();
-        this.parentId = menu.getParentId();
+        this.parentId = parentId;
         this.menuType = menu.getMenuType();
         this.isButton = menu.getIsButton();
         this.langKey = menu.getLangKey();
