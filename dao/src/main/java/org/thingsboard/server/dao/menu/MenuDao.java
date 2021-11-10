@@ -65,4 +65,11 @@ public interface MenuDao extends Dao<Menu>{
      */
     Menu findSameLevelName(UUID parentId,String name);
 
+    /**
+     * 根据菜单id,查询菜单下按钮
+     * @param ids
+     * @return
+     */
+    List<Menu> getButtonListByIds(List<UUID> ids);
+
 }

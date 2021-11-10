@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
+import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
@@ -195,6 +197,32 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         tenantMenu.setUpdatedUser(updatedUser);
         tenantMenu.setName(tenantMenuName);
         return tenantMenu;
+    }
+
+    public AbstractTenantMenuEntity(Menu menu,int level,UUID createdUser) {
+        this.id = Uuids.timeBased();
+        this.tenantId = menu.getTenantId();
+        this.sysMenuId = menu.getId();
+        this.region = menu.getRegion();
+        this.sysMenuCode = menu.getCode();
+        this.sysMenuName = menu.getName();
+        this.tenantMenuName = menu.getName();
+        this.tenantMenuCode = "ZHAN"+ System.currentTimeMillis();
+        this.level = level;
+        this.sort = menu.getSort();
+        this.url = menu.getUrl();
+        this.tenantMenuIcon = menu.getMenuIcon();
+        this.tenantMenuImages = menu.getMenuImages();
+        this.parentId = menu.getParentId();
+        this.menuType = menu.getMenuType();
+        this.isButton = menu.getIsButton();
+        this.langKey = menu.getLangKey();
+        this.path = menu.getPath();
+        this.hasChildren = false;
+        this.createdTime = Uuids.unixTimestamp(Uuids.timeBased());
+        this.createdUser = createdUser;
+        this.updatedTime = Uuids.unixTimestamp(Uuids.timeBased());
+        this.updatedUser = createdUser;
     }
 
 }

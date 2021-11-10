@@ -146,6 +146,6 @@ public interface DeviceService {
      * @param factoryId
      * @return
      */
-    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryId) throws ThingsboardException ;
+    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryId) throws ThingsboardException;
 
 }
