@@ -21,6 +21,8 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
 
+import java.util.HashSet;
+
 import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -66,10 +68,10 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "获得设备字典列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
             @ApiImplicitParam(name = "supplier", value = "供应商", paramType = "query")})
@@ -78,8 +80,8 @@ public class DictDeviceController extends BaseController {
     public PageData<DictDevice> listDictDevice(
             @RequestParam int page,
             @RequestParam int pageSize,
-            @RequestParam(required = false) String sortProperty,
-            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String supplier
@@ -100,6 +102,7 @@ public class DictDeviceController extends BaseController {
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
         CommonUtil.checkCode(dictDeviceVO.getCode(), "SBZD");
+        CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
         this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
         return dictDeviceVO;
     }
@@ -111,10 +114,11 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "获得设备字典详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path")})
+            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true)})
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device/{id}")
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
         return this.dictDeviceService.getDictDeviceDetail(id, getTenantId());
     }
 
@@ -123,10 +127,11 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "删除设备字典")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path"),})
+            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true),})
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping("/dict/device/{id}")
     public void deleteDictDevice(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
         this.dictDeviceService.deleteDictDevice(id, getTenantId());
     }
 

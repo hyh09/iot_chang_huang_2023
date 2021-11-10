@@ -88,5 +88,12 @@ public interface MenuRepository extends PagingAndSortingRepository<MenuEntity, U
     @Query(value = "SELECT t FROM MenuEntity t WHERE t.parentId = :parentId AND t.name = :name ")
     MenuEntity findSameLevelName(@Param("parentId") UUID parentId,@Param("name") String name);
 
+    /**
+     * 根据菜单id,查询菜单下按钮
+     * @param ids
+     * @return
+     */
+    @Query("SELECT t FROM MenuEntity t WHERE t.parentId IN :ids AND t.isButton = true ORDER BY t.sort ASC")
+    List<MenuEntity> getButtonListByIds(@Param("ids") List<UUID> ids);
 
 }

@@ -29,6 +29,7 @@ import org.thingsboard.server.dao.model.sql.AlarmEntity;
 import org.thingsboard.server.dao.model.sql.AlarmInfoEntity;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,6 +37,8 @@ import java.util.UUID;
  * Created by Valerii Sosliuk on 5/21/2017.
  */
 public interface AlarmRepository extends CrudRepository<AlarmEntity, UUID> {
+
+    Optional<AlarmEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     @Query("SELECT a FROM AlarmEntity a WHERE a.originatorId = :originatorId AND a.type = :alarmType ORDER BY a.startTs DESC")
     List<AlarmEntity> findLatestByOriginatorAndType(@Param("originatorId") UUID originatorId,

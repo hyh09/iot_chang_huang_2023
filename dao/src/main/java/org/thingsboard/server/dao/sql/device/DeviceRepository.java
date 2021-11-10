@@ -21,7 +21,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
@@ -239,4 +241,10 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             "INNER JOIN DeviceProfileEntity p ON d.deviceProfileId = p.id " +
             "WHERE p.transportType = :transportType")
     Page<UUID> findIdsByDeviceProfileTransportType(@Param("transportType") DeviceTransportType transportType, Pageable pageable);
+
+    /**
+     * 批量查询设备属性
+     */
+    @Query("SELECT d FROM DeviceEntity d WHERE d.id  in (:ids)")
+    List<DeviceEntity> queryAllByIds(@Param("ids") List<UUID> ids);
 }
