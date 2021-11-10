@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const forwardUrl = "http://10.10.11.23:8080"; // http://10.10.10.134:8080"  "http://10.10.10.222/:8080";
+const forwardUrl = "http://10.10.11.23:8080"; // http://10.10.10.134:8080  http://10.10.11.23:8080  http://10.10.10.222:8080
 const wsForwardUrl = "ws://10.10.11.23:8080";
 const ruleNodeUiforwardUrl = forwardUrl;
 

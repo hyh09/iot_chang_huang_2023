@@ -9,6 +9,13 @@
         </mat-error>
       </mat-form-field>
       <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.lang-key</mat-label>
+        <input matInput formControlName="langKey" required>
+        <mat-error *ngIf="entityForm.get('langKey').hasError('required')">
+          {{ 'menu-mng.lang-key-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
         <mat-label translate>menu-mng.menu-type</mat-label>
         <mat-select
           formControlName="menuType"
@@ -26,9 +33,16 @@
         <mat-label translate>menu-mng.parent-menu</mat-label>
         <mat-select
           formControlName="parentId"
-          [disabled]="!entityForm.get('menuType').value || superMenus.length === 0"
+          [disabled]="(isLoading$ | async) || !isEdit || !entityForm.get('menuType').value || superMenus.length === 0"
         >
           <mat-option *ngFor="let menu of superMenus" [value]="menu.id">{{ menu.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>menu-mng.is-button-or-not</mat-label>
+        <mat-select formControlName="isButton">
+          <mat-option [value]="true">{{ 'action.yes' | translate }}</mat-option>
+          <mat-option [value]="false">{{ 'action.no' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field class="mat-block">

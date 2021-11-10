@@ -142,6 +142,7 @@ import { WidgetContainerComponent } from '@home/components/widget/widget-contain
 import { SnmpDeviceProfileTransportModule } from '@home/components/profile/device/snpm/snmp-device-profile-transport.module';
 import { DeviceCredentialsModule } from '@home/components/device/device-credentials.module';
 import { DeviceProfileCommonModule } from '@home/components/profile/device/common/device-profile-common.module';
+import { FactoryTreeComponent } from './factory-tree/factory-tree.component';
 
 @NgModule({
   declarations:
@@ -260,7 +261,8 @@ import { DeviceProfileCommonModule } from '@home/components/profile/device/commo
       DashboardStateDialogComponent,
       DashboardImageDialogComponent,
       EmbedDashboardDialogComponent,
-      DisplayWidgetTypesPanelComponent
+      DisplayWidgetTypesPanelComponent,
+      FactoryTreeComponent
     ],
   imports: [
     CommonModule,
@@ -371,7 +373,8 @@ import { DeviceProfileCommonModule } from '@home/components/profile/device/commo
     DashboardStateDialogComponent,
     DashboardImageDialogComponent,
     EmbedDashboardDialogComponent,
-    DisplayWidgetTypesPanelComponent
+    DisplayWidgetTypesPanelComponent,
+    FactoryTreeComponent
   ],
   providers: [
     WidgetComponentService,

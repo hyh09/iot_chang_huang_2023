@@ -43,7 +43,8 @@ import { WidgetInfo } from '@home/models/widget-component.models';
 import jsonSchemaDefaults from 'json-schema-defaults';
 import materialIconsCodepoints from '!raw-loader!material-design-icons/iconfont/codepoints';
 import { Observable, of, ReplaySubject } from 'rxjs';
-import { NzTreeNode } from 'ng-zorro-antd/tree';
+import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
+import { Router } from '@angular/router';
 
 const i18nRegExp = new RegExp(`{${i18nPrefix}:[^{}]+}`, 'g');
 
@@ -81,7 +82,7 @@ const commonMaterialIcons: Array<string> = ['more_horiz', 'more_vert', 'open_in_
   'settings', 'notifications', 'notifications_active', 'info', 'info_outline', 'warning', 'list', 'file_download', 'import_export',
   'share', 'add', 'edit', 'done'];
 
-export interface TreeNode extends NzTreeNode {
+export interface TreeNodeOptions extends NzTreeNodeOptions {
   id: string,
   parentId: string
 }
@@ -118,7 +119,8 @@ export class UtilsService {
 
   constructor(@Inject(WINDOW) private window: Window,
               private zone: NgZone,
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private router: Router) {
     let frame: Element = null;
     try {
       frame = window.frameElement;
@@ -483,27 +485,82 @@ export class UtilsService {
 
   /**
    * @description 将平级树节点数组转换成层级树节点数组
-   * @param treeNodes 树节点平级数组
+   * @param treeNodes 树节点平级数组 TreeNodeOptions[]
    * @returns 层级树节点数组
    */
-  public formatTree(treeNodes: Array<TreeNode>): Array<TreeNode> {
-    const arr: Array<TreeNode> = new Array<TreeNode>();
+  public formatTree(treeNodes: TreeNodeOptions[]): TreeNodeOptions[] {
+    const arr: TreeNodeOptions[] = new Array<TreeNodeOptions>();
     const map = {};
     if (treeNodes) {
       treeNodes.forEach(node => {
         map[node.id] = node;
-      })
+        node.isLeaf = true;
+      });
       treeNodes.forEach(node => {
-        if (!node.parentId || !map[node.parentId]) {
-          if (!node.children) {
-            node.children = new Array<TreeNode>();
+        if (node.parentId) {
+          const parent: TreeNodeOptions = map[node.parentId];
+          if (!parent.children) {
+            parent.children = new Array<TreeNodeOptions>();
           }
-          arr.push(node);
+          parent.children.push(node);
+          parent.isLeaf = false;
         } else {
-          (map[node.parentId] as TreeNode).children.push(node)
+          arr.push(node);
         }
       })
     }
     return arr;
+  }
+
+  /**
+   * @description 将层级树节点数组转换成平级树节点数组
+   * @param treeNodes 树节点层级数组 NzTreeNode[]
+   * @returns 平级树节点数组 NzTreeNode[]
+   */
+  public expandTreeNode(treeNode: NzTreeNode): NzTreeNode[] {
+    const arr: NzTreeNode[] = [];
+    if (treeNode) {
+      arr.push(treeNode);
+      if (treeNode.children && treeNode.children.length > 0) {
+        treeNode.children.forEach(node => {
+          arr.push(...this.expandTreeNode(node));
+        });
+      }
+    }
+    return arr;
+  }
+
+  /**
+   * @description 将层级树节点数据数组转换成平级树节点数组
+   * @param treeNodeOptions 树节点层级数组 NzTreeNodeOptions[]
+   * @param keepChildren 是否保留children boolean
+   * @returns 平级树节点数据数组 TreeNodeOptions[]
+   */
+   public expandTreeNodeOptions(treeNodeOptions: NzTreeNodeOptions, keepChildren?: boolean): TreeNodeOptions[] {
+    const arr: TreeNodeOptions[] = [];
+    if (treeNodeOptions) {
+      const { id, parentId } = treeNodeOptions;
+      if (keepChildren) {
+        arr.push({ ...treeNodeOptions, id, parentId });
+      } else {
+        arr.push({ ...treeNodeOptions, id, parentId, children: undefined });
+      }
+      if (treeNodeOptions.children && treeNodeOptions.children.length > 0) {
+        treeNodeOptions.children.forEach(nodeOptions => {
+          arr.push(...this.expandTreeNodeOptions(nodeOptions));
+        });
+      }
+    }
+    return arr;
+  }
+
+  public hasPermission(btnLangKey: string, path?: string): boolean {
+    const btnMap: { [key: string]: string[] } = JSON.parse(sessionStorage.getItem('menuBtnMap') || '') || {};
+    const currPath = path || this.router.url;
+    if (btnMap[currPath]) {
+      return btnMap[currPath].includes(btnLangKey);
+    } else {
+      return true;
+    }
   }
 }

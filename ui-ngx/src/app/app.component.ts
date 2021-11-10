@@ -154,7 +154,6 @@ export class AppComponent implements OnInit {
   //订阅ui状态更改
   subscribeUiState(){
     this.store.pipe(select(selectTenantUI)).subscribe(ui => {
-      console.log(ui)
       this.changeCss(ui);
       if (ui) {
         this.changeIcon(ui.iconImageUrl);
@@ -203,12 +202,7 @@ export class AppComponent implements OnInit {
 
   //改变应用标题
   changeTitle(title: string) {
-    console.log(title)
-    if (title) {
-      env.appTitle = title;
-    }else{
-      env.appTitle = "环思物联";
-    }
+    env.appTitle = title || '环思物联';
     this.titleService.setTitle(
       this.router.routerState.snapshot.root,
       this.translate
