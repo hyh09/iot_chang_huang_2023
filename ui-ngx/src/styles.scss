@@ -1084,6 +1084,15 @@ button {
   min-width: 40px !important;
 }
 
+input:-webkit-autofill {
+  box-shadow:0 0 0 1000px transparent inset !important;
+}
+input:-internal-autofill-previewed,
+  input:-internal-autofill-selected {
+  -webkit-text-fill-color: #333 !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {
