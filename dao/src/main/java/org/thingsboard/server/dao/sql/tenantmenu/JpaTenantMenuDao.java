@@ -87,22 +87,30 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      */
     @Override
     public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
-        List<TenantMenuEntity> collect = tenantMenuList.stream().map(e -> {
-            TenantMenuEntity entity = new TenantMenuEntity(e);
-            return entity;
-        }).collect(Collectors.toList());
-        List<TenantMenuEntity> entityList = collect.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(entityList)){
-            List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList()));
-            if(CollectionUtils.isNotEmpty(buttons)) {
-                collect.forEach(i->{
-                    buttons.forEach(j->{
-                        if(i.getSysMenuId() != null && i.getSysMenuId().toString().equals(i.getParentId().toString())){
-                            TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(j,i.getLevel() + 1,j.getCreatedUser());
-                            collect.add(tenantMenuEntity);
+        List<TenantMenuEntity> collect = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(tenantMenuList)){
+            tenantMenuList.forEach(i->{
+                collect.add(new TenantMenuEntity(i));
+            });
+            List<TenantMenuEntity> entityList = collect.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
+            List<TenantMenuEntity> collectButton = new ArrayList<>();
+            if(CollectionUtils.isNotEmpty(entityList)){
+                List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList()));
+                if(CollectionUtils.isNotEmpty(buttons)) {
+                    for (TenantMenuEntity entity:collect){
+                        for (Menu menu:buttons) {
+                            if (entity.getSysMenuId() != null && entity.getSysMenuId().toString().equals(menu.getParentId().toString())) {
+                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(menu, entity.getLevel() + 1, menu.getCreatedUser());
+                                tenantMenuEntity.setTenantId(entity.getTenantId());
+                                collectButton.add(tenantMenuEntity);
+                                System.out.println(tenantMenuEntity.getTenantMenuName());
+                            }
                         }
-                    });
-                });
+                    }
+                }
+            }
+            if(CollectionUtils.isNotEmpty(collectButton)){
+                collect.addAll(collectButton);
             }
         }
         tenantMenuRepository.saveAll(collect);
