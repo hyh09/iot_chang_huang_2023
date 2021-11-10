@@ -73,6 +73,12 @@ public class DeviceDetailResult {
     private String name;
 
     /**
+     * 设备图片
+     */
+    @ApiModelProperty("设备图片")
+    private String picture;
+
+    /**
      * 设备是否在线
      */
     @ApiModelProperty("设备是否在线")

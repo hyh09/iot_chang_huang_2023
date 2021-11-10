@@ -59,4 +59,6 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
     public Device toData() {
         return super.toDevice();
     }
+
+
 }

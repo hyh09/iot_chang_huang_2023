@@ -476,6 +476,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return resultList;
     }
 
+
+    @Override
+    public  List<DeviceEntity> queryAllByIds(List<UUID> ids){
+         return  deviceRepository.queryAllByIds(ids);
+    }
+
     /**
      * 比较版本号大小
      * source大于target,返回值为1
