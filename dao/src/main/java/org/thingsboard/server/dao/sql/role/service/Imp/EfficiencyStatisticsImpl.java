@@ -232,6 +232,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             EffectTsKvEntity  entity1 =value.get(0);
             if(entity1 != null) {
                 appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
+                appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {
                     Workshop workshop = workshopDao.findById(tenantId, entity1.getWorkshopId());
                     appDeviceEnergyVo.setWorkshopName(workshop.getName());

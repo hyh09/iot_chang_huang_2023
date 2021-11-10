@@ -60,4 +60,7 @@ public class AppDeviceEnergyVo {
     @ApiModelProperty("产线名称 ")
     private String productionName;
 
+    @ApiModelProperty("时间")
+    private  Long time;
+
 }
