@@ -1,4 +1,4 @@
-package org.thingsboard.server.common.data.vo.resultvo.cap;
+package org.thingsboard.server.common.data.vo.resultvo.energy;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,12 +16,24 @@ import java.util.List;
 @Data
 @ToString
 @ApiModel(value = "查询产能的出参实体")
-public class ResultCapAppVo {
+public class ResultEnergyAppVo {
     /**
-     * 总产能数据
+     * 水的总值
      */
-    @ApiModelProperty("总产能数据 Long类型 ")
-    private String totalValue;
+    @ApiModelProperty("水的总值")
+    private String totalWaterValue;
+    /**
+     * 电的总值
+     */
+    @ApiModelProperty("电的总值")
+    private String totalElectricValue;
+    /**
+     * 气总值
+     */
+    @ApiModelProperty("气总值")
+    private String totalAirValue;
+
+
 
 //    /**
 //     * 默认是当前 00点
@@ -30,18 +42,18 @@ public class ResultCapAppVo {
 //    /**
 //     * 默认是当天的 晚上24点数据
 //     */
-//    private Long endTime;
+//    private  Long  endTime;
 //
-//    private String factoryId;
+//    private  String factoryId;
 //    /**
 //     * 所属工厂 默认是第一条数据的工厂 下的数据
 //     */
-//    private String factoryName;
+//    private  String factoryName;
 
     /**
      * 设备的具体数据
      */
-    private List<AppDeviceCapVo> appDeviceCapVoList;
+    private List<AppDeviceEnergyVo> appDeviceCapVoList;
 
 
 }

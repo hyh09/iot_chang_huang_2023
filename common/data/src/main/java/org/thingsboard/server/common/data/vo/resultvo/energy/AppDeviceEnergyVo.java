@@ -1,4 +1,4 @@
-package org.thingsboard.server.common.data.vo.resultvo.cap;
+package org.thingsboard.server.common.data.vo.resultvo.energy;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,8 +13,8 @@ import lombok.ToString;
  **/
 @Data
 @ToString
-@ApiModel(value = "查询设备产能 实体")
-public class AppDeviceCapVo {
+@ApiModel(value = "查询设备能耗 实体")
+public class AppDeviceEnergyVo {
 
 
     /**
@@ -27,21 +27,40 @@ public class AppDeviceCapVo {
      */
     @ApiModelProperty("设备的id ")
     private String deviceId;
+//    /**
+//     * 产能  水、电、气
+//     */
+//    private  String  value;  //比如多个属性呢？
+
     /**
-     * 产能
+     * 水的总值
      */
-    @ApiModelProperty("产能 ")
-    private String value;  //比如多个属性呢？
+    @ApiModelProperty("水的值 ")
+    private String waterValue;
+    /**
+     * 电的总值
+     */
+    @ApiModelProperty("电的值 ")
+    private String electricValue;
+    /**
+     * 气总值
+     */
+    @ApiModelProperty("气值 ")
+    private String airValue;
+
 
     /**
      * 设备所属的车间 车间名称
      */
-    @ApiModelProperty("设备所属的车间 车间名称 ")
+    @ApiModelProperty("车间名称 ")
     private String workshopName;
     /**
      * 设备所属的产线 产线名称
      */
-    @ApiModelProperty("设备所属的产线 产线名称 ")
+    @ApiModelProperty("产线名称 ")
     private String productionName;
+
+    @ApiModelProperty("时间")
+    private  Long time;
 
 }

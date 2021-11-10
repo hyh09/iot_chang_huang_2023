@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
@@ -127,9 +129,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
         return DeviceListAffiliationDTO.builder()
                 .factoryMap(DaoUtil.convertDataList(Lists.newArrayList(this.factoryRepository.findAllById(factoryIds))).stream()
-                        .collect(Collectors.toMap(e -> e.getId(), Function.identity(), (a, b) -> a)))
+                        .collect(Collectors.toMap(Factory::getId, Function.identity(), (a, b) -> a)))
                 .workshopMap(DaoUtil.convertDataList(Lists.newArrayList(this.workshopRepository.findAllById(workshopIds))).stream()
-                        .collect(Collectors.toMap(e -> e.getId(), Function.identity(), (a, b) -> a)))
+                        .collect(Collectors.toMap(Workshop::getId, Function.identity(), (a, b) -> a)))
                 .productionLineMap(DaoUtil.convertDataList(Lists.newArrayList(this.productionLineRepository.findAllById(productionLineIds))).stream()
                         .collect(Collectors.toMap(ProductionLine::getId, Function.identity(), (a, b) -> a)))
                 .build();
