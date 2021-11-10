@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.sql.role.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.checkerframework.checker.units.qual.C;
 import org.thingsboard.server.dao.model.sql.AbstractTsKvEntity;
 import org.thingsboard.server.dao.model.sqlts.timescale.ts.TimescaleTsKvCompositeKey;
 import org.thingsboard.server.dao.util.StringUtilToll;
@@ -32,6 +33,11 @@ import java.util.UUID;
                                         @ColumnResult(name = "entity_id", type = UUID.class),
                                         @ColumnResult(name = "ts" ,type = Long.class),
                                         @ColumnResult(name = "key" ,type = Integer.class),
+
+                                        @ColumnResult(name = "deviceName",type = String.class),
+                                        @ColumnResult(name = "factoryId",type = UUID.class),
+                                        @ColumnResult(name = "workshopId",type = UUID.class),
+                                        @ColumnResult(name = "productionLineId",type = UUID.class),
 
                                         @ColumnResult(name = "booleanValue",type=Boolean.class),
                                         @ColumnResult(name = "strValue",type = String.class),
@@ -67,6 +73,25 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
      */
     @Transient
     private String keyName;
+
+    @Transient
+  private  String  deviceName;
+    /**
+     * 工厂
+     */
+    @Transient
+    private UUID factoryId;
+    /**
+     * 车间
+     */
+    @Transient
+    private UUID workshopId;
+    /**
+     * 生产线
+     */
+    @Transient
+    private UUID productionLineId;
+
 
 
 //    protected Boolean booleanValue;
@@ -119,6 +144,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
 
     public EffectTsKvEntity(String onlyKeyId,UUID entityId,Long ts1,Integer key1,
+                            String deviceName,UUID factoryId,UUID workshopId,UUID productionLineId,
                             Boolean booleanValue1,String strValue,Long longValue,Double doubleValue,String jsonValue,
                             Long ts2,Boolean bollV2,String strV2,Long longV2,Double doubleValue2,String jsonValue2
     ) {
@@ -126,6 +152,11 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
         this.entityId = entityId;
         this.ts =ts1;
         this.key =key1;
+
+        this.deviceName =deviceName;
+        this.factoryId =factoryId;
+        this.workshopId=workshopId;
+        this.productionLineId=productionLineId;
 
         this.booleanValue=booleanValue1;
         this.strValue=strValue;
@@ -194,5 +225,24 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 //
 //        }
 
+    }
+
+
+
+    /**
+     * 返回当前的设备的这个属性的值
+     */
+    public  String getValue()
+    {
+      System.out.println("打印当前的key:"+subtractDouble+"===#:"+subtractLong);
+        if(this.subtractDouble>0)
+        {
+            return  subtractDouble.toString();
+        }
+        if(this.subtractLong>0)
+        {
+            return subtractLong.toString();
+        }
+        return  "0";
     }
 }

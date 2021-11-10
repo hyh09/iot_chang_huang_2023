@@ -1,23 +1,17 @@
 package org.thingsboard.server.common.data.vo;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.ToString;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
  * @program: thingsboard
- * @description: 查询产能的入参实体
+ * @description: 能耗入参对象
  * @author: HU.YUNHUI
- * @create: 2021-11-09 09:34
+ * @create: 2021-11-09 19:06
  **/
-@Data
-@ToString
-@ApiModel(value = "查询产能的入参实体")
-public class QueryTsKvVo {
+
+public class QueryEnergyVo {
 
     @ApiModelProperty("起始时间 Long类型 ")
     private Long startTime;
@@ -38,12 +32,8 @@ public class QueryTsKvVo {
     @ApiModelProperty("工厂id  UUID类型")
     private UUID factoryId;
 
-    @ApiModelProperty("当前要传的属性 数组类型  ###不需要前端传了")
+    @ApiModelProperty("当前要传的属性 数组类型")
     private String key;
-
-    @ApiModelProperty("当前要传的属性 数组类型  ###能耗的水 电气 入参; ##也不需要传了")
-    private List<String> keys;
-
 
     @ApiModelProperty("分页参数大小 不传默认是2")
     private  int pageSize=2;
