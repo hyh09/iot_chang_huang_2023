@@ -26,6 +26,8 @@ import org.thingsboard.server.dao.sql.factory.FactoryRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.function.Function;
@@ -41,6 +43,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class ClientServiceImpl extends AbstractEntityService implements ClientService, CommonService {
+
+    @PersistenceContext
+    protected EntityManager entityManager;
 
     // 工厂Repository
     FactoryRepository factoryRepository;
@@ -107,7 +112,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public Map<String, Boolean> listAllDeviceOnlineStatus(List<UUID> allDeviceIdList) {
         return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, "active")
                 .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
-
     }
 
     /**
@@ -134,8 +138,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     /**
      * 组装设备请求 specification
      *
-     * @param tenantId 租户Id
-     * @param t        extends FactoryDeviceQuery
+     * @param tenantId      租户Id
+     * @param t             extends FactoryDeviceQuery
      */
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
@@ -153,8 +157,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             } else {
                 predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
             }
+
             query.orderBy(cb.desc(root.get("createdTime")));
-            return cb.and(predicates.toArray(new Predicate[0]));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
     }
 

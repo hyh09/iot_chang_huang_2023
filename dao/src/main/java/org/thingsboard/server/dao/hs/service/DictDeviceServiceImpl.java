@@ -83,7 +83,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 predicates.add(cb.like(root.get("code"), "%" + dictDeviceListQuery.getCode().trim() + "%"));
             if (!StringUtils.isBlank(dictDeviceListQuery.getSupplier()))
                 predicates.add(cb.like(root.get("supplier"), "%" + dictDeviceListQuery.getSupplier().trim() + "%"));
-            return cb.and(predicates.toArray(new Predicate[0]));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
         return DaoUtil.toPageData(this.deviceRepository.findAll(specification, DaoUtil.toPageable(pageLink)));

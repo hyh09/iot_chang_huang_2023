@@ -37,7 +37,17 @@ public class RTMonitorAppController extends BaseController {
     DeviceMonitorService deviceMonitorService;
 
     /**
-     * 获得实时监控数据列表
+     * 报警记录查询界面资源
+     */
+    @ApiOperation("获得报警记录查询界面资源")
+    @GetMapping(value = "/alarmRecord/resource")
+    public AlarmRecordResource getAlarmRecordResource() {
+        return new AlarmRecordResource().setAlarmStatusList(AlarmSimpleStatus.toResourceList())
+                .setAlarmLevelList(AlarmSimpleLevel.toResourceList());
+    }
+
+    /**
+     * 设备监控-获得实时监控数据列表
      */
     @ApiOperation(value = "获得实时监控数据列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
@@ -68,7 +78,7 @@ public class RTMonitorAppController extends BaseController {
 
 
     /**
-     * 实时监控-查询设备详情
+     * 设备监控-实时监控-查询设备详情
      *
      * @param id 设备id
      */
@@ -83,7 +93,7 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
-     * 实时监控-查询设备详情-分组属性历史数据
+     * 设备监控-实时监控-查询设备详情-分组属性历史数据
      */
     @ApiOperation(value = "实时监控-查询设备详情-分组属性历史数据", notes = "默认一天")
     @ApiImplicitParams({
@@ -107,29 +117,7 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
-     * 获得报警记录统计信息
-     */
-    @ApiOperation(value = "获得报警记录统计信息", notes = "近6个月、优先级为设备、产线、车间、工厂，如均为null则为未分配")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
-    })
-    @GetMapping(value = "/alarmRecord/statistics")
-    public List<AlarmTimesResult> getAlarms(
-            @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workShopId,
-            @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId
-    ) throws ThingsboardException {
-        FactoryDeviceQuery query = new FactoryDeviceQuery().setDeviceId(deviceId).setProductionLineId(productionLineId)
-                .setFactoryId(factoryId).setWorkShopId(workShopId);
-        return this.deviceMonitorService.listAppAlarmsRecordStatistics(getTenantId(), query);
-    }
-
-    /**
-     * 获得报警记录列表
+     * 设备监控-获得报警记录列表
      *
      * @see AlarmController#getAlarms
      */
@@ -168,25 +156,34 @@ public class RTMonitorAppController extends BaseController {
         return this.deviceMonitorService.listAppAlarmsRecord(getTenantId(), query, pageLink);
     }
 
+
     /**
-     * 获得在线设备情况
+     * 首页-获得报警记录统计信息
      */
-    @ApiOperation(value = "获得在线设备情况", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
+    @ApiOperation(value = "获得报警记录统计信息", notes = "不传工厂id默认为未分配")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+    })
+    @GetMapping(value = "/alarmRecord/statistics")
+    public List<AlarmTimesResult> getAlarms(
+            @RequestParam(required = false) String factoryId
+    ) throws ThingsboardException {
+        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
+        return this.deviceMonitorService.listAppAlarmsRecordStatistics(getTenantId(), query);
+    }
+
+    /**
+     * 首页-获得在线设备情况
+     */
+    @ApiOperation(value = "获得在线设备情况", notes = "不传工厂id默认为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
     })
     @GetMapping(value = "/device/onlineStatus/statistics")
     public DeviceOnlineStatusResult getDeviceOnlineStatusStatistics(
-            @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workShopId,
-            @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId
+            @RequestParam(required = false) String factoryId
     ) throws ThingsboardException {
-        FactoryDeviceQuery query = new FactoryDeviceQuery().setDeviceId(deviceId).setProductionLineId(productionLineId)
-                .setFactoryId(factoryId).setWorkShopId(workShopId);
+        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
         return this.deviceMonitorService.getRTMonitorOnlineStatusAppData(getTenantId(), query);
     }
 }

@@ -59,6 +59,7 @@ import java.util.stream.IntStream;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DeviceMonitorServiceImpl extends AbstractEntityService implements DeviceMonitorService, CommonService {
+
     // 设备配置Repository
     DeviceProfileRepository deviceProfileRepository;
 
@@ -107,7 +108,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
             if (!StringUtils.isBlank(name))
                 predicates.add(cb.like(root.get("name"), "%" + name.trim() + "%"));
-            return cb.and(predicates.toArray(new Predicate[0]));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
         return DaoUtil.toPageData(this.deviceProfileRepository.findAll(specification, DaoUtil.toPageable(pageLink)));
@@ -227,7 +228,35 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public RTMonitorResult getRTMonitorData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
-        return null;
+        var allDeviceList = this.clientService.listDeviceByQuery(tenantId, query);
+        var allDeviceIdList = allDeviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
+        var devicePageData = this.clientService.listDevicePageByQuery(tenantId, query, pageLink);
+
+        var activeStatusMap = this.clientService.listAllDeviceOnlineStatus(allDeviceIdList);
+
+        var deviceWithoutImageList = devicePageData.getData().stream().filter(e -> StringUtils.isBlank(e.getImages())).collect(Collectors.toList());
+        var map = Lists.newArrayList(this.dictDeviceRepository.findAllById(deviceWithoutImageList.stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())))
+                .stream().collect(Collectors.toMap(e -> e.getId().toString(), DictDeviceEntity::getPicture, (a, b) -> a));
+
+        var resultList = devicePageData.getData().stream().map(e -> {
+            var idStr = e.getId().toString();
+            return RTMonitorDeviceResult.builder()
+                    .id(idStr)
+                    .name(e.getName())
+                    .image(Optional.ofNullable(map.get(e.getId().toString())).orElse(e.getImages()))
+                    .isOnLine(calculateValueInMap(activeStatusMap, idStr))
+                    .build();
+        }).collect(Collectors.toList());
+
+        int onLineCount = calculateValueInMap(activeStatusMap);
+
+        return RTMonitorResult.builder()
+                .devicePageData(new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext()))
+                .allDeviceCount(allDeviceList.size())
+                .offLineDeviceCount(allDeviceList.size() - onLineCount)
+                .onLineDeviceCount(onLineCount)
+                .alarmTimesList(this.listAlarmTimesResult(tenantId, allDeviceIdList))
+                .build();
     }
 
     /**
@@ -239,7 +268,72 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException, ThingsboardException {
-        return null;
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id))).map(DeviceEntity::toData).orElseThrow(() -> new ThingsboardException("device not exist", ThingsboardErrorCode.GENERAL));
+        var deviceBaseDTO = this.clientService.getDeviceBase(tenantId, new FactoryDeviceQuery(device.getFactoryId().toString(), device.getWorkshopId().toString(), device.getProductionLineId().toString(), device.getId().toString()));
+
+        var kvEntryMap = this.timeseriesService.findAllLatest(tenantId, DeviceId.fromString(id)).get()
+                .stream().sorted(Comparator.comparing(TsKvEntry::getKey)).collect(Collectors.toMap(TsKvEntry::getKey, Function.identity(), (key1, key2) -> key1, LinkedHashMap::new));
+
+        var dictDataMap = this.dictDataService.listDictDataByKeys(tenantId,
+                kvEntryMap.entrySet().stream().reduce(new ArrayList<>(), (r, e) -> {
+                    r.add(e.getKey());
+                    return r;
+                }, (a, b) -> null));
+
+        List<DictDeviceGroupVO> groupResultList = new ArrayList<>();
+        List<String> groupPropertyNameList = new ArrayList<>();
+
+        DictDevice dictDevice = new DictDevice();
+        if (device.getDictDeviceId() != null) {
+            dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), device.getDictDeviceId()).map(DictDeviceEntity::toData).orElseGet(DictDevice::new);
+
+            var groupVOList = this.dictDeviceService.listDictDeviceGroup(device.getDictDeviceId());
+
+            groupResultList = groupVOList.stream().map(e -> DictDeviceGroupVO.builder()
+                    .id(e.getId())
+                    .name(e.getName())
+                    .groupPropertyList(e.getGroupPropertyList().stream().map(v -> {
+                        var kvData = Optional.ofNullable(kvEntryMap.get(v.getName()));
+                        kvData.ifPresent(k -> groupPropertyNameList.add(v.getName()));
+                        return DictDeviceGroupPropertyVO.builder()
+                                .id(v.getId())
+                                .unit(Optional.ofNullable(dictDataMap.get(v.getName())).map(DictData::getUnit).orElse(null))
+                                .name(v.getName())
+                                .title(v.getTitle())
+                                .content(kvData.isEmpty() ? v.getContent() : kvData.get().getValue().toString())
+                                .createdTime(kvData.isEmpty() ? v.getCreatedTime() : kvData.get().getTs())
+                                .build();
+                    }).collect(Collectors.toList()))
+                    .build()).collect(Collectors.toList());
+        }
+
+        var ungrouped = DictDeviceGroupVO.builder().name("未分组").groupPropertyList(new ArrayList<>()).build();
+        kvEntryMap.forEach((k, v) -> {
+            if (!groupPropertyNameList.contains(k)) {
+                ungrouped.getGroupPropertyList().add(DictDeviceGroupPropertyVO.builder()
+                        .unit(Optional.ofNullable(dictDataMap.get(v.getKey())).map(DictData::getUnit).orElse(null))
+                        .name(v.getKey())
+                        .title(v.getKey())
+                        .content(v.getValueAsString())
+                        .createdTime(v.getTs())
+                        .build());
+            }
+        });
+        if (!ungrouped.getGroupPropertyList().isEmpty())
+            groupResultList.add(ungrouped);
+
+        return DeviceDetailResult.builder()
+                .id(device.getId().toString())
+                .name(device.getName())
+                .picture(Optional.ofNullable(device.getImages()).orElse(dictDevice.getPicture()))
+                .isOnLine(calculateValueInMap(this.clientService.listAllDeviceOnlineStatus(List.of(device.getId().getId())), device.getId().toString()))
+                .factoryName(Optional.ofNullable(deviceBaseDTO.getFactory()).map(Factory::getName).orElse(null))
+                .workShopName(Optional.ofNullable(deviceBaseDTO.getWorkshop()).map(Workshop::getName).orElse(null))
+                .productionLineName(Optional.ofNullable(deviceBaseDTO.getProductionLine()).map(ProductionLine::getName).orElse(null))
+                .isUnAllocation(this.isDeviceUnAllocation(device))
+                .resultList(groupResultList)
+                .alarmTimesList(this.listAlarmTimesResult(tenantId, List.of(toUUID(id))))
+                .build();
     }
 
     /**
@@ -254,7 +348,28 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public List<DictDeviceGroupPropertyVO> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException {
-        return null;
+        List<String> keyList = new ArrayList<>() {{
+            add(groupPropertyName);
+        }};
+        List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, 1, Aggregation.COUNT, "desc"))
+                .collect(Collectors.toList());
+
+        var tempResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), tempQueries).get()
+                .stream().collect(Collectors.toMap(TsKvEntry::getKey, Function.identity()));
+        if (tempResult.isEmpty())
+            return Lists.newArrayList();
+        int count = Integer.parseInt(String.valueOf(tempResult.get(groupPropertyName).getValue()));
+        List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, count, Aggregation.NONE, "desc"))
+                .collect(Collectors.toList());
+
+        var dictDataMap = this.dictDataService.listDictDataByKeys(tenantId, keyList);
+
+        return this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get()
+                .stream().map(e -> DictDeviceGroupPropertyVO.builder()
+                        .content(e.getValue().toString())
+                        .unit(Optional.ofNullable(dictDataMap.get(groupPropertyName)).map(DictData::getUnit).orElse(null))
+                        .createdTime(e.getTs())
+                        .build()).collect(Collectors.toList());
     }
 
     /**
@@ -269,7 +384,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public AppHistoryVO listAppGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException {
-        return null;
+        var data = this.listGroupPropertyHistory(tenantId, deviceId, groupPropertyName, startTime, endTime);
+
+        return AppHistoryVO.builder()
+                .propertyVOList(data)
+                .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getContent()) ? Boolean.TRUE : Boolean.FALSE)
+                .build();
     }
 
     /**
@@ -282,7 +402,33 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public PageData<Map<String, Object>> listDeviceTelemetryHistory(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
-        return null;
+        var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
+
+        List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), 1, Aggregation.COUNT, timePageLink.getSortOrder().getDirection().toString()))
+                .collect(Collectors.toList());
+
+        var temp = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), tempQueries).get()
+                .stream().map(KvEntry::getValue).map(e -> Integer.valueOf(String.valueOf(e))).collect(Collectors.toList());
+        if (temp.isEmpty())
+            new PageData<>(Lists.newArrayList(), 0, 0L, false);
+        var count = temp.stream().mapToInt(Integer::intValue).sum();
+        var max = temp.stream().max(Integer::compareTo).orElse(0);
+
+        List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
+                .collect(Collectors.toList());
+        var KvResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get();
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<Long, Map<String, Object>> resultMap = new LinkedHashMap<>();
+        KvResult.forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), v.getValueAsString()));
+        resultMap.forEach((k, v) -> {
+            v.put("创建时间", k);
+            result.add(v);
+        });
+
+        var totalPage = Double.valueOf(Math.ceil(max.doubleValue() / timePageLink.getPageSize())).intValue();
+        var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), max), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), max));
+        return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(max)), timePageLink.getPage() + 1 < totalPage);
     }
 
     /**
@@ -294,7 +440,22 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public List<DictDeviceGroupPropertyVO> listDictDeviceGroupPropertyTitle(TenantId tenantId, String deviceId) {
-        return null;
+        List<DictDeviceGroupPropertyVO> propertyVOList = new ArrayList<>() {{
+            add(DictDeviceGroupPropertyVO.builder()
+                    .name("创建时间").title("创建时间").build());
+        }};
+
+        var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
+        if (keyList.isEmpty())
+            return propertyVOList;
+        var dictDataMap = this.dictDataService.listDictDataByKeys(tenantId, keyList);
+
+        propertyVOList.addAll(keyList.stream().map(e -> DictDeviceGroupPropertyVO.builder()
+                .name(e)
+                .title(e)
+                .unit(Optional.ofNullable(dictDataMap.get(e)).map(DictData::getUnit).orElse(null))
+                .build()).collect(Collectors.toList()));
+        return propertyVOList;
     }
 
     /**
@@ -346,7 +507,15 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query) {
-      return null;
+        var allDeviceList = this.clientService.listDeviceByQuery(tenantId, query);
+        var allDeviceIdList = allDeviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
+        var result = this.clientService.listAllDeviceOnlineStatus(allDeviceIdList);
+        var count = calculateValueInMap(result);
+        return DeviceOnlineStatusResult.builder()
+                .allDeviceCount(allDeviceIdList.size())
+                .onLineDeviceCount(count)
+                .offLineDeviceCount(allDeviceIdList.size() - count)
+                .build();
     }
 
     /**

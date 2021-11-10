@@ -60,7 +60,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
                 predicates.add(cb.like(root.get("code"), "%" + dictDataListQuery.getCode().trim() + "%"));
             if (dictDataListQuery.getDictDataType() != null)
                 predicates.add(cb.equal(root.get("type"), dictDataListQuery.getDictDataType().toString()));
-            return cb.and(predicates.toArray(new Predicate[0]));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
         return DaoUtil.toPageData(this.dataRepository.findAll(specification, DaoUtil.toPageable(pageLink)));
