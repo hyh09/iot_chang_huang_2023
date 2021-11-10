@@ -10,6 +10,7 @@ import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -31,7 +32,7 @@ public final class TenantMenuEntity extends AbstractTenantMenuEntity<TenantMenu>
         super(tenantMenu);
     }
 
-    public TenantMenuEntity(Menu menu){
-        super(menu);
+    public TenantMenuEntity(Menu menu, int level, UUID createdUser){
+        super(menu,level,createdUser);
     }
 }

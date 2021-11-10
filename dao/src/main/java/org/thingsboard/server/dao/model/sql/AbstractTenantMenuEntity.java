@@ -22,7 +22,6 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
@@ -200,22 +199,16 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         return tenantMenu;
     }
 
-    public AbstractTenantMenuEntity(Menu menu) {
-        if (this.id == null) {
-            this.setId(Uuids.timeBased());
-        }
+    public AbstractTenantMenuEntity(Menu menu,int level,UUID createdUser) {
+        this.id = Uuids.timeBased();
         this.tenantId = menu.getTenantId();
         this.sysMenuId = menu.getId();
         this.region = menu.getRegion();
         this.sysMenuCode = menu.getCode();
         this.sysMenuName = menu.getName();
-        if(StringUtils.isEmpty(this.tenantMenuName)){
-            this.tenantMenuName = menu.getName();
-        }
-        if(StringUtils.isEmpty(this.tenantMenuCode)){
-            this.tenantMenuCode = "";
-        }
-        this.level = menu.getLevel();
+        this.tenantMenuName = menu.getName();
+        this.tenantMenuCode = "ZHAN"+ System.currentTimeMillis();
+        this.level = level;
         this.sort = menu.getSort();
         this.url = menu.getUrl();
         this.tenantMenuIcon = menu.getMenuIcon();
@@ -226,10 +219,10 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         this.langKey = menu.getLangKey();
         this.path = menu.getPath();
         this.hasChildren = false;
-        this.createdTime = menu.getUpdatedTime();
-        this.createdUser = menu.getCreatedUser();
-        this.updatedTime = menu.getUpdatedTime();
-        this.updatedUser = menu.getUpdatedUser();
+        this.createdTime = Uuids.unixTimestamp(Uuids.timeBased());
+        this.createdUser = createdUser;
+        this.updatedTime = Uuids.unixTimestamp(Uuids.timeBased());
+        this.updatedUser = createdUser;
     }
 
 }

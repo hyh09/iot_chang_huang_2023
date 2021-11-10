@@ -23,10 +23,12 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
+import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.menu.MenuDao;
 import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
@@ -47,6 +49,8 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
 
     @Autowired
     private TenantMenuRepository tenantMenuRepository;
+    @Autowired
+    private MenuDao menuDao;
 
     @Override
     protected Class<TenantMenuEntity> getEntityClass() {
@@ -87,6 +91,20 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
             TenantMenuEntity entity = new TenantMenuEntity(e);
             return entity;
         }).collect(Collectors.toList());
+        List<TenantMenuEntity> entityList = collect.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(entityList)){
+            List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList()));
+            if(CollectionUtils.isNotEmpty(buttons)) {
+                collect.forEach(i->{
+                    buttons.forEach(j->{
+                        if(i.getSysMenuId() != null && i.getSysMenuId().toString().equals(i.getParentId().toString())){
+                            TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(j,i.getLevel() + 1,j.getCreatedUser());
+                            collect.add(tenantMenuEntity);
+                        }
+                    });
+                });
+            }
+        }
         tenantMenuRepository.saveAll(collect);
     }
     /**
@@ -121,8 +139,6 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public Integer getMaxSortByParentId(UUID parentId){
         return tenantMenuRepository.getMaxSortByParentId(parentId);
     }
-
-
 
     /**
      * 查询同级下指定菜单后面所有菜单
@@ -171,24 +187,22 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         return tenantMenuList;
     }
 
-
     @Override
     public List<TenantMenu> findByIdIn(List<UUID> ids) {
         return   listToVo(tenantMenuRepository.findByIdIn(ids));
     }
+
     /**
      * 自定义查询菜单列表
-     * @param tenantMenu
+     * @param menuType
+     * @param tenantId
+     * @param id
      * @return
      */
-
     @Override
     public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id) {
         return  listToVo(tenantMenuRepository.getTenantMenuListByIds(menuType,tenantId,id));
     }
-
-
-
 
     @Override
     public List<TenantMenu>  getTenantMenuListByTenantId(String menuType,UUID tenantId)
