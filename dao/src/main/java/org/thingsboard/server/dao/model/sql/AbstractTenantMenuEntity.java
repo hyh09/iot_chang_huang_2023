@@ -15,13 +15,16 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
+import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
@@ -195,6 +198,38 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
         tenantMenu.setUpdatedUser(updatedUser);
         tenantMenu.setName(tenantMenuName);
         return tenantMenu;
+    }
+
+    public AbstractTenantMenuEntity(Menu menu) {
+        if (this.id == null) {
+            this.setId(Uuids.timeBased());
+        }
+        this.tenantId = menu.getTenantId();
+        this.sysMenuId = menu.getId();
+        this.region = menu.getRegion();
+        this.sysMenuCode = menu.getCode();
+        this.sysMenuName = menu.getName();
+        if(StringUtils.isEmpty(this.tenantMenuName)){
+            this.tenantMenuName = menu.getName();
+        }
+        if(StringUtils.isEmpty(this.tenantMenuCode)){
+            this.tenantMenuCode = "";
+        }
+        this.level = menu.getLevel();
+        this.sort = menu.getSort();
+        this.url = menu.getUrl();
+        this.tenantMenuIcon = menu.getMenuIcon();
+        this.tenantMenuImages = menu.getMenuImages();
+        this.parentId = menu.getParentId();
+        this.menuType = menu.getMenuType();
+        this.isButton = menu.getIsButton();
+        this.langKey = menu.getLangKey();
+        this.path = menu.getPath();
+        this.hasChildren = false;
+        this.createdTime = menu.getUpdatedTime();
+        this.createdUser = menu.getCreatedUser();
+        this.updatedTime = menu.getUpdatedTime();
+        this.updatedUser = menu.getUpdatedUser();
     }
 
 }
