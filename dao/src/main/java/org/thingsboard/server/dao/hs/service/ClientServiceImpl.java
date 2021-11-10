@@ -127,9 +127,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
         return DeviceListAffiliationDTO.builder()
                 .factoryMap(DaoUtil.convertDataList(Lists.newArrayList(this.factoryRepository.findAllById(factoryIds))).stream()
-                        .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity(), (a, b) -> a)))
+                        .collect(Collectors.toMap(e -> e.getId(), Function.identity(), (a, b) -> a)))
                 .workshopMap(DaoUtil.convertDataList(Lists.newArrayList(this.workshopRepository.findAllById(workshopIds))).stream()
-                        .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity(), (a, b) -> a)))
+                        .collect(Collectors.toMap(e -> e.getId(), Function.identity(), (a, b) -> a)))
                 .productionLineMap(DaoUtil.convertDataList(Lists.newArrayList(this.productionLineRepository.findAllById(productionLineIds))).stream()
                         .collect(Collectors.toMap(ProductionLine::getId, Function.identity(), (a, b) -> a)))
                 .build();
