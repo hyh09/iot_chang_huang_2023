@@ -47,7 +47,6 @@ public class DictDeviceController extends BaseController {
      * @return 可用设备字典编码
      */
     @ApiOperation(value = "获得当前可用设备字典编码")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device/availableCode")
     public String getAvailableCode() throws ThingsboardException {
         return this.dictDeviceService.getAvailableCode(getTenantId());
@@ -59,7 +58,6 @@ public class DictDeviceController extends BaseController {
      * @return 分组及分组属性
      */
     @ApiOperation(value = "获得当前默认初始化的分组及分组属性")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device/group/initData")
     public List<DictDeviceGroupVO> getGroupInitData() throws ThingsboardException {
         return this.dictDeviceService.getGroupInitData();
@@ -86,7 +84,6 @@ public class DictDeviceController extends BaseController {
             @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
             @ApiImplicitParam(name = "supplier", value = "供应商", paramType = "query")})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device")
     public PageData<DictDevice> listDictDevice(
             @RequestParam int page,
@@ -109,7 +106,6 @@ public class DictDeviceController extends BaseController {
      * 新增或修改设备字典
      */
     @ApiOperation(value = "新增或修改设备字典")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
         CommonUtil.checkCode(dictDeviceVO.getCode(), "SBZD");
@@ -127,7 +123,6 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "获得设备字典详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true)})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/device/{id}")
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
@@ -140,7 +135,6 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "删除设备字典")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true),})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping("/dict/device/{id}")
     public void deleteDictDevice(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
