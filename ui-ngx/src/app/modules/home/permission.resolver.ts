@@ -40,12 +40,13 @@ export class PermissionResolver implements Resolve<Permissions>  {
             type: menu.hasChildren ? 'toggle' : 'link',
             path: menu.path,
             icon: menu.tenantMenuIcon,
-            isMdiIcon: menu.tenantMenuIcon.startsWith('mdi:'),
+            isMdiIcon: (menu.tenantMenuIcon || '').startsWith('mdi:'),
             parentId: menu.parentId
           };
-          menuSections.push(menuSection);
           if (menu.isButton) {
             menuBtnMap[menuMap[menu.parentId].path].push(menu.langKey);
+          } else {
+            menuSections.push(menuSection);
           }
         });
       }
@@ -66,7 +67,7 @@ export class PermissionResolver implements Resolve<Permissions>  {
         menu.isLeaf = true;
       });
       menuSections.forEach(menu => {
-        if (menu.parentId) {
+        if (menu.parentId && map[menu.parentId]) {
           const parent: MenuSection = map[menu.parentId];
           if (!parent.pages) {
             parent.pages = [];
