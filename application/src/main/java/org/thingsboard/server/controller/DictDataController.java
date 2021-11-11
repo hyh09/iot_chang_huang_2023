@@ -82,7 +82,7 @@ public class DictDataController extends BaseController {
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
-            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query", required = true)})
+            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query")})
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/data")
     public PageData<DictData> listDictData(
@@ -92,10 +92,9 @@ public class DictDataController extends BaseController {
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
-            @RequestParam DictDataDataTypeEnum dictDataType
+            @RequestParam(required = false) DictDataDataTypeEnum dictDataType
     )
             throws ThingsboardException {
-        checkParameter("dictDataType", dictDataType);
         DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
                 .code(code).name(name).dictDataType(dictDataType).build();
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);

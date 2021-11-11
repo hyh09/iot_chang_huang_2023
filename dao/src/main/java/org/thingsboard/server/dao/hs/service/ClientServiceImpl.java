@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hs.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,15 +10,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.dao.InitEntity;
+import org.thingsboard.server.dao.hs.dao.InitRepository;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
@@ -46,6 +53,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     @PersistenceContext
     protected EntityManager entityManager;
+
+    // 初始化Repository
+    InitRepository initRepository;
 
     // 工厂Repository
     FactoryRepository factoryRepository;
@@ -127,19 +137,35 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
         return DeviceListAffiliationDTO.builder()
                 .factoryMap(DaoUtil.convertDataList(Lists.newArrayList(this.factoryRepository.findAllById(factoryIds))).stream()
-                        .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity(), (a, b) -> a)))
+                        .collect(Collectors.toMap(Factory::getId, Function.identity(), (a, b) -> a)))
                 .workshopMap(DaoUtil.convertDataList(Lists.newArrayList(this.workshopRepository.findAllById(workshopIds))).stream()
-                        .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity(), (a, b) -> a)))
+                        .collect(Collectors.toMap(Workshop::getId, Function.identity(), (a, b) -> a)))
                 .productionLineMap(DaoUtil.convertDataList(Lists.newArrayList(this.productionLineRepository.findAllById(productionLineIds))).stream()
                         .collect(Collectors.toMap(ProductionLine::getId, Function.identity(), (a, b) -> a)))
                 .build();
     }
 
     /**
+     * 获得设备字典初始化数据
+     */
+    @Override
+    public List<DictDeviceGroupVO> listDictDeviceInitData() {
+        List<DictDeviceGroupVO> list = Lists.newArrayList();
+        var jsonNodeOptional = this.initRepository.findByScope(InitScopeEnum.DICT_DEVICE_GROUP.getCode()).map(InitEntity::getInitData);
+        if (jsonNodeOptional.isEmpty())
+            return list;
+
+        var jsonNode = jsonNodeOptional.get();
+
+        jsonNode.forEach(e -> list.add(convertValue(e, DictDeviceGroupVO.class)));
+        return list;
+    }
+
+    /**
      * 组装设备请求 specification
      *
-     * @param tenantId      租户Id
-     * @param t             extends FactoryDeviceQuery
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
      */
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
@@ -161,6 +187,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
+    }
+
+    @Autowired
+    public void setInitRepository(InitRepository initRepository) {
+        this.initRepository = initRepository;
     }
 
     @Autowired

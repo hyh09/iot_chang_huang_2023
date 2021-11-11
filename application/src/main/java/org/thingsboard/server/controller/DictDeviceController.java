@@ -4,15 +4,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -22,8 +21,8 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import javax.validation.Valid;
 
 import java.util.HashSet;
+import java.util.List;
 
-import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
 
@@ -52,6 +51,18 @@ public class DictDeviceController extends BaseController {
     @GetMapping("/dict/device/availableCode")
     public String getAvailableCode() throws ThingsboardException {
         return this.dictDeviceService.getAvailableCode(getTenantId());
+    }
+
+    /**
+     * 获得当前默认初始化的分组及分组属性
+     *
+     * @return 分组及分组属性
+     */
+    @ApiOperation(value = "获得当前默认初始化的分组及分组属性")
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+    @GetMapping("/dict/device/group/initData")
+    public List<DictDeviceGroupVO> getGroupInitData() throws ThingsboardException {
+        return this.dictDeviceService.getGroupInitData();
     }
 
     /**
@@ -103,6 +114,7 @@ public class DictDeviceController extends BaseController {
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
         CommonUtil.checkCode(dictDeviceVO.getCode(), "SBZD");
         CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
+        CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
         this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
         return dictDeviceVO;
     }
