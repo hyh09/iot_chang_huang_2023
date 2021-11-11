@@ -1,7 +1,6 @@
 package org.thingsboard.server.dao.menu;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageData;
@@ -43,9 +42,16 @@ public interface MenuDao extends Dao<Menu>{
      * @param pageLink
      * @return
      */
-    PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException ;
+    PageData<Menu> getMenuPage(Menu menu, PageLink pageLink) throws ThingsboardException;
 
-    Menu saveMenu(TenantId tenantId, Menu menu)throws ThingsboardException;
+    /**
+     * 条件查询系统菜单列表
+     * @param menu
+     * @return
+     */
+    List<Menu> getMenuListByCdn(Menu menu);
+
+    Menu saveMenu(Menu menu)throws ThingsboardException;
 
     void delMenu(UUID id);
 
@@ -58,4 +64,12 @@ public interface MenuDao extends Dao<Menu>{
      * @return
      */
     Menu findSameLevelName(UUID parentId,String name);
+
+    /**
+     * 根据菜单id,查询菜单下按钮
+     * @param ids
+     * @return
+     */
+    List<Menu> getButtonListByIds(List<UUID> ids);
+
 }

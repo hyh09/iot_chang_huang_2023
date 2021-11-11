@@ -340,10 +340,10 @@ CREATE TABLE IF NOT EXISTS public.tb_tenant_menu
     id uuid NOT NULL,
     tenant_id uuid NOT NULL,
     sys_menu_id uuid NOT NULL,
-    sys_menu_code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    sys_menu_code character varying(255) COLLATE pg_catalog."default",
     sys_menu_name character varying(255) COLLATE pg_catalog."default",
     tenant_menu_name character varying(255) COLLATE pg_catalog."default",
-    tenant_menu_code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    tenant_menu_code character varying(255) COLLATE pg_catalog."default",
     level bigint NOT NULL,
     sort bigint NOT NULL,
     url character varying(1000) COLLATE pg_catalog."default",
@@ -503,3 +503,9 @@ CREATE TABLE IF NOT EXISTS public.tb_user_menu_role
     tenant_id uuid,
     CONSTRAINT tb_user_menu_role_pkey PRIMARY KEY (id)
 )
+
+--新增字段 是否树节点（true/false）
+ALTER TABLE public.tb_tenant_menu
+    ADD COLUMN has_children boolean DEFAULT false;
+ALTER TABLE public.tb_tenant_menu ALTER sys_menu_code DROP not null;
+ALTER TABLE public.tb_tenant_menu ALTER sys_menu_id DROP not null;

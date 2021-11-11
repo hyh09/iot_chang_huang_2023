@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -73,7 +72,7 @@ public class MenuController extends BaseController {
             }else {
                 checkParameter("id",addMenuDto.getId());
                 menu.setUpdatedUser(getCurrentUser().getUuidId());
-                menu = checkNotNull(menuService.updateMenu(menu));
+                menu = menuService.updateMenu(menu);
                 if(menu != null){
                     menuVo = new MenuVo(menu);
                 }
@@ -124,7 +123,6 @@ public class MenuController extends BaseController {
     @ApiOperation("修改系统菜单排序")
     @ApiImplicitParams({@ApiImplicitParam(name = "id",value = "当前菜单",dataType = "String",paramType="query",required = true),
             @ApiImplicitParam(name = "frontId",value = "移动到指定位置后，前面一个菜单标识",dataType = "String",paramType="query")})
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/updantMenuSort", method = RequestMethod.PUT)
     @ResponseBody
     public MenuVo updMenuSort(@RequestParam String id, @RequestParam String frontId) throws ThingsboardException {
@@ -205,16 +203,16 @@ public class MenuController extends BaseController {
                                         MenuQueryCdnQry menuQueryCdnQry) throws ThingsboardException {
         try {
             PageData<MenuVo> resultPage = new PageData<>();
-            List<MenuVo> menuVos = new ArrayList<>();
+            List<MenuVo> resultMenuVos = new ArrayList<>();
             PageLink pageLink = createPageLink(pageSize, page,"", sortProperty, sortOrder);
             PageData<Menu> menuPageData = checkNotNull(menuService.getMenuPage(menuQueryCdnQry.toMenu(), pageLink));
             List<Menu> menuList = menuPageData.getData();
             if(!CollectionUtils.isEmpty(menuList)){
                 for (Menu menu : menuList) {
-                    menuVos.add(new MenuVo(menu));
+                    resultMenuVos.add(new MenuVo(menu));
                 }
             }
-            resultPage = new PageData<>(menuVos,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
+            resultPage = new PageData<>(resultMenuVos,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
             return resultPage;
         } catch (Exception e) {
             throw handleException(e);
@@ -244,22 +242,23 @@ public class MenuController extends BaseController {
 
     /**
      * 查询系统菜单列表（标记被当前租户绑定过的）
-     * @param tenantId
+     * @param menuType
+     * @param name
      * @return
+     * @throws ThingsboardException
      */
     @ApiOperation("查询系统菜单列表（标记被当前租户绑定过的）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "menuType",value = "菜单类型（PC/APP）",dataType = "string",paramType = "query",required = true),
             @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true),
             @ApiImplicitParam(name = "name",value = "菜单名称",dataType = "string",paramType = "query")})
-    @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/getTenantMenuListByTenantId", method = RequestMethod.GET)
     @ResponseBody
     public List<MenuInfo> getTenantMenuListByTenantId(@RequestParam String menuType,@RequestParam String tenantId,@RequestParam(required = false) String name)throws ThingsboardException{
         try {
-            checkParameter("tenantId",tenantId);
             checkParameter("menuType",menuType);
-            return checkNotNull(menuService.getTenantMenuListByTenantId(menuType,tenantId,name));
+            checkParameter("租户标识tenantId不能为空",tenantId);
+            return checkNotNull(menuService.getTenantMenuListByTenantId(menuType,UUID.fromString(tenantId),name));
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -285,26 +284,24 @@ public class MenuController extends BaseController {
         }
     }
 
-
-
-
     /**
      * 条件查询系统菜单列表
-     * @param menuType
-     * @param name
+     * @param menuQueryCdnQry
      * @return
      * @throws ThingsboardException
      */
     @ApiOperation("条件查询系统菜单列表")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "menuType",value = "菜单类型（PC/APP）",dataType = "string",paramType = "query"),
-            @ApiImplicitParam(name = "name",value = "菜单名称",dataType = "string",paramType = "query")})
+    @ApiImplicitParam(name = "menuQueryCdnQry",value = "条件内容",dataType = "MenuQueryCdnQry",paramType = "query")
     @RequestMapping(value = "/getMenuListByCdn", method = RequestMethod.GET)
     @ResponseBody
-    public List<MenuVo> getMenuListByCdn(@RequestParam String menuType,@RequestParam(required = false) String name)throws ThingsboardException{
+    public List<MenuVo> getMenuListByCdn(MenuQueryCdnQry menuQueryCdnQry)throws ThingsboardException{
         try {
             List<MenuVo> result = new ArrayList<>();
-            List<Menu> menuList = menuService.getMenuListByCdn(menuType, name);
+            Menu queryMenu = new Menu();
+            if(menuQueryCdnQry != null){
+                queryMenu = menuQueryCdnQry.toMenu();
+            }
+            List<Menu> menuList = menuService.getMenuListByCdn(queryMenu);
             if(!CollectionUtils.isEmpty(menuList)){
                 for (Menu menu:menuList){
                     MenuVo menuVo = new MenuVo(menu);
@@ -323,5 +320,6 @@ public class MenuController extends BaseController {
             throw handleException(e);
         }
     }
+
 
 }

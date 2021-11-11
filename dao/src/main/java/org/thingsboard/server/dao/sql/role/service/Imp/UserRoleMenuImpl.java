@@ -59,13 +59,15 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         User  user =  userService.findUserById(null,userId);
         if(user == null)
         {
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询不到");
+            return  new JudgeUserVo();
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询不到");
         }
         //当前用户查询
         List<TenantSysRoleEntity>  factorySysRoleEntities =  tenantSysRoleService.queryRoleByUserId(user.getUuidId());
         if(CollectionUtils.isEmpty(factorySysRoleEntities))
         {
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询未分配角色");
+            return  new JudgeUserVo();
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询未分配角色");
 
         }
         //当前创建人的角色

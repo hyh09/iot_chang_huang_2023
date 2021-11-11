@@ -280,4 +280,22 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      */
     void addProductionLine(Device device) throws ThingsboardException;
 
+    /**
+     * 查询工厂下具有最新版本的一个网关设备
+     * @param factoryIds 工厂标识
+     * @return
+     */
+   List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException ;
+
+
+    List<DeviceEntity>  queryAllByIds(List<UUID> ids);
+
+    /**
+     *平台设备列表查询
+     * @param device
+     * @param pageLink
+     * @return
+     */
+    PageData<Device> getTenantDeviceInfoList(Device device, PageLink pageLink);
+
 }

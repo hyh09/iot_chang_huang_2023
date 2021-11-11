@@ -59,4 +59,5 @@ public interface BaseRepository<T, ID extends Serializable> extends JpaRepositor
      //查询总数的count的通用sql
      Long queryContListSqlLocal(String sql, Map<String, Object> param,boolean isNativeSql);
 
+
 }

@@ -4,7 +4,9 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.dao.Dao;
+import org.thingsboard.server.dao.model.sql.FactoryEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface FactoryDao extends Dao<Factory>{
@@ -22,4 +24,25 @@ public interface FactoryDao extends Dao<Factory>{
      * @param id
      */
     void delFactory(UUID id);
+
+    /**
+     * 根据工厂管理员查询
+     * @param factoryAdminId
+     * @return
+     */
+    Factory findFactoryByAdmin(UUID factoryAdminId);
+
+    /**
+     * 根据租户查询
+     * @param tenantId
+     * @return
+     */
+    List<Factory> findFactoryByTenantId(UUID tenantId);
+
+    /**
+     * 查询租户的第一条工厂
+     * @param tenantId 租户id
+     * @return
+     */
+    FactoryEntity findFactoryByTenantIdFirst(UUID tenantId);
 }

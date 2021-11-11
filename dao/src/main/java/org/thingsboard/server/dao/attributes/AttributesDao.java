@@ -21,10 +21,12 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Andrew Shvayka
@@ -44,4 +46,13 @@ public interface AttributesDao {
     List<String> findAllKeysByDeviceProfileId(TenantId tenantId, DeviceProfileId deviceProfileId);
 
     List<String> findAllKeysByEntityIds(TenantId tenantId, EntityType entityType, List<EntityId> entityIds);
+
+    /**
+     * 根据设备标识以及属性类型查询属性
+     * @param entityIds
+     * @param attributeType
+     * @param attributeKey
+     * @return
+     */
+    List<AttributeKvEntity> findAllByEntityIds(List<UUID> entityIds, String attributeType,String attributeKey);
 }

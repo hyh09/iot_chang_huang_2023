@@ -31,8 +31,8 @@ public interface ClientService {
     /**
      * 查询设备列表
      *
-     * @param tenantId 租户Id
-     * @param t        extends FactoryDeviceQuery
+     * @param tenantId      租户Id
+     * @param t             extends FactoryDeviceQuery
      */
     <T extends FactoryDeviceQuery> List<Device> listDeviceByQuery(TenantId tenantId, T t);
 

@@ -17,18 +17,21 @@ package org.thingsboard.server.dao.sql.tenantmenu;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by Valerii Sosliuk on 4/30/2017.
  */
-public interface TenantMenuRepository extends PagingAndSortingRepository<TenantMenuEntity, UUID> {
+public interface TenantMenuRepository extends PagingAndSortingRepository<TenantMenuEntity, UUID> , JpaSpecificationExecutor<TenantMenuEntity> {
 
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.region = :region " +
             "AND LOWER(t.tenantMenuName) LIKE LOWER(CONCAT(:textSearch, '%'))")
@@ -64,14 +67,31 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
     List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId);
 
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName = :tenantMenuName ORDER BY t.sort ASC")
-    List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")String tenantId,@Param("tenantMenuName")String tenantMenuName);
+    List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId,@Param("tenantMenuName")String tenantMenuName);
 
 
     List<TenantMenuEntity> findByIdIn(List<UUID> ids);
 
 
+    /**
+     * 根据租户删除菜单
+     * @param tenantId
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM TenantMenuEntity t WHERE t.tenantId = :tenantId")
+    void deletedByTenant(@Param("tenantId")UUID tenantId);
+
+    /**
+     * 根据系统菜单删除菜单
+     * @param delByMenuId
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM TenantMenuEntity t WHERE t.sysMenuId = :sysMenuId")
+    void delByMenuId(@Param("sysMenuId")UUID sysMenuId);
+
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName in (:ids) ORDER BY t.sort ASC")
     List<TenantMenuEntity> getTenantMenuListByIds(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId, @Param("ids") List<UUID> ids);
-
 
 }

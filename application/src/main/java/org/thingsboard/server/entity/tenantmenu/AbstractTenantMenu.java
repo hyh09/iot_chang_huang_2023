@@ -55,6 +55,10 @@ public abstract class AbstractTenantMenu{
     public String menuType;
     @ApiModelProperty("是按钮（true/false）")
     public Boolean isButton;
+    @ApiModelProperty("路径")
+    public String path;
+    @ApiModelProperty("是否树节点（true/false）")
+    public Boolean hasChildren;
     @ApiModelProperty("创建人标识")
     public UUID createdUser;
     @ApiModelProperty("创建时间")
@@ -73,7 +77,7 @@ public abstract class AbstractTenantMenu{
 
     public AbstractTenantMenu(TenantMenu tenantMenu) {
         if (tenantMenu.getId() != null) {
-            this.setId(tenantMenu.getId().getId());
+            this.setId(tenantMenu.getId());
         }
         this.tenantId = tenantMenu.getTenantId();
         this.sysMenuId = tenantMenu.getSysMenuId();
@@ -88,8 +92,11 @@ public abstract class AbstractTenantMenu{
         this.tenantMenuIcon = tenantMenu.getTenantMenuIcon();
         this.tenantMenuImages = tenantMenu.getTenantMenuImages();
         this.parentId = tenantMenu.getParentId();
+        this.isButton = tenantMenu.getIsButton();
         this.menuType = tenantMenu.getMenuType();
         this.langKey = tenantMenu.getLangKey();
+        this.path = tenantMenu.getPath();
+        this.hasChildren = tenantMenu.getHasChildren();
         this.createdTime = tenantMenu.getUpdatedTime();
         this.createdUser = tenantMenu.getCreatedUser();
         this.updatedTime = tenantMenu.getUpdatedTime();
@@ -114,6 +121,8 @@ public abstract class AbstractTenantMenu{
         tenantMenu.setMenuType(menuType);
         tenantMenu.setIsButton(isButton);
         tenantMenu.setLangKey(langKey);
+        tenantMenu.setPath(path);
+        tenantMenu.setHasChildren(hasChildren);
         tenantMenu.setCreatedTime(createdTime);
         tenantMenu.setCreatedUser(createdUser);
         tenantMenu.setUpdatedTime(updatedTime);

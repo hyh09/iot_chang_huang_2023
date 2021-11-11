@@ -32,7 +32,12 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
      * @param tenantMenuList
      */
     @Override
-    public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
+    public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList, UUID tenantId){
+        //删除所有租户菜单
+        if(tenantId != null){
+            tenantMenuDao.deletedByTenant(tenantId);
+        }
+        //保存租户菜单
         tenantMenuDao.saveOrUpdTenantMenu(tenantMenuList);
     }
 
@@ -67,7 +72,7 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     @Override
     public List<TenantMenu> updTenantMenu(TenantMenu tenantMenu){
         log.trace("Executing updTenantMenu [{}]", tenantMenu);
-        TenantMenu newTenantMenu = tenantMenuDao.findById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId().getId());
+        TenantMenu newTenantMenu = tenantMenuDao.findById(new TenantId(tenantMenu.getTenantId()), tenantMenu.getId());
         newTenantMenu.updTenantMenu(tenantMenu);
         tenantMenuDao.save(newTenantMenu);
         //查询调整后的菜单列表
@@ -162,7 +167,6 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
         log.trace(" --tenantMenuDao.findByIdIn 的入参{}",ids);
         return tenantMenuDao.findByIdIn(ids);
     }
-
     /**
      * 获取租户下的菜单
      * @param menuType
@@ -178,4 +182,6 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> ids) {
         return tenantMenuDao.getTenantMenuListByIds(menuType,tenantId,ids);
     }
+
+
 }

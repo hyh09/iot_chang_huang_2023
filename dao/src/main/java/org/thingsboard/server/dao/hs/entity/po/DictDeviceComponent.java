@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.entity.po;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * 设备字典-部件
@@ -13,6 +14,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Accessors(chain = true)
 public class DictDeviceComponent extends BasePO {
 
     private static final long serialVersionUID = 4934987555236873702L;
@@ -25,11 +27,6 @@ public class DictDeviceComponent extends BasePO {
      * 设备字典Id
      */
     private String dictDeviceId;
-
-    /**
-     * 租户Id
-     */
-    private String tenantId;
 
     /**
      * 部件父Id

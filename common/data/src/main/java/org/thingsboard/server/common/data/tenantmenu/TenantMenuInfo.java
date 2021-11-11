@@ -36,7 +36,7 @@ public class TenantMenuInfo{
 
     public TenantMenuInfo(TenantMenu tenantMenu){
         if (tenantMenu.getId() != null) {
-            this.setId(tenantMenu.getId().getId());
+            this.setId(tenantMenu.getId());
         }
         this.tenantId = tenantMenu.getTenantId();
         this.sysMenuId = tenantMenu.getSysMenuId();

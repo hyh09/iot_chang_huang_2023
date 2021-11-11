@@ -34,7 +34,7 @@ public interface DictDataService {
      * @param tenantId      租户Id
      * @param dictDataQuery 数据字典参数
      */
-    void updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException;
+    DictDataQuery updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException;
 
     /**
      * 获得数据字典详情

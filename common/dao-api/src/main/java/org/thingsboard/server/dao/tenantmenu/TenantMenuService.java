@@ -9,10 +9,10 @@ public interface TenantMenuService {
 
     /**
      *新增/修改租户菜单
-     * @param pcList
-     * @param appList
+     * @param tenantMenuList
+     * @param tenantId
      */
-    void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
+    void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList, UUID tenantId);
 
     List<TenantMenu> saveTenantMenuList(List<TenantMenu> tenantMenu);
 
