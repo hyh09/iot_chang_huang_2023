@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
@@ -342,6 +343,11 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         List<DictDeviceGroupPropertyEntity> entities=  this.groupPropertyRepository.findAllByName(name);
         List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
         return  nameList;
+    }
+
+    @Override
+    public List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId) {
+        return this.groupPropertyRepository.findGroupNameAndName(dictDeviceId);
     }
 
     @Autowired

@@ -911,7 +911,7 @@ public class DeviceController extends BaseController {
             @ApiImplicitParam(name = "page", value = "起始页默认0开始"),
     })
    @RequestMapping(value = "app/device/queryAllByNameLike", params = {"pageSize", "page"}, method = RequestMethod.GET)
-   public  PageData<DeviceDataVo>  queryAllByNameLike(@Valid @RequestParam("factoryId") UUID factoryId,
+   public  PageData<DeviceDataVo>  queryAllByNameLike(@RequestParam("factoryId") UUID factoryId,
                                                       @RequestParam("name") String  name,
                                                       @RequestParam int pageSize,
                                                       @RequestParam int page,

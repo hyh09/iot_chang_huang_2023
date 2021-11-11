@@ -20,6 +20,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -98,6 +99,18 @@ public class EfficiencyStatisticsController extends BaseController {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
     }
+
+
+
+    @ApiOperation("设备属性分组属性接口")
+    @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
+    @ResponseBody
+   public  Object queryDictDevice(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+        log.info("打印当前的入参:{}",deviceId);
+     return  efficiencyStatisticsSvc.queryGroupDict(deviceId,getTenantId());
+
+    }
+
 
 
 

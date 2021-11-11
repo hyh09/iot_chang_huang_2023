@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +32,9 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
 
     @Query("select t from DictDeviceGroupPropertyEntity t, DictDeviceGroupEntity t1 where  t.dictDeviceGroupId= t1.id   and t1.name =:name   order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllByName(@Param("name") String name);
+
+    @Query("select new org.thingsboard.server.common.data.vo.device.DictDeviceDataVo(t1.name,t.name) from DictDeviceGroupPropertyEntity t, DictDeviceGroupEntity t1 where  t.dictDeviceGroupId= t1.id   and t1.dictDeviceId =:dictDeviceId   order by t.sort,t1.sort asc")
+    List<DictDeviceDataVo> findGroupNameAndName(@Param("dictDeviceId") UUID dictDeviceId);
 
 
 }
