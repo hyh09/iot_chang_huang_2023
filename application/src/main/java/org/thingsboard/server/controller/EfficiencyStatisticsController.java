@@ -7,11 +7,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @program: thingsboard
@@ -37,7 +45,18 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryCapacity", method = RequestMethod.POST)
     @ResponseBody
     public ResultCapAppVo queryCapacity(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
+        try {
+            if(queryTsKvVo.getEndTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
+            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
+        }
     }
 
 
@@ -48,8 +67,32 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryEnergy", method = RequestMethod.POST)
     @ResponseBody
     public ResultEnergyAppVo queryEnergy(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
+        try{
+            if(queryTsKvVo.getEndTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
             return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
+    }
+
+
+    @ApiOperation(value = "【app端查询当前设备的运行状态】")
+    @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
+        if(queryTsKvVo.getEndTime() == null )
+        {
+            queryTsKvVo.setStartTime(CommonUtils.getZero());
+            queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+        }
+        return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
+    }
 
 
 

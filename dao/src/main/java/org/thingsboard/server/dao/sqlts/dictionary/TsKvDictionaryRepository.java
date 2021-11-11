@@ -15,16 +15,22 @@
  */
 package org.thingsboard.server.dao.sqlts.dictionary;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionaryCompositeKey;
 import org.thingsboard.server.dao.util.SqlTsOrTsLatestAnyDao;
 
+import java.util.List;
 import java.util.Optional;
 
 @SqlTsOrTsLatestAnyDao
 public interface TsKvDictionaryRepository extends CrudRepository<TsKvDictionary, TsKvDictionaryCompositeKey> {
 
     Optional<TsKvDictionary> findByKeyId(int keyId);
+
+    @Query("SELECT t FROM TsKvDictionary  t  where  t.key in (:keys)")
+    List<TsKvDictionary> findAllByKeyIn(@Param("keys") List<String> keys);
 
 }

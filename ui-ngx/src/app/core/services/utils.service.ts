@@ -87,6 +87,12 @@ export interface TreeNodeOptions extends NzTreeNodeOptions {
   parentId: string
 }
 
+export interface TableTreeNodeOptions {
+  id: string,
+  parentId?: string,
+  children?: TableTreeNodeOptions[]
+}
+
 // @dynamic
 @Injectable({
   providedIn: 'root'
@@ -497,13 +503,40 @@ export class UtilsService {
         node.isLeaf = true;
       });
       treeNodes.forEach(node => {
-        if (node.parentId) {
+        if (node.parentId && map[node.parentId]) {
           const parent: TreeNodeOptions = map[node.parentId];
           if (!parent.children) {
             parent.children = new Array<TreeNodeOptions>();
           }
           parent.children.push(node);
           parent.isLeaf = false;
+        } else {
+          arr.push(node);
+        }
+      })
+    }
+    return arr;
+  }
+
+  /**
+   * @description 将平级树节点数组转换成树形表格的层级树节点数组
+   * @param treeNodes 树节点平级数组 TableTreeNodeOptions[]
+   * @returns 树形数组的层级树节点数组
+   */
+  public formatTableTree(treeNodes: TableTreeNodeOptions[]): TableTreeNodeOptions[] {
+    const arr: TableTreeNodeOptions[] = new Array<TableTreeNodeOptions>();
+    const map = {};
+    if (treeNodes) {
+      treeNodes.forEach(node => {
+        map[node.id] = node;
+      });
+      treeNodes.forEach(node => {
+        if (node.parentId && map[node.parentId]) {
+          const parent: TableTreeNodeOptions = map[node.parentId];
+          if (!parent.children) {
+            parent.children = new Array<TableTreeNodeOptions>();
+          }
+          parent.children.push(node);
         } else {
           arr.push(node);
         }

@@ -1,9 +1,14 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @program: thingsboard
@@ -17,7 +22,7 @@ public interface EfficiencyStatisticsSvc {
     /**
      * 产能接口
      */
-    public ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+     ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
 
     /**
@@ -27,7 +32,7 @@ public interface EfficiencyStatisticsSvc {
 
 
 
-
+    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
 
 
 

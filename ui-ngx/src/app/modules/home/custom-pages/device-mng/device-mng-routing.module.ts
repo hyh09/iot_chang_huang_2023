@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictionary-table-config.resolver';
 import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
+import { FactoryMngComponent } from './factory-mng/factory-mng.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,17 @@ const routes: Routes = [
         },
         resolve: {
           entitiesTableConfig: DeviceDictionaryTableConfigResolver
+        }
+      },
+      {
+        path: 'factoryManagement',
+        component: FactoryMngComponent,
+        data: {
+          title: 'device-mng.factory-mng',
+          breadcrumb: {
+            label: 'device-mng.factory-mng',
+            icon: 'mdi:factory-mng'
+          }
         }
       }
     ]

@@ -62,7 +62,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
     this.config.afterResolved = () => {
-      this.config.addEnabled = this.utils.hasPermission('user.add');
+      this.config.addEnabled = this.utils.hasPermission('auth-mng.add-role');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
       this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
       this.config.cellActionDescriptors = this.configureCellActions();
