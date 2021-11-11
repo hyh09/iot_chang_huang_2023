@@ -1,9 +1,25 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Injectable, NgModule } from '@angular/core';
+import { CanActivate, Router, RouterModule, Routes } from '@angular/router';
+import { UtilsService } from '@app/core/public-api';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { BindUserTableConfigResolver } from './role-mng/bind-user-table-config.resolver';
 import { RoleMngTableConfigResolver } from './role-mng/role-mng-table-config.resolver';
 import { UserMngTableConfigResolver } from './user-mng/user-mng-table-config.resolver';
+
+@Injectable()
+export class BindUsersGuard implements CanActivate {
+  constructor(
+    private utils: UtilsService,
+    private router: Router
+  ) {}
+  canActivate() {
+    if (this.utils.hasPermission('auth-mng.bind-users', '/authManagement/roleManagemnet')) {
+      return true
+    }
+    this.router.navigateByUrl('/home');
+    return false;
+  }
+}
 
 const routes: Routes = [
   {
@@ -64,6 +80,7 @@ const routes: Routes = [
                 icon: 'account_circle'
               }
             },
+            canActivate: [BindUsersGuard],
             resolve: {
               entitiesTableConfig: BindUserTableConfigResolver
             }
@@ -80,7 +97,8 @@ const routes: Routes = [
   providers: [
     UserMngTableConfigResolver,
     RoleMngTableConfigResolver,
-    BindUserTableConfigResolver
+    BindUserTableConfigResolver,
+    BindUsersGuard
   ]
 })
 export class AuthMngRoutingModule { }

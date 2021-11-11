@@ -17,6 +17,7 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.data.DeviceData;
@@ -75,6 +76,9 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private String gatewayVersion;
     //网关版本更新时间
     private Long gatewayUpdateTs;
+    @ApiModelProperty("true-已分配，false-未分配（默认值）")
+    private Boolean isAllot = false;
+    /********以上是非数据库字段********/
 
 
     public Device() {
@@ -321,6 +325,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setGatewayUpdateTs(Long gatewayUpdateTs) {
         this.gatewayUpdateTs = gatewayUpdateTs;
+    }
+
+    public Boolean getAllot() {
+        return isAllot;
+    }
+
+    public void setAllot(Boolean allot) {
+        isAllot = allot;
     }
 
     @Override

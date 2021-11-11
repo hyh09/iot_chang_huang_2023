@@ -1,6 +1,6 @@
 <mat-form-field>
   <mat-label>{{ 'menu-mng.name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.name" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.name" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.name"
     matSuffix mat-icon-button aria-label="Clear"

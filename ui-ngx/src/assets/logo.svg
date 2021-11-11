@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="145px" height="130px" viewBox="0 0 145 130" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Fill 1</title>
+    <g id="登录页" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="登录11" transform="translate(-439.000000, -262.000000)" fill="#C52E31">
+            <path d="M511.5,262 L439,392 L458.128854,392 C466.917042,392 470.15673,388.937015 474.551844,381.336125 L509.066662,319.045923 C510.148599,317.176534 512.851401,317.176534 513.932317,319.045923 L547.979656,380.450356 C552.374771,388.051247 557.058743,392 565.847952,392 L584,392 L511.5,262 Z M485,392 L539,392 L512,345 L485,392 Z" id="Fill-1"></path>
+        </g>
+    </g>
+</svg>
