@@ -12,6 +12,7 @@ import { RoleMngService } from "@app/core/http/custom/role-mng.service";
 import { MatDialog } from "@angular/material/dialog";
 import { EntityAction } from "@app/modules/home/models/entity/entity-component.models";
 import { SetPermissionsComponent } from "./set-permissions.component";
+import { UtilsService } from "@app/core/public-api";
 
 @Injectable()
 export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Role>> {
@@ -23,7 +24,8 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     private datePipe: DatePipe,
     private roleMngService: RoleMngService,
     public dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private utils: UtilsService
   ) {
     this.config.entityType = EntityType.ROLE_MNG;
     this.config.entityComponent = RoleMngComponent;
@@ -47,7 +49,6 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       new EntityTableColumn<Role>('roleName', 'auth-mng.role-name', '33.333333%'),
       new DateEntityTableColumn<Role>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
-    this.config.cellActionDescriptors = this.configureCellActions();
   }
 
   resolve(): EntityTableConfig<Role> {
@@ -60,6 +61,12 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     this.config.tableTitle = this.translate.instant('auth-mng.role-mng');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.afterResolved = () => {
+      this.config.addEnabled = this.utils.hasPermission('auth-mng.add-role');
+      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+      this.config.cellActionDescriptors = this.configureCellActions();
+    }
 
     this.config.entitiesFetchFunction = pageLink => this.roleMngService.getRoles(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.roleMngService.getRole(id);
@@ -80,18 +87,22 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
 
   configureCellActions(): Array<CellActionDescriptor<Role>> {
     const actions: Array<CellActionDescriptor<Role>> = [];
-    actions.push({
-      name: this.translate.instant('auth-mng.bind-users'),
-      icon: 'account_circle',
-      isEnabled: (entity) => (!!(entity && entity.id && entity.id)),
-      onAction: ($event, entity) => this.bindUsers($event, entity.id)
-    },
-    {
-      name: this.translate.instant('auth-mng.set-permissions'),
-      mdiIcon: 'mdi:config',
-      isEnabled: (entity) => (!!(entity && entity.id && entity.id)),
-      onAction: ($event, entity) => this.setPermissions($event, entity.id)
-    });
+    if (this.utils.hasPermission('auth-mng.bind-users')) {
+      actions.push({
+        name: this.translate.instant('auth-mng.bind-users'),
+        icon: 'account_circle',
+        isEnabled: (entity) => (!!(entity && entity.id && entity.id)),
+        onAction: ($event, entity) => this.bindUsers($event, entity.id)
+      });
+    }
+    if (this.utils.hasPermission('auth-mng.set-permissions')) {
+      actions.push({
+        name: this.translate.instant('auth-mng.set-permissions'),
+        mdiIcon: 'mdi:config',
+        isEnabled: (entity) => (!!(entity && entity.id && entity.id)),
+        onAction: ($event, entity) => this.setPermissions($event, entity.id)
+      });
+    }
     return actions;
   }
 

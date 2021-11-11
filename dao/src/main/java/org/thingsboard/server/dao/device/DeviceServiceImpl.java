@@ -904,7 +904,16 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return deviceDao.findGatewayNewVersionByFactory(factoryIds);
     }
 
-
+    /**
+     *平台设备列表查询
+     * @param device
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public PageData<Device> getTenantDeviceInfoList(Device device,PageLink pageLink){
+        return deviceDao.getTenantDeviceInfoList(device,pageLink);
+    }
 
 
 

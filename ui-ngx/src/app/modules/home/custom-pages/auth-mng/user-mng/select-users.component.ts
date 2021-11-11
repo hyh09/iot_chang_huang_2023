@@ -7,7 +7,7 @@ import { RoleMngService } from '@app/core/http/custom/role-mng.service';
 import { BaseData, DialogComponent, EntityType, entityTypeResources, entityTypeTranslations, HasId } from "@app/shared/public-api";
 import { Store } from "@ngrx/store";
 import { UserInfo } from '@app/shared/models/custom/auth-mng.models';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
+import { EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
 import { UserMngFiltersComponent } from './user-mng-filters.component';
 import { DatePipe } from '@angular/common';
 
@@ -22,7 +22,6 @@ export class SelectUsersComponent extends DialogComponent<SelectUsersComponent, 
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
-    private datePipe: DatePipe,
     public dialogRef: MatDialogRef<SelectUsersComponent, UserInfo[]>,
     protected roleMngService: RoleMngService,
     protected translate: TranslateService,
@@ -43,7 +42,7 @@ export class SelectUsersComponent extends DialogComponent<SelectUsersComponent, 
     this.config.titleVisible = false;
     this.config.groupActionEnabled = false;
     this.config.entitiesDeleteEnabled = false;
-    this.config.entitySelectionEnabled = () => { return true }
+    this.config.selectionAlwaysEnabled = true;
 
     this.config.componentsData = {
       userCode: '',

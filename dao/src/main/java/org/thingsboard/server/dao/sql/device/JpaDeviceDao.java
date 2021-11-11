@@ -19,13 +19,13 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
-import org.apache.commons.collections.CollectionUtils;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -513,5 +513,81 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         }
         return result;
     }
+
+    /**
+     *平台设备列表查询
+     * @param device
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public PageData<Device> getTenantDeviceInfoList(Device device,PageLink pageLink){
+        // 动态条件查询
+        Specification<DeviceEntity> specification = this.queryCondition(device,pageLink);
+        Pageable pageable = DaoUtil.toPageable(pageLink);
+        Page<DeviceEntity> menuEntities = deviceRepository.findAll(specification, pageable);
+        PageData<Device> resultPage = new PageData<>();
+        resultPage = new PageData<Device>(this.resultList(menuEntities.getContent()),menuEntities.getTotalPages(),menuEntities.getTotalElements(),menuEntities.hasNext());
+        return resultPage;
+    }
+
+
+    /**
+     * 构造查询条件,需要家条件在这里面加
+     * @param device
+     * @return
+     */
+    private Specification<DeviceEntity> queryCondition(Device device,PageLink pageLink){
+        // 动态条件查询
+        Specification<DeviceEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(device != null){
+                if(device.getAllot() != null){
+                    if(device.getAllot()){
+                        //已分配。根据工厂id或车间id不为空来查询
+                        List<Predicate> factoryOrProductionLine = new ArrayList<>();
+                        factoryOrProductionLine.add(cb.isNotEmpty(root.get("factoryId")));
+                        factoryOrProductionLine.add(cb.isNotEmpty(root.get("productionLineId")));
+                        /* 下面这一行代码很重要。
+                         * criteriaBuilder.or(Predicate... restrictions) 接收多个Predicate，可变参数；
+                         * 这多个 Predicate条件之间，是使用OR连接的；该方法最终返回 一个Predicate对象；
+                         */
+                        predicates.add(cb.or(factoryOrProductionLine.toArray(new Predicate[0])));
+                    }else {
+                        //未分配。根据工厂id或车间id为空来查询
+                        predicates.add(cb.equal(root.get("factoryId"),null));
+                        predicates.add(cb.equal(root.get("productionLineId"),null));
+                    }
+                }
+                if(StringUtils.isNotEmpty(device.getName())){
+                    predicates.add(cb.like(root.get("name"),"%" + device.getName().trim() + "%"));
+                }
+                if(StringUtils.isNotEmpty(pageLink.getTextSearch())){
+                    predicates.add(cb.like(root.get("name"),"%" + pageLink.getTextSearch().trim() + "%"));
+                }
+                if(StringUtils.isNotEmpty(device.getType())){
+                    predicates.add(cb.equal(root.get("type"),device.getType()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return specification;
+    }
+
+    /**
+     * 返回值，List
+     * @param deviceList
+     * @return
+     */
+    private List<Device> resultList(List<DeviceEntity> deviceList){
+        List<Device> resultDeviceList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(deviceList)){
+            deviceList.forEach(i->{
+                resultDeviceList.add(i.toData());
+            });
+        }
+        return resultDeviceList;
+    }
+
 
 }

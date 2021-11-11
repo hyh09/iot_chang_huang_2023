@@ -39,4 +39,8 @@ public class DeviceInfo extends Device {
         this.customerIsPublic = customerIsPublic;
         this.deviceProfileName = deviceProfileName;
     }
+
+    public DeviceInfo(Device device){
+        super(device);
+    }
 }

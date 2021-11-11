@@ -1,6 +1,6 @@
 <mat-form-field>
   <mat-label>{{ 'auth-mng.role-code' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.roleCode" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.roleCode" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.roleCode"
     matSuffix mat-icon-button aria-label="Clear"
@@ -11,7 +11,7 @@
 </mat-form-field>
 <mat-form-field>
   <mat-label>{{ 'auth-mng.role-name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.roleName" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.roleName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.roleName"
     matSuffix mat-icon-button aria-label="Clear"

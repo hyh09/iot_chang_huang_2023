@@ -8,6 +8,7 @@ import { DeviceDictionaryComponent } from './device-dictionary/device-dictionary
 import { DataDictionaryFiltersComponent } from './data-dictionary/data-dictionary-filters.component';
 import { DeviceDictionaryFiltersComponent } from './device-dictionary/device-dictionary-filters.component';
 import { DeviceCompFormComponent } from './device-dictionary/device-comp-form.component';
+import { FactoryMngComponent } from './factory-mng/factory-mng.component';
 
 @NgModule({
   imports: [
@@ -21,7 +22,8 @@ import { DeviceCompFormComponent } from './device-dictionary/device-comp-form.co
     DataDictionaryFiltersComponent,
     DeviceDictionaryComponent,
     DeviceDictionaryFiltersComponent,
-    DeviceCompFormComponent
+    DeviceCompFormComponent,
+    FactoryMngComponent
   ]
 })
 export class DeviceManagementModule { }
