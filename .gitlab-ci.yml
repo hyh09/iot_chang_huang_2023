@@ -33,6 +33,8 @@ package:
     # - npm i pkg-fetch -g
     # - npm i pkg -g
     # - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
+    - cd application
+    - ls -a
     - mvn $MAVEN_CLI_OPTS clean install -Dskiptests
   only:
     - dev
