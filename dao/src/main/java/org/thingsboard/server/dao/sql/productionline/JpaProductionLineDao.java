@@ -99,7 +99,9 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
         List<ProductionLine> productionLineList = new ArrayList<>();
         Specification<ProductionLineEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("tenantId"),tenantId));
+            if(tenantId != null){
+                predicates.add(cb.equal(root.get("tenantId"),tenantId));
+            }
             if(workshopId != null){
                 predicates.add(cb.equal(root.get("workshopId"),workshopId));
             }
@@ -116,6 +118,26 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
         }
         return productionLineList;
 
+    }
+
+    /**
+     * 根据id删除（逻辑删除）
+     * @param id
+     */
+    @Override
+    public void delProductionLine(UUID id){
+        ProductionLineEntity productionLineEntity = productionLineRepository.findById(id).get();
+        productionLineEntity.setDelFlag("D");
+        productionLineRepository.save(productionLineEntity);
+    }
+
+    /**
+     * 根据车间id删除（逻辑删除）
+     * @param workshopId
+     */
+    @Override
+    public void delProductionLineByWorkshopId(UUID workshopId){
+        productionLineRepository.delProductionLineByWorkshopId(workshopId);
     }
 
 }
