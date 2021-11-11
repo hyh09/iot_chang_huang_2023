@@ -29,10 +29,10 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - npm i pkg-fetch -g
-    - npm i pkg -g
-    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
-    - ls application/target
+    # - npm i pkg-fetch -g
+    # - npm i pkg -g
+    # - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
+    - mvn $MAVEN_CLI_OPTS clean install -Dskiptests
   only:
     - dev
   after_script:
