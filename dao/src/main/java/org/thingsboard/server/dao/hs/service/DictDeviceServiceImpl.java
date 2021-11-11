@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
+    // 二方库Service
+    ClientService clientService;
+
     // 设备字典Repository
     DictDeviceRepository deviceRepository;
 
