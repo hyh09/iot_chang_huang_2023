@@ -35,10 +35,10 @@ package:
     # - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
     - yum -y install tree
     - tree --dirsfirst -L 4 /cache
-    - ls -al .m2/repository || true
-    - cd application
+    - ls -al /.m2/repository || true
+    - cd ui-ngx
     - ls -a
-    - mvn $MAVEN_CLI_OPTS clean install -Dskiptests
+    - yarn install
     - tree --dirsfirst -L 4 /cache
     - ls -al .m2/repository || true
   only:
