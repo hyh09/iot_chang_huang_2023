@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -57,11 +59,21 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
     @Override
     public JudgeUserVo decideUser(UserId userId) {
         User  user =  userService.findUserById(null,userId);
+        JudgeUserVo  judgeUserVo =  new JudgeUserVo();
         if(user == null)
         {
-            return  new JudgeUserVo();
-//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询不到");
+            return  judgeUserVo;
+//           throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询不到");
         }
+        
+
+        ///暂时的
+        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+        {
+            judgeUserVo.setTenantFlag(true);
+            return judgeUserVo;
+        }
+
         //当前用户查询
         List<TenantSysRoleEntity>  factorySysRoleEntities =  tenantSysRoleService.queryRoleByUserId(user.getUuidId());
         if(CollectionUtils.isEmpty(factorySysRoleEntities))
