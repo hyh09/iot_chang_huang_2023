@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
@@ -45,6 +46,11 @@ public class EfficiencyStatisticsController extends BaseController {
     @ResponseBody
     public ResultCapAppVo queryCapacity(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
         try {
+            if(queryTsKvVo.getEndTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
             return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
@@ -62,6 +68,11 @@ public class EfficiencyStatisticsController extends BaseController {
     @ResponseBody
     public ResultEnergyAppVo queryEnergy(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
         try{
+            if(queryTsKvVo.getEndTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
             return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
@@ -75,6 +86,11 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
+        if(queryTsKvVo.getEndTime() == null )
+        {
+            queryTsKvVo.setStartTime(CommonUtils.getZero());
+            queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+        }
         return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
     }
 
