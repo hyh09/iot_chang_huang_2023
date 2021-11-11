@@ -100,4 +100,10 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
+
+    /**
+     * 获得当前默认初始化的分组及分组属性
+     *
+     */
+    List<DictDeviceGroupVO> getGroupInitData();
 }

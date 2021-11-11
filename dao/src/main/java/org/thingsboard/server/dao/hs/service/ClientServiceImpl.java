@@ -1,9 +1,13 @@
 package org.thingsboard.server.dao.hs.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +22,12 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.dao.InitEntity;
+import org.thingsboard.server.dao.hs.dao.InitRepository;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
@@ -30,7 +38,11 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +60,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     @PersistenceContext
     protected EntityManager entityManager;
+
+    // 初始化Repository
+    InitRepository initRepository;
 
     // 工厂Repository
     FactoryRepository factoryRepository;
@@ -138,10 +153,26 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 获得设备字典初始化数据
+     */
+    @Override
+    public List<DictDeviceGroupVO> listDictDeviceInitData() {
+        List<DictDeviceGroupVO> list = Lists.newArrayList();
+        var jsonNodeOptional = this.initRepository.findByScope(InitScopeEnum.DICT_DEVICE_GROUP.getCode()).map(InitEntity::getInitData);
+        if (jsonNodeOptional.isEmpty())
+            return list;
+
+        var jsonNode = jsonNodeOptional.get();
+
+        jsonNode.forEach(e -> list.add(convertValue(e, DictDeviceGroupVO.class)));
+        return list;
+    }
+
+    /**
      * 组装设备请求 specification
      *
-     * @param tenantId      租户Id
-     * @param t             extends FactoryDeviceQuery
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
      */
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
@@ -163,6 +194,35 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
+    }
+
+    public <T> Slice<T> conditionalFindAll(Class<T> entityClass, Map<String, Object> conditionsToApply, Pageable pageable) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+        Root<T> entityRoot = criteriaQuery.from(entityClass);
+        List<Predicate> predicates = new ArrayList<>();
+
+        conditionsToApply.entrySet().stream()
+                .filter(Objects::nonNull)
+                .forEach(entry ->
+                        predicates.add(criteriaBuilder.equal(entityRoot.get(entry.getKey()),
+                                entry.getValue())));
+        criteriaQuery.select(entityRoot)
+                .where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+        TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
+
+        int pageSize = pageable.getPageSize();
+        int offset = pageable.getPageNumber() > 0 ? pageable.getPageNumber() * pageSize : 0;
+        query.setMaxResults(pageSize + 1);
+        query.setFirstResult(offset);
+        List<T> resultList = query.getResultList();
+        boolean hasNext = pageable.isPaged() && resultList.size() > pageSize;
+        return new SliceImpl<>(hasNext ? resultList.subList(0, pageSize) : resultList, pageable, hasNext);
+    }
+
+    @Autowired
+    public void setInitRepository(InitRepository initRepository) {
+        this.initRepository = initRepository;
     }
 
     @Autowired
