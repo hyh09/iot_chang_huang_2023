@@ -45,6 +45,7 @@ import materialIconsCodepoints from '!raw-loader!material-design-icons/iconfont/
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { Router } from '@angular/router';
+import { HasUUID } from '@app/shared/public-api';
 
 const i18nRegExp = new RegExp(`{${i18nPrefix}:[^{}]+}`, 'g');
 

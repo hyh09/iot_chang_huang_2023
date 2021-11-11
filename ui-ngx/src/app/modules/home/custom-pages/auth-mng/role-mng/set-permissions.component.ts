@@ -4,9 +4,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { AppState } from "@app/core/core.state";
 import { RoleMngService } from '@app/core/http/custom/role-mng.service';
-import { DialogComponent } from "@app/shared/public-api";
+import { DialogComponent, HasUUID } from "@app/shared/public-api";
 import { Store } from "@ngrx/store";
-import { rolePermissions } from '@app/shared/models/custom/auth-mng.models';
 import { MenuTreeNodeOptions, MenuType } from '@app/shared/models/custom/menu-mng.models';
 import { UtilsService } from '@app/core/public-api';
 import { NzTreeComponent, NzTreeNode } from 'ng-zorro-antd/tree';
@@ -17,7 +16,7 @@ import { ActionNotificationShow } from '@app/core/notification/notification.acti
   templateUrl: './set-permissions.component.html',
   styleUrls: ['./set-permissions.component.scss']
 })
-export class SetPermissionsComponent extends DialogComponent<SetPermissionsComponent, rolePermissions> implements OnInit {
+export class SetPermissionsComponent extends DialogComponent<SetPermissionsComponent, HasUUID> implements OnInit {
 
   public pcMenus: MenuTreeNodeOptions[] = [];
   public appMenus: MenuTreeNodeOptions[] = [];
@@ -32,7 +31,7 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
-    public dialogRef: MatDialogRef<SetPermissionsComponent, rolePermissions>,
+    public dialogRef: MatDialogRef<SetPermissionsComponent, HasUUID>,
     protected roleMngService: RoleMngService,
     protected translate: TranslateService,
     protected utils: UtilsService,

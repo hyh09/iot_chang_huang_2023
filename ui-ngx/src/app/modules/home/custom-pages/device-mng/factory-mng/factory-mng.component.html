@@ -1,10 +1,18 @@
-<mat-drawer-container hasBackdrop="false" class="tb-absolute-fill">
+<mat-drawer-container hasBackdrop="false" class="tb-absolute-fill factory-mng-table-wrapper">
   <mat-drawer
     class="tb-details-drawer mat-elevation-z4"
     #drawer
     mode="over"
     position="end"
     [opened]="isDetailsOpen">
+    <tb-entity-details-panel
+      *ngIf="isDetailsOpen"
+      [entitiesTableConfig]="drawerEntityConfig"
+      [entityId]="currentEntityId"
+      (closeEntityDetails)="isDetailsOpen = false; currentEntityId = '';"
+      (entityUpdated)="fetchData()"
+    >
+    </tb-entity-details-panel>
   </mat-drawer>
   <mat-drawer-content>
     <div
@@ -12,7 +20,7 @@
       fxLayoutGap="16px"
       class="mat-padding tb-entity-table tb-absolute-fill"
     >
-      <div fxLayout="column" class="mat-elevation-z1 tb-entity-table-content">
+      <div class="mat-elevation-z1 tb-entity-table-content">
         <mat-toolbar class="mat-table-toolbar">
           <div class="mat-toolbar-tools">
             <div fxLayout="row" fxLayoutAlign="start center" fxLayout.xs="column" fxLayoutAlign.xs="center start" class="title-container">
@@ -50,19 +58,19 @@
             </button>
           </div>
         </div>
-        <div fxFlex class="table-container">
+        <div class="table-container">
           <nz-table
             #table
             [nzData]="tableData"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
             [nzNoResult]="'device-mng.no-factory-text' | translate"
-            [nzScroll]="{ x: '100%', y: '100%' }"
+            [nzScroll]="scrollConfig"
           >
             <thead>
               <tr>
                 <th>{{ 'device-mng.factory-col-name' | translate }}</th>
-                <th nzWidth="116px">{{ 'device-mng.logo' | translate }}</th>
+                <th nzWidth="104px">{{ 'device-mng.logo' | translate }}</th>
                 <th>{{ 'device-mng.address' | translate }}</th>
                 <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
                 <th nzWidth="120px" nzRight></th>
@@ -71,9 +79,12 @@
             <tbody>
               <ng-container *ngFor="let data of table.data">
                 <ng-container *ngFor="let item of mapOfExpandedData[data.id]">
-                  <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+                  <tr
+                    *ngIf="(item.parent && item.parent.expand) || !item.parent"
+                    (click)="onRowClick($event, item)"
+                  >
                     <td
-                      [nzIndentSize]="item.level! * 5"
+                      [nzIndentSize]="item.level! * 10"
                       [nzShowExpand]="!!item.children"
                       [(nzExpand)]="item.expand"
                       (nzExpandChange)="collapse(mapOfExpandedData[data.id], item, $event)"
@@ -81,11 +92,63 @@
                       {{ item.name }}
                     </td>
                     <td>
-                      <div *ngIf="item.image" fxFlex fxLayoutAlign="center center" class="image-wrapper">
-                        <img nz-image [nzSrc]="item.image" />
+                      <div *ngIf="item.logoImages" fxFlex fxLayoutAlign="start center" class="image-wrapper">
+                        <img nz-image [nzSrc]="item.logoImages" (click)="$event.stopPropagation()" />
                       </div>
                     </td>
+                    <td>{{ item.address }}</td>
                     <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
+                    <td nzRight nzAlign="right">
+                      <button
+                        *ngIf="item.rowType === 'factory'"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.add-work-shop' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); addWorkShop(item.id, item.name)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'workShop'"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.add-prod-line' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); addProdLine(item.id, item.factoryName, item.name)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'prodLine'"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.distribute' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); distributeDevice(item.id)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'device'"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.add-device' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); addDevice(item.id, item.factoryName, item.workShopName, item.name)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
+                        matTooltip="{{ 'action.delete' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); del(item)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
                   </tr>
                 </ng-container>
               </ng-container>
