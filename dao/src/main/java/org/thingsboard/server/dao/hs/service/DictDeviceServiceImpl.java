@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
@@ -33,9 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
-    // 二方库Service
-    ClientService clientService;
-
     // 设备字典Repository
     DictDeviceRepository deviceRepository;
 
@@ -181,7 +179,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
-            BeanUtils.copyProperties(dictDeviceVO, dictDevice);
+            BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
             dictDevice.setTenantId(tenantId.toString());
         }
 
@@ -358,6 +356,11 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setClientService(ClientService clientService) {
         this.clientService = clientService;
+    }
+
+    @Override
+    public List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId) {
+        return this.groupPropertyRepository.findGroupNameAndName(dictDeviceId);
     }
 
     @Autowired

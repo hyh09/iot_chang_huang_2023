@@ -5,7 +5,7 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.dao.hs.dao.DictDeviceGroupPropertyEntity;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
@@ -115,5 +115,7 @@ public interface DictDeviceService {
      * @return map: key-name  ,value-name
      */
     List<String> findAllByName( UUID dictDeviceId, String name);
+
+    List<DictDeviceDataVo> findGroupNameAndName( UUID dictDeviceId);
 
 }
