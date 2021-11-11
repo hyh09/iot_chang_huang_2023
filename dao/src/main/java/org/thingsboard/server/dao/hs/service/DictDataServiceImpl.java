@@ -2,10 +2,12 @@ package org.thingsboard.server.dao.hs.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
@@ -17,7 +19,6 @@ import org.thingsboard.server.dao.hs.dao.DictDataRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
-import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
-public class DictDataServiceImpl extends AbstractEntityService implements DictDataService {
+public class DictDataServiceImpl extends AbstractEntityService implements DictDataService, CommonService {
 
     DictDataRepository dataRepository;
 
@@ -47,30 +48,21 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      * @return 数据字典列表
      */
     @Override
+    @SuppressWarnings("Duplicates")
     public PageData<DictData> listDictDataByQuery(TenantId tenantId, DictDataListQuery dictDataListQuery, PageLink pageLink) {
-        // 动态条件查询
+        // dynamic query
         Specification<DictDataEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            var es = cb.equal(root.<UUID>get("tenantId"), tenantId.getId());
-
-            if (dictDataListQuery != null) {
-                if (!StringUtils.isBlank(dictDataListQuery.getName())) {
-                    predicates.add(cb.like(root.get("name"), "%" + dictDataListQuery.getName().trim() + "%"));
-                }
-                if (!StringUtils.isBlank(dictDataListQuery.getCode())) {
-                    predicates.add(cb.like(root.get("code"), "%" + dictDataListQuery.getCode().trim() + "%"));
-                }
-                if (dictDataListQuery.getDictDataType() != null) {
-                    predicates.add(cb.equal(root.get("type"), dictDataListQuery.getDictDataType().toString()));
-                }
-            }
-            if (predicates.isEmpty())
-                return es;
-            predicates.add(es);
-            return cb.and(predicates.toArray(new Predicate[0]));
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            if (!StringUtils.isBlank(dictDataListQuery.getName()))
+                predicates.add(cb.like(root.get("name"), "%" + dictDataListQuery.getName().trim() + "%"));
+            if (!StringUtils.isBlank(dictDataListQuery.getCode()))
+                predicates.add(cb.like(root.get("code"), "%" + dictDataListQuery.getCode().trim() + "%"));
+            if (dictDataListQuery.getDictDataType() != null)
+                predicates.add(cb.equal(root.get("type"), dictDataListQuery.getDictDataType().toString()));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
-        // 查询数据
         return DaoUtil.toPageData(this.dataRepository.findAll(specification, DaoUtil.toPageable(pageLink)));
     }
 
@@ -82,30 +74,25 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     @Transactional
-    public void updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException {
-        DictData dictData;
+    public DictDataQuery updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException {
+        DictData dictData = new DictData();
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
-            // 修改
-            dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(dictDataQuery.getId())).toData();
-            dictData.setName(dictDataQuery.getName());
-            dictData.setComment(dictDataQuery.getComment());
-            dictData.setIcon(dictDataQuery.getIcon());
+            // Modify
+            dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDataQuery.getId())).map(DictDataEntity::toData)
+                    .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));;
+            BeanUtils.copyProperties(dictDataQuery, dictData, "id", "code");
             dictData.setType(dictDataQuery.getType().toString());
-            dictData.setComment(dictDataQuery.getComment());
         } else {
-            // 新增
-            dictData = new DictData();
-
-            dictData.setTenantId(tenantId.toString());
-            dictData.setName(dictDataQuery.getName());
-            dictData.setCode(dictDataQuery.getCode());
-            dictData.setComment(dictDataQuery.getComment());
-            dictData.setIcon(dictDataQuery.getIcon());
+            // Save
+            BeanUtils.copyProperties(dictDataQuery, dictData);
             dictData.setType(dictDataQuery.getType().toString());
-            dictData.setUnit(dictDataQuery.getUnit());
-            dictData.setComment(dictDataQuery.getComment());
+            dictData.setTenantId(tenantId.toString());
         }
-        this.dataRepository.save(new DictDataEntity(dictData));
+
+        DictDataEntity dictDataEntity = new DictDataEntity(dictData);
+        this.dataRepository.save(dictDataEntity);
+        BeanUtils.copyProperties(dictDataEntity.toData(), dictDataQuery);
+        return dictDataQuery;
     }
 
     /**
@@ -115,7 +102,8 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public DictData getDictDataDetail(String id, TenantId tenantId) throws ThingsboardException {
-        return this.dataRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(id)).toData();
+        return this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
+                .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));
     }
 
     /**
@@ -126,8 +114,9 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Override
     @Transactional
     public void deleteDictDataById(String id, TenantId tenantId) throws ThingsboardException {
-        DictData dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), UUID.fromString(id)).toData();
-        this.dataRepository.deleteById(UUID.fromString(dictData.getId()));
+        var dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
+                .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));
+        this.dataRepository.deleteById(toUUID(dictData.getId()));
     }
 
     /**
@@ -138,7 +127,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        return CommonUtil.getAvailableCode(this.dataRepository.findAllCodesByTenantId(tenantId.getId()), "SJZD");
+        return this.getAvailableCode(this.dataRepository.findAllCodesByTenantId(tenantId.getId()), "SJZD");
     }
 
     /**

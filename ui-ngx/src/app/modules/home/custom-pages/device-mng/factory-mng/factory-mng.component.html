@@ -1,0 +1,98 @@
+<mat-drawer-container hasBackdrop="false" class="tb-absolute-fill">
+  <mat-drawer
+    class="tb-details-drawer mat-elevation-z4"
+    #drawer
+    mode="over"
+    position="end"
+    [opened]="isDetailsOpen">
+  </mat-drawer>
+  <mat-drawer-content>
+    <div
+      fxLayout="row"
+      fxLayoutGap="16px"
+      class="mat-padding tb-entity-table tb-absolute-fill"
+    >
+      <div fxLayout="column" class="mat-elevation-z1 tb-entity-table-content">
+        <mat-toolbar class="mat-table-toolbar">
+          <div class="mat-toolbar-tools">
+            <div fxLayout="row" fxLayoutAlign="start center" fxLayout.xs="column" fxLayoutAlign.xs="center start" class="title-container">
+              <span class="tb-entity-table-title">{{ 'device-mng.factory-mng' | translate }}</span>
+            </div>
+            <span fxFlex></span>
+            <button
+              mat-icon-button [disabled]="isLoading$ | async"
+              (click)="addFactory()"
+              matTooltip="{{ 'device-mng.add-factory' | translate }}"
+              matTooltipPosition="above"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </mat-toolbar>
+        <div class="entity-filter-header">
+          <mat-form-field *ngFor="let filter of filters">
+            <mat-label>{{ filter.langKey | translate }}</mat-label>
+            <input type="text" matInput [(ngModel)]="filterParams[filter.propName]" (keyup.enter)="fetchData()" />
+            <button
+              *ngIf="filterParams.name"
+              matSuffix mat-icon-button aria-label="Clear"
+              (click)="onClear(filter.propName)"
+            >
+              <mat-icon class="material-icons">close</mat-icon>
+            </button>
+          </mat-form-field>
+          <div class="action-btns">
+            <button mat-flat-button color="primary" (click)="fetchData()">
+              {{ 'action.search' | translate }}
+            </button>
+            <button mat-stroked-button (click)="fetchData()">
+              {{ 'device-mng.batch-distribute' | translate }}
+            </button>
+          </div>
+        </div>
+        <div fxFlex class="table-container">
+          <nz-table
+            #table
+            [nzData]="tableData"
+            nzTableLayout="fixed"
+            [nzShowPagination]="false"
+            [nzNoResult]="'device-mng.no-factory-text' | translate"
+            [nzScroll]="{ x: '100%', y: '100%' }"
+          >
+            <thead>
+              <tr>
+                <th>{{ 'device-mng.factory-col-name' | translate }}</th>
+                <th nzWidth="116px">{{ 'device-mng.logo' | translate }}</th>
+                <th>{{ 'device-mng.address' | translate }}</th>
+                <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
+                <th nzWidth="120px" nzRight></th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let data of table.data">
+                <ng-container *ngFor="let item of mapOfExpandedData[data.id]">
+                  <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+                    <td
+                      [nzIndentSize]="item.level! * 5"
+                      [nzShowExpand]="!!item.children"
+                      [(nzExpand)]="item.expand"
+                      (nzExpandChange)="collapse(mapOfExpandedData[data.id], item, $event)"
+                    >
+                      {{ item.name }}
+                    </td>
+                    <td>
+                      <div *ngIf="item.image" fxFlex fxLayoutAlign="center center" class="image-wrapper">
+                        <img nz-image [nzSrc]="item.image" />
+                      </div>
+                    </td>
+                    <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </nz-table>
+        </div>
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

@@ -7,6 +7,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -119,5 +120,29 @@ public class CommonUtils {
         }
         String[] result=new String[emptyName.size()];
         return emptyName.toArray(result);
+    }
+
+
+    /**
+     * 获取当天的零时时间
+     */
+    public  static  long  getZero()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date zero = calendar.getTime();
+      return   zero.getTime();
+    }
+
+    /**
+     * 获取当前的时间
+     */
+    public  static  long getNowTime()
+    {
+        Date  date =  new Date();
+        return  date.getTime();
     }
 }

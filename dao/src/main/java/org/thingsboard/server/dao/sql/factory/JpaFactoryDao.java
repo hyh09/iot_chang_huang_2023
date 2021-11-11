@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
@@ -75,7 +76,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
 
 
     @Override
-    public Factory saveFactory(Factory factory){
+    public Factory saveFactory(Factory factory)throws ThingsboardException {
         FactoryEntity factoryEntity = new FactoryEntity(factory);
         if (factoryEntity.getUuid() == null) {
             UUID uuid = Uuids.timeBased();
@@ -118,6 +119,16 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      */
     @Override
     public List<Factory>  findFactoryByTenantId(UUID tenantId){return factoryRepository.findFactoryByTenantId(tenantId);}
+
+
+    /**
+     * 只查询租户下的第一条工厂
+     */
+    @Override
+    public  FactoryEntity findFactoryByTenantIdFirst(UUID tenantId){
+        return factoryRepository.findFactoryByTenantIdFirst(tenantId);
+    }
+
 
     /**
      * 条件查询工厂列表
@@ -440,6 +451,18 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         });
         return factoryEntityList;
     }
-
+    /**
+     * 查询详情
+     * @param id
+     * @return
+     */
+    @Override
+    public Factory findById(UUID id){
+        FactoryEntity entity = factoryRepository.findById(id).get();
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
+    }
 }
 

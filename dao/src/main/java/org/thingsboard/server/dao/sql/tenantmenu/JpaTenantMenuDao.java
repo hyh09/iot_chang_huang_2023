@@ -24,6 +24,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
+import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
@@ -51,9 +52,10 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     @Autowired
     private TenantMenuRepository tenantMenuRepository;
     @Autowired
-    private TenantMenuRoleDao tenantMenuRoleDao;
-    @Autowired
     private MenuDao menuDao;
+    @Autowired
+    private TenantMenuRoleDao tenantMenuRoleDao;
+
     @Override
     protected Class<TenantMenuEntity> getEntityClass() {
         return TenantMenuEntity.class;
@@ -89,26 +91,32 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      */
     @Override
     public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
-        List<TenantMenuEntity> collect = tenantMenuList.stream().map(e -> {
-            TenantMenuEntity entity = new TenantMenuEntity(e);
-            return entity;
-        }).collect(Collectors.toList());
-        //查询出系统菜单的按钮，并保存
-//        List<UUID> sysMenuIds = collect.stream().filter(e -> e.getSysMenuId() != null).map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList());
-//        if(CollectionUtils.isNotEmpty(sysMenuIds)){
-//            List<Menu> buttonListByIds = menuDao.getButtonListByIds(sysMenuIds);
-//            if(CollectionUtils.isNotEmpty(buttonListByIds)){
-//                collect.forEach(i->{
-//                    buttonListByIds.forEach(j->{
-//                        if(){
-//
-//                        }
-//                        collect.add(new TenantMenuEntity(j));
-//                    });
-//                });
-//            }
-//        }
-
+        List<TenantMenuEntity> collect = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(tenantMenuList)){
+            tenantMenuList.forEach(i->{
+                collect.add(new TenantMenuEntity(i));
+            });
+            List<TenantMenuEntity> entityList = collect.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
+            List<TenantMenuEntity> collectButton = new ArrayList<>();
+            if(CollectionUtils.isNotEmpty(entityList)){
+                List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList()));
+                if(CollectionUtils.isNotEmpty(buttons)) {
+                    for (TenantMenuEntity entity:collect){
+                        for (Menu menu:buttons) {
+                            if (entity.getSysMenuId() != null && entity.getSysMenuId().toString().equals(menu.getParentId().toString())) {
+                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(menu, entity.getLevel() + 1, menu.getCreatedUser(),entity.getId());
+                                tenantMenuEntity.setTenantId(entity.getTenantId());
+                                collectButton.add(tenantMenuEntity);
+                                System.out.println(tenantMenuEntity.getTenantMenuName());
+                            }
+                        }
+                    }
+                }
+            }
+            if(CollectionUtils.isNotEmpty(collectButton)){
+                collect.addAll(collectButton);
+            }
+        }
         tenantMenuRepository.saveAll(collect);
     }
     /**
@@ -143,8 +151,6 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public Integer getMaxSortByParentId(UUID parentId){
         return tenantMenuRepository.getMaxSortByParentId(parentId);
     }
-
-
 
     /**
      * 查询同级下指定菜单后面所有菜单
@@ -193,24 +199,22 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         return tenantMenuList;
     }
 
-
     @Override
     public List<TenantMenu> findByIdIn(List<UUID> ids) {
         return   listToVo(tenantMenuRepository.findByIdIn(ids));
     }
+
     /**
      * 自定义查询菜单列表
-     * @param tenantMenu
+     * @param menuType
+     * @param tenantId
+     * @param id
      * @return
      */
-
     @Override
     public List<TenantMenu> getTenantMenuListByIds(String menuType, UUID tenantId, List<UUID> id) {
         return  listToVo(tenantMenuRepository.getTenantMenuListByIds(menuType,tenantId,id));
     }
-
-
-
 
     @Override
     public List<TenantMenu>  getTenantMenuListByTenantId(String menuType,UUID tenantId)

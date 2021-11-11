@@ -71,7 +71,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
      * 启用状态
      */
     @Column(name = ModelConstants.USER_ACTIVE_STATUS_PROPERTY)
-    private  String  activeStatus;
+    private  String  activeStatus="1";
     /**
      * 用户编码
      */

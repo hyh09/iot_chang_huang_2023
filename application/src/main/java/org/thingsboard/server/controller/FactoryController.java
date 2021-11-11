@@ -175,4 +175,27 @@ public class FactoryController extends BaseController  {
             throw handleException(e);
         }
     }
+
+    /**
+     * 根据登录人角色查询工厂列表
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("根据登录人角色查询工厂列表")
+    @RequestMapping(value = "/findFactoryListByLoginRole", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FactoryVo> findFactoryListByLoginRole() throws ThingsboardException {
+        try {
+            List<FactoryVo> factoryVoList = new ArrayList<>();
+            List<Factory> factoryList = factoryService.findFactoryListByLoginRole(getCurrentUser().getId().getId(),getCurrentUser().getTenantId().getId());
+            if(!CollectionUtils.isEmpty(factoryList)){
+                factoryList.forEach(i->{
+                    factoryVoList.add(new FactoryVo(i));
+                });
+            }
+            return factoryVoList;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
 }

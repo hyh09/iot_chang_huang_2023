@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.factory;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 
@@ -13,14 +14,14 @@ public interface FactoryService {
      * @param factory
      * @return
      */
-    Factory saveFactory(Factory factory);
+    Factory saveFactory(Factory factory)throws ThingsboardException;
 
     /**
      * 修改后刷新值
      * @param factory
      * @return
      */
-    Factory updFactory(Factory factory);
+    Factory updFactory(Factory factory)throws ThingsboardException;
 
     /**
      * 删除后刷新值
@@ -59,5 +60,12 @@ public interface FactoryService {
      */
     List<Factory> findFactoryVersion(Factory factory) throws Exception;
 
+    /**
+     * 根据登录人角色查询工厂列表
+     * @param userId
+     * @param tenantId
+     * @return
+     */
+    List<Factory> findFactoryListByLoginRole(UUID userId,UUID tenantId);
 
 }

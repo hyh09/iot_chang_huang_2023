@@ -9,7 +9,7 @@ import { Store } from "@ngrx/store";
 import { rolePermissions } from '@app/shared/models/custom/auth-mng.models';
 import { MenuTreeNodeOptions, MenuType } from '@app/shared/models/custom/menu-mng.models';
 import { UtilsService } from '@app/core/public-api';
-import { NzTreeComponent, NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
+import { NzTreeComponent, NzTreeNode } from 'ng-zorro-antd/tree';
 import { ActionNotificationShow } from '@app/core/notification/notification.actions';
 
 @Component({

@@ -19,11 +19,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.thingsboard.rule.engine.api.msg.DeviceCredentialsUpdateNotificationMsg;
@@ -50,6 +53,7 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.entity.device.dto.AddDeviceDto;
+import org.thingsboard.server.entity.device.dto.DeviceQry;
 import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -66,6 +70,7 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 
+@Api(value="设备管理Controller",tags={"设备管理口"})
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -342,6 +347,36 @@ public class DeviceController extends BaseController {
             } else {
                 return checkNotNull(deviceService.findDeviceInfosByTenantId(tenantId, pageLink));
             }
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @ApiOperation("平台设备列表查询（重写原来的列表查询）")
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query"),
+            @ApiImplicitParam(name = "sortProperty",value = "排序字段",dataType = "string",paramType = "query",required = true),
+            @ApiImplicitParam(name = "sortOrder",value = "排序方式（DESC/ASC）",dataType = "string",paramType = "query")})
+    @ResponseBody
+    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize,@RequestParam int page,DeviceQry deviceQry) throws ThingsboardException {
+        try {
+            PageData<DeviceInfo> resultPage = new PageData<>();
+            List<DeviceInfo> resultDevices = new ArrayList<>();
+            TenantId tenantId = getCurrentUser().getTenantId();
+            PageLink pageLink = createPageLink(pageSize, page, deviceQry.getSearchText(), deviceQry.getSortProperty(), deviceQry.getSortOrder());
+            Device device = deviceQry.toDevice();
+            device.setTenantId(tenantId);
+            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
+            List<Device> deviceList = menuPageData.getData();
+            if(!CollectionUtils.isEmpty(deviceList)){
+                deviceList.forEach(i->{
+                    resultDevices.add(new DeviceInfo(i));
+                });
+            }
+            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
+            return resultPage;
         } catch (Exception e) {
             throw handleException(e);
         }
