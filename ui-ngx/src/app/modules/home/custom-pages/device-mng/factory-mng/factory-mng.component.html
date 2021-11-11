@@ -45,16 +45,14 @@
             <button mat-flat-button color="primary" (click)="fetchData()">
               {{ 'action.search' | translate }}
             </button>
-          </div>
-          <div class="action-btns">
-            <button mat-button color="primary" (click)="fetchData()">
+            <button mat-stroked-button (click)="fetchData()">
               {{ 'device-mng.batch-distribute' | translate }}
             </button>
           </div>
         </div>
         <div fxFlex class="table-container">
           <nz-table
-            #compTable
+            #table
             [nzData]="tableData"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
@@ -63,16 +61,35 @@
           >
             <thead>
               <tr>
-                <!-- <th nzWidth="200px" nzLeft>{{ 'device-mng.comp-name' | translate }}</th>
-                <th nzWidth="150px">{{ 'device-mng.comp-type' | translate }}</th>
-                <th nzWidth="250px">{{ 'device-mng.supplier' | translate }}</th>
-                <th nzWidth="100px">{{ 'device-mng.model' | translate }}</th>
-                <th nzWidth="150px">{{ 'device-mng.version' | translate }}</th>
-                <th nzWidth="150px">{{ 'device-mng.guarantee' | translate }}</th>
-                <th nzWidth="116px">{{ 'device-mng.comp-picture' | translate }}</th>
-                <th nzWidth="150px" nzRight></th> -->
+                <th>{{ 'device-mng.factory-col-name' | translate }}</th>
+                <th nzWidth="116px">{{ 'device-mng.logo' | translate }}</th>
+                <th>{{ 'device-mng.address' | translate }}</th>
+                <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
+                <th nzWidth="120px" nzRight></th>
               </tr>
             </thead>
+            <tbody>
+              <ng-container *ngFor="let data of table.data">
+                <ng-container *ngFor="let item of mapOfExpandedData[data.id]">
+                  <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+                    <td
+                      [nzIndentSize]="item.level! * 5"
+                      [nzShowExpand]="!!item.children"
+                      [(nzExpand)]="item.expand"
+                      (nzExpandChange)="collapse(mapOfExpandedData[data.id], item, $event)"
+                    >
+                      {{ item.name }}
+                    </td>
+                    <td>
+                      <div *ngIf="item.image" fxFlex fxLayoutAlign="center center" class="image-wrapper">
+                        <img nz-image [nzSrc]="item.image" />
+                      </div>
+                    </td>
+                    <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
           </nz-table>
         </div>
       </div>
