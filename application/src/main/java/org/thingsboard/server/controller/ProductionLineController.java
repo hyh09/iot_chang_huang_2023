@@ -82,7 +82,7 @@ public class ProductionLineController extends BaseController  {
      */
     @ApiOperation("查询租户/车间下所有生产线列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true),
+            @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query"),
             @ApiImplicitParam(name = "workshopId",value = "车间标识",dataType = "string",paramType = "query"),
             @ApiImplicitParam(name = "factoryId",value = "工厂标识",dataType = "string",paramType = "query")
     })
@@ -92,7 +92,9 @@ public class ProductionLineController extends BaseController  {
     public List<ProductionLineVo> findWorkshopList(@RequestParam String tenantId,@RequestParam String workshopId,@RequestParam String factoryId) throws ThingsboardException {
         try {
             List<ProductionLineVo> productionLineVos = new ArrayList<>();
-            checkParameter("tenantId",tenantId);
+            if(StringUtils.isEmpty(tenantId)){
+                tenantId = getCurrentUser().getTenantId().getId().toString();
+            }
             checkNotNull(productionLineService.findProductionLineList(
                     toUUID(tenantId),
                     StringUtils.isNotEmpty(workshopId) ?toUUID(workshopId):null,

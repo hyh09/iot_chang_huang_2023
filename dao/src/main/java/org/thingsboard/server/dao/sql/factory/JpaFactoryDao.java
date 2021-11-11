@@ -156,9 +156,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 if(notBlankFactoryName){
                     predicates.add(cb.like(root.get("name"),"%" + factory.getName().trim() + "%"));
                 }
-                //工厂管理员及工厂用户只能看工厂数据
-                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag()){
-                    predicates.add(cb.equal(root.get("id"), judgeUserVo.getUserId()));
+                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
+                    //工厂管理员/工厂用户，拥有该工厂数据权限
+                    predicates.add(cb.equal(root.get("adminUserId"), judgeUserVo.getUserId()));
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
