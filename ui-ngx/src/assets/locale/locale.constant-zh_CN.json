@@ -1,4 +1,7 @@
 {
+  "system": {
+    "title": "环思物联"
+  },
   "access": {
     "access-forbidden": "禁止访问",
     "access-forbidden-text": "您没有访问此位置的权限<br/>如果您仍希望访问此位置,请尝试使用其他用户登录。",
@@ -1935,7 +1938,7 @@
     "email": "电子邮件",
     "error": "登录错误",
     "expired-password-reset-message": "您的凭据已过期！请创建新密码。",
-    "forgot-password": "忘记密码？",
+    "forgot-password": "忘记密码",
     "login": "登录",
     "login-with": "使用 {{name}} 登录",
     "new-password": "新密码",
@@ -1949,7 +1952,7 @@
     "request-password-reset": "请求密码重置",
     "reset-password": "重置密码",
     "sign-in": "登录 ",
-    "username": "用户名（电子邮件）"
+    "username": "用户名（邮箱）"
   },
   "position": {
     "bottom": "底部",
@@ -2664,6 +2667,7 @@
     "device-mng": "设备管理",
     "data-dic": "数据字典",
     "device-dic": "设备字典",
+    "factory-mng": "工厂管理",
     "delete-data-dic-title": "确定要删除数据字典 '{{dataDicName}}'?",
     "delete-data-dic-text": "请注意：确认后该数据字典及其所有相关数据将不可恢复。",
     "delete-data-dics-title": "确定要删除 { count, plural, 1 {# 个数据字典} other {# 个数据字典} }?",
@@ -2714,12 +2718,24 @@
     "comp-empty": "暂无部件",
     "add-comp": "添加部件",
     "edit-comp": "编辑部件",
+    "factory-name": "工厂名称",
+    "work-shop-name": "车间名称",
+    "prod-line-name": "产线名称",
+    "device-name": "设备名称",
+    "distribute": "分配",
+    "batch-distribute": "批量分配",
+    "factory-col-code": "编码",
+    "factory-col-name": "名称",
+    "logo": "logo",
+    "address": "地址",
     "data-dic-details": "数据字典详情",
     "device-dic-details": "设备字典详情",
     "add-data-dic": "添加数据字典",
     "add-device-dic": "添加设备字典",
+    "add-factory": "添加工厂",
     "no-data-dics-text": "未找到数据字典",
     "no-device-dics-text": "未找到设备字典",
+    "no-factory-text": "未找到工厂",
     "selected-data-dics": "已选择 { count, plural, 1 {# 个数据字典} other {# 个数据字典} }",
     "selected-device-dics": "已选择 { count, plural, 1 {# 个设备字典} other {# 个设备字典} }",
     "code-required": "字典编码必填",
