@@ -917,6 +917,11 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
 
+    @Override
+    public PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink){
+        return deviceDao.queryAllByNameLike(factoryId,name,pageLink);
+    }
+
 
 
 

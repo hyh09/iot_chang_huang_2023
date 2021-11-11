@@ -157,4 +157,7 @@ public interface DeviceService {
      */
     PageData<Device> getTenantDeviceInfoList(Device device, PageLink pageLink);
 
+
+    PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
+
 }

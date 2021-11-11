@@ -245,4 +245,15 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
      */
     @Query("SELECT d FROM DeviceEntity d WHERE d.id  in (:ids)")
     List<DeviceEntity> queryAllByIds(@Param("ids") List<UUID> ids);
+
+//    @Query(value = "select t from DeviceEntity  t where  t.factoryId=?1 and t.name like  %?2% ")
+//    Page<DeviceEntity> queryAllByNameLike(UUID factoryId,String Name,Pageable pageable);
+
+    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceDataVo(t.id,t.name,f1.id,f1.name,t.workshopId,w1.name,t.productionLineId,p1.name) " +
+            "from DeviceEntity  t LEFT  JOIN  FactoryEntity f1  on  t.factoryId = f1.id" +
+              " LEFT JOIN  WorkshopEntity  w1  ON  w1.id = t.workshopId     LEFT JOIN ProductionLineEntity  p1  ON  p1.id = t.productionLineId  "+
+            "  where  t.factoryId=?1 and t.name like  %?2% ")
+    Page<DeviceDataVo> queryAllByNameLike(UUID factoryId, String Name, Pageable pageable);
+
+
 }
