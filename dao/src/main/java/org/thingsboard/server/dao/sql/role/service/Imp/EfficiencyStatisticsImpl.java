@@ -32,9 +32,11 @@ import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
+import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.util.StringUtilToll;
@@ -54,11 +56,10 @@ import java.util.stream.Collectors;
 public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Autowired private EffectTsKvRepository effectTsKvRepository;
-    @Autowired private DeviceDao deviceDao;
     @Autowired  private DeviceRepository deviceRepository;
     @Autowired private FactoryDao factoryDao;
-    @Autowired private WorkshopDao workshopDao;
-    @Autowired private ProductionLineDao productionLineDao;
+    @Autowired private WorkshopRepository workshopRepository;
+    @Autowired private ProductionLineRepository productionLineRepository;
     @Autowired private TsKvRepository tsKvRepository;
     @Autowired private DictDeviceService dictDeviceService;
     @Autowired private TsKvDictionaryRepository dictionaryRepository;
@@ -89,28 +90,34 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
                 collect(Collectors.toList());
         log.info("当前的分页之后的数据:{}",pageList);
-        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
-        log.info("当前的分页之后的数据之设备id的汇总:{}",ids);
-        List<DeviceEntity>  entities =  deviceDao.queryAllByIds(ids);
-        Map<UUID,DeviceEntity> map1 = entities.stream().collect(Collectors.toMap(DeviceEntity::getId,DeviceEntity->DeviceEntity));
-        log.info("查询到的设备信息map1:{}",map1);
+//        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
+//        log.info("当前的分页之后的数据之设备id的汇总:{}",ids);
+//        List<DeviceEntity>  entities =  deviceDao.queryAllByIds(ids);
+//        Map<UUID,DeviceEntity> map1 = entities.stream().collect(Collectors.toMap(DeviceEntity::getId,DeviceEntity->DeviceEntity));
+//        log.info("查询到的设备信息map1:{}",map1);
         List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
-            DeviceEntity  entity1 = map1.get(entity.getEntityId());
+//            DeviceEntity  entity1 = map1.get(entity.getEntityId());
+            log.info("entity:====>"+entity);
             //会存在为空的
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
-            capVo.setDeviceName(entity1.getName());
+            capVo.setDeviceName(entity.getDeviceName());
+            log.info("打印的当前的：workshopDao："+workshopRepository);
 
-            if(entity1.getWorkshopId() != null) {
-                Workshop workshop = workshopDao.findById(tenantId, entity1.getWorkshopId());
-                capVo.setWorkshopName(workshop.getName());
+            if(entity.getWorkshopId() != null) {
+                log.info("打印的当前的：workshopDao："+workshopRepository);
+                log.info("打印的当前的：tenantId："+tenantId);
+                log.info("打印的当前的：entity.getWorkshopId()："+entity.getWorkshopId());
+
+                Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
+                capVo.setWorkshopName(workshop.get().getName());
             }
 
-            if(entity1.getProductionLineId() != null) {
-                ProductionLine productionLine = productionLineDao.findById(tenantId, entity1.getProductionLineId());
-                capVo.setProductionName(productionLine.getName());
+            if(entity.getProductionLineId() != null) {
+                Optional<ProductionLineEntity> productionLine = productionLineRepository.findByTenantIdAndId(tenantId.getId(), entity.getProductionLineId());
+                capVo.setProductionName(productionLine.get().getName());
             }
             appDeviceCapVoList.add(capVo);
 
@@ -289,13 +296,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
                 appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {
-                    Workshop workshop = workshopDao.findById(tenantId, entity1.getWorkshopId());
-                    appDeviceEnergyVo.setWorkshopName(workshop.getName());
+                    Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity1.getWorkshopId());
+                    appDeviceEnergyVo.setWorkshopName(workshop.get().getName());
                 }
 
                 if (entity1.getProductionLineId() != null) {
-                    ProductionLine productionLine = productionLineDao.findById(tenantId, entity1.getProductionLineId());
-                    appDeviceEnergyVo.setProductionName(productionLine.getName());
+                    Optional<ProductionLineEntity> productionLine = productionLineRepository.findByTenantIdAndId(tenantId.getId(), entity1.getProductionLineId());
+                    appDeviceEnergyVo.setProductionName(productionLine.get().getName());
                 }
                 value.stream().forEach(effectTsKvEntity -> {
                     log.info("打印当前的key:"+effectTsKvEntity.getKey()+"effectTsKvEntity.getValue():"+effectTsKvEntity.getValue());

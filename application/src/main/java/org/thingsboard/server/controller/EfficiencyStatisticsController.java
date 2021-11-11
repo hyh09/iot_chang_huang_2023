@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
@@ -42,7 +44,13 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryCapacity", method = RequestMethod.POST)
     @ResponseBody
     public ResultCapAppVo queryCapacity(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
+        try {
+            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
+        }
     }
 
 
@@ -53,8 +61,14 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryEnergy", method = RequestMethod.POST)
     @ResponseBody
     public ResultEnergyAppVo queryEnergy(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
+        try{
             return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
+    }
 
 
     @ApiOperation(value = "【app端查询当前设备的运行状态】")
