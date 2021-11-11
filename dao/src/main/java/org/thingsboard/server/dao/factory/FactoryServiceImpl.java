@@ -42,7 +42,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public Factory saveFactory(Factory factory){
+    public Factory saveFactory(Factory factory) throws ThingsboardException{
         log.trace("Executing saveFactory [{}]", factory);
         if (factory != null && factory.getId() == null) {
             //创建管理员账号
@@ -68,7 +68,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public Factory updFactory(Factory factory){
+    public Factory updFactory(Factory factory)throws ThingsboardException{
         log.trace("Executing updFactory [{}]", factory);
         return factoryDao.saveFactory(factory);
     }
@@ -94,7 +94,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public List<Factory> findFactoryList(UUID tenantId){
         log.trace("Executing findFactoryList [{}]", tenantId);
-        return factoryDao.find(new TenantId(tenantId));
+        return factoryDao.findFactoryByTenantId(tenantId);
     }
 
     /**
@@ -105,7 +105,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public Factory findById(UUID id){
         log.trace("Executing findById [{}]", id);
-        return factoryDao.findById(null, id);
+        return factoryDao.findById(id);
     }
 
     /**
