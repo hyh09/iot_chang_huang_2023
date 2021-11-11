@@ -28,4 +28,9 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
 
     @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
+
+    @Query("select t from DictDeviceGroupPropertyEntity t, DictDeviceGroupEntity t1 where  t.dictDeviceGroupId= t1.id   and t1.name =:name   order by t.sort asc")
+    List<DictDeviceGroupPropertyEntity> findAllByName(@Param("name") String name);
+
+
 }

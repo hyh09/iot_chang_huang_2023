@@ -339,6 +339,14 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         return entity.map(deviceProfileDictDeviceEntity -> DeviceProfileId.fromString(deviceProfileDictDeviceEntity.getDeviceProfileId().toString())).orElse(null);
     }
 
+
+    @Override
+    public List<String> findAllByName(UUID dictDeviceId, String name) {
+        List<DictDeviceGroupPropertyEntity> entities=  this.groupPropertyRepository.findAllByName(name);
+        List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
+        return  nameList;
+    }
+
     /**
      * 获得当前默认初始化的分组及分组属性
      */

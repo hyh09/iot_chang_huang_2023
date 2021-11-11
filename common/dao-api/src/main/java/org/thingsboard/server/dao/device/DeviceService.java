@@ -32,6 +32,7 @@ import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
 
 import java.util.List;
@@ -155,5 +156,8 @@ public interface DeviceService {
      * @return
      */
     PageData<Device> getTenantDeviceInfoList(Device device, PageLink pageLink);
+
+
+    PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
 
 }
