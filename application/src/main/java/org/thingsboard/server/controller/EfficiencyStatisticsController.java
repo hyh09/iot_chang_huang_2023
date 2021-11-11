@@ -86,12 +86,17 @@ public class EfficiencyStatisticsController extends BaseController {
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
-        if(queryTsKvVo.getEndTime() == null )
+        try {
+            if (queryTsKvVo.getEndTime() == null) {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
+            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
+        }catch (Exception e)
         {
-            queryTsKvVo.setStartTime(CommonUtils.getZero());
-            queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            e.printStackTrace();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
-        return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
     }
 
 
