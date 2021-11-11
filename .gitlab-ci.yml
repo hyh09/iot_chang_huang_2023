@@ -33,9 +33,13 @@ package:
     # - npm i pkg-fetch -g
     # - npm i pkg -g
     # - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
+    - tree --dirsfirst -L 4 /cache
+    - ls -al ./.m2/repository || true
     - cd application
     - ls -a
     - mvn $MAVEN_CLI_OPTS clean install -Dskiptests
+    - tree --dirsfirst -L 4 /cache
+    - ls -al ./.m2/repository || true
   only:
     - dev
   after_script:
