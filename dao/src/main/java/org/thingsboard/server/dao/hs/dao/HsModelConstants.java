@@ -22,6 +22,13 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_ID = "dict_device_id";
     public static final String DEVICE_PROFILE_ID = "device_profile_id";
 
+    /**
+     * 初始化
+     */
+    public static final String INIT_TABLE_NAME = "hs_init";
+    public static final String INIT_DATA = "init_data";
+    public static final String INIT_SCOPE = "scope";
+
 
     /**
      * 数据字典

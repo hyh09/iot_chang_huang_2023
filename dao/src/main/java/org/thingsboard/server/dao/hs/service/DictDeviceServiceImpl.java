@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
+    // 二方库Service
+    ClientService clientService;
+
     // 设备字典Repository
     DictDeviceRepository deviceRepository;
 
@@ -178,7 +181,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
-            BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
+            BeanUtils.copyProperties(dictDeviceVO, dictDevice);
             dictDevice.setTenantId(tenantId.toString());
         }
 
@@ -334,6 +337,19 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     public DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId) {
         var entity = this.deviceProfileDictDeviceRepository.findByDictDeviceId(dictDeviceId);
         return entity.map(deviceProfileDictDeviceEntity -> DeviceProfileId.fromString(deviceProfileDictDeviceEntity.getDeviceProfileId().toString())).orElse(null);
+    }
+
+    /**
+     * 获得当前默认初始化的分组及分组属性
+     */
+    @Override
+    public List<DictDeviceGroupVO> getGroupInitData() {
+        return this.clientService.listDictDeviceInitData();
+    }
+
+    @Autowired
+    public void setClientService(ClientService clientService) {
+        this.clientService = clientService;
     }
 
     @Autowired

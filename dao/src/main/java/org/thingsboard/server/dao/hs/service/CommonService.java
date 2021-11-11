@@ -1,6 +1,10 @@
 package org.thingsboard.server.dao.hs.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 
 import java.time.YearMonth;
 import java.time.ZoneOffset;
@@ -18,6 +22,16 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 转换数据
+     *
+     * @param fromValue   源数据
+     * @param toValueType 目标类
+     */
+    default <T> T convertValue(Object fromValue, Class<T> toValueType) {
+        return new ObjectMapper().convertValue(fromValue, toValueType);
+    }
 
     /**
      * 计算Map里value为ture的数量
