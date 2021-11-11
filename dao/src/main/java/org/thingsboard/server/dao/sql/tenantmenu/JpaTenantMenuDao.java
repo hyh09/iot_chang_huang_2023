@@ -53,6 +53,8 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     private TenantMenuRepository tenantMenuRepository;
     @Autowired
     private MenuDao menuDao;
+    @Autowired
+    private TenantMenuRoleDao tenantMenuRoleDao;
 
     @Override
     protected Class<TenantMenuEntity> getEntityClass() {
