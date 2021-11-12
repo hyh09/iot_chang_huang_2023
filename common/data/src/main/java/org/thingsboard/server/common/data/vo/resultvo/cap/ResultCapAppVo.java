@@ -21,7 +21,7 @@ public class ResultCapAppVo {
      * 总产能数据
      */
     @ApiModelProperty("总产能数据 Long类型 ")
-    private String totalValue;
+    private String totalValue="0";
 
 //    /**
 //     * 默认是当前 00点

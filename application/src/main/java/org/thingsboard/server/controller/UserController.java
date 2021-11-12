@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
@@ -472,9 +473,9 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理界面下的【删除用户接口】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = USER_ID, value = "用户id"),})
-    @RequestMapping(value = "/user/delete",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/user/delete/{userId}",method = RequestMethod.DELETE)
     @ResponseBody
-    public String    delete(@RequestParam(USER_ID) String strUserId) throws ThingsboardException {
+    public String    delete(@PathVariable("userId") String strUserId) throws ThingsboardException {
         log.info("【delete User's input parameter ID:{}】",strUserId);
         checkParameter(USER_ID, strUserId);
         UserId userId = new UserId(toUUID(strUserId));
@@ -483,9 +484,15 @@ public class UserController extends BaseController {
         if(user.getAuthority().equals(Authority.SYS_ADMIN)){
             throw new ThingsboardException("You do not have permission to delete!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
-        userService.deleteUser(getTenantId(),userId);
-        userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
-        return "success";
+        try {
+            userService.deleteUser(getTenantId(), userId);
+            userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
+            return "success";
+        }catch (EmptyResultDataAccessException e)
+        {
+            log.info("打印当前的异常信息###正常异常:{}",e);
+            return  "success";
+        }
     }
 
     /**
