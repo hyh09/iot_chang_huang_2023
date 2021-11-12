@@ -104,18 +104,23 @@ public interface DictDeviceService {
 
     /**
      * 获得当前默认初始化的分组及分组属性
-     *
      */
     List<DictDeviceGroupVO> getGroupInitData();
 
     /**
-     *
      * @param dictDeviceId
      * @param name
      * @return map: key-name  ,value-name
      */
-    List<String> findAllByName( UUID dictDeviceId, String name);
+    List<String> findAllByName(UUID dictDeviceId, String name);
 
-    List<DictDeviceDataVo> findGroupNameAndName( UUID dictDeviceId);
+    List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);
 
+    /**
+     * 【不分页】获得设备字典列表
+     *
+     * @param tenantId 租户Id
+     * @return 设备字典列表
+     */
+    List<DictDevice> listAllDictDevice(TenantId tenantId);
 }
