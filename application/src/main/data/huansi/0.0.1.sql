@@ -550,3 +550,10 @@ ALTER TABLE public.tb_tenant_menu
     ADD COLUMN has_children boolean DEFAULT false;
 ALTER TABLE public.tb_tenant_menu ALTER sys_menu_code DROP not null;
 ALTER TABLE public.tb_tenant_menu ALTER sys_menu_id DROP not null;
+--更改工厂表logo图片长度
+ALTER TABLE hs_factory alter COLUMN logo_images type character varying(100000);
+--更改车间表logo图片长度
+ALTER TABLE hs_workshop alter COLUMN logo_images type character varying(100000);
+--更改产线表logo图片长度
+ALTER TABLE hs_production_line alter COLUMN logo_images type character varying(100000);
+

@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
@@ -92,7 +93,9 @@ public class FactoryController extends BaseController  {
     public List<FactoryVo> findFactoryList(@RequestParam String tenantId) throws ThingsboardException {
         try {
             List<FactoryVo> factoryVoList = new ArrayList<>();
-            checkParameter("tenantId",tenantId);
+            if(StringUtils.isEmpty(tenantId)){
+                tenantId = getCurrentUser().getTenantId().getId().toString();
+            }
             List<Factory> factoryList = factoryService.findFactoryList(toUUID(tenantId));
             if(!CollectionUtils.isEmpty(factoryList)){
                 factoryList.forEach(i->{

@@ -1,6 +1,7 @@
 package org.thingsboard.server.common.data.workshop;
 
 import lombok.Data;
+import org.thingsboard.server.common.data.factory.Factory;
 
 import java.util.UUID;
 
@@ -36,6 +37,11 @@ public class Workshop{
 
     public Workshop(UUID id) {
         this.id = id;
+    }
+
+    public Workshop (Factory factory){
+        this.setName(factory.getWorkshopName());
+        this.setTenantId(factory.getTenantId());
     }
 
 }
