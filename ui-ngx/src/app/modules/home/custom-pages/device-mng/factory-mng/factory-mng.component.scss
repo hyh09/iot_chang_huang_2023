@@ -1,12 +1,21 @@
 @import '../../../components/entity/entities-table.component.scss';
 
-.image-wrapper {
-  width: 100px;
-  height: 100px;
-  img {
+.factory-mng-table-wrapper {
+  .image-wrapper {
+    margin: 5px 0;
+    img {
+      cursor: pointer;
+      max-width: 100px;
+      max-height: 40px;
+      object-fit: contain;
+    }
+  }
+
+  button .mat-icon {
+    color: rgba(0, 0, 0, 0.54);
+  }
+
+  tr {
     cursor: pointer;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
   }
 }

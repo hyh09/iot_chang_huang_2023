@@ -39,6 +39,9 @@ export enum EntityType {
   RPC = 'RPC',
   DATA_DICTIONARY = 'DATA_DICTIONARY',
   DEVICE_DICTIONARY = 'DEVICE_DICTIONARY',
+  FACTORY = 'FACTORY',
+  WORK_SHOP = 'WORK_SHOP',
+  PROD_LINE = 'PROD_LINE',
   MENU = 'MENU',
   USER_MNG = 'USER_MNG',
   ROLE_MNG = 'ROLE_MNG'
@@ -339,6 +342,27 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
+      EntityType.FACTORY,
+      {
+        add: 'device-mng.add-factory',
+        details: 'factory-details'
+      }
+    ],
+    [
+      EntityType.WORK_SHOP,
+      {
+        add: 'device-mng.add-work-shop',
+        details: 'work-shop-details'
+      }
+    ],
+    [
+      EntityType.PROD_LINE,
+      {
+        add: 'device-mng.add-prod-line',
+        details: 'prod-line-details'
+      }
+    ],
+    [
       EntityType.MENU,
       {
         type: 'entity.type-menu',
@@ -474,6 +498,24 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.DEVICE_DICTIONARY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.FACTORY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.WORK_SHOP,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.PROD_LINE,
       {
         helpLinkId: ''
       }
