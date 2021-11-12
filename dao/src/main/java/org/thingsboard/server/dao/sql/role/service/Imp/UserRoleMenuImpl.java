@@ -14,8 +14,10 @@ import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
+import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
+import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
@@ -45,6 +47,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
     @Autowired  private UserService  userService;
     @Autowired  private TenantSysRoleService tenantSysRoleService;
     @Autowired  private UserMenuRoleService userMenuRoleService;
+    @Autowired protected CheckSvc checkSvc;
 
 
     {
@@ -100,6 +103,18 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
     @Override
     public User save(User user, User user1)  {
+
+        UserVo  vo1 = new UserVo();
+        vo1.setEmail(user.getEmail());
+        if(checkSvc.checkValueByKey(vo1)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The email ["+user.getEmail()+"]already exists!");
+        }
+        UserVo  vo2 = new UserVo();
+        vo2.setEmail(user.getPhoneNumber());
+        if(checkSvc.checkValueByKey(vo2)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The phoneNumber["+user.getPhoneNumber()+"]already exists!!");
+        }
+
         String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
         user.setTenantId(user1.getTenantId());
         user.setUserCreator(user1.getUuidId().toString());
