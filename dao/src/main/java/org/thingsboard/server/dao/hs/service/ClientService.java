@@ -6,6 +6,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 
 import java.util.List;
@@ -58,4 +59,9 @@ public interface ClientService {
      * @param deviceList 设备列表
      */
     DeviceListAffiliationDTO getDeviceListAffiliation(List<Device> deviceList);
+
+    /**
+     * 获得设备字典初始化数据
+     */
+    List<DictDeviceGroupVO> listDictDeviceInitData();
 }

@@ -52,6 +52,7 @@ import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.device.provision.ProvisionFailedException;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
@@ -927,6 +928,11 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return null;
 
     }
+    @Override
+    public PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink){
+        return deviceDao.queryAllByNameLike(factoryId,name,pageLink);
+    }
+
 
 
 
