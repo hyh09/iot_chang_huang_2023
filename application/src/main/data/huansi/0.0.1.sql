@@ -1,5 +1,46 @@
 
 -- ----------------------------
+-- Table structure for hs_init
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."hs_init";
+CREATE TABLE "public"."hs_init" (
+                                    "id" uuid NOT NULL,
+                                    "init_data" jsonb,
+                                    "scope" varchar(255) COLLATE "pg_catalog"."default",
+                                    "created_time" int8,
+                                    "created_user" varchar(255) COLLATE "pg_catalog"."default",
+                                    "updated_time" int8,
+                                    "updated_user" varchar(255) COLLATE "pg_catalog"."default"
+)
+;
+ALTER TABLE "public"."hs_init" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."hs_init"."id" IS 'Id';
+COMMENT ON COLUMN "public"."hs_init"."init_data" IS '初始化数据';
+COMMENT ON COLUMN "public"."hs_init"."scope" IS '范围';
+COMMENT ON COLUMN "public"."hs_init"."created_time" IS '创建时间';
+COMMENT ON COLUMN "public"."hs_init"."created_user" IS '创建人';
+COMMENT ON COLUMN "public"."hs_init"."updated_time" IS '更新时间';
+COMMENT ON COLUMN "public"."hs_init"."updated_user" IS '更新人';
+COMMENT ON TABLE "public"."hs_init" IS '初始化';
+
+-- ----------------------------
+-- Records of hs_init
+-- ----------------------------
+BEGIN;
+INSERT INTO "public"."hs_init" VALUES ('a6bcd176-7538-402c-9035-5b966888faa0', '[{"id": null, "name": "能耗", "groupPropertyList": [{"id": null, "name": "水", "unit": null, "title": "水", "content": "0", "createdTime": null}, {"id": null, "name": "电", "unit": null, "title": "电", "content": "0", "createdTime": null}, {"id": null, "name": "气", "unit": null, "title": "气", "content": "0", "createdTime": null}]}, {"id": null, "name": "产能", "groupPropertyList": [{"id": null, "name": "总产能", "unit": null, "title": "总产能", "content": "0", "createdTime": null}]}]', 'DICT_DEVICE_GROUP', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9');
+COMMIT;
+
+-- ----------------------------
+-- Uniques structure for table hs_init
+-- ----------------------------
+ALTER TABLE "public"."hs_init" ADD CONSTRAINT "uk_init_scope" UNIQUE ("scope");
+
+-- ----------------------------
+-- Primary Key structure for table hs_init
+-- ----------------------------
+ALTER TABLE "public"."hs_init" ADD CONSTRAINT "hs_dict_data_copy1_pkey" PRIMARY KEY ("id");
+
+-- ----------------------------
 -- Table structure for hs_device_profile_dict_device
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."hs_device_profile_dict_device";

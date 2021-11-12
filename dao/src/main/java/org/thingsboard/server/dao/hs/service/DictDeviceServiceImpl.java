@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
@@ -33,6 +34,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
+    // 二方库Service
+    ClientService clientService;
+
     // 设备字典Repository
     DictDeviceRepository deviceRepository;
 
@@ -334,6 +338,32 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     public DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId) {
         var entity = this.deviceProfileDictDeviceRepository.findByDictDeviceId(dictDeviceId);
         return entity.map(deviceProfileDictDeviceEntity -> DeviceProfileId.fromString(deviceProfileDictDeviceEntity.getDeviceProfileId().toString())).orElse(null);
+    }
+
+
+    @Override
+    public List<String> findAllByName(UUID dictDeviceId, String name) {
+        List<DictDeviceGroupPropertyEntity> entities=  this.groupPropertyRepository.findAllByName(name);
+        List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
+        return  nameList;
+    }
+
+    /**
+     * 获得当前默认初始化的分组及分组属性
+     */
+    @Override
+    public List<DictDeviceGroupVO> getGroupInitData() {
+        return this.clientService.listDictDeviceInitData();
+    }
+
+    @Autowired
+    public void setClientService(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
+    @Override
+    public List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId) {
+        return this.groupPropertyRepository.findGroupNameAndName(dictDeviceId);
     }
 
     @Autowired
