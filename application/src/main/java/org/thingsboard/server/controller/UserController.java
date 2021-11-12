@@ -110,6 +110,14 @@ public class UserController extends BaseController {
     @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
     @Autowired  private UserMenuRoleService userMenuRoleService;
 
+    @ApiOperation(value = "提供app端获取用户的信息【当前登录人的信息 无参请求】")
+    @RequestMapping(value = "/app/user/", method = RequestMethod.GET)
+    @ResponseBody
+    public  User  getAppUserById() throws ThingsboardException {
+        SecurityUser authUser = getCurrentUser();
+        return  this.getUserById(authUser.getUuidId().toString());
+    }
+
 
 
 //    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
