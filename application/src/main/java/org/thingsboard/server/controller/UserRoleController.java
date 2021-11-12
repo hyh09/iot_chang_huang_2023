@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -94,14 +95,21 @@ public class UserRoleController extends BaseController{
     @ApiOperation(value = "角色的删除接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "roleId", value = "用户id"),})
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{roleId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public   Object   delete(@RequestParam("roleId") String roleId) throws ThingsboardException
+    public   Object delete(@PathVariable("roleId") String roleId)
     {
-           log.info("删除角色的接口入参:{}",roleId);
-           tenantSysRoleService.deleteById(strUuid(roleId));
+        try {
+            log.info("删除角色的接口入参:{}",roleId);
+            tenantSysRoleService.deleteById(strUuid(roleId));
             userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
-        return "success";
+            return "success";
+        }catch (EmptyResultDataAccessException e)
+        {
+            log.info("打印当前的异常信息###正常异常:{}",e);
+            return  "success";
+        }
+
 
     }
 
