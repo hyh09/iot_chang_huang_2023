@@ -33,14 +33,14 @@
     overflow: hidden;
     transition: .75s cubic-bezier(.35, 0, .25, 1);
     transition-property: height;
-    background-color: #2a3547;
+    background-color: #2a3547 !important;
     a.mat-button {
       padding: 0 16px 0 32px;
       font-weight: 500;
       text-transform: none !important;
       text-rendering: optimizeLegibility;
       &.tb-active {
-        background-color: #0663ff;
+        background-color: #0663ff !important;
       }
     }
   }

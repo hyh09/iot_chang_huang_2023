@@ -149,6 +149,7 @@ import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzImageModule } from 'ng-zorro-antd/image';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 @NgModule({
   providers: [
@@ -302,7 +303,8 @@ import { NzImageModule } from 'ng-zorro-antd/image';
     NzTreeModule,
     NzTabsModule,
     NzTableModule,
-    NzImageModule
+    NzImageModule,
+    NzSelectModule
   ],
   exports: [
     FooterComponent,
@@ -398,6 +400,7 @@ import { NzImageModule } from 'ng-zorro-antd/image';
     NzTabsModule,
     NzTableModule,
     NzImageModule,
+    NzSelectModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,
