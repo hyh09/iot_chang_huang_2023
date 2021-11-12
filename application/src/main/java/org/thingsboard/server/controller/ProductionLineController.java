@@ -36,9 +36,9 @@ public class ProductionLineController extends BaseController  {
     @ResponseBody
     public ProductionLineVo saveProductionLine(@RequestBody AddProductionLineDto addProductionLineDto) throws ThingsboardException {
         try {
-            checkParameter("tenantId",addProductionLineDto.getTenantId());
             checkParameter("workshopId",addProductionLineDto.getWorkshopId());
             ProductionLine productionLine = addProductionLineDto.toProductionLine();
+            productionLine.setTenantId(getCurrentUser().getTenantId().getId());
             if(addProductionLineDto.getId() == null){
                 productionLine.setCreatedUser(getCurrentUser().getUuidId());
                 productionLine = checkNotNull(productionLineService.saveProductionLine(productionLine));
@@ -61,9 +61,9 @@ public class ProductionLineController extends BaseController  {
     @ApiOperation("删除生产线")
     @ApiImplicitParam(name = "id",value = "工厂标识",dataType = "string",paramType="query",required = true)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void delProductionLine(@RequestParam String id) throws ThingsboardException {
+    public void delProductionLine(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
             productionLineService.delProductionLine(toUUID(id));

@@ -71,6 +71,7 @@ import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.factory.FactoryService;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
@@ -264,7 +265,11 @@ public abstract class BaseController {
     @Autowired
     protected ProductionLineService productionLineService;
 
-    @Autowired protected RoleMenuSvc roleMenuSvc;
+    @Autowired
+    protected RoleMenuSvc roleMenuSvc;
+
+    @Autowired
+    protected DictDeviceService dictDeviceService;
 
     @Value("${server.log_controller_error_stack_trace}")
     @Getter

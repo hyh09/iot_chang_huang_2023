@@ -46,7 +46,6 @@ public class FactoryController extends BaseController  {
     public FactoryVo saveFactory(@RequestBody AddFactoryDto addFactoryDto) throws ThingsboardException {
         try {
             checkNotNull(addFactoryDto);
-            checkParameter("tenantId",addFactoryDto.getTenantId());
             Factory factory = addFactoryDto.toFactory();
             if(addFactoryDto.getId() == null){
                 factory.setCreatedUser(getCurrentUser().getUuidId());
@@ -69,9 +68,9 @@ public class FactoryController extends BaseController  {
      */
     @ApiOperation("删除工厂")
     @ApiImplicitParam(name = "id",value = "工厂标识",dataType = "string",paramType="query",required = true)
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void delFactory(@RequestParam String id) throws ThingsboardException {
+    public void delFactory(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
             factoryService.delFactory(toUUID(id));

@@ -156,4 +156,9 @@ public interface DeviceService {
      */
     PageData<Device> getTenantDeviceInfoList(Device device, PageLink pageLink);
 
+    /**
+     * 获取设备详情
+     */
+    Device getDeviceInfo(UUID id);
+
 }
