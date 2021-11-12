@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: springboot-jpa-20210106
@@ -17,21 +18,25 @@ import java.util.List;
 @ToString
 @ApiModel(value = "查询产能的出参实体")
 public class ResultEnergyAppVo {
-    /**
-     * 水的总值
-     */
-    @ApiModelProperty("水的总值")
-    private String totalWaterValue;
-    /**
-     * 电的总值
-     */
-    @ApiModelProperty("电的总值")
-    private String totalElectricValue;
-    /**
-     * 气总值
-     */
-    @ApiModelProperty("气总值")
-    private String totalAirValue;
+
+    @ApiModelProperty("总值分组-总值的value")
+    private Map<String,String> totalValue;
+
+//    /**
+//     * 水的总值
+//     */
+//    @ApiModelProperty("水的总值")
+//    private String totalWaterValue;
+//    /**
+//     * 电的总值
+//     */
+//    @ApiModelProperty("电的总值")
+//    private String totalElectricValue;
+//    /**
+//     * 气总值
+//     */
+//    @ApiModelProperty("气总值")
+//    private String totalAirValue;
 
 
 

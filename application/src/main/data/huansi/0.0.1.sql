@@ -2,6 +2,9 @@
 -- ----------------------------
 -- Table structure for hs_init
 -- ----------------------------
+-- ----------------------------
+-- Table structure for hs_init
+-- ----------------------------
 DROP TABLE IF EXISTS "public"."hs_init";
 CREATE TABLE "public"."hs_init" (
                                     "id" uuid NOT NULL,
@@ -22,6 +25,11 @@ COMMENT ON COLUMN "public"."hs_init"."created_user" IS '创建人';
 COMMENT ON COLUMN "public"."hs_init"."updated_time" IS '更新时间';
 COMMENT ON COLUMN "public"."hs_init"."updated_user" IS '更新人';
 COMMENT ON TABLE "public"."hs_init" IS '初始化';
+
+-- ----------------------------
+-- Primary Key structure for table hs_init
+-- ----------------------------
+ALTER TABLE "public"."hs_init" ADD CONSTRAINT "hs_init_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Records of hs_init
@@ -550,3 +558,10 @@ ALTER TABLE public.tb_tenant_menu
     ADD COLUMN has_children boolean DEFAULT false;
 ALTER TABLE public.tb_tenant_menu ALTER sys_menu_code DROP not null;
 ALTER TABLE public.tb_tenant_menu ALTER sys_menu_id DROP not null;
+--更改工厂表logo图片长度
+ALTER TABLE hs_factory alter COLUMN logo_images type character varying(100000);
+--更改车间表logo图片长度
+ALTER TABLE hs_workshop alter COLUMN logo_images type character varying(100000);
+--更改产线表logo图片长度
+ALTER TABLE hs_production_line alter COLUMN logo_images type character varying(100000);
+

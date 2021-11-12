@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
+import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
@@ -41,7 +42,8 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
 
     @Autowired
     private WorkshopRepository workshopRepository;
-
+    @Autowired
+    private ProductionLineDao productionLineDao;
 
     @Override
     protected Class<WorkshopEntity> getEntityClass() {
@@ -73,20 +75,17 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
     }
 
     @Override
-    public List<WorkshopEntity> findWorkshopListBuyCdn(WorkshopEntity workshopEntity){
-        if(workshopEntity != null){
-            Specification<WorkshopEntity> specification = (root, query, cb) -> {
-                List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.equal(root.get("tenantId"),workshopEntity.getTenantId()));
-                if(StringUtils.isNotEmpty(workshopEntity.getName())){
-                    predicates.add(cb.like(root.get("name"),"%" + workshopEntity.getName().trim() + "%"));
-                }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            };
-            return workshopRepository.findAll(specification);
-        }
-        return new ArrayList<>();
+    public List<Workshop> findWorkshopListBuyCdn(Workshop workshop){
+        return this.commonCondition(workshop);
     }
+
+    @Override
+    public List<Workshop> findWorkshopListByfactoryId(UUID factoryId){
+        Workshop workshop = new Workshop();
+        workshop.setFactoryId(factoryId);
+        return this.commonCondition(workshop);
+    }
+
 
     /**
      * 查询租户下所有车间列表
@@ -96,21 +95,60 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
      */
     @Override
     public List<Workshop> findWorkshopListByTenant(UUID tenantId,UUID factoryId){
-        List<Workshop> resultWorkshopList = new ArrayList<>();
+        Workshop workshop = new Workshop();
+        workshop.setTenantId(tenantId);
+        workshop.setFactoryId(factoryId);
+        return this.commonCondition(workshop);
+    }
+
+    /**
+     * 删除(逻辑删除)
+     * @param id
+     */
+    @Override
+    public void delWorkshop(UUID id){
+        //判断下面有没有产线
+        if(CollectionUtils.isEmpty(productionLineDao.findProductionLineList(null,id,null))){
+            WorkshopEntity workshopEntity = workshopRepository.findById(id).get();
+            workshopEntity.setDelFlag("D");
+            workshopRepository.save(workshopEntity);
+        }
+    }
+
+    /**
+     * 根据工厂删除(逻辑删除)
+     * @param factoryId
+     */
+    @Override
+    public void delWorkshopByFactoryId(UUID factoryId){
+        workshopRepository.delWorkshopByFactoryId(factoryId);
+    }
+
+
+    /**
+     * 构造查询条件,需要加条件在这里面加
+     * @param workshop
+     * @return
+     */
+    private List<Workshop> commonCondition(Workshop workshop){
+        List<Workshop> resultWorkshop = new ArrayList<>();
         Specification<WorkshopEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("tenantId"),tenantId));
-            if(factoryId != null){
-                predicates.add(cb.equal(root.get("factoryId"),factoryId));
+            predicates.add(cb.equal(root.get("tenantId"),workshop.getTenantId()));
+            if(StringUtils.isNotEmpty(workshop.getName())){
+                predicates.add(cb.like(root.get("name"),"%" + workshop.getName().trim() + "%"));
+            }
+            if(workshop.getFactoryId() != null && StringUtils.isNotEmpty(workshop.getFactoryId().toString())){
+                predicates.add(cb.equal(root.get("factoryId"),workshop.getFactoryId()));
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
-        List<WorkshopEntity> workshopEntityList = workshopRepository.findAll(specification);
-        if(CollectionUtils.isNotEmpty(workshopEntityList)){
-            workshopEntityList.forEach(i->{
-                resultWorkshopList.add(i.toData());
+        List<WorkshopEntity> all = workshopRepository.findAll(specification);
+        if(CollectionUtils.isNotEmpty(all)){
+            all.forEach(i->{
+                resultWorkshop.add(i.toData());
             });
         }
-        return resultWorkshopList;
+        return resultWorkshop;
     }
 }

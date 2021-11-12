@@ -54,7 +54,7 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
     @Override
     public void delProductionLine(UUID id){
         log.trace("Executing delProductionLine [{}]", id);
-        productionLineDao.removeById(null, id);
+        productionLineDao.delProductionLine( id);
     }
 
 

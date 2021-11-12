@@ -1,6 +1,5 @@
 package org.thingsboard.server.dao.hs.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -38,11 +37,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -194,30 +189,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
-    }
-
-    public <T> Slice<T> conditionalFindAll(Class<T> entityClass, Map<String, Object> conditionsToApply, Pageable pageable) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-        Root<T> entityRoot = criteriaQuery.from(entityClass);
-        List<Predicate> predicates = new ArrayList<>();
-
-        conditionsToApply.entrySet().stream()
-                .filter(Objects::nonNull)
-                .forEach(entry ->
-                        predicates.add(criteriaBuilder.equal(entityRoot.get(entry.getKey()),
-                                entry.getValue())));
-        criteriaQuery.select(entityRoot)
-                .where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
-        TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
-
-        int pageSize = pageable.getPageSize();
-        int offset = pageable.getPageNumber() > 0 ? pageable.getPageNumber() * pageSize : 0;
-        query.setMaxResults(pageSize + 1);
-        query.setFirstResult(offset);
-        List<T> resultList = query.getResultList();
-        boolean hasNext = pageable.isPaged() && resultList.size() > pageSize;
-        return new SliceImpl<>(hasNext ? resultList.subList(0, pageSize) : resultList, pageable, hasNext);
     }
 
     @Autowired

@@ -9,6 +9,7 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -33,6 +34,10 @@ public interface EfficiencyStatisticsSvc {
 
 
     Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
+
+
+    //查询当前的分组-分组属性
+    Object   queryGroupDict(UUID deviceId,TenantId tenantId);
 
 
 

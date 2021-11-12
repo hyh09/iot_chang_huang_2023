@@ -44,6 +44,8 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
@@ -62,6 +64,7 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -897,6 +900,35 @@ public class DeviceController extends BaseController {
     }
 
 
+    /***
+     * 设备的模糊查询 只根据设备的名称查询  queryAllByNameLike
+     */
+    @ApiOperation("app端调用设备的名字模糊查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂id"),
+            @ApiImplicitParam(name = "name", value = "设备的名称"),
+            @ApiImplicitParam(name = "pageSize", value = "分页大小"),
+            @ApiImplicitParam(name = "page", value = "起始页默认0开始"),
+    })
+   @RequestMapping(value = "app/device/queryAllByNameLike", params = {"pageSize", "page"}, method = RequestMethod.GET)
+   public  PageData<DeviceDataVo>  queryAllByNameLike(@RequestParam("factoryId") UUID factoryId,
+                                                      @RequestParam("name") String  name,
+                                                      @RequestParam int pageSize,
+                                                      @RequestParam int page,
+                                                      @RequestParam(required = false) String textSearch,
+                                                      @RequestParam(required = false) String sortProperty,
+                                                      @RequestParam(required = false) String sortOrder  )
+    {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+          return   deviceService.queryAllByNameLike(factoryId,name,pageLink);
+
+        } catch (ThingsboardException e) {
+            e.printStackTrace();
+            throw  new CustomException("501","获取当前数据异常");
+        }
+
+    }
 
 
 }

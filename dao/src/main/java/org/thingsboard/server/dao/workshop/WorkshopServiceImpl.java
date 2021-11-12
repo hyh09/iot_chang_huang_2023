@@ -50,7 +50,7 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
     @Override
     public void delWorkshop(UUID id){
         log.trace("Executing delWorkshop [{}]", id);
-        workshopDao.removeById(null, id);
+        workshopDao.delWorkshop(id);
     }
 
 

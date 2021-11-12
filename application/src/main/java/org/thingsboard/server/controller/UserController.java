@@ -28,8 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,12 +58,14 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
+import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.entity.ResultVo;
-import org.thingsboard.server.entity.user.CodeVo;
-import org.thingsboard.server.entity.user.UserVo;
+import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -109,6 +111,14 @@ public class UserController extends BaseController {
     private final ApplicationEventPublisher eventPublisher;
     @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
     @Autowired  private UserMenuRoleService userMenuRoleService;
+
+    @ApiOperation(value = "提供app端获取用户的信息【当前登录人的信息 无参请求】")
+    @RequestMapping(value = "/app/user/", method = RequestMethod.GET)
+    @ResponseBody
+    public  User  getAppUserById() throws ThingsboardException {
+        SecurityUser authUser = getCurrentUser();
+        return  this.getUserById(authUser.getUuidId().toString());
+    }
 
 
 
@@ -423,6 +433,17 @@ public class UserController extends BaseController {
               return   this.update(user);
             }
 
+            UserVo  vo1 = new UserVo();
+            vo1.setEmail(user.getEmail());
+            if(checkSvc.checkValueByKey(vo1)){
+                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The email ["+user.getEmail()+"]already exists!");
+            }
+            UserVo  vo2 = new UserVo();
+            vo2.setEmail(user.getPhoneNumber());
+            if(checkSvc.checkValueByKey(vo2)){
+                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The phoneNumber["+user.getPhoneNumber()+"]already exists!!");
+            }
+
             SecurityUser  securityUser =  getCurrentUser();
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
@@ -452,9 +473,9 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理界面下的【删除用户接口】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = USER_ID, value = "用户id"),})
-    @RequestMapping(value = "/user/delete",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/user/delete/{userId}",method = RequestMethod.DELETE)
     @ResponseBody
-    public String    delete(@RequestParam(USER_ID) String strUserId) throws ThingsboardException {
+    public String    delete(@PathVariable("userId") String strUserId) throws ThingsboardException {
         log.info("【delete User's input parameter ID:{}】",strUserId);
         checkParameter(USER_ID, strUserId);
         UserId userId = new UserId(toUUID(strUserId));
@@ -463,9 +484,15 @@ public class UserController extends BaseController {
         if(user.getAuthority().equals(Authority.SYS_ADMIN)){
             throw new ThingsboardException("You do not have permission to delete!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
-        userService.deleteUser(getTenantId(),userId);
-        userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
-        return "success";
+        try {
+            userService.deleteUser(getTenantId(), userId);
+            userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
+            return "success";
+        }catch (EmptyResultDataAccessException e)
+        {
+            log.info("打印当前的异常信息###正常异常:{}",e);
+            return  "success";
+        }
     }
 
     /**

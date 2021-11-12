@@ -1,4 +1,4 @@
-package org.thingsboard.server.entity.user;
+package org.thingsboard.server.common.data.vo.user;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

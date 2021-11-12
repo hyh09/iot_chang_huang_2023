@@ -16,9 +16,10 @@
 package org.thingsboard.server.dao.sql.productionline;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
-import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -29,4 +30,11 @@ import java.util.UUID;
 public interface ProductionLineRepository extends PagingAndSortingRepository<ProductionLineEntity, UUID>, JpaSpecificationExecutor<ProductionLineEntity> {
 
     Optional<ProductionLineEntity> findByTenantIdAndId(UUID tenantId, UUID id);
+
+    /**
+     * 根据车间id删除（逻辑删除）
+     * @param workshopId
+     */
+    @Query(value = "UPDATE ProductionLineEntity t SET t.delFlag = 'D' WHERE t.workshopId = :workshopId")
+    void delProductionLineByWorkshopId(@Param(("workshopId")) UUID workshopId);
 }
