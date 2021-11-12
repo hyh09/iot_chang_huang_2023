@@ -69,7 +69,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         ResultCapAppVo  resultCapAppVo = new ResultCapAppVo();
         log.info("app的产能分析接口入参:{}",vo);
         /***************暂时写死的 ***/
-        if(StringUtils.isNotBlank(vo.getKey()))
+        if(StringUtils.isBlank(vo.getKey()))
         {
            List<String>  nameKey=  dictDeviceService.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
            String keyName=  nameKey.get(0);
@@ -88,11 +88,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
                 collect(Collectors.toList());
         log.info("当前的分页之后的数据:{}",pageList);
+
 //        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
 //        log.info("当前的分页之后的数据之设备id的汇总:{}",ids);
 //        List<DeviceEntity>  entities =  deviceDao.queryAllByIds(ids);
 //        Map<UUID,DeviceEntity> map1 = entities.stream().collect(Collectors.toMap(DeviceEntity::getId,DeviceEntity->DeviceEntity));
 //        log.info("查询到的设备信息map1:{}",map1);
+
         List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
@@ -103,12 +105,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
             if(entity.getWorkshopId() != null) {
                 Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
-                capVo.setWorkshopName(workshop.get().getName());
+                capVo.setWorkshopName(workshop.isPresent()?workshop.get().getName():"");
             }
 
             if(entity.getProductionLineId() != null) {
                 Optional<ProductionLineEntity> productionLine = productionLineRepository.findByTenantIdAndId(tenantId.getId(), entity.getProductionLineId());
-                capVo.setProductionName(productionLine.get().getName());
+                capVo.setProductionName(productionLine.isPresent()?productionLine.get().getName():"");
             }
             appDeviceCapVoList.add(capVo);
 
@@ -130,13 +132,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
         Map<String,String> totalValueMap = new HashMap<>();
-        /*********************************   暂时写死的*/
         List<String>  keys1 = new ArrayList<>();
-//        keys1.add("totalMsgs");
-//        keys1.add("successfulMsgs");
-//        keys1.add("failedMsgs");
-//        vo.setKeys(keys1);
-
            keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
           vo.setKeys(keys1);
 
