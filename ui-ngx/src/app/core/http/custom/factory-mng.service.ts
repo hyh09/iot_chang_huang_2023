@@ -28,7 +28,7 @@ export class FactoryMngService {
     Object.keys(params).forEach(key => {
       queryStr.push(`${key}=${params[key]}`);
     });
-    return this.http.get<FactoryMngList>(`/api/factory/findFactoryListBuyCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<FactoryMngList>(`/api/factory/findFactoryListByCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 新增/更新工厂信息
@@ -83,12 +83,32 @@ export class FactoryMngService {
 
   // 获取设备信息
   public getDevice(id: string, config?: RequestConfig): Observable<ProdDevice> {
-    return this.http.get<ProdDevice>(`/api/device/info/${id}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<ProdDevice>(`/api/device/getDeviceInfo/${id}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 移除设备
   public removeDevice(params: { deviceIdList: string[]; productionLineId: string; }, config?: RequestConfig) {
     return this.http.post(`/api/removeDevice`, params, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取所有工厂
+  public getAllFactories(config?: RequestConfig): Observable<Factory[]> {
+    return this.http.get<Factory[]>(`/api/factory/findFactoryList`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取所有车间
+  public getAllWorkShops(config?: RequestConfig): Observable<WorkShop[]> {
+    return this.http.get<WorkShop[]>(`/api/workshop/findWorkshopListByTenant`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取所有产线
+  public getAllProdLines(config?: RequestConfig): Observable<ProdLine[]> {
+    return this.http.get<ProdLine[]>(`/api/workshop/findProductionLineListByTenant`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 分配设备
+  public distributeDevice(params: { deviceIdList: string[]; factoryId: string; workshopId: string; productionLineId: string; }, config?: RequestConfig) {
+    return this.http.post(`/api/distributionDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
 }

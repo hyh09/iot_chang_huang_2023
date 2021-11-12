@@ -15,6 +15,7 @@ import { EntityTableConfig } from '@app/modules/home/models/entity/entities-tabl
 import { WorkShopFormComponent } from './work-shop-form.component';
 import { ProdLineFormComponent } from './prod-line-form.component';
 import { DeviceFormComponent } from './device-form.component';
+import { DistributeDeviceComponent } from './distribute-device.component';
 
 @Component({
   selector: 'tb-factory-mng',
@@ -36,6 +37,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
   public scrollConfig = { x: '100%', y: '' }
   public drawerEntityConfig: EntityTableConfig<BaseData<HasId>> = {};
   public currentEntityId: string = '';
+  public checkedDeviceIdList = new Set<string>();
 
   constructor(
     protected store: Store<AppState>,
@@ -64,29 +66,30 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
   }
 
   fetchData() {
+    this.checkedDeviceIdList = new Set<string>();
     this.factoryMngService.getFactoryList(this.filterParams).subscribe(res => {
       const arr: FactoryTableOriginRow[] = [];
       const tableArr: FactoryTableTreeNode[] = [];
-      res.factoryEntityList.forEach(factory => {
+      res.factoryList.forEach(factory => {
         factory.rowType = 'factory';
         factory.key = factory.id + '';
       });
-      res.workshopEntityList.forEach(workShop => {
+      res.workshopList.forEach(workShop => {
         workShop.parentId = workShop.factoryId;
         workShop.rowType = 'workShop';
         workShop.key = workShop.id + '';
       });
-      res.productionLineEntityList.forEach(prodLine => {
+      res.productionLineList.forEach(prodLine => {
         prodLine.parentId = prodLine.workshopId;
         prodLine.rowType = 'prodLine';
         prodLine.key = prodLine.id + '';
       });
-      res.deviceEntityList.forEach(device => {
+      res.deviceVoList.forEach(device => {
         device.parentId = device.productionLineId;
         device.rowType = 'device';
         device.key = device.id + '';
       });
-      arr.push(...res.factoryEntityList, ...res.workshopEntityList, ...res.productionLineEntityList, ...res.deviceEntityList);
+      arr.push(...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList);
       arr.forEach(item => {
         tableArr.push({
           id: item.key,
@@ -100,10 +103,19 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         });
       });
       this.tableData = this.utils.formatTableTree(tableArr);
+      this.mapOfExpandedData = {};
       this.tableData.forEach(item => {
         this.mapOfExpandedData[item.id] = this.convertTreeToList(item);
       });
     });
+  }
+
+  onDeviceCheckedChange(id: string, checked: boolean) {
+    if (checked) {
+      this.checkedDeviceIdList.add(id);
+    } else {
+      this.checkedDeviceIdList.delete(id);
+    }
   }
 
   collapse(array: FactoryTableTreeNode[], data: FactoryTableTreeNode, $event: boolean): void {
@@ -156,7 +168,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityTranslations: entityTypeTranslations.get(EntityType.FACTORY),
           entityResources: entityTypeResources.get(EntityType.FACTORY),
           entityComponent: FactoryFormComponent,
-          saveEntity: factoryInfo => this.factoryMngService.saveFactory(factoryInfo)
+          saveEntity: entity => this.factoryMngService.saveFactory(entity)
         }
       }
     }).afterClosed().subscribe(res => {
@@ -164,20 +176,68 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     });
   }
 
-  addWorkShop(factoryId: string, factoryName: string) {
-
+  addWorkShop({ id: factoryId, name: factoryName }: { [key: string]: string }) {
+    this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>, BaseData<HasId>>(AddEntityDialogComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        entitiesTableConfig: {
+          entityTranslations: entityTypeTranslations.get(EntityType.WORK_SHOP),
+          entityResources: entityTypeResources.get(EntityType.WORK_SHOP),
+          entityComponent: WorkShopFormComponent,
+          saveEntity: entity => this.factoryMngService.saveWorkShop(entity),
+          componentsData: { factoryId, factoryName }
+        }
+      }
+    }).afterClosed().subscribe(res => {
+      res && this.fetchData();
+    });
   }
 
-  addProdLine(workShopId: string, factoryName: string, workShopName: string) {
-
+  addProdLine({ factoryId, factoryName, id: workShopId, name: workShopName }: { [key: string]: string }) {
+    this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>, BaseData<HasId>>(AddEntityDialogComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        entitiesTableConfig: {
+          entityTranslations: entityTypeTranslations.get(EntityType.PROD_LINE),
+          entityResources: entityTypeResources.get(EntityType.PROD_LINE),
+          entityComponent: ProdLineFormComponent,
+          saveEntity: entity => this.factoryMngService.saveProdLine(entity),
+          componentsData: { factoryId, factoryName, workShopId, workShopName }
+        }
+      }
+    }).afterClosed().subscribe(res => {
+      res && this.fetchData();
+    });
   }
 
-  addDevice(prodLineId: string, factoryName: string, workShopName: string, prodLineName: string) {
-
+  addDevice({ factoryId, factoryName, workShopId, workShopName, id: productionLineId, name: productionLineName }: { [key: string]: string }) {
+    this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>, BaseData<HasId>>(AddEntityDialogComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        entitiesTableConfig: {
+          entityTranslations: entityTypeTranslations.get(EntityType.DEVICE),
+          entityResources: entityTypeResources.get(EntityType.DEVICE),
+          entityComponent: DeviceFormComponent,
+          saveEntity: entity => this.factoryMngService.saveDevice(entity),
+          componentsData: { factoryId, factoryName, workShopId, workShopName, productionLineId, productionLineName }
+        }
+      }
+    }).afterClosed().subscribe(res => {
+      res && this.fetchData();
+    });
   }
 
-  distributeDevice(deviceId: string) {
-
+  distributeDevice(deviceIdList?: string[]) {
+    this.dialog.open<DistributeDeviceComponent, string[]>(DistributeDeviceComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: deviceIdList || Array.from(this.checkedDeviceIdList)
+    }).afterClosed().subscribe(res => {
+      res && this.fetchData();
+    });
   }
 
   del(entity: FactoryTableTreeNode) {
@@ -242,10 +302,6 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     } else {
       this.isDetailsOpen = false;
     }
-  }
-
-  onEntityUpdated() {
-
   }
 
 }

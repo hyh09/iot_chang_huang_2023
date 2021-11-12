@@ -13,6 +13,7 @@ import { FactoryFormComponent } from './factory-mng/factory-form.component';
 import { WorkShopFormComponent } from './factory-mng/work-shop-form.component';
 import { ProdLineFormComponent } from './factory-mng/prod-line-form.component';
 import { DeviceFormComponent } from './factory-mng/device-form.component';
+import { DistributeDeviceComponent } from './factory-mng/distribute-device.component';
 
 @NgModule({
   imports: [
@@ -31,7 +32,8 @@ import { DeviceFormComponent } from './factory-mng/device-form.component';
     FactoryFormComponent,
     WorkShopFormComponent,
     ProdLineFormComponent,
-    DeviceFormComponent
+    DeviceFormComponent,
+    DistributeDeviceComponent
   ]
 })
 export class DeviceManagementModule { }

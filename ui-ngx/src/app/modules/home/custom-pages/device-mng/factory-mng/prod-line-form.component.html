@@ -1,3 +1,29 @@
-<p>
-  prod-line-form works!
-</p>
+<div class="mat-padding" style="min-width: 560px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <div class="mat-block" style="padding-bottom: 12px; color: #666;">
+        {{ 'device-mng.factory-belong' | translate }}{{ entitiesTableConfig.componentsData.factoryName }}
+      </div>
+      <div class="mat-block" style="padding-bottom: 1.25em; color: #666;">
+        {{ 'device-mng.work-shop-belong' | translate }}{{ entitiesTableConfig.componentsData.workShopName }}
+      </div>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.prod-line-name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'device-mng.prod-line-name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.remark</mat-label>
+        <input matInput formControlName="remark">
+      </mat-form-field>
+      <tb-image-input
+        label="{{ 'device-mng.logo' | translate }}"
+        maxSizeByte="524288"
+        formControlName="logoImages"
+        [disabled]="!isEdit"
+      ></tb-image-input>
+    </fieldset>
+  </form>
+</div>

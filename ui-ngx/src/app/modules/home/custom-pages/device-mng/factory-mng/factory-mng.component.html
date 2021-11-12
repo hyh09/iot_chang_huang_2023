@@ -53,7 +53,11 @@
             <button mat-flat-button color="primary" (click)="fetchData()">
               {{ 'action.search' | translate }}
             </button>
-            <button mat-stroked-button (click)="fetchData()">
+            <button
+              mat-stroked-button
+              [disabled]="checkedDeviceIdList.values.length === 0"
+              (click)="distributeDevice()"
+            >
               {{ 'device-mng.batch-distribute' | translate }}
             </button>
           </div>
@@ -88,6 +92,9 @@
                       [nzShowExpand]="!!item.children"
                       [(nzExpand)]="item.expand"
                       (nzExpandChange)="collapse(mapOfExpandedData[data.id], item, $event)"
+                      [nzShowCheckbox]="item.rowType === 'device'"
+                      [nzChecked]="checkedDeviceIdList.has(item.id)"
+                      (nzCheckedChange)="onDeviceCheckedChange(item.id, $event)"
                     >
                       {{ item.name }}
                     </td>
@@ -105,7 +112,7 @@
                         [disabled]="isLoading$ | async"
                         matTooltip="{{ 'device-mng.add-work-shop' | translate }}"
                         matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); addWorkShop(item.id, item.name)"
+                        (click)="$event.stopPropagation(); addWorkShop(item)"
                       >
                         <mat-icon>add</mat-icon>
                       </button>
@@ -115,7 +122,7 @@
                         [disabled]="isLoading$ | async"
                         matTooltip="{{ 'device-mng.add-prod-line' | translate }}"
                         matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); addProdLine(item.id, item.factoryName, item.name)"
+                        (click)="$event.stopPropagation(); addProdLine(item)"
                       >
                         <mat-icon>add</mat-icon>
                       </button>
@@ -125,7 +132,7 @@
                         [disabled]="isLoading$ | async"
                         matTooltip="{{ 'device-mng.distribute' | translate }}"
                         matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); distributeDevice(item.id)"
+                        (click)="$event.stopPropagation(); addDevice(item)"
                       >
                         <mat-icon>add</mat-icon>
                       </button>
@@ -135,9 +142,9 @@
                         [disabled]="isLoading$ | async"
                         matTooltip="{{ 'device-mng.add-device' | translate }}"
                         matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); addDevice(item.id, item.factoryName, item.workShopName, item.name)"
+                        (click)="$event.stopPropagation(); distributeDevice([item.id])"
                       >
-                        <mat-icon>add</mat-icon>
+                        <mat-icon svgIcon="mdi:distribute"></mat-icon>
                       </button>
                       <button
                         mat-icon-button

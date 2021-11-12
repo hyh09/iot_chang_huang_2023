@@ -1,6 +1,7 @@
 import { TableTreeNodeOptions } from "@app/core/public-api";
 import { BaseData } from "@app/shared/public-api";
 import { DeviceId, FactoryId, ProdLineId, WorkShopId } from "../id/custom/factory-mng-id.models";
+import { DeviceProperty, DeviceDataGroup, DeviceComp } from "./device-mng.models";
 
 interface CommonData {
   key?: string;
@@ -48,16 +49,26 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   workshopName?: string;
   productionLineId?: string;
   productionLineName?: string;
+  dictDeviceId?: string;
   deviceNo?: string;
-  images?: string;
   rowType?: FactoryRowType;
+  type?: string,
+  supplier?: string,
+  model?: string,
+  version?: string,
+  warrantyPeriod?: string,
+  picture?: string,
+  comment?: string,
+  propertyList?: Array<DeviceProperty>,
+  groupList?: Array<DeviceDataGroup>,
+  componentList?: Array<DeviceComp>
 }
 
 export interface FactoryMngList {
-  factoryEntityList: Factory[];
-  workshopEntityList: WorkShop[];
-  productionLineEntityList: ProdLine[];
-  deviceEntityList: ProdDevice[];
+  factoryList: Factory[];
+  workshopList: WorkShop[];
+  productionLineList: ProdLine[];
+  deviceVoList: ProdDevice[];
 }
 
 export interface FactoryTableOriginRow {
