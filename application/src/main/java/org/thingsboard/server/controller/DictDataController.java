@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataResource;
@@ -109,7 +110,7 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "更新或新增数据字典")
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
-        CommonUtil.checkCode(dictDataQuery.getCode(), "SJZD");
+        CommonUtil.checkCode(dictDataQuery.getCode(), HSConstants.CODE_PREFIX_DICT_DATA);
         return this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
     }
 

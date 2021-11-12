@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.utils;
 
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceComponentVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 
@@ -86,7 +87,7 @@ public class CommonUtil {
      */
     public static void recursionCheckComponentCode(List<DictDeviceComponentVO> componentList, Set<String> set) throws ThingsboardException {
         for (DictDeviceComponentVO componentVO : componentList) {
-            checkCode(componentVO.getCode(), "SBBJ");
+            checkCode(componentVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE_COMPONENT);
             if (set.contains(componentVO.getCode()))
                 throw new ThingsboardException("code duplicated", ThingsboardErrorCode.GENERAL);
             else

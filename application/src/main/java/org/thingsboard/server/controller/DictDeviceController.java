@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
@@ -108,7 +109,7 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "新增或修改设备字典")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
-        CommonUtil.checkCode(dictDeviceVO.getCode(), "SBZD");
+        CommonUtil.checkCode(dictDeviceVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE);
         CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
         CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
         this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
@@ -141,4 +142,12 @@ public class DictDeviceController extends BaseController {
         this.dictDeviceService.deleteDictDevice(id, getTenantId());
     }
 
+    /**
+     * 【不分页】获得设备字典列表
+     */
+    @ApiOperation(value = "【不分页】获得设备字典列表")
+    @GetMapping("/dict/device/all")
+    public List<DictDevice> listAllDictDevice() throws ThingsboardException {
+        return this.dictDeviceService.listAllDictDevice(getTenantId());
+    }
 }

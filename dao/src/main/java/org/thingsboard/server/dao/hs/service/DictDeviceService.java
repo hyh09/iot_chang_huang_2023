@@ -103,7 +103,14 @@ public interface DictDeviceService {
 
     /**
      * 获得当前默认初始化的分组及分组属性
-     *
      */
     List<DictDeviceGroupVO> getGroupInitData();
+
+    /**
+     * 【不分页】获得设备字典列表
+     *
+     * @param tenantId 租户Id
+     * @return 设备字典列表
+     */
+    List<DictDevice> listAllDictDevice(TenantId tenantId);
 }

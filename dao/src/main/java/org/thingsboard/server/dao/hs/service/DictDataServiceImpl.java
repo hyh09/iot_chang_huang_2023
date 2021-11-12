@@ -14,6 +14,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.DictDataEntity;
 import org.thingsboard.server.dao.hs.dao.DictDataRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
@@ -127,7 +128,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        return this.getAvailableCode(this.dataRepository.findAllCodesByTenantId(tenantId.getId()), "SJZD");
+        return this.getAvailableCode(this.dataRepository.findAllCodesByTenantId(tenantId.getId()), HSConstants.CODE_PREFIX_DICT_DATA);
     }
 
     /**
