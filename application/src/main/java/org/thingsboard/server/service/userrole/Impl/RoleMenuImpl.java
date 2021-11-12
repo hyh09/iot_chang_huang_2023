@@ -140,7 +140,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         }
         if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
         {
-            List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
+                List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
             return listToVo(menus);
         }
         List<TenantMenuVo>  menusd = new ArrayList<>();
@@ -152,7 +152,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         {
             return menusd;
         }
-        List<UUID> uuids= entityList.stream().map(TenantMenuRoleEntity::getId).collect(Collectors.toList());
+        List<UUID> uuids= entityList.stream().map(TenantMenuRoleEntity::getTenantMenuId).collect(Collectors.toList());
         List<TenantMenu>  menus1= menuService.getTenantMenuListByIds(vo.getMenuType(),vo.getTenantId(),uuids);
         log.info("获取当前登录的人菜单TenantMenu:{}",menus1);
 
