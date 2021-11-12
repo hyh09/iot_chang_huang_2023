@@ -109,7 +109,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
-import org.thingsboard.server.service.userrole.CheckSvc;
+import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.mail.MessagingException;
