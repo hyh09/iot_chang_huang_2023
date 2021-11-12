@@ -922,10 +922,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Override
     public Device getDeviceInfo(UUID id){
         //查询设备信息
-//        Device device = deviceDao.getDeviceInfo(id);
-//        deviceComponentDao.getDeviceComponentById(id);
-//        return deviceDao.getDeviceInfo(device);
-        return null;
+        Device device = deviceDao.getDeviceInfo(id);
+        device.setDeviceComponentList(deviceComponentDao.getDeviceComponentByDeviceId(id));
+        return device;
 
     }
     @Override

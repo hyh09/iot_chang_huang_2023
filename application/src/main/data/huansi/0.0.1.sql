@@ -546,14 +546,23 @@ CREATE TABLE IF NOT EXISTS public.tb_user_menu_role
 )
 
 --新增字段 是否树节点（true/false）
-ALTER TABLE public.tb_tenant_menu
-    ADD COLUMN has_children boolean DEFAULT false;
+ALTER TABLE public.tb_tenant_menu ADD COLUMN has_children boolean DEFAULT false;
+--修改tb_tenant_menu
 ALTER TABLE public.tb_tenant_menu ALTER sys_menu_code DROP not null;
 ALTER TABLE public.tb_tenant_menu ALTER sys_menu_id DROP not null;
 --更改工厂表logo图片长度
-ALTER TABLE hs_factory alter COLUMN logo_images type character varying(100000);
+ALTER TABLE public.hs_factory alter COLUMN logo_images type character varying(1000000);
 --更改车间表logo图片长度
-ALTER TABLE hs_workshop alter COLUMN logo_images type character varying(100000);
+ALTER TABLE public.hs_workshop alter COLUMN logo_images type character varying(1000000);
+--更改车间表bg图片长度
+ALTER TABLE public.hs_workshop alter COLUMN bg_images type character varying(1000000);
 --更改产线表logo图片长度
-ALTER TABLE hs_production_line alter COLUMN logo_images type character varying(100000);
+ALTER TABLE public.hs_production_line alter COLUMN logo_images type character varying(1000000);
 
+--修改设备表字段名
+ALTER TABLE public.device RENAME images  to picture ;
+ALTER TABLE public.device alter COLUMN picture type character varying(1000000);
+ALTER TABLE public.device ADD COLUMN comment character varying(255) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.device.comment IS '备注';
+ALTER TABLE public.device ADD COLUMN device_no character varying(255) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.device.comment IS '设备编号';

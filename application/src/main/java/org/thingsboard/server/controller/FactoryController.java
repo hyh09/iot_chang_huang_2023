@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
-import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
 import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
+import org.thingsboard.server.entity.factory.vo.FactoryLevelAllListVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -47,6 +47,7 @@ public class FactoryController extends BaseController  {
         try {
             checkNotNull(addFactoryDto);
             Factory factory = addFactoryDto.toFactory();
+            factory.setTenantId(getCurrentUser().getTenantId().getId());
             if(addFactoryDto.getId() == null){
                 factory.setCreatedUser(getCurrentUser().getUuidId());
                 factory = checkNotNull(factoryService.saveFactory(factory));
@@ -115,15 +116,15 @@ public class FactoryController extends BaseController  {
      */
     @ApiOperation("条件查询工厂列表")
     @ApiImplicitParam(name = "queryFactoryDto",value = "入参对象",dataType = "QueryFactoryDto",paramType = "query")
-    @RequestMapping(value = "/findFactoryListBuyCdn", method = RequestMethod.GET)
+    @RequestMapping(value = "/findFactoryListByCdn", method = RequestMethod.GET)
     @ResponseBody
-    public FactoryListVo findFactoryListBuyCdn(QueryFactoryDto queryFactoryDto) throws ThingsboardException {
+    public FactoryLevelAllListVo findFactoryListByCdn(QueryFactoryDto queryFactoryDto) throws ThingsboardException {
         try {
             checkParameter("没有获取到租户tenantId",getCurrentUser().getTenantId().getId());
             Factory factory = queryFactoryDto.toFactory();
             factory.setTenantId(getCurrentUser().getTenantId().getId());
             factory.setLoginUserId(getCurrentUser().getId().getId());
-            return checkNotNull(factoryService.findFactoryListBuyCdn(factory));
+            return new FactoryLevelAllListVo(factoryService.findFactoryListByCdn(factory));
         } catch (Exception e) {
             throw handleException(e);
         }

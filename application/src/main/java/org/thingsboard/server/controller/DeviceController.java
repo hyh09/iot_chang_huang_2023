@@ -65,7 +65,6 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
 import javax.annotation.Nullable;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -819,15 +818,7 @@ public class DeviceController extends BaseController {
     @ResponseBody
     public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto,@RequestParam(name = "accessToken", required = false)String accessToken)throws ThingsboardException {
         try {
-
             checkNotNull(addDeviceDto);
-//
-//            if(addDeviceDto.getId() == null){
-//                device.setCreatedUser(getCurrentUser().getUuidId());
-//            }else {
-//                device.setUpdatedUser(getCurrentUser().getUuidId());
-//            }
-//
             boolean created = addDeviceDto.getId() == null;
             Device device = addDeviceDto.toDevice();
             device.setTenantId(getCurrentUser().getTenantId());
@@ -916,7 +907,8 @@ public class DeviceController extends BaseController {
             DeviceVo resultDeviceVo = new DeviceVo(checkNotNull(deviceService.getDeviceInfo(toUUID(id))));
             if(resultDeviceVo != null && resultDeviceVo.getDictDeviceId() != null && StringUtils.isNotEmpty(resultDeviceVo.getDictDeviceId().toString())){
                 //查询设备字典
-                DictDeviceVO dictDeviceVO = dictDeviceService.getDictDeviceDetail(id.toString(),getCurrentUser().getTenantId());
+                DictDeviceVO dictDeviceVO = dictDeviceService.getDictDeviceDetail(resultDeviceVo.getDictDeviceId().toString(),getCurrentUser().getTenantId());
+                resultDeviceVo.setDictDeviceVO(dictDeviceVO);
             }
             return resultDeviceVo;
         } catch (Exception e) {

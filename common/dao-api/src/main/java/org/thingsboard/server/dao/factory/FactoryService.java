@@ -51,7 +51,7 @@ public interface FactoryService {
      * @param factory
      * @return
      */
-    FactoryListVo findFactoryListBuyCdn(Factory factory);
+    FactoryListVo findFactoryListByCdn(Factory factory);
 
     /**
      * 查询工厂最新版本
