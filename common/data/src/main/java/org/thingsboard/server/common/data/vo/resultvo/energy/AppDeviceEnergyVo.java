@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.Map;
+
 /**
  * @program: springboot-jpa-20210106
  * @description: app产能返回之设备对象
@@ -32,21 +34,24 @@ public class AppDeviceEnergyVo {
 //     */
 //    private  String  value;  //比如多个属性呢？
 
-    /**
-     * 水的总值
-     */
-    @ApiModelProperty("水的值 ")
-    private String waterValue;
-    /**
-     * 电的总值
-     */
-    @ApiModelProperty("电的值 ")
-    private String electricValue;
-    /**
-     * 气总值
-     */
-    @ApiModelProperty("气值 ")
-    private String airValue;
+//    /**
+//     * 水的总值
+//     */
+//    @ApiModelProperty("水的值 ")
+//    private String waterValue;
+//    /**
+//     * 电的总值
+//     */
+//    @ApiModelProperty("电的值 ")
+//    private String electricValue;
+//    /**
+//     * 气总值
+//     */
+//    @ApiModelProperty("气值 ")
+//    private String airValue;
+
+    @ApiModelProperty("key是属性名-值{比如温度:10 ")
+    private Map<String,String> mapValue;
 
 
     /**

@@ -159,10 +159,10 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         //查询登录人角色
         //查询登录人角色及所属工厂
         JudgeUserVo judgeUserVo = userRoleMenuSvc.decideUser(new UserId(userId));
-        if (judgeUserVo != null && judgeUserVo.getTenantFlag()) {
+        if (judgeUserVo != null && judgeUserVo.getTenantFlag() != null &&judgeUserVo.getTenantFlag()) {
             //租户管理员/租户有菜单权限的用户，拥有全部数据权限
             resultFactory = factoryDao.findFactoryByTenantId(tenantId);
-        } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag()){
+        } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
             //工厂管理员/工厂用户，拥有所属工厂数据权限
             //查询工厂信息
             Factory queryFactory = factoryDao.findFactoryByAdmin(judgeUserVo.getUserId());

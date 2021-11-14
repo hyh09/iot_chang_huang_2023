@@ -1,8 +1,9 @@
-package org.thingsboard.server.service.userrole;
+package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.entity.user.CodeVo;
-import org.thingsboard.server.entity.user.UserVo;
+import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UserVo;
+
 
 /**
  * 校验数据重复等逻辑

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataResource;
@@ -44,7 +45,6 @@ public class DictDataController extends BaseController {
      * @return 字典界面资源
      */
     @ApiOperation(value = "获得数据字典界面资源")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/data/resource")
     public DictDataResource listDictDataResource() throws ThingsboardException {
         return new DictDataResource().setDictDataTypeList(DictDataDataTypeEnum.toResourceList());
@@ -56,7 +56,6 @@ public class DictDataController extends BaseController {
      * @return 数据字典编码
      */
     @ApiOperation(value = "获得当前可用数据字典编码")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/data/availableCode")
     public String getAvailableCode() throws ThingsboardException {
         return this.dictDataService.getAvailableCode(getTenantId());
@@ -82,8 +81,7 @@ public class DictDataController extends BaseController {
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "code", value = "编码", paramType = "query"),
             @ApiImplicitParam(name = "name", value = "名称", paramType = "query"),
-            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query", required = true)})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
+            @ApiImplicitParam(name = "dictDataType", value = "数据类型", dataType = "DictDataType", paramType = "query")})
     @GetMapping("/dict/data")
     public PageData<DictData> listDictData(
             @RequestParam int pageSize,
@@ -92,10 +90,9 @@ public class DictDataController extends BaseController {
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String name,
-            @RequestParam DictDataDataTypeEnum dictDataType
+            @RequestParam(required = false) DictDataDataTypeEnum dictDataType
     )
             throws ThingsboardException {
-        checkParameter("dictDataType", dictDataType);
         DictDataListQuery dictDataListQuery = DictDataListQuery.builder()
                 .code(code).name(name).dictDataType(dictDataType).build();
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
@@ -111,10 +108,9 @@ public class DictDataController extends BaseController {
      * @param dictDataQuery 数据字典请求参数实体类
      */
     @ApiOperation(value = "更新或新增数据字典")
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
-        CommonUtil.checkCode(dictDataQuery.getCode(), "SJZD");
+        CommonUtil.checkCode(dictDataQuery.getCode(), HSConstants.CODE_PREFIX_DICT_DATA);
         return this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
     }
 
@@ -126,7 +122,6 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "获得数据字典详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path", required = true),})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/dict/data/{id}")
     public DictData getDictDataDetail(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
@@ -141,7 +136,6 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "删除数据字典")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据字典id", paramType = "path", required = true),})
-    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping("/dict/data/{id}")
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);

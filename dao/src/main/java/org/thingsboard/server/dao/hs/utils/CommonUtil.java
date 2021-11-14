@@ -2,7 +2,9 @@ package org.thingsboard.server.dao.hs.utils;
 
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceComponentVO;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 工具类
@@ -84,7 +87,7 @@ public class CommonUtil {
      */
     public static void recursionCheckComponentCode(List<DictDeviceComponentVO> componentList, Set<String> set) throws ThingsboardException {
         for (DictDeviceComponentVO componentVO : componentList) {
-            checkCode(componentVO.getCode(), "SBBJ");
+            checkCode(componentVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE_COMPONENT);
             if (set.contains(componentVO.getCode()))
                 throw new ThingsboardException("code duplicated", ThingsboardErrorCode.GENERAL);
             else
@@ -94,5 +97,19 @@ public class CommonUtil {
             }
             recursionCheckComponentCode(componentVO.getComponentList(), set);
         }
+    }
+
+
+    /**
+     * 【特定】校验两个list是否包含相同的头数据
+     */
+    public static void checkDictDeviceGroupVOListHeadIsUnlike(List<DictDeviceGroupVO> sourceList, List<DictDeviceGroupVO> childList) throws ThingsboardException {
+        // TODO 校验
+//        var groupNum = childList.size();
+//        childList.forEach(e -> {
+//            var index = childList.indexOf(e);
+//            var propertyNum = e.getGroupPropertyList().size();
+//
+//        });
     }
 }

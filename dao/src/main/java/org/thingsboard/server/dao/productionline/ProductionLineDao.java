@@ -20,4 +20,16 @@ public interface ProductionLineDao extends Dao<ProductionLine>{
      * @return
      */
     List<ProductionLine> findProductionLineList(UUID tenantId, UUID workshopId, UUID factoryId);
+
+    /**
+     * 根据id删除（逻辑删除）
+     * @param id
+     */
+    void delProductionLine(UUID id);
+
+    /**
+     * 根据车间id删除（逻辑删除）
+     * @param workshopId
+     */
+    void delProductionLineByWorkshopId(UUID workshopId);
 }

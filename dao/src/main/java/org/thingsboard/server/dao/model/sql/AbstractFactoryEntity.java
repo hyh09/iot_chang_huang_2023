@@ -116,6 +116,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.latitude = abstractFactoryEntity.getLatitude();
         this.mobile = abstractFactoryEntity.getMobile();
         this.email = abstractFactoryEntity.getEmail();
+        this.postalCode = abstractFactoryEntity.getPostalCode();
         this.adminUserId = abstractFactoryEntity.getAdminUserId();
         this.adminUserName = abstractFactoryEntity.getAdminUserName();
         this.remark = abstractFactoryEntity.getRemark();
@@ -140,6 +141,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.latitude = factory.getLatitude();
         this.mobile = factory.getMobile();
         this.email = factory.getEmail();
+        this.postalCode = factory.getPostalCode();
         this.adminUserId = factory.getAdminUserId();
         this.adminUserName = factory.getAdminUserName();
         this.remark = factory.getRemark();
@@ -162,6 +164,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         factory.setLatitude(latitude);
         factory.setMobile(mobile);
         factory.setEmail(email);
+        factory.setPostalCode(this.postalCode);
         factory.setAdminUserId(adminUserId);
         factory.setAdminUserName(adminUserName);
         factory.setRemark(remark);

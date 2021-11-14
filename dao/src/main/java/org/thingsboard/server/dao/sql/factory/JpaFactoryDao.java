@@ -34,10 +34,8 @@ import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
-import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
-import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.Predicate;
@@ -61,8 +59,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     private ProductionLineDao productionLineDao;
     @Autowired
     private DeviceDao deviceDao;
-    @Autowired
-    private UserRoleMenuSvc userRoleMenuSvc;
 
     @Override
     protected Class<FactoryEntity> getEntityClass() {
@@ -94,15 +90,19 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     }
 
     /**
-     * 删除后刷新值(逻辑删除)
+     * 删除(逻辑删除)
      * @param id
      */
     @Override
     public void delFactory(UUID id){
         FactoryEntity factoryEntity = factoryRepository.findById(id).get();
-        factoryEntity.setDelFlag("D");
-        factoryRepository.save(factoryEntity);
+        workshopDao.findWorkshopListByfactoryId(factoryEntity.getId());
+        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(factoryEntity.getId()))){
+            factoryEntity.setDelFlag("D");
+            factoryRepository.save(factoryEntity);
+        }
     }
+
 
     /**
      * 根据工厂管理员查询
@@ -138,7 +138,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     @Override
     public FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo){
         List<FactoryEntity> factoryEntityList = new ArrayList<>();
-        List<WorkshopEntity> workshopEntityList = new ArrayList<>();
+        List<Workshop> workshopList = new ArrayList<>();
         List<ProductionLineEntity> productionLineEntityList = new ArrayList<>();
         List<DeviceEntity> deviceEntityList = new ArrayList<>();
 
@@ -156,9 +156,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 if(notBlankFactoryName){
                     predicates.add(cb.like(root.get("name"),"%" + factory.getName().trim() + "%"));
                 }
-                //工厂管理员及工厂用户只能看工厂数据
-                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag()){
-                    predicates.add(cb.equal(root.get("id"), judgeUserVo.getUserId()));
+                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
+                    //工厂管理员/工厂用户，拥有该工厂数据权限
+                    predicates.add(cb.equal(root.get("adminUserId"), judgeUserVo.getUserId()));
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -166,9 +166,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
 
             //查询车间
             if(notBlankWorkshopName){
-                workshopEntityList = workshopDao.findWorkshopListBuyCdn(new WorkshopEntity(factory));
+                workshopList = workshopDao.findWorkshopListBuyCdn(new Workshop(factory));
             }else {
-                workshopEntityList = workshopDao.findWorkshopListBuyCdn(new WorkshopEntity(factory.getTenantId()));
+                workshopList = workshopDao.findWorkshopListBuyCdn(new Workshop(factory.getTenantId()));
             }
             //查询产线
             if(notBlankProductionlineName){
@@ -197,36 +197,36 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     //判断车间数据是否为空
                     if(notBlankWorkshopName){
                         //设备不为空-产线不为空-车间不为空，拿产线数据筛选车间
-                        workshopEntityList = this.filterWorkshopByProductionLine(productionLineEntityList,workshopEntityList);
+                        workshopList = this.filterWorkshopByProductionLine(productionLineEntityList,workshopList);
 
                         //判断工厂数据是否为空
                         if(notBlankFactoryName){
                             //设备不为空-产线不为空-车间不为空-工厂不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByWorkshop(workshopList,factoryEntityList);
                         }
                     }else {
                         //判断工厂数据是否为空
                         if(notBlankFactoryName){
                             //设备不为空-产线不为空-车间为空-工厂不为空，拿产线数据筛选工厂
-                            factoryEntityList = this.filterFactoryByProductionLine(productionLineEntityList,workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByProductionLine(productionLineEntityList,workshopList,factoryEntityList);
                         }
                     }
                 }else {
                     //判断车间数据是否为空
                     if(notBlankWorkshopName){
                         //设备不为空-产线为空，车间不为空，拿设备数据筛选车间
-                        workshopEntityList = this.filterWorkshopByDevice(deviceEntityList,productionLineEntityList,workshopEntityList);
+                        workshopList = this.filterWorkshopByDevice(deviceEntityList,productionLineEntityList,workshopList);
 
                         //判断工厂数据是否为空
                         if(notBlankFactoryName){
                             //设备不为空-产线为空-车间不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByWorkshop(workshopList,factoryEntityList);
                         }
                     }else {
                         //判断工厂数据是否为空
                         if(notBlankFactoryName){
                             //设备不为空-产线为空-车间为空，拿设备数据筛选工厂
-                            factoryEntityList = this.filterFactoryByDevice(deviceEntityList,productionLineEntityList,workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByDevice(deviceEntityList,productionLineEntityList,workshopList,factoryEntityList);
                         }
 
                     }
@@ -238,18 +238,18 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     //判断车间是否为空
                     if(notBlankWorkshopName){
                         //设备为空-产线不为空-车间不为空，拿产线数据筛选车间
-                        workshopEntityList = this.filterWorkshopByProductionLine(productionLineEntityList,workshopEntityList);
+                        workshopList = this.filterWorkshopByProductionLine(productionLineEntityList,workshopList);
 
                         //判断工厂是否为空
                         if(notBlankFactoryName){
                             //设备为空-产线不为空-车间不为空-工厂不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByWorkshop(workshopList,factoryEntityList);
                         }
                     }else {
                         //判断工厂是否为空
                         if(notBlankFactoryName){
                             //设备为空-产线不为空-车间为空-工厂不为空，拿产线数据筛选工厂
-                            factoryEntityList = this.filterFactoryByProductionLine(productionLineEntityList,workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByProductionLine(productionLineEntityList,workshopList,factoryEntityList);
                         }
                     }
                 }else {
@@ -258,17 +258,17 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                         //判断工厂是否为空
                         if(notBlankFactoryName){
                             //设备为空-产线为空-车间不为空-工厂不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
+                            factoryEntityList = this.filterFactoryByWorkshop(workshopList,factoryEntityList);
                         }
                     }
                 }
 
             }
         }
-        return this.toFactoryListVo(factoryEntityList,workshopEntityList,productionLineEntityList,deviceEntityList);
+        return this.toFactoryListVo(factoryEntityList,workshopList,productionLineEntityList,deviceEntityList);
     }
 
-    private FactoryListVo toFactoryListVo(List<FactoryEntity> factoryEntityList, List<WorkshopEntity> workshopEntityList, List<ProductionLineEntity> productionLineEntityList, List<DeviceEntity> deviceEntityList) {
+    private FactoryListVo toFactoryListVo(List<FactoryEntity> factoryEntityList, List<Workshop> workshops, List<ProductionLineEntity> productionLineEntityList, List<DeviceEntity> deviceEntityList) {
         List<Factory> factoryList = new ArrayList<>();
         List<Workshop> workshopList = new ArrayList<>();
         List<ProductionLine> productionLineList = new ArrayList<>();
@@ -280,9 +280,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             });
 
         }
-        if (CollectionUtils.isNotEmpty(workshopEntityList)) {
-            workshopEntityList.forEach(i -> {
-                workshopList.add(i.toWorkshop());
+        if (CollectionUtils.isNotEmpty(workshops)) {
+            workshops.forEach(i -> {
+                workshopList.add(i);
             });
 
         }
@@ -323,30 +323,30 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     /**
      * 根据产线过滤车间
      * @param productionLineEntityList
-     * @param workshopEntityList
+     * @param workshopList
      * @return
      */
-    private List<WorkshopEntity> filterWorkshopByProductionLine(List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList){
+    private List<Workshop> filterWorkshopByProductionLine(List<ProductionLineEntity> productionLineEntityList,List<Workshop> workshopList){
         productionLineEntityList.forEach(i->{
-            Iterator<WorkshopEntity> it = workshopEntityList.iterator();
+            Iterator<Workshop> it = workshopList.iterator();
             while (it.hasNext()){
-                WorkshopEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getWorkshopId().toString())){
+                Workshop entity = it.next();
+                if(!entity.getId().toString().equals(i.getWorkshopId().toString())){
                     it.remove();
                 }
             }
         });
-        return workshopEntityList;
+        return workshopList;
     }
 
     /**
      * 根据车间过滤工厂
-     * @param workshopEntityList
+     * @param workshopList
      * @param factoryEntityList
      * @return
      */
-    private List<FactoryEntity> filterFactoryByWorkshop(List<WorkshopEntity> workshopEntityList,List<FactoryEntity> factoryEntityList){
-        workshopEntityList.forEach(i->{
+    private List<FactoryEntity> filterFactoryByWorkshop(List<Workshop> workshopList,List<FactoryEntity> factoryEntityList){
+        workshopList.forEach(i->{
             Iterator<FactoryEntity> it = factoryEntityList.iterator();
             while (it.hasNext()){
                 FactoryEntity entity = it.next();
@@ -361,16 +361,16 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     /**
      * 根据产线过滤工厂
      * @param productionLineEntityList
-     * @param workshopEntityList
+     * @param workshopList
      * @param factoryEntityList
      * @return
      */
-    private List<FactoryEntity> filterFactoryByProductionLine(List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList,List<FactoryEntity> factoryEntityList ){
+    private List<FactoryEntity> filterFactoryByProductionLine(List<ProductionLineEntity> productionLineEntityList,List<Workshop> workshopList,List<FactoryEntity> factoryEntityList ){
         productionLineEntityList.forEach(i->{
-            Iterator<WorkshopEntity> it = workshopEntityList.iterator();
+            Iterator<Workshop> it = workshopList.iterator();
             while (it.hasNext()){
-                WorkshopEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getWorkshopId().toString())){
+                Workshop entity = it.next();
+                if(!entity.getId().toString().equals(i.getWorkshopId().toString())){
                     it.remove();
                 }else {
                     Iterator<FactoryEntity> itFactory = factoryEntityList.iterator();
@@ -390,10 +390,10 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * 根据设备过滤车间
      * @param deviceEntityList
      * @param productionLineEntityList
-     * @param workshopEntityList
+     * @param workshopList
      * @return
      */
-    private List<WorkshopEntity> filterWorkshopByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList){
+    private List<Workshop> filterWorkshopByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList,List<Workshop> workshopList){
         deviceEntityList.forEach(i->{
             Iterator<ProductionLineEntity> it = productionLineEntityList.iterator();
             while (it.hasNext()){
@@ -401,10 +401,10 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 if(!entity.getUuid().toString().equals(i.getProductionLineId().toString())){
                     it.remove();
                 }else {
-                    Iterator<WorkshopEntity> itWorkshop = workshopEntityList.iterator();
+                    Iterator<Workshop> itWorkshop = workshopList.iterator();
                     while (itWorkshop.hasNext()){
-                        WorkshopEntity workshopEntity = itWorkshop.next();
-                        if(!workshopEntity.getUuid().toString().equals(entity.getWorkshopId().toString())){
+                        Workshop workshop = itWorkshop.next();
+                        if(!workshop.getId().toString().equals(entity.getWorkshopId().toString())){
                             it.remove();
                         }
                     }
@@ -412,18 +412,18 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             }
         });
 
-        return workshopEntityList;
+        return workshopList;
     }
 
     /**
      * 根据设备过滤工厂
      * @param deviceEntityList
      * @param productionLineEntityList
-     * @param workshopEntityList
+     * @param workshopList
      * @param factoryEntityList
      * @return
      */
-    private List<FactoryEntity> filterFactoryByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList,List<FactoryEntity> factoryEntityList){
+    private List<FactoryEntity> filterFactoryByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList,List<Workshop> workshopList,List<FactoryEntity> factoryEntityList){
         deviceEntityList.forEach(i->{
             Iterator<ProductionLineEntity> it = productionLineEntityList.iterator();
             while (it.hasNext()){
@@ -431,16 +431,16 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 if(!entity.getUuid().toString().equals(i.getProductionLineId().toString())){
                     it.remove();
                 }else {
-                    Iterator<WorkshopEntity> itWorkshop = workshopEntityList.iterator();
+                    Iterator<Workshop> itWorkshop = workshopList.iterator();
                     while (itWorkshop.hasNext()){
-                        WorkshopEntity workshopEntity = itWorkshop.next();
-                        if(!workshopEntity.getUuid().toString().equals(entity.getWorkshopId().toString())){
+                        Workshop workshop = itWorkshop.next();
+                        if(!workshop.getId().toString().equals(entity.getWorkshopId().toString())){
                             it.remove();
                         }else {
                             Iterator<FactoryEntity> itFactory = factoryEntityList.iterator();
                             while (itFactory.hasNext()){
                                 FactoryEntity factoryEntity = itFactory.next();
-                                if(!factoryEntity.getUuid().toString().equals(workshopEntity.getFactoryId().toString())){
+                                if(!factoryEntity.getUuid().toString().equals(workshop.getFactoryId().toString())){
                                     it.remove();
                                 }
                             }
