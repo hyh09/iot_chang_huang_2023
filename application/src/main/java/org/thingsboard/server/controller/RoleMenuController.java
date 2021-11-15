@@ -75,11 +75,18 @@ public class RoleMenuController extends BaseController{
     })
     @RequestMapping(value = "/queryByUser", method = RequestMethod.POST)
     @ResponseBody
-    public  List<TenantMenuVo> queryByUser(@RequestBody @Valid InMenuByUserVo vo) throws Exception {
-        SecurityUser securityUser = getCurrentUser();
-        vo.setTenantId(securityUser.getTenantId().getId());
-        vo.setUserId(securityUser.getUuidId());
-        return   roleMenuSvc.queryByUser(vo,securityUser.getTenantId(),securityUser.getId());
+    public  List<TenantMenuVo> queryByUser(@RequestBody @Valid InMenuByUserVo vo) {
+        try {
+            SecurityUser securityUser = getCurrentUser();
+            vo.setTenantId(securityUser.getTenantId().getId());
+            vo.setUserId(securityUser.getUuidId());
+            return roleMenuSvc.queryByUser(vo, securityUser.getTenantId(), securityUser.getId());
+        }catch (Exception e)
+        {
+            log.info("查询当前登录人的用户:{}",e);
+            e.printStackTrace();
+            return  null;
+        }
 
     }
 

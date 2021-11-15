@@ -88,6 +88,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 predicates.add(cb.like(root.get("code"), "%" + dictDeviceListQuery.getCode().trim() + "%"));
             if (!StringUtils.isBlank(dictDeviceListQuery.getSupplier()))
                 predicates.add(cb.like(root.get("supplier"), "%" + dictDeviceListQuery.getSupplier().trim() + "%"));
+
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
@@ -104,7 +105,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public DictDeviceVO getDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException {
         var dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
-                .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
+                .orElseThrow(() -> new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
 
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
@@ -143,7 +144,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Transactional
     public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
         DictDevice dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
-                .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
+                .orElseThrow(() -> new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
         this.deviceRepository.deleteById(toUUID(dictDevice.getId()));
 
         this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
@@ -175,7 +176,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         DictDeviceEntity dictDeviceEntity;
         if (!StringUtils.isBlank(dictDeviceVO.getId())) {
             dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDeviceVO.getId())).map(DictDeviceEntity::toData)
-                    .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));;
+                    .orElseThrow(() -> new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
+            ;
             BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
 
             this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
@@ -183,7 +185,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
-            BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
+            BeanUtils.copyProperties(dictDeviceVO, dictDevice);
             dictDevice.setTenantId(tenantId.toString());
         }
 
@@ -344,9 +346,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     @Override
     public List<String> findAllByName(UUID dictDeviceId, String name) {
-        List<DictDeviceGroupPropertyEntity> entities=  this.groupPropertyRepository.findAllByName(name);
+        List<DictDeviceGroupPropertyEntity> entities = this.groupPropertyRepository.findAllByName(name);
         List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
-        return  nameList;
+        return nameList;
     }
 
     /**
