@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -97,10 +98,14 @@ public class UserRoleController extends BaseController{
             @ApiImplicitParam(name = "roleId", value = "用户id"),})
     @RequestMapping(value = "/delete/{roleId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public   Object delete(@PathVariable("roleId") String roleId)
-    {
+    public   Object delete(@PathVariable("roleId") String roleId) throws ThingsboardException {
         try {
             log.info("删除角色的接口入参:{}",roleId);
+         long count =    userMenuRoleService.countAllByTenantSysRoleId(strUuid(roleId));
+         if(count > 0)
+         {
+             throw new ThingsboardException("当前角色存在绑定的用户!不能直接删除!", ThingsboardErrorCode.FAIL_VIOLATION);
+         }
             tenantSysRoleService.deleteById(strUuid(roleId));
             userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
             return "success";

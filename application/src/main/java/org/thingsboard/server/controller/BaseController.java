@@ -81,6 +81,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -280,6 +281,7 @@ public abstract class BaseController {
     protected boolean edgesEnabled;
 
     @Autowired protected CheckSvc checkSvc;
+    @Autowired protected UserMenuRoleService userMenuRoleService;
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {
