@@ -3,6 +3,7 @@ package org.thingsboard.server.common.data.productionline;
 import lombok.Data;
 import org.thingsboard.server.common.data.factory.Factory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -54,6 +55,7 @@ public class ProductionLine{
     private String factoryName;
     //车间名称
     private String workshopName;
+    private List<UUID> workshopIds;
 
     /**********************************以上是非数据库字段***************************************/
 
@@ -64,7 +66,9 @@ public class ProductionLine{
     public ProductionLine(UUID id) {
         this.id = id;
     }
-    public ProductionLine (Factory factory){
+    public ProductionLine (Factory factory,List<UUID> workshopIds){
+        this.setWorkshopIds(workshopIds);
+        this.setTenantId(factory.getTenantId());
         this.setName(factory.getWorkshopName());
         this.setTenantId(factory.getTenantId());
     }

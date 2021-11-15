@@ -93,6 +93,18 @@ public abstract class AbstractDevice{
 
     private UUID updatedUser;
 
+    /*******************************以下是非数据库字段***************************************/
+    @ApiModelProperty("工厂名称")
+    private String factoryName;
+
+    @ApiModelProperty("车间名称")
+    private String workshopName;
+
+    @ApiModelProperty("产线名称")
+    private String productionLineName;
+    /*******************************以上是非数据库字段***************************************/
+
+
     public AbstractDevice() {
         super();
     }
@@ -131,6 +143,9 @@ public abstract class AbstractDevice{
         this.dictDeviceId = device.getDictDeviceId();
         this.comment = device.getComment();
         this.deviceNo = device.getDeviceNo();
+        this.factoryName = device.getFactoryName();
+        this.workshopName = device.getWorkshopName();
+        this.productionLineName = device.getProductionLineName();
     }
 
     public AbstractDevice(DeviceEntity deviceEntity) {
@@ -159,7 +174,10 @@ public abstract class AbstractDevice{
     }
 
     public Device toDevice() {
-        Device device = new Device(new DeviceId(getId()));
+        Device device = new Device();
+        if(getId() != null){
+            device = new Device(new DeviceId(getId()));
+        }
         device.setCreatedTime(createdTime);
         if (tenantId != null) {
             device.setTenantId(new TenantId(tenantId));

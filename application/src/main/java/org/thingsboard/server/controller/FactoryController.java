@@ -46,6 +46,8 @@ public class FactoryController extends BaseController  {
     public FactoryVo saveFactory(@RequestBody AddFactoryDto addFactoryDto) throws ThingsboardException {
         try {
             checkNotNull(addFactoryDto);
+            //校验名称是否重复
+            checkFactoryName(addFactoryDto.getId(),addFactoryDto.getName());
             Factory factory = addFactoryDto.toFactory();
             factory.setTenantId(getCurrentUser().getTenantId().getId());
             if(addFactoryDto.getId() == null){

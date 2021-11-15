@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class FactoryServiceImpl extends AbstractEntityService implements FactoryService {
 
+    private static final String PREFIX_ENCODING_GC = "GC";
+
     private final FactoryDao factoryDao;
     private final UserRoleMenuSvc userRoleMenuSvc;
     private final DeviceService deviceService;
@@ -58,7 +60,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
             factory.setAdminUserId(saveUser.getId().getId());
             factory.setAdminUserName(saveUser.getUserName());
         }
-        factory.setCode(String.valueOf(System.currentTimeMillis()));
+        factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
         return factoryDao.saveFactory(factory);
     }
 
@@ -172,4 +174,17 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         }
         return resultFactory;
     }
+
+    /**
+     * 根据名称查询
+     * @return
+     */
+    @Override
+    public List<Factory> findByName(String name,UUID tenantId){
+        Factory queryFactory = new Factory();
+        queryFactory.setTenantId(tenantId);
+        queryFactory.setName(name);
+        return factoryDao.findAllByCdn(queryFactory);
+    }
+
 }
