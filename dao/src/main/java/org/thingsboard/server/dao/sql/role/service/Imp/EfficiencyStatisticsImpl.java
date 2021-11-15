@@ -144,7 +144,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询到的数据{}",effectTsKvEntities);
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
-            return appVo;
+            keys1.stream().forEach(s -> {
+                totalValueMap.put(s,"0");
+            });
+            appVo.setTotalValue(totalValueMap);
+            return appVo;  //如果查询不到; 应该返回的对应的key 且
         }
 
         List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
