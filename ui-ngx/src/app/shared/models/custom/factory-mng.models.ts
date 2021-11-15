@@ -81,6 +81,12 @@ export interface FactoryTableOriginRow {
   address?: string;
   createdTime?: number;
   rowType?: FactoryRowType;
+  factoryId?: string;
+  factoryName?: string;
+  workshopId?: string;
+  workshopName?: string;
+  productionLineId?: string;
+  productionLineName?: string;
 }
 
 export interface FactoryTableTreeNode extends TableTreeNodeOptions {

@@ -93,17 +93,17 @@ export class FactoryMngService {
 
   // 获取所有工厂
   public getAllFactories(config?: RequestConfig): Observable<Factory[]> {
-    return this.http.get<Factory[]>(`/api/factory/findFactoryList`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<Factory[]>(`/api/factory/findFactoryListByLoginRole`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取所有车间
-  public getAllWorkShops(config?: RequestConfig): Observable<WorkShop[]> {
-    return this.http.get<WorkShop[]>(`/api/workshop/findWorkshopListByTenant`, defaultHttpOptionsFromConfig(config));
+  public getAllWorkShops(factoryId?: string, tenantId?: string, config?: RequestConfig): Observable<WorkShop[]> {
+    return this.http.get<WorkShop[]>(`/api/workshop/findWorkshopListByTenant?factoryId=${factoryId || ''}&tenantId=${tenantId || ''}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取所有产线
-  public getAllProdLines(config?: RequestConfig): Observable<ProdLine[]> {
-    return this.http.get<ProdLine[]>(`/api/workshop/findProductionLineListByTenant`, defaultHttpOptionsFromConfig(config));
+  public getAllProdLines(factoryId?: string, workshopId?: string, tenantId?: string, config?: RequestConfig): Observable<ProdLine[]> {
+    return this.http.get<ProdLine[]>(`/api/productionLine/findProductionLineList?factoryId=${factoryId || ''}&workshopId=${workshopId || ''}&tenantId=${tenantId || ''}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 分配设备
