@@ -1,15 +1,4 @@
 .device-dict-wrapper {
-  .mat-expansion-panel-header.mat-expanded {
-    height: 48px;
-  }
-  .mat-expansion-panel {
-    &:first-of-type {
-      margin-top: 10px;
-    }
-    + .mat-expansion-panel {
-      margin-top: 20px;
-    }
-  }
   ::ng-deep {
     .ant-tabs-editable {
       .ant-tabs-tab {
@@ -38,6 +27,7 @@
     }
   }
   .image-wrapper {
+    padding: 5px 0;
     img {
       cursor: pointer;
       max-width: 80px;

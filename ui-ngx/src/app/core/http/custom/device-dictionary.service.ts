@@ -31,7 +31,7 @@ export class DeviceDictionaryService {
   }
 
   // 获取设备字典详情
-  public getDeviceDictionary(dictionaryId: HasUUID, config?: RequestConfig): Observable<DeviceDictionary> {
+  public getDeviceDictionary(dictionaryId: HasUUID | string, config?: RequestConfig): Observable<DeviceDictionary> {
     return this.http.get<DeviceDictionary>(`/api/dict/device/${dictionaryId}`, defaultHttpOptionsFromConfig(config));
   }
 

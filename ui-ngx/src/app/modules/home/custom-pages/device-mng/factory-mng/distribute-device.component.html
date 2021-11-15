@@ -1,6 +1,6 @@
 <div style="min-width: 360px;">
   <mat-toolbar color="primary">
-    <h2 translate>auth-mng.change-pwd</h2>
+    <h2 translate>device-mng.distribute-device</h2>
     <span fxFlex></span>
     <button mat-icon-button (click)="cancel()" type="button">
       <mat-icon class="material-icons">close</mat-icon>
@@ -22,22 +22,39 @@
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.work-shop</mat-label>
-        <mat-select formControlName="workShopId" required [disabled]="!form.get('factoryId').value">
+        <mat-select formControlName="workshopId" required [disabled]="!form.get('factoryId').value">
           <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="form.get('workShopId').hasError('required')">
+        <mat-error *ngIf="form.get('workshopId').hasError('required')">
           {{ 'device-mng.work-shop-required' | translate }}
         </mat-error>
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.prod-line</mat-label>
-        <mat-select formControlName="prodLineId" required [disabled]="!form.get('workShopId').value">
+        <mat-select formControlName="productionLineId" required [disabled]="!form.get('workshopId').value">
           <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="form.get('prodLineId').hasError('required')">
+        <mat-error *ngIf="form.get('productionLineId').hasError('required')">
           {{ 'device-mng.prod-line-required' | translate }}
         </mat-error>
       </mat-form-field>
     </form>
+  </div>
+  <div mat-dialog-actions fxLayoutAlign="end center">
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      cdkFocusInitial
+      [disabled]="(isLoading$ | async)"
+      (click)="cancel()"
+    >{{ 'action.cancel' | translate }}</button>
+    <button
+      mat-raised-button
+      type="button"
+      color="primary"
+      [disabled]="(isLoading$ | async) || form?.invalid || !form?.dirty"
+      (click)="save()"
+    >{{ 'action.confirm' | translate }}</button>
   </div>
 </div>

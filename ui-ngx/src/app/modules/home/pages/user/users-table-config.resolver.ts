@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 
-import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
+import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import {
   DateEntityTableColumn,
   EntityTableColumn,
@@ -72,7 +72,8 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
               private customerService: CustomerService,
               private translate: TranslateService,
               private datePipe: DatePipe,
-              private dialog: MatDialog) {
+              private dialog: MatDialog,
+              private router: Router) {
 
     this.config.entityType = EntityType.USER;
     this.config.entityComponent = UserComponent;
