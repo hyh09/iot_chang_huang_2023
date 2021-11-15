@@ -345,21 +345,21 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       EntityType.FACTORY,
       {
         add: 'device-mng.add-factory',
-        details: 'factory-details'
+        details: 'device-mng.factory-details'
       }
     ],
     [
       EntityType.WORK_SHOP,
       {
         add: 'device-mng.add-work-shop',
-        details: 'work-shop-details'
+        details: 'device-mng.work-shop-details'
       }
     ],
     [
       EntityType.PROD_LINE,
       {
         add: 'device-mng.add-prod-line',
-        details: 'prod-line-details'
+        details: 'device-mng.prod-line-details'
       }
     ],
     [
