@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 
 import javax.transaction.Transactional;
@@ -84,7 +85,7 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
 
     /**
      * 根据系统菜单删除菜单
-     * @param delByMenuId
+     * @param sysMenuId
      */
     @Modifying
     @Transactional

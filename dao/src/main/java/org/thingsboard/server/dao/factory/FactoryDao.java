@@ -18,7 +18,7 @@ public interface FactoryDao extends Dao<Factory>{
      * @param factory
      * @return
      */
-    FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo);
+    FactoryListVo findFactoryListByCdn(Factory factory, JudgeUserVo judgeUserVo);
 
     /**
      * 删除后刷新值(逻辑删除)
@@ -53,4 +53,18 @@ public interface FactoryDao extends Dao<Factory>{
      * @return
      */
     Factory findById(UUID id);
+
+    /**
+     * 批量查询
+     * @param id
+     * @return
+     */
+    List<Factory> getFactoryByIdList(List<UUID> id);
+
+    /**
+     * 根据条件查询工厂信息
+     * @param factory
+     * @return
+     */
+    List<Factory> findAllByCdn(Factory factory);
 }

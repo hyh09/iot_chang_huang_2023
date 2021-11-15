@@ -168,35 +168,39 @@ public class JpaDeviceComponentDao implements DeviceComponentDao {
      */
     @Override
     public List<DeviceComponent> findDeviceComponentListByCdn(DeviceComponent deviceComponent) {
-        List<DeviceComponent> deviceComponentList = new ArrayList<>();
-            Specification<DeviceComponentEntity> specification = (root, query, cb) -> {
-                List<Predicate> predicates = new ArrayList<>();
-                if(deviceComponent != null) {
-                    if (deviceComponent.getDeviceId() != null) {
-                        predicates.add(cb.equal(root.get("deviceId"), deviceComponent.getDeviceId()));
-                    }
-                    if (deviceComponent.getParentId() != null) {
-                        predicates.add(cb.equal(root.get("parentId"), deviceComponent.getParentId()));
-                    }
-                    if (deviceComponent.getCode() != null) {
-                        predicates.add(cb.equal(root.get("code"), deviceComponent.getCode()));
-                    }
-                    if (StringUtils.isNotEmpty(deviceComponent.getName())) {
-                        predicates.add(cb.like(root.get("name"), "%" + deviceComponent.getName().trim() + "%"));
-                    }
-                    if (StringUtils.isNotEmpty(deviceComponent.getType())) {
-                        predicates.add(cb.like(root.get("type"), "%" + deviceComponent.getType().trim() + "%"));
-                    }
-                }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            };
+        return this.commonCondition(deviceComponent);
+    }
 
-            List<DeviceComponentEntity> entityList = deviceComponentRepository.findAll(specification);
-            if(CollectionUtils.isNotEmpty(entityList)){
-                entityList.forEach(i->{
-                    deviceComponentList.add(i.toDeviceComponent());
-                });
+    private List<DeviceComponent> commonCondition(DeviceComponent deviceComponent){
+        List<DeviceComponent> deviceComponentList = new ArrayList<>();
+        Specification<DeviceComponentEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(deviceComponent != null) {
+                if (deviceComponent.getDeviceId() != null) {
+                    predicates.add(cb.equal(root.get("deviceId"), deviceComponent.getDeviceId()));
+                }
+                if (deviceComponent.getParentId() != null) {
+                    predicates.add(cb.equal(root.get("parentId"), deviceComponent.getParentId()));
+                }
+                if (deviceComponent.getCode() != null) {
+                    predicates.add(cb.equal(root.get("code"), deviceComponent.getCode()));
+                }
+                if (StringUtils.isNotEmpty(deviceComponent.getName())) {
+                    predicates.add(cb.like(root.get("name"), "%" + deviceComponent.getName().trim() + "%"));
+                }
+                if (StringUtils.isNotEmpty(deviceComponent.getType())) {
+                    predicates.add(cb.like(root.get("type"), "%" + deviceComponent.getType().trim() + "%"));
+                }
             }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+
+        List<DeviceComponentEntity> entityList = deviceComponentRepository.findAll(specification);
+        if(CollectionUtils.isNotEmpty(entityList)){
+            entityList.forEach(i->{
+                deviceComponentList.add(i.toDeviceComponent());
+            });
+        }
         return deviceComponentList;
     }
 
@@ -212,6 +216,18 @@ public class JpaDeviceComponentDao implements DeviceComponentDao {
             return entity.toDeviceComponent();
         }
         return null;
+    }
+
+    /**
+     * 根据设备标识查询设备构成
+     * @param deviceId
+     * @return
+     */
+    @Override
+    public List<DeviceComponent>  getDeviceComponentByDeviceId(UUID deviceId){
+        DeviceComponent deviceComponent = new DeviceComponent();
+        deviceComponent.setDeviceId(deviceId);
+;        return this.commonCondition(deviceComponent);
     }
 }
 

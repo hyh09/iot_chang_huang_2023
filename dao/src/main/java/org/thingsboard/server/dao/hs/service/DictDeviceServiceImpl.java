@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
@@ -63,7 +64,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        return this.getAvailableCode(this.deviceRepository.findAllCodesByTenantId(tenantId.getId()), "SBZD");
+        return this.getAvailableCode(this.deviceRepository.findAllCodesByTenantId(tenantId.getId()), HSConstants.CODE_PREFIX_DICT_DEVICE);
     }
 
     /**
@@ -87,6 +88,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 predicates.add(cb.like(root.get("code"), "%" + dictDeviceListQuery.getCode().trim() + "%"));
             if (!StringUtils.isBlank(dictDeviceListQuery.getSupplier()))
                 predicates.add(cb.like(root.get("supplier"), "%" + dictDeviceListQuery.getSupplier().trim() + "%"));
+
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
@@ -103,7 +105,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public DictDeviceVO getDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException {
         var dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
-                .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
+                .orElseThrow(() -> new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
 
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
@@ -120,9 +122,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                     return vo;
                 }).collect(Collectors.toList());
 
-        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse("null")));
+        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
 
-        this.recursionPackageComponent(rList, pMap, "null");
+        this.recursionPackageComponent(rList, pMap, HSConstants.NULL_STR);
 
         DictDeviceVO dictDeviceVO = DictDeviceVO.builder()
                 .propertyList(propertyList)
@@ -142,7 +144,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Transactional
     public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
         DictDevice dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
-                .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
+                .orElseThrow(() -> new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
         this.deviceRepository.deleteById(toUUID(dictDevice.getId()));
 
         this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
@@ -174,7 +176,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         DictDeviceEntity dictDeviceEntity;
         if (!StringUtils.isBlank(dictDeviceVO.getId())) {
             dictDevice = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDeviceVO.getId())).map(DictDeviceEntity::toData)
-                    .orElseThrow(()->new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));;
+                    .orElseThrow(() -> new ThingsboardException("dict device not exist", ThingsboardErrorCode.GENERAL));
+            ;
             BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
 
             this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
@@ -182,7 +185,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
-            BeanUtils.copyProperties(dictDeviceVO, dictDevice, "id", "code");
+            BeanUtils.copyProperties(dictDeviceVO, dictDevice);
             dictDevice.setTenantId(tenantId.toString());
         }
 
@@ -343,9 +346,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     @Override
     public List<String> findAllByName(UUID dictDeviceId, String name) {
-        List<DictDeviceGroupPropertyEntity> entities=  this.groupPropertyRepository.findAllByName(name);
+        List<DictDeviceGroupPropertyEntity> entities = this.groupPropertyRepository.findAllByName(name);
         List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
-        return  nameList;
+        return nameList;
     }
 
     /**
@@ -354,6 +357,17 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public List<DictDeviceGroupVO> getGroupInitData() {
         return this.clientService.listDictDeviceInitData();
+    }
+
+    /**
+     * 【不分页】获得设备字典列表
+     *
+     * @param tenantId 租户Id
+     * @return 设备字典列表
+     */
+    @Override
+    public List<DictDevice> listAllDictDevice(TenantId tenantId) {
+        return DaoUtil.convertDataList(this.deviceRepository.findAllByTenantId(tenantId.getId()));
     }
 
     @Autowired

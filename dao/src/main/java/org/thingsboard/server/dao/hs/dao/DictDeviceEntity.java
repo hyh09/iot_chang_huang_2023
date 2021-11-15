@@ -98,6 +98,12 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
     public DictDeviceEntity() {
     }
 
+    public DictDeviceEntity(UUID id, String name) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+
     public DictDeviceEntity(DictDevice common) {
         if (common.getId() != null)
             this.id = UUID.fromString(common.getId());

@@ -29,6 +29,7 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
      */
     void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
 
+
     PageData<TenantMenu> findTenantMenusByRegion(TenantMenuId tenantMenuId, String region, PageLink pageLink);
 
     /**
@@ -63,5 +64,12 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
      * @return
      */
     List<TenantMenu> findAllByCdn(TenantMenu tenantMenu);
+
+    /**
+     * 根据id查
+     * @param id
+     * @return
+     */
+    TenantMenu getMenuById(UUID id);
 
 }

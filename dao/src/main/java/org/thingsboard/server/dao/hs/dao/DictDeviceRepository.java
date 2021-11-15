@@ -1,5 +1,7 @@
 package org.thingsboard.server.dao.hs.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -18,6 +20,9 @@ import java.util.UUID;
  */
 @Repository
 public interface DictDeviceRepository extends PagingAndSortingRepository<DictDeviceEntity, UUID>, JpaSpecificationExecutor<DictDeviceEntity> {
+
+    @Query("select d from DictDeviceEntity d where d.tenantId = :tenantId order by d.createdTime desc")
+    List<DictDeviceEntity> findAllByTenantId(@Param("tenantId") UUID tenantId);
 
     Optional<DictDeviceEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 

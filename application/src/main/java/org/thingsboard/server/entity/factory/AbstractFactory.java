@@ -99,6 +99,7 @@ public abstract class AbstractFactory{
         this.latitude = factory.getLatitude();
         this.mobile = factory.getMobile();
         this.email = factory.getEmail();
+        this.postalCode = factory.getPostalCode();
         this.adminUserId = factory.getAdminUserId();
         this.adminUserName = factory.getAdminUserName();
         this.remark = factory.getRemark();
@@ -119,6 +120,7 @@ public abstract class AbstractFactory{
         factory.setAddress(address);
         factory.setLongitude(longitude);
         factory.setLatitude(latitude);
+        factory.setPostalCode(this.postalCode);
         factory.setMobile(mobile);
         factory.setEmail(email);
         factory.setAdminUserId(adminUserId);

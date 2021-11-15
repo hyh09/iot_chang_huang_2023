@@ -35,6 +35,7 @@ import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
@@ -42,8 +43,10 @@ import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
+import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,6 +65,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
     @Autowired
     private AttributesDao attributesDao;
+
+    @Autowired
+    private ProductionLineDao productionLineDao;
 
     @Override
     protected Class<DeviceEntity> getEntityClass() {
@@ -302,19 +308,39 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     @Override
-    public List<DeviceEntity> findDeviceListBuyCdn(DeviceEntity deviceEntity){
-        if(deviceEntity != null){
+    public List<Device> findDeviceListBuyCdn(Device device){
+        List<Device> resultList = new ArrayList<>();
+        if(device != null){
             Specification<DeviceEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.equal(root.get("tenantId"),deviceEntity.getTenantId()));
-                if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(deviceEntity.getName())){
-                    predicates.add(cb.like(root.get("name"),"%" + deviceEntity.getName().trim() + "%"));
+                if(device.getTenantId() != null && org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getTenantId().toString())){
+                    predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
+                }
+                if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getName())){
+                    predicates.add(cb.like(root.get("name"),"%" + device.getName().trim() + "%"));
+                }
+                if(device.getFactoryId() != null && org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getFactoryId().toString())){
+                    predicates.add(cb.equal(root.get("factoryId"),device.getFactoryId()));
+                }
+                if(device.getWorkshopId() != null && org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getWorkshopId().toString())){
+                    predicates.add(cb.equal(root.get("workshopId"),device.getWorkshopId()));
+                }
+                if(CollectionUtils.isNotEmpty(device.getProductionLineIds())){
+                    // 下面是一个 IN查询
+                    CriteriaBuilder.In<UUID> in = cb.in(root.get("productionLineId"));
+                    device.getProductionLineIds().forEach(in::value);
+                    predicates.add(in);
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
-            return deviceRepository.findAll(specification);
+            List<DeviceEntity> all = deviceRepository.findAll(specification);
+            if(CollectionUtils.isNotEmpty(all)){
+                all.forEach(i->{
+                    resultList.add(i.toData());
+                });
+            }
         }
-        return new ArrayList<>();
+        return this.getParentNameByList(resultList);
     }
 
     /**
@@ -349,7 +375,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public void removeProductionLine(List<UUID> deviceIdList,UUID updatedUser) throws ThingsboardException{
         deviceIdList.forEach(deviceId->{
             if(deviceId != null){
-                DeviceEntity entity = new DeviceEntity();
+                DeviceEntity entity = deviceRepository.findById(deviceId).get();
                 entity.setId(deviceId);
                 entity.setFactoryId(null);
                 entity.setWorkshopId(null);
@@ -371,7 +397,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public void addProductionLine(Device device) throws ThingsboardException{
         device.getDeviceIdList().forEach(deviceId->{
             if(deviceId != null){
-                DeviceEntity entity = new DeviceEntity();
+                DeviceEntity entity = deviceRepository.findById(deviceId).get();
                 entity.setId(deviceId);
                 entity.setFactoryId(device.getFactoryId());
                 entity.setWorkshopId(device.getWorkshopId());
@@ -397,7 +423,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             Specification<DeviceEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
                 if(factoryIds != null && factoryIds.size() > 0){
-                    predicates.add(cb.in(root.get("factoryId").in(factoryIds)));
+                    // 下面是一个 IN查询
+                    CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                    factoryIds.forEach(in::value);
+                    predicates.add(in);
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -594,6 +623,92 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             });
         }
         return resultDeviceList;
+    }
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    @Override
+    public Device getDeviceInfo(UUID id){
+        DeviceEntity entity = deviceRepository.findById(id).get();
+        Device device = entity.toData();
+        if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
+            ProductionLine productionLine = productionLineDao.findById(device.getProductionLineId());
+            if(device != null){
+                device.setFactoryName(productionLine.getFactoryName());
+                device.setWorkshopName(productionLine.getWorkshopName());
+                device.setProductionLineName(productionLine.getName());
+            }
+        }
+        return device;
+    }
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Device> getDeviceByIdList(List<UUID> ids){
+        List<Device> resultList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(ids)){
+            Specification<DeviceEntity> specification = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                ids.forEach(in::value);
+                predicates.add(in);
+
+                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            };
+            List<DeviceEntity> all = deviceRepository.findAll(specification);
+            if(CollectionUtils.isNotEmpty(all)){
+                //查询产线名称
+                List<UUID> productionLineIds = all.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+                List<ProductionLine> productionLineList = productionLineDao.getProductionLineByIdList(productionLineIds);
+                all.forEach(i->{
+                    Device device = i.toData();
+                    if(CollectionUtils.isNotEmpty(productionLineList)){
+                        productionLineList.forEach(j->{
+                            if(i.getProductionLineId() != null && i.getProductionLineId().toString().equals(j.getId().toString())){
+                                device.setFactoryName(j.getFactoryName());
+                                device.setWorkshopName(j.getWorkshopName());
+                                device.setProductionLineName(j.getName());
+                            }
+                        });
+                    }
+                    resultList.add(device);
+                });
+            }
+        }
+        return resultList;
+    }
+
+    /**
+     * 获取父级名称
+     * @param deviceList
+     * @return
+     */
+    public List<Device> getParentNameByList(List<Device> deviceList){
+        if(CollectionUtils.isNotEmpty(deviceList)){
+            //查询产线名称
+            List<UUID> productionLineIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<ProductionLine> productionLineList = productionLineDao.getProductionLineByIdList(productionLineIds);
+            deviceList.forEach(i->{
+                if(CollectionUtils.isNotEmpty(productionLineList)){
+                    productionLineList.forEach(j->{
+                        if(i.getProductionLineId() != null && i.getProductionLineId().toString().equals(j.getId().toString())){
+                            i.setFactoryName(j.getFactoryName());
+                            i.setWorkshopName(j.getWorkshopName());
+                            i.setProductionLineName(j.getName());
+                        }
+                    });
+                }
+            });
+        }
+        return deviceList;
     }
 
 

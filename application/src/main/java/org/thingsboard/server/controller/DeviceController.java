@@ -53,6 +53,7 @@ import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.entity.device.dto.AddDeviceDto;
 import org.thingsboard.server.entity.device.dto.DeviceQry;
@@ -64,7 +65,6 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
 import javax.annotation.Nullable;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -818,15 +818,7 @@ public class DeviceController extends BaseController {
     @ResponseBody
     public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto,@RequestParam(name = "accessToken", required = false)String accessToken)throws ThingsboardException {
         try {
-
             checkNotNull(addDeviceDto);
-//
-//            if(addDeviceDto.getId() == null){
-//                device.setCreatedUser(getCurrentUser().getUuidId());
-//            }else {
-//                device.setUpdatedUser(getCurrentUser().getUuidId());
-//            }
-//
             boolean created = addDeviceDto.getId() == null;
             Device device = addDeviceDto.toDevice();
             device.setTenantId(getCurrentUser().getTenantId());
@@ -899,6 +891,30 @@ public class DeviceController extends BaseController {
         }
     }
 
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("获取设备详情")
+    @ApiImplicitParam(name = "id",value = "当前id",dataType = "String",paramType="path",required = true)
+    @RequestMapping(value = "/device/getDeviceInfo/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public DeviceVo getDeviceInfo(@PathVariable("id") String id) throws ThingsboardException {
+        try {
+            checkParameter("id",id);
+            DeviceVo resultDeviceVo = new DeviceVo(checkNotNull(deviceService.getDeviceInfo(toUUID(id))));
+            if(resultDeviceVo != null && resultDeviceVo.getDictDeviceId() != null && StringUtils.isNotEmpty(resultDeviceVo.getDictDeviceId().toString())){
+                //查询设备字典
+                DictDeviceVO dictDeviceVO = dictDeviceService.getDictDeviceDetail(resultDeviceVo.getDictDeviceId().toString(),getCurrentUser().getTenantId());
+                resultDeviceVo.setDictDeviceVO(dictDeviceVO);
+            }
+            return resultDeviceVo;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
 
     /***
      * 设备的模糊查询 只根据设备的名称查询  queryAllByNameLike

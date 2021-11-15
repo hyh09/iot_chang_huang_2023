@@ -1,13 +1,12 @@
-import { TableTreeNodeOptions, TreeNodeOptions } from "@app/core/public-api";
+import { TableTreeNodeOptions } from "@app/core/public-api";
+import { BaseData } from "@app/shared/public-api";
+import { DeviceId, FactoryId, ProdLineId, WorkShopId } from "../id/custom/factory-mng-id.models";
+import { DeviceProperty, DeviceDataGroup, DeviceComp } from "./device-mng.models";
 
-interface BaseData {
-  id: {
-    id: string
-  };
-  key: string;
+interface CommonData {
+  key?: string;
   parentId?: string;
-  code: string;
-  name: string;
+  code?: string;
   createdTime?: number;
   createdUser?: string;
   updatedTime?: number;
@@ -15,55 +14,73 @@ interface BaseData {
   remark?: string;
 }
 
-export interface Factory extends BaseData {
-  mobile: string;
-  email: string;
+export declare type FactoryRowType = 'factory' | 'workShop' | 'prodLine' | 'device';
+
+export interface Factory extends BaseData<FactoryId>, CommonData {
+  mobile?: string;
+  email?: string;
   address?: string;
   postalCode?: string;
   logoImages?: string;
+  rowType?: FactoryRowType;
 }
 
-export interface WorkShop extends BaseData {
-  factoryId: string;
-  factoryName: string;
+export interface WorkShop extends BaseData<WorkShopId>, CommonData {
+  factoryId?: string;
+  factoryName?: string;
   logoImages?: string;
   bgImages?: string;
+  rowType: FactoryRowType;
 }
 
-export interface ProdLine extends BaseData {
-  factoryId: string;
-  factoryName: string;
-  workshopId: string;
-  workshopName: string;
+export interface ProdLine extends BaseData<ProdLineId>, CommonData {
+  factoryId?: string;
+  factoryName?: string;
+  workshopId?: string;
+  workshopName?: string;
   logoImages?: string;
+  rowType: FactoryRowType;
 }
 
-export interface ProdDevice extends BaseData {
-  factoryId: string;
-  factoryName: string;
-  workshopId: string;
-  workshopName: string;
+export interface ProdDevice extends BaseData<DeviceId>, CommonData {
+  factoryId?: string;
+  factoryName?: string;
+  workshopId?: string;
+  workshopName?: string;
   productionLineId?: string;
   productionLineName?: string;
+  dictDeviceId?: string;
   deviceNo?: string;
-  images?: string;
+  rowType?: FactoryRowType;
+  type?: string,
+  supplier?: string,
+  model?: string,
+  version?: string,
+  warrantyPeriod?: string,
+  picture?: string,
+  comment?: string,
+  propertyList?: Array<DeviceProperty>,
+  groupList?: Array<DeviceDataGroup>,
+  componentList?: Array<DeviceComp>
 }
 
 export interface FactoryMngList {
-  factoryEntityList: Factory[];
-  workshopEntityList: WorkShop[];
-  productionLineEntityList: ProdLine[];
-  deviceEntityList: ProdDevice[];
+  factoryList: Factory[];
+  workshopList: WorkShop[];
+  productionLineList: ProdLine[];
+  deviceVoList: ProdDevice[];
 }
 
 export interface FactoryTableOriginRow {
-  key: string;
-  code: string;
-  name: string;
+  key?: string;
+  parentId?: string;
+  code?: string;
+  name?: string;
   logoImages?: string;
   images?: string;
   address?: string;
   createdTime?: number;
+  rowType?: FactoryRowType;
 }
 
 export interface FactoryTableTreeNode extends TableTreeNodeOptions {
@@ -73,7 +90,14 @@ export interface FactoryTableTreeNode extends TableTreeNodeOptions {
   children?: FactoryTableTreeNode[];
   code?: string;
   name?: string;
-  image?: string;
+  logoImages?: string;
   address?: string;
   createdTime?: number;
+  rowType?: FactoryRowType;
+  factoryId?: string;
+  factoryName?: string;
+  workshopId?: string;
+  workshopName?: string;
+  productionLineId?: string;
+  productionLineName?: string;
 }

@@ -51,7 +51,7 @@ public interface FactoryService {
      * @param factory
      * @return
      */
-    FactoryListVo findFactoryListBuyCdn(Factory factory);
+    FactoryListVo findFactoryListByCdn(Factory factory);
 
     /**
      * 查询工厂最新版本
@@ -67,5 +67,11 @@ public interface FactoryService {
      * @return
      */
     List<Factory> findFactoryListByLoginRole(UUID userId,UUID tenantId);
+
+    /**
+     * 根据名称查询
+     * @return
+     */
+    List<Factory> findByName(String name,UUID tenantId);
 
 }
