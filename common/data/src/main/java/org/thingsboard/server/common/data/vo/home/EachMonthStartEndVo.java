@@ -3,6 +3,8 @@ package org.thingsboard.server.common.data.vo.home;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.Map;
+
 /**
  * @program: springboot-jpa-20210106
  * @description: 每个的的第一天0点和最后一天的时间
@@ -37,5 +39,14 @@ public class EachMonthStartEndVo {
 
     //转换后的日期，用来看日志的
     private String strEndTime;
+
+    /**
+     * 当前月的能耗
+     */
+    private Map<String,String> value;
+
+
+
+
 
 }
