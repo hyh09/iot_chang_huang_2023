@@ -200,7 +200,7 @@ public class CommonUtils {
      * 包含当月
      * @return
      */
-    public  List<EachMonthStartEndVo> getSixMonths()
+    public static List<EachMonthStartEndVo> getSixMonths()
     {
         List<EachMonthStartEndVo> voList  = new ArrayList<>();
         for(int i=-5;i<1;i++) {
@@ -212,7 +212,7 @@ public class CommonUtils {
 
 
 
-    public EachMonthStartEndVo getEachMonthStartEndTime(int amount)
+    public static  EachMonthStartEndVo getEachMonthStartEndTime(int amount)
     {
 
         EachMonthStartEndVo vo = new EachMonthStartEndVo();

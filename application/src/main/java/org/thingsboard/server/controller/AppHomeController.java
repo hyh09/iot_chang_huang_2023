@@ -10,6 +10,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
@@ -19,6 +20,7 @@ import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -81,24 +83,29 @@ public class AppHomeController extends BaseController{
     }
 
 
-//    @ApiOperation(value = "【app首页的能耗接口--三个时期的总产量 昨天 今天 历史的 水 电 气能耗】")
-//    @RequestMapping(value = "/threeEnergyValue", method = RequestMethod.GET)
-//    @ResponseBody
-//    public ResultHomeEnergyAppVo threeEnergyValue(@RequestParam("factoryId") UUID factoryId) throws ThingsboardException {
-//        ResultHomeEnergyAppVo result = new ResultHomeEnergyAppVo();
-//
-//        try {
-//            result.setTodayValue(getMapValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-//            result.setYesterdayValue(getMapValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-//            result.setHistory(getMapValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
-//            return result;
-//        }catch (Exception e)
-//        {
-//            e.printStackTrace();
-//
-//        }
-//        return  result;
-//    }
+    @ApiOperation(value = "【app首页的能耗接口--6个月的能耗")
+    @RequestMapping(value = "/sixMonthsEnergy", method = RequestMethod.GET)
+    @ResponseBody
+    public List<EachMonthStartEndVo>  sixMonthsEnergy(@RequestParam("factoryId") UUID factoryId) throws ThingsboardException {
+
+        try {
+            List<EachMonthStartEndVo>   sixMonths = CommonUtils.getSixMonths();
+            sixMonths.forEach(vo ->{
+                try {
+                    vo.setValue(getMapValueByTime(factoryId,vo.getStartTime(),vo.getEndTime()));
+                } catch (ThingsboardException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            return sixMonths;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return  null;
+    }
 
 
 
