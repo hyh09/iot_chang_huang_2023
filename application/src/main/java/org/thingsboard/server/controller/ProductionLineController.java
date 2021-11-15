@@ -84,9 +84,9 @@ public class ProductionLineController extends BaseController  {
             @ApiImplicitParam(name = "workshopId",value = "车间标识",dataType = "string",paramType = "query"),
             @ApiImplicitParam(name = "factoryId",value = "工厂标识",dataType = "string",paramType = "query")
     })
-    @RequestMapping(value = "/findWorkshopList", method = RequestMethod.GET)
+    @RequestMapping(value = "/findProductionLineList", method = RequestMethod.GET)
     @ResponseBody
-    public List<ProductionLineVo> findWorkshopList(@RequestParam String tenantId,@RequestParam String workshopId,@RequestParam String factoryId) throws ThingsboardException {
+    public List<ProductionLineVo> findProductionLineList(@RequestParam String tenantId,@RequestParam String workshopId,@RequestParam String factoryId) throws ThingsboardException {
         try {
             List<ProductionLineVo> productionLineVos = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){

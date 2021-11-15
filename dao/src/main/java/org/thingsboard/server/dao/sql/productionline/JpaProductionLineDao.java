@@ -33,6 +33,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -138,6 +139,12 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
                 if(StringUtils.isNotEmpty(productionLine.getName())){
                     predicates.add(cb.like(root.get("name"),"%" + productionLine.getName().trim() + "%"));
                 }
+                if(CollectionUtils.isNotEmpty(productionLine.getWorkshopIds())){
+                    // 下面是一个 IN查询
+                    CriteriaBuilder.In<UUID> in = cb.in(root.get("workshopId"));
+                    productionLine.getWorkshopIds().forEach(in::value);
+                    predicates.add(in);
+                }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
             List<ProductionLineEntity> all = productionLineRepository.findAll(specification);
@@ -210,6 +217,28 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
     }
 
     /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    @Override
+    public ProductionLine findById(UUID id){
+        ProductionLineEntity entity = productionLineRepository.findById(id).get();
+        if(entity != null){
+            ProductionLine productionLine = entity.toData();
+            if(productionLine.getWorkshopId() != null && StringUtils.isNotEmpty(productionLine.getWorkshopId().toString())){
+                Workshop byId = workshopDao.findById(productionLine.getWorkshopId());
+                if(byId != null){
+                    productionLine.setFactoryName(byId.getFactoryName());
+                    productionLine.setWorkshopName(byId.getName());
+                }
+            }
+            return productionLine;
+        }
+        return null;
+    }
+
+    /**
      * 批量查询
      * @param ids
      * @return
@@ -220,7 +249,11 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
         if(CollectionUtils.isNotEmpty(ids)){
             Specification<ProductionLineEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.in(root.get("id").in(ids)));
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                ids.forEach(in::value);
+                predicates.add(in);
+
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
             List<ProductionLineEntity> all = productionLineRepository.findAll(specification);
@@ -232,7 +265,7 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
                     ProductionLine productionLine = i.toProductionLine();
                     if(CollectionUtils.isNotEmpty(workshopList)){
                         workshopList.forEach(j->{
-                            if(i.getWorkshopId() != null && i.getWorkshopId().toString().equals(j.getId())){
+                            if(i.getWorkshopId() != null && i.getWorkshopId().toString().equals(j.getId().toString())){
                                 productionLine.setFactoryName(j.getFactoryName());
                                 productionLine.setWorkshopName(j.getName());
                             }
@@ -258,7 +291,7 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
             productionLineList.forEach(i->{
                 if(CollectionUtils.isNotEmpty(workshopList)){
                     workshopList.forEach(j->{
-                        if(i.getWorkshopId() != null && i.getWorkshopId().toString().equals(j.getId())){
+                        if(i.getWorkshopId() != null && i.getWorkshopId().toString().equals(j.getId().toString())){
                             i.setFactoryName(j.getFactoryName());
                             i.setWorkshopName(j.getName());
                         }

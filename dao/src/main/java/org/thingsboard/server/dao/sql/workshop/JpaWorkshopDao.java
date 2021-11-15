@@ -32,6 +32,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,6 +167,12 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             if(workshop.getFactoryId() != null && StringUtils.isNotEmpty(workshop.getFactoryId().toString())){
                 predicates.add(cb.equal(root.get("factoryId"),workshop.getFactoryId()));
             }
+            if(CollectionUtils.isNotEmpty(workshop.getFactoryIds())){
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("factoryId"));
+                workshop.getFactoryIds().forEach(in::value);
+                predicates.add(in);
+            }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         List<WorkshopEntity> all = workshopRepository.findAll(specification);
@@ -175,6 +182,25 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             });
         }
         return resultWorkshop;
+    }
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    @Override
+    public Workshop findById(UUID id){
+        WorkshopEntity workshopEntity = workshopRepository.findById(id).get();
+        if(workshopEntity != null){
+            Workshop workshop = workshopEntity.toWorkshop();
+            Factory byId = factoryDao.findById(workshopEntity.getFactoryId());
+            if(byId != null){
+                workshop.setFactoryName(byId.getName());
+            }
+            return workshop;
+        }
+        return null;
     }
 
     /**
@@ -188,7 +214,10 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
         if(CollectionUtils.isNotEmpty(ids)){
             Specification<WorkshopEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.in(root.get("id").in(ids)));
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                ids.forEach(in::value);
+                predicates.add(in);
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
             List<WorkshopEntity> all = workshopRepository.findAll(specification);
@@ -200,7 +229,7 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
                     Workshop workshop = i.toWorkshop();
                     if(CollectionUtils.isNotEmpty(factoryByIdList)){
                         factoryByIdList.forEach(j->{
-                            if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId())){
+                            if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId().toString())){
                                 workshop.setFactoryName(j.getName());
                             }
                         });
@@ -225,7 +254,7 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             workshopList.forEach(i->{
                 if(CollectionUtils.isNotEmpty(factoryByIdList)){
                     factoryByIdList.forEach(j->{
-                        if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId())){
+                        if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId().toString())){
                             i.setFactoryName(j.getName());
                         }
                     });
