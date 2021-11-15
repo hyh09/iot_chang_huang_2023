@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.model.sql.AlarmEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
@@ -307,7 +309,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .build()).collect(Collectors.toList());
         }
 
-        var ungrouped = DictDeviceGroupVO.builder().name("未分组").groupPropertyList(new ArrayList<>()).build();
+        var ungrouped = DictDeviceGroupVO.builder().name(HSConstants.UNGROUPED).groupPropertyList(new ArrayList<>()).build();
         kvEntryMap.forEach((k, v) -> {
             if (!groupPropertyNameList.contains(k)) {
                 ungrouped.getGroupPropertyList().add(DictDeviceGroupPropertyVO.builder()
@@ -419,10 +421,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var KvResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get();
 
         List<Map<String, Object>> result = new ArrayList<>();
-        Map<Long, Map<String, Object>> resultMap = new LinkedHashMap<>();
+        Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
         KvResult.forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), v.getValueAsString()));
         resultMap.forEach((k, v) -> {
-            v.put("创建时间", k);
+            v.put(HSConstants.CREATED_TIME, k);
             result.add(v);
         });
 
@@ -442,7 +444,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     public List<DictDeviceGroupPropertyVO> listDictDeviceGroupPropertyTitle(TenantId tenantId, String deviceId) {
         List<DictDeviceGroupPropertyVO> propertyVOList = new ArrayList<>() {{
             add(DictDeviceGroupPropertyVO.builder()
-                    .name("创建时间").title("创建时间").build());
+                    .name(HSConstants.CREATED_TIME).title(HSConstants.CREATED_TIME).build());
         }};
 
         var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
