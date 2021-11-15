@@ -2,14 +2,17 @@ package org.thingsboard.server.dao.productionline;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @Slf4j
+@Transactional
 public class ProductionLineServiceImpl extends AbstractEntityService implements ProductionLineService {
 
     private static final String DEFAULT_TENANT_REGION = "Global";
@@ -28,7 +31,7 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
      * @return
      */
     @Override
-    public ProductionLine saveProductionLine(ProductionLine factory){
+    public ProductionLine saveProductionLine(ProductionLine factory) throws ThingsboardException {
         log.trace("Executing saveProductionLine [{}]", factory);
         factory.setCode(String.valueOf(System.currentTimeMillis()));
         return productionLineDao.saveProductionLine(factory);
@@ -40,7 +43,7 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
      * @return
      */
     @Override
-    public ProductionLine updProductionLine(ProductionLine factory){
+    public ProductionLine updProductionLine(ProductionLine factory) throws ThingsboardException{
         log.trace("Executing updProductionLine [{}]", factory);
         return productionLineDao.saveProductionLine(factory);
     }

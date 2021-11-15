@@ -293,7 +293,7 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
 
 
     @Override
-    public Menu getTenantById(UUID id){
+    public Menu getMenuById(UUID id){
         return menuRepository.findById(id).get().toData();
     }
 

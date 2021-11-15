@@ -50,4 +50,9 @@ export class DeviceDictionaryService {
     return this.http.get(`/api/dict/device/availableCode`, { responseType: 'text' });
   }
 
+  // 获取所有设备字典
+  public getAllDeviceDictionaries(config?: RequestConfig): Observable<DeviceDictionary[]> {
+    return this.http.get<DeviceDictionary[]>(`/api/dict/device/all`, defaultHttpOptionsFromConfig(config));
+  }
+
 }

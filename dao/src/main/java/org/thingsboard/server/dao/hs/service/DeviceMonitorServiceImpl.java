@@ -236,7 +236,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var activeStatusMap = this.clientService.listAllDeviceOnlineStatus(allDeviceIdList);
 
-        var deviceWithoutImageList = devicePageData.getData().stream().filter(e -> StringUtils.isBlank(e.getImages())).collect(Collectors.toList());
+        var deviceWithoutImageList = devicePageData.getData().stream().filter(e -> StringUtils.isBlank(e.getPicture())).collect(Collectors.toList());
         var map = Lists.newArrayList(this.dictDeviceRepository.findAllById(deviceWithoutImageList.stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())))
                 .stream().collect(Collectors.toMap(e -> e.getId().toString(), DictDeviceEntity::getPicture, (a, b) -> a));
 
@@ -245,7 +245,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return RTMonitorDeviceResult.builder()
                     .id(idStr)
                     .name(e.getName())
-                    .image(Optional.ofNullable(map.get(e.getId().toString())).orElse(e.getImages()))
+                    .image(Optional.ofNullable(map.get(e.getId().toString())).orElse(e.getPicture()))
                     .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                     .build();
         }).collect(Collectors.toList());
@@ -327,7 +327,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return DeviceDetailResult.builder()
                 .id(device.getId().toString())
                 .name(device.getName())
-                .picture(Optional.ofNullable(device.getImages()).orElse(dictDevice.getPicture()))
+                .picture(Optional.ofNullable(device.getPicture()).orElse(dictDevice.getPicture()))
                 .isOnLine(calculateValueInMap(this.clientService.listAllDeviceOnlineStatus(List.of(device.getId().getId())), device.getId().toString()))
                 .factoryName(Optional.ofNullable(deviceBaseDTO.getFactory()).map(Factory::getName).orElse(null))
                 .workShopName(Optional.ofNullable(deviceBaseDTO.getWorkshop()).map(Workshop::getName).orElse(null))

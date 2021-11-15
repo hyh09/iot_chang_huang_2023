@@ -15,6 +15,7 @@ import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import static org.thingsboard.server.dao.service.Validator.validateId;
 
 @Service
 @Slf4j
+@Transactional
 public class MenuServiceImpl extends AbstractEntityService implements MenuService {
 
     private static final String DEFAULT_TENANT_REGION = "Global";
@@ -57,6 +59,22 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         Integer maxSort = menuDao.getMaxSortByParentId(menu.getParentId());
         menu.setSort(maxSort == null ? ONE:maxSort);
         Menu savedMenut = menuDao.saveMenu(menu);
+
+       /* if(menu.getIsButton()){
+            //查询要变更的租户菜单
+            List<TenantMenu> addInfos = new ArrayList<>();
+            TenantMenu tenantMenuQry = new TenantMenu();
+            tenantMenuQry.setSysMenuId(menu.getId());
+            List<TenantMenu> allByCdn = tenantMenuDao.findAllByCdn(tenantMenuQry);
+            if(CollectionUtils.isNotEmpty(allByCdn)) {
+                allByCdn.forEach(i -> {
+                    TenantMenu addInfo = menu.toTenantMenuByAddButton(i);
+
+                });
+                //添加租户菜单按钮
+                tenantMenuDao.saveOrUpdTenantMenu(allByCdn);
+            }
+        }*/
         return savedMenut;
     }
 
@@ -68,6 +86,55 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     @Override
     public Menu updateMenu(Menu menu)  throws ThingsboardException{
         log.trace("Executing updateMenu [{}]", menu);
+        //按钮名称、lang_key、path、icon修改，变更租户菜单按钮
+        /*TenantMenu tenantMenu = new TenantMenu();
+        Menu menuById = menuDao.getMenuById(menu.getId());
+        if(menuById != null){
+            if(menuById.getLangKey() != null && !menuById.getLangKey().equals(menu.getLangKey())){
+                tenantMenu.setLangKey(menuById.getLangKey());
+            }
+            if(menuById.getPath() != null && !menuById.getPath().equals(menu.getPath())){
+                tenantMenu.setPath(menuById.getPath());
+            }
+            if(menuById.getIsButton() && menuById.getMenuIcon() != null && !menuById.getMenuIcon().equals(menu.getMenuIcon())){
+                tenantMenu.setTenantMenuIcon(menuById.getMenuIcon());
+                tenantMenu.setTenantMenuName(menuById.getName());
+                if(menuById.getParentId() != null && menu.getMenuType() != null
+                        && !menuById.getParentId().toString().equals(menu.getMenuType())){
+                    throw new ThingsboardException("按钮不允许变更父级菜单",ThingsboardErrorCode.FAIL_VIOLATION);
+                }
+            }
+        }
+        if(tenantMenu != null ){
+            //查询要变更的租户菜单
+            TenantMenu tenantMenuQry = new TenantMenu();
+            tenantMenuQry.setSysMenuId(menu.getId());
+            List<TenantMenu> allByCdn = tenantMenuDao.findAllByCdn(tenantMenuQry);
+            if(CollectionUtils.isNotEmpty(allByCdn)){
+                allByCdn.forEach(i->{
+                    i.setSysMenuId(menu.getId());
+                    if(StringUtils.isNotEmpty(menuById.getLangKey())){
+                        i.setLangKey(menuById.getLangKey());
+                    }
+                    if(StringUtils.isNotEmpty(menuById.getPath())){
+                        i.setPath(menuById.getPath());
+                    }
+                    if(StringUtils.isNotEmpty(menuById.getLangKey())){
+                        i.setLangKey(menuById.getLangKey());
+                    }
+                    if(StringUtils.isNotEmpty(menuById.getPath())){
+                        i.setPath(menuById.getPath());
+                    }
+                    if(StringUtils.isNotEmpty(menuById.getLangKey())){
+                        i.setTenantMenuIcon(menuById.getMenuIcon());
+                    }
+                    if(StringUtils.isNotEmpty(menuById.getPath())){
+                        i.setTenantMenuName(menuById.getName());
+                    }
+                });
+                tenantMenuDao.saveOrUpdTenantMenu(allByCdn);
+            }
+        }*/
         return menuDao.saveMenu(menu);
     }
 
@@ -200,8 +267,8 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     }
 
     @Override
-    public Menu getTenantById(UUID id){
-       return menuDao.getTenantById(id);
+    public Menu getMenuById(UUID id){
+       return menuDao.getMenuById(id);
     }
 
     /**

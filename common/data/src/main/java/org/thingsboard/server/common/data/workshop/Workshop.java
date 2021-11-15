@@ -28,8 +28,15 @@ public class Workshop{
     private UUID createdUser;
     private long updatedTime;
     private UUID updatedUser;
-
     private String delFlag;
+
+    /**********************************以下是非数据库字段***************************************/
+    //工厂名称
+    private String factoryName;
+
+
+    /**********************************以上是非数据库字段***************************************/
+
 
     public Workshop() {
         super();
@@ -37,6 +44,11 @@ public class Workshop{
 
     public Workshop(UUID id) {
         this.id = id;
+    }
+    public Workshop(UUID id,UUID factoryId,UUID tenantId) {
+        this.id = id;
+        this.factoryId = factoryId;
+        this.tenantId = tenantId;
     }
 
     public Workshop (Factory factory){

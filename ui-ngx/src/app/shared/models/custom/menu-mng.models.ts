@@ -1,5 +1,5 @@
 import { BaseData, CustomBaseData } from './../base-data';
-import { MenuId } from '../id/custom/menu-mng-id';
+import { MenuId } from '../id/custom/menu-mng-id.models';
 import { TreeNodeOptions } from '@app/core/public-api';
 
 export enum MenuType {

@@ -59,6 +59,11 @@ public interface DeviceComponentDao{
      */
     DeviceComponent getDeviceComponentById(UUID id);
 
-
+    /**
+     * 根据设备标识查询设备构成
+     * @param deviceId
+     * @return
+     */
+    List<DeviceComponent>  getDeviceComponentByDeviceId(UUID deviceId);
 
 }

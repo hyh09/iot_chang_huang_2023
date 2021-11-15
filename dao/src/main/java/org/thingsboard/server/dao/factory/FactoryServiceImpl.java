@@ -114,9 +114,9 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public FactoryListVo findFactoryListBuyCdn(Factory factory){
+    public FactoryListVo findFactoryListByCdn(Factory factory){
         log.trace("Executing findFactoryListBuyCdn [{}]", factory);
-        return factoryDao.findFactoryListBuyCdn( factory,userRoleMenuSvc.decideUser(new UserId(factory.getLoginUserId())));
+        return factoryDao.findFactoryListByCdn( factory,userRoleMenuSvc.decideUser(new UserId(factory.getLoginUserId())));
     }
 
     /**

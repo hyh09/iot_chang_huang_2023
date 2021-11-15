@@ -36,9 +36,9 @@ public class WorkshopController extends BaseController  {
     @ResponseBody
     public WorkshopVo saveWorkshop(@RequestBody AddWorkshopDto addWorkshopDto) throws ThingsboardException {
         try {
-            checkParameter("tenantId",addWorkshopDto.getTenantId());
             checkParameter("factoryId",addWorkshopDto.getFactoryId());
             Workshop workshop = addWorkshopDto.toWorkshop();
+            workshop.setTenantId(getCurrentUser().getTenantId().getId());
             if(addWorkshopDto.getId() == null){
                 workshop.setCreatedUser(getCurrentUser().getUuidId());
                 workshop = checkNotNull(workshopService.saveWorkshop(workshop));
@@ -61,9 +61,9 @@ public class WorkshopController extends BaseController  {
     @ApiOperation("删除车间")
     @ApiImplicitParam(name = "id",value = "工厂标识",dataType = "string",paramType="query",required = true)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void delWorkshop(@RequestParam String id) throws ThingsboardException {
+    public void delWorkshop(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
             workshopService.delWorkshop(toUUID(id));

@@ -253,10 +253,10 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
     /**
      * 多条件查询
-     * @param deviceEntity
+     * @param device
      * @return
      */
-    List<DeviceEntity> findDeviceListBuyCdn(DeviceEntity deviceEntity);
+    List<Device> findDeviceListBuyCdn(Device device);
 
 
     /**
@@ -301,5 +301,19 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
 
     PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    Device getDeviceInfo(UUID id);
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    List<Device> getDeviceByIdList(List<UUID> ids);
 
 }
