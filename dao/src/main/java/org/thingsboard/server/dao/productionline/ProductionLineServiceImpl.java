@@ -82,6 +82,6 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
     @Override
     public ProductionLine findById(UUID id){
         log.trace("Executing findById [{}]", id);
-        return productionLineDao.findById(null, id);
+        return productionLineDao.findById(id);
     }
 }

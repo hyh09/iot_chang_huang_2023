@@ -37,11 +37,13 @@ import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 /**
@@ -209,23 +211,20 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             };
             factoryList = factoryRepository.findAll(specification);
 
-            //查询车间
-            if(notBlankWorkshopName){
-                workshopList = workshopDao.findWorkshopListByCdn(new Workshop(factory));
-            }else {
-                workshopList = workshopDao.findWorkshopListByCdn(new Workshop(null,null,factory.getTenantId()));
-            }
-            //查询产线
-            if(notBlankProductionlineName){
-                productionLineList = productionLineDao.findProductionLineListBuyCdn(new ProductionLine(factory));
-            }else {
-                productionLineList = productionLineDao.findProductionLineListBuyCdn(new ProductionLine(factory.getTenantId()));
-            }
-            //查询设备
-            if(notBlankDeviceName){
-                deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory));
-            }else {
-                deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory.getTenantId()));
+            if(CollectionUtils.isNotEmpty(factoryList)){
+                List<UUID> factoryIds = factoryList.stream().map(m->m.getId()).collect(Collectors.toList());
+                //查询车间
+                workshopList = workshopDao.findWorkshopListByCdn(new Workshop(factory,factoryIds));
+                if(CollectionUtils.isNotEmpty(workshopList)){
+                    List<UUID> workshopIds = workshopList.stream().map(m->m.getId()).collect(Collectors.toList());
+                    //查询产线
+                    productionLineList = productionLineDao.findProductionLineListBuyCdn(new ProductionLine(factory,workshopIds));
+                    if(CollectionUtils.isNotEmpty(productionLineList)){
+                        List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
+                        //查询设备
+                        deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory,productionLineIds));
+                    }
+                }
             }
 
 
@@ -521,7 +520,10 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         if(CollectionUtils.isNotEmpty(ids)){
             Specification<FactoryEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.in(root.get("id").in(ids)));
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                ids.forEach(in::value);
+                predicates.add(in);
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
             List<FactoryEntity> all = factoryRepository.findAll(specification);
@@ -532,6 +534,16 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             }
         }
         return resultList;
+    }
+
+    /**
+     * 根据条件查询工厂信息
+     * @param factory
+     * @return
+     */
+    @Override
+    public List<Factory> findAllByCdn(Factory factory){
+        return this.commonCondition(factory);
     }
 }
 

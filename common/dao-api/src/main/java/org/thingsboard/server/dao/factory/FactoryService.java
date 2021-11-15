@@ -68,4 +68,10 @@ public interface FactoryService {
      */
     List<Factory> findFactoryListByLoginRole(UUID userId,UUID tenantId);
 
+    /**
+     * 根据名称查询
+     * @return
+     */
+    List<Factory> findByName(String name,UUID tenantId);
+
 }

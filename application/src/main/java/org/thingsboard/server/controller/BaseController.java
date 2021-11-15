@@ -41,6 +41,7 @@ import org.thingsboard.server.common.data.edge.EdgeEventType;
 import org.thingsboard.server.common.data.edge.EdgeInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageDataIterableByTenantIdEntityId;
@@ -81,6 +82,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -110,7 +112,6 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
-import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.mail.MessagingException;
@@ -1010,6 +1011,25 @@ public abstract class BaseController {
         if(sameLevelNameRepetition){
             log.warn("名称重复");
             throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 校验工厂名称是否重复
+     * @param name
+     */
+    public void checkFactoryName(UUID id,String name) throws ThingsboardException {
+        List<Factory> byName = factoryService.findByName(name, this.getCurrentUser().getTenantId().getId());
+        if(org.apache.commons.collections.CollectionUtils.isNotEmpty(byName)){
+            if(id == null){
+                log.warn("名称重复");
+                throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+            }else {
+                if(!byName.get(0).getId().toString().equals(id.toString())){
+                    log.warn("名称重复");
+                    throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                }
+            }
         }
     }
 
