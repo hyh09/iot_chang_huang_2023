@@ -60,4 +60,11 @@ public interface FactoryDao extends Dao<Factory>{
      * @return
      */
     List<Factory> getFactoryByIdList(List<UUID> id);
+
+    /**
+     * 根据条件查询工厂信息
+     * @param factory
+     * @return
+     */
+    List<Factory> findAllByCdn(Factory factory);
 }

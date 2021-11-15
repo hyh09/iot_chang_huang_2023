@@ -86,6 +86,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private String workshopName;
     //产线名称
     private String productionLineName;
+    private List<UUID> productionLineIds;
     /**********************************以上是非数据库字段***************************************/
 
 
@@ -125,7 +126,9 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         return this;
     }
 
-    public Device (Factory factory){
+    public Device (Factory factory,List<UUID> productionLineIds){
+        this.setProductionLineIds(productionLineIds);
+        this.setTenantId(new TenantId(factory.getTenantId()));
         this.setName(factory.getWorkshopName());
         this.setTenantId(new TenantId(factory.getTenantId()));
     }
@@ -398,6 +401,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setDeviceNo(String deviceNo) {
         this.deviceNo = deviceNo;
+    }
+
+    public List<UUID> getProductionLineIds() {
+        return productionLineIds;
+    }
+
+    public void setProductionLineIds(List<UUID> productionLineIds) {
+        this.productionLineIds = productionLineIds;
     }
 
     @Override

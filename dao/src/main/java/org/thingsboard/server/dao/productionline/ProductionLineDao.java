@@ -39,4 +39,11 @@ public interface ProductionLineDao extends Dao<ProductionLine>{
      * @return
      */
     List<ProductionLine> getProductionLineByIdList(List<UUID> ids);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    ProductionLine findById(UUID id);
 }

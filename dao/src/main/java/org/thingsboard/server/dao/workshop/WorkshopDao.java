@@ -41,4 +41,11 @@ public interface WorkshopDao extends Dao<Workshop>{
      * @return
      */
     List<Workshop> getWorkshopByIdList(List<UUID> ids);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    Workshop findById(UUID id);
 }
