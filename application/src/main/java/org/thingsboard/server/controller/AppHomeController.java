@@ -11,11 +11,15 @@ import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
+import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -57,6 +61,46 @@ public class AppHomeController extends BaseController{
 
 
 
+    @ApiOperation(value = "【app首页的能耗接口--三个时期的总产量 昨天 今天 历史的 水 电 气能耗】")
+    @RequestMapping(value = "/threeEnergyValue", method = RequestMethod.GET)
+    @ResponseBody
+    public ResultHomeEnergyAppVo threeEnergyValue(@RequestParam("factoryId") UUID factoryId) throws ThingsboardException {
+        ResultHomeEnergyAppVo result = new ResultHomeEnergyAppVo();
+
+        try {
+            result.setTodayValue(getMapValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+            result.setYesterdayValue(getMapValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+            result.setHistory(getMapValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+            return result;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return  result;
+    }
+
+
+//    @ApiOperation(value = "【app首页的能耗接口--三个时期的总产量 昨天 今天 历史的 水 电 气能耗】")
+//    @RequestMapping(value = "/threeEnergyValue", method = RequestMethod.GET)
+//    @ResponseBody
+//    public ResultHomeEnergyAppVo threeEnergyValue(@RequestParam("factoryId") UUID factoryId) throws ThingsboardException {
+//        ResultHomeEnergyAppVo result = new ResultHomeEnergyAppVo();
+//
+//        try {
+//            result.setTodayValue(getMapValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+//            result.setYesterdayValue(getMapValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+//            result.setHistory(getMapValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+//            return result;
+//        }catch (Exception e)
+//        {
+//            e.printStackTrace();
+//
+//        }
+//        return  result;
+//    }
+
+
 
 
 
@@ -71,5 +115,21 @@ public class AppHomeController extends BaseController{
             return  resultCapAppVo.getTotalValue();
         }
         return  "0";
+    }
+
+
+
+
+    private Map<String,String> getMapValueByTime(UUID factoryId, long startTime, long EndTime) throws ThingsboardException {
+        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+        queryTsKvVo.setFactoryId(factoryId);
+        queryTsKvVo.setStartTime(startTime);
+        queryTsKvVo.setEndTime(EndTime);
+        ResultEnergyAppVo resultEnergyAppVo =   efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId());
+        if(resultEnergyAppVo != null)
+        {
+            return  resultEnergyAppVo.getTotalValue();
+        }
+        return  new HashMap<>();
     }
 }

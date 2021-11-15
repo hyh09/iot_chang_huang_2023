@@ -153,16 +153,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
         log.info(" 能效-当前的分页之后的数据之设备id的汇总:{}",ids);
         Map<UUID,List<EffectTsKvEntity>> map = pageList.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
-
-//        Map<UUID,List<EffectTsKvEntity>>  entityMap=   listToMap(effectTsKvEntities);
         log.info("查询到的数据转换为设备维度:{}",map);
         appVo.setAppDeviceCapVoList(getEntityKeyValue(map,tenantId));
-        //总的
-//        appVo.setTotalWaterValue(getTotalValue(effectTsKvEntities,18));
-//        appVo.setTotalElectricValue(getTotalValue(effectTsKvEntities,19));
-//        appVo.setTotalAirValue(getTotalValue(effectTsKvEntities,20));
         keys1.stream().forEach(str->{
-
             totalValueMap.put(str,getTotalValue(effectTsKvEntities,str));
         });
         appVo.setTotalValue(totalValueMap);
@@ -315,30 +308,19 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {
                     Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity1.getWorkshopId());
-                    appDeviceEnergyVo.setWorkshopName(workshop.get().getName());
+                    appDeviceEnergyVo.setWorkshopName(workshop.isPresent()?workshop.get().getName():"");
                 }
 
                 if (entity1.getProductionLineId() != null) {
                     Optional<ProductionLineEntity> productionLine = productionLineRepository.findByTenantIdAndId(tenantId.getId(), entity1.getProductionLineId());
-                    appDeviceEnergyVo.setProductionName(productionLine.get().getName());
+                    appDeviceEnergyVo.setProductionName(productionLine.isPresent()?productionLine.get().getName():"");
                 }
 
                 value.stream().forEach(effectTsKvEntity -> {
                     log.info("打印当前的key:"+effectTsKvEntity.getKey()+"effectTsKvEntity.getValue():"+effectTsKvEntity.getValue());
                     mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValue());
-                    //水
-//                    if (effectTsKvEntity.getKey() == 18) {
-//                        appDeviceEnergyVo.setWaterValue(effectTsKvEntity.getValue());
-//                    }
-//                    //电
-//                    if (effectTsKvEntity.getKey() == 19) {
-//                        appDeviceEnergyVo.setElectricValue(effectTsKvEntity.getValue());
-//                    }
-//                    //气
-//                    if (effectTsKvEntity.getKey() == 20) {
-//                        appDeviceEnergyVo.setAirValue(effectTsKvEntity.getValue());
-//                    }
                 });
+                appDeviceEnergyVo.setMapValue(mapValue);
             }
 
             appList.add(appDeviceEnergyVo);
