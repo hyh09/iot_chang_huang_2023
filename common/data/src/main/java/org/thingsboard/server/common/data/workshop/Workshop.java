@@ -3,6 +3,7 @@ package org.thingsboard.server.common.data.workshop;
 import lombok.Data;
 import org.thingsboard.server.common.data.factory.Factory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -33,6 +34,7 @@ public class Workshop{
     /**********************************以下是非数据库字段***************************************/
     //工厂名称
     private String factoryName;
+    private List<UUID> factoryIds;
 
 
     /**********************************以上是非数据库字段***************************************/
@@ -51,7 +53,9 @@ public class Workshop{
         this.tenantId = tenantId;
     }
 
-    public Workshop (Factory factory){
+    public Workshop (Factory factory,List<UUID> factoryIds){
+        this.setFactoryIds(factoryIds);
+        this.setTenantId(factory.getTenantId());
         this.setName(factory.getWorkshopName());
         this.setTenantId(factory.getTenantId());
     }

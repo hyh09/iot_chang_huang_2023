@@ -76,6 +76,6 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
     @Override
     public Workshop findById(UUID id){
         log.trace("Executing findById [{}]", id);
-        return workshopDao.findById(null, id);
+        return workshopDao.findById(id);
     }
 }
