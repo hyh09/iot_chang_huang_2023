@@ -250,10 +250,10 @@ public class CommonUtils {
         ca.set(Calendar.MILLISECOND, 59);
         // 获取本月最后一天的时间戳
         System.out.println(ca.getTimeInMillis());
-        Date zero1 = ca.getTime();
-        String s2 = format1.format(zero1);
+        Date zero2 = ca.getTime();
+        String s2 = format1.format(zero2);
         System.out.println("==获取本月第最后天的时间戳====>"+s2);
-        vo.setEndTime(zero.getTime());
+        vo.setEndTime(zero2.getTime());
         vo.setStrEndTime(s2);
 
         vo.setMonth(ca.get(Calendar.MONTH) + 1);
