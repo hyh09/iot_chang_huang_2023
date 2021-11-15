@@ -99,8 +99,7 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/delete/{roleId}", method = RequestMethod.DELETE)
     @ResponseBody
     public   Object delete(@PathVariable("roleId") String roleId) throws ThingsboardException {
-        try {
-            log.info("删除角色的接口入参:{}",roleId);
+        log.info("删除角色的接口入参:{}",roleId);
          long count =    userMenuRoleService.countAllByTenantSysRoleId(strUuid(roleId));
          if(count > 0)
          {
@@ -108,12 +107,9 @@ public class UserRoleController extends BaseController{
          }
             tenantSysRoleService.deleteById(strUuid(roleId));
             userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
+            tenantMenuRoleService.deleteByTenantSysRoleId(strUuid(roleId));
             return "success";
-        }catch (EmptyResultDataAccessException e)
-        {
-            log.info("打印当前的异常信息###正常异常:{}",e);
-            return  "success";
-        }
+
 
 
     }
