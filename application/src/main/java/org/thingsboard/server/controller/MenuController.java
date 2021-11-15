@@ -233,7 +233,7 @@ public class MenuController extends BaseController {
         try {
             MenuId menuId = new MenuId(toUUID(id));
             checkParameter("id",id);
-            Menu menu = menuService.getTenantById(UUID.fromString(id));
+            Menu menu = menuService.getMenuById(UUID.fromString(id));
             return new MenuVo(menu);
         } catch (Exception e) {
             throw handleException(e);

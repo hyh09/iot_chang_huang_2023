@@ -22,7 +22,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
@@ -32,6 +36,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 /**
@@ -44,6 +49,8 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
     private WorkshopRepository workshopRepository;
     @Autowired
     private ProductionLineDao productionLineDao;
+    @Autowired
+    private FactoryDao factoryDao;
 
     @Override
     protected Class<WorkshopEntity> getEntityClass() {
@@ -57,9 +64,25 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
 
 
     @Override
-    public Workshop saveWorkshop(Workshop workshop){
+    public Workshop saveWorkshop(Workshop workshop)throws ThingsboardException {
+        Boolean create = workshop.getId() == null;
+        //校验名称重复
+        Workshop check = new Workshop();
+        check.setName(workshop.getName());
+        check.setTenantId(workshop.getTenantId());
+        check.setFactoryId(workshop.getFactoryId());
+        List<Workshop> workshopList = this.commonCondition(check);
+        if(CollectionUtils.isNotEmpty(workshopList)){
+            if (create) {
+                throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+            }else {
+                if(!workshopList.get(0).getId().toString().equals(workshop.getId().toString())) {
+                    throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
+            }
+        }
         WorkshopEntity workshopEntity = new WorkshopEntity(workshop);
-        if (workshopEntity.getUuid() == null) {
+        if (create) {
             UUID uuid = Uuids.timeBased();
             workshopEntity.setUuid(uuid);
             workshopEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
@@ -75,8 +98,8 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
     }
 
     @Override
-    public List<Workshop> findWorkshopListBuyCdn(Workshop workshop){
-        return this.commonCondition(workshop);
+    public List<Workshop> findWorkshopListByCdn(Workshop workshop){
+        return this.getParentNameByList(this.commonCondition(workshop));
     }
 
     @Override
@@ -109,9 +132,11 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
     public void delWorkshop(UUID id){
         //判断下面有没有产线
         if(CollectionUtils.isEmpty(productionLineDao.findProductionLineList(null,id,null))){
-            WorkshopEntity workshopEntity = workshopRepository.findById(id).get();
+            /* 逻辑删除暂时不用
+             WorkshopEntity workshopEntity = workshopRepository.findById(id).get();
             workshopEntity.setDelFlag("D");
-            workshopRepository.save(workshopEntity);
+            workshopRepository.save(workshopEntity);*/
+            workshopRepository.deleteById(id);
         }
     }
 
@@ -150,5 +175,63 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             });
         }
         return resultWorkshop;
+    }
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Workshop> getWorkshopByIdList(List<UUID> ids){
+        List<Workshop> resultList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(ids)){
+            Specification<WorkshopEntity> specification = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.in(root.get("id").in(ids)));
+                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            };
+            List<WorkshopEntity> all = workshopRepository.findAll(specification);
+            if(CollectionUtils.isNotEmpty(all)){
+                //查询工厂名称
+                List<UUID> factoryIds = all.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+                List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
+                all.forEach(i->{
+                    Workshop workshop = i.toWorkshop();
+                    if(CollectionUtils.isNotEmpty(factoryByIdList)){
+                        factoryByIdList.forEach(j->{
+                            if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId())){
+                                workshop.setFactoryName(j.getName());
+                            }
+                        });
+                    }
+                    resultList.add(workshop);
+                });
+            }
+        }
+        return resultList;
+    }
+
+    /**
+     * 获取父级名称
+     * @param workshopList
+     * @return
+     */
+    public List<Workshop> getParentNameByList(List<Workshop> workshopList){
+        if(CollectionUtils.isNotEmpty(workshopList)){
+            //查询工厂名称
+            List<UUID> factoryIds = workshopList.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
+            workshopList.forEach(i->{
+                if(CollectionUtils.isNotEmpty(factoryByIdList)){
+                    factoryByIdList.forEach(j->{
+                        if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId())){
+                            i.setFactoryName(j.getName());
+                        }
+                    });
+                }
+            });
+        }
+        return workshopList;
     }
 }
