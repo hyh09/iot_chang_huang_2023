@@ -3,6 +3,7 @@ package org.thingsboard.server.common.data.memu;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.thingsboard.server.common.data.id.menu.MenuId;
+import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.validation.NoXss;
 
 import java.util.UUID;
@@ -70,6 +71,34 @@ public class Menu{
         this.menuImages = menu.getMenuImages();
         this.parentId = menu.getParentId();
     }
+
+    public TenantMenu toTenantMenuByAddButton(TenantMenu tenantMenuSource){
+        TenantMenu tenantMenu = new TenantMenu();
+        tenantMenu.setParentId(tenantMenuSource.getParentId());
+        tenantMenu.setLevel(tenantMenuSource.getLevel() + 1);
+        tenantMenu.setTenantId(this.getTenantId());
+        tenantMenu.setSysMenuId(this.getId());
+        tenantMenu.setRegion(this.getRegion());
+        tenantMenu.setSysMenuCode(this.getCode());
+        tenantMenu.setSysMenuName(this.getName());
+        tenantMenu.setTenantMenuName(this.getName());
+        tenantMenu.setUrl(this.getUrl());
+        tenantMenu.setTenantMenuIcon(this.getMenuIcon());
+        tenantMenu.setTenantMenuImages(this.getMenuImages());
+        tenantMenu.setMenuType(this.getMenuType());
+        tenantMenu.setIsButton(this.getIsButton());
+        tenantMenu.setLangKey(this.getLangKey());
+        tenantMenu.setPath(this.getPath());
+        tenantMenu.setHasChildren(false);
+        tenantMenu.setCreatedTime(this.getCreatedTime());
+        tenantMenu.setCreatedUser(this.getCreatedUser());
+        tenantMenu.setUpdatedTime(this.getUpdatedTime());
+        tenantMenu.setUpdatedUser(this.getUpdatedUser());
+        tenantMenu.setName(this.getName());
+        return tenantMenu;
+    }
+
+
 
 }
 

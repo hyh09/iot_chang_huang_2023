@@ -24,10 +24,10 @@ public class FactoryListVo {
 
     public FactoryListVo(){}
 
-    public FactoryListVo(List<Factory> factoryEntityList, List<Workshop> workshopEntityList, List<ProductionLine> productionLineEntityList, List<Device> deviceEntityList) {
+    public FactoryListVo(List<Factory> factoryEntityList, List<Workshop> workshopEntityList, List<ProductionLine> productionLineEntityList, List<Device> deviceList) {
         this.factoryEntityList = factoryEntityList;
         this.workshopEntityList = workshopEntityList;
         this.productionLineEntityList = productionLineEntityList;
-        this.deviceEntityList = deviceEntityList;
+        this.deviceEntityList = deviceList;
     }
 }

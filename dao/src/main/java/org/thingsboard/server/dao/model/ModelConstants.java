@@ -189,7 +189,7 @@ public class ModelConstants {
     public static final String DEVICE_SOFTWARE_ID_PROPERTY = "software_id";
     public static final String DEVICE_PRODUCTION_LINE_ID_PROPERTY = "production_line_id";
     public static final String DEVICE_DICT_DEVICE_ID_PROPERTY = "dict_device_id";
-    public static final String DEVICE_IMAGES_PROPERTY = "images";
+    public static final String DEVICE_PICTURE_PROPERTY = "picture";
     public static final String DEVICE_ICON_PROPERTY = "icon";
 
 

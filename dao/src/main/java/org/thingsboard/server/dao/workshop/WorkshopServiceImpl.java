@@ -2,14 +2,17 @@ package org.thingsboard.server.dao.workshop;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @Slf4j
+@Transactional
 public class WorkshopServiceImpl extends AbstractEntityService implements WorkshopService {
 
     private final WorkshopDao workshopDao;
@@ -24,7 +27,7 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
      * @return
      */
     @Override
-    public Workshop saveWorkshop(Workshop workshop){
+    public Workshop saveWorkshop(Workshop workshop) throws ThingsboardException {
         log.trace("Executing saveWorkshop [{}]", workshop);
         workshop.setCode(String.valueOf(System.currentTimeMillis()));
         return workshopDao.saveWorkshop(workshop);
@@ -36,7 +39,7 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
      * @return
      */
     @Override
-    public Workshop updWorkshop(Workshop workshop){
+    public Workshop updWorkshop(Workshop workshop) throws ThingsboardException{
         log.trace("Executing updWorkshop [{}]", workshop);
         return workshopDao.saveWorkshop(workshop);
     }

@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.workshop;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.workshop.Workshop;
 
 import java.util.List;
@@ -12,14 +13,14 @@ public interface WorkshopService {
      * @param workshop
      * @return
      */
-    Workshop saveWorkshop(Workshop workshop);
+    Workshop saveWorkshop(Workshop workshop) throws ThingsboardException;
 
     /**
      * 修改后刷新值
      * @param workshop
      * @return
      */
-    Workshop updWorkshop(Workshop workshop);
+    Workshop updWorkshop(Workshop workshop) throws ThingsboardException;
 
     /**
      * 删除后刷新值

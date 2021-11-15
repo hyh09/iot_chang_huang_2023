@@ -36,10 +36,7 @@ import org.thingsboard.server.dao.sql.role.dao.TenantMenuRoleDao;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
 
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -119,6 +116,8 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         }
         tenantMenuRepository.saveAll(collect);
     }
+
+
     /**
      * 保存租户菜单信息
      * @param tenantMenu
@@ -228,6 +227,20 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     }
 
     /**
+     * 根据id查
+     * @param id
+     * @return
+     */
+    @Override
+    public TenantMenu getMenuById(UUID id){
+        TenantMenuEntity entity = tenantMenuRepository.findById(id).get();
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
+    }
+
+    /**
      * 构造查询条件,需要家条件在这里面加
      * @param tenantMenu
      * @return
@@ -245,6 +258,9 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
                 }
                 if(StringUtils.isNotEmpty(tenantMenu.getMenuType())){
                     predicates.add(cb.equal(root.get("menuType"),tenantMenu.getMenuType()));
+                }
+                if(tenantMenu.getSysMenuId() != null){
+                    predicates.add(cb.equal(root.get("sysMenuId"),tenantMenu.getSysMenuId()));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));

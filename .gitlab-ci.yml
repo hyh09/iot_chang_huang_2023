@@ -16,7 +16,6 @@ before_script:
 cache:
   paths:
     - .m2/repository
-    - ui-ngx/node_modules
   # keep cache across branch
   key: "$CI_JOB_NAME"
 
@@ -30,17 +29,10 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    # - npm i pkg-fetch -g
-    # - npm i pkg -g
-    # - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
-    - yum -y install tree
-    - tree --dirsfirst -L 4 /cache
-    - ls -al /.m2/repository || true
-    - cd ui-ngx
-    - ls -a
-    - yarn install
-    - tree --dirsfirst -L 4 /cache
-    - ls -al .m2/repository || true
+    - npm i pkg-fetch -g
+    - npm i pkg -g
+    - mvn $MAVEN_CLI_OPTS clean install -Dmaven.test.skip=true -Dhttps.protocols=TLSv1.2
+    - ls application/target
   only:
     - dev
   after_script:
