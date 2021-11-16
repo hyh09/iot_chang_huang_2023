@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -36,9 +35,9 @@ public class ProductionLineController extends BaseController  {
     @ResponseBody
     public ProductionLineVo saveProductionLine(@RequestBody AddProductionLineDto addProductionLineDto) throws ThingsboardException {
         try {
-            checkParameter("tenantId",addProductionLineDto.getTenantId());
             checkParameter("workshopId",addProductionLineDto.getWorkshopId());
             ProductionLine productionLine = addProductionLineDto.toProductionLine();
+            productionLine.setTenantId(getCurrentUser().getTenantId().getId());
             if(addProductionLineDto.getId() == null){
                 productionLine.setCreatedUser(getCurrentUser().getUuidId());
                 productionLine = checkNotNull(productionLineService.saveProductionLine(productionLine));
@@ -60,10 +59,9 @@ public class ProductionLineController extends BaseController  {
      */
     @ApiOperation("删除生产线")
     @ApiImplicitParam(name = "id",value = "工厂标识",dataType = "string",paramType="query",required = true)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void delProductionLine(@RequestParam String id) throws ThingsboardException {
+    public void delProductionLine(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
             productionLineService.delProductionLine(toUUID(id));
@@ -86,10 +84,9 @@ public class ProductionLineController extends BaseController  {
             @ApiImplicitParam(name = "workshopId",value = "车间标识",dataType = "string",paramType = "query"),
             @ApiImplicitParam(name = "factoryId",value = "工厂标识",dataType = "string",paramType = "query")
     })
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "/findProductionLineList", method = RequestMethod.GET)
     @ResponseBody
-    public List<ProductionLineVo> findWorkshopList(@RequestParam String tenantId,@RequestParam String workshopId,@RequestParam String factoryId) throws ThingsboardException {
+    public List<ProductionLineVo> findProductionLineList(@RequestParam String tenantId,@RequestParam String workshopId,@RequestParam String factoryId) throws ThingsboardException {
         try {
             List<ProductionLineVo> productionLineVos = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){
@@ -115,7 +112,6 @@ public class ProductionLineController extends BaseController  {
      */
     @ApiOperation("查询生产线详情")
     @ApiImplicitParam(name = "id",value = "当前id",dataType = "String",paramType="path",required = true)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ProductionLine findById(@PathVariable("id") String id) throws ThingsboardException {

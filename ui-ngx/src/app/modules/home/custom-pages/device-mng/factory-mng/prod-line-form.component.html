@@ -2,10 +2,10 @@
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
       <div class="mat-block" style="padding-bottom: 12px; color: #666;">
-        {{ 'device-mng.factory-belong' | translate }}{{ entitiesTableConfig.componentsData.factoryName }}
+        {{ 'device-mng.factory-belong' | translate }}{{ entityForm.get('factoryName').value }}
       </div>
       <div class="mat-block" style="padding-bottom: 1.25em; color: #666;">
-        {{ 'device-mng.work-shop-belong' | translate }}{{ entitiesTableConfig.componentsData.workShopName }}
+        {{ 'device-mng.work-shop-belong' | translate }}{{ entityForm.get('workshopName').value }}
       </div>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.prod-line-name</mat-label>

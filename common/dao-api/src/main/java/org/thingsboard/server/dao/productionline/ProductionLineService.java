@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.productionline;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 
 import java.util.List;
@@ -12,14 +13,14 @@ public interface ProductionLineService {
      * @param productionLine
      * @return
      */
-    ProductionLine saveProductionLine(ProductionLine productionLine);
+    ProductionLine saveProductionLine(ProductionLine productionLine) throws ThingsboardException;
 
     /**
      * 修改后刷新值
      * @param productionLine
      * @return
      */
-    ProductionLine updProductionLine(ProductionLine productionLine);
+    ProductionLine updProductionLine(ProductionLine productionLine) throws ThingsboardException;
 
     /**
      * 删除后刷新值

@@ -42,7 +42,7 @@
             <mat-label>{{ filter.langKey | translate }}</mat-label>
             <input type="text" matInput [(ngModel)]="filterParams[filter.propName]" (keyup.enter)="fetchData()" />
             <button
-              *ngIf="filterParams.name"
+              *ngIf="filterParams[filter.propName]"
               matSuffix mat-icon-button aria-label="Clear"
               (click)="onClear(filter.propName)"
             >
@@ -55,7 +55,7 @@
             </button>
             <button
               mat-stroked-button
-              [disabled]="checkedDeviceIdList.values.length === 0"
+              [disabled]="checkedDeviceIdList.size === 0"
               (click)="distributeDevice()"
             >
               {{ 'device-mng.batch-distribute' | translate }}
@@ -95,9 +95,8 @@
                       [nzShowCheckbox]="item.rowType === 'device'"
                       [nzChecked]="checkedDeviceIdList.has(item.id)"
                       (nzCheckedChange)="onDeviceCheckedChange(item.id, $event)"
-                    >
-                      {{ item.name }}
-                    </td>
+                      nzAlign="left"
+                    >{{ item.name }}</td>
                     <td>
                       <div *ngIf="item.logoImages" fxFlex fxLayoutAlign="start center" class="image-wrapper">
                         <img nz-image [nzSrc]="item.logoImages" (click)="$event.stopPropagation()" />
@@ -130,7 +129,7 @@
                         *ngIf="item.rowType === 'prodLine'"
                         mat-icon-button
                         [disabled]="isLoading$ | async"
-                        matTooltip="{{ 'device-mng.distribute' | translate }}"
+                        matTooltip="{{ 'device-mng.add-device' | translate }}"
                         matTooltipPosition="above"
                         (click)="$event.stopPropagation(); addDevice(item)"
                       >
@@ -140,7 +139,7 @@
                         *ngIf="item.rowType === 'device'"
                         mat-icon-button
                         [disabled]="isLoading$ | async"
-                        matTooltip="{{ 'device-mng.add-device' | translate }}"
+                        matTooltip="{{ 'device-mng.distribute-device' | translate }}"
                         matTooltipPosition="above"
                         (click)="$event.stopPropagation(); distributeDevice([item.id])"
                       >

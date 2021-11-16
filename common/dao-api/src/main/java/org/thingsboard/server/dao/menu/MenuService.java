@@ -59,7 +59,7 @@ public interface MenuService {
      */
     List<Menu> getOneLevel(String menuType);
 
-    Menu getTenantById(UUID id);
+    Menu getMenuById(UUID id);
 
     /**
      * 查询同级菜单下是否存在

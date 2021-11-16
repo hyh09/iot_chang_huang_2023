@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.workshop;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.Dao;
 
@@ -8,9 +9,9 @@ import java.util.UUID;
 
 public interface WorkshopDao extends Dao<Workshop>{
 
-    Workshop saveWorkshop(Workshop workshop);
+    Workshop saveWorkshop(Workshop workshop)throws ThingsboardException;
 
-    List<Workshop> findWorkshopListBuyCdn(Workshop workshop);
+    List<Workshop> findWorkshopListByCdn(Workshop workshop);
 
     List<Workshop> findWorkshopListByfactoryId(UUID factoryId);
 
@@ -33,4 +34,18 @@ public interface WorkshopDao extends Dao<Workshop>{
      * @param factoryId
      */
     void delWorkshopByFactoryId(UUID factoryId);
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    List<Workshop> getWorkshopByIdList(List<UUID> ids);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    Workshop findById(UUID id);
 }

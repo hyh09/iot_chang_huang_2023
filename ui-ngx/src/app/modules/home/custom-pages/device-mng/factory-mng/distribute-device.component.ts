@@ -82,7 +82,7 @@ export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceC
       }).subscribe(() => {
         this.dialogRef.close(['success']);
         this.store.dispatch(new ActionNotificationShow({
-          message: this.translate.instant('auth-mng.distribute-success'),
+          message: this.translate.instant('device-mng.distribute-success'),
           type: 'success',
           duration: 3000
         }));
