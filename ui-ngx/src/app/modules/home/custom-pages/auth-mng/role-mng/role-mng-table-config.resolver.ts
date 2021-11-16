@@ -52,6 +52,12 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
   }
 
   resolve(): EntityTableConfig<Role> {
+    this.config.componentsData = {
+      roleCode: '',
+      roleName: '',
+      availableCode: ''
+    }
+    
     this.roleMngService.getAllRoles().subscribe(res => {
       this.config.componentsData.roleList = res;
     });

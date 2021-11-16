@@ -57,6 +57,13 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
   }
 
   resolve(): EntityTableConfig<DeviceDictionary> {
+    this.config.componentsData = {
+      code: '',
+      name: '',
+      supplier: '',
+      availableCode: ''
+    }
+    
     this.setAvailableCode();
 
     this.config.tableTitle = this.translate.instant('device-mng.device-dic');

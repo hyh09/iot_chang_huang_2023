@@ -169,7 +169,10 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     checkedNodes.forEach(node => {
       const _checkedNodes = this.utils.expandTreeNode(node).filter(_node => (_node.isHalfChecked || _node.isChecked));
       _checkedNodes.forEach(_node => {
-        (this[sysTree] as NzTreeComponent).getTreeNodeByKey(_node.origin.sysMenuId).isDisabled = false;
+        const sysNode = (this[sysTree] as NzTreeComponent).getTreeNodeByKey(_node.origin.sysMenuId);
+        if (sysNode) {
+          sysNode.isDisabled = false;
+        }
       })
     });
     

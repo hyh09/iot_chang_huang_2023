@@ -6,10 +6,10 @@ import { BaseData, HasId, HasUUID } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 
 export interface FetchListFilter {
-  name: string,
-  workshopName: string,
-  productionlineName: string,
-  deviceName: string
+  name?: string,
+  workshopName?: string,
+  productionlineName?: string,
+  deviceName?: string
 }
 
 @Injectable({
@@ -23,11 +23,13 @@ export class FactoryMngService {
   ) { }
 
   // 条件查询工厂列表（含车间、产线、设备）
-  public getFactoryList(params: FetchListFilter, config?: RequestConfig): Observable<FactoryMngList> {
+  public getFactoryList(params?: FetchListFilter, config?: RequestConfig): Observable<FactoryMngList> {
     let queryStr: string[] = [];
-    Object.keys(params).forEach(key => {
-      queryStr.push(`${key}=${params[key]}`);
-    });
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
     return this.http.get<FactoryMngList>(`/api/factory/findFactoryListByCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
