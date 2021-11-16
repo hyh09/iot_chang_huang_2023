@@ -838,7 +838,7 @@ public class DeviceController extends BaseController {
                     savedDevice.getCustomerId(),
                     created ? ActionType.ADDED : ActionType.UPDATED, null);
             //保存或修改设备构成
-            deviceService.saveOrUpdDeviceComponentList(addDeviceDto.toDevice(),savedDevice.getId().getId(),saveType);
+            deviceService.saveOrUpdDeviceComponentList(device,savedDevice.getId().getId(),saveType);
             return new DeviceVo(device);
         } catch (Exception e) {
             throw handleException(e);
