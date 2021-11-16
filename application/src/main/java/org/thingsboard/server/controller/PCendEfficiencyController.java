@@ -8,18 +8,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
+import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -91,8 +96,31 @@ public class PCendEfficiencyController extends BaseController {
     public  Object queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         log.info("打印当前的入参:{}",deviceId);
         return  efficiencyStatisticsSvc.queryDictDevice(deviceId,getTenantId());
-
     }
+
+
+
+    @ApiOperation(value = "【PC端查询当前设备的运行状态】")
+    @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
+        try {
+            if (queryTsKvVo.getEndTime() == null) {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
+            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
+        }catch (Exception e)
+        {
+            log.error("【PC端查询当前设备的运行状态】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
+
+
+
+
+
 
 
 
