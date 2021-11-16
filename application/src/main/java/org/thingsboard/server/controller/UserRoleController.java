@@ -87,9 +87,12 @@ public class UserRoleController extends BaseController{
     @ApiOperation(value = "角色模块的 无参查询全部数据")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ResponseBody
-    public Object findAll() throws ThingsboardException {
-        Map<String, Object> queryParam   = new HashMap<>();
-        return   tenantSysRoleService.findAll(queryParam);
+    public Object findAll() throws Exception {
+//        Map<String, Object> queryParam   = new HashMap<>();
+//        queryParam.put()
+        TenantSysRoleEntity  tenantSysRoleEntity = new TenantSysRoleEntity();
+        tenantSysRoleEntity.setTenantId(getTenantId().getId());
+        return   tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
     }
 
 
@@ -124,8 +127,8 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/pageQuery", method = RequestMethod.GET)
     @ResponseBody
     public Object pageQuery(
-            @RequestParam("roleCode") String roleCode,
-            @RequestParam("roleName") String roleName,
+            @RequestParam(value = "roleCode",required = false) String roleCode,
+            @RequestParam(value = "roleName",required = false) String roleName,
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,

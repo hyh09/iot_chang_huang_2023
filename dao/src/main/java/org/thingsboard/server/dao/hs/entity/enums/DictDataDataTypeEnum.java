@@ -12,7 +12,7 @@ import java.util.*;
  * @since 2021.10.18
  */
 @Getter
-public enum DictDataDataTypeEnum {
+public enum DictDataDataTypeEnum implements EnumGetter{
     FLOAT("FLOAT", "type-float"),
     BOOLEAN("BOOLEAN","type-boolean"),
     NUMBER("NUMBER", "type-number"),
@@ -25,16 +25,5 @@ public enum DictDataDataTypeEnum {
     DictDataDataTypeEnum(String code, String name){
         this.code = code;
         this.name = name;
-    }
-
-    public static List<Map<String, String>> toResourceList() {
-        List<Map<String, String>> list = new ArrayList<>();
-        Arrays.stream(DictDataDataTypeEnum.values()).forEach(e->{
-            LinkedHashMap<String, String> map = new LinkedHashMap<>();
-            map.put("name", e.getName());
-            map.put("code", e.getCode());
-            list.add(map);
-        });
-        return list;
     }
 }

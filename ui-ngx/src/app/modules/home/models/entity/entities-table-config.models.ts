@@ -194,7 +194,6 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   padding?: string;
   titleVisible? = true;
   groupActionEnabled? = true;
-  leftContentEnabled? = false;
   leftContentWidth?: string = '300px';
   afterResolved? = () => {};
   selectionAlwaysEnabled? = false;

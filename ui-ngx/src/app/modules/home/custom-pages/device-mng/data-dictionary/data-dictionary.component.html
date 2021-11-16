@@ -1,13 +1,15 @@
 <div class="mat-padding" fxLayout="column" style="min-width: 550px;">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.code</mat-label>
-        <input matInput formControlName="code" required>
-        <mat-error *ngIf="entityForm.get('code').hasError('required')">
-          {{ 'device-mng.code-required' | translate }}
-        </mat-error>
-      </mat-form-field>
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.code</mat-label>
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="entityForm.get('code').hasError('required')">
+            {{ 'device-mng.code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.name</mat-label>
         <input matInput formControlName="name" required>
@@ -35,7 +37,7 @@
         <mat-label translate>device-mng.comment</mat-label>
         <input matInput formControlName="comment">
       </mat-form-field>
-      <tb-material-icon-select formControlName="icon"></tb-material-icon-select>
+      <tb-material-icon-select formControlName="icon" [disabled]="(isLoading$ | async) || !isEdit"></tb-material-icon-select>
     </fieldset>
   </form>
 </div>

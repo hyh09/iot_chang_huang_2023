@@ -10,7 +10,7 @@ import lombok.Getter;
  * @since 2021.11.10
  */
 @Getter
-public enum InitScopeEnum {
+public enum InitScopeEnum implements EnumGetter{
     DICT_DEVICE_GROUP("DICT_DEVICE_GROUP", "设备字典分组");
 
     @JsonValue

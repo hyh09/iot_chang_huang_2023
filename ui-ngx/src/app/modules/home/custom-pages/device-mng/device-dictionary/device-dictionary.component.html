@@ -1,13 +1,15 @@
-<div class="mat-padding device-dict-wrapper" fxLayout="column" style="max-width: 1000px">
+<div class="mat-padding device-dict-wrapper" fxLayout="column">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.code</mat-label>
-        <input matInput formControlName="code" required>
-        <mat-error *ngIf="entityForm.get('code').hasError('required')">
-          {{ 'device-mng.code-required' | translate }}
-        </mat-error>
-      </mat-form-field>
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.code</mat-label>
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="entityForm.get('code').hasError('required')">
+            {{ 'device-mng.code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.name</mat-label>
         <input matInput formControlName="name" required>

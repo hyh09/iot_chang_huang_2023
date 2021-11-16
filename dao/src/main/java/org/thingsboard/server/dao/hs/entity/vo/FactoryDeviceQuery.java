@@ -29,7 +29,7 @@ public class FactoryDeviceQuery {
      * 车间Id
      */
     @ApiModelProperty("车间Id")
-    private String workShopId;
+    private String workshopId;
 
     /**
      * 产线Id

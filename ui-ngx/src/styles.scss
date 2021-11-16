@@ -1110,6 +1110,14 @@ input:-internal-autofill-previewed,
   }
 }
 
+.mat-form-field-appearance-legacy .mat-form-field-infix {
+  padding: 6px 0;
+}
+
+.mat-dialog-content {
+  max-width: 900px;
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {

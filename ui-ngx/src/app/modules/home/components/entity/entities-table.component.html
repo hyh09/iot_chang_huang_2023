@@ -38,7 +38,7 @@
       class="mat-padding tb-entity-table tb-absolute-fill"
       [style.padding]="entitiesTableConfig.padding"
     >
-      <div *ngIf="entitiesTableConfig.leftContentEnabled" class="tb-entity-left-content" [style.width]="entitiesTableConfig.leftContentWidth">
+      <div [fxShow]="!!entitiesTableConfig.leftComponent" class="tb-entity-left-content" [style.width]="entitiesTableConfig.leftContentWidth">
         <tb-anchor #entityLeftContent></tb-anchor>
       </div>
       <div fxLayout="column" class="mat-elevation-z1 tb-entity-table-content">

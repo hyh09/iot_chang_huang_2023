@@ -202,7 +202,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return AlarmRecordResult.builder()
                     .name(device.getName())
                     .id(e.getId().toString())
-                    .createTime(e.getCreatedTime())
+                    .createdTime(e.getCreatedTime())
                     .title(e.getType())
                     .status(status)
                     .level(level)
@@ -271,7 +271,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Override
     public DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException, ThingsboardException {
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id))).map(DeviceEntity::toData).orElseThrow(() -> new ThingsboardException("device not exist", ThingsboardErrorCode.GENERAL));
-        var deviceBaseDTO = this.clientService.getDeviceBase(tenantId, new FactoryDeviceQuery(device.getFactoryId().toString(), device.getWorkshopId().toString(), device.getProductionLineId().toString(), device.getId().toString()));
+        var deviceBaseDTO = this.clientService.getDeviceBase(tenantId, new FactoryDeviceQuery(UUIDToString(device.getFactoryId()), UUIDToString(device.getWorkshopId()), UUIDToString(device.getProductionLineId()), device.getId().toString()));
 
         var kvEntryMap = this.timeseriesService.findAllLatest(tenantId, DeviceId.fromString(id)).get()
                 .stream().sorted(Comparator.comparing(TsKvEntry::getKey)).collect(Collectors.toMap(TsKvEntry::getKey, Function.identity(), (key1, key2) -> key1, LinkedHashMap::new));
