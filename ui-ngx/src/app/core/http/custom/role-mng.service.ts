@@ -50,8 +50,8 @@ export class RoleMngService {
   }
 
   // 删除角色
-  public deleteRole(roleId: HasUUID, config?: RequestConfig) {
-    return this.http.delete(`/api/role/delete/${roleId}`, defaultHttpOptionsFromConfig(config));
+  public deleteRole(roleId: HasUUID) {
+    return this.http.delete(`/api/role/delete/${roleId}`, { responseType: 'text' });
   }
 
   // 获取当前可用的角色编码
