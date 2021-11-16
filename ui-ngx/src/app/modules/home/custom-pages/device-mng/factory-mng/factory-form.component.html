@@ -20,7 +20,10 @@
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.email</mat-label>
-        <input matInput formControlName="email">
+        <input matInput formControlName="email" required>
+        <mat-error *ngIf="entityForm.get('email').hasError('required')">
+          {{ 'device-mng.email-required' | translate }}
+        </mat-error>
         <mat-error *ngIf="entityForm.get('email').hasError('email')">
           {{ 'device-mng.email-invalid' | translate }}
         </mat-error>

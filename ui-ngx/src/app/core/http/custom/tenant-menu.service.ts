@@ -26,7 +26,7 @@ export class TenantMenuService {
   // 获取租户菜单（不含按钮）
   public getTenantMenuList(menuType: MenuType, tenantId: string, config?: RequestConfig): Observable<TenantMenus> {
     return this.http.get<TenantMenus>(
-      `/api/tenantMenu/getTenantMenuList?menuType=${menuType}&tenantId=${tenantId}`,
+      `/api/tenantMenu/getTenantMenuList?menuType=${menuType}&tenantId=${tenantId}&isButton=false`,
       defaultHttpOptionsFromConfig(config)
     );
   }

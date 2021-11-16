@@ -44,7 +44,8 @@ export enum EntityType {
   PROD_LINE = 'PROD_LINE',
   MENU = 'MENU',
   USER_MNG = 'USER_MNG',
-  ROLE_MNG = 'ROLE_MNG'
+  ROLE_MNG = 'ROLE_MNG',
+  ALARM_RECORD = 'ALARM_RECORD'
 }
 
 export enum AliasEntityType {
@@ -399,6 +400,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         add: 'auth-mng.add-role',
         noEntities: 'auth-mng.no-roles-text',
         selectedEntities: 'auth-mng.selected-roles'
+      }
+    ],
+    [
+      EntityType.ALARM_RECORD,
+      {
+        noEntities: 'device-monitor.no-alarm-record'
       }
     ]
   ]
