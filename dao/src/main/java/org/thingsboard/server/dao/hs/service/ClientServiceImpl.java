@@ -34,6 +34,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.function.Function;
@@ -81,6 +82,14 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
+//        TODO delete
+//        var cb = entityManager.getCriteriaBuilder();
+//        var query = cb.createQuery(DeviceEntity.class);
+//        var root = query.from(DeviceEntity.class);
+//        query.multiselect(root.<UUID>get("id"), root.<Long>get("createdTime"));
+//        var r = entityManager.createQuery(query);
+//        var z = r.getResultList();
+
         return DeviceBaseDTO.builder()
                 .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
                 .workshop(t.getWorkshopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkshopId()))) : null)
@@ -170,6 +179,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+//            predicates.add(cb.like(root.get("additional_info"), "%" + "\"gateway\":false" + "%"));
 
             if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
