@@ -1,13 +1,15 @@
 <div class="mat-padding" fxLayout="column" style="min-width: 500px;">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-      <mat-form-field class="mat-block">
-        <mat-label translate>auth-mng.user-code</mat-label>
-        <input matInput formControlName="userCode" required>
-        <mat-error *ngIf="entityForm.get('userCode').hasError('required')">
-          {{ 'auth-mng.user-code-required' | translate }}
-        </mat-error>
-      </mat-form-field>
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block">
+          <mat-label translate>auth-mng.user-code</mat-label>
+          <input matInput formControlName="userCode" required>
+          <mat-error *ngIf="entityForm.get('userCode').hasError('required')">
+            {{ 'auth-mng.user-code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
       <mat-form-field class="mat-block">
         <mat-label translate>auth-mng.user-name</mat-label>
         <input matInput formControlName="userName" required>

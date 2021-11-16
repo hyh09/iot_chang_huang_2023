@@ -142,7 +142,7 @@ import { WidgetsBundleSearchComponent } from '@shared/components/widgets-bundle-
 import { SelectableColumnsPipe } from '@shared/pipe/selectable-columns.pipe';
 import { QuickTimeIntervalComponent } from '@shared/components/time/quick-time-interval.component';
 import { OtaPackageAutocompleteComponent } from '@shared/components/ota-package/ota-package-autocomplete.component';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { CopyButtonComponent } from '@shared/components/button/copy-button.component';
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
@@ -166,7 +166,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
     },
     {
       provide: MAT_DATE_LOCALE,
-      useValue: 'en-GB'
+      useValue: 'zh-CN'
     }
   ],
   declarations: [

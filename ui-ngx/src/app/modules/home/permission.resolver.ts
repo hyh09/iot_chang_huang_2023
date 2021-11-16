@@ -44,7 +44,7 @@ export class PermissionResolver implements Resolve<Permissions>  {
             parentId: menu.parentId
           };
           if (menu.isButton) {
-            menuBtnMap[menuMap[menu.parentId].path].push(menu.langKey);
+            menuMap[menu.parentId] && menuBtnMap[menuMap[menu.parentId].path].push(menu.langKey);
           } else {
             menuSections.push(menuSection);
           }

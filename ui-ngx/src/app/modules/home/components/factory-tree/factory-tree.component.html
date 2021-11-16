@@ -1,10 +1,15 @@
 <div class="factory-tree">
-  <mat-form-field>
+  <mat-form-field class="factory-tree-search">
     <mat-label>{{ 'action.search' | translate }}</mat-label>
     <input type="text" matInput [(ngModel)]="searchValue" />
     <button *ngIf="searchValue" matSuffix mat-icon-button aria-label="Clear" (click)="searchValue = ''">
       <mat-icon class="material-icons">close</mat-icon>
     </button>
   </mat-form-field>
-  <nz-tree [nzData]="factories" [nzSearchValue]="searchValue" (nzClick)="onClickNode($event)"></nz-tree>
+  <nz-tree
+    [nzData]="treeData"
+    [nzSearchValue]="searchValue"
+    [nzVirtualHeight]="scrollHeight"
+    (nzClick)="onClickNode($event)"
+  ></nz-tree>
 </div>

@@ -1,0 +1,59 @@
+<mat-form-field>
+  <mat-label>{{ 'common.time-range' | translate }}</mat-label>
+  <mat-date-range-input [rangePicker]="picker">
+    <input
+      matStartDate
+      [(ngModel)]="entitiesTableConfig.componentsData.startTime"
+      placeholder="{{ 'common.start-time' | translate }}"
+      (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+      (click)="picker.open()"
+    >
+    <input
+      matEndDate
+      [(ngModel)]="entitiesTableConfig.componentsData.endTime"
+      placeholder="{{ 'common.end-time' | translate }}"
+      (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+      (click)="picker.open()"
+    >
+  </mat-date-range-input>
+  <mat-datepicker-toggle matPrefix [for]="picker"></mat-datepicker-toggle>
+  <button
+    *ngIf="entitiesTableConfig.componentsData.startTime || entitiesTableConfig.componentsData.endTime"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('startTime'); onClear('endTime');"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+  <mat-date-range-picker #picker></mat-date-range-picker>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'device-monitor.alarm-status' | translate }}</mat-label>
+  <mat-select
+    [(ngModel)]="entitiesTableConfig.componentsData.status"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  >
+    <mat-option [value]="statusType.ANY">{{ 'common.all' | translate }}</mat-option>
+    <mat-option [value]="statusType.ACTIVE_UNACK">{{ 'device-monitor.alarm-status-active-unack' | translate }}</mat-option>
+    <mat-option [value]="statusType.ACTIVE_ACK">{{ 'device-monitor.alarm-status-active-ack' | translate }}</mat-option>
+    <mat-option [value]="statusType.CLEARED_ACK">{{ 'device-monitor.alarm-status-cleared-ack' | translate }}</mat-option>
+  </mat-select>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'device-monitor.alarm-level' | translate }}</mat-label>
+  <mat-select
+    [(ngModel)]="entitiesTableConfig.componentsData.level"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  >
+    <mat-option [value]="levelType.ANY">{{ 'common.all' | translate }}</mat-option>
+    <mat-option [value]="levelType.CRITICAL">{{ 'device-monitor.alarm-level-critical' | translate }}</mat-option>
+    <mat-option [value]="levelType.MAJOR">{{ 'device-monitor.alarm-level-major' | translate }}</mat-option>
+    <mat-option [value]="levelType.MINOR">{{ 'device-monitor.alarm-level-minor' | translate }}</mat-option>
+    <mat-option [value]="levelType.WARNING">{{ 'device-monitor.alarm-level-warning' | translate }}</mat-option>
+    <mat-option [value]="levelType.INDETERMINATE">{{ 'device-monitor.alarm-level-indeterminate' | translate }}</mat-option>
+  </mat-select>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>
