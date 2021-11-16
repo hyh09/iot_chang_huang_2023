@@ -44,7 +44,8 @@ export enum EntityType {
   PROD_LINE = 'PROD_LINE',
   MENU = 'MENU',
   USER_MNG = 'USER_MNG',
-  ROLE_MNG = 'ROLE_MNG'
+  ROLE_MNG = 'ROLE_MNG',
+  ALARM_RECORD = 'ALARM_RECORD'
 }
 
 export enum AliasEntityType {
@@ -345,21 +346,21 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       EntityType.FACTORY,
       {
         add: 'device-mng.add-factory',
-        details: 'factory-details'
+        details: 'device-mng.factory-details'
       }
     ],
     [
       EntityType.WORK_SHOP,
       {
         add: 'device-mng.add-work-shop',
-        details: 'work-shop-details'
+        details: 'device-mng.work-shop-details'
       }
     ],
     [
       EntityType.PROD_LINE,
       {
         add: 'device-mng.add-prod-line',
-        details: 'prod-line-details'
+        details: 'device-mng.prod-line-details'
       }
     ],
     [
@@ -399,6 +400,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         add: 'auth-mng.add-role',
         noEntities: 'auth-mng.no-roles-text',
         selectedEntities: 'auth-mng.selected-roles'
+      }
+    ],
+    [
+      EntityType.ALARM_RECORD,
+      {
+        noEntities: 'device-monitor.no-alarm-record'
       }
     ]
   ]

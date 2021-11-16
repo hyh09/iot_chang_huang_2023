@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
+import { AlarmRecordTableConfigResolver } from './alarm-record/alarm-record-table-config.resolver';
 import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.component';
 
 const routes: Routes = [
@@ -39,9 +40,9 @@ const routes: Routes = [
             icon: 'disc_full'
           }
         },
-        // resolve: {
-        //   entitiesTableConfig: 
-        // }
+        resolve: {
+          entitiesTableConfig: AlarmRecordTableConfigResolver
+        }
       }
     ]
   }
@@ -51,6 +52,7 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
+    AlarmRecordTableConfigResolver
   ]
 })
-export class DeviceMngRoutingModule { }
+export class DeviceMonitorRoutingModule { }

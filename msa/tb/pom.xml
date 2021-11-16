@@ -187,6 +187,7 @@
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven.version}</version>
                 <executions>
                     <execution>
                         <id>build-docker-tb-image</id>
@@ -196,6 +197,7 @@
                         </goals>
                         <configuration>
                             <skip>${dockerfile.skip}</skip>
+
                             <repository>${docker.repo}/${tb.docker.name}</repository>
                             <verbose>true</verbose>
                             <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>

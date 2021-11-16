@@ -1,13 +1,15 @@
-<div class="mat-padding device-dict-wrapper" fxLayout="column" style="max-width: 1000px">
+<div class="mat-padding device-dict-wrapper" fxLayout="column">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.code</mat-label>
-        <input matInput formControlName="code" required>
-        <mat-error *ngIf="entityForm.get('code').hasError('required')">
-          {{ 'device-mng.code-required' | translate }}
-        </mat-error>
-      </mat-form-field>
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.code</mat-label>
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="entityForm.get('code').hasError('required')">
+            {{ 'device-mng.code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.name</mat-label>
         <input matInput formControlName="name" required>
@@ -226,7 +228,7 @@
             <th nzWidth="100px">{{ 'device-mng.model' | translate }}</th>
             <th nzWidth="150px">{{ 'device-mng.version' | translate }}</th>
             <th nzWidth="150px">{{ 'device-mng.guarantee' | translate }}</th>
-            <th nzWidth="116px">{{ 'device-mng.comp-picture' | translate }}</th>
+            <th nzWidth="104px">{{ 'device-mng.comp-picture' | translate }}</th>
             <th *ngIf="isEdit" nzWidth="150px" nzRight></th>
           </tr>
         </thead>
@@ -248,7 +250,7 @@
                 <td nzBreakWord>{{ item.version }}</td>
                 <td nzBreakWord>{{ item.warrantyPeriod }}</td>
                 <td>
-                  <div *ngIf="item.picture" fxFlex fxLayoutAlign="center center" class="image-wrapper">
+                  <div *ngIf="item.picture" class="image-wrapper">
                     <img nz-image [nzSrc]="item.picture" />
                   </div>
                 </td>

@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 
 import java.time.YearMonth;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -76,6 +74,15 @@ public interface CommonService {
      */
     default UUID toUUID(String str) {
         return UUID.fromString(str);
+    }
+
+    /**
+     * 转换成String
+     *
+     * @param uuid UUID
+     */
+    default String UUIDToString(UUID uuid) {
+        return uuid == null ? null : uuid.toString();
     }
 
     /**

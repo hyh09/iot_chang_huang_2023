@@ -27,6 +27,7 @@ export class WorkShopFormComponent extends EntityComponent<WorkShop> {
   buildForm(entity: WorkShop): FormGroup {
     return this.fb.group({
       factoryId: [entity && entity.factoryId ? entity.factoryId : this.entitiesTableConfig.componentsData.factoryId],
+      factoryName: [entity && entity.factoryName ? entity.factoryName : this.entitiesTableConfig.componentsData.factoryName],
       name: [entity ? entity.name : '', Validators.required],
       remark: [entity ? entity.remark : ''],
       logoImages: [entity ? entity.logoImages : ''],

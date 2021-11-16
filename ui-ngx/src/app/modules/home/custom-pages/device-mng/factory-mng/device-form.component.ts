@@ -19,7 +19,6 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   public mapOfCompControl: { [code: string]: AbstractControl } = {};
   public expandedCompCode: string[] = [];
   public deviceDictionaries: DeviceDictionary[] = [];
-  private deviceDicMap: { [id: string]: DeviceDictionary } = {};
 
   constructor(
     protected store: Store<AppState>,
@@ -33,8 +32,6 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
     this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
       this.deviceDictionaries = res || [];
-      this.deviceDicMap = {};
-      this.deviceDictionaries.forEach(item => (this.deviceDicMap[item.id + ''] = item));
     });
   }
 
@@ -45,8 +42,11 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     return this.fb.group({
       factoryId: [entity && entity.factoryId ? entity.factoryId : this.entitiesTableConfig.componentsData.factoryId],
-      workShopId: [entity && entity.workshopId ? entity.workshopId : this.entitiesTableConfig.componentsData.workShopId],
+      factoryName: [entity && entity.factoryName ? entity.factoryName : this.entitiesTableConfig.componentsData.factoryName],
+      workshopId: [entity && entity.workshopId ? entity.workshopId : this.entitiesTableConfig.componentsData.workshopId],
+      workshopName: [entity && entity.workshopName ? entity.workshopName : this.entitiesTableConfig.componentsData.workshopName],
       productionLineId: [entity && entity.productionLineId ? entity.productionLineId : this.entitiesTableConfig.componentsData.productionLineId],
+      productionLineName: [entity && entity.productionLineName ? entity.productionLineName : this.entitiesTableConfig.componentsData.productionLineName],
       dictDeviceId: [entity ? entity.dictDeviceId : ''],
       name: [entity ? entity.name : '', Validators.required],
       deviceNo: [entity ? entity.deviceNo : ''],
@@ -64,7 +64,12 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
 
   updateForm(entity: ProdDevice) {
+    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
+    this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
+    this.entityForm.controls.groupList = this.fb.array(groupListControls);
+    this.entityForm.controls.componentList = this.fb.array(compControls);
+    this.setMapOfExpandedComp();
   }
 
   generateFromArray(entity: ProdDevice): { [key: string]: Array<AbstractControl> } {
@@ -90,8 +95,13 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
 
   onDeviceDicChange(dictDeviceId: string) {
-    if (!dictDeviceId) {
-      this.entityForm.patchValue({
+    if (dictDeviceId) {
+      this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDicInfo => {
+        const { comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDicInfo;
+        this.updateForm({ comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList });
+      });
+    } else {
+      this.updateForm({
         comment: '',
         picture: '',
         type: '',
@@ -103,8 +113,6 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
         groupList: [],
         componentList: []
       });
-    } else {
-      this.entityForm.patchValue(this.deviceDicMap[dictDeviceId]);
     }
     this.entityForm.clearValidators();
   }

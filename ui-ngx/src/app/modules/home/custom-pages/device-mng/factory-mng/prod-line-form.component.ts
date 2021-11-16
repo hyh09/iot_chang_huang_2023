@@ -27,7 +27,9 @@ export class ProdLineFormComponent extends EntityComponent<ProdLine> {
   buildForm(entity: ProdLine): FormGroup {
     return this.fb.group({
       factoryId: [entity && entity.factoryId ? entity.factoryId : this.entitiesTableConfig.componentsData.factoryId],
-      workShopId: [entity && entity.workshopId ? entity.workshopId : this.entitiesTableConfig.componentsData.workShopId],
+      factoryName: [entity && entity.factoryName ? entity.factoryName : this.entitiesTableConfig.componentsData.factoryName],
+      workshopId: [entity && entity.workshopId ? entity.workshopId : this.entitiesTableConfig.componentsData.workshopId],
+      workshopName: [entity && entity.workshopName ? entity.workshopName : this.entitiesTableConfig.componentsData.workshopName],
       name: [entity ? entity.name : '', Validators.required],
       remark: [entity ? entity.remark : ''],
       logoImages: [entity ? entity.logoImages : '']

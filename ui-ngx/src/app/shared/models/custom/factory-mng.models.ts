@@ -1,10 +1,11 @@
-import { TableTreeNodeOptions } from "@app/core/public-api";
+import { TableTreeNodeOptions, TreeNodeOptions } from "@app/core/public-api";
 import { BaseData } from "@app/shared/public-api";
 import { DeviceId, FactoryId, ProdLineId, WorkShopId } from "../id/custom/factory-mng-id.models";
 import { DeviceProperty, DeviceDataGroup, DeviceComp } from "./device-mng.models";
 
 interface CommonData {
   key?: string;
+  title?: string;
   parentId?: string;
   code?: string;
   createdTime?: number;
@@ -73,6 +74,7 @@ export interface FactoryMngList {
 
 export interface FactoryTableOriginRow {
   key?: string;
+  title?: string;
   parentId?: string;
   code?: string;
   name?: string;
@@ -81,6 +83,12 @@ export interface FactoryTableOriginRow {
   address?: string;
   createdTime?: number;
   rowType?: FactoryRowType;
+  factoryId?: string;
+  factoryName?: string;
+  workshopId?: string;
+  workshopName?: string;
+  productionLineId?: string;
+  productionLineName?: string;
 }
 
 export interface FactoryTableTreeNode extends TableTreeNodeOptions {
@@ -93,6 +101,16 @@ export interface FactoryTableTreeNode extends TableTreeNodeOptions {
   logoImages?: string;
   address?: string;
   createdTime?: number;
+  rowType?: FactoryRowType;
+  factoryId?: string;
+  factoryName?: string;
+  workshopId?: string;
+  workshopName?: string;
+  productionLineId?: string;
+  productionLineName?: string;
+}
+
+export interface FactoryTreeNodeOptions extends TreeNodeOptions {
   rowType?: FactoryRowType;
   factoryId?: string;
   factoryName?: string;

@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -86,9 +87,12 @@ public class UserRoleController extends BaseController{
     @ApiOperation(value = "角色模块的 无参查询全部数据")
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ResponseBody
-    public Object findAll() throws ThingsboardException {
-        Map<String, Object> queryParam   = new HashMap<>();
-        return   tenantSysRoleService.findAll(queryParam);
+    public Object findAll() throws Exception {
+//        Map<String, Object> queryParam   = new HashMap<>();
+//        queryParam.put()
+        TenantSysRoleEntity  tenantSysRoleEntity = new TenantSysRoleEntity();
+        tenantSysRoleEntity.setTenantId(getTenantId().getId());
+        return   tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
     }
 
 
@@ -97,18 +101,18 @@ public class UserRoleController extends BaseController{
             @ApiImplicitParam(name = "roleId", value = "用户id"),})
     @RequestMapping(value = "/delete/{roleId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public   Object delete(@PathVariable("roleId") String roleId)
-    {
-        try {
-            log.info("删除角色的接口入参:{}",roleId);
+    public   Object delete(@PathVariable("roleId") String roleId) throws ThingsboardException {
+        log.info("删除角色的接口入参:{}",roleId);
+         long count =    userMenuRoleService.countAllByTenantSysRoleId(strUuid(roleId));
+         if(count > 0)
+         {
+             throw new ThingsboardException("当前角色存在绑定的用户!不能直接删除!", ThingsboardErrorCode.FAIL_VIOLATION);
+         }
             tenantSysRoleService.deleteById(strUuid(roleId));
             userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
+            tenantMenuRoleService.deleteByTenantSysRoleId(strUuid(roleId));
             return "success";
-        }catch (EmptyResultDataAccessException e)
-        {
-            log.info("打印当前的异常信息###正常异常:{}",e);
-            return  "success";
-        }
+
 
 
     }
@@ -123,8 +127,8 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/pageQuery", method = RequestMethod.GET)
     @ResponseBody
     public Object pageQuery(
-            @RequestParam("roleCode") String roleCode,
-            @RequestParam("roleName") String roleName,
+            @RequestParam(value = "roleCode",required = false) String roleCode,
+            @RequestParam(value = "roleName",required = false) String roleName,
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,

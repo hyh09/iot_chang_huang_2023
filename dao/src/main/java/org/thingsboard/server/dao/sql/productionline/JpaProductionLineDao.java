@@ -271,7 +271,7 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
                             }
                         });
                     }
-                    resultList.add(i.toProductionLine());
+                    resultList.add(productionLine);
                 });
             }
         }

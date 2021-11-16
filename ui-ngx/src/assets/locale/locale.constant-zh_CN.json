@@ -551,7 +551,11 @@
     "loading": "加载中...",
     "password": "密码",
     "username": "用户名",
-    "select-all": "全选"
+    "select-all": "全选",
+    "all": "全部",
+    "time-range": "起止时间",
+    "start-time": "开始时间",
+    "end-time": "结束时间"
   },
   "confirm-on-exit": {
     "html-message": "您有未保存的更改。<br/> 确定要离开此页面吗？",
@@ -2767,6 +2771,7 @@
     "phone-number-invalid": "手机号格式错误",
     "email-invalid": "邮箱格式错误",
     "address-required": "地址必填",
+    "email-required": "邮箱必填",
     "work-shop-name-required": "车间名称必填",
     "device-name-required": "设备名称必填",
     "factory": "工厂",
@@ -2774,7 +2779,9 @@
     "prod-line": "产线",
     "factory-required": "请选择工厂",
     "work-shop-required": "请选择车间",
-    "prod-line-required": "请选择产线"
+    "prod-line-required": "请选择产线",
+    "distribute-device": "分配设备",
+    "device-info": "设备信息"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",
@@ -2851,6 +2858,20 @@
   "device-monitor": {
     "device-monitor": "设备监控",
     "real-time-monitor": "实时监控",
-    "alarm-record": "报警记录"
+    "alarm-record": "报警记录",
+    "no-alarm-record": "未找到报警记录",
+    "device-name": "设备名称",
+    "alarm-title": "报警标题",
+    "alarm-info": "报警信息",
+    "alarm-status": "状态",
+    "alarm-level": "级别",
+    "alarm-status-active-unack": "未确认",
+    "alarm-status-active-ack": "已确认",
+    "alarm-status-cleared-ack": "已清除",
+    "alarm-level-critical": "危险",
+    "alarm-level-major": "重要",
+    "alarm-level-minor": "次要",
+    "alarm-level-warning": "警告",
+    "alarm-level-indeterminate": "不确定"
   }
 }

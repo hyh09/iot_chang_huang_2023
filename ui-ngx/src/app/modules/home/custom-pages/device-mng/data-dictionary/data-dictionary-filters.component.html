@@ -26,7 +26,7 @@
     [(ngModel)]="entitiesTableConfig.componentsData.dictDataType"
     (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
   >
-    <mat-option value="">全部</mat-option>
+    <mat-option value="">{{ 'common.all' | translate }}</mat-option>
     <mat-option
       *ngFor="let option of entitiesTableConfig.componentsData.dataTypeList"
       [value]="option.code"

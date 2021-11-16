@@ -92,6 +92,7 @@ export class MaterialIconSelectComponent extends PageComponent implements OnInit
   }
 
   openIconDialog() {
+    if (this.disabled) return;
     this.dialogs.materialIconPicker(this.materialIconFormGroup.get('icon').value).subscribe(
       (icon) => {
         if (icon) {
