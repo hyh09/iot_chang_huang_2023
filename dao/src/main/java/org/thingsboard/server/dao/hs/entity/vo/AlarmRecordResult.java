@@ -30,7 +30,7 @@ public class AlarmRecordResult {
      * 创建时间
      */
     @ApiModelProperty("创建时间")
-    private Long createTime;
+    private Long createdTime;
 
     /**
      * 设备名称

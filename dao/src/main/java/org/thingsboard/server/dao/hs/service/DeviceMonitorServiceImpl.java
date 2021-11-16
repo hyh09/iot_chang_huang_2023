@@ -202,7 +202,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return AlarmRecordResult.builder()
                     .name(device.getName())
                     .id(e.getId().toString())
-                    .createTime(e.getCreatedTime())
+                    .createdTime(e.getCreatedTime())
                     .title(e.getType())
                     .status(status)
                     .level(level)
