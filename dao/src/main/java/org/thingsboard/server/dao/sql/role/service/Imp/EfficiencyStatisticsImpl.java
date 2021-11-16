@@ -271,6 +271,20 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return map;
     }
 
+
+    @Override
+    public List<String>  queryDictDevice(UUID deviceId, TenantId tenantId) {
+        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),deviceId);
+        if(deviceId == null)
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
+
+        }
+        List<DictDeviceDataVo> dictDeviceDataVos = dictDeviceService.findGroupNameAndName(deviceInfo.getDictDeviceId());
+        List<String> nameList = dictDeviceDataVos.stream().map(DictDeviceDataVo::getName).collect(Collectors.toList());
+        return  nameList;
+    }
+
     /**
      * 获取当前租户的第一个工厂id
      * @param tenantId 当前登录人的租户

@@ -47,6 +47,6 @@ public interface EfficiencyStatisticsSvc {
     //查询当前的分组-分组属性
     Object   queryGroupDict(UUID deviceId,TenantId tenantId);
 
-
+    List<String>   queryDictDevice(UUID deviceId,TenantId tenantId);
 
 }

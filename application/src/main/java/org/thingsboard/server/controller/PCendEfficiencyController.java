@@ -75,5 +75,25 @@ public class PCendEfficiencyController extends BaseController {
     }
 
 
+    @ApiOperation("设备属性分组-分组后的属性属性接口---pc端用不到")
+    @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
+    @ResponseBody
+    public  Object queryGroupDict(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+        log.info("打印当前的入参:{}",deviceId);
+        return  efficiencyStatisticsSvc.queryGroupDict(deviceId,getTenantId());
+
+    }
+
+
+    @ApiOperation("设备属性分组后的属性name属性接口--pcd端下拉框")
+    @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
+    @ResponseBody
+    public  Object queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+        log.info("打印当前的入参:{}",deviceId);
+        return  efficiencyStatisticsSvc.queryDictDevice(deviceId,getTenantId());
+
+    }
+
+
 
 }
