@@ -47,10 +47,10 @@ public interface TenantMenuService {
 
     /**
      * 查询租户菜单
-     * @param tenantId
+     * @param tenantMenu
      * @return
      */
-    List<TenantMenu> getTenantMenuList(String menuType, String tenantId, String tenentMenuName);
+    List<TenantMenu> getTenantMenuList(TenantMenu tenantMenu);
 
     TenantMenu findById(UUID tenantMenuId);
 
