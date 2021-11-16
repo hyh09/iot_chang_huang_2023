@@ -77,6 +77,15 @@ public interface CommonService {
     }
 
     /**
+     * 转换成String
+     *
+     * @param uuid UUID
+     */
+    default String UUIDToString(UUID uuid) {
+        return uuid == null ? null : uuid.toString();
+    }
+
+    /**
      * 获得近几个月的开始时间
      *
      * @param monthNum 月份数量
