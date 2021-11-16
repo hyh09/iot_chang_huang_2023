@@ -2781,7 +2781,8 @@
     "work-shop-required": "请选择车间",
     "prod-line-required": "请选择产线",
     "distribute-device": "分配设备",
-    "device-info": "设备信息"
+    "device-info": "设备信息",
+    "search-name": "搜索名称"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",
