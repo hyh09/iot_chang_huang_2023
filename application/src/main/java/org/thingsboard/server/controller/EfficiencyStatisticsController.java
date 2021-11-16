@@ -36,7 +36,7 @@ import java.util.UUID;
 @RequestMapping("/api/app/efficiency")
 public class EfficiencyStatisticsController extends BaseController {
 
-    @Autowired private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+
 
 
     /**

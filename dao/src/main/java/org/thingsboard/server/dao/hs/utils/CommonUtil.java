@@ -1,18 +1,18 @@
 package org.thingsboard.server.dao.hs.utils;
 
+import com.google.common.collect.Maps;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceComponentVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * 工具类
@@ -21,6 +21,15 @@ import java.util.stream.IntStream;
  * @since 2021.10.21
  */
 public class CommonUtil {
+
+    public static <T extends EnumGetter> List<Map<String, String>> toResourceList(Collection<T> t) {
+        return t.stream().map(e -> {
+            HashMap<String, String> map = Maps.newLinkedHashMap();
+            map.put("name", e.getName());
+            map.put("code", e.getCode());
+            return map;
+        }).collect(Collectors.toList());
+    }
 
     /**
      * 通用处理异步返回

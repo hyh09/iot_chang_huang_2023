@@ -63,7 +63,6 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
     @Query(value = "UPDATE tb_user  set " +
             "phone_number = :#{#user.phoneNumber} ," +
             "active_status = :#{#user.activeStatus} ," +
-            "user_code = :#{#user.userCode} ," +
             "user_name =  :#{#user.userName} ," +
             "user_creator =  :#{#user.userCreator} ," +
             "email =  :#{#user.email}   " +

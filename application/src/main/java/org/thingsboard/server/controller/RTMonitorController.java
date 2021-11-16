@@ -46,7 +46,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
             @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
     })
@@ -57,12 +57,12 @@ public class RTMonitorController extends BaseController {
             @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workShopId,
+            @RequestParam(required = false) String workshopId,
             @RequestParam(required = false) String productionLineId,
             @RequestParam(required = false) String deviceId) throws ThingsboardException {
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
-        var query = new FactoryDeviceQuery(factoryId, workShopId, productionLineId, deviceId);
+        var query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
         return this.deviceMonitorService.getRTMonitorData(getTenantId(), query, pageLink);
     }
 

@@ -27,6 +27,15 @@ public class UserMenuRoleService  extends BaseSQLServiceImpl<UserMenuRoleEntity,
 
   	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * 查询角色绑定的用户
+     * @param tenantSysRoleId
+     * @return
+     */
+   public long countAllByTenantSysRoleId(UUID tenantSysRoleId)
+   {
+       return  this.dao.countAllByTenantSysRoleId(tenantSysRoleId);
+   }
 
 
     public  List<UserMenuRoleEntity> queryRoleIdByUserId(UUID userId)

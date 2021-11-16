@@ -60,6 +60,13 @@
             }
             &.mat-form-field-type-mat-date-range-input {
               width: 240px;
+              .mat-date-range-input-container {
+                .mat-date-range-input-start-wrapper,
+                .mat-date-range-input-end-wrapper {
+                  width: calc((100% - 18px) / 2);
+                  text-align: center;
+                }
+              }
             }
           }
           .action-btns {
