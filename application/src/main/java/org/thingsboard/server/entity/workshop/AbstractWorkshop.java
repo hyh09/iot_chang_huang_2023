@@ -61,6 +61,12 @@ public abstract class AbstractWorkshop{
     private String delFlag = "A";
 
 
+    /***********************************************以下非数据库字段*************************************************************/
+    @ApiModelProperty("工厂名称")
+    private String factoryName;
+    /***********************************************以上非数据库字段**************************************************************/
+
+
     public AbstractWorkshop() {
         super();
     }
@@ -75,6 +81,7 @@ public abstract class AbstractWorkshop{
         this.logoIcon = workshop.getLogoIcon();
         this.logoImages = workshop.getLogoImages();
         this.bgImages = workshop.getBgImages();
+        this.factoryName = workshop.getFactoryName();
         this.remark = workshop.getRemark();
         this.tenantId = workshop.getTenantId();
         this.createdTime = workshop.getUpdatedTime();
