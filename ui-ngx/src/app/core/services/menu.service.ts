@@ -161,6 +161,11 @@ export class MenuService {
         name: 'tenant.management',
         places: [
           {
+            name: 'menu-mng.menu-mng',
+            path: '/menuManagement',
+            icon: 'menu'
+          },
+          {
             name: 'tenant.tenants',
             icon: 'supervisor_account',
             path: '/tenants'

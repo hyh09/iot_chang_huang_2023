@@ -70,6 +70,8 @@ public class ThingsboardErrorResponseHandler extends ResponseEntityExceptionHand
         if (!response.isCommitted()) {
             try {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding("utf-8");
+
 
                 if (exception instanceof ThingsboardException) {
                     ThingsboardException thingsboardException = (ThingsboardException) exception;

@@ -3,10 +3,14 @@ package org.thingsboard.server.dao.sql.role.service.Imp;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
@@ -18,6 +22,8 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
+import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -60,6 +66,50 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private TsKvDictionaryRepository dictionaryRepository;
 
 
+    @Override
+    public PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+        if(StringUtils.isBlank(vo.getKey()))
+        {
+            List<String>  nameKey=  dictDeviceService.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+            String keyName=  nameKey.get(0);
+            log.info("打印的产能key:{}",keyName);
+            vo.setKey(keyName);
+        }
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
+        List<EffectTsKvEntity> effectTsKvEntities = effectTsKvRepository.queryEntity(vo);
+        if(CollectionUtils.isEmpty(effectTsKvEntities))
+        {
+            return  null;
+        }
+        Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
+        List<EffectTsKvEntity> pageList=  page.getContent();
+        List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
+
+        pageList.stream().forEach(entity->{
+            AppDeviceCapVo  capVo = new AppDeviceCapVo();
+            log.info("entity:====>"+entity);
+            capVo.setValue(getValueByEntity(entity));
+            capVo.setDeviceId(entity.getEntityId().toString());
+            capVo.setDeviceName(entity.getDeviceName());
+
+            if(entity.getWorkshopId() != null) {
+                Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
+                capVo.setWorkshopName(workshop.isPresent()?workshop.get().getName():"");
+            }
+
+            if(entity.getProductionLineId() != null) {
+                Optional<ProductionLineEntity> productionLine = productionLineRepository.findByTenantIdAndId(tenantId.getId(), entity.getProductionLineId());
+                capVo.setProductionName(productionLine.isPresent()?productionLine.get().getName():"");
+            }
+            appDeviceCapVoList.add(capVo);
+
+        });
+        return new PageDataAndTotalValue<AppDeviceCapVo>(getTotalValue(effectTsKvEntities),appDeviceCapVoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
+
     /**
      * app的产能接口
      * @return
@@ -88,13 +138,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
                 collect(Collectors.toList());
         log.info("当前的分页之后的数据:{}",pageList);
-
-//        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
-//        log.info("当前的分页之后的数据之设备id的汇总:{}",ids);
-//        List<DeviceEntity>  entities =  deviceDao.queryAllByIds(ids);
-//        Map<UUID,DeviceEntity> map1 = entities.stream().collect(Collectors.toMap(DeviceEntity::getId,DeviceEntity->DeviceEntity));
-//        log.info("查询到的设备信息map1:{}",map1);
-
         List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();

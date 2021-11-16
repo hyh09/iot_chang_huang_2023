@@ -1093,6 +1093,23 @@ input:-internal-autofill-previewed,
   transition: background-color 5000s ease-in-out 0s !important;
 }
 
+.mat-expansion-panel-header{
+  &.mat-expanded {
+    height: 48px;
+  }
+  > .mat-content {
+    align-items: center;
+  }
+}
+.mat-expansion-panel {
+  &:first-of-type {
+    margin-top: 10px;
+  }
+  + .mat-expansion-panel {
+    margin-top: 20px;
+  }
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {

@@ -49,4 +49,17 @@ public class QueryTsKvVo {
     private  int pageSize=2;
     @ApiModelProperty("起始页  不传默认是0")
     private  int page=0;
+
+
+    public QueryTsKvVo() {
+    }
+
+    public QueryTsKvVo(Long startTime, Long endTime, UUID deviceId, UUID productionLineId, UUID workshopId, UUID factoryId) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.deviceId = deviceId;
+        this.productionLineId = productionLineId;
+        this.workshopId = workshopId;
+        this.factoryId = factoryId;
+    }
 }
