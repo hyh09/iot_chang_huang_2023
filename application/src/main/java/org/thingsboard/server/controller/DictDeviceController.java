@@ -21,7 +21,6 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
 
-import java.util.HashSet;
 import java.util.List;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;

@@ -1,11 +1,12 @@
 package org.thingsboard.server.controller;
 
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
@@ -47,7 +48,7 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "获得数据字典界面资源")
     @GetMapping("/dict/data/resource")
     public DictDataResource listDictDataResource() throws ThingsboardException {
-        return new DictDataResource().setDictDataTypeList(DictDataDataTypeEnum.toResourceList());
+        return new DictDataResource().setDictDataTypeList(CommonUtil.toResourceList(EnumUtils.getEnumList(DictDataDataTypeEnum.class)));
     }
 
     /**

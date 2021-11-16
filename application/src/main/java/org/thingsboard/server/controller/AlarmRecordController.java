@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.alarm.*;
@@ -19,6 +20,7 @@ import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordQuery;
 import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResource;
 import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResult;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.permission.Operation;
 
@@ -45,8 +47,8 @@ public class AlarmRecordController extends BaseController {
     @ApiOperation("获得报警记录查询界面资源")
     @GetMapping(value = "/alarmRecord/resource")
     public AlarmRecordResource getAlarmRecordResource() {
-        return new AlarmRecordResource().setAlarmStatusList(AlarmSimpleStatus.toResourceList())
-                .setAlarmLevelList(AlarmSimpleLevel.toResourceList());
+        return new AlarmRecordResource().setAlarmStatusList(CommonUtil.toResourceList(EnumUtils.getEnumList(AlarmSimpleStatus.class)))
+                .setAlarmLevelList(CommonUtil.toResourceList(EnumUtils.getEnumList(AlarmSimpleLevel.class)));
     }
 
     /**
@@ -126,7 +128,7 @@ public class AlarmRecordController extends BaseController {
             @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
             @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workShopId", value = "车间Id", paramType = "query"),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
             @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
     })
@@ -141,7 +143,7 @@ public class AlarmRecordController extends BaseController {
             @RequestParam(required = false) Long startTime,
             @RequestParam(required = false) Long endTime,
             @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workShopId,
+            @RequestParam(required = false) String workshopId,
             @RequestParam(required = false) String productionLineId,
             @RequestParam(required = false) String deviceId
     ) throws ThingsboardException {
@@ -150,7 +152,7 @@ public class AlarmRecordController extends BaseController {
         var query = AlarmRecordQuery.builder()
                 .alarmSimpleStatus(status).alarmSimpleLevel(level).build();
         query.setDeviceId(deviceId).setProductionLineId(productionLineId)
-        .setFactoryId(factoryId).setWorkShopId(workShopId);
+        .setFactoryId(factoryId).setWorkshopId(workshopId);
         return this.deviceMonitorService.listAlarmsRecord(getTenantId(), query, pageLink);
     }
 }
