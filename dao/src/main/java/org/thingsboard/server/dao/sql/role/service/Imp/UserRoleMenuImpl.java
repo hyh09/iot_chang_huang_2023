@@ -136,6 +136,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         entity.setUpdatedUser(user1.getUuidId());
         entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
         entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
+        entity.setTenantId(user1.getTenantId().getId());
         TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
 
         UserMenuRoleEntity entityRR = new UserMenuRoleEntity();

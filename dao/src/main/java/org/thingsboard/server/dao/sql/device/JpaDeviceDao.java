@@ -335,9 +335,20 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             };
             List<DeviceEntity> all = deviceRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
-                all.forEach(i->{
-                    resultList.add(i.toData());
-                });
+                for (DeviceEntity i : all){
+                    Device deviceBo = i.toData();
+                    if(device.getFilterGatewayFlag()){
+                        //过滤网关
+                        JsonNode additionalInfo = i.getAdditionalInfo();
+                        if(additionalInfo != null){
+                            JsonNode gateway = additionalInfo.get("gateway");
+                            if(gateway != null && gateway.asBoolean()){
+                                continue;
+                            }
+                        }
+                    }
+                    resultList.add(deviceBo);
+                }
             }
         }
         return this.getParentNameByList(resultList);

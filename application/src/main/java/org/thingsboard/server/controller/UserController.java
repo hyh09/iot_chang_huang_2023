@@ -503,6 +503,12 @@ public class UserController extends BaseController {
     @ResponseBody
     public Object update(@RequestBody User user) throws ThingsboardException {
         log.info("打印更新用户的入参:{}",user);
+        checkEmailAndPhone(user);
+        UserVo  vo2 = new UserVo();
+        vo2.setEmail(user.getPhoneNumber());
+        if(checkSvc.checkValueByKey(vo2)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The phoneNumber["+user.getPhoneNumber()+"]already exists!!");
+        }
         checkParameter(USER_ID, user.getStrId());
         SecurityUser  securityUser =  getCurrentUser();
         user.setUserCreator(securityUser.getId().toString());
@@ -575,6 +581,22 @@ public class UserController extends BaseController {
 
     }
 
+
+    private  void checkEmailAndPhone(User  user)
+    {
+        UserVo  vo1 = new UserVo();
+        vo1.setUserId(user.getUuidId().toString());
+        vo1.setEmail(user.getEmail());
+        if(checkSvc.checkValueByKey(vo1)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 这个邮箱 ["+user.getEmail()+"]已经被占用!");
+        }
+        UserVo  vo2 = new UserVo();
+        vo2.setUserId(user.getUuidId().toString());
+        vo2.setEmail(user.getPhoneNumber());
+        if(checkSvc.checkValueByKey(vo2)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"这个手机号:["+user.getPhoneNumber()+"]已经被占用!!");
+        }
+    }
 
 
 

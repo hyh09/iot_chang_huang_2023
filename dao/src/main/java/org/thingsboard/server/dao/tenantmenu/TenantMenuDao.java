@@ -45,11 +45,10 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
 
     /**
      * 查询租户PC/APP菜单列表
-     * @param menuType
-     * @param tenantId
+     * @param tenantMenu
      * @return
      */
-    List<TenantMenu> getTenantMenuList(String menuType,String tenantId,String tenantMenuName);
+    List<TenantMenu> getTenantMenuList(TenantMenu tenantMenu);
 
     List<TenantMenu>  findByIdIn(List<UUID> ids);
 

@@ -77,6 +77,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @SuppressWarnings("Duplicates")
     public PageData<DictDevice> listDictDeviceByQuery(DictDeviceListQuery dictDeviceListQuery, TenantId tenantId, PageLink pageLink) {
+
         // dynamic query
         Specification<DictDeviceEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
