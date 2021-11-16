@@ -53,6 +53,13 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
   }
 
   resolve(): EntityTableConfig<UserInfo> {
+    this.config.componentsData = {
+      userCode: '',
+      userName: '',
+      availableCode: '',
+      roleList: []
+    }
+    
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
     this.config.afterResolved = () => {

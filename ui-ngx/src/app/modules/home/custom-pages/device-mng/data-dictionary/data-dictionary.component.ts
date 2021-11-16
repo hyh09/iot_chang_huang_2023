@@ -41,6 +41,7 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
 
   updateForm(entity: DataDictionary) {
     this.entityForm.patchValue(entity);
+    console.log(this.entityForm.get('id').value)
   }
 
 }

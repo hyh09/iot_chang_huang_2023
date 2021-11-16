@@ -28,7 +28,7 @@ export class FactoryFormComponent extends EntityComponent<Factory> {
     return this.fb.group({
       name: [entity ? entity.name : '', Validators.required],
       mobile: [entity ? entity.mobile : '', [Validators.required, Validators.pattern(/^(1)\d{10}$/)]],
-      email: [entity ? entity.email : '', Validators.email],
+      email: [entity ? entity.email : '', [Validators.required, Validators.email]],
       address: [entity ? entity.address : '', Validators.required],
       postalCode: [entity ? entity.postalCode : ''],
       remark: [entity ? entity.remark : ''],
