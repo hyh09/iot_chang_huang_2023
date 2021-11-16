@@ -1,8 +1,11 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
@@ -18,6 +21,11 @@ import java.util.UUID;
  * @create: 2021-11-09 11:13
  **/
 public interface EfficiencyStatisticsSvc {
+
+
+    PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+
+
 
 
     /**
