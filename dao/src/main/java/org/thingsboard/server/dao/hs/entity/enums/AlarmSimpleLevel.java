@@ -12,13 +12,13 @@ import java.util.*;
  * @since 2021.10.26
  */
 @Getter
-public enum AlarmSimpleLevel {
-    ANY("ANY", "type-any"),
-    CRITICAL("CRITICAL", "type-critical"),
-    MAJOR("MAJOR", "type-major"),
-    MINOR("MINOR", "type-minor"),
-    WARNING("WARNING", "type-warning"),
-    INDETERMINATE("INDETERMINATE", "type-indeterminate");
+public enum AlarmSimpleLevel implements EnumGetter{
+    ANY("ANY", "alarm-level-any"),
+    CRITICAL("CRITICAL", "alarm-level-critical"),
+    MAJOR("MAJOR", "alarm-level-major"),
+    MINOR("MINOR", "alarm-level-minor"),
+    WARNING("WARNING", "alarm-level-warning"),
+    INDETERMINATE("INDETERMINATE", "alarm-level-indeterminate");
 
     private final String code;
     private final String name;
@@ -55,16 +55,5 @@ public enum AlarmSimpleLevel {
             default:
                 return null;
         }
-    }
-
-    public static List<Map<String, String>> toResourceList() {
-        List<Map<String, String>> list = new ArrayList<>();
-        Arrays.stream(AlarmSimpleLevel.values()).forEach(e -> {
-            LinkedHashMap<String, String> map = new LinkedHashMap<>();
-            map.put("name", e.getName());
-            map.put("code", e.toString());
-            list.add(map);
-        });
-        return list;
     }
 }

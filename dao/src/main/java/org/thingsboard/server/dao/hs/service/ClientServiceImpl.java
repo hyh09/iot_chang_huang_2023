@@ -4,9 +4,6 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,7 +83,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
         return DeviceBaseDTO.builder()
                 .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
-                .workshop(t.getWorkShopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkShopId()))) : null)
+                .workshop(t.getWorkshopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkshopId()))) : null)
                 .productionLine(t.getProductionLineId() != null ? DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getProductionLineId()))) : null)
                 .device(t.getDeviceId() != null ? DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getDeviceId()))) : null)
                 .build();
@@ -178,8 +175,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
             } else if (!StringUtils.isBlank(t.getProductionLineId())) {
                 predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
-            } else if (!StringUtils.isBlank(t.getWorkShopId())) {
-                predicates.add(cb.equal(root.<UUID>get("workShopId"), toUUID(t.getWorkShopId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
             } else if (!StringUtils.isBlank(t.getFactoryId())) {
                 predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
             } else {
