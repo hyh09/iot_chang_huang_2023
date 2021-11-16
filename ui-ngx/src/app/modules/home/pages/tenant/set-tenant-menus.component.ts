@@ -129,6 +129,8 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
         options.checked = false;
         options.disabled = false;
         options.sysMenuId = options.id;
+        options.sysMenuName = options.name;
+        options.sysMenuCode = options.code;
         options.tenantMenuIcon = options.menuIcon;
         options.tenantMenuImages = options.menuImages;
         options.tenantMenuName = options.name;

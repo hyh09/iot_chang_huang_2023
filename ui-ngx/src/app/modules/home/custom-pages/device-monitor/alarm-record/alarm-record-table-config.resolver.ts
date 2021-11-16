@@ -38,15 +38,15 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
 
     this.config.columns.push(
       new DateEntityTableColumn<AlarmRecord>('createdTime', 'common.created-time', this.datePipe, '150px'),
-      new EntityTableColumn<AlarmRecord>('name', 'device-monitor.device-name', '25%'),
-      new EntityTableColumn<AlarmRecord>('title', 'device-monitor.alarm-title', '25%'),
-      new EntityTableColumn<AlarmRecord>('info', 'device-monitor.alarm-info', '50%'),
+      new EntityTableColumn<AlarmRecord>('name', 'device-monitor.device-name', '25%', ({ name }) => (name), () => ({}), false),
+      new EntityTableColumn<AlarmRecord>('title', 'device-monitor.alarm-title', '25%', ({ name }) => (name), () => ({}), false),
+      new EntityTableColumn<AlarmRecord>('info', 'device-monitor.alarm-info', '50%', ({ name }) => (name), () => ({}), false),
       new EntityTableColumn<AlarmRecord>('statusStr', 'device-monitor.alarm-status', '80px', ({statusStr}) => {
         return this.translate.instant(`device-monitor.${statusStr}`);
-      }),
+      }, () => ({}), false),
       new EntityTableColumn<AlarmRecord>('levelStr', 'device-monitor.alarm-level', '80px', ({levelStr}) => {
         return this.translate.instant(`device-monitor.${levelStr}`);
-      })
+      }, () => ({}), false)
     );
   }
 
