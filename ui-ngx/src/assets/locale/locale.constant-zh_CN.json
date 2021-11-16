@@ -2774,7 +2774,9 @@
     "prod-line": "产线",
     "factory-required": "请选择工厂",
     "work-shop-required": "请选择车间",
-    "prod-line-required": "请选择产线"
+    "prod-line-required": "请选择产线",
+    "distribute-device": "分配设备",
+    "device-info": "设备信息"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",
