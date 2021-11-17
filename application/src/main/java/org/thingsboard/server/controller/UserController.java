@@ -61,7 +61,9 @@ import org.thingsboard.server.common.data.security.model.JwtToken;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.entity.ResultVo;
@@ -206,6 +208,9 @@ public class UserController extends BaseController {
              user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
              user.setFactoryId(null);
             User savedUser = checkNotNull(userService.saveUser(user));
+                saveRole(savedUser);
+
+
             if (sendEmail) {
                 SecurityUser authUser = getCurrentUser();
                 UserCredentials userCredentials = userService.findUserCredentialsByUserId(authUser.getTenantId(), savedUser.getId());
@@ -564,7 +569,6 @@ public class UserController extends BaseController {
         }
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         SecurityUser  securityUser =  getCurrentUser();
-//        queryParam.put("userCreator",securityUser.getUuidId());
         queryParam.put("tenantId",securityUser.getTenantId().getId());
         if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
          {
@@ -613,6 +617,38 @@ public class UserController extends BaseController {
         if(checkSvc.checkValueByKey(vo2)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"这个手机号:["+user.getPhoneNumber()+"]已经被占用!!");
         }
+    }
+
+
+    private  void saveRole(User user) throws ThingsboardException {
+        TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.TENANT_ADMIN.getRoleCode(),user.getTenantId().getId());
+         if(entityBy == null)
+         {
+             TenantSysRoleEntity entity = new TenantSysRoleEntity();
+             entity.setCreatedUser(getCurrentUser().getUuidId());
+             entity.setUpdatedUser(getCurrentUser().getUuidId());
+             entity.setRoleCode(RoleEnums.TENANT_ADMIN.getRoleCode());
+             entity.setRoleName(RoleEnums.TENANT_ADMIN.getRoleName());
+             entity.setTenantId(user.getTenantId().getId());
+             entity.setFactoryId(user.getFactoryId());
+             entity.setType(user.getType());
+             entity.setSystemTab("1");
+
+             TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
+
+             UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
+             entityRR.setUserId(user.getUuidId());
+             entityRR.setTenantSysRoleId(rmEntity.getId());
+             userMenuRoleService.saveEntity(entityRR);
+             return;
+         }
+
+
+        UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
+        entityRR.setUserId(user.getUuidId());
+        entityRR.setTenantSysRoleId(entityBy.getId());
+        userMenuRoleService.saveEntity(entityRR);
+
     }
 
 
