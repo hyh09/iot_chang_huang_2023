@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -128,7 +129,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var deviceProfile = deviceProfileService.findDeviceProfileById(tenantId, deviceProfileId);
 
         var dictDeviceList = DaoUtil.convertDataList(this.deviceProfileDictDeviceRepository.findAllBindDeviceProfile(deviceProfile.getId().getId()));
-        return DeviceProfileVO.builder().deviceProfile(deviceProfile).dictDeviceList(dictDeviceList).build();
+
+        DeviceProfileVO deviceProfileVO = new DeviceProfileVO();
+        BeanUtils.copyProperties(deviceProfile, deviceProfileVO);
+        deviceProfileVO.setDictDeviceIdList(dictDeviceList.stream().map(DictDevice::getId).collect(Collectors.toList()));
+        return deviceProfileVO;
     }
 
     /**
@@ -157,17 +162,21 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .map(AlarmEntity::toData).orElseThrow(() -> new ThingsboardException("TenantId error！", ThingsboardErrorCode.GENERAL));
         switch (alarmStatus) {
             case ACTIVE_ACK:
-                if (AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).isCanBeConfirm()) {
+                if (!AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).canBeConfirm()) {
                     throw new ThingsboardException("alarm status is not ACTIVE_UNACK！", ThingsboardErrorCode.GENERAL);
                 }
                 alarm.setAckTs(ts);
                 break;
             case CLEARED_ACK:
-                if (AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).isCanBeClear()) {
+                if (!AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).canBeClear()) {
                     throw new ThingsboardException("alarm status is not ACTIVE_UNACK or ACTIVE_ACK！", ThingsboardErrorCode.GENERAL);
                 }
+                if (alarm.getAckTs() == 0L)
+                    alarm.setAckTs(ts);
                 alarm.setClearTs(ts);
                 break;
+            default:
+                throw new ThingsboardException("alarm status is not support", ThingsboardErrorCode.GENERAL);
         }
         alarm.setStatus(alarmStatus);
         this.alarmRepository.save(new AlarmEntity(alarm));
@@ -208,8 +217,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .level(level)
                     .statusStr(status.getName())
                     .levelStr(level.getName())
-                    .isCanBeConfirm(status.isCanBeConfirm())
-                    .isCanBeClear(status.isCanBeClear())
+                    .isCanBeConfirm(status.canBeConfirm())
+                    .isCanBeClear(status.canBeClear())
                     .info(Optional.ofNullable(e.getDetails()).map(v -> v.get("data")).map(JsonNode::toString).orElse(null))
                     .factoryStr(Optional.ofNullable(affiliationDTO.getFactoryMap().get(device.getFactoryId())).map(Factory::getName).orElse(null))
                     .workShopStr(Optional.ofNullable(affiliationDTO.getWorkshopMap().get(device.getWorkshopId())).map(Workshop::getName).orElse(null))
@@ -523,16 +532,16 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 绑定设备字典到设备配置
      *
-     * @param dictDeviceList  设备字典列表
-     * @param deviceProfileId 设备配置Id
+     * @param dictDeviceIdList 设备字典Id列表
+     * @param deviceProfileId  设备配置Id
      */
     @Override
     @Transactional
-    public void bindDictDeviceToDeviceProfile(List<DictDevice> dictDeviceList, DeviceProfileId deviceProfileId) {
+    public void bindDictDeviceToDeviceProfile(List<String> dictDeviceIdList, DeviceProfileId deviceProfileId) {
         this.deleteBindDictDevice(deviceProfileId);
-        deviceProfileDictDeviceRepository.saveAll(dictDeviceList.stream().map(e -> {
+        deviceProfileDictDeviceRepository.saveAll(dictDeviceIdList.stream().map(e -> {
             DeviceProfileDictDeviceEntity entity = new DeviceProfileDictDeviceEntity();
-            entity.setDictDeviceId(toUUID(e.getId()));
+            entity.setDictDeviceId(toUUID(e));
             entity.setDeviceProfileId(deviceProfileId.getId());
             return entity;
         }).collect(Collectors.toList()));
