@@ -233,7 +233,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
            Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
                      log.info("查询到的当前设备{}的配置的keys属性:{}###mapDict:{}",vo.getDeviceId(),keys,mapDict);
-           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndTime(vo.getDeviceId(),keys,vo.getStartTime(),vo.getEndTime());
+           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndTime(vo.getDeviceId(),keys);
                 log.info("查询到的当前设备{}的配置的entities属性:{}",vo.getDeviceId(),entities);
            List<TsKvEntry> tsKvEntries  = new ArrayList<>();
             entities.stream().forEach(tsKvEntity -> {
