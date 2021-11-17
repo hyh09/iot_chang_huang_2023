@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.util.sql;
 
 
 import org.springframework.data.jpa.domain.Specification;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 
 import javax.persistence.Id;
@@ -217,22 +218,23 @@ public class JpaQueryHelper {
 								}
 								pList.add(in);
 							} else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
-								pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
+								if(StringUtils.isNotEmpty((String) value)) {
+									pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
+								}
 							}else if(f.getType().isAssignableFrom(UUID.class) ){
 								if(value instanceof  UUID ){
-									System.out.println("=====>" + f.getType());
-									System.out.println("===value==>" + value);
-									System.out.println("==f.getName()=:"+f.getName());
-									System.out.println("==root.get(f.getName()=:"+root.get(f.getName()));
-
+									System.out.println("==UUID===>" + f.getType());
+									System.out.println("===UUIDvalue==>" + value);
+									System.out.println("==UUIDf.getName()=:"+f.getName());
+									System.out.println("==UUID root.get(f.getName()=:"+root.get(f.getName()));
+									pList.add(cb.equal(root.get(f.getName()).as(UUID.class), value));
 
 								}
 								if(value instanceof  String ){
 									System.out.println("=====>" + f.getType());
 									System.out.println("===value==>" + value);
-
+									pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
 								}
-								pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
 							}else  if(f.getType().isAssignableFrom(long.class) )
 							{
                                 if(value instanceof  Long){

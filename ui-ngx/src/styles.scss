@@ -1118,6 +1118,14 @@ input:-internal-autofill-previewed,
   max-width: 900px;
 }
 
+.mat-button-disabled .mat-icon {
+  color: rgba(0, 0, 0, 0.26) !important;
+}
+
+form button .mat-icon {
+  color: rgba(0, 0, 0, 0.54);
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {
