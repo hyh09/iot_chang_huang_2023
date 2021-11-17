@@ -132,7 +132,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         DeviceProfileVO deviceProfileVO = new DeviceProfileVO();
         BeanUtils.copyProperties(deviceProfile, deviceProfileVO);
-        deviceProfileVO.setDictDeviceList(dictDeviceList);
+        deviceProfileVO.setDictDeviceIdList(dictDeviceList.stream().map(DictDevice::getId).collect(Collectors.toList()));
         return deviceProfileVO;
     }
 
@@ -532,16 +532,16 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 绑定设备字典到设备配置
      *
-     * @param dictDeviceList  设备字典列表
-     * @param deviceProfileId 设备配置Id
+     * @param dictDeviceIdList 设备字典Id列表
+     * @param deviceProfileId  设备配置Id
      */
     @Override
     @Transactional
-    public void bindDictDeviceToDeviceProfile(List<DictDevice> dictDeviceList, DeviceProfileId deviceProfileId) {
+    public void bindDictDeviceToDeviceProfile(List<String> dictDeviceIdList, DeviceProfileId deviceProfileId) {
         this.deleteBindDictDevice(deviceProfileId);
-        deviceProfileDictDeviceRepository.saveAll(dictDeviceList.stream().map(e -> {
+        deviceProfileDictDeviceRepository.saveAll(dictDeviceIdList.stream().map(e -> {
             DeviceProfileDictDeviceEntity entity = new DeviceProfileDictDeviceEntity();
-            entity.setDictDeviceId(toUUID(e.getId()));
+            entity.setDictDeviceId(toUUID(e));
             entity.setDeviceProfileId(deviceProfileId.getId());
             return entity;
         }).collect(Collectors.toList()));

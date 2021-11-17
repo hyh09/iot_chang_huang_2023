@@ -138,7 +138,7 @@ public class AlarmRuleController extends BaseController {
             otaPackageStateService.update(savedDeviceProfile, isFirmwareChanged, isSoftwareChanged);
 
             // 增加设备字典的绑定
-            this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceList(), savedDeviceProfile.getId());
+            this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceIdList(), savedDeviceProfile.getId());
 
             sendEntityNotificationMsg(getTenantId(), savedDeviceProfile.getId(),
                     deviceProfileVO.getId() == null ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);

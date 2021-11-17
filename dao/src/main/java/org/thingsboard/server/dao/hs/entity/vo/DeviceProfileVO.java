@@ -24,6 +24,6 @@ public class DeviceProfileVO extends DeviceProfile{
     /**
      * 设备字典列表, 设备字典Id不能为空
      */
-    @ApiModelProperty("设备字典列表")
-    private List<DictDevice> dictDeviceList;
+    @ApiModelProperty("设备字典Id列表")
+    private List<String> dictDeviceIdList;
 }
