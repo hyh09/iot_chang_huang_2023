@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.DeviceProfile;
@@ -106,29 +107,31 @@ public class AlarmRuleController extends BaseController {
     @PostMapping(value = "/device/profile")
     @SuppressWarnings("Duplicates")
     public DeviceProfileVO saveDeviceProfile(@RequestBody DeviceProfileVO deviceProfileVO) throws ThingsboardException {
+        DeviceProfile deviceProfile = new DeviceProfile();
+        BeanUtils.copyProperties(deviceProfileVO, deviceProfile);
         try {
-            boolean created = deviceProfileVO.getId() == null;
-            deviceProfileVO.setTenantId(getTenantId());
+            boolean created = deviceProfile.getId() == null;
+            deviceProfile.setTenantId(getTenantId());
 
-            checkEntity(deviceProfileVO.getId(), (DeviceProfile) deviceProfileVO, Resource.DEVICE_PROFILE);
+            checkEntity(deviceProfile.getId(), deviceProfile, Resource.DEVICE_PROFILE);
 
             boolean isFirmwareChanged = false;
             boolean isSoftwareChanged = false;
 
             if (!created) {
-                DeviceProfile oldDeviceProfile = deviceProfileService.findDeviceProfileById(getTenantId(), deviceProfileVO.getId());
-                if (!Objects.equals(deviceProfileVO.getFirmwareId(), oldDeviceProfile.getFirmwareId())) {
+                DeviceProfile oldDeviceProfile = deviceProfileService.findDeviceProfileById(getTenantId(), deviceProfile.getId());
+                if (!Objects.equals(deviceProfile.getFirmwareId(), oldDeviceProfile.getFirmwareId())) {
                     isFirmwareChanged = true;
                 }
-                if (!Objects.equals(deviceProfileVO.getSoftwareId(), oldDeviceProfile.getSoftwareId())) {
+                if (!Objects.equals(deviceProfile.getSoftwareId(), oldDeviceProfile.getSoftwareId())) {
                     isSoftwareChanged = true;
                 }
             }
 
-            DeviceProfile savedDeviceProfile = checkNotNull(deviceProfileService.saveDeviceProfile(deviceProfileVO));
+            DeviceProfile savedDeviceProfile = checkNotNull(deviceProfileService.saveDeviceProfile(deviceProfile));
 
             tbClusterService.onDeviceProfileChange(savedDeviceProfile, null);
-            tbClusterService.broadcastEntityStateChangeEvent(deviceProfileVO.getTenantId(), savedDeviceProfile.getId(),
+            tbClusterService.broadcastEntityStateChangeEvent(deviceProfile.getTenantId(), savedDeviceProfile.getId(),
                     created ? ComponentLifecycleEvent.CREATED : ComponentLifecycleEvent.UPDATED);
 
             logEntityAction(savedDeviceProfile.getId(), savedDeviceProfile,
@@ -141,11 +144,11 @@ public class AlarmRuleController extends BaseController {
             this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceIdList(), savedDeviceProfile.getId());
 
             sendEntityNotificationMsg(getTenantId(), savedDeviceProfile.getId(),
-                    deviceProfileVO.getId() == null ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);
+                    deviceProfile.getId() == null ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);
             return deviceProfileVO;
         } catch (Exception e) {
-            logEntityAction(emptyId(EntityType.DEVICE_PROFILE), (DeviceProfile) deviceProfileVO,
-                    null, deviceProfileVO.getId() == null ? ActionType.ADDED : ActionType.UPDATED, e);
+            logEntityAction(emptyId(EntityType.DEVICE_PROFILE), deviceProfile,
+                    null, deviceProfile.getId() == null ? ActionType.ADDED : ActionType.UPDATED, e);
             throw handleException(e);
         }
     }
