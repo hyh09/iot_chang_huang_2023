@@ -12,7 +12,7 @@ import java.util.*;
  * @since 2021.10.26
  */
 @Getter
-public enum AlarmSimpleStatus implements EnumGetter{
+public enum AlarmSimpleStatus implements EnumGetter {
     ANY("ANY", "alarm-status-any"),
     ACTIVE_UNACK("ACTIVE_UNACK", "alarm-status-active-unack"),
     ACTIVE_ACK("ACTIVE_ACK", "alarm-status-active-ack"),
@@ -21,14 +21,14 @@ public enum AlarmSimpleStatus implements EnumGetter{
     private final String code;
     private final String name;
 
-    public Boolean isCanBeClear() {
+    public Boolean canBeClear() {
         if (this.equals(ACTIVE_UNACK) || this.equals(ACTIVE_ACK)) {
             return Boolean.TRUE;
         }
         return Boolean.FALSE;
     }
 
-    public Boolean isCanBeConfirm() {
+    public Boolean canBeConfirm() {
         if (this.equals(ACTIVE_UNACK)) {
             return Boolean.TRUE;
         }

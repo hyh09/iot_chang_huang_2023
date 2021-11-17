@@ -157,17 +157,21 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .map(AlarmEntity::toData).orElseThrow(() -> new ThingsboardException("TenantId error！", ThingsboardErrorCode.GENERAL));
         switch (alarmStatus) {
             case ACTIVE_ACK:
-                if (AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).isCanBeConfirm()) {
+                if (!AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).canBeConfirm()) {
                     throw new ThingsboardException("alarm status is not ACTIVE_UNACK！", ThingsboardErrorCode.GENERAL);
                 }
                 alarm.setAckTs(ts);
                 break;
             case CLEARED_ACK:
-                if (AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).isCanBeClear()) {
+                if (!AlarmSimpleStatus.valueOf(alarm.getStatus().toString()).canBeClear()) {
                     throw new ThingsboardException("alarm status is not ACTIVE_UNACK or ACTIVE_ACK！", ThingsboardErrorCode.GENERAL);
                 }
+                if (alarm.getAckTs() == 0L)
+                    alarm.setAckTs(ts);
                 alarm.setClearTs(ts);
                 break;
+            default:
+                throw new ThingsboardException("alarm status is not support", ThingsboardErrorCode.GENERAL);
         }
         alarm.setStatus(alarmStatus);
         this.alarmRepository.save(new AlarmEntity(alarm));
@@ -208,8 +212,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .level(level)
                     .statusStr(status.getName())
                     .levelStr(level.getName())
-                    .isCanBeConfirm(status.isCanBeConfirm())
-                    .isCanBeClear(status.isCanBeClear())
+                    .isCanBeConfirm(status.canBeConfirm())
+                    .isCanBeClear(status.canBeClear())
                     .info(Optional.ofNullable(e.getDetails()).map(v -> v.get("data")).map(JsonNode::toString).orElse(null))
                     .factoryStr(Optional.ofNullable(affiliationDTO.getFactoryMap().get(device.getFactoryId())).map(Factory::getName).orElse(null))
                     .workShopStr(Optional.ofNullable(affiliationDTO.getWorkshopMap().get(device.getWorkshopId())).map(Workshop::getName).orElse(null))
