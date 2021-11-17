@@ -117,6 +117,34 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         tenantMenuRepository.saveAll(saveTenantMenuEntityList);
     }
 
+    /**
+     * 系统菜单变更，触发租户菜单更新
+     * （新增按钮、按钮名称、lang_key、path、icon修改，变更租户菜单按钮）
+     * @param tenantMenuList
+     */
+    @Override
+    public void saveFromSysMenu(List<TenantMenu> tenantMenuList){
+        List<TenantMenuEntity> tenantMenuEntityList = new ArrayList<>();
+        tenantMenuList.forEach(i->{
+            TenantMenuEntity entity = new TenantMenuEntity(i);
+            if(i.getId()==null){
+                //排序、编码、主键
+                UUID uuid = Uuids.timeBased();
+                entity.setUuid(uuid);
+                entity.setCreatedTime(Uuids.unixTimestamp(uuid));
+                if(i.getIsButton()){
+                    entity.setTenantMenuCode("ZHAN"+String.valueOf(System.currentTimeMillis()));
+                }else {
+                    entity.setTenantMenuCode("ZHCD"+String.valueOf(System.currentTimeMillis()));
+                }
+                //查询相同父级下最大排序值
+                entity.setSort(getMaxSortByParentId(i.getParentId()));
+            }
+            tenantMenuEntityList.add(entity);
+        });
+        tenantMenuRepository.saveAll(tenantMenuEntityList);
+    }
+
 
     /**
      * 保存租户菜单信息
@@ -148,7 +176,8 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      * @return
      */
     public Integer getMaxSortByParentId(UUID parentId){
-        return tenantMenuRepository.getMaxSortByParentId(parentId);
+        Integer maxSortByParentId = tenantMenuRepository.getMaxSortByParentId(parentId);
+        return maxSortByParentId == null ? 0:maxSortByParentId;
     }
 
     /**
