@@ -19,12 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("设备配置")
-public class DeviceProfileVO {
-    /**
-     * 系统原有的设备配置信息
-     */
-    @ApiModelProperty("系统原有的设备配置信息")
-    private DeviceProfile deviceProfile;
+public class DeviceProfileVO extends DeviceProfile{
 
     /**
      * 设备字典列表, 设备字典Id不能为空

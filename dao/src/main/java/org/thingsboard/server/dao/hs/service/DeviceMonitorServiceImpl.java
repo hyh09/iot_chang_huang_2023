@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -128,7 +129,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var deviceProfile = deviceProfileService.findDeviceProfileById(tenantId, deviceProfileId);
 
         var dictDeviceList = DaoUtil.convertDataList(this.deviceProfileDictDeviceRepository.findAllBindDeviceProfile(deviceProfile.getId().getId()));
-        return DeviceProfileVO.builder().deviceProfile(deviceProfile).dictDeviceList(dictDeviceList).build();
+
+        DeviceProfileVO deviceProfileVO = new DeviceProfileVO();
+        BeanUtils.copyProperties(deviceProfile, deviceProfileVO);
+        deviceProfileVO.setDictDeviceList(dictDeviceList);
+        return deviceProfileVO;
     }
 
     /**
