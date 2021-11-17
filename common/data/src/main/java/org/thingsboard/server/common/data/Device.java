@@ -87,6 +87,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     //产线名称
     private String productionLineName;
     private List<UUID> productionLineIds;
+    //是否过滤掉网关true是，false否
+    private Boolean filterGatewayFlag = false;
     /**********************************以上是非数据库字段***************************************/
 
 
@@ -127,9 +129,10 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     }
 
     public Device (Factory factory,List<UUID> productionLineIds){
+        this.setFilterGatewayFlag(true);
         this.setProductionLineIds(productionLineIds);
         this.setTenantId(new TenantId(factory.getTenantId()));
-        this.setName(factory.getWorkshopName());
+        this.setName(factory.getDeviceName());
         this.setTenantId(new TenantId(factory.getTenantId()));
     }
     public Device (UUID tenantId){
@@ -409,6 +412,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setProductionLineIds(List<UUID> productionLineIds) {
         this.productionLineIds = productionLineIds;
+    }
+
+    public Boolean getFilterGatewayFlag() {
+        return filterGatewayFlag;
+    }
+
+    public void setFilterGatewayFlag(Boolean filterGatewayFlag) {
+        this.filterGatewayFlag = filterGatewayFlag;
     }
 
     @Override

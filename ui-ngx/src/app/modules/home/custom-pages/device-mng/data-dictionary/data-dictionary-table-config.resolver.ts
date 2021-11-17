@@ -58,6 +58,15 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
   }
 
   resolve(): EntityTableConfig<DataDictionary> {
+    this.config.componentsData = {
+      code: '',
+      name: '',
+      dictDataType: '',
+      dataTypeList: [],
+      dataTypeMap: {},
+      availableCode: ''
+    }
+    
     this.dataDictionaryService.getDataType().subscribe(res => {
       this.config.componentsData.dataTypeList = res;
       res.forEach(({name, code}) => {

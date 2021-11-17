@@ -16,7 +16,6 @@ import { WorkShopFormComponent } from './work-shop-form.component';
 import { ProdLineFormComponent } from './prod-line-form.component';
 import { DeviceFormComponent } from './device-form.component';
 import { DistributeDeviceComponent } from './distribute-device.component';
-import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 
 @Component({
   selector: 'tb-factory-mng',
@@ -45,7 +44,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     protected store: Store<AppState>,
     public translate: TranslateService,
     private factoryMngService: FactoryMngService,
-    private utils: UtilsService,
+    public utils: UtilsService,
     public dialog: MatDialog,
     private dialogService: DialogService
   ) {
@@ -345,7 +344,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         saveEntity,
         loadEntity,
         entityTitle: entity => entity?.name,
-        detailsReadonly: () => false,
+        detailsReadonly: () => (!this.utils.hasPermission('action.edit')),
         componentsData: {}
       }
       this.isDetailsOpen = true;

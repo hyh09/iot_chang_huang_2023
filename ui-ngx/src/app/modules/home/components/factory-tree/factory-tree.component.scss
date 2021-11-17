@@ -1,7 +1,8 @@
 .factory-tree {
+  height: 100%;
   .mat-form-field {
     width: 100%;
-    padding: 12px 12px 0;
+    padding: 16px 12px 0;
     ::ng-deep .mat-form-field-wrapper {
       padding-bottom: 0;
       .mat-form-field-infix {
@@ -14,5 +15,11 @@
   }
   ::ng-deep .cdk-virtual-scroll-content-wrapper {
     padding: 12px 5px;
+    .ant-tree-title {
+      color: rgba(0, 0, 0, 0.87);
+    }
+    .ant-tree-indent-unit {
+      width: 10px;
+    }
   }
 }

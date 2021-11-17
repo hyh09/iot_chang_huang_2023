@@ -15,13 +15,15 @@
   <div class="mat-padding" fxLayout="column">
     <form [formGroup]="entityForm">
       <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-        <mat-form-field class="mat-block">
-          <mat-label translate>auth-mng.role-code</mat-label>
-          <input matInput formControlName="roleCode" required>
-          <mat-error *ngIf="entityForm.get('roleCode').hasError('required')">
-            {{ 'auth-mng.role-code-required' | translate }}
-          </mat-error>
-        </mat-form-field>
+        <fieldset [disabled]="!!entityForm.get('id').value">
+          <mat-form-field class="mat-block">
+            <mat-label translate>auth-mng.role-code</mat-label>
+            <input matInput formControlName="roleCode" required>
+            <mat-error *ngIf="entityForm.get('roleCode').hasError('required')">
+              {{ 'auth-mng.role-code-required' | translate }}
+            </mat-error>
+          </mat-form-field>
+        </fieldset>
         <mat-form-field class="mat-block">
           <mat-label translate>auth-mng.role-name</mat-label>
           <input matInput formControlName="roleName" required>

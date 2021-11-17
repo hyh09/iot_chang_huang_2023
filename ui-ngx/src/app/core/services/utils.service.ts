@@ -43,7 +43,7 @@ import { WidgetInfo } from '@home/models/widget-component.models';
 import jsonSchemaDefaults from 'json-schema-defaults';
 import materialIconsCodepoints from '!raw-loader!material-design-icons/iconfont/codepoints';
 import { Observable, of, ReplaySubject } from 'rxjs';
-import { NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
+import { NzFormatEmitEvent, NzTreeNode, NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { Router } from '@angular/router';
 import { HasUUID } from '@app/shared/public-api';
 
@@ -84,14 +84,22 @@ const commonMaterialIcons: Array<string> = ['more_horiz', 'more_vert', 'open_in_
   'share', 'add', 'edit', 'done'];
 
 export interface TreeNodeOptions extends NzTreeNodeOptions {
-  id: string,
-  parentId: string
+  id: string;
+  parentId: string;
 }
 
 export interface TableTreeNodeOptions {
-  id: string,
-  parentId?: string,
-  children?: TableTreeNodeOptions[]
+  id: string;
+  parentId?: string;
+  children?: TableTreeNodeOptions[];
+}
+
+export interface TreeNode extends NzTreeNode {
+  origin: TreeNodeOptions;
+}
+
+export interface TreeNodeEmitEvent extends NzFormatEmitEvent {
+  node?: TreeNode;
 }
 
 // @dynamic

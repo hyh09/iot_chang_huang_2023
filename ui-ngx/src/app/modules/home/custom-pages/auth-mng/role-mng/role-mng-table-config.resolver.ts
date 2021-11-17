@@ -52,6 +52,12 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
   }
 
   resolve(): EntityTableConfig<Role> {
+    this.config.componentsData = {
+      roleCode: '',
+      roleName: '',
+      availableCode: ''
+    }
+    
     this.roleMngService.getAllRoles().subscribe(res => {
       this.config.componentsData.roleList = res;
     });
@@ -91,7 +97,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       actions.push({
         name: this.translate.instant('auth-mng.bind-users'),
         icon: 'account_circle',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.id)),
+        isEnabled: (entity) => (!!(entity && entity.id)),
         onAction: ($event, entity) => this.bindUsers($event, entity.id)
       });
     }
@@ -99,7 +105,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       actions.push({
         name: this.translate.instant('auth-mng.set-permissions'),
         mdiIcon: 'mdi:config',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.id)),
+        isEnabled: (entity) => (!!(entity && entity.id)),
         onAction: ($event, entity) => this.setPermissions($event, entity.id)
       });
     }

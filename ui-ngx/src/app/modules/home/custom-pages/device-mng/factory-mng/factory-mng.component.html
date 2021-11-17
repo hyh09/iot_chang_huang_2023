@@ -28,6 +28,7 @@
             </div>
             <span fxFlex></span>
             <button
+              *ngIf="utils.hasPermission('action.add')"
               mat-icon-button [disabled]="isLoading$ | async"
               (click)="addFactory()"
               matTooltip="{{ 'device-mng.add-factory' | translate }}"
@@ -54,6 +55,7 @@
               {{ 'action.search' | translate }}
             </button>
             <button
+              *ngIf="utils.hasPermission('device-mng.distribute-device')"
               mat-stroked-button
               [disabled]="checkedDeviceIdList.size === 0"
               (click)="distributeDevice()"
@@ -77,7 +79,7 @@
                 <th nzWidth="104px">{{ 'device-mng.logo' | translate }}</th>
                 <th>{{ 'device-mng.address' | translate }}</th>
                 <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
-                <th nzWidth="120px" nzRight></th>
+                <th *ngIf="utils.hasPermission('action.add') || utils.hasPermission('action.delete')" nzWidth="120px" nzRight></th>
               </tr>
             </thead>
             <tbody>
@@ -92,7 +94,7 @@
                       [nzShowExpand]="!!item.children"
                       [(nzExpand)]="item.expand"
                       (nzExpandChange)="collapse(mapOfExpandedData[data.id], item, $event)"
-                      [nzShowCheckbox]="item.rowType === 'device'"
+                      [nzShowCheckbox]="item.rowType === 'device' && utils.hasPermission('device-mng.distribute-device')"
                       [nzChecked]="checkedDeviceIdList.has(item.id)"
                       (nzCheckedChange)="onDeviceCheckedChange(item.id, $event)"
                       nzAlign="left"
@@ -104,39 +106,41 @@
                     </td>
                     <td>{{ item.address }}</td>
                     <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
-                    <td nzRight nzAlign="right">
+                    <td *ngIf="utils.hasPermission('action.add') || utils.hasPermission('action.delete')" nzRight nzAlign="right">
+                      <ng-container *ngIf="utils.hasPermission('action.add')">
+                        <button
+                          *ngIf="item.rowType === 'factory'"
+                          mat-icon-button
+                          [disabled]="isLoading$ | async"
+                          matTooltip="{{ 'device-mng.add-work-shop' | translate }}"
+                          matTooltipPosition="above"
+                          (click)="$event.stopPropagation(); addWorkShop(item)"
+                        >
+                          <mat-icon>add</mat-icon>
+                        </button>
+                        <button
+                          *ngIf="item.rowType === 'workShop'"
+                          mat-icon-button
+                          [disabled]="isLoading$ | async"
+                          matTooltip="{{ 'device-mng.add-prod-line' | translate }}"
+                          matTooltipPosition="above"
+                          (click)="$event.stopPropagation(); addProdLine(item)"
+                        >
+                          <mat-icon>add</mat-icon>
+                        </button>
+                        <button
+                          *ngIf="item.rowType === 'prodLine'"
+                          mat-icon-button
+                          [disabled]="isLoading$ | async"
+                          matTooltip="{{ 'device-mng.add-device' | translate }}"
+                          matTooltipPosition="above"
+                          (click)="$event.stopPropagation(); addDevice(item)"
+                        >
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </ng-container>
                       <button
-                        *ngIf="item.rowType === 'factory'"
-                        mat-icon-button
-                        [disabled]="isLoading$ | async"
-                        matTooltip="{{ 'device-mng.add-work-shop' | translate }}"
-                        matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); addWorkShop(item)"
-                      >
-                        <mat-icon>add</mat-icon>
-                      </button>
-                      <button
-                        *ngIf="item.rowType === 'workShop'"
-                        mat-icon-button
-                        [disabled]="isLoading$ | async"
-                        matTooltip="{{ 'device-mng.add-prod-line' | translate }}"
-                        matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); addProdLine(item)"
-                      >
-                        <mat-icon>add</mat-icon>
-                      </button>
-                      <button
-                        *ngIf="item.rowType === 'prodLine'"
-                        mat-icon-button
-                        [disabled]="isLoading$ | async"
-                        matTooltip="{{ 'device-mng.add-device' | translate }}"
-                        matTooltipPosition="above"
-                        (click)="$event.stopPropagation(); addDevice(item)"
-                      >
-                        <mat-icon>add</mat-icon>
-                      </button>
-                      <button
-                        *ngIf="item.rowType === 'device'"
+                        *ngIf="item.rowType === 'device' && utils.hasPermission('device-mng.distribute-device')"
                         mat-icon-button
                         [disabled]="isLoading$ | async"
                         matTooltip="{{ 'device-mng.distribute-device' | translate }}"
@@ -146,6 +150,7 @@
                         <mat-icon svgIcon="mdi:distribute"></mat-icon>
                       </button>
                       <button
+                        *ngIf="utils.hasPermission('action.delete')"
                         mat-icon-button
                         [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
                         matTooltip="{{ 'action.delete' | translate }}"
