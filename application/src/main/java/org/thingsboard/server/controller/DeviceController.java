@@ -56,7 +56,7 @@ import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.entity.device.dto.AddDeviceDto;
-import org.thingsboard.server.entity.device.dto.DeviceQry;
+import org.thingsboard.server.entity.device.dto.DeviceListQry;
 import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -355,22 +355,19 @@ public class DeviceController extends BaseController {
         }
     }
 
-    @ApiOperation("平台设备列表查询（重写原来的列表查询）")
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @ApiOperation("平台设备列表查询（重写平台原来的列表查询）")
     @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty",value = "排序字段",dataType = "string",paramType = "query",required = true),
-            @ApiImplicitParam(name = "sortOrder",value = "排序方式（DESC/ASC）",dataType = "string",paramType = "query")})
+    @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
     @ResponseBody
-    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize,@RequestParam int page,DeviceQry deviceQry) throws ThingsboardException {
+    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page, DeviceListQry deviceListQry) throws ThingsboardException {
         try {
             PageData<DeviceInfo> resultPage = new PageData<>();
             List<DeviceInfo> resultDevices = new ArrayList<>();
             TenantId tenantId = getCurrentUser().getTenantId();
-            PageLink pageLink = createPageLink(pageSize, page, deviceQry.getSearchText(), deviceQry.getSortProperty(), deviceQry.getSortOrder());
-            Device device = deviceQry.toDevice();
+            PageLink pageLink = createPageLink(pageSize, page, deviceListQry.getSearchText(), deviceListQry.getSortProperty(), deviceListQry.getSortOrder());
+            Device device = deviceListQry.toDevice();
             device.setTenantId(tenantId);
+            //查询设备
             PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
             List<Device> deviceList = menuPageData.getData();
             if(!CollectionUtils.isEmpty(deviceList)){
