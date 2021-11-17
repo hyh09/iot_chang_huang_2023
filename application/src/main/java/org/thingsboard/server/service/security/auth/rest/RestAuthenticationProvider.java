@@ -121,6 +121,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
             SecurityUser securityUser = new SecurityUser(user, userCredentials.isEnabled(), userPrincipal);
             logLoginAction(user, authentication, ActionType.LOGIN, null);
+            log.info("====securityUser.getType();=>"+securityUser.getType());
             return new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
         } catch (Exception e) {
             logLoginAction(user, authentication, ActionType.LOGIN, e);

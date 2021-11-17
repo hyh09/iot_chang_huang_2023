@@ -61,6 +61,7 @@ import org.thingsboard.server.common.data.security.model.JwtToken;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.entity.ResultVo;
@@ -202,6 +203,8 @@ public class UserController extends BaseController {
             checkEntity(user.getId(), user, Resource.USER);
 
             boolean sendEmail = user.getId() == null && sendActivationMail;
+             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+             user.setFactoryId(null);
             User savedUser = checkNotNull(userService.saveUser(user));
             if (sendEmail) {
                 SecurityUser authUser = getCurrentUser();
@@ -436,21 +439,23 @@ public class UserController extends BaseController {
             UserVo  vo1 = new UserVo();
             vo1.setEmail(user.getEmail());
             if(checkSvc.checkValueByKey(vo1)){
-                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The email ["+user.getEmail()+"]already exists!");
+                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
             }
             UserVo  vo2 = new UserVo();
-            vo2.setEmail(user.getPhoneNumber());
+            vo2.setPhoneNumber(user.getPhoneNumber());
             if(checkSvc.checkValueByKey(vo2)){
-                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The phoneNumber["+user.getPhoneNumber()+"]already exists!!");
+                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
 
             SecurityUser  securityUser =  getCurrentUser();
+            log.info("打印当前的管理人的信息:{}",securityUser);
+            log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
+
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
-            log.info("当前的securityUser.getId().toString():{}",securityUser.getId().toString());
-
             user.setUserCreator(securityUser.getId().toString());
-            log.info("当前的登录人:{}",securityUser.getEmail());
+            user.setType(securityUser.getType());
+            user.setFactoryId(securityUser.getFactoryId());
 
 
             log.info("【用户管理模块.用户添加接口】入参{}", user);
@@ -540,8 +545,8 @@ public class UserController extends BaseController {
     @RequestMapping(value = "/user/findAll",method = RequestMethod.GET)
     @ResponseBody
     public Object pageQuery(
-            @RequestParam("userCode") String userCode,
-            @RequestParam("userName") String userName,
+            @RequestParam(value = "userCode",required = false) String userCode,
+            @RequestParam(value = "userName",required = false) String userName,
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,
@@ -559,8 +564,13 @@ public class UserController extends BaseController {
         }
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         SecurityUser  securityUser =  getCurrentUser();
-        queryParam.put("userCreator",securityUser.getUuidId());
-
+//        queryParam.put("userCreator",securityUser.getUuidId());
+        queryParam.put("tenantId",securityUser.getTenantId().getId());
+        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+         {
+             log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}",securityUser.getFactoryId());
+             queryParam.put("factoryId",securityUser.getFactoryId());
+         }
 
         return userService.findAll(queryParam,pageLink);
     }
@@ -576,8 +586,15 @@ public class UserController extends BaseController {
     @ApiOperation(value = "用户管理得 {用户编码 或角色编码}得生成获取")
     @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
     public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
-        SecurityUser  securityUser =  getCurrentUser();
-           return  checkSvc.queryCodeNew(vo,securityUser.getTenantId());
+        try {
+            SecurityUser securityUser = getCurrentUser();
+            return checkSvc.queryCodeNew(vo, securityUser.getTenantId());
+        }catch (Exception e)
+        {
+             e.printStackTrace();
+            log.info("打印当前异常:{}",e);
+            throw new ThingsboardException("生成编码异常!", ThingsboardErrorCode.GENERAL);
+        }
 
     }
 
