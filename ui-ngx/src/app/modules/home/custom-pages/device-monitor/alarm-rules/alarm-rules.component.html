@@ -8,16 +8,15 @@
           {{ 'device-profile.name-required' | translate }}
         </mat-error>
       </mat-form-field>
-      <mat-form-field [fxShow]="isEdit" class="mat-block">
+      <mat-form-field [fxShow]="isEdit || entityForm.get('dictDeviceIdList').value.length === 0" class="mat-block">
         <mat-label translate>device-mng.device-dic</mat-label>
         <mat-select formControlName="dictDeviceIdList" multiple>
           <mat-option *ngFor="let option of deviceDictionaries" [value]="option.id">{{option.name}}</mat-option>
         </mat-select>
       </mat-form-field>
-      <div *ngIf="!isEdit" class="device-dic-info">
+      <div *ngIf="!isEdit && entityForm.get('dictDeviceIdList').value.length > 0" class="device-dic-info">
         <div class="device-dic-label">{{ 'device-mng.device-dic' | translate }}</div>
         <div *ngFor="let item of entityForm.get('dictDeviceIdList').value" class="device-dict-item">{{ deviceDictionariesMap[item].name }}</div>
-        <div *ngIf="entityForm.get('dictDeviceIdList').value.length === 0" class="device-dict-item">{{ 'common.none' | translate }}</div>
         <div class="dot-underline"></div>
       </div>
       <mat-form-field class="mat-block">
