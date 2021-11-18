@@ -127,7 +127,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         User  rmUser= userService.save(user,encodePassword);
 
 
-      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),user1.getTenantId().getId());
         if(entityBy != null)
         {
             UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
@@ -143,6 +143,9 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
         entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
         entity.setTenantId(user1.getTenantId().getId());
+        entity.setFactoryId(user.getFactoryId());
+        entity.setType(user.getType());
+        entity.setSystemTab("1");
         TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
 
         UserMenuRoleEntity entityRR = new UserMenuRoleEntity();

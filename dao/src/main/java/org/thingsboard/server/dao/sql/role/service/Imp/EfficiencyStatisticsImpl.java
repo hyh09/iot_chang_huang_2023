@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
+import org.thingsboard.server.common.data.vo.resultvo.energy.PcDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
@@ -82,7 +83,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity> effectTsKvEntities = effectTsKvRepository.queryEntity(vo);
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
-            return  null;
+          return new PageDataAndTotalValue<AppDeviceCapVo>("0",null, 0, 0, false);
+
         }
         Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
         List<EffectTsKvEntity> pageList=  page.getContent();
@@ -108,6 +110,53 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         });
         return new PageDataAndTotalValue<AppDeviceCapVo>(getTotalValue(effectTsKvEntities),appDeviceCapVoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
+
+
+    @Override
+    public PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+        log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
+        ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
+        Map<String,String> totalValueMap = new HashMap<>();  //总能耗
+        List<String>  keys1 = new ArrayList<>();
+        keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        List<String>  nameKey=  dictDeviceService.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+        String keyName=  nameKey.get(0);//产能的key
+        log.info("查询包含产能得key:{}",keyName);
+        keys1.add(keyName);
+        vo.setKeys(keys1);
+
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
+        List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());//不能直接分页的
+        log.info("查询到的数据{}",effectTsKvEntities);
+        if(CollectionUtils.isEmpty(effectTsKvEntities))
+        {
+            keys1.stream().forEach(s -> {
+                totalValueMap.put(s,"0");
+            });
+            appVo.setTotalValue(totalValueMap);
+            return  null;
+        }
+
+        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
+        log.info("查询到的全部数据转换为设备维度:{}",map);
+        //分页
+
+        Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
+
+
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(map,tenantId);//包含了总产能的
+        List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName);
+        log.info("具体的返回包含单位能耗数据:{}",resultList);
+        keys1.stream().forEach(str->{
+            if(!str.equals(keyName)) {  //排除产能得总产能统计
+                totalValueMap.put(str, getTotalValue(effectTsKvEntities, str));
+            }
+        });
+        return new PageDataAndTotalValue<PcDeviceEnergyVo>(totalValueMap,resultList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     /**
@@ -194,14 +243,28 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             return appVo;  //如果查询不到; 应该返回的对应的key 且
         }
 
-        List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
-                collect(Collectors.toList());
-        log.info("能效当前的分页之后的数据:{}",pageList);
-        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
-        log.info(" 能效-当前的分页之后的数据之设备id的汇总:{}",ids);
-        Map<UUID,List<EffectTsKvEntity>> map = pageList.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
+//        List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
+//                collect(Collectors.toList());
+//        log.info("能效当前的分页之后的数据:{}",pageList);
+//        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
+//        log.info(" 能效-当前的分页之后的数据之设备id的汇总:{}",ids);
+        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
         log.info("查询到的数据转换为设备维度:{}",map);
-        appVo.setAppDeviceCapVoList(getEntityKeyValue(map,tenantId));
+        Set<UUID> keySet = map.keySet();
+        log.info("打印当前的设备id:{}",keySet);
+        List<UUID> entityIdsAll  = keySet.stream().collect(Collectors.toList());
+        List<UUID>  pageList =  entityIdsAll.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
+                collect(Collectors.toList());
+        Map<UUID,List<EffectTsKvEntity>>  listMap =  new HashMap<>();
+
+
+        for(int i=0;i<pageList.size();i++)
+        {
+            UUID uuid= pageList.get(i);
+            listMap.put(uuid,map.get(uuid));
+        }
+
+        appVo.setAppDeviceCapVoList(getEntityKeyValue(listMap,tenantId));
         keys1.stream().forEach(str->{
             totalValueMap.put(str,getTotalValue(effectTsKvEntities,str));
         });
@@ -233,7 +296,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
            Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
                      log.info("查询到的当前设备{}的配置的keys属性:{}###mapDict:{}",vo.getDeviceId(),keys,mapDict);
-           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndTime(vo.getDeviceId(),keys,vo.getStartTime(),vo.getEndTime());
+           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndTime(vo.getDeviceId(),keys);
                 log.info("查询到的当前设备{}的配置的entities属性:{}",vo.getDeviceId(),entities);
            List<TsKvEntry> tsKvEntries  = new ArrayList<>();
             entities.stream().forEach(tsKvEntity -> {
@@ -350,7 +413,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
  /**
-     * 暂时写死的
      * @param listMap
      * @return
      */
@@ -388,5 +450,49 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         });
 
         return  appList;
+    }
+
+
+    /**
+     *
+     * @param vos
+     * @param keyName 产能key
+     */
+    private  List<PcDeviceEnergyVo> unitMap(List<AppDeviceEnergyVo>  vos, String  keyName)
+    {
+        List<PcDeviceEnergyVo> resultList = new ArrayList<>();
+        vos.stream().forEach(energyVo->{
+            PcDeviceEnergyVo  vo = new  PcDeviceEnergyVo();
+            vo.setDeviceId(energyVo.getDeviceId());
+            vo.setDeviceName(energyVo.getDeviceName());
+            vo.setProductionName(energyVo.getProductionName());
+            vo.setWorkshopName(energyVo.getWorkshopName());
+            Map<String,String>  mapOld =    vo.getMapValue();
+         String   keyNameValue =   mapOld.get(keyName);
+         log.info("当前设备的总产能:{}",keyNameValue);
+
+            Map<String,String>  map1 =  new HashMap<>();
+            Map<String,String>  map2 =  new HashMap<>();
+
+            mapOld.forEach((key,value)->{
+              if(!key.equals(keyName))
+              {
+                  //只会影响到单位能耗计算
+                  //
+                  //计算公式：总产能/总能耗/分钟数
+                  map1.put(key,value);
+                  Double  dvalue =      StringUtilToll.div(keyNameValue,value,"60000");
+                  map2.put(key,dvalue.toString());
+              }
+            });
+
+            vo.setMapValue(map1);
+            vo.setMapUnitValue(map2);
+            resultList.add(vo);
+        });
+
+
+        return  resultList;
+
     }
 }

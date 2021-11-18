@@ -36,9 +36,9 @@
   <ng-template matExpansionPanelContent>
     <div fxLayout="column" fxLayoutGap="0.5em">
       <mat-divider></mat-divider>
-      <mat-form-field fxFlex floatLabel="always">
+      <mat-form-field fxFlex>
         <mat-label>{{'device-profile.alarm-type' | translate}}</mat-label>
-        <input required matInput formControlName="alarmType" placeholder="Enter alarm type">
+        <input required matInput formControlName="alarmType">
         <mat-error *ngIf="alarmFormGroup.get('alarmType').hasError('required')">
           {{ 'device-profile.alarm-type-required' | translate }}
         </mat-error>

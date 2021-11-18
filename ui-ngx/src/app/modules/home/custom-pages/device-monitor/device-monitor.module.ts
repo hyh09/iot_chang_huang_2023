@@ -5,6 +5,9 @@ import { HomeComponentsModule } from '../../components/home-components.module';
 import { DeviceMonitorRoutingModule } from './device-monitor-routing.module';
 import { AlarmRecordFiltersComponent } from './alarm-record/alarm-record-filters.component';
 import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.component';
+import { AlarmRulesTabsComponent } from './alarm-rules/alarm-rules-tabs.component';
+import { AlarmRulesComponent } from './alarm-rules/alarm-rules.component';
+import { AddAlarmRuleDialogComponent } from './alarm-rules/add-alarm-rule-dialog.component';
 
 @NgModule({
   imports: [
@@ -15,7 +18,10 @@ import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.
   ],
   declarations: [
     RealTimeMonitorComponent,
-    AlarmRecordFiltersComponent
+    AlarmRecordFiltersComponent,
+    AlarmRulesComponent,
+    AlarmRulesTabsComponent,
+    AddAlarmRuleDialogComponent
   ]
 })
 export class DeviceMonitorModule { }

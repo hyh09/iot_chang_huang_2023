@@ -8,12 +8,14 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;	
 import org.hibernate.annotations.GenericGenerator;	
 import org.hibernate.annotations.CreationTimestamp;	
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;	
-import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;	
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 	
 import javax.persistence.*;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**	
   创建时间: 2021-10-22 18:05:08	
@@ -49,9 +51,30 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
     @Column(name="role_desc")	
     private String roleDesc;
 
+    /**
+     * 被创建者的类型:
+     */
+    @Column(name = ModelConstants.USER_USER_TYPE)
+    private  String type;
+
+    /**
+     * 工厂id
+     */
+    @Column(name = ModelConstants.USER_USER_FACTORY_ID)
+    private UUID factoryId;
+
+
+    /**
+     * 1是系统生成的  系统生成的准删除
+     * 0不是系统生成
+     */
+    @Column(name = "system_tab")
+    private String  systemTab="0";
 
 
 
 
 
- }
+
+
+}

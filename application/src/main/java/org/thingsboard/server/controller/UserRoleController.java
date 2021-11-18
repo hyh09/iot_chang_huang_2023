@@ -20,6 +20,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -61,7 +62,8 @@ public class UserRoleController extends BaseController{
            return updateRecord(entity);
         }
         entity.setCreatedUser(securityUser.getUuidId());
-
+        entity.setType(securityUser.getType());
+        entity.setFactoryId(securityUser.getFactoryId());
         return   tenantSysRoleService.saveEntity(entity);
     }
 
@@ -88,9 +90,14 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
     @ResponseBody
     public Object findAll() throws Exception {
-//        Map<String, Object> queryParam   = new HashMap<>();
-//        queryParam.put()
+        SecurityUser securityUser =  getCurrentUser();
         TenantSysRoleEntity  tenantSysRoleEntity = new TenantSysRoleEntity();
+
+        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+        {
+            tenantSysRoleEntity.setFactoryId(securityUser.getFactoryId());
+        }
+
         tenantSysRoleEntity.setTenantId(getTenantId().getId());
         return   tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
     }
@@ -107,6 +114,12 @@ public class UserRoleController extends BaseController{
          if(count > 0)
          {
              throw new ThingsboardException("当前角色存在绑定的用户!不能直接删除!", ThingsboardErrorCode.FAIL_VIOLATION);
+         }
+        TenantSysRoleEntity  tenantSysRoleEntity=    tenantSysRoleService.findById(strUuid(roleId));
+         if(tenantSysRoleEntity != null &&  tenantSysRoleEntity.getSystemTab().equals("1"))
+         {
+             throw new ThingsboardException("当前角色是系统创建角色不允许删除!", ThingsboardErrorCode.FAIL_VIOLATION);
+
          }
             tenantSysRoleService.deleteById(strUuid(roleId));
             userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
@@ -136,7 +149,7 @@ public class UserRoleController extends BaseController{
             @RequestParam(required = false) String sortOrder) throws ThingsboardException {
         SecurityUser securityUser =  getCurrentUser();
         Map<String, Object> queryParam  =new HashMap<>();
-        queryParam.put("updatedUser",securityUser.getUuidId().toString());
+//        queryParam.put("updatedUser",securityUser.getUuidId().toString());
         if(!StringUtils.isEmpty(roleCode))
         {
             queryParam.put("roleCode", roleCode);
@@ -145,6 +158,15 @@ public class UserRoleController extends BaseController{
         {
             queryParam.put("roleName", roleName);
         }
+
+          queryParam.put("tenantId",securityUser.getTenantId().getId());
+        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+        {
+            log.info("当前用户是工厂类别的用户");
+            queryParam.put("factoryId", securityUser.getFactoryId());
+
+        }
+
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return tenantSysRoleService.pageQuery(queryParam,pageLink);
     }

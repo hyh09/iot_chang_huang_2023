@@ -218,7 +218,7 @@ public class JpaQueryHelper {
 								}
 								pList.add(in);
 							} else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
-								if(StringUtils.isNotEmpty((String) value)) {
+								if(StringUtils.isNotEmpty((String) value) && !value.equals("0")) {  //
 									pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
 								}
 							}else if(f.getType().isAssignableFrom(UUID.class) ){

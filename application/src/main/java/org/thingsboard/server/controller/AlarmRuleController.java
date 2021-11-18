@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.DeviceProfile;
@@ -106,7 +107,8 @@ public class AlarmRuleController extends BaseController {
     @PostMapping(value = "/device/profile")
     @SuppressWarnings("Duplicates")
     public DeviceProfileVO saveDeviceProfile(@RequestBody DeviceProfileVO deviceProfileVO) throws ThingsboardException {
-        DeviceProfile deviceProfile = deviceProfileVO.getDeviceProfile();
+        DeviceProfile deviceProfile = new DeviceProfile();
+        BeanUtils.copyProperties(deviceProfileVO, deviceProfile);
         try {
             boolean created = deviceProfile.getId() == null;
             deviceProfile.setTenantId(getTenantId());
@@ -139,7 +141,7 @@ public class AlarmRuleController extends BaseController {
             otaPackageStateService.update(savedDeviceProfile, isFirmwareChanged, isSoftwareChanged);
 
             // 增加设备字典的绑定
-            this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceList(), savedDeviceProfile.getId());
+            this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceIdList(), savedDeviceProfile.getId());
 
             sendEntityNotificationMsg(getTenantId(), savedDeviceProfile.getId(),
                     deviceProfile.getId() == null ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);
