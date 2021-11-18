@@ -1,0 +1,28 @@
+.device-dic-info {
+  position: relative;
+  margin-top: 15px;
+  padding-bottom: 1.25em;
+  .device-dic-label {
+    color: rgba(0, 0, 0, 0.54);
+    transform: translateY(-1.28125em) scale(0.75) perspective(100px) translateZ(0.001px);
+    font-size: 14px;
+    position: absolute;
+    left: -7px;
+    top: -3px;
+  }
+  .device-dict-item {
+    color: rgba(0, 0, 0, 0.38);
+    font-size: 14px;
+    display: inline-block;
+    &:not(:last-of-type) {
+      margin-right: 16px;
+    }
+  }
+  .dot-underline {
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.42) 0%, rgba(0, 0, 0, 0.42) 33%, transparent 0%);
+    background-size: 4px 100%;
+    background-repeat: repeat-x;
+    height: 1px;
+    margin-top: 2px;
+  }
+}

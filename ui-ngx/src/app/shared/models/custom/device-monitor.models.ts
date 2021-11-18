@@ -1,4 +1,4 @@
-import { BaseData } from "@app/shared/public-api";
+import { BaseData, DeviceProfile } from "@app/shared/public-api";
 import { AlarmRecordId } from "../id/custom/alarm-record-id.models";
 
 export enum AlarmStatusType {
@@ -26,4 +26,8 @@ export interface AlarmRecord extends BaseData<AlarmRecordId> {
   levelStr: string;
   isCanBeClear: boolean;
   isCanBeConfirm: boolean;
+}
+
+export interface AlarmRuleInfo extends DeviceProfile {
+  dictDeviceIdList?: string[];
 }
