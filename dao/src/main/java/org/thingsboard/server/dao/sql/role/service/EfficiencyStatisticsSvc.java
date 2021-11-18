@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
+import org.thingsboard.server.common.data.vo.resultvo.energy.PcDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
-
+    PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
     /**
      * 产能接口
