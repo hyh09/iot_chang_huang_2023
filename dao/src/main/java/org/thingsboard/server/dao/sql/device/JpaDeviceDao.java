@@ -593,8 +593,8 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     if(device.getAllot()){
                         //已分配。根据工厂id或车间id不为空来查询
                         List<Predicate> factoryOrProductionLine = new ArrayList<>();
-                        factoryOrProductionLine.add(cb.isNotEmpty(root.get("factoryId")));
-                        factoryOrProductionLine.add(cb.isNotEmpty(root.get("productionLineId")));
+                        factoryOrProductionLine.add(cb.isNotNull(root.get("factoryId")));
+                        factoryOrProductionLine.add(cb.isNotNull(root.get("productionLineId")));
                         /* 下面这一行代码很重要。
                          * criteriaBuilder.or(Predicate... restrictions) 接收多个Predicate，可变参数；
                          * 这多个 Predicate条件之间，是使用OR连接的；该方法最终返回 一个Predicate对象；
@@ -602,8 +602,8 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                         predicates.add(cb.or(factoryOrProductionLine.toArray(new Predicate[0])));
                     }else {
                         //未分配。根据工厂id或车间id为空来查询
-                        predicates.add(cb.equal(root.get("factoryId"),null));
-                        predicates.add(cb.equal(root.get("productionLineId"),null));
+                        predicates.add(cb.isNull(root.get("factoryId")));
+                        predicates.add(cb.isNull(root.get("productionLineId")));
                     }
                 }
                 if(StringUtils.isNotEmpty(device.getName())){
@@ -630,7 +630,16 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         List<Device> resultDeviceList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(deviceList)){
             deviceList.forEach(i->{
-                resultDeviceList.add(i.toData());
+                Device device = i.toData();
+                if(i.getProductionLineId() != null && StringUtils.isNotEmpty(i.getProductionLineId().toString())){
+                    ProductionLine productionLine = productionLineDao.findById(i.getProductionLineId());
+                    if(device != null && productionLine != null){
+                        device.setFactoryName(productionLine.getFactoryName());
+                        device.setWorkshopName(productionLine.getWorkshopName());
+                        device.setProductionLineName(productionLine.getName());
+                    }
+                    resultDeviceList.add(device);
+                }
             });
         }
         return resultDeviceList;

@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.service.security.model;
 
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.thingsboard.server.common.data.User;
@@ -24,6 +25,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ToString
 public class SecurityUser extends User {
 
     private static final long serialVersionUID = -797397440703066079L;

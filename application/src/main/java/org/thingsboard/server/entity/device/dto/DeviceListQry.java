@@ -9,8 +9,8 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import java.util.UUID;
 
 @Data
-@ApiModel("DeviceQry")
-public class DeviceQry {
+@ApiModel("DeviceListQry")
+public class DeviceListQry {
 
     @ApiModelProperty("true-已分配，false-未分配（默认值）,null-查所有")
     private Boolean isAllot;
@@ -38,6 +38,7 @@ public class DeviceQry {
         device.setType(this.type);
         device.setDeviceProfileId(new DeviceProfileId(this.deviceProfileId));
         device.setAllot(this.isAllot);
+        device.setName(this.searchText);
         return device;
     }
 
