@@ -421,7 +421,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var temp = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), tempQueries).get()
                 .stream().map(KvEntry::getValue).map(e -> Integer.valueOf(String.valueOf(e))).collect(Collectors.toList());
         if (temp.isEmpty())
-            new PageData<>(Lists.newArrayList(), 0, 0L, false);
+            return new PageData<>(Lists.newArrayList(), 0, 0L, false);
         var count = temp.stream().mapToInt(Integer::intValue).sum();
         var max = temp.stream().max(Integer::compareTo).orElse(0);
 
