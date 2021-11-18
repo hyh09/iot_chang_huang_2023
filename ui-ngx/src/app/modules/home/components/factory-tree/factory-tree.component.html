@@ -1,5 +1,11 @@
-<div class="factory-tree">
-  <mat-form-field class="factory-tree-search">
+<div class="factory-tree" fxLayout="column">
+  <div *ngIf="treeData.length === 0" class="empty" fxLayoutAlign="center center">
+    <nz-empty
+      nzNotFoundImage="../../../../../assets/data-empty.svg"
+      nzNotFoundContent="{{ 'common.data-empty' | translate }}"
+    ></nz-empty>
+  </div>
+  <mat-form-field [fxShow]="treeData.length > 0" class="factory-tree-search">
     <mat-label>{{ 'device-mng.search-name' | translate }}</mat-label>
     <input type="text" matInput [(ngModel)]="searchValue" />
     <button *ngIf="searchValue" matSuffix mat-icon-button aria-label="Clear" (click)="searchValue = ''">
