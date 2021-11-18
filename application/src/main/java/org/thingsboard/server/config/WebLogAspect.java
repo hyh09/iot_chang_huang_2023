@@ -89,4 +89,5 @@ public class WebLogAspect {
             return new ThingsboardException(exception.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }
+
 }

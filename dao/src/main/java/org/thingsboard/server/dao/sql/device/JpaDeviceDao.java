@@ -631,13 +631,15 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         if(CollectionUtils.isNotEmpty(deviceList)){
             deviceList.forEach(i->{
                 Device device = i.toData();
-                ProductionLine productionLine = productionLineDao.findById(i.getProductionLineId());
-                if(device != null){
-                    device.setFactoryName(productionLine.getFactoryName());
-                    device.setWorkshopName(productionLine.getWorkshopName());
-                    device.setProductionLineName(productionLine.getName());
+                if(i.getProductionLineId() != null && StringUtils.isNotEmpty(i.getProductionLineId().toString())){
+                    ProductionLine productionLine = productionLineDao.findById(i.getProductionLineId());
+                    if(device != null && productionLine != null){
+                        device.setFactoryName(productionLine.getFactoryName());
+                        device.setWorkshopName(productionLine.getWorkshopName());
+                        device.setProductionLineName(productionLine.getName());
+                    }
+                    resultDeviceList.add(device);
                 }
-                resultDeviceList.add(device);
             });
         }
         return resultDeviceList;

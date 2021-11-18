@@ -828,7 +828,7 @@ public class DeviceController extends BaseController {
                 checkEntity(null, device, Resource.DEVICE);
                 saveType = SAVE_TYPE_ADD;
             }
-            //生成设备凭证
+            //保存设备，生成设备凭证
             Device savedDevice = checkNotNull(deviceService.saveDeviceWithAccessToken(device, null));
             tbClusterService.onDeviceUpdated(savedDevice, oldDevice);
             logEntityAction(savedDevice.getId(), savedDevice,

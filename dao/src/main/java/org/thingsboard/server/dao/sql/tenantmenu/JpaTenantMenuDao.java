@@ -246,9 +246,12 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      */
     @Override
     public TenantMenu getMenuById(UUID id){
-        TenantMenuEntity entity = tenantMenuRepository.findById(id).get();
-        if(entity != null){
-            return entity.toData();
+        Optional<TenantMenuEntity> optional = tenantMenuRepository.findById(id);
+        if(!optional.isEmpty()){
+            TenantMenuEntity entity = optional.get();
+            if(entity != null){
+                return entity.toData();
+            }
         }
         return null;
     }

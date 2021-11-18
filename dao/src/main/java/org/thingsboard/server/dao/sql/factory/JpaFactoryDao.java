@@ -41,6 +41,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -459,10 +460,14 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      */
     @Override
     public Factory findById(UUID id){
-        FactoryEntity entity = factoryRepository.findById(id).get();
-        if(entity != null){
-            return entity.toData();
+        Optional<FactoryEntity> optional = factoryRepository.findById(id);
+        if(!optional.isEmpty()){
+            FactoryEntity entity = optional.get();
+            if(entity != null){
+                return entity.toData();
+            }
         }
+
         return null;
     }
 
