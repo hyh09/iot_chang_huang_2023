@@ -31,3 +31,30 @@ export interface AlarmRecord extends BaseData<AlarmRecordId> {
 export interface AlarmRuleInfo extends DeviceProfile {
   dictDeviceIdList?: string[];
 }
+
+export interface AlarmTimesListItem {
+  time: string;
+  num: number;
+}
+
+export interface DeviceItem {
+  id: string;
+  name: string;
+  image: string;
+  isOnline: boolean;
+}
+
+export interface DevicePageData {
+  data: DeviceItem[];
+  hasNext: boolean;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface RealTimeData {
+  alarmTimesList: AlarmTimesListItem[];
+  allDeviceCount: number;
+  devicePageData: DevicePageData;
+  offLineDeviceCount: number;
+  onLineDeviceCount: number;
+}

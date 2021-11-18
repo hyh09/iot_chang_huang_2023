@@ -1,10 +1,9 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FactoryMngService } from '@app/core/http/custom/factory-mng.service';
 import { AppState, TreeNodeEmitEvent, UtilsService } from '@app/core/public-api';
-import { FactoryTableOriginRow, FactoryTreeNodeOptions } from '@app/shared/models/custom/factory-mng.models';
+import { FactoryTableOriginRow, FactoryTreeNodeIds, FactoryTreeNodeOptions } from '@app/shared/models/custom/factory-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
-import { NzFormatEmitEvent } from 'ng-zorro-antd/tree';
 import { EntityTableHeaderComponent } from '../entity/entity-table-header.component';
 
 @Component({
@@ -17,6 +16,9 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   public searchValue: string = '';
   public treeData: FactoryTreeNodeOptions[] = [];
   public scrollHeight = '';
+
+  @Output()
+  clickNode = new EventEmitter<FactoryTreeNodeIds>();
 
   constructor(
     protected store: Store<AppState>,
@@ -37,9 +39,11 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   }
 
   setTreeHeight() {
-    const totalHeight = document.querySelector('.factory-tree').clientHeight;
-    const searchHeight = document.querySelector('.factory-tree-search').clientHeight;
-    this.scrollHeight = `${totalHeight - searchHeight}px`
+    setTimeout(() => {
+      const totalHeight = document.querySelector('.factory-tree').clientHeight;
+      const searchHeight = 46;
+      this.scrollHeight = `${totalHeight - searchHeight}px`;
+    });
   }
 
   fetchData() {
@@ -91,24 +95,29 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
 
   onClickNode(event: TreeNodeEmitEvent) {
     const { keys, node } = event;
+    let params: FactoryTreeNodeIds;
+    const nodeInfo: FactoryTreeNodeOptions = node.origin;
+    const { rowType, id, factoryId, workshopId, productionLineId, deviceId } = nodeInfo;
     if (keys && keys.length > 0) {
-      const nodeInfo: FactoryTreeNodeOptions = node.origin;
-      const { rowType, id, factoryId, workshopId, productionLineId, deviceId } = nodeInfo;
-      Object.assign(this.entitiesTableConfig.componentsData, {
+      params = {
         factoryId: rowType === 'factory' ? id : (factoryId || ''),
         workshopId: rowType === 'workShop' ? id : (workshopId || ''),
         productionLineId: rowType === 'prodLine' ? id : (productionLineId || ''),
         deviceId: rowType === 'device' ? id : (deviceId || '')
-      });
+      };
     } else {
-      Object.assign(this.entitiesTableConfig.componentsData, {
+      params = {
         factoryId: '',
         workshopId: '',
         productionLineId: '',
-        deviceId: '',
-      });
+        deviceId: ''
+      };
     }
-    this.entitiesTableConfig.table.resetSortAndFilter(true);
+    if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {
+      Object.assign(this.entitiesTableConfig.componentsData, params);
+      this.entitiesTableConfig.table.resetSortAndFilter(true);
+    }
+    this.clickNode.emit(params);
   }
 
 }

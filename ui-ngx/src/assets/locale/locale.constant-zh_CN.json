@@ -556,7 +556,8 @@
     "time-range": "起止时间",
     "start-time": "开始时间",
     "end-time": "结束时间",
-    "none": "无"
+    "none": "无",
+    "data-empty": "暂无数据"
   },
   "confirm-on-exit": {
     "html-message": "您有未保存的更改。<br/> 确定要离开此页面吗？",
@@ -2650,6 +2651,7 @@
     }
   },
   "platform": {
+    "platform-mng": "平台管理",
     "name": "平台名称",
     "version": "平台版本",
     "showNameVersion": "展示平台名称和版本",
@@ -2886,6 +2888,14 @@
     "delete-alarm-rule-text": "请注意：确认后，该报警规则和所有相关数据将不可恢复。",
     "delete-alarm-rule-title": "确定要删除设备配置 '{{deviceProfileName}}' ？",
     "delete-alarm-rules-text": "请注意：确认后，所有选定的报警规则将被删除，所有相关数据将不可恢复。",
-    "delete-alarm-rules-title": "确定要删除 { count, plural, 1 {# 个报警规则} other {# 个报警规则} }？"
+    "delete-alarm-rules-title": "确定要删除 { count, plural, 1 {# 个报警规则} other {# 个报警规则} }？",
+    "on-line": "在线",
+    "off-line": "离线",
+    "device-empty": "暂无设备",
+    "run-state-overview": "运行概况",
+    "running-devices": "运行设备（台）",
+    "on-line-device": "在线设备",
+    "off-line-device": "离线设备",
+    "warning-statistics": "预警统计"
   }
 }

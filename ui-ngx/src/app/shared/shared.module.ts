@@ -142,7 +142,7 @@ import { WidgetsBundleSearchComponent } from '@shared/components/widgets-bundle-
 import { SelectableColumnsPipe } from '@shared/pipe/selectable-columns.pipe';
 import { QuickTimeIntervalComponent } from '@shared/components/time/quick-time-interval.component';
 import { OtaPackageAutocompleteComponent } from '@shared/components/ota-package/ota-package-autocomplete.component';
-import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CopyButtonComponent } from '@shared/components/button/copy-button.component';
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
@@ -150,6 +150,8 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzImageModule } from 'ng-zorro-antd/image';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
+
 
 @NgModule({
   providers: [
@@ -304,7 +306,8 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
     NzTabsModule,
     NzTableModule,
     NzImageModule,
-    NzSelectModule
+    NzSelectModule,
+    NzEmptyModule
   ],
   exports: [
     FooterComponent,
@@ -401,6 +404,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
     NzTableModule,
     NzImageModule,
     NzSelectModule,
+    NzEmptyModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,
