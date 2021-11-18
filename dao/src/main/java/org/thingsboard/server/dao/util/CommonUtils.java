@@ -3,13 +3,12 @@ package org.thingsboard.server.dao.util;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 通用工具
@@ -120,4 +119,148 @@ public class CommonUtils {
         String[] result=new String[emptyName.size()];
         return emptyName.toArray(result);
     }
+
+
+    /**
+     * 获取当天的零时时间
+     */
+    public  static  long  getZero()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date zero = calendar.getTime();
+      return   zero.getTime();
+    }
+
+    /**
+     * 获取当前的时间
+     */
+    public  static  long getNowTime()
+    {
+        Date  date =  new Date();
+        return  date.getTime();
+    }
+
+
+    /**
+     * 获取昨天零点
+     * @return
+     */
+    public  static  long  getYesterdayZero()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date zero = calendar.getTime();
+        return   zero.getTime();
+    }
+
+    /***
+     * 获取昨天最后一刻时间
+     * @return
+     */
+    public  static  long  getYesterdayLastTime()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        Date zero = calendar.getTime();
+        return   zero.getTime();
+    }
+
+
+    /**
+     * 获取1949年的时间
+     */
+    public  static  long getHistoryPointTime()
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(1949, 10, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date zero = calendar.getTime();
+       return  zero.getTime();
+    }
+
+    static SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * 获取当月的前5月
+     * 包含当月
+     * @return
+     */
+    public static List<EachMonthStartEndVo> getSixMonths()
+    {
+        List<EachMonthStartEndVo> voList  = new ArrayList<>();
+        for(int i=-5;i<1;i++) {
+            voList.add(getEachMonthStartEndTime(i));
+        }
+       return  voList;
+    }
+
+
+
+
+    public static  EachMonthStartEndVo getEachMonthStartEndTime(int amount)
+    {
+
+        EachMonthStartEndVo vo = new EachMonthStartEndVo();
+        vo.setFlg(amount);
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MONTH, amount);
+        c.set(Calendar.DAY_OF_MONTH, 1);//设置为1号,当前日期既为本月第一天
+        //将小时至0
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        //将分钟至0
+        c.set(Calendar.MINUTE, 0);
+        //将秒至0
+        c.set(Calendar.SECOND,0);
+        //将毫秒至0
+        c.set(Calendar.MILLISECOND, 0);
+        // 获取本月第一天的时间戳
+        Date zero = c.getTime();
+        String s = format1.format(zero);
+        System.out.println("==获取本月第一天的时间戳====>"+s);
+        System.out.println(c.getTimeInMillis());
+        vo.setStartTime(zero.getTime());
+        vo.setStrStartTime(s);
+
+        //获取当前月最后一天
+        Calendar ca = Calendar.getInstance();
+        ca.add(Calendar.MONTH, amount);
+        ca.set(Calendar.DAY_OF_MONTH, ca.getActualMaximum(Calendar.DAY_OF_MONTH));
+        //将小时至0
+        ca.set(Calendar.HOUR_OF_DAY, 23);
+        //将分钟至0
+        ca.set(Calendar.MINUTE, 59);
+        //将秒至0
+        ca.set(Calendar.SECOND,59);
+        //将毫秒至0
+        ca.set(Calendar.MILLISECOND, 59);
+        // 获取本月最后一天的时间戳
+        System.out.println(ca.getTimeInMillis());
+        Date zero2 = ca.getTime();
+        String s2 = format1.format(zero2);
+        System.out.println("==获取本月第最后天的时间戳====>"+s2);
+        vo.setEndTime(zero2.getTime());
+        vo.setStrEndTime(s2);
+
+        vo.setMonth(ca.get(Calendar.MONTH) + 1);
+        return  vo;
+
+    }
+
+
+
 }

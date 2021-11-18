@@ -72,13 +72,18 @@ public abstract class AbstractDevice{
     private UUID dictDeviceId;
 
     @ApiModelProperty("设备图片")
-    private String images;
+    private String picture;
 
     @ApiModelProperty("设备图标")
     private String icon;
 
     @ApiModelProperty("设备编码")
     private String code;
+
+    @ApiModelProperty("备注")
+    private String comment;
+    @ApiModelProperty("设备编号")
+    private String deviceNo;
 
     public long createdTime;
 
@@ -87,6 +92,18 @@ public abstract class AbstractDevice{
     private long updatedTime;
 
     private UUID updatedUser;
+
+    /*******************************以下是非数据库字段***************************************/
+    @ApiModelProperty("工厂名称")
+    private String factoryName;
+
+    @ApiModelProperty("车间名称")
+    private String workshopName;
+
+    @ApiModelProperty("产线名称")
+    private String productionLineName;
+    /*******************************以上是非数据库字段***************************************/
+
 
     public AbstractDevice() {
         super();
@@ -121,9 +138,14 @@ public abstract class AbstractDevice{
         this.factoryId = device.getFactoryId();
         this.workshopId = device.getWorkshopId();
         this.productionLineId = device.getProductionLineId();
-        this.images = device.getImages();
+        this.picture = device.getPicture();
         this.icon = device.getIcon();
         this.dictDeviceId = device.getDictDeviceId();
+        this.comment = device.getComment();
+        this.deviceNo = device.getDeviceNo();
+        this.factoryName = device.getFactoryName();
+        this.workshopName = device.getWorkshopName();
+        this.productionLineName = device.getProductionLineName();
     }
 
     public AbstractDevice(DeviceEntity deviceEntity) {
@@ -144,13 +166,18 @@ public abstract class AbstractDevice{
         this.factoryId = deviceEntity.getFactoryId();
         this.workshopId = deviceEntity.getWorkshopId();
         this.productionLineId = deviceEntity.getProductionLineId();
-        this.images = deviceEntity.getImages();
+        this.picture = deviceEntity.getPicture();
         this.icon = deviceEntity.getIcon();
         this.dictDeviceId = deviceEntity.getDictDeviceId();
+        this.comment = deviceEntity.getComment();
+        this.deviceNo = deviceEntity.getDeviceNo();
     }
 
     public Device toDevice() {
-        Device device = new Device(new DeviceId(getId()));
+        Device device = new Device();
+        if(getId() != null){
+            device = new Device(new DeviceId(getId()));
+        }
         device.setCreatedTime(createdTime);
         if (tenantId != null) {
             device.setTenantId(new TenantId(tenantId));
@@ -176,10 +203,12 @@ public abstract class AbstractDevice{
         device.setWorkshopId(workshopId);
         device.setProductionLineId(productionLineId);
         device.setProductionLineId(productionLineId);
-        device.setImages(images);
+        device.setPicture(picture);
         device.setIcon(icon);
         device.setCode(code);
         device.setDictDeviceId(dictDeviceId);
+        device.setComment(this.comment);
+        device.setDeviceNo(this.deviceNo);
         return device;
     }
 

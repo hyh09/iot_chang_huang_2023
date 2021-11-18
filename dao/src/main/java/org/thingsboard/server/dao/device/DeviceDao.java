@@ -25,6 +25,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.Dao;
 import org.thingsboard.server.dao.TenantEntityDao;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
@@ -252,10 +253,10 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
     /**
      * 多条件查询
-     * @param deviceEntity
+     * @param device
      * @return
      */
-    List<DeviceEntity> findDeviceListBuyCdn(DeviceEntity deviceEntity);
+    List<Device> findDeviceListBuyCdn(Device device);
 
 
     /**
@@ -297,5 +298,22 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return
      */
     PageData<Device> getTenantDeviceInfoList(Device device, PageLink pageLink);
+
+
+    PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    Device getDeviceInfo(UUID id);
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    List<Device> getDeviceByIdList(List<UUID> ids);
 
 }

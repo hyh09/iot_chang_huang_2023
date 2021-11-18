@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.id.DeviceId;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +29,7 @@ public class DistributionDeviceDto {
         Device device = new Device();
         device.setFactoryId(this.factoryId);
         device.setWorkshopId(this.workshopId);
-        if(this.productionLineId != null){
-            device.setId(new DeviceId(this.productionLineId));
-        }
+        device.setProductionLineId(this.productionLineId);
         if(CollectionUtils.isNotEmpty(this.deviceIdList)){
             device.setDeviceIdList(this.deviceIdList);
         }

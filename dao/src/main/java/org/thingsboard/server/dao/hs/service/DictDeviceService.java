@@ -5,6 +5,7 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
@@ -100,4 +101,26 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
+
+    /**
+     * 获得当前默认初始化的分组及分组属性
+     */
+    List<DictDeviceGroupVO> getGroupInitData();
+
+    /**
+     * @param dictDeviceId
+     * @param name
+     * @return map: key-name  ,value-name
+     */
+    List<String> findAllByName(UUID dictDeviceId, String name);
+
+    List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);
+
+    /**
+     * 【不分页】获得设备字典列表
+     *
+     * @param tenantId 租户Id
+     * @return 设备字典列表
+     */
+    List<DictDevice> listAllDictDevice(TenantId tenantId);
 }

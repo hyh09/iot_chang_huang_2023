@@ -47,14 +47,14 @@ public class EffectTsKvRepository {
 
     public  static  String FIND_WITH_SQL=" ";
 
-    public  static  String  SELECT_START_01=" select   table1.id as onlyKeyId ,table1.entity_id,table1.ts as ts, table1.key as key," +
+    public  static  String  SELECT_START_01=" select   table1.id as onlyKeyId ,table1.entity_id,table1.ts as ts, table1.key as key, ty.key as keyName, " +
             "  d1.name as deviceName,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId," +
             " table1.bool_v as booleanValue,table1.str_v as strValue, table1.long_v as longValue , table1.dbl_v as doubleValue, table1.json_v as jsonValue  ";
     public  static  String  SELECT_END_02="  table2.ts as ts2, table2.bool_v as bollV2,table2.str_v strV2,table2.long_v as longV2 ," +
             " table2.dbl_v as  doubleValue2,table2.json_v as jsonValue2 ";
-    public  static  String  FROM_QUERY=" from   table1,table2,device d1 ";
+    public  static  String  FROM_QUERY=" from   table1,table2,device d1,ts_kv_dictionary ty  ";
     //添加在设备表中存在
-    public  static  String  WHERE_QUERY="  where table1.id=table2.id and  table1.rn = table2.rn and  table1.rn='1' and d1.id =table2.entity_id  ";
+    public  static  String  WHERE_QUERY="  where table1.id=table2.id and  table1.rn = table2.rn and  table1.rn='1' and d1.id =table2.entity_id and ty.key_id = table2.key  ";
 
 
 

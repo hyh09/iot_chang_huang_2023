@@ -16,8 +16,9 @@
 package org.thingsboard.server.dao.sql.workshop;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.thingsboard.server.dao.model.sql.FactoryEntity;
+import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 
 import java.util.Optional;
@@ -29,4 +30,11 @@ import java.util.UUID;
 public interface WorkshopRepository extends PagingAndSortingRepository<WorkshopEntity, UUID>, JpaSpecificationExecutor<WorkshopEntity> {
 
     Optional<WorkshopEntity> findByTenantIdAndId(UUID tenantId, UUID id);
+
+    /**
+     * 根据工厂删除后刷新值(逻辑删除)
+     * @param factoryId
+     */
+    @Query(value = "UPDATE WorkshopEntity t SET t.delFlag = 'D' WHERE t.factoryId = :factoryId")
+    void delWorkshopByFactoryId(@Param("factoryId") UUID factoryId);
 }

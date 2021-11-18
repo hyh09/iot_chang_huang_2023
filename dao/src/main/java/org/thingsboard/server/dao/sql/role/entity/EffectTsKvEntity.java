@@ -35,6 +35,7 @@ import java.util.UUID;
                                         @ColumnResult(name = "ts" ,type = Long.class),
                                         @ColumnResult(name = "key" ,type = Integer.class),
 
+                                        @ColumnResult(name = "keyName",type = String.class),
                                         @ColumnResult(name = "deviceName",type = String.class),
                                         @ColumnResult(name = "factoryId",type = UUID.class),
                                         @ColumnResult(name = "workshopId",type = UUID.class),
@@ -144,7 +145,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     }
 
 
-    public EffectTsKvEntity(String onlyKeyId,UUID entityId,Long ts1,Integer key1,
+    public EffectTsKvEntity(String onlyKeyId,UUID entityId,Long ts1,Integer key1,String keyName,
                             String deviceName,UUID factoryId,UUID workshopId,UUID productionLineId,
                             Boolean booleanValue1,String strValue,Long longValue,Double doubleValue,String jsonValue,
                             Long ts2,Boolean bollV2,String strV2,Long longV2,Double doubleValue2,String jsonValue2
@@ -153,6 +154,8 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
         this.entityId = entityId;
         this.ts =ts1;
         this.key =key1;
+
+        this.keyName = keyName;
 
         this.deviceName =deviceName;
         this.factoryId =factoryId;

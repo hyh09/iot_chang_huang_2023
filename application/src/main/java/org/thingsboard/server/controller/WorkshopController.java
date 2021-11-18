@@ -36,9 +36,9 @@ public class WorkshopController extends BaseController  {
     @ResponseBody
     public WorkshopVo saveWorkshop(@RequestBody AddWorkshopDto addWorkshopDto) throws ThingsboardException {
         try {
-            checkParameter("tenantId",addWorkshopDto.getTenantId());
             checkParameter("factoryId",addWorkshopDto.getFactoryId());
             Workshop workshop = addWorkshopDto.toWorkshop();
+            workshop.setTenantId(getCurrentUser().getTenantId().getId());
             if(addWorkshopDto.getId() == null){
                 workshop.setCreatedUser(getCurrentUser().getUuidId());
                 workshop = checkNotNull(workshopService.saveWorkshop(workshop));
@@ -61,9 +61,9 @@ public class WorkshopController extends BaseController  {
     @ApiOperation("删除车间")
     @ApiImplicitParam(name = "id",value = "工厂标识",dataType = "string",paramType="query",required = true)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void delWorkshop(@RequestParam String id) throws ThingsboardException {
+    public void delWorkshop(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
             workshopService.delWorkshop(toUUID(id));
@@ -80,7 +80,7 @@ public class WorkshopController extends BaseController  {
      */
     @ApiOperation("查询租户下所有车间列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true),
+            @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query"),
             @ApiImplicitParam(name = "factoryId",value = "工厂标识",dataType = "string",paramType = "query")
     })
     @RequestMapping(value = "/findWorkshopListByTenant", method = RequestMethod.GET)
@@ -88,7 +88,9 @@ public class WorkshopController extends BaseController  {
     public List<WorkshopVo> findWorkshopListByTenant(@RequestParam String tenantId,@RequestParam String factoryId) throws ThingsboardException {
         try {
             List<WorkshopVo> workshopVos = new ArrayList<>();
-            checkParameter("tenantId",tenantId);
+            if(StringUtils.isEmpty(tenantId)){
+                tenantId = getCurrentUser().getTenantId().getId().toString();
+            }
             List<Workshop> workshops = checkNotNull(workshopService.findWorkshopListByTenant(toUUID(tenantId), StringUtils.isNotEmpty(factoryId) ?toUUID(factoryId):null));
             workshops.forEach(i->{
                 workshopVos.add(new WorkshopVo(i));

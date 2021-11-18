@@ -17,15 +17,12 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.data.DeviceData;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.OtaPackageId;
-import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.devicecomponent.DeviceComponent;
+import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.validation.NoXss;
 
 import java.io.ByteArrayInputStream;
@@ -60,8 +57,10 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private UUID dictDeviceId;
     private String code;
     private UUID productionLineId;
-    private String images;
+    private String picture;
     private String icon;
+    private String comment;
+    private String deviceNo;
     public long createdTime;
 
     public UUID createdUser;
@@ -70,15 +69,28 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     private UUID updatedUser;
 
-    /********以下是非数据库字段********/
+    /**********************************以下是非数据库字段***************************************/
+
     private List<UUID> deviceIdList;
     //网关版本
     private String gatewayVersion;
     //网关版本更新时间
     private Long gatewayUpdateTs;
-    @ApiModelProperty("true-已分配，false-未分配（默认值）")
+    //("true-已分配，false-未分配（默认值）")
     private Boolean isAllot = false;
-    /********以上是非数据库字段********/
+    //设备构成
+    private List<DeviceComponent> deviceComponentList;
+    //工厂名称
+    private String factoryName;
+    //车间名称
+    private String workshopName;
+    //产线名称
+    private String productionLineName;
+    private List<UUID> productionLineIds;
+    //是否过滤掉网关true是，false否
+    private Boolean filterGatewayFlag = false;
+    /**********************************以上是非数据库字段***************************************/
+
 
 
     public Device() {
@@ -114,6 +126,17 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.setFirmwareId(device.getFirmwareId());
         this.setSoftwareId(device.getSoftwareId());
         return this;
+    }
+
+    public Device (Factory factory,List<UUID> productionLineIds){
+        this.setFilterGatewayFlag(true);
+        this.setProductionLineIds(productionLineIds);
+        this.setTenantId(new TenantId(factory.getTenantId()));
+        this.setName(factory.getDeviceName());
+        this.setTenantId(new TenantId(factory.getTenantId()));
+    }
+    public Device (UUID tenantId){
+        this.setTenantId(new TenantId(tenantId));
     }
 
     public TenantId getTenantId() {
@@ -221,12 +244,12 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.productionLineId = productionLineId;
     }
 
-    public String getImages() {
-        return images;
+    public String getPicture() {
+        return picture;
     }
 
-    public void setImages(String images) {
-        this.images = images;
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
     public String getIcon() {
@@ -333,6 +356,70 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setAllot(Boolean allot) {
         isAllot = allot;
+    }
+
+    public List<DeviceComponent> getDeviceComponentList() {
+        return deviceComponentList;
+    }
+
+    public void setDeviceComponentList(List<DeviceComponent> deviceComponentList) {
+        this.deviceComponentList = deviceComponentList;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getFactoryName() {
+        return factoryName;
+    }
+
+    public void setFactoryName(String factoryName) {
+        this.factoryName = factoryName;
+    }
+
+    public String getWorkshopName() {
+        return workshopName;
+    }
+
+    public void setWorkshopName(String workshopName) {
+        this.workshopName = workshopName;
+    }
+
+    public String getProductionLineName() {
+        return productionLineName;
+    }
+
+    public void setProductionLineName(String productionLineName) {
+        this.productionLineName = productionLineName;
+    }
+
+    public String getDeviceNo() {
+        return deviceNo;
+    }
+
+    public void setDeviceNo(String deviceNo) {
+        this.deviceNo = deviceNo;
+    }
+
+    public List<UUID> getProductionLineIds() {
+        return productionLineIds;
+    }
+
+    public void setProductionLineIds(List<UUID> productionLineIds) {
+        this.productionLineIds = productionLineIds;
+    }
+
+    public Boolean getFilterGatewayFlag() {
+        return filterGatewayFlag;
+    }
+
+    public void setFilterGatewayFlag(Boolean filterGatewayFlag) {
+        this.filterGatewayFlag = filterGatewayFlag;
     }
 
     @Override

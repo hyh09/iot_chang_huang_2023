@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class FactoryServiceImpl extends AbstractEntityService implements FactoryService {
 
+    private static final String PREFIX_ENCODING_GC = "GC";
+
     private final FactoryDao factoryDao;
     private final UserRoleMenuSvc userRoleMenuSvc;
     private final DeviceService deviceService;
@@ -42,7 +44,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public Factory saveFactory(Factory factory){
+    public Factory saveFactory(Factory factory) throws ThingsboardException{
         log.trace("Executing saveFactory [{}]", factory);
         if (factory != null && factory.getId() == null) {
             //创建管理员账号
@@ -58,7 +60,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
             factory.setAdminUserId(saveUser.getId().getId());
             factory.setAdminUserName(saveUser.getUserName());
         }
-        factory.setCode(String.valueOf(System.currentTimeMillis()));
+        factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
         return factoryDao.saveFactory(factory);
     }
 
@@ -68,7 +70,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public Factory updFactory(Factory factory){
+    public Factory updFactory(Factory factory)throws ThingsboardException{
         log.trace("Executing updFactory [{}]", factory);
         return factoryDao.saveFactory(factory);
     }
@@ -94,7 +96,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public List<Factory> findFactoryList(UUID tenantId){
         log.trace("Executing findFactoryList [{}]", tenantId);
-        return factoryDao.find(new TenantId(tenantId));
+        return factoryDao.findFactoryByTenantId(tenantId);
     }
 
     /**
@@ -105,7 +107,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public Factory findById(UUID id){
         log.trace("Executing findById [{}]", id);
-        return factoryDao.findById(null, id);
+        return factoryDao.findById(id);
     }
 
     /**
@@ -114,9 +116,9 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public FactoryListVo findFactoryListBuyCdn(Factory factory){
+    public FactoryListVo findFactoryListByCdn(Factory factory){
         log.trace("Executing findFactoryListBuyCdn [{}]", factory);
-        return factoryDao.findFactoryListBuyCdn( factory,userRoleMenuSvc.decideUser(new UserId(factory.getLoginUserId())));
+        return factoryDao.findFactoryListByCdn( factory,userRoleMenuSvc.decideUser(new UserId(factory.getLoginUserId())));
     }
 
     /**
@@ -159,10 +161,10 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         //查询登录人角色
         //查询登录人角色及所属工厂
         JudgeUserVo judgeUserVo = userRoleMenuSvc.decideUser(new UserId(userId));
-        if (judgeUserVo != null && judgeUserVo.getTenantFlag()) {
+        if (judgeUserVo != null && judgeUserVo.getTenantFlag() != null &&judgeUserVo.getTenantFlag()) {
             //租户管理员/租户有菜单权限的用户，拥有全部数据权限
             resultFactory = factoryDao.findFactoryByTenantId(tenantId);
-        } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag()){
+        } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
             //工厂管理员/工厂用户，拥有所属工厂数据权限
             //查询工厂信息
             Factory queryFactory = factoryDao.findFactoryByAdmin(judgeUserVo.getUserId());
@@ -172,4 +174,17 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         }
         return resultFactory;
     }
+
+    /**
+     * 根据名称查询
+     * @return
+     */
+    @Override
+    public List<Factory> findByName(String name,UUID tenantId){
+        Factory queryFactory = new Factory();
+        queryFactory.setTenantId(tenantId);
+        queryFactory.setName(name);
+        return factoryDao.findAllByCdn(queryFactory);
+    }
+
 }

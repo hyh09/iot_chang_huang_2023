@@ -1,7 +1,9 @@
 package org.thingsboard.server.common.data.workshop;
 
 import lombok.Data;
+import org.thingsboard.server.common.data.factory.Factory;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -27,8 +29,16 @@ public class Workshop{
     private UUID createdUser;
     private long updatedTime;
     private UUID updatedUser;
-
     private String delFlag;
+
+    /**********************************以下是非数据库字段***************************************/
+    //工厂名称
+    private String factoryName;
+    private List<UUID> factoryIds;
+
+
+    /**********************************以上是非数据库字段***************************************/
+
 
     public Workshop() {
         super();
@@ -36,6 +46,18 @@ public class Workshop{
 
     public Workshop(UUID id) {
         this.id = id;
+    }
+    public Workshop(UUID id,UUID factoryId,UUID tenantId) {
+        this.id = id;
+        this.factoryId = factoryId;
+        this.tenantId = tenantId;
+    }
+
+    public Workshop (Factory factory,List<UUID> factoryIds){
+        this.setFactoryIds(factoryIds);
+        this.setTenantId(factory.getTenantId());
+        this.setName(factory.getWorkshopName());
+        this.setTenantId(factory.getTenantId());
     }
 
 }

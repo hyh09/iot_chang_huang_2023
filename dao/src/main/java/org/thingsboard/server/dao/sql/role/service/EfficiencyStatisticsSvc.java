@@ -1,9 +1,18 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -14,10 +23,15 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 public interface EfficiencyStatisticsSvc {
 
 
+    PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+
+
+
+
     /**
      * 产能接口
      */
-    public ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+     ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
 
     /**
@@ -27,8 +41,12 @@ public interface EfficiencyStatisticsSvc {
 
 
 
+    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
 
 
+    //查询当前的分组-分组属性
+    Object   queryGroupDict(UUID deviceId,TenantId tenantId);
 
+    List<String>   queryDictDevice(UUID deviceId,TenantId tenantId);
 
 }

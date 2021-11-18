@@ -59,7 +59,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
      *  0是未启用
      */
     @ApiModelProperty(value = "启用状态{1是启用,0是未启用}")
-    private  String  activeStatus;
+    private  String  activeStatus="1";
     /**
      * 用户编码
      */

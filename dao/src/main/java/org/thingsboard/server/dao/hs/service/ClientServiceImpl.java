@@ -18,8 +18,12 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.dao.InitEntity;
+import org.thingsboard.server.dao.hs.dao.InitRepository;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
@@ -30,6 +34,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.function.Function;
@@ -48,6 +53,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     @PersistenceContext
     protected EntityManager entityManager;
+
+    // 初始化Repository
+    InitRepository initRepository;
 
     // 工厂Repository
     FactoryRepository factoryRepository;
@@ -74,9 +82,17 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
+//        TODO delete
+//        var cb = entityManager.getCriteriaBuilder();
+//        var query = cb.createQuery(DeviceEntity.class);
+//        var root = query.from(DeviceEntity.class);
+//        query.multiselect(root.<UUID>get("id"), root.<Long>get("createdTime"));
+//        var r = entityManager.createQuery(query);
+//        var z = r.getResultList();
+
         return DeviceBaseDTO.builder()
                 .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
-                .workshop(t.getWorkShopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkShopId()))) : null)
+                .workshop(t.getWorkshopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkshopId()))) : null)
                 .productionLine(t.getProductionLineId() != null ? DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getProductionLineId()))) : null)
                 .device(t.getDeviceId() != null ? DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getDeviceId()))) : null)
                 .build();
@@ -138,22 +154,39 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 获得设备字典初始化数据
+     */
+    @Override
+    public List<DictDeviceGroupVO> listDictDeviceInitData() {
+        List<DictDeviceGroupVO> list = Lists.newArrayList();
+        var jsonNodeOptional = this.initRepository.findByScope(InitScopeEnum.DICT_DEVICE_GROUP.getCode()).map(InitEntity::getInitData);
+        if (jsonNodeOptional.isEmpty())
+            return list;
+
+        var jsonNode = jsonNodeOptional.get();
+
+        jsonNode.forEach(e -> list.add(convertValue(e, DictDeviceGroupVO.class)));
+        return list;
+    }
+
+    /**
      * 组装设备请求 specification
      *
-     * @param tenantId      租户Id
-     * @param t             extends FactoryDeviceQuery
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
      */
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+//            predicates.add(cb.like(root.get("additional_info"), "%" + "\"gateway\":false" + "%"));
 
             if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
             } else if (!StringUtils.isBlank(t.getProductionLineId())) {
                 predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
-            } else if (!StringUtils.isBlank(t.getWorkShopId())) {
-                predicates.add(cb.equal(root.<UUID>get("workShopId"), toUUID(t.getWorkShopId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
             } else if (!StringUtils.isBlank(t.getFactoryId())) {
                 predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
             } else {
@@ -163,6 +196,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
+    }
+
+    @Autowired
+    public void setInitRepository(InitRepository initRepository) {
+        this.initRepository = initRepository;
     }
 
     @Autowired

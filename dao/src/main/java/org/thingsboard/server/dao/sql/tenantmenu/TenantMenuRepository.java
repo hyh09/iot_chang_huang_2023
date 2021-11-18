@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 
 import javax.transaction.Transactional;
@@ -84,14 +85,14 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
 
     /**
      * 根据系统菜单删除菜单
-     * @param delByMenuId
+     * @param sysMenuId
      */
     @Modifying
     @Transactional
     @Query("DELETE FROM TenantMenuEntity t WHERE t.sysMenuId = :sysMenuId")
     void delByMenuId(@Param("sysMenuId")UUID sysMenuId);
 
-    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName in (:ids) ORDER BY t.sort ASC")
+    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.id in (:ids) ORDER BY t.sort ASC")
     List<TenantMenuEntity> getTenantMenuListByIds(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId, @Param("ids") List<UUID> ids);
 
 }

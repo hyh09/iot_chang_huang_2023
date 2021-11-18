@@ -10,9 +10,9 @@ import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.entity.ResultVo;
 import org.thingsboard.server.entity.user.CodeKeyNum;
-import org.thingsboard.server.entity.user.CodeVo;
-import org.thingsboard.server.entity.user.UserVo;
-import org.thingsboard.server.service.userrole.CheckSvc;
+import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UserVo;
+import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 

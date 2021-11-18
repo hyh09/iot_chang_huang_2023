@@ -52,6 +52,7 @@ import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.device.provision.ProvisionFailedException;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
@@ -123,7 +124,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     private DeviceComponentDao deviceComponentDao;
 
     @Autowired
-    DictDeviceComponentRepository componentRepository;
+    private DictDeviceComponentRepository componentRepository;
 
     @Override
     public DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId) {
@@ -915,6 +916,21 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return deviceDao.getTenantDeviceInfoList(device,pageLink);
     }
 
+    /**
+     * 获取设备详情
+     */
+    @Override
+    public Device getDeviceInfo(UUID id){
+        //查询设备信息
+        Device device = deviceDao.getDeviceInfo(id);
+        device.setDeviceComponentList(deviceComponentDao.getDeviceComponentByDeviceId(id));
+        return device;
+
+    }
+    @Override
+    public PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink){
+        return deviceDao.queryAllByNameLike(factoryId,name,pageLink);
+    }
 
 
 

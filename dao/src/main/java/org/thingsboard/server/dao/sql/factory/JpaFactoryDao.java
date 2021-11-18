@@ -23,6 +23,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
@@ -30,20 +32,17 @@ import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
-import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
-import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
-import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
-import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 /**
@@ -60,8 +59,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     private ProductionLineDao productionLineDao;
     @Autowired
     private DeviceDao deviceDao;
-    @Autowired
-    private UserRoleMenuSvc userRoleMenuSvc;
 
     @Override
     protected Class<FactoryEntity> getEntityClass() {
@@ -75,9 +72,24 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
 
 
     @Override
-    public Factory saveFactory(Factory factory){
+    public Factory saveFactory(Factory factory)throws ThingsboardException {
+        Boolean create = factory.getId() == null;
+        //校验名称重复
+        Factory check = new Factory();
+        check.setName(factory.getName());
+        check.setTenantId(factory.getTenantId());
+        List<Factory> factoryList = this.commonCondition(check);
+        if(CollectionUtils.isNotEmpty(factoryList)){
+            if (create) {
+                throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+            }else {
+                if(!factoryList.get(0).getId().toString().equals(factory.getId().toString())) {
+                    throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
+            }
+        }
         FactoryEntity factoryEntity = new FactoryEntity(factory);
-        if (factoryEntity.getUuid() == null) {
+        if (create) {
             UUID uuid = Uuids.timeBased();
             factoryEntity.setUuid(uuid);
             factoryEntity.setCreatedTime(Uuids.unixTimestamp(uuid));
@@ -93,15 +105,50 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     }
 
     /**
-     * 删除后刷新值(逻辑删除)
+     * 构造查询条件,需要家条件在这里面加
+     * @param factory
+     * @return
+     */
+    private List<Factory> commonCondition(Factory factory){
+        List<Factory> resultFactorytList = new ArrayList<>();
+        Specification<FactoryEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(factory != null){
+                if(factory.getTenantId() != null){
+                    predicates.add(cb.equal(root.get("tenantId"),factory.getTenantId()));
+                }
+                if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(factory.getName())){
+                    predicates.add(cb.equal(root.get("name"),factory.getName()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        List<FactoryEntity> all = factoryRepository.findAll(specification);
+        if(CollectionUtils.isNotEmpty(all)){
+            all.forEach(i->{
+                resultFactorytList.add(i.toData());
+            });
+        }
+        return resultFactorytList;
+    }
+
+
+    /**
+     * 删除(逻辑删除)
      * @param id
      */
     @Override
     public void delFactory(UUID id){
-        FactoryEntity factoryEntity = factoryRepository.findById(id).get();
-        factoryEntity.setDelFlag("D");
-        factoryRepository.save(factoryEntity);
+
+        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))){
+           /* 逻辑删除暂时不用
+            FactoryEntity factoryEntity = factoryRepository.findById(id).get();
+            factoryEntity.setDelFlag("D");
+            factoryRepository.save(factoryEntity);*/
+            factoryRepository.deleteById(id);
+        }
     }
+
 
     /**
      * 根据工厂管理员查询
@@ -135,11 +182,11 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * @return
      */
     @Override
-    public FactoryListVo findFactoryListBuyCdn(Factory factory, JudgeUserVo judgeUserVo){
-        List<FactoryEntity> factoryEntityList = new ArrayList<>();
-        List<WorkshopEntity> workshopEntityList = new ArrayList<>();
-        List<ProductionLineEntity> productionLineEntityList = new ArrayList<>();
-        List<DeviceEntity> deviceEntityList = new ArrayList<>();
+    public FactoryListVo findFactoryListByCdn(Factory factory, JudgeUserVo judgeUserVo){
+        List<FactoryEntity> factoryList = new ArrayList<>();
+        List<Workshop> workshopList = new ArrayList<>();
+        List<ProductionLine> productionLineList = new ArrayList<>();
+        List<Device> deviceList = new ArrayList<>();
 
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
@@ -147,6 +194,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionlineName());
             boolean notBlankDeviceName = StringUtils.isNotBlank(factory.getDeviceName());
 
+            /**1.先根据条件查询出所有的 工厂、车间、产线、设备**/
             //查询工厂
             // 动态条件查询
             Specification<FactoryEntity> specification = (root, query, cb) -> {
@@ -155,301 +203,304 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 if(notBlankFactoryName){
                     predicates.add(cb.like(root.get("name"),"%" + factory.getName().trim() + "%"));
                 }
-                //工厂管理员及工厂用户只能看工厂数据
-                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag()){
-                    predicates.add(cb.equal(root.get("id"), judgeUserVo.getUserId()));
+                if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
+                    //工厂管理员/工厂用户，拥有该工厂数据权限
+                    predicates.add(cb.equal(root.get("adminUserId"), judgeUserVo.getUserId()));
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
-            factoryEntityList = factoryRepository.findAll(specification);
+            factoryList = factoryRepository.findAll(specification);
 
-            //查询车间
-            if(notBlankWorkshopName){
-                workshopEntityList = workshopDao.findWorkshopListBuyCdn(new WorkshopEntity(factory));
-            }else {
-                workshopEntityList = workshopDao.findWorkshopListBuyCdn(new WorkshopEntity(factory.getTenantId()));
+            if(CollectionUtils.isNotEmpty(factoryList)){
+                List<UUID> factoryIds = factoryList.stream().map(m->m.getId()).collect(Collectors.toList());
+                //查询车间
+                workshopList = workshopDao.findWorkshopListByCdn(new Workshop(factory,factoryIds));
+                if(CollectionUtils.isNotEmpty(workshopList)){
+                    List<UUID> workshopIds = workshopList.stream().map(m->m.getId()).collect(Collectors.toList());
+                    //查询产线
+                    productionLineList = productionLineDao.findProductionLineListBuyCdn(new ProductionLine(factory,workshopIds));
+                    if(CollectionUtils.isNotEmpty(productionLineList)){
+                        List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
+                        //查询设备,过滤掉网关
+                        deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory,productionLineIds));
+                    }
+                }
             }
-            //查询产线
-            if(notBlankProductionlineName){
-                productionLineEntityList = productionLineDao.findProductionLineListBuyCdn(new ProductionLineEntity(factory));
-            }else {
-                productionLineEntityList = productionLineDao.findProductionLineListBuyCdn(new ProductionLineEntity(factory.getTenantId()));
-            }
-            //查询设备
+            /**2.根据查询条件，筛选结果**/
             if(notBlankDeviceName){
-                deviceEntityList = deviceDao.findDeviceListBuyCdn(new DeviceEntity(factory));
+                //设备名称不为空，用设备层层往上筛选
+                 return this.filterFromDevice(factoryList,workshopList,productionLineList,deviceList);
             }else {
-                deviceEntityList = deviceDao.findDeviceListBuyCdn(new DeviceEntity(factory.getTenantId()));
-            }
-
-
-            //搜索条件组合判断
-            //处理数据
-            //如果设备不为空
-            if(notBlankDeviceName){
-
-                //判断产线数据是否为空
                 if(notBlankProductionlineName){
-                    //设备不为空-产线不为空，拿设备数据筛选产线
-                    productionLineEntityList = this.filterProductionLineByDevice(deviceEntityList,productionLineEntityList);
-
-                    //判断车间数据是否为空
-                    if(notBlankWorkshopName){
-                        //设备不为空-产线不为空-车间不为空，拿产线数据筛选车间
-                        workshopEntityList = this.filterWorkshopByProductionLine(productionLineEntityList,workshopEntityList);
-
-                        //判断工厂数据是否为空
-                        if(notBlankFactoryName){
-                            //设备不为空-产线不为空-车间不为空-工厂不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
-                        }
-                    }else {
-                        //判断工厂数据是否为空
-                        if(notBlankFactoryName){
-                            //设备不为空-产线不为空-车间为空-工厂不为空，拿产线数据筛选工厂
-                            factoryEntityList = this.filterFactoryByProductionLine(productionLineEntityList,workshopEntityList,factoryEntityList);
-                        }
-                    }
+                    //产线名称不为空，用产线层层往上筛选
+                   return this.filterFromProductionLine(factoryList,workshopList,productionLineList,deviceList);
                 }else {
-                    //判断车间数据是否为空
                     if(notBlankWorkshopName){
-                        //设备不为空-产线为空，车间不为空，拿设备数据筛选车间
-                        workshopEntityList = this.filterWorkshopByDevice(deviceEntityList,productionLineEntityList,workshopEntityList);
-
-                        //判断工厂数据是否为空
-                        if(notBlankFactoryName){
-                            //设备不为空-产线为空-车间不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
-                        }
-                    }else {
-                        //判断工厂数据是否为空
-                        if(notBlankFactoryName){
-                            //设备不为空-产线为空-车间为空，拿设备数据筛选工厂
-                            factoryEntityList = this.filterFactoryByDevice(deviceEntityList,productionLineEntityList,workshopEntityList,factoryEntityList);
-                        }
-
+                        //车间名称不为空，用车间层层往上筛选
+                        return this.filterFromWorkshop(factoryList,workshopList,productionLineList,deviceList);
                     }
                 }
-            }else {
-                //判断产线是否为空
-                if(notBlankProductionlineName){
-
-                    //判断车间是否为空
-                    if(notBlankWorkshopName){
-                        //设备为空-产线不为空-车间不为空，拿产线数据筛选车间
-                        workshopEntityList = this.filterWorkshopByProductionLine(productionLineEntityList,workshopEntityList);
-
-                        //判断工厂是否为空
-                        if(notBlankFactoryName){
-                            //设备为空-产线不为空-车间不为空-工厂不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
-                        }
-                    }else {
-                        //判断工厂是否为空
-                        if(notBlankFactoryName){
-                            //设备为空-产线不为空-车间为空-工厂不为空，拿产线数据筛选工厂
-                            factoryEntityList = this.filterFactoryByProductionLine(productionLineEntityList,workshopEntityList,factoryEntityList);
-                        }
-                    }
-                }else {
-                    //判断车间是否为空
-                    if(notBlankWorkshopName){
-                        //判断工厂是否为空
-                        if(notBlankFactoryName){
-                            //设备为空-产线为空-车间不为空-工厂不为空，拿车间数据筛选工厂
-                            factoryEntityList = this.filterFactoryByWorkshop(workshopEntityList,factoryEntityList);
-                        }
-                    }
-                }
-
             }
         }
-        return this.toFactoryListVo(factoryEntityList,workshopEntityList,productionLineEntityList,deviceEntityList);
-    }
-
-    private FactoryListVo toFactoryListVo(List<FactoryEntity> factoryEntityList, List<WorkshopEntity> workshopEntityList, List<ProductionLineEntity> productionLineEntityList, List<DeviceEntity> deviceEntityList) {
-        List<Factory> factoryList = new ArrayList<>();
-        List<Workshop> workshopList = new ArrayList<>();
-        List<ProductionLine> productionLineList = new ArrayList<>();
-        List<Device> deviceList = new ArrayList<>();
-
-        if (CollectionUtils.isNotEmpty(factoryEntityList)) {
-            factoryEntityList.forEach(i -> {
-                factoryList.add(i.toFactory());
-            });
-
-        }
-        if (CollectionUtils.isNotEmpty(workshopEntityList)) {
-            workshopEntityList.forEach(i -> {
-                workshopList.add(i.toWorkshop());
-            });
-
-        }
-        if (CollectionUtils.isNotEmpty(productionLineEntityList)) {
-            productionLineEntityList.forEach(i -> {
-                productionLineList.add(i.toProductionLine());
-            });
-
-        }
-        if (CollectionUtils.isNotEmpty(deviceEntityList)) {
-            deviceEntityList.forEach(i -> {
-                deviceList.add(i.toData());
-            });
-
-        }
-        return new FactoryListVo(factoryList,workshopList,productionLineList,deviceList);
+        return new FactoryListVo(this.toFactoryList(factoryList),workshopList,productionLineList,deviceList);
     }
 
     /**
-     * 根据设备过滤产线
-     * @param deviceEntityList
-     * @param productionLineEntityList
-     * @return
-     */
-    private List<ProductionLineEntity> filterProductionLineByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList){
-        deviceEntityList.forEach(i->{
-            Iterator<ProductionLineEntity> it = productionLineEntityList.iterator();
-            while (it.hasNext()){
-                ProductionLineEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getProductionLineId().toString())){
-                    it.remove();
-                }
-            }
-        });
-        return productionLineEntityList;
-    }
-
-    /**
-     * 根据产线过滤车间
-     * @param productionLineEntityList
-     * @param workshopEntityList
-     * @return
-     */
-    private List<WorkshopEntity> filterWorkshopByProductionLine(List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList){
-        productionLineEntityList.forEach(i->{
-            Iterator<WorkshopEntity> it = workshopEntityList.iterator();
-            while (it.hasNext()){
-                WorkshopEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getWorkshopId().toString())){
-                    it.remove();
-                }
-            }
-        });
-        return workshopEntityList;
-    }
-
-    /**
-     * 根据车间过滤工厂
-     * @param workshopEntityList
+     * List<FactoryEntity>转 List<Factory>
      * @param factoryEntityList
      * @return
      */
-    private List<FactoryEntity> filterFactoryByWorkshop(List<WorkshopEntity> workshopEntityList,List<FactoryEntity> factoryEntityList){
-        workshopEntityList.forEach(i->{
-            Iterator<FactoryEntity> it = factoryEntityList.iterator();
-            while (it.hasNext()){
-                FactoryEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getFactoryId().toString())){
-                    it.remove();
-                }
-            }
-        });
-        return factoryEntityList;
+    private List<Factory> toFactoryList(List<FactoryEntity> factoryEntityList){
+        List<Factory> resultFactory = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(factoryEntityList)){
+            factoryEntityList.forEach(i->{
+                resultFactory.add(i.toFactory());
+            });
+        }
+        return resultFactory;
     }
 
     /**
-     * 根据产线过滤工厂
-     * @param productionLineEntityList
-     * @param workshopEntityList
+     * 设备名称不为空，用设备层层往上筛选
      * @param factoryEntityList
+     * @param workshops
+     * @param lines
+     * @param devices
      * @return
      */
-    private List<FactoryEntity> filterFactoryByProductionLine(List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList,List<FactoryEntity> factoryEntityList ){
-        productionLineEntityList.forEach(i->{
-            Iterator<WorkshopEntity> it = workshopEntityList.iterator();
-            while (it.hasNext()){
-                WorkshopEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getWorkshopId().toString())){
-                    it.remove();
-                }else {
-                    Iterator<FactoryEntity> itFactory = factoryEntityList.iterator();
-                    while (itFactory.hasNext()){
-                        FactoryEntity factoryEntity = itFactory.next();
-                        if(!factoryEntity.getUuid().toString().equals(entity.getFactoryId().toString())){
-                            it.remove();
+    private FactoryListVo filterFromDevice(List<FactoryEntity> factoryEntityList, List<Workshop> workshops, List<ProductionLine> lines, List<Device> devices){
+        FactoryListVo result = new FactoryListVo();
+        List<Device> resultDeviceList = devices;
+        List<ProductionLine> resultLineList = new ArrayList<>();
+        List<Workshop> resultWorkshopList = new ArrayList<>();
+        List<Factory> resultFactoryList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(resultDeviceList)){
+            //设备去重
+            resultDeviceList = resultDeviceList.stream().distinct().collect(Collectors.toList());
+            /**1.用设备筛选 -产线**/
+            for (Device device : resultDeviceList){
+                //产线
+                for(ProductionLine productionLine : lines){
+                    if(device.getProductionLineId().toString().equals(productionLine.getId().toString())){
+                        resultLineList.add(productionLine);
+                    }
+                }
+            }
+            if(CollectionUtils.isNotEmpty(resultLineList)){
+                //产线去重
+                resultLineList = resultLineList.stream().distinct().collect(Collectors.toList());
+            }
+            /**2.用设备筛选出的产线，去筛选车间**/
+            if(CollectionUtils.isNotEmpty(resultLineList) && CollectionUtils.isNotEmpty(workshops)){
+                for (ProductionLine line : resultLineList){
+                    //车间
+                    for (Workshop workshop : workshops){
+                        if(line.getWorkshopId().toString().equals(workshop.getId().toString())){
+                            resultWorkshopList.add(workshop);
                         }
                     }
                 }
             }
-        });
-        return factoryEntityList;
-    }
-
-    /**
-     * 根据设备过滤车间
-     * @param deviceEntityList
-     * @param productionLineEntityList
-     * @param workshopEntityList
-     * @return
-     */
-    private List<WorkshopEntity> filterWorkshopByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList){
-        deviceEntityList.forEach(i->{
-            Iterator<ProductionLineEntity> it = productionLineEntityList.iterator();
-            while (it.hasNext()){
-                ProductionLineEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getProductionLineId().toString())){
-                    it.remove();
-                }else {
-                    Iterator<WorkshopEntity> itWorkshop = workshopEntityList.iterator();
-                    while (itWorkshop.hasNext()){
-                        WorkshopEntity workshopEntity = itWorkshop.next();
-                        if(!workshopEntity.getUuid().toString().equals(entity.getWorkshopId().toString())){
-                            it.remove();
+            if(CollectionUtils.isNotEmpty(resultWorkshopList)){
+                //车间去重
+                resultWorkshopList = resultWorkshopList.stream().distinct().collect(Collectors.toList());
+            }
+            /**3.用上一步（设备筛选出产线，再用产线去筛选车间）筛选出的车间，去筛选工厂，**/
+            if(CollectionUtils.isNotEmpty(resultWorkshopList) && CollectionUtils.isNotEmpty(factoryEntityList)){
+                for (Workshop workshop :resultWorkshopList){
+                    //工厂
+                    for (FactoryEntity factoryEntity :factoryEntityList){
+                        if(workshop.getFactoryId().toString().equals(factoryEntity.getId().toString())){
+                            resultFactoryList.add(factoryEntity.toFactory());
                         }
                     }
                 }
             }
-        });
+            //工厂去重
+            if(CollectionUtils.isNotEmpty(resultFactoryList)){
+                resultFactoryList = resultFactoryList.stream().distinct().collect(Collectors.toList());
+            }
+        }
 
-        return workshopEntityList;
+        result.setFactoryEntityList(resultFactoryList);
+        result.setWorkshopEntityList(resultWorkshopList);
+        result.setProductionLineEntityList(resultLineList);
+        result.setDeviceEntityList(resultDeviceList);
+        return result;
     }
 
     /**
-     * 根据设备过滤工厂
-     * @param deviceEntityList
-     * @param productionLineEntityList
-     * @param workshopEntityList
+     * 产线名称不为空，用产线层层往上筛选,同时也要往下筛选设备
      * @param factoryEntityList
+     * @param workshops
+     * @param lines
      * @return
      */
-    private List<FactoryEntity> filterFactoryByDevice(List<DeviceEntity> deviceEntityList,List<ProductionLineEntity> productionLineEntityList,List<WorkshopEntity> workshopEntityList,List<FactoryEntity> factoryEntityList){
-        deviceEntityList.forEach(i->{
-            Iterator<ProductionLineEntity> it = productionLineEntityList.iterator();
-            while (it.hasNext()){
-                ProductionLineEntity entity = it.next();
-                if(!entity.getUuid().toString().equals(i.getProductionLineId().toString())){
-                    it.remove();
-                }else {
-                    Iterator<WorkshopEntity> itWorkshop = workshopEntityList.iterator();
-                    while (itWorkshop.hasNext()){
-                        WorkshopEntity workshopEntity = itWorkshop.next();
-                        if(!workshopEntity.getUuid().toString().equals(entity.getWorkshopId().toString())){
-                            it.remove();
-                        }else {
-                            Iterator<FactoryEntity> itFactory = factoryEntityList.iterator();
-                            while (itFactory.hasNext()){
-                                FactoryEntity factoryEntity = itFactory.next();
-                                if(!factoryEntity.getUuid().toString().equals(workshopEntity.getFactoryId().toString())){
-                                    it.remove();
-                                }
-                            }
+    private FactoryListVo filterFromProductionLine(List<FactoryEntity> factoryEntityList, List<Workshop> workshops, List<ProductionLine> lines, List<Device> devices) {
+        FactoryListVo result = new FactoryListVo();
+        List<Device> resultDeviceList = new ArrayList<>();
+        List<ProductionLine> resultLineList = lines;
+        List<Workshop> resultWorkshopList = new ArrayList<>();
+        List<Factory> resultFactoryList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(lines)){
+            //产线去重
+            resultLineList = resultLineList.stream().distinct().collect(Collectors.toList());
+            for (ProductionLine line : resultLineList){
+                /**1.产线筛选-设备**/
+                if(CollectionUtils.isNotEmpty(devices)){
+                    for (Device device:devices){
+                        if(device.getProductionLineId().toString().equals(line.getId().toString())){
+                            resultDeviceList.add(device);
+                        }
+                    }
+                }
+                /**2.产线筛选-车间**/
+                for (Workshop workshop:workshops){
+                    if(line.getWorkshopId().toString().equals(workshop.getId().toString())){
+                        resultWorkshopList.add(workshop);
+                    }
+                }
+
+            }
+            //设备去重
+            if(CollectionUtils.isNotEmpty(resultDeviceList)){
+                resultDeviceList = resultDeviceList.stream().distinct().collect(Collectors.toList());
+            }
+            if(CollectionUtils.isNotEmpty(resultWorkshopList)){
+                //车间去重
+                resultWorkshopList = resultWorkshopList.stream().distinct().collect(Collectors.toList());
+            }
+
+            /**用产线筛选出的车间，去筛选工厂**/
+            if(CollectionUtils.isNotEmpty(resultWorkshopList) && CollectionUtils.isNotEmpty(factoryEntityList)){
+                for (Workshop workshop :resultWorkshopList){
+                    for (FactoryEntity factoryEntity:factoryEntityList){
+                        if(workshop.getFactoryId().toString().equals(factoryEntity.getId().toString())){
+                            resultFactoryList.add(factoryEntity.toFactory());
                         }
                     }
                 }
             }
-        });
-        return factoryEntityList;
+            /**工厂去重**/
+            if(CollectionUtils.isNotEmpty(resultFactoryList)){
+                resultFactoryList = resultFactoryList.stream().distinct().collect(Collectors.toList());
+            }
+        }
+        result.setFactoryEntityList(resultFactoryList);
+        result.setWorkshopEntityList(resultWorkshopList);
+        result.setProductionLineEntityList(resultLineList);
+        result.setDeviceEntityList(resultDeviceList);
+        return result;
+
     }
 
+    /**
+     * 车间名称不为空，用车间往上筛选工厂，同时也要往下筛选产线、设备
+     * @param factoryEntityList
+     * @param workshops
+     * @return
+     */
+    private FactoryListVo filterFromWorkshop(List<FactoryEntity> factoryEntityList, List<Workshop> workshops,List<ProductionLine> lines, List<Device> devices) {
+        FactoryListVo result = new FactoryListVo();
+        List<Device> resultDeviceList = new ArrayList<>();
+        List<ProductionLine> resultLineList = new ArrayList<>();
+        List<Workshop> resultWorkshopList = workshops;
+        List<Factory> resultFactoryList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(resultWorkshopList)){
+            //车间去重
+            resultWorkshopList = resultWorkshopList.stream().distinct().collect(Collectors.toList());
+            for (Workshop workshop :resultWorkshopList){
+                /**用车间筛选-工厂**/
+                for (FactoryEntity factoryEntity : factoryEntityList){
+                    if(workshop.getFactoryId().toString().equals(factoryEntity.getId().toString())){
+                        resultFactoryList.add(factoryEntity.toFactory());
+                    }
+                }
+                /**用车间筛选-产线**/
+                for (ProductionLine productionLine:lines){
+                    if(workshop.getId().toString().equals(productionLine.getWorkshopId().toString())){
+                        resultLineList.add(productionLine);
+                    }
+                }
+            }
+            if(CollectionUtils.isNotEmpty(resultFactoryList)){
+                //工厂去重
+                resultFactoryList = resultFactoryList.stream().distinct().collect(Collectors.toList());
+            }
+            if(CollectionUtils.isNotEmpty(resultLineList)){
+                //产线去重
+                resultLineList = resultLineList.stream().distinct().collect(Collectors.toList());
+            }
+            /**用车间筛选出的产线去筛选-设备**/
+            if(CollectionUtils.isNotEmpty(resultLineList) && CollectionUtils.isNotEmpty(devices)){
+                for (ProductionLine productionLine:resultLineList){
+                    for (Device device:devices){
+                        if(productionLine.getId().toString().equals(device.getProductionLineId().toString())){
+                            resultDeviceList.add(device);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        result.setFactoryEntityList(resultFactoryList);
+        result.setWorkshopEntityList(resultWorkshopList);
+        result.setProductionLineEntityList(resultLineList);
+        result.setDeviceEntityList(resultDeviceList);
+        return result;
+    }
+
+
+    /**
+     * 查询详情
+     * @param id
+     * @return
+     */
+    @Override
+    public Factory findById(UUID id){
+        FactoryEntity entity = factoryRepository.findById(id).get();
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
+    }
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<Factory> getFactoryByIdList(List<UUID> ids){
+        List<Factory> resultList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(ids)){
+            Specification<FactoryEntity> specification = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                ids.forEach(in::value);
+                predicates.add(in);
+                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            };
+            List<FactoryEntity> all = factoryRepository.findAll(specification);
+            if(CollectionUtils.isNotEmpty(all)){
+                all.forEach(i->{
+                    resultList.add(i.toFactory());
+                });
+            }
+        }
+        return resultList;
+    }
+
+    /**
+     * 根据条件查询工厂信息
+     * @param factory
+     * @return
+     */
+    @Override
+    public List<Factory> findAllByCdn(Factory factory){
+        return this.commonCondition(factory);
+    }
 }
 

@@ -36,10 +36,7 @@ import org.thingsboard.server.dao.sql.role.dao.TenantMenuRoleDao;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
 
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -53,6 +50,8 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     private TenantMenuRepository tenantMenuRepository;
     @Autowired
     private MenuDao menuDao;
+    @Autowired
+    private TenantMenuRoleDao tenantMenuRoleDao;
 
     @Override
     protected Class<TenantMenuEntity> getEntityClass() {
@@ -89,20 +88,20 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      */
     @Override
     public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
-        List<TenantMenuEntity> collect = new ArrayList<>();
+        List<TenantMenuEntity> saveTenantMenuEntityList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(tenantMenuList)){
             tenantMenuList.forEach(i->{
-                collect.add(new TenantMenuEntity(i));
+                saveTenantMenuEntityList.add(new TenantMenuEntity(i));
             });
-            List<TenantMenuEntity> entityList = collect.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
+            List<TenantMenuEntity> entityList = saveTenantMenuEntityList.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
             List<TenantMenuEntity> collectButton = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(entityList)){
                 List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList()));
                 if(CollectionUtils.isNotEmpty(buttons)) {
-                    for (TenantMenuEntity entity:collect){
-                        for (Menu menu:buttons) {
-                            if (entity.getSysMenuId() != null && entity.getSysMenuId().toString().equals(menu.getParentId().toString())) {
-                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(menu, entity.getLevel() + 1, menu.getCreatedUser(),entity.getId());
+                    for (TenantMenuEntity entity:saveTenantMenuEntityList){
+                        for (Menu button:buttons) {
+                            if (entity.getSysMenuId() != null && entity.getSysMenuId().toString().equals(button.getParentId().toString())) {
+                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(button, entity.getLevel() + 1, button.getCreatedUser(),entity.getId());
                                 tenantMenuEntity.setTenantId(entity.getTenantId());
                                 collectButton.add(tenantMenuEntity);
                                 System.out.println(tenantMenuEntity.getTenantMenuName());
@@ -112,11 +111,13 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
                 }
             }
             if(CollectionUtils.isNotEmpty(collectButton)){
-                collect.addAll(collectButton);
+                saveTenantMenuEntityList.addAll(collectButton);
             }
         }
-        tenantMenuRepository.saveAll(collect);
+        tenantMenuRepository.saveAll(saveTenantMenuEntityList);
     }
+
+
     /**
      * 保存租户菜单信息
      * @param tenantMenu
@@ -173,28 +174,12 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
 
     /**
      * 查询租户PC/APP菜单列表
-     * @param menuType
-     * @param tenantId
+     * @param tenantMenu
      * @return
      */
     @Override
-    public List<TenantMenu> getTenantMenuList(String menuType,String tenantId,String tenantMenuName){
-        List<TenantMenu> tenantMenuList = new ArrayList<>();
-        List<TenantMenuEntity> tenantMenuEntityList = new ArrayList<>();
-        if(StringUtils.isNotEmpty(tenantMenuName)){
-            tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,UUID.fromString(tenantId),tenantMenuName);
-        }else {
-            tenantMenuEntityList = tenantMenuRepository.getTenantMenuList(menuType,UUID.fromString(tenantId));
-        }
-        if(!CollectionUtils.isEmpty(tenantMenuEntityList)){
-            tenantMenuEntityList.forEach(tenantMenuEntity->{
-                if(tenantMenuEntity != null){
-                    tenantMenuList.add(tenantMenuEntity.toData());
-                }
-            });
-
-        }
-        return tenantMenuList;
+    public List<TenantMenu> getTenantMenuList(TenantMenu tenantMenu){
+        return this.commonCondition(tenantMenu);
     }
 
     @Override
@@ -226,6 +211,20 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     }
 
     /**
+     * 根据id查
+     * @param id
+     * @return
+     */
+    @Override
+    public TenantMenu getMenuById(UUID id){
+        TenantMenuEntity entity = tenantMenuRepository.findById(id).get();
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
+    }
+
+    /**
      * 构造查询条件,需要家条件在这里面加
      * @param tenantMenu
      * @return
@@ -243,6 +242,9 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
                 }
                 if(StringUtils.isNotEmpty(tenantMenu.getMenuType())){
                     predicates.add(cb.equal(root.get("menuType"),tenantMenu.getMenuType()));
+                }
+                if(tenantMenu.getSysMenuId() != null){
+                    predicates.add(cb.equal(root.get("sysMenuId"),tenantMenu.getSysMenuId()));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));

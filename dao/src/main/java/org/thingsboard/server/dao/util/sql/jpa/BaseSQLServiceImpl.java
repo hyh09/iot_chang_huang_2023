@@ -3,10 +3,12 @@ package org.thingsboard.server.dao.util.sql.jpa;
 
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-
+@Slf4j
 public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends Serializable, D extends BaseSqlDao<T, ID>> implements BaseSQLService<T, ID, D>  {
 	private static Logger logger = LoggerFactory.getLogger(BaseSQLServiceImpl.class.getName());
 
@@ -109,7 +111,12 @@ public abstract class BaseSQLServiceImpl<T extends TenantBaseEntity, ID extends 
 
 	@Override
 	public void deleteById(ID id) {
-		dao.deleteById(id);
+		try {
+			dao.deleteById(id);
+		}catch (EmptyResultDataAccessException e)
+		{
+			log.info("打印当前的异常信息###正常异常:{}",e);
+		}
 	}
 
 
