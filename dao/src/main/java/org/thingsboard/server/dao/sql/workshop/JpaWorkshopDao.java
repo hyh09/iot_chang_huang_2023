@@ -36,6 +36,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -191,14 +192,17 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
      */
     @Override
     public Workshop findById(UUID id){
-        WorkshopEntity workshopEntity = workshopRepository.findById(id).get();
-        if(workshopEntity != null){
-            Workshop workshop = workshopEntity.toWorkshop();
-            Factory byId = factoryDao.findById(workshopEntity.getFactoryId());
-            if(byId != null){
-                workshop.setFactoryName(byId.getName());
+        Optional<WorkshopEntity> optional = workshopRepository.findById(id);
+        if(!optional.isEmpty()){
+            WorkshopEntity workshopEntity = optional.get();
+            if(workshopEntity != null){
+                Workshop workshop = workshopEntity.toWorkshop();
+                Factory byId = factoryDao.findById(workshopEntity.getFactoryId());
+                if(byId != null){
+                    workshop.setFactoryName(byId.getName());
+                }
+                return workshop;
             }
-            return workshop;
         }
         return null;
     }

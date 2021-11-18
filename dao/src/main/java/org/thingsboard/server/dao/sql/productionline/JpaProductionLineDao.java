@@ -37,6 +37,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -223,17 +224,20 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
      */
     @Override
     public ProductionLine findById(UUID id){
-        ProductionLineEntity entity = productionLineRepository.findById(id).get();
-        if(entity != null){
-            ProductionLine productionLine = entity.toData();
-            if(productionLine.getWorkshopId() != null && StringUtils.isNotEmpty(productionLine.getWorkshopId().toString())){
-                Workshop byId = workshopDao.findById(productionLine.getWorkshopId());
-                if(byId != null){
-                    productionLine.setFactoryName(byId.getFactoryName());
-                    productionLine.setWorkshopName(byId.getName());
+        Optional<ProductionLineEntity> optional = productionLineRepository.findById(id);
+        if(!optional.isEmpty()){
+            ProductionLineEntity entity = optional.get();
+            if(entity != null){
+                ProductionLine productionLine = entity.toData();
+                if(productionLine.getWorkshopId() != null && StringUtils.isNotEmpty(productionLine.getWorkshopId().toString())){
+                    Workshop byId = workshopDao.findById(productionLine.getWorkshopId());
+                    if(byId != null){
+                        productionLine.setFactoryName(byId.getFactoryName());
+                        productionLine.setWorkshopName(byId.getName());
+                    }
                 }
+                return productionLine;
             }
-            return productionLine;
         }
         return null;
     }

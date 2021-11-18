@@ -109,10 +109,25 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.type = device.getType();
         this.label = device.getLabel();
         this.deviceProfileId = device.getDeviceProfileId();
-        this.setDeviceData(device.getDeviceData());
+        this.deviceData =device.getDeviceData();
         this.firmwareId = device.getFirmwareId();
         this.softwareId = device.getSoftwareId();
+        this.workshopId = device.getWorkshopId();
+        this.factoryId = device.getFactoryId();
         this.dictDeviceId = device.getDictDeviceId();
+        this.productionLineId = device.getProductionLineId();
+        this.picture = device.getPicture();
+        this.icon = device.getIcon();
+        this.comment = device.getComment();
+        this.deviceNo = device.getDeviceNo();
+        this.createdUser = device.getCreatedUser();
+        this.createdTime = device.getCreatedTime();
+        this.updatedUser = device.getUpdatedUser();
+        this.updatedTime = device.getUpdatedTime();
+        this.factoryName = device.getFactoryName();
+        this.workshopName = device.getWorkshopName();
+        this.productionLineName = device.getProductionLineName();
+
     }
 
     public Device updateDevice(Device device) {
