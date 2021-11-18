@@ -1070,9 +1070,14 @@ mat-label {
 }
 
 button {
-  &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-button-disabled) {
+  &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-icon-button):not(.mat-button-disabled) {
     color: #fff;
     background-color: #2367fa !important;
+  }
+  &.mat-icon-button .mat-button-wrapper {
+    height: 24px;
+    display: block;
+    line-height: 20px;
   }
 }
 
@@ -1114,8 +1119,12 @@ input:-internal-autofill-previewed,
   padding: 6px 0;
 }
 
-.mat-dialog-content {
-  max-width: 900px;
+.mat-button-disabled .mat-icon {
+  color: rgba(0, 0, 0, 0.26) !important;
+}
+
+form button .mat-icon {
+  color: rgba(0, 0, 0, 0.54);
 }
 
 // 覆盖antd样式

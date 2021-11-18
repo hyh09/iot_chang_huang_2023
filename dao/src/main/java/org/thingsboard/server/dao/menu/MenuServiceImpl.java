@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.menu;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
@@ -60,21 +61,39 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         menu.setSort(maxSort == null ? ONE:maxSort);
         Menu savedMenut = menuDao.saveMenu(menu);
 
-       /* if(menu.getIsButton()){
-            //查询要变更的租户菜单
-            List<TenantMenu> addInfos = new ArrayList<>();
+        /**添加按钮，需要更新租户菜单下按钮**/
+        if(menu.getIsButton()){
+            //查询要添加按钮的租户菜单
             TenantMenu tenantMenuQry = new TenantMenu();
-            tenantMenuQry.setSysMenuId(menu.getId());
-            List<TenantMenu> allByCdn = tenantMenuDao.findAllByCdn(tenantMenuQry);
-            if(CollectionUtils.isNotEmpty(allByCdn)) {
-                allByCdn.forEach(i -> {
-                    TenantMenu addInfo = menu.toTenantMenuByAddButton(i);
-
-                });
-                //添加租户菜单按钮
-                tenantMenuDao.saveOrUpdTenantMenu(allByCdn);
+            tenantMenuQry.setSysMenuId(menu.getParentId());
+            //需要添加的按钮
+            List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(tenantMenuQry);
+            if(CollectionUtils.isNotEmpty(tenantMenuList)){
+                List<TenantMenu> saveTenantMenuList = new ArrayList<>();
+                for (TenantMenu tenantMenu: tenantMenuList){
+                    //排序、编码、主键，到租户菜单去处理
+                    TenantMenu saveTenantMenu = new TenantMenu();
+                    saveTenantMenu.setSysMenuId(savedMenut.getId());
+                    saveTenantMenu.setSysMenuName(savedMenut.getName());
+                    saveTenantMenu.setSysMenuCode(savedMenut.getCode());
+                    saveTenantMenu.setTenantMenuName(savedMenut.getName());
+                    saveTenantMenu.setLevel(tenantMenu.getLevel() + ONE);
+                    saveTenantMenu.setUrl(savedMenut.getUrl());
+                    saveTenantMenu.setParentId(tenantMenu.getId());
+                    saveTenantMenu.setTenantMenuIcon(savedMenut.getMenuIcon());
+                    saveTenantMenu.setTenantMenuImages(savedMenut.getMenuImages());
+                    saveTenantMenu.setMenuType(savedMenut.getMenuType());
+                    saveTenantMenu.setIsButton(savedMenut.getIsButton());
+                    saveTenantMenu.setLangKey(savedMenut.getLangKey());
+                    saveTenantMenu.setPath(savedMenut.getPath());
+                    saveTenantMenu.setTenantId(tenantMenu.getTenantId());
+                    saveTenantMenu.setCreatedUser(savedMenut.getCreatedUser());
+                    saveTenantMenu.setCreatedTime(savedMenut.getCreatedTime());
+                    saveTenantMenuList.add(saveTenantMenu);
+                }
+                tenantMenuDao.saveFromSysMenu(saveTenantMenuList);
             }
-        }*/
+        }
         return savedMenut;
     }
 
@@ -86,55 +105,63 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     @Override
     public Menu updateMenu(Menu menu)  throws ThingsboardException{
         log.trace("Executing updateMenu [{}]", menu);
-        //按钮名称、lang_key、path、icon修改，变更租户菜单按钮
-        /*TenantMenu tenantMenu = new TenantMenu();
+        /**按钮名称、lang_key、path、icon修改，变更租户菜单按钮**/
+        Boolean updFalg = false;  //是否需要变更
         Menu menuById = menuDao.getMenuById(menu.getId());
         if(menuById != null){
-            if(menuById.getLangKey() != null && !menuById.getLangKey().equals(menu.getLangKey())){
-                tenantMenu.setLangKey(menuById.getLangKey());
+            if(menuById.getIsButton()){
+                if(menuById.getParentId() != null && menu.getParentId() != null
+                        && !menuById.getParentId().toString().equals(menu.getParentId().toString())){
+                    throw new ThingsboardException("按钮不允许变更父级菜单", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
             }
-            if(menuById.getPath() != null && !menuById.getPath().equals(menu.getPath())){
-                tenantMenu.setPath(menuById.getPath());
+            if((menuById.getName() != null && menu.getName() == null)
+                    || (menuById.getName() == null && menu.getName() != null)
+                    || !menuById.getName().equals(menu.getName())){
+                updFalg = true;
             }
-            if(menuById.getIsButton() && menuById.getMenuIcon() != null && !menuById.getMenuIcon().equals(menu.getMenuIcon())){
-                tenantMenu.setTenantMenuIcon(menuById.getMenuIcon());
-                tenantMenu.setTenantMenuName(menuById.getName());
-                if(menuById.getParentId() != null && menu.getMenuType() != null
-                        && !menuById.getParentId().toString().equals(menu.getMenuType())){
-                    throw new ThingsboardException("按钮不允许变更父级菜单",ThingsboardErrorCode.FAIL_VIOLATION);
+            if((menuById.getLangKey() != null && menu.getLangKey() == null)
+                    || (menuById.getLangKey() == null && menu.getLangKey() != null)
+                    || !menuById.getLangKey().equals(menu.getLangKey())){
+                updFalg = true;
+            }
+            if((menuById.getPath() == null && menu.getPath() != null)
+                    || (menuById.getPath() != null && menu.getPath() == null)
+                    || (!menuById.getPath().equals(menu.getPath()))){
+                updFalg = true;
+            }
+            if((menuById.getMenuIcon() != null && menu.getMenuIcon() == null)
+                    ||(menuById.getMenuIcon() == null && menu.getMenuIcon() != null)
+                    ||(!menuById.getMenuIcon().equals(menu.getMenuIcon()))){
+                updFalg = true;
+            }
+            //判断是否需要变更
+            if(updFalg){
+                //查询需要更新租户菜单、按钮
+                TenantMenu tenantMenuQry = new TenantMenu();
+                tenantMenuQry.setSysMenuId(menu.getId());
+                //需要修改的菜单/按钮 (按钮名称、lang_key、path、icon)
+                List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(tenantMenuQry);
+                if(CollectionUtils.isNotEmpty(tenantMenuList)) {
+                    List<TenantMenu> saveTenantMenuList = new ArrayList<>();
+                    for (TenantMenu tenantMenu : tenantMenuList) {
+                        if(menu.getIsButton()){
+                            tenantMenu.setTenantMenuName(menu.getName());
+                        }
+                        tenantMenu.setSysMenuName(menu.getName());
+                        tenantMenu.setSysMenuCode(menu.getCode());
+                        tenantMenu.setLangKey(menu.getLangKey());
+                        tenantMenu.setPath(menu.getPath());
+                        tenantMenu.setUrl(menu.getUrl());
+                        tenantMenu.setTenantMenuIcon(menu.getMenuIcon());
+                        tenantMenu.setUpdatedUser(menuById.getUpdatedUser());
+                        tenantMenu.setUpdatedTime(menuById.getUpdatedTime());
+                        saveTenantMenuList.add(tenantMenu);
+                    }
+                    tenantMenuDao.saveFromSysMenu(saveTenantMenuList);
                 }
             }
         }
-        if(tenantMenu != null ){
-            //查询要变更的租户菜单
-            TenantMenu tenantMenuQry = new TenantMenu();
-            tenantMenuQry.setSysMenuId(menu.getId());
-            List<TenantMenu> allByCdn = tenantMenuDao.findAllByCdn(tenantMenuQry);
-            if(CollectionUtils.isNotEmpty(allByCdn)){
-                allByCdn.forEach(i->{
-                    i.setSysMenuId(menu.getId());
-                    if(StringUtils.isNotEmpty(menuById.getLangKey())){
-                        i.setLangKey(menuById.getLangKey());
-                    }
-                    if(StringUtils.isNotEmpty(menuById.getPath())){
-                        i.setPath(menuById.getPath());
-                    }
-                    if(StringUtils.isNotEmpty(menuById.getLangKey())){
-                        i.setLangKey(menuById.getLangKey());
-                    }
-                    if(StringUtils.isNotEmpty(menuById.getPath())){
-                        i.setPath(menuById.getPath());
-                    }
-                    if(StringUtils.isNotEmpty(menuById.getLangKey())){
-                        i.setTenantMenuIcon(menuById.getMenuIcon());
-                    }
-                    if(StringUtils.isNotEmpty(menuById.getPath())){
-                        i.setTenantMenuName(menuById.getName());
-                    }
-                });
-                tenantMenuDao.saveOrUpdTenantMenu(allByCdn);
-            }
-        }*/
         return menuDao.saveMenu(menu);
     }
 

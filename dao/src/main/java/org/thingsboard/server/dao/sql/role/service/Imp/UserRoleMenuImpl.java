@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.UserVo;
+import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.CheckSvc;
@@ -103,25 +104,30 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
     @Override
     public User save(User user, User user1)  {
+        if(user.getFactoryId() == null)
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 工厂id不能为空!");
+        }
 
         UserVo  vo1 = new UserVo();
         vo1.setEmail(user.getEmail());
         if(checkSvc.checkValueByKey(vo1)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The email ["+user.getEmail()+"]already exists!");
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
         }
         UserVo  vo2 = new UserVo();
         vo2.setEmail(user.getPhoneNumber());
         if(checkSvc.checkValueByKey(vo2)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The phoneNumber["+user.getPhoneNumber()+"]already exists!!");
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
         }
 
         String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
         user.setTenantId(user1.getTenantId());
         user.setUserCreator(user1.getUuidId().toString());
+        user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
         User  rmUser= userService.save(user,encodePassword);
 
 
-      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),user1.getTenantId().getId());
         if(entityBy != null)
         {
             UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
@@ -137,6 +143,9 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
         entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
         entity.setTenantId(user1.getTenantId().getId());
+        entity.setFactoryId(user.getFactoryId());
+        entity.setType(user.getType());
+        entity.setSystemTab("1");
         TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
 
         UserMenuRoleEntity entityRR = new UserMenuRoleEntity();

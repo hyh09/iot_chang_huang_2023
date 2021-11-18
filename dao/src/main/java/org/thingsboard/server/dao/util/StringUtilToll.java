@@ -47,6 +47,23 @@ public class StringUtilToll {
         return b1.add(b2).doubleValue();
     }
 
+    private static final int DEF_DIV_SCALE = 10;
+
+    /**
+     * 提供（相对）精确的除法运算，当发生除不尽的情况时，精确到
+     * 小数点以后10位，以后的数字四舍五入。
+     * @param v1 被除数
+     * @param v2 除数
+     * @return 两个参数的商
+     */
+    public static double div(String v1,String v2,String v3){
+        BigDecimal b1 = new BigDecimal(v1);
+        BigDecimal b2 = new BigDecimal(v2);
+        BigDecimal b3 = new BigDecimal(v3);
+      return   b1.multiply(b2).multiply(b3).doubleValue();
+    }
+
+
 
 
 

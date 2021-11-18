@@ -27,7 +27,8 @@ public interface DeviceProfileDictDeviceRepository extends PagingAndSortingRepos
 
     @Query("select p from DeviceProfileDictDeviceEntity d " +
             "left join DictDeviceEntity p on d.dictDeviceId = p.id " +
-            "where d.deviceProfileId =:deviceProfileId")
+            "where d.deviceProfileId =:deviceProfileId " +
+            "order by d.createdTime desc")
     List<DictDeviceEntity> findAllBindDeviceProfile(@Param("deviceProfileId") UUID deviceProfileId);
 
     List<DeviceProfileDictDeviceEntity> findAllByDictDeviceIdIn(List<UUID> dictDeviceIds);

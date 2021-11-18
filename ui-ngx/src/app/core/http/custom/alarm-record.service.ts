@@ -38,4 +38,14 @@ export class AlarmRecordService {
     return this.http.get<PageData<AlarmRecord>>(`/api/deviceMonitor/alarmRecord${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 确认报警信息
+  public confirmAlarmRecord(id: string, config?: RequestConfig) {
+    return this.http.post(`/api/deviceMonitor/alarmRecord/${id}/ack`, {}, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 清除报警信息
+  public clearAlarmRecord(id: string, config?: RequestConfig) {
+    return this.http.post(`/api/deviceMonitor/alarmRecord/${id}/clear`, {}, defaultHttpOptionsFromConfig(config));
+  }
+
 }

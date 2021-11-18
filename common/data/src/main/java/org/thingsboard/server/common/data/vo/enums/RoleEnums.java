@@ -11,7 +11,7 @@ public enum  RoleEnums {
     //工厂管理员角色
     FACTORY_ADMINISTRATOR("Factory","Factory administrator"),//租户创建的
 
-    TENANT_ADMIN("001","Factory administrator"),//租户是系统管理创建的
+    TENANT_ADMIN("Tenant","Tenant administrator"),//租户是系统管理创建的
     ;
 
 

@@ -15,7 +15,7 @@
 ///
 
 import { ChangeDetectorRef, Component, forwardRef, Input, OnInit } from '@angular/core';
-import { ControlValueAccessor, FormBuilder, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   AlarmSchedule,
   AlarmScheduleType,
