@@ -83,7 +83,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity> effectTsKvEntities = effectTsKvRepository.queryEntity(vo);
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
-            return  null;
+          return new PageDataAndTotalValue<AppDeviceCapVo>("0",null, 0, 0, false);
+
         }
         Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
         List<EffectTsKvEntity> pageList=  page.getContent();
