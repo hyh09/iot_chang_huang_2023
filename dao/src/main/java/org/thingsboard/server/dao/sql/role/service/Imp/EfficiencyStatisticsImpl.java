@@ -201,7 +201,21 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info(" 能效-当前的分页之后的数据之设备id的汇总:{}",ids);
         Map<UUID,List<EffectTsKvEntity>> map = pageList.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
         log.info("查询到的数据转换为设备维度:{}",map);
-        appVo.setAppDeviceCapVoList(getEntityKeyValue(map,tenantId));
+        Set<UUID> keySet = map.keySet();
+        log.info("打印当前的设备id:{}",keySet);
+        List<UUID> entityIdsAll  = keySet.stream().collect(Collectors.toList());
+        List<UUID>  pageList =  entityIdsAll.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
+                collect(Collectors.toList());
+        Map<UUID,List<EffectTsKvEntity>>  listMap =  new HashMap<>();
+
+
+        for(int i=0;i<pageList.size();i++)
+        {
+            UUID uuid= pageList.get(i);
+            listMap.put(uuid,map.get(uuid));
+        }
+
+        appVo.setAppDeviceCapVoList(getEntityKeyValue(listMap,tenantId));
         keys1.stream().forEach(str->{
             totalValueMap.put(str,getTotalValue(effectTsKvEntities,str));
         });
