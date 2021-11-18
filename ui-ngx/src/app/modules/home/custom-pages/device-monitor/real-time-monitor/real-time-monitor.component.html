@@ -1,3 +1,34 @@
-<p>
-  real-time-monitor works!
-</p>
+<div fxLayout="row" fxLayoutGap="16px" class="real-time-monitor-wrapper">
+  <div class="left-content">
+    <tb-factory-tree (clickNode)="fetchData($event)"></tb-factory-tree>
+  </div>
+  <div class="center-content">
+    <div fxLayout="row" class="device-list" [class.empty]="deviceList.length === 0">
+      <div *ngFor="let device of deviceList" class="device-item-wrapper">
+        <div class="device-item" [title]="device.name">
+          <div class="device-name">{{ device.name }}</div>
+          <div class="device-status-bg" [class.off-line]="!device.isOnline"></div>
+          <div class="device-status">
+            {{ (device.isOnline ? 'device-monitor.on-line' : 'device-monitor.off-line') | translate }}
+          </div>
+          <img [src]="device.image ? device.image : '../../../../../../assets/image-empty.svg'" />
+        </div>
+      </div>
+      <nz-empty
+        *ngIf="deviceList.length === 0"
+        nzNotFoundImage="../../../../../../assets/data-empty.svg"
+        nzNotFoundContent="{{ 'device-monitor.device-empty' | translate }}"
+      ></nz-empty>
+    </div>
+    <mat-paginator
+      [length]="totalDevices"
+      [pageIndex]="pageLink.page"
+      [pageSize]="pageLink.pageSize"
+      hidePageSize
+      showFirstLastButtons></mat-paginator>
+  </div>
+  <div fxLayout="column" fxLayoutGap="16px" class="right-content">
+    <tb-run-state-chart fxFlex [data]="runStateData"></tb-run-state-chart>
+    <tb-warning-statistics-chart fxFlex [data]="alarmTimesList"></tb-warning-statistics-chart>
+  </div>
+</div>

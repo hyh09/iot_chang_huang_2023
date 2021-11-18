@@ -27,7 +27,7 @@ const routes: Routes = [
           title: 'device-monitor.real-time-monitor',
           breadcrumb: {
             label: 'device-monitor.real-time-monitor',
-            icon: 'real-time-monitor'
+            icon: 'mdi:real-time-monitor'
           }
         }
       },
