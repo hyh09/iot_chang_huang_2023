@@ -55,10 +55,22 @@ public class DeviceDetailResult {
     private Boolean isUnAllocation;
 
     /**
-     * 实时数据
+     * 分组属性实时数据
      */
-    @ApiModelProperty("实时数据")
+    @ApiModelProperty("分组属性实时数据")
     private List<DictDeviceGroupVO> resultList;
+
+    /**
+     * 设备部件实时数据
+     */
+    @ApiModelProperty("设备部件实时数据")
+    private List<DictDeviceComponentVO> componentList;
+
+    /**
+     * 未分组属性实时数据
+     */
+    @ApiModelProperty(value = "未分组属性实时数据", notes = "暂时不显示")
+    private DictDeviceGroupVO resultUngrouped;
 
     /**
      * 预警次数列表，从远及近

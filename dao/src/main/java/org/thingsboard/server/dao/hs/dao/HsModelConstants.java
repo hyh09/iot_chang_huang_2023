@@ -21,6 +21,7 @@ public class HsModelConstants {
 
     public static final String DICT_DEVICE_ID = "dict_device_id";
     public static final String DEVICE_PROFILE_ID = "device_profile_id";
+    public static final String DICT_DATA_ID = "dict_data_id";
 
     /**
      * 初始化
@@ -70,6 +71,8 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_COMPONENT_COMMENT = "comment";
     public static final String DICT_DEVICE_COMPONENT_ICON = "icon";
     public static final String DICT_DEVICE_COMPONENT_PICTURE = "picture";
+    public static final String DICT_DEVICE_COMPONENT_KEY = "key";
+    public static final String DICT_DEVICE_COMPONENT_CONTENT = "content";
 
     public static final String DICT_DEVICE_PROPERTY_TABLE_NAME = "hs_dict_device_property";
     public static final String DICT_DEVICE_PROPERTY_NAME = "name";

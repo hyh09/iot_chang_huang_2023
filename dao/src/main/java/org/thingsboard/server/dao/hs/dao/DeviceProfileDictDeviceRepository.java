@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hs.dao;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,9 +30,11 @@ public interface DeviceProfileDictDeviceRepository extends PagingAndSortingRepos
             "left join DictDeviceEntity p on d.dictDeviceId = p.id " +
             "where d.deviceProfileId =:deviceProfileId " +
             "order by d.createdTime desc")
-    List<DictDeviceEntity> findAllBindDeviceProfile(@Param("deviceProfileId") UUID deviceProfileId);
+    List<DictDeviceEntity> findAllDictDeviceEntityByDeviceProfileId(@Param("deviceProfileId") UUID deviceProfileId);
 
     List<DeviceProfileDictDeviceEntity> findAllByDictDeviceIdIn(List<UUID> dictDeviceIds);
 
     Optional<DeviceProfileDictDeviceEntity> findByDictDeviceId(UUID dictDeviceId);
+
+    List<DeviceProfileDictDeviceEntity> findAllByDeviceProfileId(UUID deviceProfileId);
 }

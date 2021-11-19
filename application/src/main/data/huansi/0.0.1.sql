@@ -172,7 +172,10 @@ CREATE TABLE "public"."hs_dict_device_component" (
                                                      "updated_time" int8,
                                                      "updated_user" varchar(255) COLLATE "pg_catalog"."default",
                                                      "comment" varchar(255) COLLATE "pg_catalog"."default",
-                                                     "sort" int8
+                                                     "sort" int8,
+                                                     "key" varchar(255) COLLATE "pg_catalog"."default",
+                                                     "dict_data_id" uuid,
+                                                     "content" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
 ALTER TABLE "public"."hs_dict_device_component" OWNER TO "postgres";
@@ -194,6 +197,9 @@ COMMENT ON COLUMN "public"."hs_dict_device_component"."updated_time" IS '更新�
 COMMENT ON COLUMN "public"."hs_dict_device_component"."updated_user" IS '更新人';
 COMMENT ON COLUMN "public"."hs_dict_device_component"."comment" IS '备注';
 COMMENT ON COLUMN "public"."hs_dict_device_component"."sort" IS '排序字段';
+COMMENT ON COLUMN "public"."hs_dict_device_component"."key" IS '属性';
+COMMENT ON COLUMN "public"."hs_dict_device_component"."dict_data_id" IS '数据字典Id';
+COMMENT ON COLUMN "public"."hs_dict_device_component"."content" IS '内容';
 COMMENT ON TABLE "public"."hs_dict_device_component" IS '设备字典-部件';
 
 -- ----------------------------
@@ -237,7 +243,8 @@ CREATE TABLE "public"."hs_dict_device_group_property" (
                                                           "updated_user" varchar(255) COLLATE "pg_catalog"."default",
                                                           "dict_device_id" uuid,
                                                           "title" varchar(255) COLLATE "pg_catalog"."default",
-                                                          "sort" int8
+                                                          "sort" int8,
+                                                          "dict_data_id" uuid
 )
 ;
 ALTER TABLE "public"."hs_dict_device_group_property" OWNER TO "postgres";
@@ -252,6 +259,7 @@ COMMENT ON COLUMN "public"."hs_dict_device_group_property"."updated_user" IS '�
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."dict_device_id" IS '设备字典Id';
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."title" IS '标题';
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."sort" IS '排序字段';
+COMMENT ON COLUMN "public"."hs_dict_device_group_property"."dict_data_id" IS '数据字典Id';
 COMMENT ON TABLE "public"."hs_dict_device_group_property" IS '设备字典-分组属性';
 
 -- ----------------------------
