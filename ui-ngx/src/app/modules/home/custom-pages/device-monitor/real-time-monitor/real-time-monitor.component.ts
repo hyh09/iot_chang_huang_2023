@@ -9,7 +9,7 @@ import { PageLink } from '@app/shared/public-api';
   templateUrl: './real-time-monitor.component.html',
   styleUrls: ['./real-time-monitor.component.scss']
 })
-export class RealTimeMonitorComponent implements AfterViewInit {
+export class RealTimeMonitorComponent {
 
   factoryInfo: FactoryTreeNodeIds = {
     factoryId: '',
@@ -32,10 +32,6 @@ export class RealTimeMonitorComponent implements AfterViewInit {
   constructor(
     private realTimeMonitorService: RealTimeMonitorService
   ) { }
-
-  ngAfterViewInit() {
-    this.fetchData()
-  }
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
     if (factoryInfo) {

@@ -22,10 +22,11 @@
     </div>
     <mat-paginator
       [length]="totalDevices"
-      [pageIndex]="pageLink.page"
       [pageSize]="pageLink.pageSize"
       hidePageSize
-      showFirstLastButtons></mat-paginator>
+      showFirstLastButtons
+      (page)="pageLink.page = $event.pageIndex; fetchData();"
+    ></mat-paginator>
   </div>
   <div fxLayout="column" fxLayoutGap="16px" class="right-content">
     <tb-run-state-chart fxFlex [data]="runStateData"></tb-run-state-chart>

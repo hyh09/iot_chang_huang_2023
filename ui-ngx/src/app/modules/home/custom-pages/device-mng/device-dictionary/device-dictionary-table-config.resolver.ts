@@ -42,11 +42,6 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     this.config.deleteEntitiesTitle = count => this.translate.instant('device-mng.delete-device-dics-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('device-mng.delete-device-dics-text');
 
-    this.config.entitiesFetchFunction = pageLink => this.deviceDictionaryService.getDeviceDictionaries(pageLink, this.config.componentsData);
-    this.config.loadEntity = id => this.deviceDictionaryService.getDeviceDictionary(id);
-    this.config.saveEntity = dataDictionary => this.deviceDictionaryService.saveDeviceDictionary(dataDictionary);
-    this.config.deleteEntity = id => this.deviceDictionaryService.deleteDeviceDictionary(id);
-
     this.config.columns.push(
       new EntityTableColumn<DeviceDictionary>('code', 'device-mng.code', '50%'),
       new EntityTableColumn<DeviceDictionary>('name', 'device-mng.name', '50%'),

@@ -2893,9 +2893,11 @@
     "off-line": "离线",
     "device-empty": "暂无设备",
     "run-state-overview": "运行概况",
-    "running-devices": "运行设备（台）",
+    "running-devices": "在线/离线设备（台）",
+    "device-count-unit": "台",
     "on-line-device": "在线设备",
     "off-line-device": "离线设备",
-    "warning-statistics": "预警统计"
+    "warning-statistics": "预警统计",
+    "warning-count": "预警次数"
   }
 }
