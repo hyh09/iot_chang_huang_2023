@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
+import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
@@ -78,6 +79,45 @@ public class PCendEfficiencyController extends BaseController {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
     }
+
+
+
+    @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id")
+          })
+    @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
+    @ResponseBody
+    public Object queryEnergyHistory(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId
+    ) throws ThingsboardException {
+        try {
+            QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
+            queryTsKvVo.setDeviceId(deviceId);
+            queryTsKvVo.setStartTime(startTime);
+            queryTsKvVo.setEndTime(endTime);
+            queryTsKvVo.setSortOrder(sortOrder);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+
+            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo, pageLink);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+
+
 
 
     @ApiOperation("设备属性分组-分组后的属性属性接口---pc端用不到")

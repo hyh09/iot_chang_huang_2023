@@ -55,6 +55,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     // 设备配置设备字典关系Repository
     DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
+    @Autowired
+    DictDeviceService dictDeviceService;
 
     /**
      * 获得当前可用设备字典编码
@@ -344,12 +346,29 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         return entity.map(deviceProfileDictDeviceEntity -> DeviceProfileId.fromString(deviceProfileDictDeviceEntity.getDeviceProfileId().toString())).orElse(null);
     }
 
-
+    /**
+     * 获取当前产能 能耗的数据 由 分组表 改为  hs_init  表中读取  ##hs_init 为程序初始化的数据
+     *
+     * @param dictDeviceId
+     * @param name
+     * @return
+     */
     @Override
     public List<String> findAllByName(UUID dictDeviceId, String name) {
-        List<DictDeviceGroupPropertyEntity> entities = this.groupPropertyRepository.findAllByName(name);
-        List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
-        return nameList;
+        List<String> nameList  = new ArrayList<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
+        {
+            if(vos.getName().equals(name))
+            {
+                nameList =  vos.getGroupPropertyList().stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
+            }
+        }
+
+        return  nameList;
+//        List<DictDeviceGroupPropertyEntity> entities = this.groupPropertyRepository.findAllByName(name);
+//        List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
+//        return nameList;
     }
 
     /**
