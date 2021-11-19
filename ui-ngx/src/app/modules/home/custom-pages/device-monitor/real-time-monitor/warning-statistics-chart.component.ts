@@ -63,6 +63,7 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
       },
       series: [
         {
+          name: this.translate.instant('device-monitor.warning-count'),
           data: this.data.map(item => (item.num)),
           type: 'line'
         }
