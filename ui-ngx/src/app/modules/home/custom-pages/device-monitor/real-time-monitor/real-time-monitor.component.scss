@@ -22,7 +22,7 @@
         flex-wrap: wrap;
         margin: -8px;
         height: calc(100% - 57px);
-        margin-bottom: 8px;
+        margin-bottom: 9px;
         .device-item-wrapper {
           height: 25%;
           width: 50%;
@@ -71,6 +71,9 @@
               object-fit: cover;
             }
           }
+        }
+        &:not(.empty) {
+          align-content: flex-start;
         }
         &.empty {
           align-items: center;

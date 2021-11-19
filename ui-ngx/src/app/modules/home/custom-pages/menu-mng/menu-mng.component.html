@@ -10,10 +10,7 @@
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>menu-mng.lang-key</mat-label>
-        <input matInput formControlName="langKey" required>
-        <mat-error *ngIf="entityForm.get('langKey').hasError('required')">
-          {{ 'menu-mng.lang-key-required' | translate }}
-        </mat-error>
+        <input matInput formControlName="langKey">
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>menu-mng.menu-type</mat-label>
