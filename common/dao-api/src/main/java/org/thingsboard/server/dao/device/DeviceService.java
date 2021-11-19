@@ -164,4 +164,11 @@ public interface DeviceService {
 
     PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
 
+    /**
+     * 查询租户下未分配设备
+     * @param tenantId
+     * @return
+     */
+    List<Device> getNotDistributionDevice(TenantId tenantId);
+
 }
