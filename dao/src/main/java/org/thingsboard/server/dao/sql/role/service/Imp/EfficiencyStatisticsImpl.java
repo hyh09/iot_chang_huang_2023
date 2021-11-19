@@ -148,6 +148,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<String>  keys1 = new ArrayList<>();
         keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         List<String>  nameKey=  dictDeviceService.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+        if(CollectionUtils.isEmpty(nameKey))
+        {
+            throw  new CustomException("系统初始化的数据异常!");
+        }
         String keyName=  nameKey.get(0);//产能的key
         log.info("查询包含产能得key:{}",keyName);
         keys1.add(keyName);
@@ -157,25 +161,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
-        List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());//不能直接分页的
+        List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
         log.info("查询到的数据{}",effectTsKvEntities);
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
+            log.info("查询的能耗数据为空入参为:{}",vo);
             keys1.stream().forEach(s -> {
                 totalValueMap.put(s,"0");
             });
             appVo.setTotalValue(totalValueMap);
-            return  null;
+            return  null;///
         }
 
         Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
         log.info("查询到的全部数据转换为设备维度:{}",map);
-        //分页
-
-        Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
-
-
-        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(map,tenantId);//包含了总产能的
+        Set<UUID> keySet = map.keySet();
+        log.info("打印当前的设备id:{}",keySet);
+        List<UUID> entityIdsAll  = keySet.stream().collect(Collectors.toList());
+        Page<UUID> page= PageUtil.createPageFromList(entityIdsAll,pageLink);
+        Map<UUID,List<EffectTsKvEntity>>  listMap =  new HashMap<>();
+        List<UUID>  pageList=page.getContent();
+        for(int i=0;i<pageList.size();i++)
+        {
+            UUID uuid= pageList.get(i);
+            listMap.put(uuid,map.get(uuid));
+        }
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);//包含了总产能的
         List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
         keys1.stream().forEach(str->{
@@ -508,7 +519,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                   //
                   //计算公式：总产能/总能耗/分钟数
                   map1.put(key,value);
-                  Double  dvalue =      StringUtilToll.div(keyNameValue,value,"60000");
+                  Double  dvalue =  StringUtilToll.div(keyNameValue,value,"60000");
                   map2.put(key,dvalue.toString());
               }
             });
