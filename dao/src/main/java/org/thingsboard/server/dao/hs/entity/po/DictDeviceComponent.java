@@ -87,19 +87,4 @@ public class DictDeviceComponent extends BasePO {
      * 排序
      */
     private Integer sort;
-
-    /**
-     * 属性key
-     */
-    private String key;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 数据字典Id
-     */
-    private String dictDataId;
 }

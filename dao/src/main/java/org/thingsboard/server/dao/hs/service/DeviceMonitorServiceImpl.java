@@ -309,7 +309,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                         kvData.ifPresent(k -> groupPropertyNameList.add(v.getName()));
                         return DictDeviceGroupPropertyVO.builder()
                                 .id(v.getId())
-                                .unit(Optional.ofNullable(dictDataMap.get(v.getDictDataId())).map(DictData::getUnit).orElse(null))
+                                .unit(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                                 .name(v.getName())
                                 .title(v.getTitle())
                                 .content(kvData.isEmpty() ? v.getContent() : kvData.get().getValue().toString())
@@ -623,14 +623,13 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     public void recursionDealComponentData(List<DictDeviceComponentVO> componentList, Map<String, TsKvEntry> kvEntryMap, Map<String, DictData> dictDataMap, List<String> groupPropertyNameList) {
         for (DictDeviceComponentVO componentVO : componentList) {
-            if (componentVO.getKey() != null) {
-                var kvData = Optional.ofNullable(kvEntryMap.get(componentVO.getKey()));
+            for (DictDeviceComponentPropertyVO propertyVO:componentVO.getPropertyList()) {
+                var kvData = Optional.ofNullable(kvEntryMap.get(propertyVO.getName()));
                 kvData.ifPresent(k -> {
-                    groupPropertyNameList.add(componentVO.getKey());
-                    componentVO.setContent(kvData.get().getValue().toString());
-                    componentVO.setUnit(Optional.ofNullable(dictDataMap.get(componentVO.getDictDataId())).map(DictData::getUnit).orElse(null));
-                    componentVO.setCreatedTime(kvData.get().getTs());
-                    componentVO.setIcon(null).setPicture(null);
+                    groupPropertyNameList.add(propertyVO.getName());
+                    propertyVO.setContent(kvData.get().getValue().toString());
+                    propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
+                    propertyVO.setCreatedTime(kvData.get().getTs());
                 });
             }
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {

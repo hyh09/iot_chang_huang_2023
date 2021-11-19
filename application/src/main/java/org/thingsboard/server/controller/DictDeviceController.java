@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
@@ -112,7 +111,7 @@ public class DictDeviceController extends BaseController {
         CommonUtil.checkCode(dictDeviceVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE);
 //        CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
 //        CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
-        CommonUtil.checkDuplicateNameOrKey(dictDeviceVO, Sets.newHashSet());
+        CommonUtil.checkDuplicateName(dictDeviceVO, Sets.newHashSet());
         this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
         return dictDeviceVO;
     }

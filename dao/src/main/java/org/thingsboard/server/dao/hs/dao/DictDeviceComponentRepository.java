@@ -19,8 +19,6 @@ import java.util.UUID;
 @Repository
 public interface DictDeviceComponentRepository extends PagingAndSortingRepository<DictDeviceComponentEntity, UUID>, JpaSpecificationExecutor<DictDeviceComponentEntity> {
 
-    List<DictDeviceComponentEntity> findAllByDictDataId(UUID dictDataId);
-
     @Modifying
     @Query("delete from DictDeviceComponentEntity d where d.dictDeviceId = :dictDeviceId")
     void deleteByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);

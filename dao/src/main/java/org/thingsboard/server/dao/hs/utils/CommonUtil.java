@@ -5,10 +5,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceComponentVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -129,7 +126,7 @@ public class CommonUtil {
      * @param dictDeviceVO DictDeviceVO
      * @param set          属性set
      */
-    public static void checkDuplicateNameOrKey(DictDeviceVO dictDeviceVO, Set<String> set) throws ThingsboardException {
+    public static void checkDuplicateName(DictDeviceVO dictDeviceVO, Set<String> set) throws ThingsboardException {
         for (DictDeviceGroupVO groupVO : dictDeviceVO.getGroupList()) {
             for (DictDeviceGroupPropertyVO propertyVO : groupVO.getGroupPropertyList()) {
                 if (set.contains(propertyVO.getName()))
@@ -149,12 +146,14 @@ public class CommonUtil {
      */
     public static void checkComponentDuplicateNameOrKey(List<DictDeviceComponentVO> componentList, Set<String> set) throws ThingsboardException {
         for (DictDeviceComponentVO componentVO : componentList) {
-            if (componentVO.getKey() == null) {
-                // do nothing
-            } else if (set.contains(componentVO.getKey()))
-                throw new ThingsboardException(componentVO.getKey() + " 重复", ThingsboardErrorCode.GENERAL);
-            else
-                set.add(componentVO.getKey());
+            if (componentVO.getPropertyList() != null && !componentVO.getPropertyList().isEmpty()) {
+                for(DictDeviceComponentPropertyVO propertyVO:componentVO.getPropertyList()) {
+                    if (set.contains(propertyVO.getName()))
+                        throw new ThingsboardException(propertyVO.getName() + " 重复", ThingsboardErrorCode.GENERAL);
+                    else
+                        set.add(propertyVO.getName());
+                }
+            }
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }

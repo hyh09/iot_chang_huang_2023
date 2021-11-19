@@ -108,25 +108,6 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
     @Column(name = HsModelConstants.GENERAL_SORT)
     private Integer sort;
 
-    /**
-     * 属性key
-     */
-    @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_KEY)
-    private String key;
-
-    /**
-     * 内容
-     */
-    @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_CONTENT)
-    private String content;
-
-    /**
-     * 数据字典Id
-     */
-    @Column(name = HsModelConstants.DICT_DATA_ID, columnDefinition = "uuid")
-    @Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID dictDataId;
-
     public DictDeviceComponentEntity() {
     }
 
@@ -148,10 +129,6 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
         this.icon = common.getIcon();
         this.picture = common.getPicture();
         this.sort = common.getSort();
-        this.content = common.getContent();
-        this.key = common.getKey();
-        if (common.getDictDataId() != null)
-            this.dictDataId = UUID.fromString(common.getDictDataId());
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -181,11 +158,6 @@ public class DictDeviceComponentEntity extends BasePgEntity<DictDeviceComponentE
         common.setIcon(icon);
         common.setPicture(picture);
         common.setSort(sort);
-        common.setKey(key);
-        common.setContent(content);
-        if (dictDataId != null) {
-            common.setDictDataId(dictDataId.toString());
-        }
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

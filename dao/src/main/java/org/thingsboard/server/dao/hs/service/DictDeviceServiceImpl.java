@@ -57,6 +57,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     // 设备字典部件Repository
     DictDeviceComponentRepository componentRepository;
 
+    // 设备字典部件属性Repository
+    DictDeviceComponentPropertyRepository componentPropertyRepository;
+
     // 设备字典属性Repository
     DictDevicePropertyRepository propertyRepository;
 
@@ -137,8 +140,16 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 }).collect(Collectors.toList());
 
         var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
+        var componentPropertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())));
+        var componentPropertyVOList = componentPropertyList.stream()
+                .map(e->{
+                    DictDeviceComponentPropertyVO vo = new DictDeviceComponentPropertyVO();
+                    BeanUtils.copyProperties(e, vo);
+                    return vo;
+                }).collect(Collectors.toList());
+        var cMap = componentPropertyVOList.stream().collect(Collectors.groupingBy(DictDeviceComponentPropertyVO::getComponentId));
 
-        this.recursionPackageComponent(rList, pMap, HSConstants.NULL_STR);
+        this.recursionPackageComponent(rList, pMap, cMap, HSConstants.NULL_STR);
 
         DictDeviceVO dictDeviceVO = DictDeviceVO.builder()
                 .propertyList(propertyList)
@@ -156,6 +167,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     @Transactional
+    @SuppressWarnings("Duplicates")
     public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
         DictDevice dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
                 .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
@@ -168,6 +180,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
             this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.componentRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
+            this.componentPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
@@ -203,6 +216,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     @Transactional
+    @SuppressWarnings("Duplicates")
     public void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException {
         DictDevice dictDevice = new DictDevice();
         DictDeviceEntity dictDeviceEntity;
@@ -214,6 +228,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
             this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.componentRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
+            this.componentPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
@@ -284,6 +299,21 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             sort += 1;
             var dictDeviceComponentEntity = new DictDeviceComponentEntity(dictDeviceComponent);
             this.componentRepository.save(dictDeviceComponentEntity);
+
+            if (componentVO.getPropertyList() !=null && !componentVO.getPropertyList().isEmpty()) {
+                int pSort = 1;
+                List<DictDeviceComponentProperty> propertyList = new ArrayList<>();
+                for (DictDeviceComponentPropertyVO propertyVO :componentVO.getPropertyList()) {
+                    var property = new DictDeviceComponentProperty();
+                    BeanUtils.copyProperties(propertyVO, property);
+                    property.setComponentId(dictDeviceComponentEntity.getId().toString());
+                    property.setSort(pSort);
+                    propertyList.add(property);
+                    pSort += 1;
+                }
+                this.componentPropertyRepository.saveAll(propertyList.stream().map(DictDeviceComponentPropertyEntity::new).collect(Collectors.toList()));
+            }
+
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }
@@ -300,11 +330,13 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     public void recursionPackageComponent(List<DictDeviceComponentVO> rList,
                                           Map<String, List<DictDeviceComponentVO>> pMap,
+                                          Map<String, List<DictDeviceComponentPropertyVO>> cMap,
                                           String parentId) {
         if (pMap.get(parentId) != null && !pMap.get(parentId).isEmpty()) {
             pMap.get(parentId).forEach(e -> {
+                e.setPropertyList(cMap.getOrDefault(e.getId(), Lists.newArrayList()));
                 rList.add(e);
-                recursionPackageComponent(e.getComponentList(), pMap, e.getId());
+                recursionPackageComponent(e.getComponentList(), pMap, cMap, e.getId());
             });
         }
     }
@@ -410,9 +442,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public Map<String, String> mapAllPropertyDictDataId(UUID dictDeviceId) {
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
-        var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(dictDeviceId));
-
-        var map = componentList.stream().filter(e -> e.getKey() != null).collect(Collectors.toMap(DictDeviceComponent::getKey, DictDeviceComponent::getDictDataId, (a, b) -> a));
+        var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var map = componentList.stream().collect(Collectors.toMap(DictDeviceComponentProperty::getName, DictDeviceComponentProperty::getDictDataId, (a, b) -> a));
         return propertyList.stream().reduce(map, (r, e) -> {
             r.put(e.getName(), e.getDictDataId());
             return r;
@@ -467,5 +498,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setDeviceProfileDictDeviceRepository(DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository) {
         this.deviceProfileDictDeviceRepository = deviceProfileDictDeviceRepository;
+    }
+
+    @Autowired
+    public void setComponentPropertyRepository(DictDeviceComponentPropertyRepository componentPropertyRepository) {
+        this.componentPropertyRepository = componentPropertyRepository;
     }
 }

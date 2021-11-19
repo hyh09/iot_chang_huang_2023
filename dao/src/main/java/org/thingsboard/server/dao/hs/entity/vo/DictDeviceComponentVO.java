@@ -28,21 +28,6 @@ public class DictDeviceComponentVO {
     @ApiModelProperty(value = "设备字典Id")
     private String dictDeviceId;
 
-    @ApiModelProperty(value = "属性key")
-    private String key;
-
-    @ApiModelProperty(value = "内容")
-    private String content;
-
-    @ApiModelProperty(value = "单位", notes = "仅用于遥测数据展示")
-    private String unit;
-
-    @ApiModelProperty(value = "创建时间", notes = "仅用于遥测数据展示")
-    private Long createdTime;
-
-    @ApiModelProperty(value = "数据字典Id")
-    private String dictDataId;
-
     @NotNull
     @ApiModelProperty(value = "编码")
     private String code;
@@ -77,4 +62,7 @@ public class DictDeviceComponentVO {
 
     @ApiModelProperty(value = "子部件列表数据, 为null则该部件已经没有子部件, 数据结构同部件")
     private List<DictDeviceComponentVO> componentList;
+
+    @ApiModelProperty(value = "属性列表")
+    private List<DictDeviceComponentPropertyVO> propertyList;
 }
