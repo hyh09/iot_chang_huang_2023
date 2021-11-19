@@ -7,9 +7,9 @@
       <div *ngFor="let device of deviceList" class="device-item-wrapper">
         <div class="device-item" [title]="device.name">
           <div class="device-name">{{ device.name }}</div>
-          <div class="device-status-bg" [class.off-line]="!device.isOnline"></div>
+          <div class="device-status-bg" [class.off-line]="!device.isOnLine"></div>
           <div class="device-status">
-            {{ (device.isOnline ? 'device-monitor.on-line' : 'device-monitor.off-line') | translate }}
+            {{ (device.isOnLine ? 'device-monitor.on-line' : 'device-monitor.off-line') | translate }}
           </div>
           <img [src]="device.image ? device.image : '../../../../../../assets/image-empty.svg'" />
         </div>

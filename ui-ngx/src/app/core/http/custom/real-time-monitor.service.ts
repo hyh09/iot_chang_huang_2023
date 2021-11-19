@@ -52,6 +52,7 @@ export class RealTimeMonitorService {
 
   // 开启订阅
   public subscribe(deviceIdList: string[], onMessage: Function) {
+    this.tempDeviceIdList = deviceIdList;
     if (!this.isActive) {
       this.isActive = true;
       if (!this.isOpened && !this.isOpening) {
@@ -71,7 +72,6 @@ export class RealTimeMonitorService {
   }
 
   private openSocket(token: string, deviceIdList: string[], onMessage: Function) {
-    this.tempDeviceIdList = deviceIdList;
     this.webSocket = new WebSocket(`${this.telemetryUri}?token=${token}`);
     this.webSocket.onopen = () => {
       this.webSocket.send(JSON.stringify({
@@ -89,6 +89,15 @@ export class RealTimeMonitorService {
       setTimeout(() => {
         this.subscribe(deviceIdList, onMessage)
       }, 3000);
+    }
+    this.webSocket.onclose = () => {
+      if (this.isActive) {
+        this.isActive = false;
+        this.isOpened = false;
+        setTimeout(() => {
+          this.subscribe(deviceIdList, onMessage)
+        }, 3000);
+      }
     }
     this.webSocket.onmessage = () => {
       onMessage();
@@ -124,10 +133,10 @@ export class RealTimeMonitorService {
         }));
         this.tempDeviceIdList = [];
       }
-      this.webSocket.close();
       this.isActive = false;
       this.isOpened = false;
       this.isOpening = false;
+      this.webSocket.close();
     }
   }
 

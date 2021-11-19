@@ -38,10 +38,10 @@ export class RealTimeMonitorComponent implements OnDestroy {
   }
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
-    this.realTimeMonitorService.unSubscribeDevices();
     if (factoryInfo) {
       this.factoryInfo = factoryInfo;
     }
+    this.realTimeMonitorService.unSubscribeDevices();
     this.realTimeMonitorService.getRealTimeData(this.pageLink, this.factoryInfo).subscribe(res => {
       this.totalDevices = res.allDeviceCount || 0;
       this.deviceList = res.devicePageData.data || [];
@@ -50,7 +50,9 @@ export class RealTimeMonitorComponent implements OnDestroy {
         offLineDeviceCount: res.offLineDeviceCount || 0
       }
       this.alarmTimesList = res.alarmTimesList || [];
-      this.realTimeMonitorService.subscribe(this.deviceList.map(item => (item.id)), this.fetchData);
+      this.realTimeMonitorService.subscribe(this.deviceList.map(item => (item.id)), () => {
+        this.fetchData();
+      });
     });
   }
 

@@ -46,6 +46,9 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
         left: 20,
         containLabel: true
       },
+      tooltip: {
+        trigger: 'axis'
+      },
       xAxis: {
         type: 'category',
         boundaryGap: false,
