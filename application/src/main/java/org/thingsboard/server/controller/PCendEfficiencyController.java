@@ -1,9 +1,6 @@
 package org.thingsboard.server.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +18,7 @@ import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
+import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -40,7 +38,7 @@ import java.util.UUID;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/pc/efficiency")
-public class PCendEfficiencyController extends BaseController {
+public class PCendEfficiencyController extends BaseController implements AnswerExample {
 
 
 
@@ -89,6 +87,9 @@ public class PCendEfficiencyController extends BaseController {
             @ApiImplicitParam(name = "deviceId", value = "设备id")
           })
     @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+    })
     @ResponseBody
     public Object queryEnergyHistory(
             @RequestParam int pageSize,
@@ -108,7 +109,7 @@ public class PCendEfficiencyController extends BaseController {
             queryTsKvVo.setSortOrder(sortOrder);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
 
-            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo, pageLink);
+            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -120,17 +121,23 @@ public class PCendEfficiencyController extends BaseController {
 
 
 
-    @ApiOperation("设备属性分组-分组后的属性属性接口---pc端用不到")
+    @ApiOperation("设备属性分组-分组后的属性属性接口")
     @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
     @ResponseBody
     public  Object queryGroupDict(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-        log.info("打印当前的入参:{}",deviceId);
-        return  efficiencyStatisticsSvc.queryGroupDict(deviceId,getTenantId());
+        try {
+            log.info("打印当前的入参:{}", deviceId);
+            return efficiencyStatisticsSvc.queryGroupDict(deviceId, getTenantId());
+        }catch (Exception e)
+        {
+            log.error("【设备属性分组-分组后的属性属性接口】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
 
     }
 
 
-    @ApiOperation("设备属性分组后的属性name属性接口--pcd端下拉框")
+    @ApiOperation("设备属性分组后的属性name属性接口--pc端下拉框")
     @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
     @ResponseBody
     public  Object queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {

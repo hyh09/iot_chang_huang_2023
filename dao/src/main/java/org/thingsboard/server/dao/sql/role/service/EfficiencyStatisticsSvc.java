@@ -24,7 +24,7 @@ import java.util.UUID;
  **/
 public interface EfficiencyStatisticsSvc {
 
-    Object  queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo, PageLink pageLink);
+    Object  queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
 
 
     PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
