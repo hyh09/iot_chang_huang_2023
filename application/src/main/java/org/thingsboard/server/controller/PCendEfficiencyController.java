@@ -102,6 +102,11 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID deviceId
     ) throws ThingsboardException {
         try {
+            if ( startTime == null  || endTime == null) {
+                startTime=(CommonUtils.getZero());
+                endTime=(CommonUtils.getNowTime());
+            }
+
             QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
             queryTsKvVo.setDeviceId(deviceId);
             queryTsKvVo.setStartTime(startTime);
@@ -112,8 +117,8 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
         }catch (Exception e)
         {
-            e.printStackTrace();
-            return  null;
+            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
 

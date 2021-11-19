@@ -34,12 +34,12 @@ public class EffectHistoryKvRepository {
     private EntityManager entityManager;
 
 
-    private  String  with_sql=" with table1 as ( select (ts / 600000) as time1, ts, entity_id, key, ts,bool_v,long_v,substring(concat(bool_v,str_v,long_v,dbl_v,json_v),E\'(\\\\d+)\') as value\n" +
-            "    from ts_kv   where entity_id = :entityId   and  key in  (select  key_id  from  ts_kv_dictionary where key  in (:ids) ) ) ";
+    private  String  with_sql=" with table1 as ( select (ts / 600000) as time1, entity_id, key, ts,bool_v,long_v,substring(concat(bool_v,str_v,long_v,dbl_v,json_v),E\'(\\\\d+)\') as value\n" +
+            "    from ts_kv   where entity_id = :entityId  and  ts>=:startTime and ts<=:endTime  and  key in  (select  key_id  from  ts_kv_dictionary where key  in (:ids) ) ) ";
 
-    private  String select_sql=" select time1, (time1*600000) as ts";
-    private  String max_sql=" MAX(case when key=:keyId then to_number(value,\'99G999D9S\') else 0 end) as key";
-    private  String from_sql= " from  table1 t1   where  time1=\'2726400\' group by  t1.time1 order by time1  ";
+    private  String select_sql=" select time1, min(ts) as ts";
+//    private  String max_sql=" MAX(case when key=:keyId then to_number(value,\'99G999D9S\') else 0 end) as key";
+    private  String from_sql= " from  table1 t1   group by  t1.time1 order by time1  ";
 
 
     public Page<Map> queryEntity(QueryTsKvHisttoryVo queryTsKvVo, Pageable pageable)
@@ -60,9 +60,11 @@ public class EffectHistoryKvRepository {
         sql.append(with_sql);
         param.put("entityId",queryTsKvVo.getDeviceId());
         param.put("ids",queryTsKvVo.getKeys());
+        param.put("startTime",queryTsKvVo.getStartTime());
+        param.put("endTime",queryTsKvVo.getEndTime());
         sql.append(select_sql);
         queryTsKvVo.getKeys().stream().forEach(str->{
-            sql.append(" , ").append("MAX(case when key= (select  key_id  from ts_kv_dictionary  where  key= ").append("\'").append(str).append( " \' ) then to_number(value,\'99G999D9S\') else 0 end) as ").append(str);
+            sql.append(" , ").append("MAX(case when key= (select  key_id  from ts_kv_dictionary  where  key= ").append("\'").append(str).append( "\' ) then to_number(value,\'99G999D9S\') else 0 end) as ").append(str);
         });
         sql.append(from_sql);
         String sqlCount = "select count(*) from (" + sql + ") t_count_0";
