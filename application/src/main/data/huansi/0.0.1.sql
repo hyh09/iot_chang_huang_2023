@@ -197,6 +197,40 @@ COMMENT ON COLUMN "public"."hs_dict_device_component"."sort" IS '排序字段';
 COMMENT ON TABLE "public"."hs_dict_device_component" IS '设备字典-部件';
 
 -- ----------------------------
+-- Table structure for hs_dict_device_component_property
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."hs_dict_device_component_property";
+CREATE TABLE "public"."hs_dict_device_component_property" (
+                                                              "id" uuid NOT NULL,
+                                                              "component_id" uuid,
+                                                              "content" varchar(255) COLLATE "pg_catalog"."default",
+                                                              "name" varchar(255) COLLATE "pg_catalog"."default",
+                                                              "created_time" int8 NOT NULL,
+                                                              "created_user" varchar(255) COLLATE "pg_catalog"."default",
+                                                              "updated_time" int8,
+                                                              "updated_user" varchar(255) COLLATE "pg_catalog"."default",
+                                                              "dict_device_id" uuid,
+                                                              "title" varchar(255) COLLATE "pg_catalog"."default",
+                                                              "sort" int8,
+                                                              "dict_data_id" uuid
+)
+;
+ALTER TABLE "public"."hs_dict_device_component_property" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."id" IS 'Id';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."component_id" IS '部件Id';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."content" IS '内容';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."name" IS '属性名称';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."created_time" IS '创建时间';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."created_user" IS '创建人';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."updated_time" IS '更新时间';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."updated_user" IS '更新人';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."dict_device_id" IS '设备字典Id';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."title" IS '标题';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."sort" IS '排序字段';
+COMMENT ON COLUMN "public"."hs_dict_device_component_property"."dict_data_id" IS '数据字典Id';
+COMMENT ON TABLE "public"."hs_dict_device_component_property" IS '设备字典-部件属性';
+
+-- ----------------------------
 -- Table structure for hs_dict_device_group
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."hs_dict_device_group";
@@ -237,7 +271,8 @@ CREATE TABLE "public"."hs_dict_device_group_property" (
                                                           "updated_user" varchar(255) COLLATE "pg_catalog"."default",
                                                           "dict_device_id" uuid,
                                                           "title" varchar(255) COLLATE "pg_catalog"."default",
-                                                          "sort" int8
+                                                          "sort" int8,
+                                                          "dict_data_id" uuid
 )
 ;
 ALTER TABLE "public"."hs_dict_device_group_property" OWNER TO "postgres";
@@ -252,6 +287,7 @@ COMMENT ON COLUMN "public"."hs_dict_device_group_property"."updated_user" IS '�
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."dict_device_id" IS '设备字典Id';
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."title" IS '标题';
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."sort" IS '排序字段';
+COMMENT ON COLUMN "public"."hs_dict_device_group_property"."dict_data_id" IS '数据字典Id';
 COMMENT ON TABLE "public"."hs_dict_device_group_property" IS '设备字典-分组属性';
 
 -- ----------------------------

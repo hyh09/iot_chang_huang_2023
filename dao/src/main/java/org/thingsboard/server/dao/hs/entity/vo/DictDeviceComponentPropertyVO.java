@@ -12,14 +12,17 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "设备字典分组属性实体类")
+@ApiModel(value = "设备字典部件属性实体类")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictDeviceGroupPropertyVO {
+public class DictDeviceComponentPropertyVO {
 
     @ApiModelProperty(value = "id", notes = "新增或修改时均为null")
     private String id;
+
+    @ApiModelProperty(value = "部件Id", notes = "新增或修改时均为null")
+    private String componentId;
 
     @ApiModelProperty(value = "数据字典Id")
     private String dictDataId;

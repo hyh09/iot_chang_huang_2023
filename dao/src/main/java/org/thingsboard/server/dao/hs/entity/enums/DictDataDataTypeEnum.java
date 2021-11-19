@@ -12,9 +12,9 @@ import java.util.*;
  * @since 2021.10.18
  */
 @Getter
-public enum DictDataDataTypeEnum implements EnumGetter{
+public enum DictDataDataTypeEnum implements EnumGetter {
     FLOAT("FLOAT", "type-float"),
-    BOOLEAN("BOOLEAN","type-boolean"),
+    BOOLEAN("BOOLEAN", "type-boolean"),
     NUMBER("NUMBER", "type-number"),
     CHARACTER("CHARACTER", "type-character");
 
@@ -22,7 +22,7 @@ public enum DictDataDataTypeEnum implements EnumGetter{
     private final String code;
     private final String name;
 
-    DictDataDataTypeEnum(String code, String name){
+    DictDataDataTypeEnum(String code, String name) {
         this.code = code;
         this.name = name;
     }

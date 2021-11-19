@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -22,6 +23,7 @@ public class DictDeviceGroupVO {
     @ApiModelProperty(value = "id", notes = "新增或修改时均为null")
     private String id;
 
+    @NotNull
     @ApiModelProperty(value = "名称")
     private String name;
 
