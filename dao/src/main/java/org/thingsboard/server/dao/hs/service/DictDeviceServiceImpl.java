@@ -142,7 +142,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
         var componentPropertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())));
         var componentPropertyVOList = componentPropertyList.stream()
-                .map(e->{
+                .map(e -> {
                     DictDeviceComponentPropertyVO vo = new DictDeviceComponentPropertyVO();
                     BeanUtils.copyProperties(e, vo);
                     return vo;
@@ -300,10 +300,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             var dictDeviceComponentEntity = new DictDeviceComponentEntity(dictDeviceComponent);
             this.componentRepository.save(dictDeviceComponentEntity);
 
-            if (componentVO.getPropertyList() !=null && !componentVO.getPropertyList().isEmpty()) {
+            if (componentVO.getPropertyList() != null && !componentVO.getPropertyList().isEmpty()) {
                 int pSort = 1;
                 List<DictDeviceComponentProperty> propertyList = new ArrayList<>();
-                for (DictDeviceComponentPropertyVO propertyVO :componentVO.getPropertyList()) {
+                for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                     var property = new DictDeviceComponentProperty();
                     BeanUtils.copyProperties(propertyVO, property);
                     property.setComponentId(dictDeviceComponentEntity.getId().toString());
