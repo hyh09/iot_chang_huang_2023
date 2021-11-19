@@ -26,14 +26,25 @@ public class FactoryLevelAllListVo {
     private List<ProductionLine> productionLineList;
     @ApiModelProperty("设备信息")
     private List<DeviceVo> deviceVoList;
+    @ApiModelProperty("未分配的设备")
+    private List<DeviceVo> notDistributionList;
 
     public FactoryLevelAllListVo(){}
 
     public FactoryLevelAllListVo(FactoryListVo factoryListVo){
-        FactoryLevelAllListVo(factoryListVo.getFactoryEntityList(),factoryListVo.getWorkshopEntityList(),factoryListVo.getProductionLineEntityList(),factoryListVo.getDeviceEntityList());
+        FactoryLevelAllListVo(factoryListVo.getFactoryEntityList(),
+                factoryListVo.getWorkshopEntityList(),
+                factoryListVo.getProductionLineEntityList(),
+                factoryListVo.getDeviceEntityList(),
+                factoryListVo.getNotDistributionList()
+        );
     }
 
-    public FactoryLevelAllListVo FactoryLevelAllListVo(List<Factory> factoryList, List<Workshop> workshopList, List<ProductionLine> productionLineList, List<Device> deviceList) {
+    public FactoryLevelAllListVo FactoryLevelAllListVo(List<Factory> factoryList,
+                                                       List<Workshop> workshopList,
+                                                       List<ProductionLine> productionLineList,
+                                                       List<Device> deviceList,
+                                                       List<Device> notDistributionList) {
         this.factoryList = factoryList;
         this.workshopList = workshopList;
         this.productionLineList = productionLineList;
@@ -41,6 +52,12 @@ public class FactoryLevelAllListVo {
         if(CollectionUtils.isNotEmpty(deviceList)){
             deviceList.forEach(i->{
                 deviceVoList.add(new DeviceVo(i));
+            });
+        }
+        this.notDistributionList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(notDistributionList)){
+            notDistributionList.forEach(i->{
+                this.notDistributionList.add(new DeviceVo(i));
             });
         }
         return this;

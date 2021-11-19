@@ -118,7 +118,15 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public FactoryListVo findFactoryListByCdn(Factory factory){
         log.trace("Executing findFactoryListBuyCdn [{}]", factory);
-        return factoryDao.findFactoryListByCdn( factory,userRoleMenuSvc.decideUser(new UserId(factory.getLoginUserId())));
+        FactoryListVo factoryListByCdn = factoryDao.findFactoryListByCdn(factory, userRoleMenuSvc.decideUser(new UserId(factory.getLoginUserId())));
+        //查询未分配的设备
+        if(factory.getTenantId() != null){
+            List<Device> notDistributionDevice = deviceService.getNotDistributionDevice(new TenantId(factory.getTenantId()));
+            if(CollectionUtils.isNotEmpty(notDistributionDevice)){
+                factoryListByCdn.setNotDistributionList(notDistributionDevice);
+            }
+        }
+        return factoryListByCdn;
     }
 
     /**
