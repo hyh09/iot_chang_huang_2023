@@ -344,7 +344,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public Object queryGroupDict(UUID deviceId,TenantId tenantId) {
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),deviceId);
-        if(deviceId == null)
+        if(deviceInfo == null)
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
 
