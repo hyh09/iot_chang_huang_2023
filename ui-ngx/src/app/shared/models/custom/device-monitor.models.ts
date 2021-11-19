@@ -41,7 +41,7 @@ export interface DeviceItem {
   id: string;
   name: string;
   image: string;
-  isOnline: boolean;
+  isOnLine: boolean;
 }
 
 export interface DevicePageData {

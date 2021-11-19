@@ -1158,3 +1158,7 @@ form button .mat-icon {
   font-size: 16px;
   color: #909399;
 }
+
+.ant-tree .ant-tree-node-content-wrapper.ant-tree-node-selected .ant-tree-title {
+  color: #fff !important;
+}
