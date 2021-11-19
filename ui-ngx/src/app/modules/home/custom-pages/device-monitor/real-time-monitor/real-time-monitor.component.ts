@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
 import { AlarmTimesListItem, DeviceItem } from '@app/shared/models/custom/device-monitor.models';
 import { FactoryTreeNodeIds } from '@app/shared/models/custom/factory-mng.models';
@@ -9,7 +9,7 @@ import { PageLink } from '@app/shared/public-api';
   templateUrl: './real-time-monitor.component.html',
   styleUrls: ['./real-time-monitor.component.scss']
 })
-export class RealTimeMonitorComponent {
+export class RealTimeMonitorComponent implements OnDestroy {
 
   factoryInfo: FactoryTreeNodeIds = {
     factoryId: '',
@@ -33,7 +33,12 @@ export class RealTimeMonitorComponent {
     private realTimeMonitorService: RealTimeMonitorService
   ) { }
 
+  ngOnDestroy() {
+    this.realTimeMonitorService.unsubscribe();
+  }
+
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
+    this.realTimeMonitorService.unSubscribeDevices();
     if (factoryInfo) {
       this.factoryInfo = factoryInfo;
     }
@@ -45,6 +50,7 @@ export class RealTimeMonitorComponent {
         offLineDeviceCount: res.offLineDeviceCount || 0
       }
       this.alarmTimesList = res.alarmTimesList || [];
+      this.realTimeMonitorService.subscribe(this.deviceList.map(item => (item.id)), this.fetchData);
     });
   }
 
