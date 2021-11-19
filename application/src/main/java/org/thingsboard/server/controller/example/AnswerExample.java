@@ -8,18 +8,28 @@ package org.thingsboard.server.controller.example;
  **/
 public interface AnswerExample {
 
+    /**
+     * 能耗的历史数据
+     */
     public  static String  queryEnergyHistory_messg="{\n" +
             "    \"data\": [\n" +
             "        {\n" +
-            "            \"time1\": 2726400,\n" +
-            "            \"水\": 0,\n" +
-            "            \"气\": 0,\n" +
-            "            \"电\": 0,\n" +
-            "            \"ts\": 1635840000000\n" +
+            "            \"time1\": 2728802,\n" +
+            "            \"水\": 89987,\n" +
+            "            \"气\": 76987,\n" +
+            "            \"电\": 83487,\n" +
+            "            \"ts\": 1637281403407\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"time1\": 2728817,\n" +
+            "            \"水\": 89990,\n" +
+            "            \"气\": 76990,\n" +
+            "            \"电\": 83490,\n" +
+            "            \"ts\": 1637290799086\n" +
             "        }\n" +
             "    ],\n" +
             "    \"totalPages\": 1,\n" +
-            "    \"totalElements\": 1,\n" +
+            "    \"totalElements\": 2,\n" +
             "    \"hasNext\": false\n" +
             "}";
 }
