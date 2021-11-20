@@ -3,7 +3,7 @@ package org.thingsboard.server.dao.hs.entity.po;
 import lombok.*;
 
 /**
- * 设备字典-分组属性
+ * 设备字典-部件属性
  *
  * @author wwj
  * @since 2021.10.21
@@ -13,7 +13,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictDeviceGroupProperty extends BasePO {
+public class DictDeviceComponentProperty extends BasePO {
 
     private static final long serialVersionUID = 4934987555236873705L;
     /**
@@ -22,14 +22,19 @@ public class DictDeviceGroupProperty extends BasePO {
     private String id;
 
     /**
-     * 设备字典-分组Id
+     * 部件Id
      */
-    private String dictDeviceGroupId;
+    private String componentId;
 
     /**
      * 设备字典Id
      */
     private String dictDeviceId;
+
+    /**
+     * 数据字典Id
+     */
+    private String dictDataId;
 
     /**
      * 名称
@@ -50,9 +55,4 @@ public class DictDeviceGroupProperty extends BasePO {
      * 排序
      */
     private Integer sort;
-
-    /**
-     * 数据字典Id
-     */
-    private String dictDataId;
 }

@@ -34,7 +34,6 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.function.Function;

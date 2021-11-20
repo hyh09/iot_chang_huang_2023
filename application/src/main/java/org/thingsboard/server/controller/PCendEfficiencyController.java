@@ -1,9 +1,6 @@
 package org.thingsboard.server.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +12,13 @@ import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
+import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
+import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -39,7 +38,7 @@ import java.util.UUID;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/pc/efficiency")
-public class PCendEfficiencyController extends BaseController {
+public class PCendEfficiencyController extends BaseController implements AnswerExample {
 
 
 
@@ -80,17 +79,124 @@ public class PCendEfficiencyController extends BaseController {
     }
 
 
-    @ApiOperation("设备属性分组-分组后的属性属性接口---pc端用不到")
+    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id")
+    })
+    @RequestMapping(value = "/queryEntityByKeys", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+    })
+    @ResponseBody
+    public Object queryEntityByKeys(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId,
+            @RequestParam(required = false) UUID productionLineId,
+            @RequestParam(required = false) UUID workshopId,
+            @RequestParam(required = false) UUID factoryId
+    ) throws ThingsboardException {
+        try {
+            if ( startTime == null  || endTime == null) {
+                startTime=(CommonUtils.getZero());
+                endTime=(CommonUtils.getNowTime());
+            }
+
+            QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+            queryTsKvVo.setDeviceId(deviceId);
+            queryTsKvVo.setProductionLineId(productionLineId);
+            queryTsKvVo.setWorkshopId(workshopId);
+            queryTsKvVo.setFactoryId(factoryId);
+            queryTsKvVo.setStartTime(startTime);
+            queryTsKvVo.setEndTime(endTime);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId(), pageLink);
+        }catch (Exception e)
+        {
+            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id")
+          })
+    @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+    })
+    @ResponseBody
+    public Object queryEnergyHistory(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId
+    ) throws ThingsboardException {
+        try {
+            if ( startTime == null  || endTime == null) {
+                startTime=(CommonUtils.getZero());
+                endTime=(CommonUtils.getNowTime());
+            }
+
+            QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
+            queryTsKvVo.setDeviceId(deviceId);
+            queryTsKvVo.setStartTime(startTime);
+            queryTsKvVo.setEndTime(endTime);
+            queryTsKvVo.setSortOrder(sortOrder);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+
+            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
+        }catch (Exception e)
+        {
+            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
+
+
+
+
+
+    @ApiOperation("设备属性分组-分组后的属性属性接口")
     @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
     @ResponseBody
     public  Object queryGroupDict(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-        log.info("打印当前的入参:{}",deviceId);
-        return  efficiencyStatisticsSvc.queryGroupDict(deviceId,getTenantId());
+        try {
+            log.info("打印当前的入参:{}", deviceId);
+            return efficiencyStatisticsSvc.queryGroupDict(deviceId, getTenantId());
+        }catch (Exception e)
+        {
+            log.error("【设备属性分组-分组后的属性属性接口】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
 
     }
 
 
-    @ApiOperation("设备属性分组后的属性name属性接口--pcd端下拉框")
+    @ApiOperation("设备属性分组后的属性name属性接口--pc端下拉框")
     @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
     @ResponseBody
     public  Object queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {

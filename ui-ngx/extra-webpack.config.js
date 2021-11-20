@@ -80,7 +80,8 @@ module.exports = (config, options) => {
         'table-row-hover-bg': '#f4f4f4',
         'table-selected-row-bg': '#e9e9e9',
         'table-padding-vertical': '0',
-        'table-padding-horizontal': '12px'
+        'table-padding-horizontal': '12px',
+        'tree-node-selected-bg': '#2367fa'
       },
       javascriptEnabled: true
     }

@@ -1,5 +1,7 @@
 package org.thingsboard.server.dao.hs.service;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -15,9 +17,8 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
-import org.thingsboard.server.dao.hs.dao.DictDataEntity;
-import org.thingsboard.server.dao.hs.dao.DictDataRepository;
-import org.thingsboard.server.dao.hs.entity.po.DictData;
+import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
 
@@ -39,6 +40,11 @@ import java.util.stream.Collectors;
 public class DictDataServiceImpl extends AbstractEntityService implements DictDataService, CommonService {
 
     DictDataRepository dataRepository;
+
+    DictDeviceRepository deviceRepository;
+    DictDeviceGroupPropertyRepository groupPropertyRepository;
+    DictDeviceComponentRepository componentRepository;
+    DictDeviceComponentPropertyRepository componentPropertyRepository;
 
     /**
      * 查询数据字典列表
@@ -80,7 +86,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
             // Modify
             dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDataQuery.getId())).map(DictDataEntity::toData)
-                    .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));;
+                    .orElseThrow(()->new ThingsboardException("数据字典不存在", ThingsboardErrorCode.GENERAL));;
             BeanUtils.copyProperties(dictDataQuery, dictData, "id", "code");
             dictData.setType(dictDataQuery.getType().toString());
         } else {
@@ -104,7 +110,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Override
     public DictData getDictDataDetail(String id, TenantId tenantId) throws ThingsboardException {
         return this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
-                .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));
+                .orElseThrow(()->new ThingsboardException("数据字典不存在！", ThingsboardErrorCode.GENERAL));
     }
 
     /**
@@ -116,8 +122,21 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Transactional
     public void deleteDictDataById(String id, TenantId tenantId) throws ThingsboardException {
         var dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
-                .orElseThrow(()->new ThingsboardException("dict data not exist", ThingsboardErrorCode.GENERAL));
-        this.dataRepository.deleteById(toUUID(dictData.getId()));
+                .orElseThrow(()->new ThingsboardException("数据字典不存在！", ThingsboardErrorCode.GENERAL));
+        var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDataId(toUUID(id)));
+        var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDataId(toUUID(id)));
+
+        if (groupPropertyList.isEmpty() && componentList.isEmpty())
+            this.dataRepository.deleteById(toUUID(dictData.getId()));
+        else {
+            List<UUID> uuids = Lists.newArrayList();
+            uuids.addAll(groupPropertyList.stream().map(DictDeviceGroupProperty::getDictDeviceId).map(this::toUUID).collect(Collectors.toList()));
+            uuids.addAll(componentList.stream().map(DictDeviceComponentProperty::getDictDeviceId).map(this::toUUID).collect(Collectors.toList()));
+            if (uuids.isEmpty())
+                throw new ThingsboardException("存在关联的设备字典，但id不存在!请联系管理员!", ThingsboardErrorCode.GENERAL);
+            var nameList  = DaoUtil.convertDataList(Lists.newArrayList(this.deviceRepository.findAllById(uuids))).stream().map(DictDevice::getName).collect(Collectors.toList());
+            throw new ThingsboardException("存在关联的设备字典: " + Joiner.on(", ").join(nameList), ThingsboardErrorCode.GENERAL);
+        }
     }
 
     /**
@@ -143,6 +162,17 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     }
 
     /**
+     * 查询全部数据字典
+     *
+     * @param tenantId 租户Id
+     * @return 全部数据字典map
+     */
+    @Override
+    public Map<String, DictData> mapAllDictData(TenantId tenantId) {
+        return DaoUtil.convertDataList(this.dataRepository.findAllByTenantId(tenantId.getId())).stream().collect(Collectors.toMap(DictData::getId, Function.identity()));
+    }
+
+    /**
      * 按keys查询全部数据字典
      *
      * @param tenantId 租户Id
@@ -158,5 +188,25 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Autowired
     public void setDataRepository(DictDataRepository dataRepository) {
         this.dataRepository = dataRepository;
+    }
+
+    @Autowired
+    public void setDeviceRepository(DictDeviceRepository deviceRepository) {
+        this.deviceRepository = deviceRepository;
+    }
+
+    @Autowired
+    public void setGroupPropertyRepository(DictDeviceGroupPropertyRepository groupPropertyRepository) {
+        this.groupPropertyRepository = groupPropertyRepository;
+    }
+
+    @Autowired
+    public void setComponentRepository(DictDeviceComponentRepository componentRepository) {
+        this.componentRepository = componentRepository;
+    }
+
+    @Autowired
+    public void setComponentPropertyRepository(DictDeviceComponentPropertyRepository componentPropertyRepository) {
+        this.componentPropertyRepository = componentPropertyRepository;
     }
 }

@@ -94,7 +94,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         if(isEmail(username)) {
               user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
          }else {
-            user = userService.findByPhoneNumber( username);
+            user = userService.findByPhoneNumber(username);
         }
 
         System.out.println("打印的结果:"+user);
@@ -213,17 +213,18 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
 
     private static boolean isEmail(String string) {
-        log.info("【isEmail】打印当前得入参:{}",string);
-        if (string == null)
-            return false;
-        String regEx1 = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
-        Pattern p;
-        Matcher m;
-        p = Pattern.compile(regEx1);
-        m = p.matcher(string);
-        if (m.matches())
-            return true;
-        else
-            return false;
+        return  true;
+//        log.info("【isEmail】打印当前得入参:{}",string);
+//        if (string == null)
+//            return false;
+//        String regEx1 = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
+//        Pattern p;
+//        Matcher m;
+//        p = Pattern.compile(regEx1);
+//        m = p.matcher(string);
+//        if (m.matches())
+//            return true;
+//        else
+//            return false;
     }
 }

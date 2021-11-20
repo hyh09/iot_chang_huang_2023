@@ -46,10 +46,11 @@ public interface DeviceMonitorService {
     /**
      * 绑定设备字典到设备配置
      *
+     * @param tenantId         租户Id
      * @param dictDeviceIdList 设备字典Id列表
      * @param deviceProfileId  设备配置Id
      */
-    void bindDictDeviceToDeviceProfile(List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
+    void bindDictDeviceToDeviceProfile(TenantId tenantId, List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
 
     /**
      * 删除绑定的设备字典

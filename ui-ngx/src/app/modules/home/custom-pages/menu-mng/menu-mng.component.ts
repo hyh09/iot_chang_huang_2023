@@ -37,7 +37,7 @@ export class MenuMngComponent extends EntityComponent<Menu> {
         menuIcon: [entity ? entity.menuIcon : ''],
         menuImages: [entity ? entity.menuImages : ''],
         name: [entity ? entity.name : '', [Validators.required]],
-        langKey: [entity ? entity.langKey : '', [Validators.required]], 
+        langKey: [entity ? entity.langKey : ''], 
         menuType: [entity ? entity.menuType: '', [Validators.required]],
         parentId: [entity ? entity.parentId : ''],
         path: [entity ? entity.path : ''],

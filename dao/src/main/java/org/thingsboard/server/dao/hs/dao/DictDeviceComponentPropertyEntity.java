@@ -5,9 +5,10 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponentProperty;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceGroupProperty;
 import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
-import org.thingsboard.server.dao.hs.entity.po.DictDeviceGroupProperty;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +17,7 @@ import javax.persistence.Table;
 import java.util.UUID;
 
 /**
- * 设备字典分组属性实体类
+ * 设备字典部件属性实体类
  *
  * @author wwj
  * @since 2021.10.21
@@ -25,15 +26,15 @@ import java.util.UUID;
 @Entity
 @EqualsAndHashCode(callSuper = true)
 @TypeDef(name = "json", typeClass = JsonStringType.class)
-@Table(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_TABLE_NAME)
+@Table(name = HsModelConstants.DICT_DEVICE_COMPONENT_PROPERTY_TABLE_NAME)
 @EntityListeners(AuditingEntityListener.class)
-public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupPropertyEntity> implements ToData<DictDeviceGroupProperty> {
+public class DictDeviceComponentPropertyEntity extends BasePgEntity<DictDeviceComponentPropertyEntity> implements ToData<DictDeviceComponentProperty> {
     /**
-     * 设备字典分组Id
+     * 部件Id
      */
-    @Column(name = HsModelConstants.DICT_DEVICE_GROUP_ID, columnDefinition = "uuid")
+    @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_PROPERTY_COMPONENT_ID, columnDefinition = "uuid")
     @Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID dictDeviceGroupId;
+    private UUID componentId;
 
     /**
      * 设备字典Id
@@ -45,19 +46,19 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
     /**
      * 名称
      */
-    @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_NAME)
+    @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_PROPERTY_NAME)
     private String name;
 
     /**
      * 内容
      */
-    @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_CONTENT)
+    @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_PROPERTY_CONTENT)
     private String content;
 
     /**
      * 标题
      */
-    @Column(name = HsModelConstants.DICT_DEVICE_GROUP_PROPERTY_TITLE)
+    @Column(name = HsModelConstants.DICT_DEVICE_COMPONENT_PROPERTY_TITLE)
     private String title;
 
     /**
@@ -73,14 +74,14 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
     @Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID dictDataId;
 
-    public DictDeviceGroupPropertyEntity() {
+    public DictDeviceComponentPropertyEntity() {
     }
 
-    public DictDeviceGroupPropertyEntity(DictDeviceGroupProperty common) {
+    public DictDeviceComponentPropertyEntity(DictDeviceComponentProperty common) {
         if (common.getId() != null)
             this.id = UUID.fromString(common.getId());
-        if (common.getDictDeviceGroupId() != null)
-            this.dictDeviceGroupId = UUID.fromString(common.getDictDeviceGroupId());
+        if (common.getComponentId() != null)
+            this.componentId = UUID.fromString(common.getComponentId());
         if (common.getDictDeviceId() != null)
             this.dictDeviceId = UUID.fromString(common.getDictDeviceId());
 
@@ -92,18 +93,17 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
         if (common.getDictDataId() != null)
             this.dictDataId = UUID.fromString(common.getDictDataId());
 
-
         this.setCreatedTimeAndCreatedUser(common);
     }
 
     /**
      * to data
      */
-    public DictDeviceGroupProperty toData() {
-        DictDeviceGroupProperty common = new DictDeviceGroupProperty();
+    public DictDeviceComponentProperty toData() {
+        DictDeviceComponentProperty common = new DictDeviceComponentProperty();
         common.setId(id.toString());
-        if (dictDeviceGroupId != null) {
-            common.setDictDeviceGroupId(dictDeviceGroupId.toString());
+        if (componentId != null) {
+            common.setComponentId(componentId.toString());
         }
         if (dictDeviceId != null) {
             common.setDictDeviceId(dictDeviceId.toString());

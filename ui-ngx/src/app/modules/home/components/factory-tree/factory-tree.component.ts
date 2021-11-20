@@ -17,8 +17,9 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   public treeData: FactoryTreeNodeOptions[] = [];
   public scrollHeight = '';
 
-  @Output()
-  clickNode = new EventEmitter<FactoryTreeNodeIds>();
+  public selectedKeys: string[] = [];
+
+  @Output() clickNode = new EventEmitter<FactoryTreeNodeIds>();
 
   constructor(
     protected store: Store<AppState>,
@@ -89,30 +90,33 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           productionLineName: item.productionLineName
         });
       });
+      this.selectedKeys = treeArr[0] ? [treeArr[0].key] : [];
       this.treeData = this.utils.formatTree(treeArr);
-    });
-  }
-
-  onClickNode(event: TreeNodeEmitEvent) {
-    const { keys, node } = event;
-    let params: FactoryTreeNodeIds;
-    const nodeInfo: FactoryTreeNodeOptions = node.origin;
-    const { rowType, id, factoryId, workshopId, productionLineId, deviceId } = nodeInfo;
-    if (keys && keys.length > 0) {
-      params = {
-        factoryId: rowType === 'factory' ? id : (factoryId || ''),
-        workshopId: rowType === 'workShop' ? id : (workshopId || ''),
-        productionLineId: rowType === 'prodLine' ? id : (productionLineId || ''),
-        deviceId: rowType === 'device' ? id : (deviceId || '')
-      };
-    } else {
-      params = {
-        factoryId: '',
+      const params = {
+        factoryId: this.selectedKeys[0] || '',
         workshopId: '',
         productionLineId: '',
         deviceId: ''
       };
-    }
+      this.clickNode.emit(params);
+      if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {
+        Object.assign(this.entitiesTableConfig.componentsData, params);
+        this.entitiesTableConfig.table.resetSortAndFilter(true);
+      }
+    });
+  }
+
+  onClickNode(event: TreeNodeEmitEvent) {
+    const { node } = event;
+    this.selectedKeys = [node.key];
+    const nodeInfo: FactoryTreeNodeOptions = node.origin;
+    const { rowType, id, factoryId, workshopId, productionLineId, deviceId } = nodeInfo;
+    const params: FactoryTreeNodeIds = {
+      factoryId: rowType === 'factory' ? id : (factoryId || ''),
+      workshopId: rowType === 'workShop' ? id : (workshopId || ''),
+      productionLineId: rowType === 'prodLine' ? id : (productionLineId || ''),
+      deviceId: rowType === 'device' ? id : (deviceId || '')
+    };
     if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {
       Object.assign(this.entitiesTableConfig.componentsData, params);
       this.entitiesTableConfig.table.resetSortAndFilter(true);

@@ -27,12 +27,19 @@ import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * Created by Valerii Sosliuk on 5/6/2017.
  */
 public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntity, UUID>, JpaSpecificationExecutor<DeviceEntity> {
+
+    List<DeviceEntity> findAllByTenantIdAndDeviceProfileId(UUID tenantId, UUID deviceProfileId);
+
+    List<DeviceEntity> findAllByTenantIdAndDictDeviceId(UUID tenantId, UUID dictDeviceId);
+
+    List<DeviceEntity> findAllByTenantIdAndDictDeviceIdIn(UUID tenantId, Set<UUID> dictDeviceIds);
 
     @Query("SELECT new org.thingsboard.server.dao.model.sql.DeviceInfoEntity(d, c.title, c.additionalInfo, p.name) " +
             "FROM DeviceEntity d " +

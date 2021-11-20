@@ -5,8 +5,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceComponentVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -71,18 +70,18 @@ public class CommonUtil {
      */
     public static void checkCode(String code, String prefix) throws ThingsboardException {
         if (code == null || !code.startsWith(prefix)) {
-            throw new ThingsboardException("code prefix error", ThingsboardErrorCode.GENERAL);
+            throw new ThingsboardException("编码前缀错误", ThingsboardErrorCode.GENERAL);
         }
         try {
             var intStr = code.split(prefix)[1];
             if (intStr.length() != 4)
-                throw new ThingsboardException("code length is not 4", ThingsboardErrorCode.GENERAL);
+                throw new ThingsboardException("编码数字长度不等于4位", ThingsboardErrorCode.GENERAL);
             int intV = Integer.parseInt(intStr);
             if (intV < 1 || intV > 9999) {
-                throw new ThingsboardException("code num not in [1, 9999] error", ThingsboardErrorCode.GENERAL);
+                throw new ThingsboardException("编码数字不在1-9999区间内", ThingsboardErrorCode.GENERAL);
             }
         } catch (Exception ignore) {
-            throw new ThingsboardException("code error", ThingsboardErrorCode.GENERAL);
+            throw new ThingsboardException("编码错误", ThingsboardErrorCode.GENERAL);
         }
     }
 
@@ -98,7 +97,7 @@ public class CommonUtil {
         for (DictDeviceComponentVO componentVO : componentList) {
             checkCode(componentVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE_COMPONENT);
             if (set.contains(componentVO.getCode()))
-                throw new ThingsboardException("code duplicated", ThingsboardErrorCode.GENERAL);
+                throw new ThingsboardException("编码重复", ThingsboardErrorCode.GENERAL);
             else
                 set.add(componentVO.getCode());
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
@@ -118,7 +117,47 @@ public class CommonUtil {
 //        childList.forEach(e -> {
 //            var index = childList.indexOf(e);
 //            var propertyNum = e.getGroupPropertyList().size();
-//
 //        });
+    }
+
+    /**
+     * 【特定】校验dictDeviceVO是否有相同的key或者name
+     *
+     * @param dictDeviceVO DictDeviceVO
+     * @param set          属性set
+     */
+    public static void checkDuplicateName(DictDeviceVO dictDeviceVO, Set<String> set) throws ThingsboardException {
+        for (DictDeviceGroupVO groupVO : dictDeviceVO.getGroupList()) {
+            for (DictDeviceGroupPropertyVO propertyVO : groupVO.getGroupPropertyList()) {
+                if (set.contains(propertyVO.getName()))
+                    throw new ThingsboardException(propertyVO.getName() + " 重复", ThingsboardErrorCode.GENERAL);
+                else
+                    set.add(propertyVO.getName());
+            }
+        }
+        checkComponentDuplicateNameOrKey(dictDeviceVO.getComponentList(), set);
+    }
+
+    /**
+     * 【特定】校验DictDeviceComponentVO是否有相同的key或者name
+     *
+     * @param componentList 部件列表
+     * @param set           属性set
+     */
+    public static void checkComponentDuplicateNameOrKey(List<DictDeviceComponentVO> componentList, Set<String> set) throws ThingsboardException {
+        for (DictDeviceComponentVO componentVO : componentList) {
+            if (componentVO.getPropertyList() != null && !componentVO.getPropertyList().isEmpty()) {
+                for(DictDeviceComponentPropertyVO propertyVO:componentVO.getPropertyList()) {
+                    if (set.contains(propertyVO.getName()))
+                        throw new ThingsboardException(propertyVO.getName() + " 重复", ThingsboardErrorCode.GENERAL);
+                    else
+                        set.add(propertyVO.getName());
+                }
+            }
+            if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
+                continue;
+            }
+            checkComponentDuplicateNameOrKey(componentVO.getComponentList(), set);
+        }
     }
 }
