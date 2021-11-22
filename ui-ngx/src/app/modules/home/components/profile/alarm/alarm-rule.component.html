@@ -22,7 +22,7 @@
   </tb-alarm-schedule-info>
   <div *ngIf="!disabled || alarmRuleFormGroup.get('alarmDetails').value" fxLayout="row" fxLayoutAlign="start center">
     <span class="tb-alarm-rule-details title" (click)="openEditDetailsDialog($event)">
-      {{ alarmRuleFormGroup.get('alarmDetails').value ? ('device-profile.alarm-rule-details' | translate) + ': '  : ('device-profile.add-alarm-rule-details' | translate) }}
+      {{ alarmRuleFormGroup.get('alarmDetails').value ? ('device-profile.alarm-rule-details' | translate) + '：'  : ('device-profile.add-alarm-rule-details' | translate) }}
     </span>
     <span *ngIf="alarmRuleFormGroup.get('alarmDetails').value" class="tb-alarm-rule-details"
           (click)="openEditDetailsDialog($event)"
@@ -35,7 +35,7 @@
       <mat-icon>{{ disabled ? 'visibility' : (alarmRuleFormGroup.get('alarmDetails').value ? 'edit' : 'add') }}</mat-icon>
     </button>
   </div>
-  <div *ngIf="!disabled || alarmRuleFormGroup.get('dashboardId').value" fxLayout="column" fxLayoutAlign="start start"
+  <!-- <div *ngIf="!disabled || alarmRuleFormGroup.get('dashboardId').value" fxLayout="column" fxLayoutAlign="start start"
        fxLayout.gt-sm="row" fxLayoutAlign.gt-sm="start center">
     <span class="tb-alarm-rule-dashboard title">
       {{ ('device-profile.alarm-rule-mobile-dashboard' | translate) + ': ' }}
@@ -46,5 +46,5 @@
       formControlName="dashboardId">
       <div tb-hint>{{'device-profile.alarm-rule-mobile-dashboard-hint' | translate}}</div>
     </tb-dashboard-autocomplete>
-  </div>
+  </div> -->
 </div>

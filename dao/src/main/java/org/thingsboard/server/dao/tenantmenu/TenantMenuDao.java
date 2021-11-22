@@ -29,6 +29,13 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
      */
     void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
 
+    /**
+     * 系统菜单变更，触发租户菜单更新
+     * （新增按钮、按钮名称、lang_key、path、icon修改，变更租户菜单按钮）
+     * @param tenantMenuList
+     */
+    void saveFromSysMenu(List<TenantMenu> tenantMenuList);
+
 
     PageData<TenantMenu> findTenantMenusByRegion(TenantMenuId tenantMenuId, String region, PageLink pageLink);
 

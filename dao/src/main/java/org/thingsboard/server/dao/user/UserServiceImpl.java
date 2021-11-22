@@ -523,13 +523,13 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
                     User existentUserWithEmail = findUserByEmail(tenantId, user.getEmail());
                     if (existentUserWithEmail != null && !isSameData(existentUserWithEmail, user)) {
-                        throw new DataValidationException("User with email '" + user.getEmail() + "' "
-                                + " already present in database!");
+                        throw new DataValidationException("这个邮箱 '" + user.getEmail() + "' "
+                                + " 已经被占用!");
                     }
                     if (!tenantId.getId().equals(ModelConstants.NULL_UUID)) {
                         Tenant tenant = tenantDao.findById(tenantId, user.getTenantId().getId());
                         if (tenant == null) {
-                            throw new DataValidationException("User is referencing to non-existent tenant!");
+                            throw new DataValidationException("用户正在引用不存在的租户!");
                         }
                     }
                     if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {

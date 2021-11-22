@@ -46,10 +46,10 @@ public interface DeviceMonitorService {
     /**
      * 绑定设备字典到设备配置
      *
-     * @param dictDeviceList  设备字典列表
-     * @param deviceProfileId 设备配置Id
+     * @param dictDeviceIdList 设备字典Id列表
+     * @param deviceProfileId  设备配置Id
      */
-    void bindDictDeviceToDeviceProfile(List<DictDevice> dictDeviceList, DeviceProfileId deviceProfileId);
+    void bindDictDeviceToDeviceProfile(List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
 
     /**
      * 删除绑定的设备字典
@@ -173,7 +173,8 @@ public interface DeviceMonitorService {
      * 获得在线设备情况
      *
      * @param tenantId 租户Id
-     * @param query 查询参数
+     * @param query    查询参数
      * @return 在线设备情况
      */
-    DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query);}
+    DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query);
+}

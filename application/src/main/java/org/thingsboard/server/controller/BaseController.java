@@ -82,10 +82,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
-import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
-import org.thingsboard.server.dao.sql.role.service.TenantMenuRoleService;
-import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
-import org.thingsboard.server.dao.sql.role.service.CheckSvc;
+import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -287,6 +284,8 @@ public abstract class BaseController {
     @Autowired protected UserMenuRoleService userMenuRoleService;
     @Autowired protected TenantMenuRoleService tenantMenuRoleService;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+    @Autowired  protected TenantSysRoleService tenantSysRoleService;
+
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {

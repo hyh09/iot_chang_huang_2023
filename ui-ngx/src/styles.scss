@@ -1070,9 +1070,14 @@ mat-label {
 }
 
 button {
-  &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-button-disabled) {
+  &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-icon-button):not(.mat-button-disabled) {
     color: #fff;
     background-color: #2367fa !important;
+  }
+  &.mat-icon-button .mat-button-wrapper {
+    height: 24px;
+    display: block;
+    line-height: 20px;
   }
 }
 
@@ -1114,16 +1119,33 @@ input:-internal-autofill-previewed,
   padding: 6px 0;
 }
 
-.mat-dialog-content {
-  max-width: 900px;
-}
-
 .mat-button-disabled .mat-icon {
   color: rgba(0, 0, 0, 0.26) !important;
 }
 
 form button .mat-icon {
   color: rgba(0, 0, 0, 0.54);
+}
+
+button.link-button {
+  padding: 0;
+  font-size: 14px;
+  height: 14px;
+  line-height: 14px;
+  color: #0663ff !important;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  .mat-button-ripple,
+  .mat-button-focus-overlay {
+    display: none;
+  }
+  &:hover .mat-button-wrapper {
+    text-decoration: underline;
+  }
+  .mat-icon {
+    margin-top: -3px;
+  }
 }
 
 // 覆盖antd样式
@@ -1151,4 +1173,13 @@ form button .mat-icon {
   nz-embed-empty {
     font-size: 14px;
   }
+}
+
+.ant-empty-description {
+  font-size: 16px;
+  color: #909399;
+}
+
+.ant-tree .ant-tree-node-content-wrapper.ant-tree-node-selected .ant-tree-title {
+  color: #fff !important;
 }

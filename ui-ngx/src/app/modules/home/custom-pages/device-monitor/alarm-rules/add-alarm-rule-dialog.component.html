@@ -1,0 +1,75 @@
+<div>
+  <mat-toolbar color="primary">
+    <h2 translate>device-monitor.add-alarm-rule</h2>
+    <span fxFlex></span>
+    <div [tb-help]="'deviceProfiles'"></div>
+    <button mat-icon-button
+            (click)="cancel()"
+            type="button">
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
+  </mat-progress-bar>
+  <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
+  <div mat-dialog-content>
+    <mat-horizontal-stepper [linear]="true" #addAlarmRuleStepper (selectionChange)="changeStep($event)">
+      <mat-step [stepControl]="alarmRuleDetailsFormGroup">
+        <form [formGroup]="alarmRuleDetailsFormGroup" style="padding-bottom: 16px;">
+          <ng-template matStepLabel>{{ 'device-profile.device-profile-details' | translate }}</ng-template>
+          <fieldset [disabled]="isLoading$ | async">
+            <mat-form-field class="mat-block">
+              <mat-label translate>device-profile.name</mat-label>
+              <input matInput formControlName="name" required/>
+              <mat-error *ngIf="alarmRuleDetailsFormGroup.get('name').hasError('required')">
+                {{ 'device-profile.name-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field class="mat-block">
+              <mat-label translate>device-mng.device-dic</mat-label>
+              <mat-select formControlName="dictDeviceIdList" multiple>
+                <mat-option *ngFor="let option of deviceDictionaries" [value]="option.id">{{option.name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="mat-block">
+              <mat-label translate>device-profile.description</mat-label>
+              <input matInput formControlName="description" />
+            </mat-form-field>
+          </fieldset>
+        </form>
+      </mat-step>
+      <mat-step [stepControl]="alarmRulesFormGroup" [optional]="true">
+        <form [formGroup]="alarmRulesFormGroup" style="padding-bottom: 16px;">
+          <ng-template matStepLabel>{{'device-profile.alarm-rules-with-count' | translate:
+            {count: alarmRulesFormGroup.get('alarms').value ?
+                alarmRulesFormGroup.get('alarms').value.length : 0} }}</ng-template>
+          <tb-device-profile-alarms
+            formControlName="alarms"
+            [deviceProfileId]="null">
+          </tb-device-profile-alarms>
+        </form>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </div>
+  <div mat-dialog-actions fxLayout="row">
+    <button mat-stroked-button *ngIf="selectedIndex > 0"
+            [disabled]="(isLoading$ | async)"
+            (click)="previousStep()">{{ 'action.back' | translate }}</button>
+    <span fxFlex></span>
+    <button mat-stroked-button
+            color="primary"
+            *ngIf="showNext"
+            [disabled]="(isLoading$ | async)"
+            (click)="nextStep()">{{ 'action.next-with-label' | translate:{label: (getFormLabel(this.selectedIndex+1) | translate)} }}</button>
+  </div>
+  <mat-divider></mat-divider>
+  <div mat-dialog-actions fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="end">
+    <button mat-button
+            [disabled]="(isLoading$ | async)"
+            (click)="cancel()">{{ 'action.cancel' | translate }}</button>
+    <button mat-raised-button
+            [disabled]="(isLoading$ | async)"
+            color="primary"
+            (click)="add()">{{ 'action.add' | translate }}</button>
+  </div>
+</div>

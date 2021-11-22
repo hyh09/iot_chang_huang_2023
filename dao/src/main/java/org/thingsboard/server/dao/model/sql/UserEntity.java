@@ -89,6 +89,18 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     @Column(name = ModelConstants.USER_USER_CREATOR_PROPERTY)
     private String userCreator;
 
+    /**
+     * 被创建者的类型:
+     */
+    @Column(name = ModelConstants.USER_USER_TYPE)
+    private  String type;
+
+    /**
+     * 工厂id
+     */
+    @Column(name = ModelConstants.USER_USER_FACTORY_ID)
+    private UUID  factoryId;
+
 
 
 
@@ -130,6 +142,8 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.userCode = user.getUserCode();
         this.userName = user.getUserName();
         this.userCreator = user.getUserCreator();
+        this.type  = user.getType();
+        this.factoryId = user.getFactoryId();
 
     }
 
@@ -168,6 +182,9 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         user.setUserCode(userCode);
         user.setActiveStatus(activeStatus);
         user.setUserCreator(userCreator);
+
+        user.setFactoryId(factoryId);
+        user.setType(type);
 
         return user;
     }

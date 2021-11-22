@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { AlarmRecordTableConfigResolver } from './alarm-record/alarm-record-table-config.resolver';
+import { AlarmRulesTableConfigResolver } from './alarm-rules/alarm-rules-table-config.resolver';
+import { DeviceDetailsComponent } from './real-time-monitor/device-details/device-details.component';
 import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.component';
 
 const routes: Routes = [
@@ -10,7 +12,7 @@ const routes: Routes = [
     data: {
       breadcrumb: {
         label: 'device-monitor.device-monitor',
-        icon: 'touch_app'
+        icon: 'mdi:device-monitor'
       }
     },
     children: [
@@ -21,14 +23,32 @@ const routes: Routes = [
       },
       {
         path: 'realTimeMonitor',
-        component: RealTimeMonitorComponent,
         data: {
-          title: 'device-monitor.real-time-monitor',
           breadcrumb: {
             label: 'device-monitor.real-time-monitor',
-            icon: 'av_timer'
+            icon: 'mdi:real-time-monitor'
           }
-        }
+        },
+        children: [
+          {
+            path: '',
+            component: RealTimeMonitorComponent,
+            data: {
+              title: 'device-monitor.real-time-monitor'
+            }
+          },
+          {
+            path: ':deviceId/details',
+            component: DeviceDetailsComponent,
+            data: {
+              title: 'device-monitor.device-details',
+              breadcrumb: {
+                label: 'device-monitor.device-details',
+                icon: 'mdi:device-details'
+              }
+            }
+          }
+        ]
       },
       {
         path: 'alarmRecord',
@@ -37,12 +57,33 @@ const routes: Routes = [
           title: 'device-monitor.alarm-record',
           breadcrumb: {
             label: 'device-monitor.alarm-record',
-            icon: 'disc_full'
+            icon: 'mdi:alarm-records'
           }
         },
         resolve: {
           entitiesTableConfig: AlarmRecordTableConfigResolver
         }
+      },
+      {
+        path: 'alarmRules',
+        data: {
+          breadcrumb: {
+            label: 'device-monitor.alarm-rules',
+            icon: 'mdi:alarm-rules'
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-profile.device-profiles'
+            },
+            resolve: {
+              entitiesTableConfig: AlarmRulesTableConfigResolver
+            }
+          }
+        ]
       }
     ]
   }
@@ -52,7 +93,8 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
-    AlarmRecordTableConfigResolver
+    AlarmRecordTableConfigResolver,
+    AlarmRulesTableConfigResolver
   ]
 })
 export class DeviceMonitorRoutingModule { }

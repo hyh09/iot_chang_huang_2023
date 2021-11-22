@@ -1,5 +1,6 @@
 import { TableTreeNodeOptions, TreeNodeOptions } from "@app/core/public-api";
 import { BaseData } from "@app/shared/public-api";
+import { string } from "prop-types";
 import { DeviceId, FactoryId, ProdLineId, WorkShopId } from "../id/custom/factory-mng-id.models";
 import { DeviceProperty, DeviceDataGroup, DeviceComp } from "./device-mng.models";
 
@@ -118,4 +119,11 @@ export interface FactoryTreeNodeOptions extends TreeNodeOptions {
   workshopName?: string;
   productionLineId?: string;
   productionLineName?: string;
+}
+
+export interface FactoryTreeNodeIds {
+  factoryId?: string;
+  workshopId?: string;
+  productionLineId?: string;
+  deviceId?: string;
 }
