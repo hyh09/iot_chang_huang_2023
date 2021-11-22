@@ -80,10 +80,7 @@ public class RTMonitorController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        var r = this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
-        if (isDeviceOnline(id))
-            r.setIsOnLine(Boolean.TRUE);
-        return r;
+        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
     }
 
     /**
@@ -95,7 +92,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true)
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
-    public List<DictDeviceGroupPropertyVO> listRTMonitorGroupPropertyHistory(
+    public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
@@ -127,7 +124,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
     })
     @GetMapping("/rtMonitor/device/history")
     public PageData<Map<String, Object>> listRTMonitorHistory(
@@ -137,11 +134,12 @@ public class RTMonitorController extends BaseController {
             @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam Long startTime,
-            @RequestParam Long endTime
+            @RequestParam(required = false) Long endTime
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("startTime", startTime);
-        checkParameter("endTime", endTime);
+        if (endTime == null || endTime <= 0L)
+            endTime = CommonUtil.getTodayCurrentTime();
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
         validatePageLink(pageLink);
         return this.deviceMonitorService.listDeviceTelemetryHistory(getTenantId(), deviceId, pageLink);

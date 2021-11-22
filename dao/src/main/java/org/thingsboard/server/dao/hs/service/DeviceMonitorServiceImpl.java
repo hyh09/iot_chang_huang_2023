@@ -1,10 +1,8 @@
 package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.shaded.com.google.common.collect.Sets;
@@ -364,7 +362,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public List<DictDeviceGroupPropertyVO> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException {
+    public HistoryVO listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException {
         List<String> keyList = new ArrayList<>() {{
             add(groupPropertyName);
         }};
@@ -374,7 +372,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var tempResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), tempQueries).get()
                 .stream().collect(Collectors.toMap(TsKvEntry::getKey, Function.identity()));
         if (tempResult.isEmpty())
-            return Lists.newArrayList();
+            return HistoryVO.builder().isShowChart(false).propertyVOList(Lists.newArrayList()).build();
         int count = Integer.parseInt(String.valueOf(tempResult.get(groupPropertyName).getValue()));
         List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, count, Aggregation.NONE, "desc"))
                 .collect(Collectors.toList());
@@ -387,7 +385,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         }
         Map<String, String> finalRMap = rMap;
 
-        return this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get()
+        var data = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get()
                 .stream().map(e -> DictDeviceGroupPropertyVO.builder()
                         .content(e.getValue().toString())
                         .unit(Optional.ofNullable(finalRMap.getOrDefault(groupPropertyName, null))
@@ -395,23 +393,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                         .createdTime(e.getTs())
                         .build())
                 .collect(Collectors.toList());
-    }
 
-    /**
-     * 【APP】查询设备分组属性历史数据
-     *
-     * @param tenantId          租户Id
-     * @param deviceId          设备Id
-     * @param groupPropertyName 属性名称
-     * @param startTime         开始时间
-     * @param endTime           结束时间
-     * @return 设备分组属性历史数据
-     */
-    @Override
-    public AppHistoryVO listAppGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException {
-        var data = this.listGroupPropertyHistory(tenantId, deviceId, groupPropertyName, startTime, endTime);
-
-        return AppHistoryVO.builder()
+        return HistoryVO.builder()
                 .propertyVOList(data)
                 .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getContent()) ? Boolean.TRUE : Boolean.FALSE)
                 .build();
