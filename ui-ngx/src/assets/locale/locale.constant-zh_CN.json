@@ -835,10 +835,10 @@
     "type": "数据源类型"
   },
   "datetime": {
-    "date-from": "日期从",
-    "date-to": "日期到",
-    "time-from": "时间从",
-    "time-to": "时间到"
+    "date-from": "开始日期",
+    "date-to": "结束日期",
+    "time-from": "开始时间",
+    "time-to": "结束时间"
   },
   "details": {
     "details": "详情",
@@ -3098,6 +3098,8 @@
     "prop-unit": "单位：{{unit}}",
     "real-time-data": "实时数据",
     "see-history": "查看历史",
-    "device-comp": "设备部件"
+    "device-comp": "设备部件",
+    "device-history": "设备历史数据",
+    "no-device-history": "未找到历史数据"
   }
 }

@@ -25,7 +25,7 @@
           class="link-button"
           mat-button color="primary"
           type="button"
-          routerLink=""
+          (click)="gotoHistory()"
         >
           {{ 'device-monitor.see-history' | translate }}
           <mat-icon svgIcon="mdi:chevron-right"></mat-icon>

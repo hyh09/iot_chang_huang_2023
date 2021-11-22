@@ -1,13 +1,15 @@
-<mat-form-field>
+<!-- <mat-form-field>
   <mat-label>{{ 'common.time-range' | translate }}</mat-label>
   <mat-date-range-input [rangePicker]="picker" (click)="picker.open()">
     <input
       matStartDate
+      [readonly]="true"
       [(ngModel)]="entitiesTableConfig.componentsData.startTime"
       (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
     >
     <input
       matEndDate
+      [readonly]="true"
       [(ngModel)]="entitiesTableConfig.componentsData.endTime"
       (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
     >
@@ -26,7 +28,7 @@
       <button mat-raised-button color="primary" matDateRangePickerApply>{{ 'action.confirm' | translate }}</button>
     </mat-date-range-picker-actions>
   </mat-date-range-picker>
-</mat-form-field>
+</mat-form-field> -->
 <mat-form-field>
   <mat-label>{{ 'device-monitor.alarm-status' | translate }}</mat-label>
   <mat-select

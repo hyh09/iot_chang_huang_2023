@@ -65,22 +65,14 @@ export class RealTimeMonitorService {
   }
 
   // 获取设备历史数据表头
-  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<DeviceHistoryTableHeader> {
-    return this.http.get<DeviceHistoryTableHeader>(`/api/deviceMonitor/rtMonitor/device/history/header/${id}`, defaultHttpOptionsFromConfig(config));
+  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<DeviceHistoryTableHeader[]> {
+    return this.http.get<DeviceHistoryTableHeader[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备历史数据列表
-  public getDeviceHistoryDatas(pageLink: PageLink, filterParams: { startTime: number, endTime: number }, config?: RequestConfig): Observable<PageData<any>> {
-    let queryStr: string[] = [];
-    Object.keys(filterParams).forEach(key => {
-      if (key === 'startTime' || key === 'endTime') {
-        queryStr.push(`${key}=${filterParams[key] ? new Date(filterParams[key]).getTime() : ''}`);
-      } else {
-        queryStr.push(`${key}=${filterParams[key]}`);
-      }
-    });
-    return this.http.get<PageData<any>>(
-      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&${queryStr.join('&')}`,
+  public getDeviceHistoryDatas(pageLink: PageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
+    return this.http.get<PageData<object>>(
+      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
@@ -111,7 +103,9 @@ export class RealTimeMonitorService {
     this.webSocket.onopen = () => {
       this.isOpened = true;
       this.isOpening = false;
-      this.switchDevices(deviceIdList);
+      setTimeout(() => {
+        this.switchDevices(deviceIdList);
+      }, 1000);
     }
     this.webSocket.onerror = () => {
       this.isOpening = false;

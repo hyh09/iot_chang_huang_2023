@@ -93,5 +93,5 @@ export interface DeviceDetails extends DeviceBaseInfo {
 }
 
 export interface DeviceHistoryTableHeader {
-
+  name: string;
 }

@@ -29,11 +29,7 @@ export class AlarmRecordService {
   public getAlarmRecords(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<AlarmRecord>> {
     let queryStr: string[] = [];
     Object.keys(filterParams).forEach(key => {
-      if (key === 'startTime' || key === 'endTime') {
-        queryStr.push(`${key}=${filterParams[key] ? new Date(filterParams[key]).getTime() : ''}`);
-      } else {
-        queryStr.push(`${key}=${filterParams[key]}`);
-      }
+      queryStr.push(`${key}=${filterParams[key]}`);
     });
     return this.http.get<PageData<AlarmRecord>>(`/api/deviceMonitor/alarmRecord${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }

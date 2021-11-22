@@ -12,6 +12,7 @@ import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup } from 
 export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
   private deviceId: string = '';
+  private deviceName: string = '';
   baseInfo: DeviceBaseInfo = {}; // 基本信息
   currPropName: string = ''; // 当前选中的属性/参数名称
   propHistoryData: DeviceProp[] = []; // 属性/参数历史数据
@@ -41,6 +42,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
       this.realTimeMonitorService.getDeviceDetails(this.deviceId).subscribe(res => {
         const { picture, name, factoryName, workShopName, productionLineName } = res;
         this.baseInfo = { picture, name, factoryName, workShopName, productionLineName };
+        this.deviceName = name;
         this.alarmTimesList = res.alarmTimesList || [];
         this.deviceData = res.resultList || [];
         this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
@@ -113,6 +115,15 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   subscribe() {
     this.realTimeMonitorService.subscribe([this.deviceId], () => {
       this.fetchData();
+    });
+  }
+
+  gotoHistory() {
+    this.router.navigate([`history`], {
+      relativeTo: this.route,
+      queryParams: {
+        deviceName: this.deviceName
+      }
     });
   }
 

@@ -47,7 +47,7 @@
             <div fxLayout="row" fxLayoutAlign="start center" fxLayout.xs="column" fxLayoutAlign.xs="center start" class="title-container">
               <span *ngIf="entitiesTableConfig.tableTitle" class="tb-entity-table-title">{{ entitiesTableConfig.tableTitle }}</span>
               <tb-anchor #entityTableHeader></tb-anchor>
-              <tb-timewindow *ngIf="entitiesTableConfig.useTimePageLink" [(ngModel)]="timewindow"
+              <tb-timewindow *ngIf="entitiesTableConfig.useTimePageLink && !entitiesTableConfig.timeWindowInFilter" [(ngModel)]="timewindow"
                               (ngModelChange)="onTimewindowChange()"
                               asButton historyOnly></tb-timewindow>
             </div>
@@ -130,6 +130,13 @@
           </div>
         </mat-toolbar>
         <div [fxShow]="!entitiesTableConfig.groupActionEnabled || dataSource.selection.isEmpty()" class="entity-filter-header">
+          <tb-timewindow
+            *ngIf="entitiesTableConfig.useTimePageLink && entitiesTableConfig.timeWindowInFilter"
+            style="margin-right: 11px"
+            [(ngModel)]="timewindow"
+            (ngModelChange)="onTimewindowChange()"
+            asButton historyOnly>
+          </tb-timewindow>
           <tb-anchor #entityFilterHeader></tb-anchor>
         </div>
         <mat-toolbar *ngIf="entitiesTableConfig.groupActionEnabled && entitiesTableConfig.selectionEnabled" class="mat-table-toolbar" color="primary" [fxShow]="!dataSource.selection.isEmpty()">
