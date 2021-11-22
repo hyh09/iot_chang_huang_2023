@@ -23,7 +23,6 @@ import java.util.Map;
  **/
 @Slf4j
 @Repository
-//@TimescaleDBTsOrTsLatestDao
 public class EffectTsKvRepository {
 
     @PersistenceContext

@@ -76,6 +76,7 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
     }
 
     this.config.entitiesFetchFunction = pageLink => this.alarmRecordService.getAlarmRecords(pageLink, this.config.componentsData);
+    this.config.loadDataOnInit = false;
 
     return this.config;
   }

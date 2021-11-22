@@ -1127,6 +1127,27 @@ form button .mat-icon {
   color: rgba(0, 0, 0, 0.54);
 }
 
+button.link-button {
+  padding: 0;
+  font-size: 14px;
+  height: 14px;
+  line-height: 14px;
+  color: #0663ff !important;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  .mat-button-ripple,
+  .mat-button-focus-overlay {
+    display: none;
+  }
+  &:hover .mat-button-wrapper {
+    text-decoration: underline;
+  }
+  .mat-icon {
+    margin-top: -3px;
+  }
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {
@@ -1152,4 +1173,13 @@ form button .mat-icon {
   nz-embed-empty {
     font-size: 14px;
   }
+}
+
+.ant-empty-description {
+  font-size: 16px;
+  color: #909399;
+}
+
+.ant-tree .ant-tree-node-content-wrapper.ant-tree-node-selected .ant-tree-title {
+  color: #fff !important;
 }

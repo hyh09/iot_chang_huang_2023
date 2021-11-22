@@ -21,6 +21,8 @@ public class FactoryListVo {
     private List<ProductionLine> productionLineEntityList ;
     @ApiModelProperty("设备信息")
     private List<Device> deviceEntityList ;
+    @ApiModelProperty("未分配的设备")
+    private List<Device> notDistributionList;
 
     public FactoryListVo(){}
 

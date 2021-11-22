@@ -932,7 +932,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return deviceDao.queryAllByNameLike(factoryId,name,pageLink);
     }
 
-
+    /**
+     * 查询租户下未分配设备
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Device> getNotDistributionDevice(TenantId tenantId){
+        return deviceDao.getNotDistributionDevice(tenantId);
+    }
 
 
 

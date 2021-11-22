@@ -23,6 +23,8 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
 
+import java.util.List;
+
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
 /**
@@ -141,5 +143,14 @@ public class DictDataController extends BaseController {
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
         this.dictDataService.deleteDictDataById(id, getTenantId());
+    }
+
+    /**
+     * 【不分页】获得数据字典列表
+     */
+    @ApiOperation(value = "获得数据字典列表")
+    @DeleteMapping("/dict/data/all")
+    public List<DictData> listDictDataAll() throws ThingsboardException {
+        return this.dictDataService.listAllDictData(getTenantId());
     }
 }

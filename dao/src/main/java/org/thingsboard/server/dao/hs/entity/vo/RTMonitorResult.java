@@ -32,6 +32,12 @@ public class RTMonitorResult {
     private PageData<RTMonitorDeviceResult> devicePageData;
 
     /**
+     * 全部设备id列表
+     */
+    @ApiModelProperty("全部设备id列表")
+    private List<String> deviceIdList;
+
+    /**
      * 在线设备数量
      */
     @ApiModelProperty("在线设备数量")

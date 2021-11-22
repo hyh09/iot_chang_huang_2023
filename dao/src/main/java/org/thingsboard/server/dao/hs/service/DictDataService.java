@@ -69,6 +69,14 @@ public interface DictDataService {
     List<DictData> listAllDictData(TenantId tenantId);
 
     /**
+     * 查询全部数据字典
+     *
+     * @param tenantId 租户Id
+     * @return 全部数据字典map
+     */
+    Map<String, DictData> mapAllDictData(TenantId tenantId);
+
+    /**
      * 按keys查询全部数据字典
      *
      * @param tenantId 租户Id

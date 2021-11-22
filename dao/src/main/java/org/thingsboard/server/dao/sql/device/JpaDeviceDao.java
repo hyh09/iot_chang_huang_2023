@@ -580,72 +580,6 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     /**
-     * 构造查询条件,需要家条件在这里面加
-     * @param device
-     * @return
-     */
-    private Specification<DeviceEntity> queryCondition(Device device,PageLink pageLink){
-        // 动态条件查询
-        Specification<DeviceEntity> specification = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if(device != null){
-                if(device.getAllot() != null){
-                    if(device.getAllot()){
-                        //已分配。根据工厂id或车间id不为空来查询
-                        List<Predicate> factoryOrProductionLine = new ArrayList<>();
-                        factoryOrProductionLine.add(cb.isNotNull(root.get("factoryId")));
-                        factoryOrProductionLine.add(cb.isNotNull(root.get("productionLineId")));
-                        /* 下面这一行代码很重要。
-                         * criteriaBuilder.or(Predicate... restrictions) 接收多个Predicate，可变参数；
-                         * 这多个 Predicate条件之间，是使用OR连接的；该方法最终返回 一个Predicate对象；
-                         */
-                        predicates.add(cb.or(factoryOrProductionLine.toArray(new Predicate[0])));
-                    }else {
-                        //未分配。根据工厂id或车间id为空来查询
-                        predicates.add(cb.isNull(root.get("factoryId")));
-                        predicates.add(cb.isNull(root.get("productionLineId")));
-                    }
-                }
-                if(StringUtils.isNotEmpty(device.getName())){
-                    predicates.add(cb.like(root.get("name"),"%" + device.getName().trim() + "%"));
-                }
-                if(StringUtils.isNotEmpty(pageLink.getTextSearch())){
-                    predicates.add(cb.like(root.get("name"),"%" + pageLink.getTextSearch().trim() + "%"));
-                }
-                if(StringUtils.isNotEmpty(device.getType())){
-                    predicates.add(cb.equal(root.get("type"),device.getType()));
-                }
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        return specification;
-    }
-
-    /**
-     * 返回值，List
-     * @param deviceList
-     * @return
-     */
-    private List<Device> resultList(List<DeviceEntity> deviceList){
-        List<Device> resultDeviceList = new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(deviceList)){
-            deviceList.forEach(i->{
-                Device device = i.toData();
-                if(i.getProductionLineId() != null && StringUtils.isNotEmpty(i.getProductionLineId().toString())){
-                    ProductionLine productionLine = productionLineDao.findById(i.getProductionLineId());
-                    if(device != null && productionLine != null){
-                        device.setFactoryName(productionLine.getFactoryName());
-                        device.setWorkshopName(productionLine.getWorkshopName());
-                        device.setProductionLineName(productionLine.getName());
-                    }
-                    resultDeviceList.add(device);
-                }
-            });
-        }
-        return resultDeviceList;
-    }
-
-    /**
      * 获取设备详情
      * @param id
      * @return
@@ -707,6 +641,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     /**
+     * 查询租户下未分配设备
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Device> getNotDistributionDevice(TenantId tenantId){
+        Device device = new Device();
+        device.setTenantId(tenantId);
+        device.setAllot(false);
+        return this.queryList(device);
+    }
+
+    /**
      * 获取父级名称
      * @param deviceList
      * @return
@@ -731,5 +678,79 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return deviceList;
     }
 
+    /**
+     * 条件查询，返回list
+     * @param device
+     * @return
+     */
+    private List<Device> queryList(Device device){
+        return this.resultList(deviceRepository.findAll(this.queryCondition(device,null)));
+    }
+
+    /**
+     * 构造查询条件,需要家条件在这里面加
+     * @param device
+     * @return
+     */
+    private Specification<DeviceEntity> queryCondition(Device device,PageLink pageLink){
+        // 动态条件查询
+        Specification<DeviceEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(device != null){
+                if(device.getAllot() != null){
+                    if(device.getAllot()){
+                        //已分配。根据工厂id或车间id不为空来查询
+                        List<Predicate> factoryOrProductionLine = new ArrayList<>();
+                        factoryOrProductionLine.add(cb.isNotNull(root.get("factoryId")));
+                        factoryOrProductionLine.add(cb.isNotNull(root.get("productionLineId")));
+                        /* 下面这一行代码很重要。
+                         * criteriaBuilder.or(Predicate... restrictions) 接收多个Predicate，可变参数；
+                         * 这多个 Predicate条件之间，是使用OR连接的；该方法最终返回 一个Predicate对象；
+                         */
+                        predicates.add(cb.or(factoryOrProductionLine.toArray(new Predicate[0])));
+                    }else {
+                        //未分配。根据工厂id或车间id为空来查询
+                        predicates.add(cb.isNull(root.get("factoryId")));
+                        predicates.add(cb.isNull(root.get("productionLineId")));
+                    }
+                }
+                if(StringUtils.isNotEmpty(device.getName())){
+                    predicates.add(cb.like(root.get("name"),"%" + device.getName().trim() + "%"));
+                }
+                if(pageLink != null && StringUtils.isNotEmpty(pageLink.getTextSearch())){
+                    predicates.add(cb.like(root.get("name"),"%" + pageLink.getTextSearch().trim() + "%"));
+                }
+                if(StringUtils.isNotEmpty(device.getType())){
+                    predicates.add(cb.equal(root.get("type"),device.getType()));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return specification;
+    }
+
+    /**
+     * 返回值，List
+     * @param deviceList
+     * @return
+     */
+    private List<Device> resultList(List<DeviceEntity> deviceList){
+        List<Device> resultDeviceList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(deviceList)){
+            deviceList.forEach(i->{
+                Device device = i.toData();
+                if(i.getProductionLineId() != null && StringUtils.isNotEmpty(i.getProductionLineId().toString())){
+                    ProductionLine productionLine = productionLineDao.findById(i.getProductionLineId());
+                    if(device != null && productionLine != null){
+                        device.setFactoryName(productionLine.getFactoryName());
+                        device.setWorkshopName(productionLine.getWorkshopName());
+                        device.setProductionLineName(productionLine.getName());
+                    }
+                }
+                resultDeviceList.add(device);
+            });
+        }
+        return resultDeviceList;
+    }
 
 }

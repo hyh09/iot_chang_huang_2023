@@ -8,6 +8,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -91,7 +92,10 @@ public class RTMonitorAppController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
+        var r = this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
+        if (isDeviceOnline(id))
+            r.setIsOnLine(Boolean.TRUE);
+        return r;
     }
 
     /**

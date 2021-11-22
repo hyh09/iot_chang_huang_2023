@@ -8,6 +8,10 @@ import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.
 import { AlarmRulesTabsComponent } from './alarm-rules/alarm-rules-tabs.component';
 import { AlarmRulesComponent } from './alarm-rules/alarm-rules.component';
 import { AddAlarmRuleDialogComponent } from './alarm-rules/add-alarm-rule-dialog.component';
+import { RunStateChartComponent } from './real-time-monitor/run-state-chart.component';
+import { WarningStatisticsChartComponent } from './real-time-monitor/warning-statistics-chart.component';
+import { DeviceDetailsComponent } from './real-time-monitor/device-details/device-details.component';
+import { PropDataChartComponent } from './real-time-monitor/device-details/prop-data-chart.component';
 
 @NgModule({
   imports: [
@@ -21,7 +25,11 @@ import { AddAlarmRuleDialogComponent } from './alarm-rules/add-alarm-rule-dialog
     AlarmRecordFiltersComponent,
     AlarmRulesComponent,
     AlarmRulesTabsComponent,
-    AddAlarmRuleDialogComponent
+    AddAlarmRuleDialogComponent,
+    RunStateChartComponent,
+    WarningStatisticsChartComponent,
+    DeviceDetailsComponent,
+    PropDataChartComponent
   ]
 })
 export class DeviceMonitorModule { }
