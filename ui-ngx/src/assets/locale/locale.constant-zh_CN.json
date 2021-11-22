@@ -3060,6 +3060,7 @@
     "alarm-record": "报警记录",
     "no-alarm-records": "未找到报警记录",
     "device-name": "设备名称",
+    "device-name-with-suffix": "设备名称：",
     "alarm-title": "报警标题",
     "alarm-info": "报警信息",
     "alarm-status": "状态",
@@ -3090,6 +3091,13 @@
     "on-line-device": "在线设备",
     "off-line-device": "离线设备",
     "warning-statistics": "预警统计",
-    "warning-count": "预警次数"
+    "warning-count": "预警次数",
+    "device-details": "设备详情",
+    "base-info": "基本信息",
+    "real-time-data-chart": "实时数据图表",
+    "prop-unit": "单位：{{unit}}",
+    "real-time-data": "实时数据",
+    "see-history": "查看历史",
+    "device-comp": "设备部件"
   }
 }
