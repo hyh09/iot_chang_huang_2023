@@ -371,6 +371,26 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 //        return nameList;
     }
 
+    @Override
+   public  Map<String,String> getUnit()
+    {
+      Map<String, String> map = new HashMap<>();
+
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getUnit));
+            map.putAll(map1);
+        }
+      return map;
+
+    }
+
+
+
+
+
+
     /**
      * 获得当前默认初始化的分组及分组属性
      */

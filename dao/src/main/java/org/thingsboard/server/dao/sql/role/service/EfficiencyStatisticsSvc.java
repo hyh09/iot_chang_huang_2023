@@ -25,6 +25,9 @@ import java.util.UUID;
  **/
 public interface EfficiencyStatisticsSvc {
 
+    //能耗历史的表头
+    List<String> queryEnergyHistoryHeader();
+
     Object  queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
 
 
