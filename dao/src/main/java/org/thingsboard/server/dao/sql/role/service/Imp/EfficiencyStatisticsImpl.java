@@ -72,6 +72,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private TsKvDictionaryRepository dictionaryRepository;
     @Autowired private EffectHistoryKvRepository effectHistoryKvRepository;
 
+
+    private  final  static String  HEADER_0= "设备名称";
+    private  final  static  String HEADER_1="createTime";//创建时间
+    /**
+     * 查询历史能耗的表头
+     * @return
+     */
+    @Override
+    public List<String> queryEnergyHistoryHeader() {
+        log.info("查询历史耗能的表头");
+        List<String> strings= new ArrayList<>();
+        strings.add(HEADER_0);
+        List<String>  keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        log.info("查询历史耗能的表头{}",keys1);
+        Map<String,String>  map = dictDeviceService.getUnit();
+        log.info("查询历史耗能的表头map{}",map);
+
+        keys1.stream().forEach(str01->{
+            strings.add(str01+"("+map.get(str01)+")");
+                }
+        );
+        keys1.add(HEADER_1);
+        log.info("查询历史耗能的表头keys1{}",keys1);
+        return keys1;
+    }
+
     /**
      * 查询历史能耗
      * @param queryTsKvVo
@@ -81,6 +107,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public Object queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink) {
+         Map<String,String>  map = dictDeviceService.getUnit() ;
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
