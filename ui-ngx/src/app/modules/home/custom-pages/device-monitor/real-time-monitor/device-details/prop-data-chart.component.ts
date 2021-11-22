@@ -1,27 +1,28 @@
 import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges, OnDestroy } from '@angular/core';
-import { AlarmTimesListItem } from '@app/shared/models/custom/device-monitor.models';
+import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
 
 @Component({
-  selector: 'tb-warning-statistics-chart',
+  selector: 'tb-prop-data-chart',
   template: `<div class="chart-panel">
-              <div #warningStatisticsChart class="chart-wrapper"></div>
+              <div #propDataChart class="chart-wrapper"></div>
             </div>`,
-  styleUrls: ['./chart.component.scss']
+  styleUrls: ['../chart.component.scss']
 })
-export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+  
+  @Input() propName: string;
+  @Input() data: DeviceProp[];
 
-  @Input() data: AlarmTimesListItem[];
-
-  @ViewChild('warningStatisticsChart') warningStatisticsChart: ElementRef;
+  @ViewChild('propDataChart') propDataChart: ElementRef;
 
   private chart: any;
 
   constructor(private translate: TranslateService) { }
 
   ngAfterViewInit() {
-    this.chart = echarts.init(this.warningStatisticsChart.nativeElement);
+    this.chart = echarts.init(this.propDataChart.nativeElement);
     window.addEventListener('resize', this.chart.resize);
   }
 
@@ -35,9 +36,12 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
 
   init() {
     if (!this.chart) return;
+    const chartData = this.data.map(item => {
+      return [new Date(item.createdTime), item.content]
+    });
     const option = {
       title: {
-        text: this.translate.instant('device-monitor.warning-statistics'),
+        text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.propName ? ` - ${this.propName}` : ''}`,
         left: 0,
         textStyle: {
           fontSize: 16,
@@ -55,22 +59,26 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
         trigger: 'axis'
       },
       xAxis: {
-        type: 'category',
+        type: 'time',
         boundaryGap: false,
         axisLabel: {
           margin: 16
-        },
-        data: this.data.map(item => (item.time))
+        }
       },
       yAxis: {
         type: 'value',
-        name: this.translate.instant('device-monitor.warning-count')
+        name: this.data[0] && this.data[0].unit ? this.translate.instant('device-monitor.prop-unit', { unit: this.data[0].unit }) : ''
       },
       series: [
         {
-          name: this.translate.instant('device-monitor.warning-count'),
-          data: this.data.map(item => (item.num)),
-          type: 'line'
+          name: this.propName,
+          data: chartData,
+          type: 'line',
+          symbol: 'none',
+          smooth: true,
+          tooltip: {
+            formatter: '{b}：{c}'
+          }
         }
       ]
     };
