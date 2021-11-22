@@ -45,18 +45,9 @@
         padding-bottom: 32px;
         margin-top: -0.5em;
         .tb-reset-password {
-          padding: 0;
           font-size: 13px;
           height: 13px;
           line-height: 13px;
-          color: #0663ff;
-          min-width: 0;
-          ::ng-deep .mat-button-focus-overlay {
-            display: none;
-          }
-          &:hover .mat-button-wrapper {
-            text-decoration: underline;
-          }
         }
       }
 

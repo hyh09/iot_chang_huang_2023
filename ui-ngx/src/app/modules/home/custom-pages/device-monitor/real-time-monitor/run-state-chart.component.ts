@@ -41,7 +41,11 @@ export class RunStateChartComponent implements AfterViewInit, OnDestroy, OnChang
       title: {
         text: this.translate.instant('device-monitor.run-state-overview'),
         subtext: this.translate.instant('device-monitor.running-devices'),
-        left: 0
+        left: 0,
+        textStyle: {
+          fontSize: 16,
+          color: 'rgba(0, 0, 0, 0.87)'
+        }
       },
       color: ['#2367fa', '#ff9d4d'],
       tooltip: {
