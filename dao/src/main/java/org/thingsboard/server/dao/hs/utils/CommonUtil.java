@@ -8,7 +8,10 @@ import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -46,6 +49,13 @@ public class CommonUtil {
      */
     public static <T> List<T> handleAsync(List<CompletableFuture<T>> t) {
         return t.stream().map(CompletableFuture::join).collect(Collectors.toList());
+    }
+
+    /**
+     * 获得当年零点的时间
+     */
+    public static Long getThisYearStartTime() {
+        return LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.firstDayOfYear()), LocalTime.MIN).toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
     /**

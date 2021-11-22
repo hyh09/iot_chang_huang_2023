@@ -92,7 +92,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true)
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
-    public List<DictDeviceGroupPropertyVO> listRTMonitorGroupPropertyHistory(
+    public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);

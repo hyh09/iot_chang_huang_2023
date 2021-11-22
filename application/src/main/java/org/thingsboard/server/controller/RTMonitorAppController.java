@@ -8,7 +8,6 @@ import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -106,7 +105,7 @@ public class RTMonitorAppController extends BaseController {
             @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true)
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
-    public AppHistoryVO listRTMonitorGroupPropertyHistory(
+    public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName,
             @RequestParam Long startTime,
@@ -116,7 +115,7 @@ public class RTMonitorAppController extends BaseController {
         checkParameter("groupPropertyName", groupPropertyName);
         checkParameter("startTime", startTime);
         checkParameter("endTime", endTime);
-        return this.deviceMonitorService.listAppGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
+        return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
     }
 
     /**

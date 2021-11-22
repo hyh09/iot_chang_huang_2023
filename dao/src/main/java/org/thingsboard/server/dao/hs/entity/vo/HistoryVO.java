@@ -12,11 +12,11 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "App历史数据VO")
+@ApiModel(value = "历史数据VO")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppHistoryVO {
+public class HistoryVO {
 
     @ApiModelProperty(value = "是否展示图表", notes = "仅数值型数据展示图表")
     private Boolean isShowChart;
