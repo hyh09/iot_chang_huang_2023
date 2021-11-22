@@ -1,4 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
 import { AlarmTimesListItem, DeviceItem } from '@app/shared/models/custom/device-monitor.models';
 import { FactoryTreeNodeIds } from '@app/shared/models/custom/factory-mng.models';
@@ -30,7 +31,8 @@ export class RealTimeMonitorComponent implements OnDestroy {
   deviceList: DeviceItem[] = [];
 
   constructor(
-    private realTimeMonitorService: RealTimeMonitorService
+    private realTimeMonitorService: RealTimeMonitorService,
+    private router: Router
   ) { }
 
   ngOnDestroy() {
@@ -41,7 +43,6 @@ export class RealTimeMonitorComponent implements OnDestroy {
     if (factoryInfo) {
       this.factoryInfo = factoryInfo;
     }
-    this.realTimeMonitorService.unSubscribeDevices();
     this.realTimeMonitorService.getRealTimeData(this.pageLink, this.factoryInfo).subscribe(res => {
       this.totalDevices = res.allDeviceCount || 0;
       this.deviceList = res.devicePageData.data || [];
@@ -50,10 +51,15 @@ export class RealTimeMonitorComponent implements OnDestroy {
         offLineDeviceCount: res.offLineDeviceCount || 0
       }
       this.alarmTimesList = res.alarmTimesList || [];
-      this.realTimeMonitorService.subscribe(this.deviceList.map(item => (item.id)), () => {
+      this.realTimeMonitorService.switchDevices(res.deviceIdList);
+      this.realTimeMonitorService.subscribe(res.deviceIdList || [], () => {
         this.fetchData();
       });
     });
+  }
+
+  goToDetail(deviceId: string) {
+    this.router.navigateByUrl(`deviceMonitor/realTimeMonitor/${deviceId}/details`);
   }
 
 }

@@ -2,9 +2,9 @@ import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { AuthService } from "@app/core/auth/auth.service";
 import { RequestConfig, defaultHttpOptionsFromConfig, WINDOW } from "@app/core/public-api";
-import { RealTimeData } from "@app/shared/models/custom/device-monitor.models";
+import { DeviceDetails, DeviceHistoryTableHeader, DeviceProp, RealTimeData } from "@app/shared/models/custom/device-monitor.models";
 import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
-import { PageLink } from "@app/shared/public-api";
+import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 
 @Injectable({
@@ -18,6 +18,7 @@ export class RealTimeMonitorService {
   private isOpened: boolean = false;
   private isOpening: boolean = false;
   private tempDeviceIdList: string[] = [];
+  private leftDeviceCount: number = 0;
 
   constructor(
     private http: HttpClient,
@@ -50,9 +51,43 @@ export class RealTimeMonitorService {
     return this.http.get<RealTimeData>(`/api/deviceMonitor/rtMonitor/device${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 获取设备详情数据
+  public getDeviceDetails(id: string, config?: RequestConfig): Observable<DeviceDetails> {
+    return this.http.get<DeviceDetails>(`/api/deviceMonitor/rtMonitor/device/${id}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取某条属性/参数的历史数据
+  public getPropHistoryData(deviceId: string, groupPropertyName: string, config?: RequestConfig): Observable<DeviceProp[]> {
+    return this.http.get<DeviceProp[]>(
+      `/api/deviceMonitor/rtMonitor/device/groupProperty/history?deviceId=${deviceId}&groupPropertyName=${groupPropertyName}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
+  // 获取设备历史数据表头
+  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<DeviceHistoryTableHeader> {
+    return this.http.get<DeviceHistoryTableHeader>(`/api/deviceMonitor/rtMonitor/device/history/header/${id}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取设备历史数据列表
+  public getDeviceHistoryDatas(pageLink: PageLink, filterParams: { startTime: number, endTime: number }, config?: RequestConfig): Observable<PageData<any>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      if (key === 'startTime' || key === 'endTime') {
+        queryStr.push(`${key}=${filterParams[key] ? new Date(filterParams[key]).getTime() : ''}`);
+      } else {
+        queryStr.push(`${key}=${filterParams[key]}`);
+      }
+    });
+    return this.http.get<PageData<any>>(
+      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&${queryStr.join('&')}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
   // 开启订阅
   public subscribe(deviceIdList: string[], onMessage: Function) {
-    this.tempDeviceIdList = deviceIdList;
+    this.leftDeviceCount = deviceIdList.length;
     if (!this.isActive) {
       this.isActive = true;
       if (!this.isOpened && !this.isOpening) {
@@ -74,15 +109,9 @@ export class RealTimeMonitorService {
   private openSocket(token: string, deviceIdList: string[], onMessage: Function) {
     this.webSocket = new WebSocket(`${this.telemetryUri}?token=${token}`);
     this.webSocket.onopen = () => {
-      this.webSocket.send(JSON.stringify({
-        tsSubCmds: deviceIdList.map(deviceId => ({
-          entityType: "DEVICE",
-          entityId: deviceId,
-          scope: "LATEST_TELEMETRY"
-        }))
-      }));
       this.isOpened = true;
       this.isOpening = false;
+      this.switchDevices(deviceIdList);
     }
     this.webSocket.onerror = () => {
       this.isOpening = false;
@@ -100,22 +129,39 @@ export class RealTimeMonitorService {
       }
     }
     this.webSocket.onmessage = () => {
-      onMessage();
+      if (this.leftDeviceCount > 0) {
+        this.leftDeviceCount--;
+      } else {
+        onMessage();
+      }
     }
   }
 
-  // 取消订阅设备
-  public unSubscribeDevices() {
-    if (this.isActive && this.isOpened && this.tempDeviceIdList.length > 0) {
-      this.webSocket.send(JSON.stringify({
-        tsSubCmds: this.tempDeviceIdList.map(deviceId => ({
-          entityType: "DEVICE",
-          entityId: deviceId,
-          scope: "LATEST_TELEMETRY",
-          unsubscribe: true
-        }))
-      }));
-      this.tempDeviceIdList = [];
+  // 切换订阅设备
+  public switchDevices(deviceIdList: string[]) {
+    if (this.isActive && this.isOpened) {
+      if (this.tempDeviceIdList.length > 0) {
+        this.webSocket.send(JSON.stringify({
+          tsSubCmds: this.tempDeviceIdList.map(deviceId => ({
+            entityType: "DEVICE",
+            entityId: deviceId,
+            scope: "LATEST_TELEMETRY",
+            unsubscribe: true
+          }))
+        }));
+        this.tempDeviceIdList = [];
+        this.leftDeviceCount = 0;
+      }
+      if (deviceIdList && deviceIdList.length > 0) {
+        this.tempDeviceIdList = deviceIdList;
+        this.webSocket.send(JSON.stringify({
+          tsSubCmds: deviceIdList.map(deviceId => ({
+            entityType: "DEVICE",
+            entityId: deviceId,
+            scope: "LATEST_TELEMETRY"
+          }))
+        }));
+      }
     }
   }
 
@@ -132,6 +178,7 @@ export class RealTimeMonitorService {
           }))
         }));
         this.tempDeviceIdList = [];
+        this.leftDeviceCount = 0;
       }
       this.isActive = false;
       this.isOpened = false;
