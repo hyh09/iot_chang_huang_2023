@@ -508,6 +508,11 @@ ALTER TABLE public.tb_user
 ALTER TABLE public.tb_user
     ADD COLUMN active_status character varying(255) COLLATE pg_catalog."default";
 
+--2021-11-22新增2个字段
+ALTER TABLE public.tb_user
+    ADD COLUMN type character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_user
+    ADD COLUMN factory_id uuid;
 -- Table: public.tb_tenant_sys_role
 -- 角色-菜单 关系数 表 ------
 -- DROP TABLE public.tb_tenant_sys_role;
@@ -525,6 +530,13 @@ CREATE TABLE IF NOT EXISTS public.tb_tenant_sys_role
     tenant_id uuid,
     CONSTRAINT tb_tenant_sys_role_pkey PRIMARY KEY (id)
 )
+ALTER TABLE public.tb_tenant_sys_role
+    ADD COLUMN type character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_tenant_sys_role
+    ADD COLUMN factory_id uuid;
+ALTER TABLE public.tb_tenant_sys_role
+    ADD COLUMN system_tab character varying(255) COLLATE pg_catalog."default";
+
 CREATE TABLE IF NOT EXISTS public.tb_tenant_menu_role
 (
     id uuid NOT NULL,
