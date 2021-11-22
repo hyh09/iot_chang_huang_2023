@@ -126,7 +126,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
                 .orElseThrow(() -> new ThingsboardException("数据字典不存在！", ThingsboardErrorCode.GENERAL));
         var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDataId(toUUID(id)));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDataId(toUUID(id)));
-
+        
         if (groupPropertyList.isEmpty() && componentList.isEmpty())
             this.dataRepository.deleteById(toUUID(dictData.getId()));
         else {

@@ -1009,6 +1009,24 @@ public abstract class BaseController {
     }
 
     /**
+     * 判断单个设备是否在线
+     *
+     * @param deviceId 设备Id
+     */
+    public boolean isDeviceOnline(String deviceId) {
+        return this.deviceStateService.isDeviceOnline(DeviceId.fromString(deviceId));
+    }
+
+    /**
+     * 统计设备列表在线数量
+     *
+     * @param deviceIdList 设备Id列表
+     */
+    public int countDeviceOnlineStatus(List<String> deviceIdList) {
+        return 0;
+    }
+
+    /**
      * 校验同层级下系统菜单/按钮名称是否重复
      * @return
      */

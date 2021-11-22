@@ -38,4 +38,5 @@ public interface DeviceStateService extends ApplicationListener<PartitionChangeE
 
     void onQueueMsg(TransportProtos.DeviceStateServiceMsgProto proto, TbCallback bytes);
 
+    boolean isDeviceOnline(DeviceId deviceId);
 }

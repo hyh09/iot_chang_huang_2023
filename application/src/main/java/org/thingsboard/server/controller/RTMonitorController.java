@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -14,6 +15,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+import org.thingsboard.server.service.state.DeviceStateService;
 
 import java.util.List;
 import java.util.Map;
@@ -78,7 +80,10 @@ public class RTMonitorController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
+        var r = this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
+        if (isDeviceOnline(id))
+            r.setIsOnLine(Boolean.TRUE);
+        return r;
     }
 
     /**
@@ -114,7 +119,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 查询设备历史数据
      */
-    @ApiOperation("查询设备详情-分组属性历史数据")
+    @ApiOperation("查询设备历史数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),

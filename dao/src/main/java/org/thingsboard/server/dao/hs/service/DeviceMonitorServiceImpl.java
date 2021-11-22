@@ -270,6 +270,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .offLineDeviceCount(allDeviceList.size() - onLineCount)
                 .onLineDeviceCount(onLineCount)
                 .alarmTimesList(this.listAlarmTimesResult(tenantId, allDeviceIdList))
+                .deviceIdList(allDeviceIdList.stream().map(UUID::toString).collect(Collectors.toList()))
                 .build();
     }
 
