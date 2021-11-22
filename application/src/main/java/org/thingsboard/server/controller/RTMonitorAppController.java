@@ -92,10 +92,7 @@ public class RTMonitorAppController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        var r = this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
-        if (isDeviceOnline(id))
-            r.setIsOnLine(Boolean.TRUE);
-        return r;
+        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
     }
 
     /**

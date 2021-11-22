@@ -473,11 +473,6 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         return ts < state.getLastActivityTime() + state.getInactivityTimeout();
     }
 
-    @Override
-    public boolean isDeviceOnline(DeviceId deviceId) {
-        return Optional.ofNullable(deviceId).map(deviceStates::get).map(DeviceStateData::getState).map(DeviceState::isActive).orElse(false);
-    }
-
     @Nonnull
     DeviceStateData getOrFetchDeviceStateData(DeviceId deviceId) {
         DeviceStateData deviceStateData = deviceStates.get(deviceId);
