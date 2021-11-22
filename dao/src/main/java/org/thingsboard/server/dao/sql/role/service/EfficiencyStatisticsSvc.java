@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -30,7 +31,7 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
-    PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+    PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
     /**
      * 产能接口
