@@ -14,6 +14,7 @@ import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
+import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
@@ -109,15 +110,29 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 工厂id不能为空!");
         }
 
+        if(user1.getTenantId() ==  null)
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 所属租户不能为空!");
+        }
+
         UserVo  vo1 = new UserVo();
         vo1.setEmail(user.getEmail());
         if(checkSvc.checkValueByKey(vo1)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
         }
         UserVo  vo2 = new UserVo();
-        vo2.setEmail(user.getPhoneNumber());
+        vo2.setPhoneNumber(user.getPhoneNumber());
         if(checkSvc.checkValueByKey(vo2)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
+        }
+
+        //用户编码如果不传就
+        if(StringUtils.isNotEmpty(user.getUserCode()))
+        {
+            CodeVo  codeVo =  new CodeVo();
+            codeVo.setKey("1");
+         String    str = (String) checkSvc.queryCodeNew(codeVo,user1.getTenantId());
+          user.setUserCode(str);
         }
 
         String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
