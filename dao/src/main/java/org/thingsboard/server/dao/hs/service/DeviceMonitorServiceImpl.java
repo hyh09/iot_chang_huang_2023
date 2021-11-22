@@ -270,6 +270,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .offLineDeviceCount(allDeviceList.size() - onLineCount)
                 .onLineDeviceCount(onLineCount)
                 .alarmTimesList(this.listAlarmTimesResult(tenantId, allDeviceIdList))
+                .deviceIdList(allDeviceIdList.stream().map(UUID::toString).collect(Collectors.toList()))
                 .build();
     }
 
@@ -623,7 +624,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     public void recursionDealComponentData(List<DictDeviceComponentVO> componentList, Map<String, TsKvEntry> kvEntryMap, Map<String, DictData> dictDataMap, List<String> groupPropertyNameList) {
         for (DictDeviceComponentVO componentVO : componentList) {
-            for (DictDeviceComponentPropertyVO propertyVO:componentVO.getPropertyList()) {
+            for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                 var kvData = Optional.ofNullable(kvEntryMap.get(propertyVO.getName()));
                 kvData.ifPresent(k -> {
                     groupPropertyNameList.add(propertyVO.getName());

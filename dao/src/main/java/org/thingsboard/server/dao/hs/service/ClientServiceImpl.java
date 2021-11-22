@@ -169,8 +169,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
-//            predicates.add(cb.like(root.get("additionalInfo"), "%" + "\"gateway\":false" + "%"));
+            predicates.add(cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0));
 
             if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));

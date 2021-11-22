@@ -65,15 +65,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -479,6 +471,11 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     boolean isActive(long ts, DeviceState state) {
         return ts < state.getLastActivityTime() + state.getInactivityTimeout();
+    }
+
+    @Override
+    public boolean isDeviceOnline(DeviceId deviceId) {
+        return Optional.ofNullable(deviceId).map(deviceStates::get).map(DeviceStateData::getState).map(DeviceState::isActive).orElse(false);
     }
 
     @Nonnull
