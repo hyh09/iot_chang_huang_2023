@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
 import { Factory, FactoryMngList, ProdDevice, ProdLine, WorkShop } from "@app/shared/models/custom/factory-mng.models";
-import { BaseData, HasId, HasUUID } from "@app/shared/public-api";
+import { BaseData, HasId } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 
 export interface FetchListFilter {

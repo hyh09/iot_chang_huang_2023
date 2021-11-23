@@ -67,7 +67,7 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     this.tenantMenuService.getSysMenuList(menuType, this.tenantInfo.id.id).subscribe(menus => {
       if (menus) {
         menus.forEach(menu => {
-          menu.title = menu.langKey ? this.translate.instant(menu.langKey) : menu.name;
+          menu.title = menuType === MenuType.PC ? (menu.langKey ? this.translate.instant(menu.langKey) : menu.name) : menu.name;
           menu.key = menu.id;
           menu.checked = menu.associatedTenant;
           menu.disabled = menu.associatedTenant;
@@ -83,7 +83,7 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     this.tenantMenuService.getTenantMenuList(menuType, this.tenantInfo.id.id).subscribe(menus => {
       if (menus) {
         menus.forEach(menu => {
-          menu.title = menu.langKey ? this.translate.instant(menu.langKey) : menu.name;;
+          menu.title = menuType === MenuType.PC ? (menu.langKey ? this.translate.instant(menu.langKey) : menu.tenantMenuName) : menu.tenantMenuName;
           menu.key = menu.id;
           menu.selectable = false;
         });
