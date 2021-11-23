@@ -8,28 +8,15 @@ package org.thingsboard.server.controller.example;
  **/
 public interface AnswerExample {
 
+   //能耗历史的表头
+    public  static  String queryEnergyHistoryHeader="[\"设备名称\",\"总耗水量 (T)\",\"总耗电量 (KWH)\",\"总耗气量 (T)\",\"createTime\"]";
+
     /**
      * 能耗的历史数据
      */
-    public  static String  queryEnergyHistory_messg="{\n" +
-            "    \"data\": [\n" +
-            "        {\n" +
-            "            \"time1\": 2728802,\n" +
-            "            \"水\": 89987,\n" +
-            "            \"气\": 76987,\n" +
-            "            \"电\": 83487,\n" +
-            "            \"ts\": 1637281403407\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"time1\": 2728817,\n" +
-            "            \"水\": 89990,\n" +
-            "            \"气\": 76990,\n" +
-            "            \"电\": 83490,\n" +
-            "            \"ts\": 1637290799086\n" +
-            "        }\n" +
-            "    ],\n" +
-            "    \"totalPages\": 1,\n" +
-            "    \"totalElements\": 2,\n" +
-            "    \"hasNext\": false\n" +
-            "}";
+    public  static String  queryEnergyHistory_messg="{\"data\":[{\"总耗电量 (KWH)\":77000,\"设备名称\":\"电脑设备05\",\"总耗气量 (T)\":70500,\"createTime\":1594167803353,\"总耗水量 (T)\":83500}],\"totalPages\":1000,\"totalElements\":1000,\"hasNext\":true}";
+
+
+    String queryEntityByKeysHeader="[\"设备名称\",\"水 (T)\",\"电 (KWH)\",\"气 (T)\",\"单位能耗能耗水 (T)\",\"单位能耗能耗电 (KWH)\",\"单位能耗能耗气 (T)\"]";
+
 }

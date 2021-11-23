@@ -12,6 +12,7 @@ import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup } from 
 export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
   private deviceId: string = '';
+  private deviceName: string = '';
   baseInfo: DeviceBaseInfo = {}; // 基本信息
   currPropName: string = ''; // 当前选中的属性/参数名称
   propHistoryData: DeviceProp[] = []; // 属性/参数历史数据
@@ -19,6 +20,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   deviceData: DevicePropGroup[] = []; // 设备属性/参数
   devcieComp: DeviceComp[] = []; // 设备部件
   mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
+  showRealTimeChart: boolean;
 
   constructor(
     private realTimeMonitorService: RealTimeMonitorService,
@@ -41,6 +43,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
       this.realTimeMonitorService.getDeviceDetails(this.deviceId).subscribe(res => {
         const { picture, name, factoryName, workShopName, productionLineName } = res;
         this.baseInfo = { picture, name, factoryName, workShopName, productionLineName };
+        this.deviceName = name;
         this.alarmTimesList = res.alarmTimesList || [];
         this.deviceData = res.resultList || [];
         this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
@@ -59,8 +62,13 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   fetchPropHistoryData(propName: string, callFn?: Function) {
     this.currPropName = propName;
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
-      this.propHistoryData = propData || [];
-      callFn && callFn();
+      if (propData.isShowChart) {
+        this.propHistoryData = propData.propertyVOList || [];
+        callFn && callFn();
+        this.showRealTimeChart = true;
+      } else {
+        this.showRealTimeChart = false;
+      }
     });
   }
 
@@ -113,6 +121,15 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   subscribe() {
     this.realTimeMonitorService.subscribe([this.deviceId], () => {
       this.fetchData();
+    });
+  }
+
+  gotoHistory() {
+    this.router.navigate([`history`], {
+      relativeTo: this.route,
+      queryParams: {
+        deviceName: this.deviceName
+      }
     });
   }
 

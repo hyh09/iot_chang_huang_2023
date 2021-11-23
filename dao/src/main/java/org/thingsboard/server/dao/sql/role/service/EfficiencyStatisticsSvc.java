@@ -25,6 +25,8 @@ import java.util.UUID;
  **/
 public interface EfficiencyStatisticsSvc {
 
+    List<String> queryEntityByKeysHeader();
+
     //能耗历史的表头
     List<String> queryEnergyHistoryHeader();
 
@@ -34,7 +36,7 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
-    PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
+    PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
     /**
      * 产能接口

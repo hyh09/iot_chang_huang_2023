@@ -74,7 +74,36 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     private  final  static String  HEADER_0= "设备名称";
-    private  final  static  String HEADER_1="createTime";//创建时间
+    private  final  static String  HEADER_DEVICE_ID= "deviceId";
+    private  final  static  String HEADER_1="createdTime";//创建时间
+
+    private  final  static  String PRE_HISTORY_ENERGY="总耗";//历史能耗 ：
+    private  final  static  String AFTER_HISTORY_ENERGY="量";//历史能耗 ：
+
+
+
+
+    @Override
+    public List<String> queryEntityByKeysHeader() {
+        log.info("效能分页首页得数据，获取表头接口");
+        List<String> strings= new ArrayList<>();
+        strings.add(HEADER_0);
+        List<String>  keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        log.info("查询历史耗能的表头{}",keys1);
+        Map<String,String>  map = dictDeviceService.getUnit();
+        log.info("查询历史耗能的表头map{}",map);
+        keys1.stream().forEach(str01->{
+                    strings.add(getHomeKeyNameOnlyUtil(str01,map));
+                }
+        );
+        keys1.stream().forEach(str01->{
+                    strings.add(getHomeKeyNameByUtil(str01,map));
+                }
+        );
+        log.info("查询历史耗能的表头keys1{}",keys1);
+        return strings;
+    }
+
     /**
      * 查询历史能耗的表头
      * @return
@@ -90,12 +119,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头map{}",map);
 
         keys1.stream().forEach(str01->{
-            strings.add(str01+"("+map.get(str01)+")");
+            strings.add( getKeyNameByUtil(str01,map));
                 }
         );
-        keys1.add(HEADER_1);
+        strings.add(HEADER_1);
         log.info("查询历史耗能的表头keys1{}",keys1);
-        return keys1;
+        return strings;
     }
 
     /**
@@ -114,13 +143,42 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
 
         }
+        String deviceName = deviceInfo.getName();
         //先查询能耗的属性
         List<String>  keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         queryTsKvVo.setKeys(keys1);
         Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo,DaoUtil.toPageable(pageLink));
         List<Map> list = page.getContent();
         log.info("查询当前角色下的用户绑定数据list{}",list);
-        return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+         if(CollectionUtils.isEmpty(list))
+         {
+             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+         }
+         List<Map> mapList = new ArrayList<>();
+         for(Map m:list)
+         {
+             Map  map1 = new HashMap();
+             m.forEach((k,v)->{
+
+                 map1.put("设备名称",deviceName);
+                 if(k.equals("ts"))
+                 {
+                     map1.put("createdTime",v); //createdTime
+                 }
+                 if(StringUtils.isNotBlank(map.get(k)))
+                 {
+                     String  strKey = k+"";
+                     map1.put( getKeyNameByUtil(strKey,map),v);
+                 }
+
+             });
+             mapList.add(map1);
+
+         }
+
+        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+
+
     }
 
     @Override
@@ -137,14 +195,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
         List<EffectTsKvEntity> effectTsKvEntities = effectTsKvRepository.queryEntity(vo);
+        List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
+
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
-          return new PageDataAndTotalValue<AppDeviceCapVo>("0",null, 0, 0, false);
+          return new PageDataAndTotalValue<AppDeviceCapVo>("0",appDeviceCapVoList, 0, 0, false);
 
         }
         Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
         List<EffectTsKvEntity> pageList=  page.getContent();
-        List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
 
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
@@ -170,13 +229,24 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     @Override
-    public PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
+    public PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
-        Map<String,String> totalValueMap = new HashMap<>();  //总能耗
+//        Map<String,String> totalValueMap = new HashMap<>();  //总能耗
+
+        List<String>  totalValueList = new ArrayList<>();
+
+
+
         List<String>  keys1 = new ArrayList<>();
+        List<String>  headerList = new ArrayList<>();
         keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        headerList.addAll(keys1);
+        log.info("打印当前的表头name:{}",headerList);
         List<String>  nameKey=  dictDeviceService.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+
+        Map<String,String>  mapUnit  = dictDeviceService.getUnit();
+
         if(CollectionUtils.isEmpty(nameKey))
         {
             throw  new CustomException("系统初始化的数据异常!");
@@ -195,11 +265,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
             log.info("查询的能耗数据为空入参为:{}",vo);
-            keys1.stream().forEach(s -> {
-                totalValueMap.put(s,"0");
+            headerList.stream().forEach(s -> {
+//                totalValueMap.put(s,"0"+" ("+mapUnit.get(s)+")");
+                totalValueList.add(s+": "+"0"+" ("+mapUnit.get(s)+")");
             });
-            appVo.setTotalValue(totalValueMap);
-            return  null;///
+            return new PageDataAndTotalValue<Map>(totalValueList,new ArrayList<>(), 0, 0,false);
         }
 
         Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
@@ -223,12 +293,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
-        keys1.stream().forEach(str->{
-            if(!str.equals(keyName)) {  //排除产能得总产能统计
-                totalValueMap.put(str, getTotalValue(effectTsKvEntities, str));
-            }
+        headerList.stream().forEach(str->{
+            log.info("打印当前的str:{}",str);
+            totalValueList.add(str+": "+getTotalValue(effectTsKvEntities, str)+ " ("+mapUnit.get(str)+")");
         });
-        return new PageDataAndTotalValue<PcDeviceEnergyVo>(totalValueMap,resultList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+        return new PageDataAndTotalValue<Map>(totalValueList,todataByList(resultList), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     /**
@@ -576,5 +645,65 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         return  resultList;
 
+    }
+
+
+    /**
+     * 获取历史能耗的表头
+     * @param str01  配置的遥测key
+     * @param map  key 对应的单位
+     * @return
+     */
+    private  String getKeyNameByUtil(String str01,Map  map)
+    {
+       return PRE_HISTORY_ENERGY+str01+AFTER_HISTORY_ENERGY+" ("+map.get(str01)+")";
+    }
+
+
+
+    /**
+     * 获取首页能耗的 水 (单位)
+     * @param str01  配置的遥测key
+     * @param map  key 对应的单位
+     * @return
+     */
+    private  String getHomeKeyNameOnlyUtil(String str01,Map  map)
+    {
+        return ""+str01+" ("+map.get(str01)+")";
+    }
+
+    /**
+     * 获取首页能耗的 单位能耗水 (单位)
+     * @param str01  配置的遥测key
+     * @param map  key 对应的单位
+     * @return
+     */
+    private  String getHomeKeyNameByUtil(String str01,Map  map)
+    {
+        return "单位能耗"+str01+" ("+map.get(str01)+")";
+    }
+
+
+
+    private  List<Map>  todataByList(List<PcDeviceEnergyVo>  resultList)
+    {
+        List<Map>  mapList = new ArrayList<>();
+        Map<String,String>  mapUnit  = dictDeviceService.getUnit();
+
+        resultList.stream().forEach(vo->{
+            Map   map = new HashMap();
+            map.put(HEADER_0,vo.getDeviceName());
+            map.put(HEADER_DEVICE_ID,vo.getDeviceId());
+            Map<String,String> mapData = vo.getMapValue();
+            mapData.forEach((k1,v1)->{
+                map.put(getHomeKeyNameOnlyUtil(k1,mapUnit),v1);
+            });
+            Map<String,String> mapData1 = vo.getMapUnitValue();
+            mapData1.forEach((k1,v1)->{
+                map.put(getHomeKeyNameByUtil(k1,mapUnit),v1);
+            });
+            mapList.add(map);
+        });
+        return mapList;
     }
 }

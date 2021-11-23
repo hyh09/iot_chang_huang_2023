@@ -59,7 +59,7 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
         };
         const checkedKeys: string[] = [];
         menus.forEach(menu => {
-          menu.title = menu.langKey ? this.translate.instant(menu.langKey) : menu.name;;
+          menu.title = menuType === MenuType.PC ? (menu.langKey ? this.translate.instant(menu.langKey) : menu.name) : menu.name;
           menu.key = menu.id;
           menu.checked && checkedKeys.push(menu.key);
         });
