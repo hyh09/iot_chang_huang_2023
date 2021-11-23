@@ -1,15 +1,17 @@
-package org.thingsboard.server.service.userrole.sqldata;
+package org.thingsboard.server.dao.sql.role.userrole.sqldata;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
-import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
-import org.thingsboard.server.common.data.vo.CustomException;
-import org.thingsboard.server.common.data.vo.enums.ActivityException;
-import org.thingsboard.server.service.userrole.SqlSplicingSvc;
+import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
+//import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
+//import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 
 import java.util.HashMap;
 import java.util.Map;
