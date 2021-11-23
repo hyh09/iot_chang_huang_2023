@@ -377,6 +377,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
       Map<String, String> map = new HashMap<>();
 
         List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        log.info("打印当前的数据:{}",dictDeviceGroupVOS);
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
             Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getUnit));

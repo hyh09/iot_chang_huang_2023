@@ -75,6 +75,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private  final  static String  HEADER_0= "设备名称";
     private  final  static  String HEADER_1="createTime";//创建时间
+
+    private  final  static  String PRE_HISTORY_ENERGY="总耗";//历史能耗 ：
+    private  final  static  String AFTER_HISTORY_ENERGY="量";//历史能耗 ：
+
     /**
      * 查询历史能耗的表头
      * @return
@@ -90,12 +94,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头map{}",map);
 
         keys1.stream().forEach(str01->{
-            strings.add(str01+"("+map.get(str01)+")");
+            strings.add(PRE_HISTORY_ENERGY+str01+AFTER_HISTORY_ENERGY+" ("+map.get(str01)+")");
                 }
         );
-        keys1.add(HEADER_1);
+        strings.add(HEADER_1);
         log.info("查询历史耗能的表头keys1{}",keys1);
-        return keys1;
+        return strings;
     }
 
     /**

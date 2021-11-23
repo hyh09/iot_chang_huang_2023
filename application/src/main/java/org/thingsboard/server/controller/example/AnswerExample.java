@@ -8,6 +8,9 @@ package org.thingsboard.server.controller.example;
  **/
 public interface AnswerExample {
 
+
+    public  static  String queryEnergyHistoryHeader="[\"设备名称\",\"总耗水量 (T)\",\"总耗电量 (KWH)\",\"总耗气量 (T)\",\"createTime\"]";
+
     /**
      * 能耗的历史数据
      */
