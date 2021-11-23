@@ -15,4 +15,8 @@ public interface AnswerExample {
      * 能耗的历史数据
      */
     public  static String  queryEnergyHistory_messg="{\"data\":[{\"总耗电量 (KWH)\":77000,\"设备名称\":\"电脑设备05\",\"总耗气量 (T)\":70500,\"createTime\":1594167803353,\"总耗水量 (T)\":83500}],\"totalPages\":1000,\"totalElements\":1000,\"hasNext\":true}";
+
+
+    String queryEntityByKeysHeader="[\"设备名称\",\"水 (T)\",\"电 (KWH)\",\"气 (T)\",\"单位能耗能耗水 (T)\",\"单位能耗能耗电 (KWH)\",\"单位能耗能耗气 (T)\"]";
+
 }
