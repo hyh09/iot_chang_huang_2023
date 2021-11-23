@@ -19,8 +19,7 @@
 -- ----------------------------
 -- Table structure for hs_device_component
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_device_component";
-CREATE TABLE "public"."hs_device_component" (
+CREATE TABLE IF NOT EXISTS "public"."hs_device_component" (
                                                 "id" uuid NOT NULL,
                                                 "created_time" int8,
                                                 "code" varchar(255) COLLATE "pg_catalog"."default",
@@ -40,13 +39,11 @@ CREATE TABLE "public"."hs_device_component" (
                                                 "warranty_period" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."hs_device_component" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for hs_device_profile_dict_device
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_device_profile_dict_device";
-CREATE TABLE "public"."hs_device_profile_dict_device" (
+CREATE TABLE IF NOT EXISTS "public"."hs_device_profile_dict_device" (
                                                           "created_time" int8 NOT NULL,
                                                           "created_user" varchar(255) COLLATE "pg_catalog"."default",
                                                           "updated_time" int8,
@@ -56,7 +53,6 @@ CREATE TABLE "public"."hs_device_profile_dict_device" (
                                                           "id" uuid NOT NULL
 )
 ;
-ALTER TABLE "public"."hs_device_profile_dict_device" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."created_time" IS '创建时间';
 COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."created_user" IS '创建人';
 COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."updated_time" IS '更新时间';
@@ -69,8 +65,7 @@ COMMENT ON TABLE "public"."hs_device_profile_dict_device" IS '设备配置-设�
 -- ----------------------------
 -- Table structure for hs_dict_data
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_data";
-CREATE TABLE "public"."hs_dict_data" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_data" (
                                          "id" uuid NOT NULL,
                                          "code" varchar(255) COLLATE "pg_catalog"."default",
                                          "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -86,7 +81,6 @@ CREATE TABLE "public"."hs_dict_data" (
                                          "tenant_id" uuid
 )
 ;
-ALTER TABLE "public"."hs_dict_data" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_data"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_data"."code" IS '编码';
 COMMENT ON COLUMN "public"."hs_dict_data"."name" IS '名称';
@@ -105,8 +99,7 @@ COMMENT ON TABLE "public"."hs_dict_data" IS '数据字典';
 -- ----------------------------
 -- Table structure for hs_dict_device
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_device";
-CREATE TABLE "public"."hs_dict_device" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_device" (
                                            "id" uuid NOT NULL,
                                            "code" varchar(255) COLLATE "pg_catalog"."default",
                                            "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -125,7 +118,6 @@ CREATE TABLE "public"."hs_dict_device" (
                                            "comment" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."hs_dict_device" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_device"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_device"."code" IS '编码';
 COMMENT ON COLUMN "public"."hs_dict_device"."name" IS '名称';
@@ -147,8 +139,7 @@ COMMENT ON TABLE "public"."hs_dict_device" IS '设备字典';
 -- ----------------------------
 -- Table structure for hs_dict_device_component
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_device_component";
-CREATE TABLE "public"."hs_dict_device_component" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_device_component" (
                                                      "id" uuid NOT NULL,
                                                      "code" varchar(255) COLLATE "pg_catalog"."default",
                                                      "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -169,7 +160,6 @@ CREATE TABLE "public"."hs_dict_device_component" (
                                                      "sort" int8
 )
 ;
-ALTER TABLE "public"."hs_dict_device_component" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_device_component"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_device_component"."code" IS '编码';
 COMMENT ON COLUMN "public"."hs_dict_device_component"."name" IS '名称';
@@ -193,8 +183,7 @@ COMMENT ON TABLE "public"."hs_dict_device_component" IS '设备字典-部件';
 -- ----------------------------
 -- Table structure for hs_dict_device_component_property
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_device_component_property";
-CREATE TABLE "public"."hs_dict_device_component_property" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_device_component_property" (
                                                               "id" uuid NOT NULL,
                                                               "component_id" uuid,
                                                               "content" varchar(255) COLLATE "pg_catalog"."default",
@@ -209,7 +198,6 @@ CREATE TABLE "public"."hs_dict_device_component_property" (
                                                               "dict_data_id" uuid
 )
 ;
-ALTER TABLE "public"."hs_dict_device_component_property" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_device_component_property"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_device_component_property"."component_id" IS '部件Id';
 COMMENT ON COLUMN "public"."hs_dict_device_component_property"."content" IS '内容';
@@ -227,8 +215,7 @@ COMMENT ON TABLE "public"."hs_dict_device_component_property" IS '设备字典-�
 -- ----------------------------
 -- Table structure for hs_dict_device_group
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_device_group";
-CREATE TABLE "public"."hs_dict_device_group" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_device_group" (
                                                  "id" uuid NOT NULL,
                                                  "dict_device_id" uuid,
                                                  "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -239,7 +226,6 @@ CREATE TABLE "public"."hs_dict_device_group" (
                                                  "sort" int8
 )
 ;
-ALTER TABLE "public"."hs_dict_device_group" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_device_group"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_device_group"."dict_device_id" IS '设备字典Id';
 COMMENT ON COLUMN "public"."hs_dict_device_group"."name" IS '分组名称';
@@ -253,8 +239,7 @@ COMMENT ON TABLE "public"."hs_dict_device_group" IS '设备字典-分组';
 -- ----------------------------
 -- Table structure for hs_dict_device_group_property
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_device_group_property";
-CREATE TABLE "public"."hs_dict_device_group_property" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_device_group_property" (
                                                           "id" uuid NOT NULL,
                                                           "dict_device_group_id" uuid,
                                                           "content" varchar(255) COLLATE "pg_catalog"."default",
@@ -269,7 +254,6 @@ CREATE TABLE "public"."hs_dict_device_group_property" (
                                                           "dict_data_id" uuid
 )
 ;
-ALTER TABLE "public"."hs_dict_device_group_property" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."dict_device_group_id" IS '设备字典分组Id';
 COMMENT ON COLUMN "public"."hs_dict_device_group_property"."content" IS '内容';
@@ -287,8 +271,7 @@ COMMENT ON TABLE "public"."hs_dict_device_group_property" IS '设备字典-分�
 -- ----------------------------
 -- Table structure for hs_dict_device_property
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_dict_device_property";
-CREATE TABLE "public"."hs_dict_device_property" (
+CREATE TABLE IF NOT EXISTS "public"."hs_dict_device_property" (
                                                     "id" uuid NOT NULL,
                                                     "dict_device_id" uuid,
                                                     "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -300,7 +283,6 @@ CREATE TABLE "public"."hs_dict_device_property" (
                                                     "sort" int8
 )
 ;
-ALTER TABLE "public"."hs_dict_device_property" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_dict_device_property"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_dict_device_property"."dict_device_id" IS '设备字典Id';
 COMMENT ON COLUMN "public"."hs_dict_device_property"."name" IS '属性名称';
@@ -315,8 +297,7 @@ COMMENT ON TABLE "public"."hs_dict_device_property" IS '设备字典-属性';
 -- ----------------------------
 -- Table structure for hs_factory
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_factory";
-CREATE TABLE "public"."hs_factory" (
+CREATE TABLE IF NOT EXISTS "public"."hs_factory" (
                                        "id" uuid NOT NULL,
                                        "code" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
                                        "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -339,13 +320,11 @@ CREATE TABLE "public"."hs_factory" (
                                        "mobile" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."hs_factory" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for hs_init
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_init";
-CREATE TABLE "public"."hs_init" (
+CREATE TABLE IF NOT EXISTS "public"."hs_init" (
                                     "id" uuid NOT NULL,
                                     "init_data" jsonb,
                                     "scope" varchar(255) COLLATE "pg_catalog"."default",
@@ -355,7 +334,6 @@ CREATE TABLE "public"."hs_init" (
                                     "updated_user" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."hs_init" OWNER TO "postgres";
 COMMENT ON COLUMN "public"."hs_init"."id" IS 'Id';
 COMMENT ON COLUMN "public"."hs_init"."init_data" IS '初始化数据';
 COMMENT ON COLUMN "public"."hs_init"."scope" IS '范围';
@@ -368,8 +346,7 @@ COMMENT ON TABLE "public"."hs_init" IS '初始化';
 -- ----------------------------
 -- Table structure for hs_production_line
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_production_line";
-CREATE TABLE "public"."hs_production_line" (
+CREATE TABLE IF NOT EXISTS "public"."hs_production_line" (
                                                "id" uuid NOT NULL,
                                                "workshop_id" uuid NOT NULL,
                                                "code" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
@@ -388,13 +365,11 @@ CREATE TABLE "public"."hs_production_line" (
                                                "bg_images" varchar(100000) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."hs_production_line" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for hs_workshop
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."hs_workshop";
-CREATE TABLE "public"."hs_workshop" (
+CREATE TABLE IF NOT EXISTS "public"."hs_workshop" (
                                         "id" uuid NOT NULL,
                                         "factory_id" uuid NOT NULL,
                                         "code" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
@@ -411,13 +386,11 @@ CREATE TABLE "public"."hs_workshop" (
                                         "bg_images" varchar(1000000) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."hs_workshop" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for tb_menu
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."tb_menu";
-CREATE TABLE "public"."tb_menu" (
+CREATE TABLE IF NOT EXISTS "public"."tb_menu" (
                                     "id" uuid NOT NULL,
                                     "code" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
                                     "name" varchar(255) COLLATE "pg_catalog"."default",
@@ -438,13 +411,11 @@ CREATE TABLE "public"."tb_menu" (
                                     "lang_key" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."tb_menu" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for tb_tenant_menu
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."tb_tenant_menu";
-CREATE TABLE "public"."tb_tenant_menu" (
+CREATE TABLE IF NOT EXISTS "public"."tb_tenant_menu" (
                                            "id" uuid NOT NULL,
                                            "tenant_id" uuid NOT NULL,
                                            "sys_menu_id" uuid,
@@ -470,13 +441,11 @@ CREATE TABLE "public"."tb_tenant_menu" (
                                            "has_children" bool DEFAULT false
 )
 ;
-ALTER TABLE "public"."tb_tenant_menu" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for tb_tenant_menu_role
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."tb_tenant_menu_role";
-CREATE TABLE "public"."tb_tenant_menu_role" (
+CREATE TABLE IF NOT EXISTS "public"."tb_tenant_menu_role" (
                                                 "id" uuid NOT NULL,
                                                 "created_time" int8,
                                                 "created_user" uuid,
@@ -489,13 +458,11 @@ CREATE TABLE "public"."tb_tenant_menu_role" (
                                                 "flg" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."tb_tenant_menu_role" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for tb_tenant_sys_role
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."tb_tenant_sys_role";
-CREATE TABLE "public"."tb_tenant_sys_role" (
+CREATE TABLE IF NOT EXISTS "public"."tb_tenant_sys_role" (
                                                "id" uuid NOT NULL,
                                                "created_time" int8,
                                                "created_user" uuid,
@@ -510,13 +477,11 @@ CREATE TABLE "public"."tb_tenant_sys_role" (
                                                "type" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "public"."tb_tenant_sys_role" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for tb_user_menu_role
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."tb_user_menu_role";
-CREATE TABLE "public"."tb_user_menu_role" (
+CREATE TABLE IF NOT EXISTS "public"."tb_user_menu_role" (
                                               "id" uuid NOT NULL,
                                               "created_time" int8,
                                               "created_user" uuid,
@@ -528,7 +493,6 @@ CREATE TABLE "public"."tb_user_menu_role" (
                                               "user_id" uuid
 )
 ;
-ALTER TABLE "public"."tb_user_menu_role" OWNER TO "postgres";
 
 -- ----------------------------
 -- Primary Key structure for table hs_device_component
