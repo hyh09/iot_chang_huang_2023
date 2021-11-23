@@ -160,7 +160,7 @@ abstract public class BaseEdgeTest extends AbstractControllerTest {
         tenantAdmin = new User();
         tenantAdmin.setAuthority(Authority.TENANT_ADMIN);
         tenantAdmin.setTenantId(savedTenant.getId());
-        tenantAdmin.setEmail("tenant2@thingsboard.org");
+        tenantAdmin.setEmail("tenant2@huansi.net");
         tenantAdmin.setFirstName("Joe");
         tenantAdmin.setLastName("Downs");
 
@@ -877,7 +877,7 @@ abstract public class BaseEdgeTest extends AbstractControllerTest {
         customerUser.setAuthority(Authority.CUSTOMER_USER);
         customerUser.setTenantId(savedTenant.getId());
         customerUser.setCustomerId(savedCustomer.getId());
-        customerUser.setEmail("customerUser@thingsboard.org");
+        customerUser.setEmail("customerUser@huansi.net");
         customerUser.setFirstName("John");
         customerUser.setLastName("Edwards");
         User savedUser = doPost("/api/user", customerUser, User.class);

@@ -95,12 +95,12 @@ metadata:
   name: tb-database
   namespace: hsyl-iot
 spec:
-  type: ClusterIP
-#  type: NodePort
+#  type: ClusterIP
+  type: NodePort
   selector:
     app: postgres
   ports:
   - port: 5432
-#    nodePort: 30682
+    nodePort: 30682
     name: postgres
 ---
