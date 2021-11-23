@@ -1,5 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service.Imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private TsKvDictionaryRepository dictionaryRepository;
     @Autowired private EffectHistoryKvRepository effectHistoryKvRepository;
 
+
+    private  final  static String  HEADER_0= "设备名称";
+    private  final  static  String HEADER_1="createTime";//创建时间
+    /**
+     * 查询历史能耗的表头
+     * @return
+     */
+    @Override
+    public List<String> queryEnergyHistoryHeader() {
+        log.info("查询历史耗能的表头");
+        List<String> strings= new ArrayList<>();
+        strings.add(HEADER_0);
+        List<String>  keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        log.info("查询历史耗能的表头{}",keys1);
+        Map<String,String>  map = dictDeviceService.getUnit();
+        log.info("查询历史耗能的表头map{}",map);
+
+        keys1.stream().forEach(str01->{
+            strings.add(str01+"("+map.get(str01)+")");
+                }
+        );
+        keys1.add(HEADER_1);
+        log.info("查询历史耗能的表头keys1{}",keys1);
+        return keys1;
+    }
+
     /**
      * 查询历史能耗
      * @param queryTsKvVo
@@ -79,6 +107,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public Object queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink) {
+         Map<String,String>  map = dictDeviceService.getUnit() ;
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
@@ -141,7 +170,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     @Override
-    public PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+    public PageDataAndTotalValue<PcDeviceEnergyVo> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
         Map<String,String> totalValueMap = new HashMap<>();  //总能耗
@@ -187,6 +216,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             listMap.put(uuid,map.get(uuid));
         }
         List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);//包含了总产能的
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonlist = mapper.writeValueAsString(vos);
+        log.info("输出打印的所有的能耗的数据:{}",jsonlist);
+
         List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
         keys1.stream().forEach(str->{
@@ -461,6 +495,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         listMap.forEach((key,value)->{
             AppDeviceEnergyVo appDeviceEnergyVo  = new  AppDeviceEnergyVo();
             Map<String,String> mapValue = new HashMap<>();
+            Map<String,Long> timeValueMap = new HashMap<>();
 
             appDeviceEnergyVo.setDeviceId(key.toString());
             EffectTsKvEntity  entity1 =value.get(0);
@@ -478,13 +513,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
 
                 value.stream().forEach(effectTsKvEntity -> {
-                    log.info("打印当前的key:"+effectTsKvEntity.getKey()+"effectTsKvEntity.getValue():"+effectTsKvEntity.getValue());
                     mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValue());
+                    timeValueMap.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs2());
                 });
                 appDeviceEnergyVo.setMapValue(mapValue);
+                appDeviceEnergyVo.setTimeValueMap(timeValueMap);
             }
 
             appList.add(appDeviceEnergyVo);
+
         });
 
         return  appList;
@@ -505,9 +542,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setDeviceName(energyVo.getDeviceName());
             vo.setProductionName(energyVo.getProductionName());
             vo.setWorkshopName(energyVo.getWorkshopName());
-            Map<String,String>  mapOld =    vo.getMapValue();
+            Map<String,String>  mapOld =    energyVo.getMapValue();
          String   keyNameValue =   mapOld.get(keyName);
          log.info("当前设备的总产能:{}",keyNameValue);
+
+         Map<String,Long> timeValueMap = energyVo.getTimeValueMap();
+           Long time001 =  timeValueMap.get(keyName);
+         log.info("打印设备的总产能的时间:{}",time001);
+
 
             Map<String,String>  map1 =  new HashMap<>();
             Map<String,String>  map2 =  new HashMap<>();
@@ -519,7 +561,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                   //
                   //计算公式：总产能/总能耗/分钟数
                   map1.put(key,value);
-                  Double  dvalue =  StringUtilToll.div(keyNameValue,value,"60000");
+                Long  time02 =   (timeValueMap.get(key));
+                Long  t3 =   (time001-time02);
+                  Double  dvalue =  StringUtilToll.div(keyNameValue,value,t3.toString());
                   map2.put(key,dvalue.toString());
               }
             });

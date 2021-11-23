@@ -6,7 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.common.data.vo.CustomException;
 
 import java.util.List;

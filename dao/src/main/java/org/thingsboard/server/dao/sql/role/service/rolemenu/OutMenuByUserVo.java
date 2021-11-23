@@ -1,11 +1,8 @@
-package org.thingsboard.server.entity.rolemenu;
+package org.thingsboard.server.dao.sql.role.service.rolemenu;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.service.userrole.SqlSplicingSvc;
-
-import java.util.UUID;
 
 @Data
 @ToString
