@@ -94,7 +94,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头map{}",map);
 
         keys1.stream().forEach(str01->{
-            strings.add(PRE_HISTORY_ENERGY+str01+AFTER_HISTORY_ENERGY+" ("+map.get(str01)+")");
+            strings.add( getKeyNameByUtil(str01,map));
                 }
         );
         strings.add(HEADER_1);
@@ -118,13 +118,42 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
 
         }
+        String deviceName = deviceInfo.getName();
         //先查询能耗的属性
         List<String>  keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         queryTsKvVo.setKeys(keys1);
         Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo,DaoUtil.toPageable(pageLink));
         List<Map> list = page.getContent();
         log.info("查询当前角色下的用户绑定数据list{}",list);
-        return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+         if(CollectionUtils.isEmpty(list))
+         {
+             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+         }
+         List<Map> mapList = new ArrayList<>();
+         for(Map m:list)
+         {
+             Map  map1 = new HashMap();
+             m.forEach((k,v)->{
+
+                 map1.put("设备名称",deviceName);
+                 if(k.equals("ts"))
+                 {
+                     map1.put("createTime",v);
+                 }
+                 if(StringUtils.isNotBlank(map.get(k)))
+                 {
+                     String  strKey = k+"";
+                     map1.put( getKeyNameByUtil(strKey,map),v);
+                 }
+
+             });
+             mapList.add(map1);
+
+         }
+
+        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+
+
     }
 
     @Override
@@ -580,5 +609,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         return  resultList;
 
+    }
+
+
+    /**
+     * 获取历史能耗的表头
+     * @param str01  配置的遥测key
+     * @param map  key 对应的单位
+     * @return
+     */
+    private  String getKeyNameByUtil(String str01,Map  map)
+    {
+       return PRE_HISTORY_ENERGY+str01+AFTER_HISTORY_ENERGY+" ("+map.get(str01)+")";
     }
 }

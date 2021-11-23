@@ -87,7 +87,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryEntityByKeys", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+//            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
     })
     @ResponseBody
     public Object queryEntityByKeys(
