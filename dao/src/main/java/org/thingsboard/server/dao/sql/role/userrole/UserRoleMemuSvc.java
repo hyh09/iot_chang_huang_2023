@@ -1,11 +1,10 @@
-package org.thingsboard.server.service.userrole;
+package org.thingsboard.server.dao.sql.role.userrole;
 
-import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.dao.sql.role.userrole.user.UserRoleVo;
 import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
-import org.thingsboard.server.entity.role.UserRoleVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,18 +22,18 @@ public interface UserRoleMemuSvc {
     Object unboundUser(RoleBindUserVo vo);
 
 
-    void relationUserBach(List<UUID> rId,UUID uuid) ;
+    void relationUserBach(List<UUID> rId, UUID uuid) ;
 
     //删除用户所关联的角色数据
     void  deleteRoleByUserId(UUID userId);
 
     //更新用户得时候更新角色
-    void  updateRoleByUserId(List<UUID> rId,UUID uuid);
+    void  updateRoleByUserId(List<UUID> rId, UUID uuid);
 
     /**
      * 删除角色下得关系数据
      */
-    void  deleteRoleByRole(UUID  roleId);
+    void  deleteRoleByRole(UUID roleId);
 
 
  /**
@@ -45,7 +44,7 @@ public interface UserRoleMemuSvc {
   */
  Object getUserByInRole(QueryUserVo user, PageLink pageLink, SortRowName sortRowName);
 
- Object getUserByNotInRole( QueryUserVo user, PageLink pageLink,SortRowName sortRowName);
+ Object getUserByNotInRole(QueryUserVo user, PageLink pageLink, SortRowName sortRowName);
 
 
 }

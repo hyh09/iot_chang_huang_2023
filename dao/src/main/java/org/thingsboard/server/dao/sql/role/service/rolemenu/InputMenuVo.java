@@ -1,4 +1,4 @@
-package org.thingsboard.server.entity.rolemenu;
+package org.thingsboard.server.dao.sql.role.service.rolemenu;
 
 import lombok.Data;
 import lombok.ToString;

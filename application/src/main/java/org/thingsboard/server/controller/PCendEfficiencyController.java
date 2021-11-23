@@ -129,6 +129,13 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
+//    @ApiOperation("效能分析-能耗历史的表头数据返回-无参请求")
+//    @ResponseBody
+//    @RequestMapping(value = "/queryEnergyHistoryHeader", method = RequestMethod.GET)
+//    public String[] queryEnergyHistoryHeader()
+//    {
+//
+//    }
 
 
 
