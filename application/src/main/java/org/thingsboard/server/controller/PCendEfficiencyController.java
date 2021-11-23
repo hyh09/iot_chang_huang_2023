@@ -87,7 +87,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryEntityByKeys", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+//            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
     })
     @ResponseBody
     public Object queryEntityByKeys(
@@ -129,13 +129,22 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
-//    @ApiOperation("效能分析-能耗历史的表头数据返回-无参请求")
-//    @ResponseBody
-//    @RequestMapping(value = "/queryEnergyHistoryHeader", method = RequestMethod.GET)
-//    public String[] queryEnergyHistoryHeader()
-//    {
-//
-//    }
+    @ApiOperation("效能分析-能耗历史的表头数据返回-无参请求")
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEnergyHistoryHeader),
+    })
+    @ResponseBody
+    @RequestMapping(value = "/queryEnergyHistoryHeader", method = RequestMethod.GET)
+    public List<String> queryEnergyHistoryHeader() throws ThingsboardException {
+        try{
+        return efficiencyStatisticsSvc.queryEnergyHistoryHeader();
+        }catch (Exception e)
+        {
+            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+
+    }
 
 
 
