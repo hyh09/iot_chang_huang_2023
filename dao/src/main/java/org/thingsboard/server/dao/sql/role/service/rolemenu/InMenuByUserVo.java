@@ -1,15 +1,15 @@
-package org.thingsboard.server.entity.rolemenu;
+package org.thingsboard.server.dao.sql.role.service.rolemenu;
 
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.annotatonsvc.IsRight;
-import org.thingsboard.server.annotatonsvc.MunuTypeEnum;
+import org.thingsboard.server.dao.sql.role.service.annotatonsvc.IsRight;
+import org.thingsboard.server.dao.sql.role.service.annotatonsvc.MunuTypeEnum;
+//import org.thingsboard.server.annotatonsvc.IsRight;
+//import org.thingsboard.server.annotatonsvc.MunuTypeEnum;
 
-import javax.validation.constraints.NotBlank;
-import java.util.List;
 import java.util.UUID;
 
 @Data

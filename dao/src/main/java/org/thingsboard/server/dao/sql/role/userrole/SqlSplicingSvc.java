@@ -1,10 +1,10 @@
-package org.thingsboard.server.service.userrole;
+package org.thingsboard.server.dao.sql.role.userrole;
 
 import org.thingsboard.server.common.data.vo.QueryUserVo;
-import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
-import org.thingsboard.server.service.userrole.sqldata.SqlVo;
+import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.dao.sql.role.userrole.sqldata.SqlVo;
 
 /**
  * JPA调用原生sql的统一sql管理
