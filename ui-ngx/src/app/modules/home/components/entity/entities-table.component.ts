@@ -616,7 +616,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
   }
 
   trackByEntityId(index: number, entity: BaseData<HasId>) {
-    return entity.id.id;
+    return entity.id ? (entity.id.id || entity.id) : entity.createdTime;
   }
 
 }

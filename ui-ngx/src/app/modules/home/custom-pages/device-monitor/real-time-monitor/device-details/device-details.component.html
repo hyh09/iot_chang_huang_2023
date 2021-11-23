@@ -14,87 +14,95 @@
         </div>
       </div>
     </div>
-    <tb-prop-data-chart fxFlex [propName]="currPropName" [data]="propHistoryData"></tb-prop-data-chart>
-    <tb-warning-statistics-chart fxFlex [data]="alarmTimesList"></tb-warning-statistics-chart>
+    <div fxFlex fxLayout="column" fxLayoutGap="16px" class="line-chart-wrapper">
+      <div [fxShow]="showRealTimeChart" class="line-chart-item">
+        <tb-prop-data-chart [propName]="currPropName" [data]="propHistoryData"></tb-prop-data-chart>
+      </div>
+      <div class="line-chart-item">
+        <tb-warning-statistics-chart [data]="alarmTimesList"></tb-warning-statistics-chart>
+      </div>
+    </div>
   </div>
   <div fxFlex class="right-content">
-    <div *ngIf="deviceData.length > 0 || devcieComp.length > 0" fxLayout="column" fxLayoutGap="16px" class="real-time-data">
-      <div fxLayout="row" fxLayoutAlign="space-between center">
+    <div *ngIf="deviceData.length > 0 || devcieComp.length > 0" fxLayout="column" class="real-time-data">
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="real-time-data-header">
         <span class="title">{{ 'device-monitor.real-time-data' | translate }}</span>
         <button
           class="link-button"
           mat-button color="primary"
           type="button"
-          routerLink=""
+          (click)="gotoHistory()"
         >
           {{ 'device-monitor.see-history' | translate }}
           <mat-icon svgIcon="mdi:chevron-right"></mat-icon>
         </button>
       </div>
-      <div *ngFor="let group of deviceData" class="real-time-data-item">
-        <div class="title">{{ group.name }}</div>
-        <nz-table
-          #deviceDataTable
-          [nzData]="group.groupPropertyList || []"
-          [nzShowPagination]="false"
-          nzNoResult="{{ 'common.data-empty' | translate }}"
-        >
-          <tbody>
-            <tr *ngFor="let data of deviceDataTable.data" (click)="fetchPropHistoryData(data.name)">
-              <td width="33%">{{data.name}}</td>
-              <td width="33%">{{data.content}}{{data.unit}}</td>
-              <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-            </tr>
-          </tbody>
-        </nz-table>
-      </div>
-      <div class="real-time-data-item">
-        <div class="title">{{ 'device-monitor.device-comp' | translate }}</div>
-        <nz-table
-          #compTable
-          [nzData]="devcieComp"
-          nzTableLayout="fixed"
-          [nzShowPagination]="false"
-          nzNoResult="{{ 'common.data-empty' | translate }}"
-          class="comp-table"
-        >
-          <tbody>
-            <ng-container *ngFor="let data of compTable.data">
-              <ng-container *ngFor="let item of mapOfExpandedComp[data.code]">
-                <tr
-                  *ngIf="(item.parent && item.parent.expand) || !item.parent"
-                  class="comp-name-row"
-                >
-                  <td
-                    class="comp-name"
-                    nzBreakWord
-                    nzLeft
-                    [nzIndentSize]="item.level! * 5"
-                    [nzShowExpand]="!!item.componentList && item.componentList.length > 0"
-                    [(nzExpand)]="item.expand"
-                    (nzExpandChange)="collapse(mapOfExpandedComp[data.code], item, $event)"
-                  >{{ item.name }}</td>
-                </tr>
-                <tr *ngIf="item.propertyList && item.propertyList.length > 0 && item.expand">
-                  <nz-table
-                    #compPropTable
-                    [nzData]="item.propertyList"
-                    nzTableLayout="fixed"
-                    [nzShowPagination]="false"
+      <div fxFlex fxLayout="column" fxLayoutGap="16px" class="real-time-data-content">
+        <div *ngFor="let group of deviceData" class="real-time-data-item">
+          <div class="title">{{ group.name }}</div>
+          <nz-table
+            #deviceDataTable
+            [nzData]="group.groupPropertyList || []"
+            [nzShowPagination]="false"
+            nzNoResult="{{ 'common.data-empty' | translate }}"
+          >
+            <tbody>
+              <tr *ngFor="let data of deviceDataTable.data" (click)="fetchPropHistoryData(data.name)" [class.active]="data.name === currPropName">
+                <td width="33%">{{data.name}}</td>
+                <td width="33%">{{data.content}}{{data.unit}}</td>
+                <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </div>
+        <div class="real-time-data-item">
+          <div class="title">{{ 'device-monitor.device-comp' | translate }}</div>
+          <nz-table
+            #compTable
+            [nzData]="devcieComp"
+            nzTableLayout="fixed"
+            [nzShowPagination]="false"
+            nzNoResult="{{ 'common.data-empty' | translate }}"
+            class="comp-table"
+          >
+            <tbody>
+              <ng-container *ngFor="let data of compTable.data">
+                <ng-container *ngFor="let item of mapOfExpandedComp[data.code]">
+                  <tr
+                    *ngIf="(item.parent && item.parent.expand) || !item.parent"
+                    class="comp-name-row"
                   >
-                    <tbody>
-                      <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name)">
-                        <td width="33%" [nzIndentSize]="item.level! * 5">{{data.name}}</td>
-                        <td width="33%">{{data.content}}{{data.unit}}</td>
-                        <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                      </tr>
-                    </tbody>  
-                  </nz-table>
-                </tr>
+                    <td
+                      class="comp-name"
+                      nzBreakWord
+                      nzLeft
+                      [nzIndentSize]="item.level! * 5"
+                      [nzShowExpand]="!!item.componentList && item.componentList.length > 0"
+                      [(nzExpand)]="item.expand"
+                      (nzExpandChange)="collapse(mapOfExpandedComp[data.code], item, $event)"
+                    >{{ item.name }}</td>
+                  </tr>
+                  <tr *ngIf="item.propertyList && item.propertyList.length > 0 && item.expand">
+                    <nz-table
+                      #compPropTable
+                      [nzData]="item.propertyList"
+                      nzTableLayout="fixed"
+                      [nzShowPagination]="false"
+                    >
+                      <tbody>
+                        <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name)" [class.active]="data.name === currPropName">
+                          <td width="33%" [nzIndentSize]="item.level! * 5">{{data.name}}</td>
+                          <td width="33%">{{data.content}}{{data.unit}}</td>
+                          <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        </tr>
+                      </tbody>  
+                    </nz-table>
+                  </tr>
+                </ng-container>
               </ng-container>
-            </ng-container>
-          </tbody>
-        </nz-table>
+            </tbody>
+          </nz-table>
+        </div>
       </div>
     </div>
   </div>

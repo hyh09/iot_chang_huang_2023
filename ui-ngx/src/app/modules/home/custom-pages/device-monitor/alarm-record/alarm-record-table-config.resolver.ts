@@ -32,8 +32,6 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
       workshopId: '',
       productionLineId: '',
       deviceId: '',
-      startTime: '',
-      endTime: '',
       status: AlarmStatusType.ANY,
       level: AlarmLevelType.ANY
     }
@@ -41,8 +39,8 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
     this.config.columns.push(
       new DateEntityTableColumn<AlarmRecord>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<AlarmRecord>('name', 'device-monitor.device-name', '25%', ({ name }) => (name), () => ({}), false),
-      new EntityTableColumn<AlarmRecord>('title', 'device-monitor.alarm-title', '25%', ({ name }) => (name), () => ({}), false),
-      new EntityTableColumn<AlarmRecord>('info', 'device-monitor.alarm-info', '50%', ({ name }) => (name), () => ({}), false),
+      new EntityTableColumn<AlarmRecord>('title', 'device-monitor.alarm-title', '25%', ({ title }) => (title), () => ({}), false),
+      new EntityTableColumn<AlarmRecord>('info', 'device-monitor.alarm-info', '50%', ({ info }) => (info), () => ({}), false),
       new EntityTableColumn<AlarmRecord>('statusStr', 'device-monitor.alarm-status', '80px', ({statusStr}) => {
         return this.translate.instant(`device-monitor.${statusStr}`);
       }, () => ({}), false),
@@ -58,8 +56,6 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
       workshopId: '',
       productionLineId: '',
       deviceId: '',
-      startTime: '',
-      endTime: '',
       status: AlarmStatusType.ANY,
       level: AlarmLevelType.ANY
     }
@@ -71,6 +67,8 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
     this.config.detailsPanelEnabled = false;
     this.config.entitiesDeleteEnabled = false;
     this.config.selectionEnabled = false;
+    this.config.useTimePageLink = true;
+    this.config.timeWindowInFilter = true;
     this.config.afterResolved = () => {
       this.config.cellActionDescriptors = this.configureCellActions();
     }
