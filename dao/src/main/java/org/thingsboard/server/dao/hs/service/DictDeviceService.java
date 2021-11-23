@@ -114,6 +114,13 @@ public interface DictDeviceService {
      */
     List<String> findAllByName(UUID dictDeviceId, String name);
 
+    /**
+     * 获取初始化单位数据
+     * @return
+     */
+    Map<String,String> getUnit();
+
+
     List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);
 
     /**
