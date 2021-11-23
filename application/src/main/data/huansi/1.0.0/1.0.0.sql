@@ -635,3 +635,22 @@ ALTER TABLE "public"."tb_tenant_sys_role" ADD CONSTRAINT "tb_tenant_sys_role_pke
 -- Primary Key structure for table tb_user_menu_role
 -- ----------------------------
 ALTER TABLE "public"."tb_user_menu_role" ADD CONSTRAINT "tb_user_menu_role_pkey" PRIMARY KEY ("id");
+
+
+-- 用户表的修改 ALTER TABLE public.tb_user DROP COLUMN user_code;
+ALTER TABLE public.tb_user
+    ADD COLUMN user_code character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_user
+    ADD COLUMN user_creator character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_user
+    ADD COLUMN user_name character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_user
+    ADD COLUMN phone_number character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_user
+    ADD COLUMN active_status character varying(255) COLLATE pg_catalog."default";
+
+--2021-11-22新增2个字段
+ALTER TABLE public.tb_user
+    ADD COLUMN type character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.tb_user
+    ADD COLUMN factory_id uuid;
