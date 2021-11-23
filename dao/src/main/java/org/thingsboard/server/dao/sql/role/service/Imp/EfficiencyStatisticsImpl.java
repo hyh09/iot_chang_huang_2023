@@ -170,14 +170,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
         List<EffectTsKvEntity> effectTsKvEntities = effectTsKvRepository.queryEntity(vo);
+        List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
+
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
-          return new PageDataAndTotalValue<AppDeviceCapVo>("0",null, 0, 0, false);
+          return new PageDataAndTotalValue<AppDeviceCapVo>("0",appDeviceCapVoList, 0, 0, false);
 
         }
         Page<EffectTsKvEntity> page= PageUtil.createPageFromList(effectTsKvEntities,pageLink);
         List<EffectTsKvEntity> pageList=  page.getContent();
-        List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
 
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
