@@ -1,11 +1,10 @@
-package org.thingsboard.server.entity.rolemenu;
+package org.thingsboard.server.dao.sql.role.service.rolemenu;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;

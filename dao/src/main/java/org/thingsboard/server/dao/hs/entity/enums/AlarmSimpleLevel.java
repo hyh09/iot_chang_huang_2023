@@ -12,7 +12,7 @@ import java.util.*;
  * @since 2021.10.26
  */
 @Getter
-public enum AlarmSimpleLevel implements EnumGetter{
+public enum AlarmSimpleLevel implements EnumGetter {
     ANY("ANY", "alarm-level-any"),
     CRITICAL("CRITICAL", "alarm-level-critical"),
     MAJOR("MAJOR", "alarm-level-major"),

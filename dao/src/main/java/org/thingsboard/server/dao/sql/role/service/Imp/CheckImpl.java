@@ -1,4 +1,4 @@
-package org.thingsboard.server.service.userrole.Impl;
+package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,14 +7,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
+import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
+import org.thingsboard.server.dao.sql.role.userrole.sqldata.SqlVo;
+import org.thingsboard.server.dao.sql.role.userrole.user.CodeKeyNum;
 import org.thingsboard.server.dao.user.UserService;
-import org.thingsboard.server.entity.ResultVo;
-import org.thingsboard.server.entity.user.CodeKeyNum;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.dao.sql.role.service.CheckSvc;
-import org.thingsboard.server.service.userrole.SqlSplicingSvc;
-import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
 import java.util.ArrayList;
 import java.util.BitSet;

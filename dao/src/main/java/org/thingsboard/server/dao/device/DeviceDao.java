@@ -316,4 +316,11 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      */
     List<Device> getDeviceByIdList(List<UUID> ids);
 
+    /**
+     * 查询租户下未分配设备
+     * @param tenantId
+     * @return
+     */
+    List<Device> getNotDistributionDevice(TenantId tenantId);
+
 }

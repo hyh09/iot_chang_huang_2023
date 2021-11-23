@@ -60,7 +60,9 @@ public class StringUtilToll {
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
         BigDecimal b3 = new BigDecimal(v3);
-      return   b1.multiply(b2).multiply(b3).doubleValue();
+//      return   b1.multiply(b2).multiply(b3).doubleValue();
+        BigDecimal bigDecimal =  b1.divide(b2, 2, BigDecimal.ROUND_HALF_UP).divide(b3,2, BigDecimal.ROUND_HALF_UP);
+       return bigDecimal.doubleValue();
     }
 
 

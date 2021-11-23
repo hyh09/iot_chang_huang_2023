@@ -100,7 +100,7 @@ public interface DictDeviceService {
      *
      * @param dictDeviceId 设备字典Id
      */
-    DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
+    UUID getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
 
     /**
      * 获得当前默认初始化的分组及分组属性
@@ -114,6 +114,13 @@ public interface DictDeviceService {
      */
     List<String> findAllByName(UUID dictDeviceId, String name);
 
+    /**
+     * 获取初始化单位数据
+     * @return
+     */
+    Map<String,String> getUnit();
+
+
     List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);
 
     /**
@@ -123,4 +130,11 @@ public interface DictDeviceService {
      * @return 设备字典列表
      */
     List<DictDevice> listAllDictDevice(TenantId tenantId);
+
+    /**
+     * 获得全部设备字典属性(包括部件)-数据字典Id Map
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    Map<String, String> mapAllPropertyDictDataId(UUID dictDeviceId);
 }

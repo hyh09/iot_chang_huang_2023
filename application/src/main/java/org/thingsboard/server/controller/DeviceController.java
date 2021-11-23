@@ -111,6 +111,7 @@ public class DeviceController extends BaseController {
         }
     }
 
+    @ApiOperation("系统原生平台设备添加接口")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device", method = RequestMethod.POST)
     @ResponseBody
@@ -813,7 +814,7 @@ public class DeviceController extends BaseController {
     @ApiImplicitParam(name = "addDeviceDto",value = "入参实体",dataType = "AddDeviceDto",paramType="body")
     @RequestMapping(value = "/saveOrUpdDevice", method = RequestMethod.POST)
     @ResponseBody
-    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto,@RequestParam(name = "accessToken", required = false)String accessToken)throws ThingsboardException {
+    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto)throws ThingsboardException {
         try {
             checkNotNull(addDeviceDto);
             boolean created = addDeviceDto.getId() == null;
@@ -830,6 +831,7 @@ public class DeviceController extends BaseController {
             }
             //保存设备，生成设备凭证
             Device savedDevice = checkNotNull(deviceService.saveDeviceWithAccessToken(device, null));
+            //设备配置
             tbClusterService.onDeviceUpdated(savedDevice, oldDevice);
             logEntityAction(savedDevice.getId(), savedDevice,
                     savedDevice.getCustomerId(),
@@ -906,6 +908,10 @@ public class DeviceController extends BaseController {
                 //查询设备字典
                 DictDeviceVO dictDeviceVO = dictDeviceService.getDictDeviceDetail(resultDeviceVo.getDictDeviceId().toString(),getCurrentUser().getTenantId());
                 resultDeviceVo.setDictDeviceVO(dictDeviceVO);
+                //设备字典不为空，要覆盖设备的picture、icon、comment
+                resultDeviceVo.setPicture(dictDeviceVO.getPicture());
+                resultDeviceVo.setIcon(dictDeviceVO.getIcon());
+                resultDeviceVo.setComment(dictDeviceVO.getComment());
             }
             return resultDeviceVo;
         } catch (Exception e) {

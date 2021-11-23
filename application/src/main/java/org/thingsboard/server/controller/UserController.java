@@ -66,9 +66,10 @@ import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
-import org.thingsboard.server.entity.ResultVo;
+import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
+import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -77,7 +78,7 @@ import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
-import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
+//import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -424,6 +425,7 @@ public class UserController extends BaseController {
     {
            log.info("【changeOthersPassword】打印当前的入参{}",vo);
            vo.setPassword(passwordEncoder.encode(vo.getPassword()));
+//            eventPublisher.publishEvent(new UserAuthDataChangedEvent( UserId.fromString(vo.getUserId())));
            return  userService.changeOthersPassword(vo);
     }
 

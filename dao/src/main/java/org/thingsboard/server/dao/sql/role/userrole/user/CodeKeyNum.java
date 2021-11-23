@@ -1,4 +1,4 @@
-package org.thingsboard.server.entity.user;
+package org.thingsboard.server.dao.sql.role.userrole.user;
 
 /**
  * @program: thingsboard

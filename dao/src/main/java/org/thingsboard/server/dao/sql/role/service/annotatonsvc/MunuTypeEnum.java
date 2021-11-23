@@ -1,4 +1,4 @@
-package org.thingsboard.server.annotatonsvc;
+package org.thingsboard.server.dao.sql.role.service.annotatonsvc;
 
 public enum  MunuTypeEnum {
 
