@@ -105,7 +105,7 @@ public class RTMonitorAppController extends BaseController {
             @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true)
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
-    public AppHistoryVO listRTMonitorGroupPropertyHistory(
+    public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName,
             @RequestParam Long startTime,
@@ -115,7 +115,7 @@ public class RTMonitorAppController extends BaseController {
         checkParameter("groupPropertyName", groupPropertyName);
         checkParameter("startTime", startTime);
         checkParameter("endTime", endTime);
-        return this.deviceMonitorService.listAppGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
+        return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
     }
 
     /**

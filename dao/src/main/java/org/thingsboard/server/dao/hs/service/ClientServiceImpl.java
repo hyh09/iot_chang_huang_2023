@@ -1,16 +1,23 @@
 package org.thingsboard.server.dao.hs.service;
 
 import com.google.common.collect.Lists;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.kv.AttributeKvEntry;
+import org.thingsboard.server.common.data.kv.KvEntry;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
@@ -18,6 +25,7 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.InitEntity;
 import org.thingsboard.server.dao.hs.dao.InitRepository;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
@@ -31,12 +39,13 @@ import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
+import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,6 +62,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     @PersistenceContext
     protected EntityManager entityManager;
+
+    @Value("${state.persistToTelemetry:false}")
+    @Getter
+    private boolean persistToTelemetry;
 
     // 初始化Repository
     InitRepository initRepository;
@@ -75,6 +88,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     // 属性Service
     AttributesService attributesService;
 
+    // 遥测Service
+    TimeseriesService tsService;
+
     /**
      * 查询设备基本信息、工厂、车间、产线、设备等
      *
@@ -82,14 +98,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
-//        TODO delete
-//        var cb = entityManager.getCriteriaBuilder();
-//        var query = cb.createQuery(DeviceEntity.class);
-//        var root = query.from(DeviceEntity.class);
-//        query.multiselect(root.<UUID>get("id"), root.<Long>get("createdTime"));
-//        var r = entityManager.createQuery(query);
-//        var z = r.getResultList();
-
         return DeviceBaseDTO.builder()
                 .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
                 .workshop(t.getWorkshopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkshopId()))) : null)
@@ -128,8 +136,16 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Map<String, Boolean> listAllDeviceOnlineStatus(List<UUID> allDeviceIdList) {
-        return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, "active")
-                .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
+        if (persistToTelemetry) {
+            Map<String, Boolean> map = new HashMap<>();
+            for (UUID uuid: allDeviceIdList) {
+                map.put(uuid.toString(), this.getDeviceOnlineStatus(DeviceId.fromString(UUIDToString(uuid))));
+            }
+            return map;
+        } else {
+            return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
+                    .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
+        }
     }
 
     /**
@@ -179,7 +195,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
-//            predicates.add(cb.like(root.get("additional_info"), "%" + "\"gateway\":false" + "%"));
+            predicates.add(cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0));
 
             if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
@@ -196,6 +212,39 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
+    }
+
+    /**
+     * 获得但各个设备的在线状态
+     *
+     * @param deviceId 设备Id
+     */
+    @SuppressWarnings("Duplicates")
+    public boolean getDeviceOnlineStatus(DeviceId deviceId) {
+        try {
+            if (persistToTelemetry) {
+                List<TsKvEntry> tData = tsService.findLatest(TenantId.SYS_TENANT_ID, deviceId, Lists.newArrayList(HSConstants.ATTR_ACTIVE)).get();
+                if (tData != null) {
+                    for (KvEntry entry : tData) {
+                        if (entry != null && !org.springframework.util.StringUtils.isEmpty(entry.getKey()) && entry.getKey().equals(HSConstants.ATTR_ACTIVE)) {
+                            return entry.getBooleanValue().orElse(false);
+                        }
+                    }
+                }
+            } else {
+                List<AttributeKvEntry> aData = attributesService.find(TenantId.SYS_TENANT_ID, deviceId, DataConstants.SERVER_SCOPE, Lists.newArrayList(HSConstants.ATTR_ACTIVE)).get();
+                if (aData != null) {
+                    for (KvEntry entry : aData) {
+                        if (entry != null && !org.springframework.util.StringUtils.isEmpty(entry.getKey()) && entry.getKey().equals(HSConstants.ATTR_ACTIVE)) {
+                            return entry.getBooleanValue().orElse(false);
+                        }
+                    }
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Autowired
@@ -231,5 +280,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setAttributesService(AttributesService attributesService) {
         this.attributesService = attributesService;
+    }
+
+    @Autowired
+    public void setTsService(TimeseriesService tsService) {
+        this.tsService = tsService;
     }
 }

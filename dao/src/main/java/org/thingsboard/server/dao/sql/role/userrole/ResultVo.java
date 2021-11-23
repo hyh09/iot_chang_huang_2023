@@ -1,4 +1,4 @@
-package org.thingsboard.server.entity;
+package org.thingsboard.server.dao.sql.role.userrole;
 
 import lombok.Data;
 import lombok.ToString;

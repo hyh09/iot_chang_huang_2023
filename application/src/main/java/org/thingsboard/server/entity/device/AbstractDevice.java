@@ -16,6 +16,7 @@
 package org.thingsboard.server.entity.device;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,6 +26,8 @@ import org.thingsboard.server.common.data.device.data.DeviceData;
 import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -198,7 +201,15 @@ public abstract class AbstractDevice{
         device.setName(name);
         device.setType(type);
         device.setLabel(label);
-        device.setAdditionalInfo(additionalInfo);
+        if(additionalInfo == null){
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("gateway",false);
+            map.put("overwriteActivityTime",false);
+            map.put("description","");
+            device.setAdditionalInfo(new ObjectMapper().valueToTree(map));
+        }else {
+            device.setAdditionalInfo(additionalInfo);
+        }
         device.setFactoryId(factoryId);
         device.setWorkshopId(workshopId);
         device.setProductionLineId(productionLineId);

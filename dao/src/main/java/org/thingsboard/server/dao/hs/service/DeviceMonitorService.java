@@ -9,7 +9,6 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.util.List;
@@ -46,10 +45,11 @@ public interface DeviceMonitorService {
     /**
      * 绑定设备字典到设备配置
      *
+     * @param tenantId         租户Id
      * @param dictDeviceIdList 设备字典Id列表
      * @param deviceProfileId  设备配置Id
      */
-    void bindDictDeviceToDeviceProfile(List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
+    void bindDictDeviceToDeviceProfile(TenantId tenantId, List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
 
     /**
      * 删除绑定的设备字典
@@ -107,19 +107,7 @@ public interface DeviceMonitorService {
      * @param endTime           结束时间
      * @return 设备分组属性历史数据
      */
-    List<DictDeviceGroupPropertyVO> listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException;
-
-    /**
-     * 【APP】查询设备分组属性历史数据
-     *
-     * @param tenantId          租户Id
-     * @param deviceId          设备Id
-     * @param groupPropertyName 属性名称
-     * @param startTime         开始时间
-     * @param endTime           结束时间
-     * @return 设备分组属性历史数据
-     */
-    AppHistoryVO listAppGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException;
+    HistoryVO listGroupPropertyHistory(TenantId tenantId, String deviceId, String groupPropertyName, Long startTime, Long endTime) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备遥测数据历史数据

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -14,6 +15,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+import org.thingsboard.server.service.state.DeviceStateService;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +92,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true)
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
-    public List<DictDeviceGroupPropertyVO> listRTMonitorGroupPropertyHistory(
+    public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
@@ -114,7 +116,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 查询设备历史数据
      */
-    @ApiOperation("查询设备详情-分组属性历史数据")
+    @ApiOperation("查询设备历史数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
@@ -122,7 +124,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
     })
     @GetMapping("/rtMonitor/device/history")
     public PageData<Map<String, Object>> listRTMonitorHistory(
@@ -132,11 +134,12 @@ public class RTMonitorController extends BaseController {
             @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam Long startTime,
-            @RequestParam Long endTime
+            @RequestParam(required = false) Long endTime
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("startTime", startTime);
-        checkParameter("endTime", endTime);
+        if (endTime == null || endTime <= 0L)
+            endTime = CommonUtil.getTodayCurrentTime();
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
         validatePageLink(pageLink);
         return this.deviceMonitorService.listDeviceTelemetryHistory(getTenantId(), deviceId, pageLink);

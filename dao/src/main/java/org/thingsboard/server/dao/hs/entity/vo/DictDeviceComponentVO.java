@@ -62,4 +62,7 @@ public class DictDeviceComponentVO {
 
     @ApiModelProperty(value = "子部件列表数据, 为null则该部件已经没有子部件, 数据结构同部件")
     private List<DictDeviceComponentVO> componentList;
+
+    @ApiModelProperty(value = "属性列表")
+    private List<DictDeviceComponentPropertyVO> propertyList;
 }

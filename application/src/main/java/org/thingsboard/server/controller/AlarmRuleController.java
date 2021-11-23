@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller;
 
+import com.google.api.client.util.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -26,6 +27,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -141,7 +143,7 @@ public class AlarmRuleController extends BaseController {
             otaPackageStateService.update(savedDeviceProfile, isFirmwareChanged, isSoftwareChanged);
 
             // 增加设备字典的绑定
-            this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceIdList(), savedDeviceProfile.getId());
+            this.deviceMonitorService.bindDictDeviceToDeviceProfile(getTenantId(), Optional.ofNullable(deviceProfileVO.getDictDeviceIdList()).orElse(Lists.newArrayList()), savedDeviceProfile.getId());
 
             sendEntityNotificationMsg(getTenantId(), savedDeviceProfile.getId(),
                     deviceProfile.getId() == null ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);
