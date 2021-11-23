@@ -67,7 +67,7 @@
                             (ngModelChange)="onHideIntervalChanged()"></mat-checkbox>
             </section>
             <section fxLayout="column" fxFlex [fxShow]="isEdit || !timewindow.hideInterval">
-              <div formGroupName="history" class="mat-content mat-padding" style="padding-top: 8px;">
+              <div formGroupName="history" class="mat-content mat-padding" style="padding-top: 16px;">
                 <mat-radio-group formControlName="historyType">
                   <mat-radio-button [value]="historyTypes.LAST_INTERVAL" color="primary">
                     <section fxLayout="column">
@@ -94,7 +94,7 @@
                         style="padding-top: 8px;"></tb-datetime-period>
                     </section>
                   </mat-radio-button>
-                  <mat-radio-button [value]="historyTypes.INTERVAL" color="primary">
+                  <!-- <mat-radio-button [value]="historyTypes.INTERVAL" color="primary">
                     <section fxLayout="column">
                       <span translate>timewindow.interval</span>
                       <tb-quick-time-interval
@@ -105,7 +105,7 @@
                               timewindowForm.get('history.historyType').value === historyTypes.INTERVAL"
                         style="padding-top: 8px"></tb-quick-time-interval>
                     </section>
-                  </mat-radio-button>
+                  </mat-radio-button> -->
                 </mat-radio-group>
               </div>
             </section>
@@ -204,7 +204,7 @@
                 mat-raised-button
                 color="primary"
                 [disabled]="(isLoading$ | async) || timewindowForm.invalid || !timewindowForm.dirty">
-            {{ 'action.update' | translate }}
+            {{ 'action.search' | translate }}
         </button>
       </div>
     </div>

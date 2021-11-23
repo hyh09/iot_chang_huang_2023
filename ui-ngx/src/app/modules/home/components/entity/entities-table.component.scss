@@ -79,6 +79,21 @@
               }
             }
           }
+          .data-overview {
+            padding: 14px 24px;
+            background: rgba(227,227,227,0.2);
+            margin: 20px -19px 0;
+            display: flex;
+            .overview-item {
+              line-height: 25px;
+              font-weight: 500;
+              color: rgba(0,0,0,0.87);
+              font-size: 18px;
+              + .overview-item {
+                margin-left: 90px;
+              }
+            }
+          }
         }
       }
 

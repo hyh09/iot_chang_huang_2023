@@ -46,7 +46,9 @@ export enum EntityType {
   USER_MNG = 'USER_MNG',
   ROLE_MNG = 'ROLE_MNG',
   ALARM_RECORD = 'ALARM_RECORD',
-  ALARM_RULES = 'ALARM_RULES'
+  ALARM_RULES = 'ALARM_RULES',
+  DEVICE_HISTORY = 'DEVICE_HISTORY',
+  POTENCY = 'POTENCY'
 }
 
 export enum AliasEntityType {
@@ -417,6 +419,18 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         details: "device-monitor.alarm-rule-details",
         selectedEntities: "device-monitor.selected-alarm-rules"
       }
+    ],
+    [
+      EntityType.DEVICE_HISTORY,
+      {
+        noEntities: 'device-monitor.no-device-history'
+      }
+    ],
+    [
+      EntityType.POTENCY,
+      {
+        noEntities: 'device.no-devices-text'
+      }
     ]
   ]
 );
@@ -563,6 +577,18 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.ALARM_RULES,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.DEVICE_HISTORY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.POTENCY,
       {
         helpLinkId: ''
       }

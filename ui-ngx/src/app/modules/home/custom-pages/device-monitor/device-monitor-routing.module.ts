@@ -4,6 +4,7 @@ import { EntitiesTableComponent } from '../../components/entity/entities-table.c
 import { AlarmRecordTableConfigResolver } from './alarm-record/alarm-record-table-config.resolver';
 import { AlarmRulesTableConfigResolver } from './alarm-rules/alarm-rules-table-config.resolver';
 import { DeviceDetailsComponent } from './real-time-monitor/device-details/device-details.component';
+import { DeviceHistoryTableConfigResolver } from './real-time-monitor/device-history-table-config.resolver';
 import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.component';
 
 const routes: Routes = [
@@ -39,14 +40,34 @@ const routes: Routes = [
           },
           {
             path: ':deviceId/details',
-            component: DeviceDetailsComponent,
             data: {
-              title: 'device-monitor.device-details',
               breadcrumb: {
                 label: 'device-monitor.device-details',
                 icon: 'mdi:device-details'
               }
-            }
+            },
+            children: [
+              {
+                path: '',
+                component: DeviceDetailsComponent,
+                data: {
+                  title: 'device-monitor.device-details'
+                }
+              },
+              {
+                path: 'history',
+                component: EntitiesTableComponent,
+                resolve: {
+                  entitiesTableConfig: DeviceHistoryTableConfigResolver
+                },
+                data: {
+                  breadcrumb: {
+                    label: 'device-monitor.device-history',
+                    icon: 'mdi:history-data'
+                  }
+                }
+              }
+            ]
           }
         ]
       },
@@ -94,7 +115,8 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     AlarmRecordTableConfigResolver,
-    AlarmRulesTableConfigResolver
+    AlarmRulesTableConfigResolver,
+    DeviceHistoryTableConfigResolver
   ]
 })
 export class DeviceMonitorRoutingModule { }

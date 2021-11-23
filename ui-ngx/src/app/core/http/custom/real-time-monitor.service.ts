@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { AuthService } from "@app/core/auth/auth.service";
 import { RequestConfig, defaultHttpOptionsFromConfig, WINDOW } from "@app/core/public-api";
-import { DeviceDetails, DeviceHistoryTableHeader, DeviceProp, RealTimeData } from "@app/shared/models/custom/device-monitor.models";
+import { DeviceDetails, DevicePropHistory, RealTimeData } from "@app/shared/models/custom/device-monitor.models";
 import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
 import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
@@ -57,30 +57,22 @@ export class RealTimeMonitorService {
   }
 
   // 获取某条属性/参数的历史数据
-  public getPropHistoryData(deviceId: string, groupPropertyName: string, config?: RequestConfig): Observable<DeviceProp[]> {
-    return this.http.get<DeviceProp[]>(
+  public getPropHistoryData(deviceId: string, groupPropertyName: string, config?: RequestConfig): Observable<DevicePropHistory> {
+    return this.http.get<DevicePropHistory>(
       `/api/deviceMonitor/rtMonitor/device/groupProperty/history?deviceId=${deviceId}&groupPropertyName=${groupPropertyName}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
 
   // 获取设备历史数据表头
-  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<DeviceHistoryTableHeader> {
-    return this.http.get<DeviceHistoryTableHeader>(`/api/deviceMonitor/rtMonitor/device/history/header/${id}`, defaultHttpOptionsFromConfig(config));
+  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<{ name: string }[]> {
+    return this.http.get<{ name: string }[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备历史数据列表
-  public getDeviceHistoryDatas(pageLink: PageLink, filterParams: { startTime: number, endTime: number }, config?: RequestConfig): Observable<PageData<any>> {
-    let queryStr: string[] = [];
-    Object.keys(filterParams).forEach(key => {
-      if (key === 'startTime' || key === 'endTime') {
-        queryStr.push(`${key}=${filterParams[key] ? new Date(filterParams[key]).getTime() : ''}`);
-      } else {
-        queryStr.push(`${key}=${filterParams[key]}`);
-      }
-    });
-    return this.http.get<PageData<any>>(
-      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&${queryStr.join('&')}`,
+  public getDeviceHistoryDatas(pageLink: PageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
+    return this.http.get<PageData<object>>(
+      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
@@ -111,7 +103,9 @@ export class RealTimeMonitorService {
     this.webSocket.onopen = () => {
       this.isOpened = true;
       this.isOpening = false;
-      this.switchDevices(deviceIdList);
+      setTimeout(() => {
+        this.switchDevices(deviceIdList);
+      }, 1000);
     }
     this.webSocket.onerror = () => {
       this.isOpening = false;
