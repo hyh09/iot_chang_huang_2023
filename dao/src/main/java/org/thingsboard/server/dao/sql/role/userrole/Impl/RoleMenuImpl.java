@@ -1,11 +1,11 @@
-package org.thingsboard.server.service.userrole.Impl;
+package org.thingsboard.server.dao.sql.role.userrole.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.commons.lang3.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -16,20 +16,21 @@ import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.vo.enums.MenuCheckEnum;
 import org.thingsboard.server.common.data.vo.menu.QueryMenuByRoleVo;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
-import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 import org.thingsboard.server.dao.sql.role.entity.TenantMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
+import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
+import org.thingsboard.server.dao.sql.role.userrole.sqldata.SqlVo;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
 import org.thingsboard.server.dao.user.UserService;
-import org.thingsboard.server.entity.ResultVo;
-import org.thingsboard.server.entity.rolemenu.InMenuByUserVo;
-import org.thingsboard.server.entity.rolemenu.OutMenuByUserVo;
-import org.thingsboard.server.entity.rolemenu.RoleMenuVo;
-import org.thingsboard.server.service.userrole.RoleMenuSvc;
-import org.thingsboard.server.service.userrole.SqlSplicingSvc;
-import org.thingsboard.server.service.userrole.sqldata.SqlVo;
+import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
+import org.thingsboard.server.dao.sql.role.service.rolemenu.OutMenuByUserVo;
+import org.thingsboard.server.dao.sql.role.service.rolemenu.RoleMenuVo;
+//import org.thingsboard.server.service.userrole.RoleMenuSvc;
+//import org.thingsboard.server.service.userrole.SqlSplicingSvc;
+//import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
     @Autowired private TenantSysRoleService roleService;
 
     @Autowired private TenantMenuService  menuService;//租户菜单接口
-    @Autowired  private  SqlSplicingSvc splicingSvc;
+    @Autowired  private SqlSplicingSvc splicingSvc;
     @Autowired private UserService userService;
 
 

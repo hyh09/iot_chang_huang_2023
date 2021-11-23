@@ -1,8 +1,7 @@
-package org.thingsboard.server.service.userrole.Impl;
+package org.thingsboard.server.dao.sql.role.userrole.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -19,15 +18,19 @@ import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
+import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
+import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
+import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
+import org.thingsboard.server.dao.sql.role.userrole.sqldata.SqlVo;
+import org.thingsboard.server.dao.sql.role.userrole.user.UserRoleVo;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.util.JsonUtils;
 import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
-import org.thingsboard.server.dao.util.sql.jpa.transform.NameTransform;
-import org.thingsboard.server.entity.ResultVo;
-import org.thingsboard.server.entity.role.UserRoleVo;
-import org.thingsboard.server.service.userrole.SqlSplicingSvc;
-import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
-import org.thingsboard.server.service.userrole.sqldata.SqlVo;
+//import org.thingsboard.server.entity.ResultVo;
+//import org.thingsboard.server.entity.role.UserRoleVo;
+//import org.thingsboard.server.service.userrole.SqlSplicingSvc;
+//import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
+//import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
 import java.util.HashMap;
 import java.util.List;
