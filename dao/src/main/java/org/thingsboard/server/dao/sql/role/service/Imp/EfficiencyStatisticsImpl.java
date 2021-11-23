@@ -670,6 +670,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     private  String getHomeKeyNameByUtil(String str01,Map  map)
     {
-        return "单位能耗能耗"+str01+" ("+map.get(str01)+")";
+        return "单位能耗"+str01+" ("+map.get(str01)+")";
     }
 }
