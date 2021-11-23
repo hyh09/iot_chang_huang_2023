@@ -41,7 +41,7 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
         this.config.entitiesDeleteEnabled = false;
         this.config.selectionEnabled = false;
         this.config.useTimePageLink = true;
-        this.config.timeWindowInFilter = true
+        this.config.timeWindowInFilter = true;
 
         this.config.columns.splice(1, this.config.columns.length - 1);
         (res || []).forEach(col => {

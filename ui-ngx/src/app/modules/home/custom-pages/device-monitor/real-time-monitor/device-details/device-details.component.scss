@@ -47,6 +47,11 @@
             }
           }
         }
+        .line-chart-wrapper {
+          .line-chart-item {
+            height: calc((100% - 16px) / 2);
+          }
+        }
       }
       .right-content {
         border-radius: 4px;

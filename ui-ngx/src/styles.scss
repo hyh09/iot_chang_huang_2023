@@ -1173,6 +1173,9 @@ button.link-button {
   nz-embed-empty {
     font-size: 14px;
   }
+  tr.ant-table-row.active td {
+    background: #f4f4f4;
+  }
 }
 
 .ant-empty-description {

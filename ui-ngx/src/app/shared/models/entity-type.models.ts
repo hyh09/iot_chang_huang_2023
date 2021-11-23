@@ -47,7 +47,8 @@ export enum EntityType {
   ROLE_MNG = 'ROLE_MNG',
   ALARM_RECORD = 'ALARM_RECORD',
   ALARM_RULES = 'ALARM_RULES',
-  DEVICE_HISTORY = 'DEVICE_HISTORY'
+  DEVICE_HISTORY = 'DEVICE_HISTORY',
+  POTENCY = 'POTENCY'
 }
 
 export enum AliasEntityType {
@@ -424,6 +425,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       {
         noEntities: 'device-monitor.no-device-history'
       }
+    ],
+    [
+      EntityType.POTENCY,
+      {
+        noEntities: 'device.no-devices-text'
+      }
     ]
   ]
 );
@@ -576,6 +583,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.DEVICE_HISTORY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.POTENCY,
       {
         helpLinkId: ''
       }

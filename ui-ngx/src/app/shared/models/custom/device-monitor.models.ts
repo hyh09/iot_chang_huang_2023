@@ -79,6 +79,11 @@ export interface DeviceProp {
   unit: string;
 }
 
+export interface DevicePropHistory {
+  isShowChart: boolean;
+  propertyVOList: DeviceProp[];
+}
+
 export interface DevicePropGroup {
   id?: string;
   name?: string;
@@ -90,8 +95,4 @@ export interface DeviceDetails extends DeviceBaseInfo {
   resultList?: DevicePropGroup[]; // 设备参数
   resultUngrouped?: DevicePropGroup; // 设备属性
   componentList?: DeviceComp[]; // 设备部件
-}
-
-export interface DeviceHistoryTableHeader {
-  name: string;
 }

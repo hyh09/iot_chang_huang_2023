@@ -14,8 +14,14 @@
         </div>
       </div>
     </div>
-    <tb-prop-data-chart fxFlex [propName]="currPropName" [data]="propHistoryData"></tb-prop-data-chart>
-    <tb-warning-statistics-chart fxFlex [data]="alarmTimesList"></tb-warning-statistics-chart>
+    <div fxFlex fxLayout="column" fxLayoutGap="16px" class="line-chart-wrapper">
+      <div [fxShow]="showRealTimeChart" class="line-chart-item">
+        <tb-prop-data-chart [propName]="currPropName" [data]="propHistoryData"></tb-prop-data-chart>
+      </div>
+      <div class="line-chart-item">
+        <tb-warning-statistics-chart [data]="alarmTimesList"></tb-warning-statistics-chart>
+      </div>
+    </div>
   </div>
   <div fxFlex class="right-content">
     <div *ngIf="deviceData.length > 0 || devcieComp.length > 0" fxLayout="column" class="real-time-data">
@@ -41,7 +47,7 @@
             nzNoResult="{{ 'common.data-empty' | translate }}"
           >
             <tbody>
-              <tr *ngFor="let data of deviceDataTable.data" (click)="fetchPropHistoryData(data.name)">
+              <tr *ngFor="let data of deviceDataTable.data" (click)="fetchPropHistoryData(data.name)" [class.active]="data.name === currPropName">
                 <td width="33%">{{data.name}}</td>
                 <td width="33%">{{data.content}}{{data.unit}}</td>
                 <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
@@ -84,7 +90,7 @@
                       [nzShowPagination]="false"
                     >
                       <tbody>
-                        <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name)">
+                        <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name)" [class.active]="data.name === currPropName">
                           <td width="33%" [nzIndentSize]="item.level! * 5">{{data.name}}</td>
                           <td width="33%">{{data.content}}{{data.unit}}</td>
                           <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>

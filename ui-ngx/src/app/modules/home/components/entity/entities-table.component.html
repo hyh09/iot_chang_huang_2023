@@ -132,7 +132,7 @@
         <div [fxShow]="!entitiesTableConfig.groupActionEnabled || dataSource.selection.isEmpty()" class="entity-filter-header">
           <tb-timewindow
             *ngIf="entitiesTableConfig.useTimePageLink && entitiesTableConfig.timeWindowInFilter"
-            style="margin-right: 11px"
+            style="margin: 0 11px 0 5px"
             [(ngModel)]="timewindow"
             (ngModelChange)="onTimewindowChange()"
             asButton historyOnly>

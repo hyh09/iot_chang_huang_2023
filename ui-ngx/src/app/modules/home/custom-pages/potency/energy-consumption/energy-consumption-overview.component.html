@@ -1,0 +1,7 @@
+<div class="data-overview">
+  <div class="overview-item">{{ 'potency.total-energy-consumption' | translate }}</div>
+  <div
+    *ngFor="let item of entitiesTableConfig.componentsData.totalValue"
+    class="overview-item"
+  >{{ item }}</div>
+</div>

@@ -20,6 +20,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   deviceData: DevicePropGroup[] = []; // 设备属性/参数
   devcieComp: DeviceComp[] = []; // 设备部件
   mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
+  showRealTimeChart: boolean;
 
   constructor(
     private realTimeMonitorService: RealTimeMonitorService,
@@ -61,8 +62,13 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   fetchPropHistoryData(propName: string, callFn?: Function) {
     this.currPropName = propName;
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
-      this.propHistoryData = propData || [];
-      callFn && callFn();
+      if (propData.isShowChart) {
+        this.propHistoryData = propData.propertyVOList || [];
+        callFn && callFn();
+        this.showRealTimeChart = true;
+      } else {
+        this.showRealTimeChart = false;
+      }
     });
   }
 
