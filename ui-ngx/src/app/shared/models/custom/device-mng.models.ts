@@ -19,11 +19,13 @@ export interface DeviceData {
   name: string;
   content: string;
   title: string;
+  dictDataId: string;
 }
 
 export interface DeviceDataGroup {
   name: string;
   groupPropertyList: Array<DeviceData>;
+  editable?: boolean;
 }
 
 export interface DeviceCompProp {

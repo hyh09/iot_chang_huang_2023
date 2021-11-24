@@ -20,6 +20,7 @@ import org.thingsboard.server.dao.sql.role.entity.TenantMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
 import org.thingsboard.server.dao.sql.role.userrole.sqldata.SqlVo;
@@ -28,9 +29,7 @@ import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.OutMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.RoleMenuVo;
-//import org.thingsboard.server.service.userrole.RoleMenuSvc;
-//import org.thingsboard.server.service.userrole.SqlSplicingSvc;
-//import org.thingsboard.server.service.userrole.sqldata.SqlVo;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +46,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
     @Autowired private TenantMenuService  menuService;//租户菜单接口
     @Autowired  private SqlSplicingSvc splicingSvc;
     @Autowired private UserService userService;
+    @Autowired  private UserRoleMenuSvc userRoleMenuSvc;
 
 
 
@@ -140,7 +140,8 @@ public class RoleMenuImpl implements RoleMenuSvc {
             //返回系统菜单;
             return menusd;
         }
-        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+       // if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+        if(userRoleMenuSvc.isTENANT(userId.getId()))
         {
                 List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
             return listToVo(menus);

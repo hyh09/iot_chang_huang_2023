@@ -14,6 +14,9 @@ import java.util.UUID;
  **/
 public interface UserRoleMenuSvc {
 
+    //判断当前用户是不是租户
+    Boolean  isTENANT(UUID userId);
+
     //判断当人角色
     JudgeUserVo  decideUser(UserId userId);
 

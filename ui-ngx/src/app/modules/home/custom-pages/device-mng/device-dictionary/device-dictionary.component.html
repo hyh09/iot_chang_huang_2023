@@ -126,20 +126,25 @@
             nzClosable [nzTitle]="isEdit ? titleTemplate : groupControl.get('name').value"
           >
             <ng-template #titleTemplate>
-              <span *ngIf="!groupControl.get('isEdit').value && groupControl.get('name').value; else tabInput">
+              <span
+                *ngIf="!groupControl.get('isEdit').value && groupControl.get('name').value || !groupControl.get('editable').value; else tabInput"
+                [style.padding-right]="!groupControl.get('editable').value ? '10px' : ''"
+              >
                 {{ groupControl.get('name').value }}
               </span>
-              <mat-icon [matMenuTriggerFor]="tabMenu">more_vert</mat-icon>
-              <mat-menu #tabMenu="matMenu" xPosition="after">
-                <button mat-menu-item type="button" [disabled]="groupControl.get('isEdit').value" (click)="editDataGroupName(groupControl)">
-                  <mat-icon>edit</mat-icon>
-                  <span translate>action.rename</span>
-                </button>
-                <button mat-menu-item type="button" (click)="removeDeviceDataGroup($index)">
-                  <mat-icon>close</mat-icon>
-                  <span translate>action.delete</span>
-                </button>
-              </mat-menu>
+              <ng-container *ngIf="groupControl.get('editable').value">
+                <mat-icon [matMenuTriggerFor]="tabMenu">more_vert</mat-icon>
+                <mat-menu #tabMenu="matMenu" xPosition="after">
+                  <button mat-menu-item type="button" [disabled]="groupControl.get('isEdit').value" (click)="editDataGroupName(groupControl)">
+                    <mat-icon>edit</mat-icon>
+                    <span translate>action.rename</span>
+                  </button>
+                  <button mat-menu-item type="button" (click)="removeDeviceDataGroup($index)">
+                    <mat-icon>close</mat-icon>
+                    <span translate>action.delete</span>
+                  </button>
+                </mat-menu>
+              </ng-container>
               <ng-template #tabInput>
                 <mat-form-field class="tab-input">
                   <input
@@ -159,20 +164,28 @@
               fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
             >
               <ng-container [formGroupName]="$subIndex">
-                <mat-form-field class="mat-block">
-                  <mat-label translate>device-mng.device-data-name</mat-label>
-                  <input matInput formControlName="name">
-                </mat-form-field>
-                <mat-form-field class="mat-block" fxFlex>
-                  <mat-label translate>device-mng.device-data-content</mat-label>
-                  <input matInput formControlName="content">
-                </mat-form-field>
-                <mat-form-field class="mat-block" fxFlex>
-                  <mat-label translate>device-mng.device-data-desc</mat-label>
-                  <input matInput formControlName="title">
+                <fieldset fxFlex fxLayout="row" fxLayoutGap="10px" [disabled]="!groupControl.get('editable').value">
+                  <mat-form-field class="mat-block">
+                    <mat-label translate>device-mng.device-data-name</mat-label>
+                    <input matInput formControlName="name">
+                  </mat-form-field>
+                  <mat-form-field class="mat-block" fxFlex>
+                    <mat-label translate>device-mng.device-data-content</mat-label>
+                    <input matInput formControlName="content">
+                  </mat-form-field>
+                  <mat-form-field class="mat-block" fxFlex>
+                    <mat-label translate>device-mng.device-data-desc</mat-label>
+                    <input matInput formControlName="title">
+                  </mat-form-field>
+                </fieldset>
+                <mat-form-field>
+                  <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
+                  <mat-select formControlName="dictDataId">
+                    <mat-option *ngFor="let option of entitiesTableConfig.componentsData.dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
+                  </mat-select>
                 </mat-form-field>
                 <button
-                  *ngIf="isEdit"
+                  *ngIf="isEdit && groupControl.get('editable').value"
                   mat-icon-button
                   type="button"
                   matTooltip="{{ 'action.delete' | translate }}"

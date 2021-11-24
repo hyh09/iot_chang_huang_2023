@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { Observable } from 'rxjs';
-import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
+import { DeviceDataGroup, DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
 import { PageLink } from '@app/shared/models/page/page-link';
 import { PageData } from '@app/shared/models/page/page-data';
 import { HasUUID } from '@app/shared/public-api';
@@ -53,6 +53,11 @@ export class DeviceDictionaryService {
   // 获取所有设备字典
   public getAllDeviceDictionaries(config?: RequestConfig): Observable<DeviceDictionary[]> {
     return this.http.get<DeviceDictionary[]>(`/api/dict/device/all`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取初始化的设备参数分组及分组下的属性
+  public getDeviceInitDataGroup(config?: RequestConfig): Observable<DeviceDataGroup[]> {
+    return this.http.get<DeviceDataGroup[]>(`/api/dict/device/group/initData`, defaultHttpOptionsFromConfig(config));
   }
 
 }

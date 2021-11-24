@@ -58,6 +58,7 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
+import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -66,6 +67,7 @@ import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
@@ -78,7 +80,6 @@ import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
-//import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -94,9 +95,8 @@ import java.util.stream.Collectors;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class UserController extends BaseController {
+public class UserController extends BaseController implements DefalutSvc {
 
-    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
 
     public static final String USER_ID = "userId";
     public static final String YOU_DON_T_HAVE_PERMISSION_TO_PERFORM_THIS_OPERATION = "You don't have permission to perform this operation!";
@@ -114,7 +114,10 @@ public class UserController extends BaseController {
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
     @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired  private UserRoleMenuSvc  nuSvc;
     @Autowired  private UserMenuRoleService userMenuRoleService;
+
+
 
     @ApiOperation(value = "提供app端获取用户的信息【当前登录人的信息 无参请求】")
     @RequestMapping(value = "/app/user/", method = RequestMethod.GET)
@@ -308,7 +311,7 @@ public class UserController extends BaseController {
             List<EdgeId> relatedEdgeIds = findRelatedEdgeIds(getTenantId(), userId);
 
             userService.deleteUser(getCurrentUser().getTenantId(), userId);
-
+            userRoleMemuSvc.deleteRoleByUserId(userId.getId());
             logEntityAction(userId, user,
                     user.getCustomerId(),
                     ActionType.DELETED, null, strUserId);
@@ -336,7 +339,8 @@ public class UserController extends BaseController {
         try {
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             SecurityUser currentUser = getCurrentUser();
-            if (Authority.TENANT_ADMIN.equals(currentUser.getAuthority())) {
+             if(nuSvc.isTENANT(currentUser.getUuidId())){
+//            if (Authority.TENANT_ADMIN.equals(currentUser.getAuthority())) {
                 return checkNotNull(userService.findUsersByTenantId(currentUser.getTenantId(), pageLink));
             } else {
                 return checkNotNull(userService.findCustomerUsers(currentUser.getTenantId(), currentUser.getCustomerId(), pageLink));
@@ -464,6 +468,14 @@ public class UserController extends BaseController {
             user.setType(securityUser.getType());
             user.setFactoryId(securityUser.getFactoryId());
 
+            if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+            {
+                user.setAuthority(Authority.FACTORY_MANAGEMENT);
+            }else{
+                user.setAuthority(Authority.TENANT_ADMIN);
+            }
+
+
 
             log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
@@ -559,26 +571,29 @@ public class UserController extends BaseController {
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String sortProperty,
             @RequestParam(required = false) String sortOrder) throws ThingsboardException {
+         try {
+             Map<String, Object> queryParam = new HashMap<>();
+             if (!StringUtils.isEmpty(userCode)) {
+                 queryParam.put("userCode", userCode);
+             }
+             if (!StringUtils.isEmpty(userName)) {
+                 queryParam.put("userName", userName);
+             }
+             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+             SecurityUser securityUser = getCurrentUser();
+             queryParam.put("tenantId", securityUser.getTenantId().getId());
+             if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
+                 log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
+                 queryParam.put("factoryId", securityUser.getFactoryId());
+             }
 
-        Map<String, Object> queryParam  =new HashMap<>();
-        if(!StringUtils.isEmpty(userCode))
-        {
-            queryParam.put("userCode", userCode);
-        }
-        if(!StringUtils.isEmpty(userName))
-        {
-            queryParam.put("userName", userName);
-        }
-        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        SecurityUser  securityUser =  getCurrentUser();
-        queryParam.put("tenantId",securityUser.getTenantId().getId());
-        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+             return userService.findAll(queryParam, pageLink);
+         }catch (Exception  e)
          {
-             log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}",securityUser.getFactoryId());
-             queryParam.put("factoryId",securityUser.getFactoryId());
+             e.printStackTrace();
+             log.info("查询用户 【分页查询】打印当前异常:{}",e);
+             throw new ThingsboardException("查询用户异常!", ThingsboardErrorCode.GENERAL);
          }
-
-        return userService.findAll(queryParam,pageLink);
     }
 
     @ApiOperation(value = "用户管理得 用户得重复数据校验")

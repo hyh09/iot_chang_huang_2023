@@ -212,11 +212,17 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             whereSql.append(" and t1.tenant_id =:tenantId ");
             param.put("tenantId", vo.getTenantId());
         }
-        if((vo.getCreateId() !=null ))
+
+        if(vo.getFactoryId() != null)
         {
-            whereSql.append(" and t1.user_creator =:userCreator ");
-            param.put("userCreator", vo.getCreateId().toString());
+            whereSql.append(" and t1.factoryId =:factoryId ");
+            param.put("factoryId", vo.getFactoryId());
         }
+//        if((vo.getCreateId() !=null ))
+//        {
+//            whereSql.append(" and t1.user_creator =:userCreator ");
+//            param.put("userCreator", vo.getCreateId().toString());
+//        }
 
         return  new  SqlVo(sql+whereSql.toString(),param);
     }
