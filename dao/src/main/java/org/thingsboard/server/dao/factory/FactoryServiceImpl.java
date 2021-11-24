@@ -46,22 +46,26 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     @Override
     public Factory saveFactory(Factory factory) throws ThingsboardException{
         log.trace("Executing saveFactory [{}]", factory);
-        if (factory != null && factory.getId() == null) {
+        factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
+        Factory factorySave = factoryDao.saveFactory(factory);
+        if (factorySave != null && factory.getId() == null) {
             //创建管理员账号
             User adduser = new User();
-            adduser.setPhoneNumber(factory.getMobile());
-            adduser.setEmail(factory.getEmail());
-            adduser.setUserName(factory.getName());
+            adduser.setPhoneNumber(factorySave.getMobile());
+            adduser.setEmail(factorySave.getEmail());
+            adduser.setUserName(factorySave.getName());
+            adduser.setFactoryId(factorySave.getId());
             User loginUser = new User();
-            loginUser.setId(new UserId(factory.getCreatedUser()));
-            loginUser.setTenantId(new TenantId(factory.getTenantId()));
+            loginUser.setId(new UserId(factorySave.getCreatedUser()));
+            loginUser.setTenantId(new TenantId(factorySave.getTenantId()));
             User saveUser = userRoleMenuSvc.save(adduser,loginUser);
 
-            factory.setAdminUserId(saveUser.getId().getId());
-            factory.setAdminUserName(saveUser.getUserName());
+            //保存管理员信息
+            factorySave.setAdminUserId(saveUser.getId().getId());
+            factorySave.setAdminUserName(saveUser.getUserName());
+            factoryDao.saveFactory(factorySave);
         }
-        factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
-        return factoryDao.saveFactory(factory);
+        return factorySave;
     }
 
     /**
