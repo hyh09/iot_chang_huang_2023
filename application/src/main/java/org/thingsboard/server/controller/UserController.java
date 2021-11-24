@@ -308,7 +308,7 @@ public class UserController extends BaseController {
             List<EdgeId> relatedEdgeIds = findRelatedEdgeIds(getTenantId(), userId);
 
             userService.deleteUser(getCurrentUser().getTenantId(), userId);
-
+            userRoleMemuSvc.deleteRoleByUserId(userId.getId());
             logEntityAction(userId, user,
                     user.getCustomerId(),
                     ActionType.DELETED, null, strUserId);
