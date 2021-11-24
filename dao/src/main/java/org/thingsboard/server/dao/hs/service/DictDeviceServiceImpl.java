@@ -309,6 +309,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                     BeanUtils.copyProperties(propertyVO, property);
                     property.setComponentId(dictDeviceComponentEntity.getId().toString());
                     property.setSort(pSort);
+                    property.setDictDeviceId(dictDeviceId);
                     propertyList.add(property);
                     pSort += 1;
                 }
