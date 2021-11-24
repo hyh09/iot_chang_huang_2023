@@ -64,7 +64,7 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
      * @param tenantId
      * @return
      */
-    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId ORDER BY t.sort ASC")
+    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId ORDER BY t.level,t.sort ASC")
     List<TenantMenuEntity> getTenantMenuList(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId);
 
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.tenantMenuName = :tenantMenuName ORDER BY t.sort ASC")
@@ -92,7 +92,7 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
     @Query("DELETE FROM TenantMenuEntity t WHERE t.sysMenuId = :sysMenuId")
     void delByMenuId(@Param("sysMenuId")UUID sysMenuId);
 
-    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.id in (:ids) ORDER BY t.sort ASC")
+    @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.id in (:ids) ORDER BY  t.level, t.sort ASC")
     List<TenantMenuEntity> getTenantMenuListByIds(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId, @Param("ids") List<UUID> ids);
 
 }
