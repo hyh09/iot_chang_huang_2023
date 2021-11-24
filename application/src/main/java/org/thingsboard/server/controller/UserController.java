@@ -559,26 +559,29 @@ public class UserController extends BaseController {
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String sortProperty,
             @RequestParam(required = false) String sortOrder) throws ThingsboardException {
+         try {
+             Map<String, Object> queryParam = new HashMap<>();
+             if (!StringUtils.isEmpty(userCode)) {
+                 queryParam.put("userCode", userCode);
+             }
+             if (!StringUtils.isEmpty(userName)) {
+                 queryParam.put("userName", userName);
+             }
+             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+             SecurityUser securityUser = getCurrentUser();
+             queryParam.put("tenantId", securityUser.getTenantId().getId());
+             if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
+                 log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
+                 queryParam.put("factoryId", securityUser.getFactoryId());
+             }
 
-        Map<String, Object> queryParam  =new HashMap<>();
-        if(!StringUtils.isEmpty(userCode))
-        {
-            queryParam.put("userCode", userCode);
-        }
-        if(!StringUtils.isEmpty(userName))
-        {
-            queryParam.put("userName", userName);
-        }
-        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        SecurityUser  securityUser =  getCurrentUser();
-        queryParam.put("tenantId",securityUser.getTenantId().getId());
-        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+             return userService.findAll(queryParam, pageLink);
+         }catch (Exception  e)
          {
-             log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}",securityUser.getFactoryId());
-             queryParam.put("factoryId",securityUser.getFactoryId());
+             e.printStackTrace();
+             log.info("查询用户 【分页查询】打印当前异常:{}",e);
+             throw new ThingsboardException("查询用户异常!", ThingsboardErrorCode.GENERAL);
          }
-
-        return userService.findAll(queryParam,pageLink);
     }
 
     @ApiOperation(value = "用户管理得 用户得重复数据校验")
