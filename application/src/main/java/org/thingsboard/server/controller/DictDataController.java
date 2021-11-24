@@ -149,7 +149,7 @@ public class DictDataController extends BaseController {
      * 【不分页】获得数据字典列表
      */
     @ApiOperation(value = "获得数据字典列表")
-    @DeleteMapping("/dict/data/all")
+    @GetMapping("/dict/data/all")
     public List<DictData> listDictDataAll() throws ThingsboardException {
         return this.dictDataService.listAllDictData(getTenantId());
     }
