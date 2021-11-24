@@ -77,42 +77,55 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
      */
     @Override
     public JudgeUserVo decideUser(UserId userId) {
+         JudgeUserVo  judgeUserVo =  new JudgeUserVo();
+
         User  user =  userService.findUserById(null,userId);
-        JudgeUserVo  judgeUserVo =  new JudgeUserVo();
-        if(user == null)
+        if(user.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
         {
-            return  judgeUserVo;
-//           throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询不到");
+            return  new JudgeUserVo(false,true,userId.getId());
         }
-        
+        if(user.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
+        {
+            return  new JudgeUserVo(true,false,userId.getId());
+        }
+//        JudgeUserVo  judgeUserVo =  new JudgeUserVo();
+//        if(user == null)
+//        {
+//            return  judgeUserVo;
+////           throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询不到");
+//        }
+//
+//
+//        ///暂时的
+//        if(isTENANT(user.getUuidId()))
+//        {
+//            judgeUserVo.setTenantFlag(true);
+//            return judgeUserVo;
+//        }
+//
+//        //当前用户查询
+//        List<TenantSysRoleEntity>  factorySysRoleEntities =  tenantSysRoleService.queryRoleByUserId(user.getUuidId());
+//        JudgeUserVo vo1 = getJudeUserVoById(factorySysRoleEntities,user.getUuidId()) ;
+//        if(vo1 != null)
+//        {
+//            return  vo1;
+//        }
+//
+//
+//        if(CollectionUtils.isEmpty(factorySysRoleEntities))
+//        {
+//            return  new JudgeUserVo();
+////            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询未分配角色");
+//
+//        }
+//        //当前创建人的角色
+//        List<TenantSysRoleEntity>  tenantSysRoleEntities1 =  tenantSysRoleService.queryRoleByUserId(UUID.fromString(user.getUserCreator()));
+//        JudgeUserVo vo = getJudeUserVoById(tenantSysRoleEntities1,UUID.fromString(user.getUserCreator())) ;
+//        if(vo != null)
+//        {
+//            return  vo;
+//        }
 
-        ///暂时的
-        if(isTENANT(user.getUuidId()))
-        {
-            judgeUserVo.setTenantFlag(true);
-            return judgeUserVo;
-        }
-
-        //当前用户查询
-        List<TenantSysRoleEntity>  factorySysRoleEntities =  tenantSysRoleService.queryRoleByUserId(user.getUuidId());
-        if(CollectionUtils.isEmpty(factorySysRoleEntities))
-        {
-            return  new JudgeUserVo();
-//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"用户id:"+userId+"查询未分配角色");
-
-        }
-        //当前创建人的角色
-        List<TenantSysRoleEntity>  tenantSysRoleEntities1 =  tenantSysRoleService.queryRoleByUserId(UUID.fromString(user.getUserCreator()));
-        JudgeUserVo vo = getJudeUserVoById(tenantSysRoleEntities1,UUID.fromString(user.getUserCreator())) ;
-        if(vo != null)
-        {
-            return  vo;
-        }
-        JudgeUserVo vo1 = getJudeUserVoById(factorySysRoleEntities,user.getUuidId()) ;
-        if(vo1 != null)
-        {
-            return  vo1;
-        }
         return  new JudgeUserVo(false,false,null);
 
     }
