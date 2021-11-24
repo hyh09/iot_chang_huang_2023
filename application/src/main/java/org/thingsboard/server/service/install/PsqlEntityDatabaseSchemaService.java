@@ -29,6 +29,7 @@ public class PsqlEntityDatabaseSchemaService extends SqlAbstractDatabaseSchemaSe
     public static final String SCHEMA_ENTITIES_SQL = "schema-entities.sql";
     public static final String SCHEMA_ENTITIES_IDX_SQL = "schema-entities-idx.sql";
     public static final String SCHEMA_ENTITIES_IDX_PSQL_ADDON_SQL = "schema-entities-idx-psql-addon.sql";
+    public static final String Test001 = "1.0.0.sql";
 
     public PsqlEntityDatabaseSchemaService() {
         super(SCHEMA_ENTITIES_SQL, SCHEMA_ENTITIES_IDX_SQL);
@@ -39,6 +40,10 @@ public class PsqlEntityDatabaseSchemaService extends SqlAbstractDatabaseSchemaSe
         super.createDatabaseIndexes();
         log.info("Installing SQL DataBase schema PostgreSQL specific indexes part: " + SCHEMA_ENTITIES_IDX_PSQL_ADDON_SQL);
         executeQueryFromFile(SCHEMA_ENTITIES_IDX_PSQL_ADDON_SQL);
+        log.info("Installing SQL DataBase schema PostgreSQL specific Test001 part: " + Test001);
+        executeQueryFromFile(Test001);
+
+
     }
 
 }
