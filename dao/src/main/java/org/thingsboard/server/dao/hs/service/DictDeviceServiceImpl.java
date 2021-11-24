@@ -475,6 +475,22 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     /**
+     * 获得全部设备字典属性(包括部件)-描述 Map
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public Map<String, String> mapAllPropertyTitle(UUID dictDeviceId) {
+        var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var map = componentList.stream().collect(Collectors.toMap(DictDeviceComponentProperty::getName, e-> Optional.ofNullable(e.getTitle()).orElse(e.getName()), (a, b) -> a));
+        return propertyList.stream().reduce(map, (r, e) -> {
+            r.put(e.getName(), Optional.ofNullable(e.getTitle()).orElse(e.getName()));
+            return r;
+        }, (a, b) -> null);
+    }
+
+    /**
      * 获得全部设备字典属性(包括部件)-数据字典Id Map
      *
      * @param dictDeviceId 设备字典Id
