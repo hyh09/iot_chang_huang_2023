@@ -67,6 +67,7 @@ import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
@@ -113,7 +114,10 @@ public class UserController extends BaseController implements DefalutSvc {
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
     @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired  private UserRoleMenuSvc  nuSvc;
     @Autowired  private UserMenuRoleService userMenuRoleService;
+
+
 
     @ApiOperation(value = "提供app端获取用户的信息【当前登录人的信息 无参请求】")
     @RequestMapping(value = "/app/user/", method = RequestMethod.GET)
@@ -335,7 +339,8 @@ public class UserController extends BaseController implements DefalutSvc {
         try {
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             SecurityUser currentUser = getCurrentUser();
-            if (Authority.TENANT_ADMIN.equals(currentUser.getAuthority())) {
+             if(nuSvc.isTENANT(currentUser.getUuidId())){
+//            if (Authority.TENANT_ADMIN.equals(currentUser.getAuthority())) {
                 return checkNotNull(userService.findUsersByTenantId(currentUser.getTenantId(), pageLink));
             } else {
                 return checkNotNull(userService.findCustomerUsers(currentUser.getTenantId(), currentUser.getCustomerId(), pageLink));

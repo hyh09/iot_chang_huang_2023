@@ -55,6 +55,21 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
 
     }
 
+    @Override
+    public Boolean isTENANT(UUID userId) {
+        List<TenantSysRoleEntity>  tenantSysRoleEntities =  tenantSysRoleService.queryRoleByUserId(userId);
+        if(CollectionUtils.isEmpty(tenantSysRoleEntities)){
+            return false;
+        }
+        long count=   tenantSysRoleEntities.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
+        if(count>0)
+        {
+            return  false;
+        }
+
+        return  false;
+    }
+
     /**
      * 查询当前人的是否是 工厂管理角色 /组合角色
      * @param userId
@@ -72,7 +87,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
         
 
         ///暂时的
-        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+        if(isTENANT(user.getUuidId()))
         {
             judgeUserVo.setTenantFlag(true);
             return judgeUserVo;
