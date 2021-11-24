@@ -1,3 +1,17 @@
-<p>
-  running-state works!
-</p>
+<div fxLayout="row" fxLayoutGap="16px" class="tb-running-state-wrapper">
+  <div class="left-content">
+    <tb-factory-tree [deviceOnly]="true" (clickNode)="fetchData($event)"></tb-factory-tree>
+  </div>
+  <div fxFlex fxLayout="column" fxLayoutGap="20px" class="right-content">
+    <div class="title">{{ 'potency.running-state' | translate }}</div>
+    <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start end" class="filters">
+      <mat-form-field>
+        <mat-label>{{ 'potency.property' | translate }}</mat-label>
+        <mat-select multiple [(ngModel)]="selectedPropIds" (ngModelChange)="fetchData()">
+          <mat-option *ngFor="let option of properties" [value]="option.id">{{ option.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <tb-timewindow [(ngModel)]="timewindow" (ngModelChange)="fetchData()" asButton historyOnly></tb-timewindow>
+    </div>
+  </div>
+</div>
