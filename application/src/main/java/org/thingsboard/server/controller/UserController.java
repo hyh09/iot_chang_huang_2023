@@ -463,6 +463,14 @@ public class UserController extends BaseController implements DefalutSvc {
             user.setType(securityUser.getType());
             user.setFactoryId(securityUser.getFactoryId());
 
+            if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+            {
+                user.setAuthority(Authority.FACTORY_MANAGEMENT);
+            }else{
+                user.setAuthority(Authority.TENANT_ADMIN);
+            }
+
+
 
             log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
