@@ -76,7 +76,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     /**
      * 创建者的类别 :租户类别  工厂类别
      */
-    private  String type;
+    private  String type="";
 
     /**
      * 工厂id

@@ -2,7 +2,6 @@ package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -10,6 +9,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
+import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -36,24 +36,39 @@ import java.util.UUID;
  **/
 @Slf4j
 @Service
-public class UserRoleMenuImpl  implements UserRoleMenuSvc {
+public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
 
-    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
-    protected static ApplicationContext applicationContext ;
 
     private final BCryptPasswordEncoder passwordEncoder;
-
-
-
-    @Autowired private UserService  userService;
-    @Autowired private TenantSysRoleService tenantSysRoleService;
-    @Autowired private UserMenuRoleService userMenuRoleService;
-    @Autowired protected CheckSvc checkSvc;
 
     public UserRoleMenuImpl() {
         passwordEncoder= new BCryptPasswordEncoder();
     }
 
+    @Autowired  private UserService  userService;
+    @Autowired  private TenantSysRoleService tenantSysRoleService;
+    @Autowired  private UserMenuRoleService userMenuRoleService;
+    @Autowired protected CheckSvc checkSvc;
+
+
+    {
+
+    }
+
+    @Override
+    public Boolean isTENANT(UUID userId) {
+        List<TenantSysRoleEntity>  tenantSysRoleEntities =  tenantSysRoleService.queryRoleByUserId(userId);
+        if(CollectionUtils.isEmpty(tenantSysRoleEntities)){
+            return false;
+        }
+        long count=   tenantSysRoleEntities.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
+        if(count>0)
+        {
+            return  true;
+        }
+
+        return  false;
+    }
 
     /**
      * 查询当前人的是否是 工厂管理角色 /组合角色
@@ -72,7 +87,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         
 
         ///暂时的
-        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+        if(isTENANT(user.getUuidId()))
         {
             judgeUserVo.setTenantFlag(true);
             return judgeUserVo;
@@ -116,14 +131,14 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
         UserVo  vo1 = new UserVo();
         vo1.setEmail(user.getEmail());
-//        if(checkSvc.checkValueByKey(vo1)){
-//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
-//        }
+        if(checkSvc.checkValueByKey(vo1)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
+        }
         UserVo  vo2 = new UserVo();
         vo2.setPhoneNumber(user.getPhoneNumber());
-//        if(checkSvc.checkValueByKey(vo2)){
-//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
-//        }
+        if(checkSvc.checkValueByKey(vo2)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
+        }
 
         //用户编码如果不传就
         if(StringUtils.isNotEmpty(user.getUserCode()))
@@ -138,6 +153,9 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         user.setTenantId(user1.getTenantId());
         user.setUserCreator(user1.getUuidId().toString());
         user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+
+         user.setAuthority(Authority.FACTORY_MANAGEMENT);
+
         User  rmUser= userService.save(user,encodePassword);
 
 
@@ -188,6 +206,4 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         }
         return  null;
     }
-
-
 }

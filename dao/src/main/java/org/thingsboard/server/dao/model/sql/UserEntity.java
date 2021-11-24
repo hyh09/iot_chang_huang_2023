@@ -184,7 +184,11 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         user.setUserCreator(userCreator);
 
         user.setFactoryId(factoryId);
-        user.setType(type);
+        if(type != null)
+        {
+            user.setType(type);
+
+        }
 
         return user;
     }
