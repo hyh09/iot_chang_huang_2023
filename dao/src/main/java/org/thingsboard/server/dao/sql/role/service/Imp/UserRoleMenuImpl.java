@@ -64,7 +64,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
         long count=   tenantSysRoleEntities.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
         if(count>0)
         {
-            return  false;
+            return  true;
         }
 
         return  false;
