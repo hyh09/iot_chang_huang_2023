@@ -460,15 +460,18 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var dictDataMap = this.dictDataService.mapAllDictData(tenantId);
         Map<String, String> rMap = Maps.newHashMap();
+        Map<String, String> nameTitleMap = Maps.newHashMap();
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData).orElse(null);
         if (device != null && device.getDictDeviceId() != null) {
             rMap = this.dictDeviceService.mapAllPropertyDictDataId(device.getDictDeviceId());
+            nameTitleMap = this.dictDeviceService.mapAllPropertyTitle(device.getDictDeviceId());
         }
         Map<String, String> finalRMap = rMap;
+        Map<String, String> finalNameTitleMap = nameTitleMap;
 
         propertyVOList.addAll(keyList.stream().map(e -> DictDeviceGroupPropertyVO.builder()
                 .name(e)
-                .title(e)
+                .title(finalNameTitleMap.getOrDefault(e, e))
                 .unit(Optional.ofNullable(finalRMap.getOrDefault(e, null))
                         .map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                 .build()).collect(Collectors.toList()));

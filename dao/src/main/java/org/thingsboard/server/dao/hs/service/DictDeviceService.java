@@ -132,6 +132,13 @@ public interface DictDeviceService {
     List<DictDevice> listAllDictDevice(TenantId tenantId);
 
     /**
+     * 获得全部设备字典属性(包括部件)-描述 Map
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    Map<String, String> mapAllPropertyTitle(UUID dictDeviceId);
+
+    /**
      * 获得全部设备字典属性(包括部件)-数据字典Id Map
      *
      * @param dictDeviceId 设备字典Id
