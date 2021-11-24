@@ -166,7 +166,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         log.info("【用户管理.用户添加的接口添加】"+user);
 
 
-//            user.setAuthority(Authority.CUSTOMER_USER);
+            user.setAuthority(Authority.TENANT_ADMIN);
 
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
