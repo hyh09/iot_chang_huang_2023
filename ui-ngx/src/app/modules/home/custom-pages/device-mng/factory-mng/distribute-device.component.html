@@ -20,24 +20,26 @@
           {{ 'device-mng.factory-required' | translate }}
         </mat-error>
       </mat-form-field>
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.work-shop</mat-label>
-        <mat-select formControlName="workshopId" required [disabled]="!form.get('factoryId').value">
-          <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('workshopId').hasError('required')">
-          {{ 'device-mng.work-shop-required' | translate }}
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.prod-line</mat-label>
-        <mat-select formControlName="productionLineId" required [disabled]="!form.get('workshopId').value">
-          <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('productionLineId').hasError('required')">
-          {{ 'device-mng.prod-line-required' | translate }}
-        </mat-error>
-      </mat-form-field>
+      <ng-container *ngIf="!data.factoryOnly">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.work-shop</mat-label>
+          <mat-select formControlName="workshopId" required [disabled]="!form.get('factoryId').value">
+            <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('workshopId').hasError('required')">
+            {{ 'device-mng.work-shop-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.prod-line</mat-label>
+          <mat-select formControlName="productionLineId" required [disabled]="!form.get('workshopId').value">
+            <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('productionLineId').hasError('required')">
+            {{ 'device-mng.prod-line-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </ng-container>
     </form>
   </div>
   <div mat-dialog-actions fxLayoutAlign="end center">
