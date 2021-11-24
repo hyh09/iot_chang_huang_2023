@@ -67,4 +67,9 @@ export class DataDictionaryService {
     return this.http.get(`/api/dict/data/availableCode`, { responseType: 'text' });
   }
 
+  // 获取所有设备字典
+  public getAllDataDictionaries(config?: RequestConfig): Observable<DataDictionary[]> {
+    return this.http.get<DataDictionary[]>(`/api/dict/data/all`, defaultHttpOptionsFromConfig(config));
+  }
+
 }

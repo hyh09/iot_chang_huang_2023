@@ -10,6 +10,7 @@ import { DeviceDictionaryComponent } from "./device-dictionary.component";
 import { DeviceDictionaryFiltersComponent } from "./device-dictionary-filters.component";
 import { map } from "rxjs/operators";
 import { UtilsService } from "@app/core/public-api";
+import { DataDictionaryService } from "@app/core/http/custom/data-dictionary.service";
 
 @Injectable()
 export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DeviceDictionary>> {
@@ -20,6 +21,7 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     private translate: TranslateService,
     private datePipe: DatePipe,
     private deviceDictionaryService: DeviceDictionaryService,
+    private dataDictionaryService: DataDictionaryService,
     private utils: UtilsService
   ) {
     this.config.entityType = EntityType.DEVICE_DICTIONARY;
@@ -32,7 +34,9 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       code: '',
       name: '',
       supplier: '',
-      availableCode: ''
+      availableCode: '',
+      initDataGroup: [],
+      dataDictionaryList: []
     }
 
     this.config.addDialogStyle = {width: '900px'};
@@ -58,10 +62,14 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       code: '',
       name: '',
       supplier: '',
-      availableCode: ''
+      availableCode: '',
+      initDataGroup: [],
+      dataDictionaries: []
     }
     
     this.setAvailableCode();
+    this.getInitDataGroup();
+    this.getAllDataDictionaries();
 
     this.config.tableTitle = this.translate.instant('device-mng.device-dic');
     this.config.searchEnabled = false;
@@ -90,7 +98,19 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
 
   setAvailableCode(): void {
     this.deviceDictionaryService.getAvailableCode().subscribe(code => {
-      this.config.componentsData.availableCode = code
+      this.config.componentsData.availableCode = code;
+    });
+  }
+
+  getInitDataGroup(): void {
+    this.deviceDictionaryService.getDeviceInitDataGroup().subscribe(res => {
+      this.config.componentsData.initDataGroup = res || [];
+    });
+  }
+
+  getAllDataDictionaries(): void {
+    this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
+      this.config.componentsData.dataDictionaries = res || [];
     });
   }
 
