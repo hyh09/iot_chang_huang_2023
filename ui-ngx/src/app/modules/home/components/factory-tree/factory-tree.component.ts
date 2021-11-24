@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FactoryMngService } from '@app/core/http/custom/factory-mng.service';
 import { AppState, TreeNodeEmitEvent, UtilsService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTreeNodeIds, FactoryTreeNodeOptions } from '@app/shared/models/custom/factory-mng.models';
@@ -18,6 +18,8 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   public scrollHeight = '';
 
   public selectedKeys: string[] = [];
+
+  @Input() deviceOnly: boolean = false;
 
   @Output() clickNode = new EventEmitter<FactoryTreeNodeIds>();
 
@@ -87,7 +89,8 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           workshopId: item.workshopId,
           workshopName: item.workshopName,
           productionLineId: item.productionLineId,
-          productionLineName: item.productionLineName
+          productionLineName: item.productionLineName,
+          selectable: this.deviceOnly ? item.rowType === 'device' : true
         });
       });
       this.selectedKeys = treeArr[0] ? [treeArr[0].key] : [];
@@ -108,6 +111,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
 
   onClickNode(event: TreeNodeEmitEvent) {
     const { node } = event;
+    if (this.deviceOnly && node.origin.rowType !== 'device') return;
     this.selectedKeys = [node.key];
     const nodeInfo: FactoryTreeNodeOptions = node.origin;
     const { rowType, id, factoryId, workshopId, productionLineId, deviceId } = nodeInfo;

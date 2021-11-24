@@ -2921,6 +2921,9 @@
     "comp-name": "部件名称",
     "comp-type": "部件类型",
     "comp-picture": "部件图片",
+    "comp-data": "部件参数",
+    "add-comp-data": "添加部件参数",
+    "add-comp-data-tip": "请点击右上角的 “+” 号来添加部件参数",
     "comp-empty": "暂无部件",
     "add-comp": "添加部件",
     "edit-comp": "编辑部件",
@@ -3113,6 +3116,7 @@
     "total-capacity": "总产能：",
     "total-energy-consumption": "总能耗：",
     "go-to-history": "查看历史数据",
-    "created-time": "上报时间"
+    "created-time": "上报时间",
+    "property": "参数"
   }
 }
