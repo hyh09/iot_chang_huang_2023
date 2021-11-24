@@ -1,4 +1,4 @@
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";

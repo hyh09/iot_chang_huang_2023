@@ -132,22 +132,21 @@ public class RoleMenuImpl implements RoleMenuSvc {
     @Override
     public List<TenantMenuVo>queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception {
         User user = userService.findUserById(tenantId, userId);
+        List<TenantMenuVo>  menusd = new ArrayList<>();
 
         log.info("=user===>{}",user);
         if(user.getAuthority() == Authority.SYS_ADMIN)
         {
             //返回系统菜单;
-            return null;
+            return menusd;
         }
         if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
         {
                 List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
             return listToVo(menus);
         }
-        List<TenantMenuVo>  menusd = new ArrayList<>();
         log.info("获取当前登录的人菜单:{}",vo);
         List<TenantMenuRoleEntity> entityList =  tenantMenuRoleService.queryMenuIdByRole(vo.getUserId());
-        //如果是系统管理员 或者租户管理员呢？ //先不考虑
         log.info("获取当前登录的人菜单查询到的角色数据:{}",entityList);
         if(CollectionUtils.isEmpty(entityList))
         {
@@ -159,7 +158,6 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
         List<TenantMenuVo>  vos=   listToVo(menus1);
         log.info("获取当前登录的人菜单TenantMenuVo:{}",vos);
-
         return  vos;
     }
 
