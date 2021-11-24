@@ -42,7 +42,7 @@
     "angular2-hotkeys": "^2.2.0",
     "canvas-gauges": "^2.1.7",
     "compass-sass-mixins": "^0.12.7",
-    "core-js": "^3.12.1",
+    "core-js": "^3.6.5",
     "date-fns": "^2.21.3",
     "echarts": "^5.2.2",
     "flot": "git://github.com/thingsboard/flot.git#0.9-work",

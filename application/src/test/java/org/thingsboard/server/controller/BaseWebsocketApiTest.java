@@ -89,7 +89,7 @@ public abstract class BaseWebsocketApiTest extends AbstractWebsocketTest {
         tenantAdmin = new User();
         tenantAdmin.setAuthority(Authority.TENANT_ADMIN);
         tenantAdmin.setTenantId(savedTenant.getId());
-        tenantAdmin.setEmail("tenant2@thingsboard.org");
+        tenantAdmin.setEmail("tenant2@huansi.net");
         tenantAdmin.setFirstName("Joe");
         tenantAdmin.setLastName("Downs");
 

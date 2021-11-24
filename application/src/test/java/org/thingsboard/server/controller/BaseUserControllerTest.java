@@ -55,7 +55,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         Tenant savedTenant = doPost("/api/tenant", tenant, Tenant.class);
         Assert.assertNotNull(savedTenant);
 
-        String email = "tenant2@thingsboard.org";
+        String email = "tenant2@huansi.net";
         User user = new User();
         user.setAuthority(Authority.TENANT_ADMIN);
         user.setTenantId(savedTenant.getId());
@@ -116,7 +116,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         User tenantAdmin = new User();
         tenantAdmin.setAuthority(Authority.TENANT_ADMIN);
         tenantAdmin.setTenantId(savedTenant.getId());
-        tenantAdmin.setEmail("tenant2@thingsboard.org");
+        tenantAdmin.setEmail("tenant2@huansi.net");
         tenantAdmin.setFirstName("Joe");
         tenantAdmin.setLastName("Downs");
         tenantAdmin = createUserAndLogin(tenantAdmin, "testPassword1");
@@ -139,7 +139,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         Tenant savedTenant = doPost("/api/tenant", tenant, Tenant.class);
         Assert.assertNotNull(savedTenant);
 
-        String email = "tenant2@thingsboard.org";
+        String email = "tenant2@huansi.net";
         User user = new User();
         user.setAuthority(Authority.TENANT_ADMIN);
         user.setTenantId(savedTenant.getId());
@@ -197,7 +197,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         Tenant savedTenant = doPost("/api/tenant", tenant, Tenant.class);
         Assert.assertNotNull(savedTenant);
 
-        String email = "tenant2@thingsboard.org";
+        String email = "tenant2@huansi.net";
         User user = new User();
         user.setAuthority(Authority.TENANT_ADMIN);
         user.setTenantId(savedTenant.getId());
@@ -293,7 +293,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
 
         User user = new User();
         user.setAuthority(Authority.TENANT_ADMIN);
-        user.setEmail("tenant2@thingsboard.org");
+        user.setEmail("tenant2@huansi.net");
         user.setFirstName("Joe");
         user.setLastName("Downs");
 
@@ -311,7 +311,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         Tenant savedTenant = doPost("/api/tenant", tenant, Tenant.class);
         Assert.assertNotNull(savedTenant);
 
-        String email = "tenant2@thingsboard.org";
+        String email = "tenant2@huansi.net";
         User user = new User();
         user.setAuthority(Authority.TENANT_ADMIN);
         user.setTenantId(savedTenant.getId());
@@ -349,7 +349,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
             User user = new User();
             user.setAuthority(Authority.TENANT_ADMIN);
             user.setTenantId(tenantId);
-            user.setEmail("testTenant" + i + "@thingsboard.org");
+            user.setEmail("testTenant" + i + "@huansi.net");
             tenantAdmins.add(doPost("/api/user", user, User.class));
         }
 
@@ -400,7 +400,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
             user.setAuthority(Authority.TENANT_ADMIN);
             user.setTenantId(tenantId);
             String suffix = RandomStringUtils.randomAlphanumeric((int) (5 + Math.random() * 10));
-            String email = email1 + suffix + "@thingsboard.org";
+            String email = email1 + suffix + "@huansi.net";
             email = i % 2 == 0 ? email.toLowerCase() : email.toUpperCase();
             user.setEmail(email);
             tenantAdminsEmail1.add(doPost("/api/user", user, User.class));
@@ -414,7 +414,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
             user.setAuthority(Authority.TENANT_ADMIN);
             user.setTenantId(tenantId);
             String suffix = RandomStringUtils.randomAlphanumeric((int) (5 + Math.random() * 10));
-            String email = email2 + suffix + "@thingsboard.org";
+            String email = email2 + suffix + "@huansi.net";
             email = i % 2 == 0 ? email.toLowerCase() : email.toUpperCase();
             user.setEmail(email);
             tenantAdminsEmail2.add(doPost("/api/user", user, User.class));
@@ -492,7 +492,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         User tenantAdmin = new User();
         tenantAdmin.setAuthority(Authority.TENANT_ADMIN);
         tenantAdmin.setTenantId(tenantId);
-        tenantAdmin.setEmail("tenant2@thingsboard.org");
+        tenantAdmin.setEmail("tenant2@huansi.net");
         tenantAdmin.setFirstName("Joe");
         tenantAdmin.setLastName("Downs");
 
@@ -509,7 +509,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
             User user = new User();
             user.setAuthority(Authority.CUSTOMER_USER);
             user.setCustomerId(customerId);
-            user.setEmail("testCustomer" + i + "@thingsboard.org");
+            user.setEmail("testCustomer" + i + "@huansi.net");
             customerUsers.add(doPost("/api/user", user, User.class));
         }
 
@@ -552,7 +552,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
         User tenantAdmin = new User();
         tenantAdmin.setAuthority(Authority.TENANT_ADMIN);
         tenantAdmin.setTenantId(tenantId);
-        tenantAdmin.setEmail("tenant2@thingsboard.org");
+        tenantAdmin.setEmail("tenant2@huansi.net");
         tenantAdmin.setFirstName("Joe");
         tenantAdmin.setLastName("Downs");
 
@@ -572,7 +572,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
             user.setAuthority(Authority.CUSTOMER_USER);
             user.setCustomerId(customerId);
             String suffix = RandomStringUtils.randomAlphanumeric((int) (5 + Math.random() * 10));
-            String email = email1 + suffix + "@thingsboard.org";
+            String email = email1 + suffix + "@huansi.net";
             email = i % 2 == 0 ? email.toLowerCase() : email.toUpperCase();
             user.setEmail(email);
             customerUsersEmail1.add(doPost("/api/user", user, User.class));
@@ -586,7 +586,7 @@ public abstract class BaseUserControllerTest extends AbstractControllerTest {
             user.setAuthority(Authority.CUSTOMER_USER);
             user.setCustomerId(customerId);
             String suffix = RandomStringUtils.randomAlphanumeric((int) (5 + Math.random() * 10));
-            String email = email2 + suffix + "@thingsboard.org";
+            String email = email2 + suffix + "@huansi.net";
             email = i % 2 == 0 ? email.toLowerCase() : email.toUpperCase();
             user.setEmail(email);
             customerUsersEmail2.add(doPost("/api/user", user, User.class));

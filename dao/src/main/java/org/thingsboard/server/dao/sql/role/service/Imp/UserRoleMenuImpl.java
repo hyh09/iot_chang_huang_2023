@@ -1,8 +1,8 @@
 package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -39,22 +39,21 @@ import java.util.UUID;
 public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
     private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
+    protected static ApplicationContext applicationContext ;
 
     private final BCryptPasswordEncoder passwordEncoder;
+
+
+
+    @Autowired private UserService  userService;
+    @Autowired private TenantSysRoleService tenantSysRoleService;
+    @Autowired private UserMenuRoleService userMenuRoleService;
+    @Autowired protected CheckSvc checkSvc;
 
     public UserRoleMenuImpl() {
         passwordEncoder= new BCryptPasswordEncoder();
     }
 
-    @Autowired  private UserService  userService;
-    @Autowired  private TenantSysRoleService tenantSysRoleService;
-    @Autowired  private UserMenuRoleService userMenuRoleService;
-    @Autowired protected CheckSvc checkSvc;
-
-
-    {
-
-    }
 
     /**
      * 查询当前人的是否是 工厂管理角色 /组合角色
@@ -117,14 +116,14 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
         UserVo  vo1 = new UserVo();
         vo1.setEmail(user.getEmail());
-        if(checkSvc.checkValueByKey(vo1)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
-        }
+//        if(checkSvc.checkValueByKey(vo1)){
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
+//        }
         UserVo  vo2 = new UserVo();
         vo2.setPhoneNumber(user.getPhoneNumber());
-        if(checkSvc.checkValueByKey(vo2)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
-        }
+//        if(checkSvc.checkValueByKey(vo2)){
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
+//        }
 
         //用户编码如果不传就
         if(StringUtils.isNotEmpty(user.getUserCode()))
@@ -189,4 +188,6 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         }
         return  null;
     }
+
+
 }

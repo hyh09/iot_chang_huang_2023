@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.service;
 
+import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
