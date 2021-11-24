@@ -1,7 +1,6 @@
 package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
+import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -36,9 +36,8 @@ import java.util.UUID;
  **/
 @Slf4j
 @Service
-public class UserRoleMenuImpl  implements UserRoleMenuSvc {
+public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
 
-    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
 
     private final BCryptPasswordEncoder passwordEncoder;
 

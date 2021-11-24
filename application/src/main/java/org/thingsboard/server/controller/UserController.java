@@ -58,6 +58,7 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
+import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -93,9 +94,8 @@ import java.util.stream.Collectors;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class UserController extends BaseController {
+public class UserController extends BaseController implements DefalutSvc {
 
-    private  static  final String DEFAULT_PASSWORD="123456";//rawPassword
 
     public static final String USER_ID = "userId";
     public static final String YOU_DON_T_HAVE_PERMISSION_TO_PERFORM_THIS_OPERATION = "You don't have permission to perform this operation!";
