@@ -273,7 +273,12 @@ public class UserRoleController extends BaseController{
         log.info("打印当前的入参:{}",vo);
         SecurityUser securityUser =  getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
-        vo.setCreateId(securityUser.getUuidId());
+//        vo.setCreateId(securityUser.getUuidId());
+
+        if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
+            log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
+             vo.setFactoryId(securityUser.getFactoryId());
+        }
 
         return userRoleMemuSvc.getUserByNotInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
