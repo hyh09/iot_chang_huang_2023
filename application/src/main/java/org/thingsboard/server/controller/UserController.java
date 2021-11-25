@@ -468,12 +468,12 @@ public class UserController extends BaseController implements DefalutSvc {
             user.setType(securityUser.getType());
             user.setFactoryId(securityUser.getFactoryId());
 
-            if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
-            {
-                user.setAuthority(Authority.FACTORY_MANAGEMENT);
-            }else{
-                user.setAuthority(Authority.TENANT_ADMIN);
-            }
+//            if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+//            {
+//                user.setAuthority(Authority.FACTORY_MANAGEMENT);
+//            }else{
+//                user.setAuthority(Authority.TENANT_ADMIN);
+//            }
 
 
 
