@@ -2,11 +2,11 @@ package org.thingsboard.server.dao.hs.dao;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponentProperty;
-import org.thingsboard.server.dao.hs.entity.po.DictDeviceGroupProperty;
 import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
@@ -90,7 +90,7 @@ public class DictDeviceComponentPropertyEntity extends BasePgEntity<DictDeviceCo
         this.title = common.getTitle();
         this.sort = common.getSort();
 
-        if (common.getDictDataId() != null)
+        if (common.getDictDataId() != null && !StringUtils.isBlank(common.getDictDataId()))
             this.dictDataId = UUID.fromString(common.getDictDataId());
 
         this.setCreatedTimeAndCreatedUser(common);
