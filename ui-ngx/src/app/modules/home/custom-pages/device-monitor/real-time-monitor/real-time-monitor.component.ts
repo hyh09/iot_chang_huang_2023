@@ -41,6 +41,9 @@ export class RealTimeMonitorComponent implements OnDestroy {
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
     if (factoryInfo) {
+      if (JSON.stringify(factoryInfo) !== JSON.stringify(this.factoryInfo)) {
+        this.pageLink.page = 0;
+      }
       this.factoryInfo = factoryInfo;
     }
     this.realTimeMonitorService.getRealTimeData(this.pageLink, this.factoryInfo).subscribe(res => {

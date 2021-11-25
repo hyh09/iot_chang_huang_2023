@@ -46,7 +46,7 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
         this.config.columns.splice(1, this.config.columns.length - 1);
         (res || []).forEach(col => {
           if (col.name !== 'createdTime') {
-            this.config.columns.push(new EntityTableColumn<object>(col.name, col.name, '', (entity) => (entity[col.name]), () => ({}), false));
+            this.config.columns.push(new EntityTableColumn<object>(col.name, col.title || col.name, '', (entity) => (entity[col.name]), () => ({}), false));
           }
         });
 

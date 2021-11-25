@@ -1954,7 +1954,7 @@
     "logout": "注销",
     "menu": "菜单",
     "open-user-menu": "打开用户菜单",
-    "profile": "属性"
+    "profile": "个人信息"
   },
   "icon": {
     "icon": "图标",
@@ -2165,7 +2165,7 @@
     "change-password": "更改密码",
     "current-password": "当前密码",
     "last-login-time": "最后登录",
-    "profile": "属性"
+    "profile": "个人信息"
   },
   "queue": {
     "name": "队列名称",
