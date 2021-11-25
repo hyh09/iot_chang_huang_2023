@@ -19,3 +19,7 @@ export interface DeviceCapacityList {
 export interface DeviceEnergyConsumptionList extends PageData<object> {
   totalValue: string[];
 }
+
+export interface RunningState {
+  [key: string]: { time: number; value: string; }[];
+}

@@ -15,7 +15,7 @@ import { EntityTableConfig } from '@app/modules/home/models/entity/entities-tabl
 import { WorkShopFormComponent } from './work-shop-form.component';
 import { ProdLineFormComponent } from './prod-line-form.component';
 import { DeviceFormComponent } from './device-form.component';
-import { DistributeDeviceComponent } from './distribute-device.component';
+import { DistributeDeviceComponent, DistributeDeviceDialogData } from './distribute-device.component';
 
 @Component({
   selector: 'tb-factory-mng',
@@ -258,10 +258,12 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
   }
 
   distributeDevice(deviceIdList?: string[]) {
-    this.dialog.open<DistributeDeviceComponent, string[]>(DistributeDeviceComponent, {
+    this.dialog.open<DistributeDeviceComponent, DistributeDeviceDialogData>(DistributeDeviceComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      data: deviceIdList || Array.from(this.checkedDeviceIdList)
+      data: {
+        deviceIdList: deviceIdList || Array.from(this.checkedDeviceIdList)
+      }
     }).afterClosed().subscribe(res => {
       res && this.fetchData();
       this.checkedDeviceIdList.clear();
