@@ -4,19 +4,17 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
-import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
@@ -231,8 +229,11 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     @ApiOperation("设备属性分组后的属性name属性接口--pc端下拉框")
     @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message =pc_queryDictName),
+    })
     @ResponseBody
-    public  Object queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+    public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         log.info("打印当前的入参:{}",deviceId);
         return  efficiencyStatisticsSvc.queryDictDevice(deviceId,getTenantId());
     }
@@ -240,15 +241,14 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
     @ApiOperation(value = "【PC端查询当前设备的运行状态】")
+    @ApiResponses({
+            @ApiResponse(code = 200, message =pc_queryTheRunningStatusByDevice),
+    })
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
         try {
-            if (queryTsKvVo.getEndTime() == null) {
-                queryTsKvVo.setStartTime(CommonUtils.getZero());
-                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-            }
-            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
+            return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
             log.error("【PC端查询当前设备的运行状态】异常信息:{}",e);
