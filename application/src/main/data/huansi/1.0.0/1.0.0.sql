@@ -654,3 +654,6 @@ ALTER TABLE public.tb_user
     ADD COLUMN type character varying(255) COLLATE pg_catalog."default";
 ALTER TABLE public.tb_user
     ADD COLUMN factory_id uuid;
+
+ALTER TABLE public.device
+    ADD COLUMN code character varying(1000) COLLATE pg_catalog."default";
