@@ -13,11 +13,12 @@ import { EntityTableHeaderComponent } from '../entity/entity-table-header.compon
 })
 export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implements OnInit, AfterViewInit {
 
-  public searchValue: string = '';
-  public treeData: FactoryTreeNodeOptions[] = [];
-  public scrollHeight = '';
+  searchValue: string = '';
+  treeData: FactoryTreeNodeOptions[] = [];
+  scrollHeight = '';
 
-  public selectedKeys: string[] = [];
+  selectedKeys: string[] = [];
+  expandedKeys: string[] = [];
 
   @Input() deviceOnly: boolean = false;
 
@@ -93,18 +94,24 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           selectable: this.deviceOnly ? item.rowType === 'device' : true
         });
       });
-      this.selectedKeys = treeArr[0] ? [treeArr[0].key] : [];
+      const params = { factoryId: '', workshopId: '', productionLineId: '', deviceId: '' };
+      if (this.deviceOnly) {
+        const device = res.deviceVoList[0] || {};
+        this.selectedKeys = [device.key];
+        const { factoryId, workshopId, productionLineId, id: deviceId } = device;
+        Object.assign(params, { factoryId, workshopId, productionLineId, deviceId });
+        this.expandedKeys = [factoryId, workshopId, productionLineId];
+      } else {
+        this.selectedKeys = res.factoryList[0] ? [res.factoryList[0].key] : [];
+        params.factoryId = this.selectedKeys[0] || '';
+      }
       this.treeData = this.utils.formatTree(treeArr);
-      const params = {
-        factoryId: this.selectedKeys[0] || '',
-        workshopId: '',
-        productionLineId: '',
-        deviceId: ''
-      };
-      this.clickNode.emit(params);
-      if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {
-        Object.assign(this.entitiesTableConfig.componentsData, params);
-        this.entitiesTableConfig.table.resetSortAndFilter(true);
+      if (this.selectedKeys[0]) {
+        this.clickNode.emit(params);
+        if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {
+          Object.assign(this.entitiesTableConfig.componentsData, params);
+          this.entitiesTableConfig.table.resetSortAndFilter(true);
+        }
       }
     });
   }

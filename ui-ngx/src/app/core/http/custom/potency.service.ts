@@ -3,7 +3,8 @@ import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
 import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
-import { DeviceCapacityList, DeviceEnergyConsumptionList } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumptionList, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceProp } from "@app/shared/models/custom/device-monitor.models";
 
 interface FilterParams {
   factoryId?: string;
@@ -63,6 +64,16 @@ export class PotencyService {
       `/api/pc/efficiency/queryEnergyHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)
     );
+  }
+
+  // 获取设备的参数
+  public getDeviceProps(deviceId: string, config?: RequestConfig): Observable<DeviceProp[]> {
+    return this.http.get<DeviceProp[]>(`/api/pc/efficiency/queryDictName?deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取设备运行状态
+  public getDeviceRunningState(params: { deviceId: string; startTime: number; endTime: number; }, config?: RequestConfig): Observable<RunningState> {
+    return this.http.post<RunningState>(`/api/pc/efficiency/queryTheRunningStatusByDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
 }
