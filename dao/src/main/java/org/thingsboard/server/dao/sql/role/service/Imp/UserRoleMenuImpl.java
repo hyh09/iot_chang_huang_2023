@@ -188,8 +188,12 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
         entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
         entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
         entity.setTenantId(user1.getTenantId().getId());
-        entity.setFactoryId(user.getFactoryId());
-        entity.setType(user.getType());
+        //####备注: 改为租户可见
+//        entity.setFactoryId(user.getFactoryId());
+//        entity.setType(user.getType());
+
+        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+
         entity.setSystemTab("1");
         TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
 
