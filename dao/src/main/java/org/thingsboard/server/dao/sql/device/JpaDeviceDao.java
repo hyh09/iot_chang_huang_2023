@@ -697,6 +697,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Specification<DeviceEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if(device != null){
+                if(device.getTenantId() != null && device.getTenantId().getId() != null){
+                    predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
+                }
                 if(device.getAllot() != null){
                     if(device.getAllot()){
                         //已分配。根据工厂id或车间id不为空来查询
