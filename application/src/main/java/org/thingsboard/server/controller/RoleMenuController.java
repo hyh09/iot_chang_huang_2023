@@ -77,7 +77,7 @@ public class RoleMenuController extends BaseController{
             SecurityUser securityUser = getCurrentUser();
             vo.setTenantId(securityUser.getTenantId().getId());
             vo.setUserId(securityUser.getUuidId());
-            return roleMenuSvc.queryByUser(vo, securityUser.getTenantId(), securityUser.getId());
+            return roleMenuSvc.queryByUser(vo);
         }catch (Exception e)
         {
             log.info("查询当前登录人的用户:{}",e);
