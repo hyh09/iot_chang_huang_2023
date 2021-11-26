@@ -1,6 +1,7 @@
 package org.thingsboard.server.common.data.vo.device;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,25 +9,23 @@ import lombok.ToString;
 
 /**
  * @program: thingsboard
- * @description: 属性组-分组下的属性
+ * @description: 设备字典属性
  * @author: HU.YUNHUI
- * @create: 2021-11-11 19:06
+ * @create: 2021-11-25 13:26
  **/
 @Data
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(value = "提供app端--【属性组-分组下的属性】")
-public class DictDeviceDataVo {
+@ApiModel(value = "设备字典属性")
+public class DeviceDictionaryPropertiesVo {
 
-    //组name
-    private  String  groupName;
-
-    //分组下面的name
-    private  String  name;
-
-    private String  title;
-
+    @ApiModelProperty("名称")
+    private  String name;
+    @ApiModelProperty("标题")
+    private String title;
+    @ApiModelProperty("单位")
     private  String unit;
+
 
 }
