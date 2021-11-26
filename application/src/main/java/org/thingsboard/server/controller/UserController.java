@@ -64,6 +64,7 @@ import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
@@ -441,6 +442,7 @@ public class UserController extends BaseController implements DefalutSvc {
     @RequestMapping(value = "/user/save", method = RequestMethod.POST)
     @ResponseBody
     public Object save(@RequestBody User user) throws ThingsboardException {
+         DataValidator.validateEmail(user.getEmail());
 
         SecurityUser  securityUser =  getCurrentUser();
         log.info("打印当前的管理人的信息:{}",securityUser);

@@ -91,7 +91,9 @@ public abstract class DataValidator<D extends BaseData<?>> {
 
     public static void validateEmail(String email) {
         if (!doValidateEmail(email)) {
-            throw new DataValidationException("Invalid email address format '" + email + "'!");
+//            throw new DataValidationException("Invalid email address format '" + email + "'!");
+            throw new DataValidationException("无效的邮箱格式【 " + email + "】!");
+
         }
     }
 
