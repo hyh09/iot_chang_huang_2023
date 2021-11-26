@@ -60,6 +60,7 @@ public class RoleMenuController extends BaseController{
     public List<TenantMenuVo> queryAllNew(@RequestBody @Valid InMenuByUserVo vo) throws Exception {
         SecurityUser securityUser = getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
+        vo.setUserId(securityUser.getUuidId());
          return   roleMenuSvc.queryAllNew(vo);
 
     }

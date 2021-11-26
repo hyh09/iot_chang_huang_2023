@@ -169,6 +169,7 @@ public class UserRoleController extends BaseController{
             log.info("当前用户是工厂类别的用户");
             queryParam.put("factoryId", securityUser.getFactoryId());
 
+
         }
 
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
