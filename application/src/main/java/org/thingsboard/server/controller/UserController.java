@@ -443,7 +443,7 @@ public class UserController extends BaseController implements DefalutSvc {
     @ResponseBody
     public Object save(@RequestBody User user) throws ThingsboardException {
          DataValidator.validateEmail(user.getEmail());
-
+         DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
         log.info("打印当前的管理人的信息:{}",securityUser);
         log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
