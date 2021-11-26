@@ -32,6 +32,12 @@
             margin: 0;
           }
         }
+        tb-running-state-chart {
+          height: calc((100% - 17px) / 2);
+        }
+        mat-paginator {
+          border-top: 1px solid rgba(0, 0, 0, 0.12);
+        }
       }
     }
   }

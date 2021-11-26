@@ -167,7 +167,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
         user.setUserCreator(user1.getUuidId().toString());
         user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
 
-         user.setAuthority(Authority.FACTORY_MANAGEMENT);
+//         user.setAuthority(Authority.FACTORY_MANAGEMENT);
 
         User  rmUser= userService.save(user,encodePassword);
 

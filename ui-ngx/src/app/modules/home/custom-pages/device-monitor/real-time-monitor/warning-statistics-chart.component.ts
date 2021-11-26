@@ -38,7 +38,8 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
     const option = {
       title: {
         text: this.translate.instant('device-monitor.warning-statistics'),
-        left: 0,
+        subtext: this.translate.instant('device-monitor.warning-count'),
+        left: -5,
         textStyle: {
           fontSize: 16,
           color: 'rgba(0, 0, 0, 0.87)'
@@ -47,8 +48,8 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
       color: ['#0663ff'],
       grid: {
         bottom: 5,
-        right: 30,
-        left: 20,
+        right: 25,
+        left: 6,
         containLabel: true
       },
       tooltip: {
@@ -63,8 +64,7 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
         data: this.data.map(item => (item.time))
       },
       yAxis: {
-        type: 'value',
-        name: this.translate.instant('device-monitor.warning-count')
+        type: 'value'
       },
       series: [
         {

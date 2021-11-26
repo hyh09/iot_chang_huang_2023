@@ -65,8 +65,8 @@ export class RealTimeMonitorService {
   }
 
   // 获取设备历史数据表头
-  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<{ name: string }[]> {
-    return this.http.get<{ name: string }[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
+  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<{ name: string; title: string }[]> {
+    return this.http.get<{ name: string; title: string }[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备历史数据列表

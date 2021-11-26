@@ -10,11 +10,16 @@ import { DialogComponent } from '@app/shared/public-api';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 
+export interface DistributeDeviceDialogData {
+  factoryOnly?: boolean;
+  deviceIdList: string[];
+}
+
 @Component({
   selector: 'tb-distribute-device',
   templateUrl: './distribute-device.component.html'
 })
-export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceComponent, string[]> implements OnInit {
+export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceComponent, string> implements OnInit {
 
   public form: FormGroup;
   public factoryList: Factory[];
@@ -26,11 +31,11 @@ export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceC
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
-    public dialogRef: MatDialogRef<DistributeDeviceComponent, string[]>,
+    public dialogRef: MatDialogRef<DistributeDeviceComponent, string>,
     protected fb: FormBuilder,
     protected factoryMngService: FactoryMngService,
     protected translate: TranslateService,
-    @Inject(MAT_DIALOG_DATA) protected deviceIdList: string[]
+    @Inject(MAT_DIALOG_DATA) public data: DistributeDeviceDialogData
   ) {
     super(store, router, dialogRef);
   }
@@ -41,11 +46,19 @@ export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceC
   }
 
   buildForm() {
-    this.form = this.fb.group({
-      factoryId: ['', Validators.required],
-      workshopId: ['', Validators.required],
-      productionLineId: ['', Validators.required]
-    });
+    if (this.data.factoryOnly) {
+      this.form = this.fb.group({
+        factoryId: ['', Validators.required],
+        workshopId: [''],
+        productionLineId: ['']
+      });
+    } else {
+      this.form = this.fb.group({
+        factoryId: ['', Validators.required],
+        workshopId: ['', Validators.required],
+        productionLineId: ['', Validators.required]
+      });
+    }
     this.form.get('factoryId').valueChanges.subscribe(newFactoryId => {
       this.form.get('workshopId').setValue('');
       this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === newFactoryId));
@@ -77,10 +90,10 @@ export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceC
   save() {
     if (this.form.valid) {
       this.factoryMngService.distributeDevice({
-        deviceIdList: this.deviceIdList,
+        deviceIdList: this.data.deviceIdList,
         ...this.form.value
       }).subscribe(() => {
-        this.dialogRef.close(['success']);
+        this.dialogRef.close('success');
         this.store.dispatch(new ActionNotificationShow({
           message: this.translate.instant('device-mng.distribute-success'),
           type: 'success',

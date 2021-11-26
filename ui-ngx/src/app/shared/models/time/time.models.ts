@@ -131,6 +131,11 @@ export interface WidgetTimewindow {
   stDiff?: number;
 }
 
+export interface TimeRange {
+  startTime: number;
+  endTime: number;
+}
+
 export enum QuickTimeInterval {
   YESTERDAY = 'YESTERDAY',
   DAY_BEFORE_YESTERDAY = 'DAY_BEFORE_YESTERDAY',
