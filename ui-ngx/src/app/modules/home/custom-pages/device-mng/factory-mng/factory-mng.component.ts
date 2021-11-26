@@ -90,7 +90,17 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         device.rowType = 'device';
         device.key = device.id + '';
       });
-      arr.push(...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList);
+      res.notDistributionList.forEach(device => {
+        device.parentId = '-1';
+        device.rowType = 'device';
+        device.key = device.id;
+      });
+      arr.push(
+        ...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList, ...res.notDistributionList
+      );
+      if (res.notDistributionList.length > 0) {
+        arr.push({key: '-1', name: this.translate.instant('device-mng.undistributed-device')});
+      }
       arr.forEach(item => {
         tableArr.push({
           id: item.key,
