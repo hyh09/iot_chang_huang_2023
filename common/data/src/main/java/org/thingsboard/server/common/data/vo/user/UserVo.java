@@ -24,4 +24,7 @@ public class UserVo {
 
     @ApiModelProperty(value = "用户编码")
     private  String userCode;
+
+
+    private  UUID TenantId;
 }

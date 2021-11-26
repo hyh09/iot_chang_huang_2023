@@ -101,6 +101,13 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             whereSql.append(" and t1.user_code =:userCode ");
             param.put("userCode",vo.getUserCode());
         }
+        if((vo.getTenantId()) != null)
+        {
+            whereSql.append(" and t1.tenant_id =:tenantId ");
+            param.put("tenantId",vo.getTenantId());
+        }
+
+
         if(StringUtils.isNoneBlank(vo.getUserId()))
         {
 
