@@ -130,8 +130,8 @@ public class RoleMenuImpl implements RoleMenuSvc {
     }
 
     @Override
-    public List<TenantMenuVo>queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception {
-        User user = userService.findUserById(tenantId, userId);
+    public List<TenantMenuVo>queryByUser(InMenuByUserVo vo) throws Exception {
+        User user = userService.findUserById(new TenantId(vo.getTenantId()), new UserId(vo.getUserId()));
         List<TenantMenuVo>  menusd = new ArrayList<>();
 
         log.info("=user===>{}",user);
@@ -141,7 +141,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
             return menusd;
         }
        // if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
-        if(userRoleMenuSvc.isTENANT(userId.getId()))
+        if(userRoleMenuSvc.isTENANT(vo.getUserId()))
         {
                 List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
             return listToVo(menus);
