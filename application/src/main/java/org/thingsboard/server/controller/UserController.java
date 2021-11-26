@@ -441,10 +441,21 @@ public class UserController extends BaseController implements DefalutSvc {
     @RequestMapping(value = "/user/save", method = RequestMethod.POST)
     @ResponseBody
     public Object save(@RequestBody User user) throws ThingsboardException {
+
+        SecurityUser  securityUser =  getCurrentUser();
+        log.info("打印当前的管理人的信息:{}",securityUser);
+        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
         try {
             if(user.getId() != null){
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
+            }
+
+            UserVo  vo0 = new UserVo();
+            vo0.setTenantId(securityUser.getTenantId().getId());
+            vo0.setUserCode(user.getUserCode());
+            if(checkSvc.checkValueByKey(vo0)){
+                throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 用户编码 ["+user.getUserCode()+"]已经被占用!");
             }
 
             UserVo  vo1 = new UserVo();
@@ -458,9 +469,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
 
-            SecurityUser  securityUser =  getCurrentUser();
-            log.info("打印当前的管理人的信息:{}",securityUser);
-            log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
+
 
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
@@ -526,15 +535,34 @@ public class UserController extends BaseController implements DefalutSvc {
     @RequestMapping(value="/user/update",method = RequestMethod.POST)
     @ResponseBody
     public Object update(@RequestBody User user) throws ThingsboardException {
+        SecurityUser  securityUser =  getCurrentUser();
+
         log.info("打印更新用户的入参:{}",user);
         checkEmailAndPhone(user);
-        UserVo  vo2 = new UserVo();
-        vo2.setEmail(user.getPhoneNumber());
-        if(checkSvc.checkValueByKey(vo2)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"The phoneNumber["+user.getPhoneNumber()+"]already exists!!");
+
+
+        UserVo  vo0 = new UserVo();
+        vo0.setUserCode(user.getUserCode());
+        vo0.setUserId(user.getUuidId().toString());
+        vo0.setTenantId(securityUser.getTenantId().getId());
+        if(checkSvc.checkValueByKey(vo0)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 用户编码 ["+user.getUserCode()+"]已经被占用!");
         }
+
+        UserVo  vo1 = new UserVo();
+        vo1.setEmail(user.getEmail());
+        vo1.setUserId(user.getUuidId().toString());
+        if(checkSvc.checkValueByKey(vo1)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
+        }
+        UserVo  vo2 = new UserVo();
+        vo2.setPhoneNumber(user.getPhoneNumber());
+        vo2.setUserId(user.getUuidId().toString());
+        if(checkSvc.checkValueByKey(vo2)){
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
+        }
+
         checkParameter(USER_ID, user.getStrId());
-        SecurityUser  securityUser =  getCurrentUser();
         user.setUserCreator(securityUser.getId().toString());
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
