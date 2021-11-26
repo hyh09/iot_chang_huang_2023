@@ -19,6 +19,7 @@ import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
@@ -51,6 +52,7 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
+        DataValidator.validateCode(entity.getRoleCode());
         SecurityUser securityUser =  getCurrentUser();
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setTenantId(securityUser.getTenantId().getId());
