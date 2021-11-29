@@ -229,14 +229,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
-        ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
-//        Map<String,String> totalValueMap = new HashMap<>();  //总能耗
-
         List<String>  totalValueList = new ArrayList<>();
-
-
-
-        List<String>  keys1 = new ArrayList<>();
+         List<String>  keys1 = new ArrayList<>();
         List<String>  headerList = new ArrayList<>();
         keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         headerList.addAll(keys1);
@@ -254,7 +248,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         keys1.add(keyName);
         vo.setKeys(keys1);
 
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && vo.getDeviceId() == null )
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
@@ -264,7 +258,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             log.info("查询的能耗数据为空入参为:{}",vo);
             headerList.stream().forEach(s -> {
-//                totalValueMap.put(s,"0"+" ("+mapUnit.get(s)+")");
                 totalValueList.add(s+": "+"0"+" ("+mapUnit.get(s)+")");
             });
             return new PageDataAndTotalValue<Map>(totalValueList,new ArrayList<>(), 0, 0,false);
