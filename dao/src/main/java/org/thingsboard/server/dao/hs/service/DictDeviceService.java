@@ -115,6 +115,12 @@ public interface DictDeviceService {
     List<String> findAllByName(UUID dictDeviceId, String name);
 
     /**
+     * 查询初始化得数据
+     * @return
+     */
+    List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name);
+
+    /**
      * 获取初始化单位数据
      * @return
      */

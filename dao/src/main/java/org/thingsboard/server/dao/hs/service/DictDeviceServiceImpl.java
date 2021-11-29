@@ -450,10 +450,20 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     }
 
+    @Override
+    public List<DictDeviceGroupPropertyVO>  findAllDictDeviceGroupVO(String name) {
+        List<DictDeviceGroupPropertyVO>  voList  = new ArrayList<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
+        {
+            if(vos.getName().equals(name))
+            {
+                voList.addAll(vos.getGroupPropertyList());
+            }
+        }
 
-
-
-
+        return  voList;
+    }
 
     /**
      * 获得当前默认初始化的分组及分组属性

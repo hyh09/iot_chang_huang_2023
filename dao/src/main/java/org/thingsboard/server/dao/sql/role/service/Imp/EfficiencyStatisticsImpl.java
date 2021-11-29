@@ -89,19 +89,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("效能分页首页得数据，获取表头接口");
         List<String> strings= new ArrayList<>();
         strings.add(HEADER_0);
-        List<String>  keys1=  dictDeviceService.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        log.info("查询历史耗能的表头{}",keys1);
-        Map<String,String>  map = dictDeviceService.getUnit();
-        log.info("查询历史耗能的表头map{}",map);
-        keys1.stream().forEach(str01->{
-                    strings.add(getHomeKeyNameOnlyUtil(str01,map));
-                }
-        );
-        keys1.stream().forEach(str01->{
-                    strings.add(getHomeKeyNameByUtil(str01,map));
-                }
-        );
-        log.info("查询历史耗能的表头keys1{}",keys1);
+        List<DictDeviceGroupPropertyVO>    dictVoList= dictDeviceService.findAllDictDeviceGroupVO(EfficiencyEnums.ENERGY_002.getgName());
+        dictVoList.stream().forEach(dataVo->{
+            strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
+
+        });
+        dictVoList.stream().forEach(dataVo->{
+            strings.add(getHomeKeyNameByUtilNeW(dataVo));
+
+        });
+        log.info("查询历史耗能的表头keys1{}",strings);
         return strings;
     }
 
@@ -726,6 +723,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     {
         return ""+str01+" ("+map.get(str01)+")";
     }
+
+
+    /**
+     * 能耗分析表头方法
+     *  eg:  水 (w)
+     * @param dataVo
+     * @return
+     */
+    private  String getHomeKeyNameOnlyUtilNeW(DictDeviceGroupPropertyVO dataVo)
+    {
+        String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
+        return ""+title+" ("+dataVo.getUnit()+")";
+    }
+    /**
+     * 能耗分析表头方法
+     *  eg:  单位能耗水 (w)
+     * @param dataVo
+     * @return
+     */
+    private  String getHomeKeyNameByUtilNeW(DictDeviceGroupPropertyVO dataVo)
+    {
+        String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
+        return "单位能耗"+title+" ("+dataVo.getUnit()+")";
+    }
+
+
 
     /**
      * 获取首页能耗的 单位能耗水 (单位)
