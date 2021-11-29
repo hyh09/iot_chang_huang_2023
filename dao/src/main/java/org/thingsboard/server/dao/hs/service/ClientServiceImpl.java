@@ -45,7 +45,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -138,7 +137,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public Map<String, Boolean> listAllDeviceOnlineStatus(List<UUID> allDeviceIdList) {
         if (persistToTelemetry) {
             Map<String, Boolean> map = new HashMap<>();
-            for (UUID uuid: allDeviceIdList) {
+            for (UUID uuid : allDeviceIdList) {
                 map.put(uuid.toString(), this.getDeviceOnlineStatus(DeviceId.fromString(UUIDToString(uuid))));
             }
             return map;
@@ -186,6 +185,27 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 列举全部工厂
+     *
+     * @param tenantId 租户Id
+     */
+    @Override
+    public List<Factory> listAllFactoryByTenantId(TenantId tenantId) {
+        return DaoUtil.convertDataList(this.factoryRepository.findAllByTenantIdOrderByCreatedTimeDesc(tenantId.getId()));
+    }
+
+    /**
+     * 列举工厂下全部车间
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     */
+    @Override
+    public List<Workshop> listAllWorkshopByTenantIdAndFactoryId(TenantId tenantId, UUID factoryId) {
+        return DaoUtil.convertDataList(this.workshopRepository.findAllByTenantIdAndFactoryIdOrderByCreatedTimeDesc(tenantId.getId(), factoryId));
+    }
+
+    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id
@@ -197,7 +217,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
             predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
 
-            if (!StringUtils.isBlank(t.getDeviceId())) {
+            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+                // do nothing
+            } else if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
             } else if (!StringUtils.isBlank(t.getProductionLineId())) {
                 predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
