@@ -64,6 +64,7 @@ import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
@@ -73,6 +74,7 @@ import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
+import org.thingsboard.server.dao.util.ReflectionUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -82,8 +84,10 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 
+import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -364,9 +368,15 @@ public class UserController extends BaseController implements DefalutSvc {
         checkParameter("tenantId", strTenantId);
         try {
             TenantId tenantId = new TenantId(toUUID(strTenantId));
-            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+//            Field field = UserEntity.class.getDeclaredField(sortProperty);// 暴力获取private修饰的成员变量
+//            Column annotation = field.getAnnotation(Column.class);
+            Field field=  ReflectionUtils.getAccessibleField(new UserEntity(),sortProperty);
+            Column annotation = field.getAnnotation(Column.class);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, annotation.name(), sortOrder);
             return checkNotNull(userService.findTenantAdmins(tenantId, pageLink));
         } catch (Exception e) {
+            e.printStackTrace();
+            log.info("查询/tenant/{tenantId}/users接口报错:{}",e);
             throw handleException(e);
         }
     }
@@ -389,6 +399,7 @@ public class UserController extends BaseController implements DefalutSvc {
             TenantId tenantId = getCurrentUser().getTenantId();
             return checkNotNull(userService.findCustomerUsers(tenantId, customerId, pageLink));
         } catch (Exception e) {
+            e.printStackTrace();
             throw handleException(e);
         }
     }

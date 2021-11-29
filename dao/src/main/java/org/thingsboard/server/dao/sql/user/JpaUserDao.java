@@ -25,6 +25,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.Authority;
+import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
@@ -94,14 +95,17 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
 
     @Override
     public PageData<User> findTenantAdmins(UUID tenantId, PageLink pageLink) {
-        return DaoUtil.toPageData(
-                userRepository
-                        .findUsersByAuthority(
-                                tenantId,
-                                NULL_UUID,
-                                Objects.toString(pageLink.getTextSearch(), ""),
-                                Authority.TENANT_ADMIN,
-                                DaoUtil.toPageable(pageLink)));
+        Page<UserEntity>  userEntities =  userRepository.findTenantAdmins(tenantId,Objects.toString(pageLink.getTextSearch(), ""),
+                RoleEnums.TENANT_ADMIN.getRoleCode(),DaoUtil.toPageable(pageLink));
+        return  DaoUtil.toPageData(userEntities);
+//        return DaoUtil.toPageData(
+//                userRepository
+//                        .findUsersByAuthority(
+//                                tenantId,
+//                                NULL_UUID,
+//                                Objects.toString(pageLink.getTextSearch(), ""),
+//                                Authority.TENANT_ADMIN,
+//                                DaoUtil.toPageable(pageLink)));
     }
 
     @Override
