@@ -1069,6 +1069,9 @@
     "device-name-filter-required": "设备名称筛选器必填",
     "device-public": "设备公开",
     "device-required": "设备必填",
+    "device-state": "设备状态",
+    "device-state-distributed": "已分配",
+    "device-state-undistributed": "未分配",
     "device-type": "设备类型",
     "device-type-list-empty": "未选择设备类型",
     "device-type-required": "设备类型必填",
@@ -2983,7 +2986,8 @@
     "prod-line-required": "请选择产线",
     "distribute-device": "分配设备",
     "device-info": "设备信息",
-    "search-name": "搜索名称"
+    "search-name": "搜索名称",
+    "undistributed-device": "未分配设备"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",

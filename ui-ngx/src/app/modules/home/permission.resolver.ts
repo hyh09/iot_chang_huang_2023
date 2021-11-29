@@ -5,12 +5,7 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { MenuSection } from "@app/core/public-api";
 import { TenantMenu } from "@app/shared/public-api";
-
-interface Permissions {
-  firstPath: string;
-  menuSections: MenuSection[];
-  menuBtnMap: { [key: string]: string[] };
-}
+import { Permissions } from "@app/core/http/custom/tenant-menu.service";
 
 @Injectable()
 export class PermissionResolver implements Resolve<Permissions>  {

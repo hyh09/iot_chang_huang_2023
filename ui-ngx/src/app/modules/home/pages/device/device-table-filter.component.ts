@@ -23,11 +23,11 @@ import { EntityType } from '@shared/models/entity-type.models';
 import { DeviceProfileId } from '../../../../shared/models/id/device-profile-id';
 
 @Component({
-  selector: 'tb-device-table-header',
-  templateUrl: './device-table-header.component.html',
-  styleUrls: ['./device-table-header.component.scss']
+  selector: 'tb-device-table-filter',
+  templateUrl: './device-table-filter.component.html',
+  styleUrls: ['./device-table-filter.component.scss']
 })
-export class DeviceTableHeaderComponent extends EntityTableHeaderComponent<DeviceInfo> {
+export class DeviceTableFilterComponent extends EntityTableHeaderComponent<DeviceInfo> {
 
   entityType = EntityType;
 
@@ -37,6 +37,11 @@ export class DeviceTableHeaderComponent extends EntityTableHeaderComponent<Devic
 
   deviceProfileChanged(deviceProfileId: DeviceProfileId) {
     this.entitiesTableConfig.componentsData.deviceProfileId = deviceProfileId;
+    this.entitiesTableConfig.table.resetSortAndFilter(true);
+  }
+
+  onClear(param: string): void {
+    this.entitiesTableConfig.componentsData[param] = '';
     this.entitiesTableConfig.table.resetSortAndFilter(true);
   }
 

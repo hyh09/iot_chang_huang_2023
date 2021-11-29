@@ -1,6 +1,5 @@
 import { TableTreeNodeOptions, TreeNodeOptions } from "@app/core/public-api";
 import { BaseData } from "@app/shared/public-api";
-import { string } from "prop-types";
 import { DeviceId, FactoryId, ProdLineId, WorkShopId } from "../id/custom/factory-mng-id.models";
 import { DeviceProperty, DeviceDataGroup, DeviceComp } from "./device-mng.models";
 
@@ -66,11 +65,20 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   componentList?: Array<DeviceComp>
 }
 
+export interface NotDistributedDevice extends CommonData {
+  id: string;
+  name: string;
+  deviceProfileId: string;
+  picture: string;
+  rowType: FactoryRowType;
+}
+
 export interface FactoryMngList {
   factoryList: Factory[];
   workshopList: WorkShop[];
   productionLineList: ProdLine[];
   deviceVoList: ProdDevice[];
+  notDistributionList: NotDistributedDevice[];
 }
 
 export interface FactoryTableOriginRow {

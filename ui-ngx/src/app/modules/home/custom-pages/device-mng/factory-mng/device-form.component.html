@@ -1,7 +1,7 @@
-<div class="mat-padding device-dict-wrapper" fxLayout="column" style="min-width: 660px">
+<div class="mat-padding device-dict-wrapper" fxLayout="column" style="min-width: 660px; max-width: 900;">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-      <mat-expansion-panel [expanded]="true">
+      <mat-expansion-panel [expanded]="true" style="margin-top: 0">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ 'device-mng.basic-info' | translate }}</mat-panel-title>
         </mat-expansion-panel-header>
