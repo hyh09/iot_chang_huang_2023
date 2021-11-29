@@ -195,7 +195,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
-            predicates.add(cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0));
+            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
 
             if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
