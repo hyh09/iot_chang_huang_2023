@@ -30,13 +30,16 @@ import java.util.Optional;
 @Slf4j
 public class WebLogAspect {
 
-    // @Pointcut("execution(public * org.thingsboard.server.controller..*.*(..))")
+    // @Pointcut("execution(public * org.thingsboard.server.controller..*(..))")
     // @Pointcut("execution(public * org.thingsboard.server.dao.hs.service.*.*(..))")
-    @Pointcut("execution(public * org.thingsboard.server.controller.AlarmRecordController.*(..))"
-            + "||execution(public * org.thingsboard.server.controller.RTMonitorAppController.*(..))"
-            + "||execution(public * org.thingsboard.server.controller.RTMonitorController.*(..))"
-            + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
-            + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
+    @Pointcut(
+            // custom
+            "execution(public * org.thingsboard.server.controller.AlarmRecordController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.RTMonitorAppController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.RTMonitorController.*(..))"
+//                    + "||execution(public * org.thingsboard.server.controller.RTMonitorBoardController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
     )
     public void webLog() {
     }
@@ -87,9 +90,7 @@ public class WebLogAspect {
         }
 
         if (sqlEx != null && sqlEx.getConstraintName() != null) {
-            if (sqlEx.getConstraintName().equalsIgnoreCase("fk_device_profile"))
-                return new ThingsboardException("该设备配置已被设备使用，无法删除！", ThingsboardErrorCode.GENERAL);
-            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_code_and_tenant_id"))
+            if (sqlEx.getConstraintName().equalsIgnoreCase("uk_code_and_tenant_id"))
                 return new ThingsboardException("数据字典编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
             else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_code_and_tenant_id_2"))
                 return new ThingsboardException("设备字典编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
