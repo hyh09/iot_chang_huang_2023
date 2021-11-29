@@ -435,6 +435,25 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     @Override
+    public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
+        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
+            voList.stream().forEach(vo1->{
+                nameMap.put(vo1.getName(),vo1);
+            });
+        }
+        return  nameMap;
+    }
+
+
+    /**
+     *
+     * @return
+     */
+    @Override
    public  Map<String,String> getUnit()
     {
       Map<String, String> map = new HashMap<>();
