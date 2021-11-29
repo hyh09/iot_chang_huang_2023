@@ -591,13 +591,16 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return startTimeList.get(r);
         }));
 
-        return startTimeList.stream().map(e -> {
+        var data = startTimeList.stream().map(e -> {
             var t = LocalDateTime.ofInstant(Instant.ofEpochMilli(e), ZoneId.systemDefault());
             var month = YearMonth.of(t.getYear(), t.getMonth()).toString();
             return AlarmTimesResult.builder()
                     .time(month)
                     .num(Optional.ofNullable(alarmMap.get(e)).map(List::size).orElse(0)).build();
         }).collect(Collectors.toList());
+
+        Collections.reverse(data);
+        return data;
     }
 
     /**
