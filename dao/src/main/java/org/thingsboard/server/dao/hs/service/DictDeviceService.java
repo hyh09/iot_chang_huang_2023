@@ -116,15 +116,23 @@ public interface DictDeviceService {
     List<String> findAllByName(UUID dictDeviceId, String name);
 
     /**
-     * 查询初始化得数据
+     * 2021-11-29 15:22
+     * 查询初始化得数据 分组属性
      * @return
      */
     List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name);
 
     /**
+     *
+     * @return
+     */
+    Map<String,DictDeviceGroupPropertyVO> getMapPropertyVo();
+
+    /**
      * 获取初始化单位数据
      * @return
      */
+    @Deprecated
     Map<String,String> getUnit();
 
 
