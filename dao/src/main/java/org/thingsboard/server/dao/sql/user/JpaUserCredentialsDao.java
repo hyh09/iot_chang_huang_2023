@@ -66,4 +66,10 @@ public class JpaUserCredentialsDao extends JpaAbstractDao<UserCredentialsEntity,
     public int updatePassword(UUID userId, String password) {
         return userCredentialsRepository.updatePassword(userId,password);
     }
+
+
+    @Override
+    public int updateEnableByUserId(UUID userId, boolean enabled) {
+        return userCredentialsRepository.updateEnableByUserId(userId,enabled);
+    }
 }
