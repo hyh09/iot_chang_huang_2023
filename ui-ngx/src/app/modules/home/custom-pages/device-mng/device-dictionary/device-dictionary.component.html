@@ -73,11 +73,11 @@
           fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
         >
           <ng-container [formGroupName]="$index">
-            <mat-form-field class="mat-block">
+            <mat-form-field class="mat-block" [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit">
               <mat-label translate>device-mng.prop-name</mat-label>
               <input matInput formControlName="name">
             </mat-form-field>
-            <mat-form-field class="mat-block" fxFlex>
+            <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit">
               <mat-label translate>device-mng.prop-content</mat-label>
               <input matInput formControlName="content">
             </mat-form-field>
@@ -165,22 +165,22 @@
             >
               <ng-container [formGroupName]="$subIndex">
                 <fieldset fxFlex fxLayout="row" fxLayoutGap="10px" [disabled]="!groupControl.get('editable').value">
-                  <mat-form-field class="mat-block">
+                  <mat-form-field class="mat-block" [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit || !groupControl.get('editable').value">
                     <mat-label translate>device-mng.device-data-name</mat-label>
                     <input matInput formControlName="name">
                   </mat-form-field>
-                  <mat-form-field class="mat-block" fxFlex>
+                  <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit || !groupControl.get('editable').value">
                     <mat-label translate>device-mng.device-data-content</mat-label>
                     <input matInput formControlName="content">
                   </mat-form-field>
-                  <mat-form-field class="mat-block" fxFlex>
+                  <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit || !groupControl.get('editable').value">
                     <mat-label translate>device-mng.device-data-desc</mat-label>
                     <input matInput formControlName="title">
                   </mat-form-field>
                 </fieldset>
                 <mat-form-field>
                   <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
-                  <mat-select formControlName="dictDataId">
+                  <mat-select formControlName="dictDataId" [disabled]="(isLoading$ | async) || !isEdit">
                     <mat-option *ngFor="let option of entitiesTableConfig.componentsData.dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                   </mat-select>
                 </mat-form-field>

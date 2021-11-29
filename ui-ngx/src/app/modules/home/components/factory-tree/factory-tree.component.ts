@@ -17,7 +17,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   treeData: FactoryTreeNodeOptions[] = [];
   scrollHeight = '';
 
-  selectedKeys: string[] = [];
+  public selectedKeys: string[] = [];
   expandedKeys: string[] = [];
 
   @Input() deviceOnly: boolean = false;
@@ -145,6 +145,28 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
       this.entitiesTableConfig.table.resetSortAndFilter(true);
     }
     this.clickNode.emit(params);
+  }
+
+  public setKeyState(factoryInfo: FactoryTreeNodeIds) {
+    if (factoryInfo) {
+      const { factoryId, workshopId, productionLineId, deviceId } = factoryInfo;
+      if (deviceId) {
+        this.selectedKeys = [deviceId];
+        this.expandedKeys = [factoryId, workshopId, productionLineId];
+      } else if (productionLineId) {
+        this.selectedKeys = [productionLineId];
+        this.expandedKeys = [factoryId, workshopId];
+      } else if (workshopId) {
+        this.selectedKeys = [workshopId];
+        this.expandedKeys = [factoryId];
+      } else if(factoryId) {
+        this.selectedKeys = [factoryId];
+        this.expandedKeys = [];
+      } else {
+        this.selectedKeys = [];
+        this.expandedKeys = [];
+      }
+    }
   }
 
 }

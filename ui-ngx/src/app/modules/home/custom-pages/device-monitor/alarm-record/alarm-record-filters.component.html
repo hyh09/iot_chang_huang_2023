@@ -2,7 +2,7 @@
   <mat-label>{{ 'device-monitor.alarm-status' | translate }}</mat-label>
   <mat-select
     [(ngModel)]="entitiesTableConfig.componentsData.status"
-    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true, true)"
   >
     <mat-option [value]="statusType.ANY">{{ 'common.all' | translate }}</mat-option>
     <mat-option [value]="statusType.ACTIVE_UNACK">{{ 'device-monitor.alarm-status-active-unack' | translate }}</mat-option>
@@ -14,7 +14,7 @@
   <mat-label>{{ 'device-monitor.alarm-level' | translate }}</mat-label>
   <mat-select
     [(ngModel)]="entitiesTableConfig.componentsData.level"
-    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true, true)"
   >
     <mat-option [value]="levelType.ANY">{{ 'common.all' | translate }}</mat-option>
     <mat-option [value]="levelType.CRITICAL">{{ 'device-monitor.alarm-level-critical' | translate }}</mat-option>
