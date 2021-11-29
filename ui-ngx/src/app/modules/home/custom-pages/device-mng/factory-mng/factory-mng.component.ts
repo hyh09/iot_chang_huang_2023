@@ -205,7 +205,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityTranslations: entityTypeTranslations.get(EntityType.FACTORY),
           entityResources: entityTypeResources.get(EntityType.FACTORY),
           entityComponent: FactoryFormComponent,
-          saveEntity: entity => this.factoryMngService.saveFactory(entity)
+          saveEntity: entity => this.factoryMngService.saveFactory(entity),
+          addDialogStyle: { width: '608px' }
         }
       }
     }).afterClosed().subscribe(res => {
@@ -223,7 +224,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityResources: entityTypeResources.get(EntityType.WORK_SHOP),
           entityComponent: WorkShopFormComponent,
           saveEntity: entity => this.factoryMngService.saveWorkShop(entity),
-          componentsData: { factoryId, factoryName }
+          componentsData: { factoryId, factoryName },
+          addDialogStyle: { width: '608px' }
         }
       }
     }).afterClosed().subscribe(res => {
@@ -241,7 +243,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityResources: entityTypeResources.get(EntityType.PROD_LINE),
           entityComponent: ProdLineFormComponent,
           saveEntity: entity => this.factoryMngService.saveProdLine(entity),
-          componentsData: { factoryId, factoryName, workshopId, workshopName }
+          componentsData: { factoryId, factoryName, workshopId, workshopName },
+          addDialogStyle: { width: '608px' }
         }
       }
     }).afterClosed().subscribe(res => {
@@ -259,7 +262,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityResources: entityTypeResources.get(EntityType.DEVICE),
           entityComponent: DeviceFormComponent,
           saveEntity: entity => this.factoryMngService.saveDevice(entity),
-          componentsData: { factoryId, factoryName, workshopId, workshopName, productionLineId, productionLineName }
+          componentsData: { factoryId, factoryName, workshopId, workshopName, productionLineId, productionLineName },
+          addDialogStyle: { width: '948px' }
         }
       }
     }).afterClosed().subscribe(res => {
