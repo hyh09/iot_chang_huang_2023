@@ -1,6 +1,6 @@
 <div fxLayout="row" fxLayoutGap="16px" class="real-time-monitor-wrapper">
   <div class="left-content">
-    <tb-factory-tree (clickNode)="fetchData($event)"></tb-factory-tree>
+    <tb-factory-tree #factoryTree (clickNode)="fetchData($event)"></tb-factory-tree>
   </div>
   <div class="center-content">
     <div fxLayout="row" class="device-list" [class.empty]="deviceList.length === 0">

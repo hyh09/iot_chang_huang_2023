@@ -39,7 +39,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     this.realTimeMonitorService.unsubscribe();
   }
 
-  fetchData() {
+  fetchData(isMqtt?: boolean) {
     if (this.deviceId) {
       this.realTimeMonitorService.getDeviceDetails(this.deviceId).subscribe(res => {
         const { picture, name, factoryName, workShopName, productionLineName } = res;
@@ -50,7 +50,9 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
         this.devcieComp = res.componentList || [];
         this.setMapOfExpandedComp();
-        if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
+        if (isMqtt) {
+          this.fetchPropHistoryData(this.currPropName, this.currPropTitle, () => { this.subscribe(); });
+        } else if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
           const { name, title } = this.deviceData[0].groupPropertyList[0];
           this.fetchPropHistoryData(name, title, () => { this.subscribe(); });
         } else {
@@ -62,7 +64,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  fetchPropHistoryData(propName: string, propTitle: string,callFn?: Function) {
+  fetchPropHistoryData(propName: string, propTitle: string, callFn?: Function) {
     this.currPropName = propName;
     this.currPropTitle = propTitle;
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
@@ -124,7 +126,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
   subscribe() {
     this.realTimeMonitorService.subscribe([this.deviceId], () => {
-      this.fetchData();
+      this.fetchData(true);
     });
   }
 

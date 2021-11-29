@@ -58,9 +58,9 @@ export class RunStateChartComponent implements AfterViewInit, OnDestroy, OnChang
       series: [
         {
           type: 'pie',
-          radius: '50%',
-          top: '-100%',
-          bottom: '-118%',
+          radius: '60%',
+          center: ['50%', '55%'],
+          minAngle: 5,
           data: [
             { value: this.data.onLineDeviceCount || 0, name: this.translate.instant('device-monitor.on-line-device') },
             { value: this.data.offLineDeviceCount || 0, name: this.translate.instant('device-monitor.off-line-device') }

@@ -1,6 +1,7 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
+import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
 import { AlarmTimesListItem, DeviceItem } from '@app/shared/models/custom/device-monitor.models';
 import { FactoryTreeNodeIds } from '@app/shared/models/custom/factory-mng.models';
 import { PageLink } from '@app/shared/public-api';
@@ -11,6 +12,8 @@ import { PageLink } from '@app/shared/public-api';
   styleUrls: ['./real-time-monitor.component.scss']
 })
 export class RealTimeMonitorComponent implements OnDestroy {
+
+  @ViewChild('factoryTree') factoryTree: FactoryTreeComponent;
 
   factoryInfo: FactoryTreeNodeIds = {
     factoryId: '',
@@ -40,7 +43,14 @@ export class RealTimeMonitorComponent implements OnDestroy {
   }
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
-    if (factoryInfo) {
+    const pageState = sessionStorage.getItem('realTimePageSate');
+    if (pageState) {
+      sessionStorage.removeItem('realTimePageSate');
+      const { factoryInfo, page } = JSON.parse(pageState);
+      Object.assign(this.factoryInfo, factoryInfo || {});
+      this.pageLink.page = page;
+      this.factoryTree.setKeyState(this.factoryInfo);
+    } else if (factoryInfo) {
       if (JSON.stringify(factoryInfo) !== JSON.stringify(this.factoryInfo)) {
         this.pageLink.page = 0;
       }
@@ -62,6 +72,10 @@ export class RealTimeMonitorComponent implements OnDestroy {
   }
 
   goToDetail(deviceId: string) {
+    sessionStorage.setItem('realTimePageSate', JSON.stringify({
+      factoryInfo: this.factoryInfo,
+      page: this.pageLink.page
+    }));
     this.router.navigateByUrl(`deviceMonitor/realTimeMonitor/${deviceId}/details`);
   }
 
