@@ -16,8 +16,10 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
+import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
@@ -50,6 +52,7 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
+        DataValidator.validateCode(entity.getRoleCode());
         SecurityUser securityUser =  getCurrentUser();
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setTenantId(securityUser.getTenantId().getId());
@@ -60,6 +63,11 @@ public class UserRoleController extends BaseController{
         entity.setCreatedUser(securityUser.getUuidId());
         entity.setType(securityUser.getType());
         entity.setFactoryId(securityUser.getFactoryId());
+        TenantSysRoleEntity roleData=  tenantSysRoleService.queryEntityBy(entity.getRoleCode(),securityUser.getTenantId().getId());
+        if(roleData != null )
+        {
+            throw new ThingsboardException("添加角色失败：角色编码["+entity.getRoleCode()+"]已经存在!", ThingsboardErrorCode.FAIL_VIOLATION);
+        }
         return   tenantSysRoleService.saveEntity(entity);
     }
 
@@ -160,6 +168,7 @@ public class UserRoleController extends BaseController{
         {
             log.info("当前用户是工厂类别的用户");
             queryParam.put("factoryId", securityUser.getFactoryId());
+
 
         }
 

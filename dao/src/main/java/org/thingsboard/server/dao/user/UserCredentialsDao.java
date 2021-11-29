@@ -61,4 +61,6 @@ public interface UserCredentialsDao extends Dao<UserCredentials> {
 
     int  updatePassword(UUID userId,String password);
 
+     int updateEnableByUserId(UUID userId, boolean enabled);
+
 }

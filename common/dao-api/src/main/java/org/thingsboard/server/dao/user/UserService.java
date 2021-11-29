@@ -89,4 +89,7 @@ public interface UserService {
 	public List<String> findAllCodesByTenantId(UUID tenantId);
 
 	Object  changeOthersPassword(PasswordVo vo);
+
+
+	 int updateEnableByUserId(UUID userId, boolean enabled);
 }
