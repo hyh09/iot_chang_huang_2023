@@ -6,6 +6,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
+import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
@@ -150,4 +151,12 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     Map<String, String> mapAllPropertyDictDataId(UUID dictDeviceId);
+
+    /**
+     * 获得全部设备字典属性(包括部件)-数据字典 Map
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     */
+    Map<String, DictData> mapAllPropertyToDictData(TenantId tenantId, UUID dictDeviceId);
 }

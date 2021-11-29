@@ -70,6 +70,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     // 设备配置设备字典关系Repository
     DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
+
+    // 数据字典Service
+    DictDataService dictDataService;
+
     @Autowired
     DictDeviceService dictDeviceService;
 
@@ -509,9 +513,39 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     public Map<String, String> mapAllPropertyDictDataId(UUID dictDeviceId) {
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
-        var map = componentList.stream().collect(Collectors.toMap(DictDeviceComponentProperty::getName, DictDeviceComponentProperty::getDictDataId, (a, b) -> a));
+        var map = componentList.stream().reduce(new HashMap<String, String>(), (r, e) -> {
+            if (e.getDictDataId() != null)
+                r.put(e.getName(), e.getDictDataId());
+            return r;
+        }, (a, b) -> null);
         return propertyList.stream().reduce(map, (r, e) -> {
-            r.put(e.getName(), e.getDictDataId());
+            if (e.getDictDataId() != null)
+                r.put(e.getName(), e.getDictDataId());
+            return r;
+        }, (a, b) -> null);
+    }
+
+    /**
+     * 获得全部设备字典属性(包括部件)-数据字典 Map
+     *
+     * @param dictDeviceId 设备字典Id
+     * @param tenantId     租户Id
+     */
+    @Override
+    public Map<String, DictData> mapAllPropertyToDictData(TenantId tenantId, UUID dictDeviceId) {
+        var dictDataMap = this.dictDataService.mapAllDictData(tenantId);
+        var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var map = componentList.stream().reduce(new HashMap<String, DictData>(), (r, e) -> {
+            Optional.ofNullable(dictDataMap.get(e.getName())).ifPresent(f->{
+                r.put(e.getName(), f);
+            });
+            return r;
+        }, (a, b) -> null);
+        return propertyList.stream().reduce(map, (r, e) -> {
+            Optional.ofNullable(dictDataMap.get(e.getName())).ifPresent(f->{
+                r.put(e.getName(), f);
+            });
             return r;
         }, (a, b) -> null);
     }
@@ -569,5 +603,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setComponentPropertyRepository(DictDeviceComponentPropertyRepository componentPropertyRepository) {
         this.componentPropertyRepository = componentPropertyRepository;
+    }
+
+    @Autowired
+    public void setDictDataService(DictDataService dictDataService) {
+        this.dictDataService = dictDataService;
     }
 }
