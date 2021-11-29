@@ -568,6 +568,7 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setUserCreator(securityUser.getId().toString());
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
+        userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
            if(count>0)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
