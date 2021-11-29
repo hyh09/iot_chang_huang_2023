@@ -165,4 +165,13 @@ public interface DeviceMonitorService {
      * @return 在线设备情况
      */
     DeviceOnlineStatusResult getRTMonitorOnlineStatusAppData(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 【看板】获得报警记录统计信息
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 报警记录统计信息
+     */
+    BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query);
 }
