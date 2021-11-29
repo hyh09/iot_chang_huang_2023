@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -74,6 +75,30 @@ public class WebLogAspect {
         log.error("Error [{}]", exception.getMessage(), exception);
 
         String c = "";
+
+        // 处理sql异常提示
+        ConstraintViolationException sqlEx;
+        if (exception instanceof ConstraintViolationException) {
+            sqlEx = Optional.of((ConstraintViolationException) exception).orElse(null);
+        } else if (exception.getCause() instanceof ConstraintViolationException) {
+            sqlEx = Optional.of((ConstraintViolationException) (exception.getCause())).orElse(null);
+        } else {
+            sqlEx = null;
+        }
+
+        if (sqlEx != null && sqlEx.getConstraintName() != null) {
+            if (sqlEx.getConstraintName().equalsIgnoreCase("fk_device_profile"))
+                return new ThingsboardException("该设备配置已被设备使用，无法删除！", ThingsboardErrorCode.GENERAL);
+            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_code_and_tenant_id"))
+                return new ThingsboardException("数据字典编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
+            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_code_and_tenant_id_2"))
+                return new ThingsboardException("设备字典编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
+            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_component"))
+                return new ThingsboardException("设备字典部件编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
+            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_device_profile_id_dict_device_id"))
+                return new ThingsboardException("设备字典设备配置关系重复！请联系管理员", ThingsboardErrorCode.GENERAL);
+        }
+
         if (exception.getCause() != null) {
             c = exception.getCause().getClass().getCanonicalName();
         }

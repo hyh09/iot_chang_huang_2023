@@ -213,12 +213,7 @@ public class DeviceProfileServiceImpl extends AbstractEntityService implements D
         try {
             deviceProfileDao.removeById(tenantId, deviceProfileId.getId());
         } catch (Exception t) {
-            ConstraintViolationException e = extractConstraintViolationException(t).orElse(null);
-            if (e != null && e.getConstraintName() != null && e.getConstraintName().equalsIgnoreCase("fk_device_profile")) {
-                throw new DataValidationException("该设备配置已被设备使用，无法删除！");
-            } else {
-                throw t;
-            }
+            throw t;
         }
         deleteEntityRelations(tenantId, deviceProfileId);
         Cache cache = cacheManager.getCache(DEVICE_PROFILE_CACHE);
