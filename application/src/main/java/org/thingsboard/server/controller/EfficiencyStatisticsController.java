@@ -74,6 +74,10 @@ public class EfficiencyStatisticsController extends BaseController {
                 queryTsKvVo.setStartTime(CommonUtils.getZero());
                 queryTsKvVo.setEndTime(CommonUtils.getNowTime());
             }
+            if(queryTsKvVo.getStartTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getHistoryPointTime());
+            }
 
 
 
