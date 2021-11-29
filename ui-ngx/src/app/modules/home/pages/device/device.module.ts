@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '@shared/shared.module';
 import { DeviceComponent } from '@modules/home/pages/device/device.component';
 import { DeviceRoutingModule } from './device-routing.module';
-import { DeviceTableHeaderComponent } from '@modules/home/pages/device/device-table-header.component';
+import { DeviceTableFilterComponent } from '@app/modules/home/pages/device/device-table-filter.component';
 import { DeviceCredentialsDialogComponent } from '@modules/home/pages/device/device-credentials-dialog.component';
 import { HomeDialogsModule } from '../../dialogs/home-dialogs.module';
 import { HomeComponentsModule } from '@modules/home/components/home-components.module';
@@ -49,7 +49,7 @@ import { DeviceProfileCommonModule } from '@home/components/profile/device/commo
     DeviceDataComponent,
     DeviceComponent,
     DeviceTabsComponent,
-    DeviceTableHeaderComponent,
+    DeviceTableFilterComponent,
     DeviceCredentialsDialogComponent
   ],
   imports: [

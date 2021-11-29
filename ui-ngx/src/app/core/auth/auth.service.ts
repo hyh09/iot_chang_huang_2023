@@ -171,7 +171,9 @@ export class AuthService {
   public loginAsUser(userId: string) {
     return this.http.get<LoginResponse>(`/api/user/${userId}/token`, defaultHttpOptions()).pipe(
       tap((loginResponse: LoginResponse) => {
-          this.setUserFromJwtToken(loginResponse.token, loginResponse.refreshToken, true);
+          this.setUserFromJwtToken(loginResponse.token, loginResponse.refreshToken, true).subscribe(() => {
+            window.location.href = '/home';
+          });
         }
       ));
   }

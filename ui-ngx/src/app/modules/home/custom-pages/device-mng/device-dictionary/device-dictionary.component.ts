@@ -34,7 +34,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceDictionary>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    protected changeDetectorRef: ChangeDetectorRef
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
@@ -294,6 +295,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
           this.compListFormArray().push(this.createCompListControl(res));
         }
         this.setMapOfExpandedComp();
+        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
       }
     });
   }
@@ -318,6 +321,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
         target.controls.propertyList = this.fb.array(propertyListControls);
         target.updateValueAndValidity();
         this.setMapOfExpandedComp();
+        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
       }
     });
   }

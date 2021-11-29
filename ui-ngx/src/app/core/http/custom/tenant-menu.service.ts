@@ -5,6 +5,13 @@ import { SysMenus, TenantMenus } from '@shared/models/tenant.model';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { MenuType } from '@app/shared/models/custom/menu-mng.models';
 import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
+import { MenuSection } from '@app/core/public-api';
+
+export interface Permissions {
+  firstPath: string;
+  menuSections: MenuSection[];
+  menuBtnMap: { [key: string]: string[] };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -40,5 +47,5 @@ export class TenantMenuService {
   public getUserMenus(config?: RequestConfig): Observable<TenantMenus> {
     return this.http.post<TenantMenus>(`/api/roleMenu/queryByUser`, { menuType: MenuType.PC }, defaultHttpOptionsFromConfig(config));
   }
-
+  
 }

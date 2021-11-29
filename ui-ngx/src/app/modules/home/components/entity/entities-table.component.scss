@@ -52,11 +52,15 @@
           .mat-form-field {
             width: 200px;
             padding: 0 5px;
+            font-size: inherit !important;
             &:last-of-type {
               margin-right: 6px;
             }
             .mat-form-field-wrapper {
               padding-bottom: 1.5em;
+              .mat-form-field-underline {
+                bottom: 1.25em !important;
+              }
             }
             &.mat-form-field-type-mat-date-range-input {
               width: 240px;
@@ -67,6 +71,9 @@
                   text-align: center;
                 }
               }
+            }
+            .mat-select-trigger {
+              height: 15px;
             }
           }
           .action-btns {
