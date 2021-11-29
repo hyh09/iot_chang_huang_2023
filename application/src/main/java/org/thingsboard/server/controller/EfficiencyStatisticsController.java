@@ -74,6 +74,11 @@ public class EfficiencyStatisticsController extends BaseController {
                 queryTsKvVo.setStartTime(CommonUtils.getZero());
                 queryTsKvVo.setEndTime(CommonUtils.getNowTime());
             }
+
+
+
+
+
             return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
@@ -89,9 +94,9 @@ public class EfficiencyStatisticsController extends BaseController {
     public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
         try {
 //            if (queryTsKvVo.getEndTime() == null) {
-//                queryTsKvVo.setStartTime(CommonUtils.getZero());
-//                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-//            }
+////                queryTsKvVo.setStartTime(CommonUtils.getZero());
+////                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+////            }
             return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
