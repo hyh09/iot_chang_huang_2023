@@ -63,6 +63,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
       picture: [compInfo ? compInfo.picture : ''],
       propertyList: this.fb.array(propertyListControls)
     });
+    this.compForm.markAsDirty();
   }
 
   cancel() {
@@ -81,13 +82,13 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
   /**
    * @description 部件参数相关方法
    */
-   compDataFormArray(): FormArray {
+  compDataFormArray(): FormArray {
     return this.compForm.get('propertyList') as FormArray;
   }
   createPropertyListControl(data?: DeviceData): AbstractControl {
     return this.fb.group({
-      name: [data ? data.name : ''],
-      content: [data ? data.content: ''],
+      name: [data ? data.name : '', Validators.required],
+      content: [data ? data.content : '', Validators.required],
       title: [data ? data.title : ''],
       dictDataId: [data ? data.dictDataId : null]
     });
@@ -96,11 +97,11 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
     event.stopPropagation();
     event.preventDefault();
     this.compDataFormArray().push(this.createPropertyListControl());
-    this.compForm.markAsDirty();
+    this.compForm.updateValueAndValidity();
   }
   removeCompData(index: number) {
     this.compDataFormArray().removeAt(index);
-    this.compForm.markAsDirty();
+    this.compForm.updateValueAndValidity();
   }
 
 }

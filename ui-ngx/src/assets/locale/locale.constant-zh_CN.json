@@ -2909,6 +2909,7 @@
     "prop-name": "属性名称",
     "prop-content": "属性内容",
     "device-data": "设备参数",
+    "data-name-required": "参数名称必填",
     "add-device-data": "添加设备参数",
     "add-device-data-tip": "请点击右上角的 “+” 号来添加设备参数",
     "add-device-data-group": "添加分组",
@@ -2916,6 +2917,7 @@
     "custom": "自定义",
     "device-data-name": "参数名称",
     "device-data-content": "参数内容",
+    "data-content-required": "参数内容必填",
     "device-data-desc": "描述",
     "device-comp": "部件信息",
     "add-device-comp": "添加部件",
@@ -2987,7 +2989,11 @@
     "distribute-device": "分配设备",
     "device-info": "设备信息",
     "search-name": "搜索名称",
-    "undistributed-device": "未分配设备"
+    "undistributed-device": "未分配设备",
+    "group-name": "分组名称",
+    "group-name-required": "分组名称必填",
+    "duplicate-group-name": "分组名称重复",
+    "edit-group-name": "修改分组名称"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",

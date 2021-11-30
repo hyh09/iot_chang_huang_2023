@@ -137,11 +137,14 @@
                     </mat-form-field>
                   </ng-container>
                 </div>
+                <div *ngIf="groupControl.get('groupPropertyList').controls.length === 0" fxFlex fxLayoutAlign="center center">
+                  <nz-empty
+                    nzNotFoundImage="../../../../../../assets/data-empty.svg"
+                    nzNotFoundContent="{{ 'device-mng.device-data-empty' | translate }}"
+                  ></nz-empty>
+                </div>
               </nz-tab>
             </nz-tabset>
-            <div *ngIf="!isEdit && deviceDataGroupFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
-              {{ 'device-mng.device-data-empty' | translate }}
-            </div>
           </ng-container>
         </fieldset>
       </fieldset>
