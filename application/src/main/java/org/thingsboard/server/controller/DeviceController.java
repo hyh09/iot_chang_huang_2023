@@ -908,10 +908,16 @@ public class DeviceController extends BaseController {
                 //查询设备字典
                 DictDeviceVO dictDeviceVO = dictDeviceService.getDictDeviceDetail(resultDeviceVo.getDictDeviceId().toString(),getCurrentUser().getTenantId());
                 resultDeviceVo.setDictDeviceVO(dictDeviceVO);
-                //设备字典不为空，要覆盖设备的picture、icon、comment
-                resultDeviceVo.setPicture(dictDeviceVO.getPicture());
-                resultDeviceVo.setIcon(dictDeviceVO.getIcon());
-                resultDeviceVo.setComment(dictDeviceVO.getComment());
+                //如果设备picture、icon、comment为空，则使用数据字典的。
+                if(StringUtils.isEmpty(resultDeviceVo.getPicture())){
+                    resultDeviceVo.setPicture(dictDeviceVO.getPicture());
+                }
+                if(StringUtils.isEmpty(resultDeviceVo.getIcon())){
+                    resultDeviceVo.setIcon(dictDeviceVO.getIcon());
+                }
+                if(StringUtils.isEmpty(resultDeviceVo.getComment())){
+                    resultDeviceVo.setComment(dictDeviceVO.getComment());
+                }
             }
             return resultDeviceVo;
         } catch (Exception e) {
