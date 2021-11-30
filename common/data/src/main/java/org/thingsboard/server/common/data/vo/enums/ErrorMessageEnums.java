@@ -15,6 +15,7 @@ public enum  ErrorMessageEnums {
     SING_ON_USER_LOCKED("8"," 由于安全策略，用户帐户被锁定 ！","User account is locked due to security policy"),
     SING_ON_USER_INVALID("9"," 无效的用户名或密码  ！","Invalid username or password"),
     SING_ON_AUTHENTICATION("10"," 用户帐户未激活 ！","User account is not active"),
+    PARAMETER_NOT_NULL("11","入参错误！"," Input parameter error "),
     ;
 
 
