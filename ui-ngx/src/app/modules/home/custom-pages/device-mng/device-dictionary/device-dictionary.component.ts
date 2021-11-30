@@ -9,6 +9,7 @@ import { DeviceDataGroup, DeviceDictionary, DeviceProperty, DeviceData, DeviceCo
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { DeviceCompDialogData, DeviceCompFormComponent } from './device-comp-form.component';
+import { DeviceDataGroupNameComponent, DeviceDataGroupNameDialogData } from './device-data-group-name.component';
 
 @Component({
   selector: 'tb-device-dictionary',
@@ -48,8 +49,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     return this.fb.group({
       id:  [entity ? entity.id : ''],
-      code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, [Validators.required]],
-      name: [entity ? entity.name : '', [Validators.required]],
+      code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, Validators.required],
+      name: [entity ? entity.name : '', Validators.required],
       type: [entity ? entity.type : ''],
       supplier: [entity ? entity.supplier : ''],
       model: [entity ? entity.model : ''],
@@ -139,8 +140,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   createDeviceDataControl(data?: DeviceData): AbstractControl {
     return this.fb.group({
-      name: [data ? data.name : ''],
-      content: [data ? data.content: ''],
+      name: [data ? data.name : '', Validators.required],
+      content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
       dictDataId: [data ? data.dictDataId : null]
     })
@@ -155,42 +156,58 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     return this.fb.group({
       name: [dataGroup ? dataGroup.name : '', [Validators.required]],
       groupPropertyList: this.fb.array(controls),
-      editable: [dataGroup && dataGroup.editable !== undefined ? dataGroup.editable : !this.initDataGroupNames.includes(dataGroup ? dataGroup.name : '')],
-      isEdit: [false]
+      editable: [dataGroup && dataGroup.editable !== undefined ? dataGroup.editable : !this.initDataGroupNames.includes(dataGroup ? dataGroup.name : '')]
     });
   }
   addDeviceData(event: MouseEvent) {
     event.stopPropagation();
     event.preventDefault();
     this.deviceDataFormArray(this.currentTabIndex).push(this.createDeviceDataControl());
+    this.entityForm.updateValueAndValidity();
   }
   removeDeviceData(index: number) {
     this.deviceDataFormArray(this.currentTabIndex).removeAt(index);
+    this.entityForm.updateValueAndValidity();
   }
-  addDeviceDataGroup() {
-    this.deviceDataGroupFormArray().push(this.createGroupListControl());
-    setTimeout(() => {
-      this.currentTabIndex = this.deviceDataGroupFormArray().controls.length - 1;
-      this.editDataGroupName(this.deviceDataGroupFormArray().controls[this.currentTabIndex]);
+  addOrEditDeviceDataGroup(name?: string, event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    let existNames = (this.entityForm.get('groupList').value as Array<DeviceDataGroup>).map(group => (group.name));
+    if (name) {
+      existNames = existNames.filter(item => (item !== name));
+    }
+    this.dialog.open<DeviceDataGroupNameComponent, DeviceDataGroupNameDialogData>(DeviceDataGroupNameComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        name: name || '',
+        existNames
+      }
+    }).afterClosed().subscribe(res => {
+      if (res) {
+        if (!name) {
+          this.deviceDataGroupFormArray().push(this.createGroupListControl({
+            name: res || '',
+            groupPropertyList: [],
+            editable: true
+          }));
+          setTimeout(() => {
+            this.currentTabIndex = this.deviceDataGroupFormArray().controls.length - 1;
+            this.changeDetectorRef.markForCheck();
+            this.changeDetectorRef.detectChanges();
+          });
+        } else {
+          this.deviceDataGroupFormArray().controls[this.currentTabIndex].get('name').setValue(res);
+          this.changeDetectorRef.markForCheck();
+          this.changeDetectorRef.detectChanges();
+        }
+      }
     });
   }
   removeDeviceDataGroup(index: number) {
     this.deviceDataGroupFormArray().removeAt(index);
-  }
-  editDataGroupName(groupControl: AbstractControl) {
-    this.deviceDataGroupFormArray().controls.forEach(control => {
-      control.get('isEdit').setValue(false);
-    });
-    groupControl.get('isEdit').setValue(true);
-    setTimeout(() => {
-      document.getElementById(`tab-input-${this.currentTabIndex}`).focus();
-    });
-  }
-  setDataGroupName(groupControl: AbstractControl) {
-    if (!groupControl.get('name').value) {
-      groupControl.get('name').setValue(this.translate.instant('device-mng.custom'));
-    }
-    groupControl.get('isEdit').setValue(false);
   }
 
   /**

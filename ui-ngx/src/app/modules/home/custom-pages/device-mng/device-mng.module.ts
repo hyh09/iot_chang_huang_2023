@@ -14,6 +14,7 @@ import { WorkShopFormComponent } from './factory-mng/work-shop-form.component';
 import { ProdLineFormComponent } from './factory-mng/prod-line-form.component';
 import { DeviceFormComponent } from './factory-mng/device-form.component';
 import { DistributeDeviceComponent } from './factory-mng/distribute-device.component';
+import { DeviceDataGroupNameComponent } from './device-dictionary/device-data-group-name.component';
 
 @NgModule({
   imports: [
@@ -33,7 +34,8 @@ import { DistributeDeviceComponent } from './factory-mng/distribute-device.compo
     WorkShopFormComponent,
     ProdLineFormComponent,
     DeviceFormComponent,
-    DistributeDeviceComponent
+    DistributeDeviceComponent,
+    DeviceDataGroupNameComponent
   ]
 })
 export class DeviceManagementModule { }
