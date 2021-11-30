@@ -57,7 +57,12 @@ export enum ActionType {
   TIMESERIES_UPDATED = 'TIMESERIES_UPDATED',
   TIMESERIES_DELETED = 'TIMESERIES_DELETED',
   ASSIGNED_TO_EDGE = 'ASSIGNED_TO_EDGE',
-  UNASSIGNED_FROM_EDGE = 'UNASSIGNED_FROM_EDGE'
+  UNASSIGNED_FROM_EDGE = 'UNASSIGNED_FROM_EDGE',
+  DISTRIBUTE = 'DISTRIBUTE',
+  CHANGE_PASSWORD = 'CHANGE_PASSWORD',
+  SET_PERMISSIONS = 'SET_PERMISSIONS',
+  BIND_USERS = 'BIND_USERS',
+  UNBIND_USERS = 'UNBIND_USERS'
 }
 
 export enum ActionStatus {
@@ -95,7 +100,12 @@ export const actionTypeTranslations = new Map<ActionType, string>(
     [ActionType.TIMESERIES_UPDATED, 'audit-log.type-timeseries-updated'],
     [ActionType.TIMESERIES_DELETED, 'audit-log.type-timeseries-deleted'],
     [ActionType.ASSIGNED_TO_EDGE, 'audit-log.type-assigned-to-edge'],
-    [ActionType.UNASSIGNED_FROM_EDGE, 'audit-log.type-unassigned-from-edge']
+    [ActionType.UNASSIGNED_FROM_EDGE, 'audit-log.type-unassigned-from-edge'],
+    [ActionType.DISTRIBUTE, 'audit-log.type-distribute'],
+    [ActionType.CHANGE_PASSWORD, 'audit-log.type-change-password'],
+    [ActionType.SET_PERMISSIONS, 'audit-log.type-set-permissions'],
+    [ActionType.BIND_USERS, 'audit-log.type-bind-users'],
+    [ActionType.UNBIND_USERS, 'audit-log.type-unbind-users']
   ]
 );
 
