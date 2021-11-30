@@ -41,28 +41,6 @@ CREATE TABLE IF NOT EXISTS "public"."hs_device_component" (
 ;
 
 -- ----------------------------
--- Table structure for hs_device_profile_dict_device
--- ----------------------------
-CREATE TABLE IF NOT EXISTS "public"."hs_device_profile_dict_device" (
-                                                          "created_time" int8 NOT NULL,
-                                                          "created_user" varchar(255) COLLATE "pg_catalog"."default",
-                                                          "updated_time" int8,
-                                                          "updated_user" varchar(255) COLLATE "pg_catalog"."default",
-                                                          "device_profile_id" uuid,
-                                                          "dict_device_id" uuid,
-                                                          "id" uuid NOT NULL
-)
-;
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."created_time" IS '创建时间';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."created_user" IS '创建人';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."updated_time" IS '更新时间';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."updated_user" IS '更新人';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."device_profile_id" IS '设备配置id';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."dict_device_id" IS '设备字典id';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."id" IS 'id';
-COMMENT ON TABLE "public"."hs_device_profile_dict_device" IS '设备配置-设备字典关联表';
-
--- ----------------------------
 -- Table structure for hs_dict_data
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "public"."hs_dict_data" (
@@ -498,16 +476,6 @@ CREATE TABLE IF NOT EXISTS "public"."tb_user_menu_role" (
 -- Primary Key structure for table hs_device_component
 -- ----------------------------
 ALTER TABLE "public"."hs_device_component" ADD CONSTRAINT "hs_device_component_pkey" PRIMARY KEY ("id");
-
--- ----------------------------
--- Uniques structure for table hs_device_profile_dict_device
--- ----------------------------
-ALTER TABLE "public"."hs_device_profile_dict_device" ADD CONSTRAINT "uk_device_profile_id_dict_device_id" UNIQUE ("dict_device_id", "device_profile_id");
-
--- ----------------------------
--- Primary Key structure for table hs_device_profile_dict_device
--- ----------------------------
-ALTER TABLE "public"."hs_device_profile_dict_device" ADD CONSTRAINT "hs_device_profile_dict_device_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
 -- Uniques structure for table hs_dict_data

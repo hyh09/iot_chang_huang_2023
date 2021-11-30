@@ -83,9 +83,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     // 遥测Repository
     TimeseriesService timeseriesService;
 
-    // 设备配置设备字典关系Repository
-    DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
-
     // 设备配置Service
     DictDeviceService dictDeviceService;
 
@@ -130,23 +127,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     public DeviceProfileVO getDeviceProfileDetail(TenantId tenantId, DeviceProfileId deviceProfileId) {
         var deviceProfile = deviceProfileService.findDeviceProfileById(tenantId, deviceProfileId);
 
-        var dictDeviceList = DaoUtil.convertDataList(this.deviceProfileDictDeviceRepository.findAllDictDeviceEntityByDeviceProfileId(deviceProfile.getId().getId()));
-
         DeviceProfileVO deviceProfileVO = new DeviceProfileVO();
         BeanUtils.copyProperties(deviceProfile, deviceProfileVO);
-        deviceProfileVO.setDictDeviceIdList(dictDeviceList.stream().map(DictDevice::getId).collect(Collectors.toList()));
         return deviceProfileVO;
-    }
-
-    /**
-     * 删除绑定的设备字典
-     *
-     * @param deviceProfileId 设备配置id
-     */
-    @Override
-    @Transactional
-    public void deleteBindDictDevice(DeviceProfileId deviceProfileId) {
-        this.deviceProfileDictDeviceRepository.deleteByDeviceProfileId(deviceProfileId.getId());
     }
 
     /**
@@ -660,43 +643,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     /**
-     * 绑定设备字典到设备配置
-     *
-     * @param tenantId         租户Id
-     * @param dictDeviceIdList 设备字典Id列表
-     * @param deviceProfileId  设备配置Id
-     */
-    @Override
-    @Transactional
-    public void bindDictDeviceToDeviceProfile(TenantId tenantId, List<String> dictDeviceIdList, DeviceProfileId deviceProfileId) {
-        // 在其它程序代码无错误的前提下，设备正确绑定了设备配置的情况下执行下列代码
-        var deleteList = Sets.newHashSet(deviceProfileDictDeviceRepository.findAllByDeviceProfileId(deviceProfileId.getId()).stream()
-                .map(DeviceProfileDictDeviceEntity::getDictDeviceId).collect(Collectors.toList()));
-        var addList = Sets.newHashSet(dictDeviceIdList.stream().map(this::toUUID).collect(Collectors.toList()));
-        if (addList.equals(deleteList))
-            return;
-        var defaultDeviceProfileId = Optional.ofNullable(this.deviceProfileRepository.findByDefaultTrueAndTenantId(tenantId.getId())).map(DeviceProfileEntity::getId).orElse(null);
-
-        var deleteDeviceList = this.deviceRepository.findAllByTenantIdAndDictDeviceIdIn(tenantId.getId(),
-                deleteList.stream().filter(e -> !addList.contains(e)).collect(Collectors.toSet()));
-        deleteDeviceList.forEach(e -> e.setDeviceProfileId(defaultDeviceProfileId));
-        this.deviceRepository.saveAll(deleteDeviceList);
-
-        var addDeviceList = this.deviceRepository.findAllByTenantIdAndDictDeviceIdIn(tenantId.getId(),
-                addList.stream().filter(e -> !deleteList.contains(e)).collect(Collectors.toSet()));
-        addDeviceList.forEach(e -> e.setDeviceProfileId(deviceProfileId.getId()));
-        this.deviceRepository.saveAll(addDeviceList);
-
-        this.deleteBindDictDevice(deviceProfileId); // default
-        deviceProfileDictDeviceRepository.saveAll(dictDeviceIdList.stream().map(e -> {  // default
-            DeviceProfileDictDeviceEntity entity = new DeviceProfileDictDeviceEntity();
-            entity.setDictDeviceId(toUUID(e));
-            entity.setDeviceProfileId(deviceProfileId.getId());
-            return entity;
-        }).collect(Collectors.toList()));
-    }
-
-    /**
      * 获得近几个月报警次数
      *
      * @param tenantId        租户id
@@ -788,11 +734,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Autowired
     public void setDictDataService(DictDataService dictDataService) {
         this.dictDataService = dictDataService;
-    }
-
-    @Autowired
-    public void setDeviceProfileDictDeviceRepository(DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository) {
-        this.deviceProfileDictDeviceRepository = deviceProfileDictDeviceRepository;
     }
 
     @Autowired

@@ -68,9 +68,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     // 设备字典分组属性Repository
     DictDeviceGroupPropertyRepository groupPropertyRepository;
 
-    // 设备配置设备字典关系Repository
-    DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
-
     // 数据字典Service
     DictDataService dictDataService;
 
@@ -178,9 +175,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
 
         var deviceList = DaoUtil.convertDataList(this.deviceRepository.findAllByTenantIdAndDictDeviceId(tenantId.getId(), toUUID(id)));
-        var deviceProfileId = this.deviceProfileDictDeviceRepository.findByDictDeviceId(toUUID(id))
-                .map(DeviceProfileDictDeviceEntity::getDeviceProfileId).orElse(null);
-        if (deviceList.isEmpty() && deviceProfileId == null) {
+        if (deviceList.isEmpty()) {
             this.dictDeviceRepository.deleteById(toUUID(dictDevice.getId()));
 
             this.propertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
@@ -190,27 +185,11 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
         } else {
             StringBuilder sb = new StringBuilder();
-            if (!deviceList.isEmpty()) {
-                var nameList = deviceList.stream().map(Device::getName).collect(Collectors.toList());
-                sb.append("存在关联的设备：").append(Joiner.on(", ").join(nameList));
-            }
-            if (deviceProfileId != null) {
-                var name = this.deviceProfileRepository.findById(deviceProfileId).map(DeviceProfileEntity::getName).orElse("");
-                sb.append("存在关联的设备配置：").append(name);
-            }
+            var nameList = deviceList.stream().map(Device::getName).collect(Collectors.toList());
+            sb.append("存在关联的设备：").append(Joiner.on(", ").join(nameList));
             throw new ThingsboardException(sb.toString(), ThingsboardErrorCode.GENERAL);
         }
 
-    }
-
-    /**
-     * 获得未配置设备配置的设备字典列表
-     *
-     * @param tenantId 租户Id
-     */
-    @Override
-    public List<DictDevice> listDictDeviceUnused(TenantId tenantId) {
-        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllDictDeviceUnusedByTenantId(tenantId.getId()));
     }
 
     /**
@@ -392,28 +371,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     /**
-     * 批量获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceIdList 设备字典Id列表
-     */
-    @Override
-    public Map<UUID, DeviceProfileId> listDeviceProfileIdsByDictDeviceIdList(List<UUID> dictDeviceIdList) {
-        return this.deviceProfileDictDeviceRepository.findAllByDictDeviceIdIn(dictDeviceIdList)
-                .stream()
-                .collect(Collectors.toMap(DeviceProfileDictDeviceEntity::getDictDeviceId, e -> DeviceProfileId.fromString(e.getDeviceProfileId().toString()), (a, b) -> a));
-    }
-
-    /**
-     * 获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceId 设备字典Id
-     */
-    @Override
-    public UUID getDeviceProfileIdByDictDeviceId(UUID dictDeviceId) {
-        return this.deviceProfileDictDeviceRepository.findByDictDeviceId(dictDeviceId).map(DeviceProfileDictDeviceEntity::getDeviceProfileId).orElse(null);
-    }
-
-    /**
      * 获取当前产能 能耗的数据 由 分组表 改为  hs_init  表中读取  ##hs_init 为程序初始化的数据
      *
      * @param dictDeviceId
@@ -583,11 +540,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setDeviceProfileRepository(DeviceProfileRepository deviceProfileRepository) {
         this.deviceProfileRepository = deviceProfileRepository;
-    }
-
-    @Autowired
-    public void setDeviceProfileDictDeviceRepository(DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository) {
-        this.deviceProfileDictDeviceRepository = deviceProfileDictDeviceRepository;
     }
 
     @Autowired

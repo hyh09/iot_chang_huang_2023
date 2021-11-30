@@ -69,13 +69,6 @@ public interface DictDeviceService {
     void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException;
 
     /**
-     * 获得未配置设备配置的设备字典列表
-     *
-     * @param tenantId 租户Id
-     */
-    List<DictDevice> listDictDeviceUnused(TenantId tenantId);
-
-    /**
      * 获得设备字典分组及分组属性
      *
      * @param dictDeviceId 设备字典Id
@@ -88,20 +81,6 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId);
-
-    /**
-     * 批量获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceIdList 设备字典Id列表
-     */
-    Map<UUID, DeviceProfileId> listDeviceProfileIdsByDictDeviceIdList(List<UUID> dictDeviceIdList);
-
-    /**
-     * 获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceId 设备字典Id
-     */
-    UUID getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
 
     /**
      * 获得当前默认初始化的分组及分组属性
