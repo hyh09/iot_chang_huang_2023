@@ -31,6 +31,7 @@ import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.model.sql.AlarmEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceProfileEntity;
@@ -539,6 +540,126 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     /**
+     * 【看板】获得报警记录统计信息
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 报警记录统计信息
+     */
+    @Override
+    @SuppressWarnings("Duplicates")
+    public BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query) {
+        var allDeviceList = this.clientService.listDeviceByQuery(tenantId, query);
+        var allDeviceIdList = allDeviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
+
+        if (query.getIsQueryAll()) {
+            var DeviceFactoryIdMap = allDeviceList.stream().collect(Collectors.toMap(e -> e.getId().toString(), e -> UUIDToString(e.getFactoryId())));
+            var factoryList = this.clientService.listAllFactoryByTenantId(tenantId);
+            Map<String, Integer> factoryMap = Maps.newHashMap();
+
+            var alarmList = this.alarmRepository.findAllAlarmsByStartTime(tenantId.getId(), allDeviceIdList, EntityType.DEVICE.toString(), CommonUtil.getThisYearStartTime());
+            int criticalCount = 0;
+            int majorCount = 0;
+            int minorCount = 0;
+            int warningCount = 0;
+            int indeterminateCount = 0;
+            for (AlarmEntity entity : alarmList) {
+                switch (entity.getSeverity()) {
+                    case INDETERMINATE:
+                        indeterminateCount += 1;
+                        break;
+                    case CRITICAL:
+                        criticalCount += 1;
+                        break;
+                    case WARNING:
+                        warningCount += 1;
+                        break;
+                    case MINOR:
+                        minorCount += 1;
+                        break;
+                    case MAJOR:
+                        majorCount += 1;
+                        break;
+                }
+                Optional.ofNullable(entity.getOriginatorId()).map(UUID::toString).map(DeviceFactoryIdMap::get).ifPresent(e -> {
+                    var value = Optional.ofNullable(factoryMap.get(e)).map(v -> v + 1).orElse(0);
+                    factoryMap.put(e, value);
+                });
+            }
+
+            var timesResultList = factoryList.stream().map(e -> BoardAlarmTimesResult.builder()
+                    .value(e.getName())
+                    .num(factoryMap.getOrDefault(e.getId().toString(), 0))
+                    .build()).collect(Collectors.toList());
+
+            var proportionResult = BoardAlarmLevelProportionResult.builder()
+                    .criticalCount(criticalCount).majorCount(majorCount).minorCount(minorCount).
+                            warningCount(warningCount).indeterminateCount(indeterminateCount)
+                    .count(criticalCount + majorCount + minorCount + warningCount + indeterminateCount).build();
+            return BoardAlarmResult.builder()
+                    .proportionResult(proportionResult)
+                    .timesResultList(timesResultList)
+                    .build();
+        } else if (query.isQueryFactoryOnly()) {
+            var DeviceWorkshopIdMap = allDeviceList.stream().collect(Collectors.toMap(e -> e.getId().toString(), e -> UUIDToString(e.getWorkshopId())));
+            var workshopList = this.clientService.listAllWorkshopByTenantIdAndFactoryId(tenantId, toUUID(query.getFactoryId()));
+            Map<String, Integer> workshopMap = Maps.newHashMap();
+            var alarmList = this.alarmRepository.findAllAlarmsByStartTime(tenantId.getId(), allDeviceIdList, EntityType.DEVICE.toString(), CommonUtil.getThisYearStartTime());
+            int criticalCount = 0;
+            int majorCount = 0;
+            int minorCount = 0;
+            int warningCount = 0;
+            int indeterminateCount = 0;
+            for (AlarmEntity entity : alarmList) {
+                switch (entity.getSeverity()) {
+                    case INDETERMINATE:
+                        indeterminateCount += 1;
+                        break;
+                    case CRITICAL:
+                        criticalCount += 1;
+                        break;
+                    case WARNING:
+                        warningCount += 1;
+                        break;
+                    case MINOR:
+                        minorCount += 1;
+                        break;
+                    case MAJOR:
+                        majorCount += 1;
+                        break;
+                }
+                Optional.ofNullable(entity.getOriginatorId()).map(UUID::toString).map(DeviceWorkshopIdMap::get).ifPresent(e -> {
+                    var value = Optional.ofNullable(workshopMap.get(e)).map(v -> v + 1).orElse(0);
+                    workshopMap.put(e, value);
+                });
+            }
+
+            var timesResultList = workshopList.stream().map(e -> BoardAlarmTimesResult.builder()
+                    .value(e.getName())
+                    .num(workshopMap.getOrDefault(e.getId().toString(), 0))
+                    .build()).collect(Collectors.toList());
+
+            var proportionResult = BoardAlarmLevelProportionResult.builder()
+                    .criticalCount(criticalCount).majorCount(majorCount).minorCount(minorCount).
+                            warningCount(warningCount).indeterminateCount(indeterminateCount)
+                    .count(criticalCount + majorCount + minorCount + warningCount + indeterminateCount).build();
+            return BoardAlarmResult.builder()
+                    .proportionResult(proportionResult)
+                    .timesResultList(timesResultList)
+                    .build();
+        } else {
+            return BoardAlarmResult.builder()
+                    .timesResultList(this.listAlarmTimesResult(tenantId, allDeviceIdList).stream().map(e ->
+                            BoardAlarmTimesResult.builder()
+                                    .num(e.getNum()).value(e.getTime())
+                                    .build()
+                    ).collect(Collectors.toList()))
+                    .proportionResult(null)
+                    .build();
+        }
+    }
+
+    /**
      * 绑定设备字典到设备配置
      *
      * @param tenantId         租户Id
@@ -591,13 +712,16 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return startTimeList.get(r);
         }));
 
-        return startTimeList.stream().map(e -> {
+        var data = startTimeList.stream().map(e -> {
             var t = LocalDateTime.ofInstant(Instant.ofEpochMilli(e), ZoneId.systemDefault());
             var month = YearMonth.of(t.getYear(), t.getMonth()).toString();
             return AlarmTimesResult.builder()
                     .time(month)
                     .num(Optional.ofNullable(alarmMap.get(e)).map(List::size).orElse(0)).build();
         }).collect(Collectors.toList());
+
+        Collections.reverse(data);
+        return data;
     }
 
     /**

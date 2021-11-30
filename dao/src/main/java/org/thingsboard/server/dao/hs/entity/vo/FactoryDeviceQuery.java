@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "工厂设备请求参数")
+@ApiModel(value = "工厂设备请求参数", description = "都不传的话查询未分配的设备")
 public class FactoryDeviceQuery {
     /**
      * 工厂Id
@@ -42,4 +42,22 @@ public class FactoryDeviceQuery {
      */
     @ApiModelProperty("设备Id")
     private String deviceId;
+
+    /**
+     * 是否查询全部
+     */
+    @ApiModelProperty("是否查询全部")
+    private Boolean isQueryAll;
+
+    public FactoryDeviceQuery(String factoryId, String workshopId, String productionLineId, String deviceId) {
+        this.factoryId = factoryId;
+        this.workshopId = workshopId;
+        this.productionLineId = productionLineId;
+        this.deviceId = deviceId;
+        this.isQueryAll = Boolean.FALSE;
+    }
+
+    public boolean isQueryFactoryOnly() {
+        return deviceId == null && productionLineId == null && workshopId == null && Boolean.FALSE.equals(isQueryAll);
+    }
 }

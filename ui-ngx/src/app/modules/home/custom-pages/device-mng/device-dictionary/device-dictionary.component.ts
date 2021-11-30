@@ -34,7 +34,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceDictionary>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    protected changeDetectorRef: ChangeDetectorRef
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
@@ -43,9 +44,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     this.mapOfExpandedComp = {};
     this.mapOfCompControl = {};
     this.expandedCompCode = [];
-    this.initDataGroup = this.entitiesTableConfig.componentsData.initDataGroup;
-    this.initDataGroupNames = this.initDataGroup.map(item => (item.name));
-    this.initDataGroup.forEach(group => (group.editable = false));
+    this.setInitDataGroup();
     const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     return this.fb.group({
       id:  [entity ? entity.id : ''],
@@ -65,12 +64,20 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   updateForm(entity: DeviceDictionary) {
+    this.setInitDataGroup();
+    this.initDataGroup = [];
     const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
     this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
     this.setMapOfExpandedComp();
+  }
+
+  setInitDataGroup() {
+    this.initDataGroup = this.entitiesTableConfig.componentsData.initDataGroup;
+    this.initDataGroupNames = this.initDataGroup.map(item => (item.name));
+    this.initDataGroup.forEach(group => (group.editable = false));
   }
 
   generateFromArray(entity: DeviceDictionary): { [key: string]: Array<AbstractControl> } {
@@ -294,6 +301,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
           this.compListFormArray().push(this.createCompListControl(res));
         }
         this.setMapOfExpandedComp();
+        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
       }
     });
   }
@@ -318,6 +327,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
         target.controls.propertyList = this.fb.array(propertyListControls);
         target.updateValueAndValidity();
         this.setMapOfExpandedComp();
+        this.changeDetectorRef.markForCheck();
+        this.changeDetectorRef.detectChanges();
       }
     });
   }

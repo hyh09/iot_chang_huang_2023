@@ -41,9 +41,9 @@ export class DeviceService {
     private http: HttpClient
   ) { }
 
-  public getDeviceInfos(pageLink: PageLink, isAllot: boolean = null, type: string = '',
-                        deviceProfileId: string = '', config?: RequestConfig): Observable<PageData<DeviceInfo>> {
-    return this.http.get<PageData<DeviceInfo>>(`/api/tenant/deviceInfoList${pageLink.toQuery()}&type=${type}`);
+  public getDeviceInfos(pageLink: PageLink, { deviceName = '', deviceProfileId = null, isAllot = null, type = '' },
+                        config?: RequestConfig): Observable<PageData<DeviceInfo>> {
+    return this.http.get<PageData<DeviceInfo>>(`/api/tenant/deviceInfoList${pageLink.toQuery()}&searchText=${deviceName}&deviceProfileId=${deviceProfileId !== null ? deviceProfileId.id : ''}&isAllot=${isAllot}&type=${type}`, defaultHttpOptionsFromConfig(config));
   }
 
   public getTenantDeviceInfos(pageLink: PageLink, type: string = '',

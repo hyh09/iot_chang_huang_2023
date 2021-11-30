@@ -33,6 +33,8 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
 
     Optional<FactoryEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
+    List<FactoryEntity> findAllByTenantIdOrderByCreatedTimeDesc(UUID tenantId);
+
 //    @Query("SELECT org.thingsboard.server.dao.model.sql.FactoryInfoEntity(f,w,p) " +
 //            "FROM FactoryEntity f " +
 //            "LEFT JOIN WorkshopEntity w on f.id = w.factoryId " +

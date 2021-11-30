@@ -14,10 +14,11 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   private deviceId: string = '';
   private deviceName: string = '';
   baseInfo: DeviceBaseInfo = {}; // 基本信息
-  currPropName: string = ''; // 当前选中的属性/参数名称
-  propHistoryData: DeviceProp[] = []; // 属性/参数历史数据
+  currPropName: string = ''; // 当前选中的参数名称
+  currPropTitle: string = ''; // 当前选中的参数描述
+  propHistoryData: DeviceProp[] = []; // 参数历史数据
   alarmTimesList: AlarmTimesListItem[] = []; // 预警统计
-  deviceData: DevicePropGroup[] = []; // 设备属性/参数
+  deviceData: DevicePropGroup[] = []; // 设备参数
   devcieComp: DeviceComp[] = []; // 设备部件
   mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
   showRealTimeChart: boolean;
@@ -38,7 +39,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     this.realTimeMonitorService.unsubscribe();
   }
 
-  fetchData() {
+  fetchData(isMqtt?: boolean) {
     if (this.deviceId) {
       this.realTimeMonitorService.getDeviceDetails(this.deviceId).subscribe(res => {
         const { picture, name, factoryName, workShopName, productionLineName } = res;
@@ -49,18 +50,23 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
         this.devcieComp = res.componentList || [];
         this.setMapOfExpandedComp();
-        if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
-          this.fetchPropHistoryData(this.deviceData[0].groupPropertyList[0].name, () => { this.subscribe(); });
+        if (isMqtt) {
+          this.fetchPropHistoryData(this.currPropName, this.currPropTitle, () => { this.subscribe(); });
+        } else if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
+          const { name, title } = this.deviceData[0].groupPropertyList[0];
+          this.fetchPropHistoryData(name, title, () => { this.subscribe(); });
         } else {
           this.currPropName = '';
+          this.currPropTitle = '';
           this.subscribe();
         }
       });
     }
   }
 
-  fetchPropHistoryData(propName: string, callFn?: Function) {
+  fetchPropHistoryData(propName: string, propTitle: string, callFn?: Function) {
     this.currPropName = propName;
+    this.currPropTitle = propTitle;
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
       if (propData.isShowChart) {
         this.propHistoryData = propData.propertyVOList || [];
@@ -120,7 +126,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
   subscribe() {
     this.realTimeMonitorService.subscribe([this.deviceId], () => {
-      this.fetchData();
+      this.fetchData(true);
     });
   }
 

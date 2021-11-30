@@ -1,10 +1,11 @@
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DataDictionaryService } from '@app/core/http/custom/data-dictionary.service';
 import { DeviceDictionaryService } from '@app/core/http/custom/device-dictionary.service';
 import { AppState, guid } from '@app/core/public-api';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
-import { DeviceComp, DeviceCompTreeNode, DeviceData, DeviceDataGroup, DeviceDictionary, DeviceProperty } from '@app/shared/models/custom/device-mng.models';
+import { DataDictionary, DeviceComp, DeviceCompTreeNode, DeviceData, DeviceDataGroup, DeviceDictionary, DeviceProperty } from '@app/shared/models/custom/device-mng.models';
 import { ProdDevice } from '@app/shared/models/custom/factory-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -15,10 +16,11 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class DeviceFormComponent extends EntityComponent<ProdDevice> {
 
-  public mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
-  public mapOfCompControl: { [code: string]: AbstractControl } = {};
-  public expandedCompCode: string[] = [];
-  public deviceDictionaries: DeviceDictionary[] = [];
+  mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
+  mapOfCompControl: { [code: string]: AbstractControl } = {};
+  expandedCompCode: string[] = [];
+  deviceDictionaries: DeviceDictionary[] = [];
+  dataDictionaries: DataDictionary[] = [];
 
   constructor(
     protected store: Store<AppState>,
@@ -27,11 +29,15 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<ProdDevice>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
-    private deviceDictionaryService: DeviceDictionaryService
+    private deviceDictionaryService: DeviceDictionaryService,
+    private dataDictionaryService: DataDictionaryService
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
     this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
       this.deviceDictionaries = res || [];
+    });
+    this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
+      this.dataDictionaries = res || [];
     });
   }
 
@@ -143,7 +149,8 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     return this.fb.group({
       name: [data ? data.name : ''],
       content: [data ? data.content: ''],
-      title: [data ? data.title: '']
+      title: [data ? data.title : ''],
+      dictDataId: [data ? data.dictDataId : '']
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {
@@ -154,7 +161,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       }
     }
     return this.fb.group({
-      name: [dataGroup ? dataGroup.name : '', [Validators.required]],
+      name: [dataGroup ? dataGroup.name : '', Validators.required],
       groupPropertyList: this.fb.array(controls),
       isEdit: [false]
     });

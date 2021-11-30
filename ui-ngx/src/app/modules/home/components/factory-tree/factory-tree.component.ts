@@ -17,7 +17,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   treeData: FactoryTreeNodeOptions[] = [];
   scrollHeight = '';
 
-  selectedKeys: string[] = [];
+  public selectedKeys: string[] = [];
   expandedKeys: string[] = [];
 
   @Input() deviceOnly: boolean = false;
@@ -77,7 +77,18 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
         device.key = device.id + '';
         device.title = device.name;
       });
-      arr.push(...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList);
+      res.notDistributionList.forEach(device => {
+        device.parentId = '-1';
+        device.rowType = 'device';
+        device.key = device.id;
+        device.title = device.name;
+      });
+      arr.push(
+        ...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList, ...res.notDistributionList
+      );
+      if (res.notDistributionList.length > 0) {
+        arr.push({key: '-1', name: this.translate.instant('device-mng.undistributed-device')});
+      }
       arr.forEach(item => {
         treeArr.push({
           title: item.name,
@@ -104,6 +115,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
       } else {
         this.selectedKeys = res.factoryList[0] ? [res.factoryList[0].key] : [];
         params.factoryId = this.selectedKeys[0] || '';
+        params.factoryId = params.factoryId === '-1' ? '' : params.factoryId;
       }
       this.treeData = this.utils.formatTree(treeArr);
       if (this.selectedKeys[0]) {
@@ -133,6 +145,28 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
       this.entitiesTableConfig.table.resetSortAndFilter(true);
     }
     this.clickNode.emit(params);
+  }
+
+  public setKeyState(factoryInfo: FactoryTreeNodeIds) {
+    if (factoryInfo) {
+      const { factoryId, workshopId, productionLineId, deviceId } = factoryInfo;
+      if (deviceId) {
+        this.selectedKeys = [deviceId];
+        this.expandedKeys = [factoryId, workshopId, productionLineId];
+      } else if (productionLineId) {
+        this.selectedKeys = [productionLineId];
+        this.expandedKeys = [factoryId, workshopId];
+      } else if (workshopId) {
+        this.selectedKeys = [workshopId];
+        this.expandedKeys = [factoryId];
+      } else if(factoryId) {
+        this.selectedKeys = [factoryId];
+        this.expandedKeys = [];
+      } else {
+        this.selectedKeys = [];
+        this.expandedKeys = [];
+      }
+    }
   }
 
 }

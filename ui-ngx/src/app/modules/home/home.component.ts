@@ -99,7 +99,6 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   }
 
   ngOnInit() {
-
     // 缓存权限数据
     this.route.data.subscribe(({ permissions }) => {
       if (permissions) {

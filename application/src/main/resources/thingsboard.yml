@@ -13,6 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+hs_oss:
+  endpoint: "https://oss-cn-hangzhou.aliyuncs.com"
+  accessKeyId: "LTAI4G8tH2a8qNsTtz3kKZ3y"
+  accessKeySecret: "Ec2VQIaG2cJM4oqRvGkK06SLowyhTc"
+  bucketName: "hsyl-iot-test"
+
 
 server:
   # Server bind address

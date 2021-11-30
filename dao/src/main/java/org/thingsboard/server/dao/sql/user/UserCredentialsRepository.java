@@ -39,6 +39,11 @@ public interface UserCredentialsRepository extends CrudRepository<UserCredential
    @Query("update UserCredentialsEntity m set m.password=?2 where  m.userId=?1")
     int  updatePassword(UUID userId, String password);
 
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update UserCredentialsEntity m set m.enabled=?2 where  m.userId=?1")
+    int  updateEnableByUserId(UUID userId,boolean enabled);
+
 
 
 }

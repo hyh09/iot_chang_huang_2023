@@ -21,12 +21,12 @@
                 [flowConfig]="{singleFile: true, allowDuplicateUploads: true}">
     <div class="tb-image-select-container">
       <div *ngIf="showPreview" class="tb-image-preview-container">
-        <div *ngIf="!safeImageUrl; else elseBlock">{{ (disabled ? 'dashboard.empty-image' : 'dashboard.no-image') | translate }}</div>
+        <div *ngIf="!safeImageUrl; else elseBlock">{{ (disabled || readonly ? 'dashboard.empty-image' : 'dashboard.no-image') | translate }}</div>
         <ng-template #elseBlock>
           <img nz-image class="tb-image-preview" [nzSrc]="imageUrl" style="cursor: pointer;" />
         </ng-template>
       </div>
-      <div *ngIf="showClearButton && !disabled" class="tb-image-clear-container">
+      <div *ngIf="showClearButton && !disabled && !readonly" class="tb-image-clear-container">
         <button mat-button mat-icon-button color="primary"
                 type="button"
                 (click)="clearImage()"
@@ -36,7 +36,7 @@
           <mat-icon>close</mat-icon>
         </button>
       </div>
-      <div *ngIf="!disabled" class="drop-area tb-flow-drop"
+      <div *ngIf="!disabled && !readonly" class="drop-area tb-flow-drop"
            flowDrop
            [flow]="flow.flowJs">
         <label for="{{inputId}}" translate>dashboard.drop-image</label>
@@ -46,5 +46,5 @@
       </div>
     </div>
   </ng-container>
-  <div class="tb-hint" *ngIf="maxSizeByte && !disabled" translate [translateParams]="{ size: maxSizeByte | fileSize}">dashboard.maximum-upload-file-size</div>
+  <div class="tb-hint" *ngIf="maxSizeByte && !disabled && !readonly" translate [translateParams]="{ size: maxSizeByte | fileSize}">dashboard.maximum-upload-file-size</div>
 </div>

@@ -451,7 +451,7 @@ public abstract class BaseController {
             validateId(userId, "Incorrect userId " + userId);
             User user = userService.findUserById(getCurrentUser().getTenantId(), userId);
             checkNotNull(user);
-            accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
+//            accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
             return user;
         } catch (Exception e) {
             throw handleException(e, false);

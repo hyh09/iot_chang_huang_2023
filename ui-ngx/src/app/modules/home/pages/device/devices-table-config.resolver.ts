@@ -43,7 +43,7 @@ import { CustomerService } from '@core/http/customer.service';
 import { Customer } from '@app/shared/models/customer.model';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { BroadcastService } from '@core/services/broadcast.service';
-import { DeviceTableHeaderComponent } from '@modules/home/pages/device/device-table-header.component';
+import { DeviceTableFilterComponent } from '@app/modules/home/pages/device/device-table-filter.component';
 import { MatDialog } from '@angular/material/dialog';
 import {
   DeviceCredentialsDialogComponent,
@@ -103,6 +103,9 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     this.config.deleteEntitiesTitle = count => this.translate.instant('device.delete-devices-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('device.delete-devices-text');
 
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
+
     this.config.loadEntity = id => this.deviceService.getDeviceInfo(id.id);
     this.config.saveEntity = device => {
       return this.deviceService.saveDevice(device).pipe(
@@ -116,7 +119,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     this.config.detailsReadonly = () =>
       (this.config.componentsData.deviceScope === 'customer_user' || this.config.componentsData.deviceScope === 'edge_customer_user');
 
-    this.config.headerComponent = DeviceTableHeaderComponent;
+    this.config.filterComponent = DeviceTableFilterComponent;
 
   }
 
@@ -125,6 +128,8 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     this.config.componentsData = {
       deviceScope: route.data.devicesType,
       deviceProfileId: null,
+      deviceName: '',
+      isAllot: '',
       deviceCredentials$: new Subject<DeviceCredentials>(),
       edgeId: routeParams.edgeId
     };
@@ -200,8 +205,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
   }
 
   configureEntityFunctions(deviceScope: string): void {
-    this.config.entitiesFetchFunction = pageLink => this.deviceService.getDeviceInfos(pageLink, null, this.config.componentsData.edgeType,
-      this.config.componentsData.deviceProfileId !== null ? this.config.componentsData.deviceProfileId.id : '');
+    this.config.entitiesFetchFunction = pageLink => this.deviceService.getDeviceInfos(pageLink, this.config.componentsData);
     if (deviceScope === 'tenant') {
       // this.config.entitiesFetchFunction = pageLink =>
       //   this.deviceService.getTenantDeviceInfosByDeviceProfileId(pageLink,

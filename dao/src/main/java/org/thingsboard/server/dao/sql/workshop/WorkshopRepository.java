@@ -21,6 +21,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,8 @@ import java.util.UUID;
  * Created by Valerii Sosliuk on 4/30/2017.
  */
 public interface WorkshopRepository extends PagingAndSortingRepository<WorkshopEntity, UUID>, JpaSpecificationExecutor<WorkshopEntity> {
+
+    List<WorkshopEntity> findAllByTenantIdAndFactoryIdOrderByCreatedTimeDesc(UUID tenantId, UUID factoryId);
 
     Optional<WorkshopEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
