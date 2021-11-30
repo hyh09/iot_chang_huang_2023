@@ -62,6 +62,7 @@ import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
@@ -641,15 +642,21 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理得 {用户编码 或角色编码}得生成获取")
     @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
     public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
-        try {
+
+            TenantId  tenantId = null;
             SecurityUser securityUser = getCurrentUser();
-            return checkSvc.queryCodeNew(vo, securityUser.getTenantId());
-        }catch (Exception e)
-        {
-             e.printStackTrace();
-            log.info("打印当前异常:{}",e);
-            throw new ThingsboardException("生成编码异常!", ThingsboardErrorCode.GENERAL);
-        }
+            tenantId =securityUser.getTenantId();
+            if(securityUser.getAuthority() == Authority.SYS_ADMIN )
+            {
+                if(vo.getTenantId() == null){
+                    String message=   getMessageByUserId(ErrorMessageEnums.PARAMETER_NOT_NULL);
+                    throw new ThingsboardException(message+"[TenantId]", ThingsboardErrorCode.GENERAL);
+                }
+                tenantId = new TenantId(vo.getTenantId());
+                log.info("当前是系统用户");
+            }
+            return checkSvc.queryCodeNew(vo, tenantId);
+
 
     }
 
