@@ -1,5 +1,7 @@
 package org.thingsboard.server.common.data.vo.enums;
 
+import org.thingsboard.server.common.data.StringUtils;
+
 /**
  * @program: thingsboard
  * @description: 系统异常提示
@@ -14,6 +16,39 @@ public enum  ErrorMessageEnums {
     SING_ON_USER_INVALID("9"," 无效的用户名或密码  ！","Invalid username or password"),
     SING_ON_AUTHENTICATION("10"," 用户帐户未激活 ！","User account is not active"),
     ;
+
+
+    /**
+     *
+     * @param key
+     * @param lang  目前就中文和英文
+     * @return
+     */
+    public  static   String  getLanguage(String key,String lang)
+    {
+        for(ErrorMessageEnums enums:ErrorMessageEnums.values())
+        {
+            if(enums.getKey().equals(key))
+            {
+                 if(StringUtils.isEmpty(lang)) {
+                     return enums.getCNLanguage();
+
+                 }else if(lang.equals("zh_CN")) {
+
+                     return enums.getCNLanguage();
+                 }else {
+                     return enums.getEnLanguage();
+
+                 }
+            }
+        }
+
+        return  null;
+
+
+    }
+
+
 
     public  static   String  getLanguage(String key)
     {
