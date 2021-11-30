@@ -627,6 +627,7 @@ public class UserController extends BaseController implements DefalutSvc {
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
+                 queryParam.put("type", securityUser.getType());
              }
 
              return userService.findAll(queryParam, pageLink);

@@ -74,11 +74,17 @@
             <ng-container [formGroupName]="$index">
               <mat-form-field class="mat-block">
                 <mat-label translate>device-mng.device-data-name</mat-label>
-                <input matInput formControlName="name">
+                <input matInput formControlName="name" required>
+                <mat-error *ngIf="item.get('name').hasError('required')">
+                  {{ 'device-mng.data-name-required' | translate }}
+                </mat-error>
               </mat-form-field>
               <mat-form-field class="mat-block" fxFlex>
                 <mat-label translate>device-mng.device-data-content</mat-label>
-                <input matInput formControlName="content">
+                <input matInput formControlName="content" required>
+                <mat-error *ngIf="item.get('content').hasError('required')">
+                  {{ 'device-mng.data-content-required' | translate }}
+                </mat-error>
               </mat-form-field>
               <mat-form-field class="mat-block" fxFlex>
                 <mat-label translate>device-mng.device-data-desc</mat-label>

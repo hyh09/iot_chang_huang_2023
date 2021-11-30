@@ -945,7 +945,13 @@ public class DeviceController extends BaseController {
                                                       @RequestParam(required = false) String sortOrder  )
     {
         try {
+            if(StringUtils.isEmpty(sortProperty))
+            {
+                sortProperty="createdTime";
+                sortOrder="";
+            }
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+
           return   deviceService.queryAllByNameLike(factoryId,name,pageLink);
 
         } catch (ThingsboardException e) {
