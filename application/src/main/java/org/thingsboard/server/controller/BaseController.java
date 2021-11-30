@@ -84,6 +84,7 @@ import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
+import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -286,6 +287,7 @@ public abstract class BaseController {
     @Autowired protected TenantMenuRoleService tenantMenuRoleService;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     @Autowired  protected TenantSysRoleService tenantSysRoleService;
+    @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
 
 
     @ExceptionHandler(ThingsboardException.class)

@@ -76,11 +76,13 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     /**
      * 创建者的类别 :租户类别  工厂类别
      */
+    @ApiModelProperty(value = "如果是工厂管理员新增字段【必传写死 FACTORY_MANAGEMENT】 #不用传了;此值后端赋值")
     private  String type="";
 
     /**
      * 工厂id
      */
+    @ApiModelProperty(value = "如果是工厂管理员新增字段【必传】")
     private UUID  factoryId;
 
 
