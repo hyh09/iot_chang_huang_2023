@@ -215,7 +215,7 @@ public class DeviceProfileServiceImpl extends AbstractEntityService implements D
         } catch (Exception t) {
             ConstraintViolationException e = extractConstraintViolationException(t).orElse(null);
             if (e != null && e.getConstraintName() != null && e.getConstraintName().equalsIgnoreCase("fk_device_profile")) {
-                throw new DataValidationException("The device profile referenced by the devices cannot be deleted!");
+                throw new DataValidationException("该设备配置已被设备使用，无法删除！");
             } else {
                 throw t;
             }

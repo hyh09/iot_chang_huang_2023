@@ -70,6 +70,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     // 设备配置设备字典关系Repository
     DeviceProfileDictDeviceRepository deviceProfileDictDeviceRepository;
+
+    // 数据字典Service
+    DictDataService dictDataService;
+
     @Autowired
     DictDeviceService dictDeviceService;
 
@@ -435,6 +439,25 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     @Override
+    public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
+        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
+            voList.stream().forEach(vo1->{
+                nameMap.put(vo1.getName(),vo1);
+            });
+        }
+        return  nameMap;
+    }
+
+
+    /**
+     *
+     * @return
+     */
+    @Override
    public  Map<String,String> getUnit()
     {
       Map<String, String> map = new HashMap<>();
@@ -450,10 +473,20 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     }
 
+    @Override
+    public List<DictDeviceGroupPropertyVO>  findAllDictDeviceGroupVO(String name) {
+        List<DictDeviceGroupPropertyVO>  voList  = new ArrayList<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
+        {
+            if(vos.getName().equals(name))
+            {
+                voList.addAll(vos.getGroupPropertyList());
+            }
+        }
 
-
-
-
+        return  voList;
+    }
 
     /**
      * 获得当前默认初始化的分组及分组属性
@@ -499,9 +532,39 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     public Map<String, String> mapAllPropertyDictDataId(UUID dictDeviceId) {
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
-        var map = componentList.stream().collect(Collectors.toMap(DictDeviceComponentProperty::getName, DictDeviceComponentProperty::getDictDataId, (a, b) -> a));
+        var map = componentList.stream().reduce(new HashMap<String, String>(), (r, e) -> {
+            if (e.getDictDataId() != null)
+                r.put(e.getName(), e.getDictDataId());
+            return r;
+        }, (a, b) -> null);
         return propertyList.stream().reduce(map, (r, e) -> {
-            r.put(e.getName(), e.getDictDataId());
+            if (e.getDictDataId() != null)
+                r.put(e.getName(), e.getDictDataId());
+            return r;
+        }, (a, b) -> null);
+    }
+
+    /**
+     * 获得全部设备字典属性(包括部件)-数据字典 Map
+     *
+     * @param dictDeviceId 设备字典Id
+     * @param tenantId     租户Id
+     */
+    @Override
+    public Map<String, DictData> mapAllPropertyToDictData(TenantId tenantId, UUID dictDeviceId) {
+        var dictDataMap = this.dictDataService.mapAllDictData(tenantId);
+        var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var map = componentList.stream().reduce(new HashMap<String, DictData>(), (r, e) -> {
+            Optional.ofNullable(dictDataMap.get(e.getName())).ifPresent(f->{
+                r.put(e.getName(), f);
+            });
+            return r;
+        }, (a, b) -> null);
+        return propertyList.stream().reduce(map, (r, e) -> {
+            Optional.ofNullable(dictDataMap.get(e.getName())).ifPresent(f->{
+                r.put(e.getName(), f);
+            });
             return r;
         }, (a, b) -> null);
     }
@@ -559,5 +622,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setComponentPropertyRepository(DictDeviceComponentPropertyRepository componentPropertyRepository) {
         this.componentPropertyRepository = componentPropertyRepository;
+    }
+
+    @Autowired
+    public void setDictDataService(DictDataService dictDataService) {
+        this.dictDataService = dictDataService;
     }
 }

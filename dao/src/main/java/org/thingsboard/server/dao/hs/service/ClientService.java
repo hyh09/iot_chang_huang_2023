@@ -1,9 +1,11 @@
 package org.thingsboard.server.dao.hs.service;
 
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
@@ -32,8 +34,8 @@ public interface ClientService {
     /**
      * 查询设备列表
      *
-     * @param tenantId      租户Id
-     * @param t             extends FactoryDeviceQuery
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
      */
     <T extends FactoryDeviceQuery> List<Device> listDeviceByQuery(TenantId tenantId, T t);
 
@@ -64,4 +66,19 @@ public interface ClientService {
      * 获得设备字典初始化数据
      */
     List<DictDeviceGroupVO> listDictDeviceInitData();
+
+    /**
+     * 列举全部工厂
+     *
+     * @param tenantId 租户Id
+     */
+    List<Factory> listAllFactoryByTenantId(TenantId tenantId);
+
+    /**
+     * 列举工厂下全部车间
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     */
+    List<Workshop> listAllWorkshopByTenantIdAndFactoryId(TenantId tenantId, UUID factoryId);
 }

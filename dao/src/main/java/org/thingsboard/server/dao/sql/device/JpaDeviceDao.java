@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
@@ -40,6 +41,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
@@ -68,6 +70,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
     @Autowired
     private ProductionLineDao productionLineDao;
+
+    @Autowired
+    private FactoryDao factoryDao;
 
     @Override
     protected Class<DeviceEntity> getEntityClass() {
@@ -697,6 +702,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Specification<DeviceEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if(device != null){
+                if(device.getTenantId() != null && device.getTenantId().getId() != null){
+                    predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
+                }
                 if(device.getAllot() != null){
                     if(device.getAllot()){
                         //已分配。根据工厂id或车间id不为空来查询
@@ -746,6 +754,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                         device.setWorkshopName(productionLine.getWorkshopName());
                         device.setProductionLineName(productionLine.getName());
                     }
+                }else if(i.getFactoryId() != null && StringUtils.isNotEmpty(i.getFactoryId().toString())){
+                    Factory factory = factoryDao.findById(i.getFactoryId());
+                    if(device !=null && factory != null){
+                        device.setFactoryName(factory.getName());
+                    }
+
                 }
                 resultDeviceList.add(device);
             });

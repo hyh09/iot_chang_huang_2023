@@ -404,6 +404,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         return (userCredentialsDao.updatePassword(UUID.fromString(vo.getUserId()), vo.getPassword())>0?"success":"fail");
     }
 
+    @Override
+    public int updateEnableByUserId(UUID userId, boolean enabled)
+    {
+        return userCredentialsDao.updateEnableByUserId(userId,enabled);
+    }
+
     private int increaseFailedLoginAttempts(User user) {
         JsonNode additionalInfo = user.getAdditionalInfo();
         if (!(additionalInfo instanceof ObjectNode)) {
