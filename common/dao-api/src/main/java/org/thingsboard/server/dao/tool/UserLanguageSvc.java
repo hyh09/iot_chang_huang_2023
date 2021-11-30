@@ -22,6 +22,7 @@ public interface UserLanguageSvc {
      * @param userId  当前登录人的用户id
      * @return
      */
+    @Deprecated
     String  getLanguageByUserLang(String key,TenantId tenantId, UserId userId) throws ThingsboardException;
 
 
