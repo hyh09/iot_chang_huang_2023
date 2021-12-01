@@ -20,10 +20,12 @@ import { SharedModule } from '@shared/shared.module';
 import { HomeComponentsModule } from '@modules/home/components/home-components.module';
 import { DeviceProfileTabsComponent } from './device-profile-tabs.component';
 import { DeviceProfileRoutingModule } from './device-profile-routing.module';
+import { DeviceProfilesTableFilterComponent } from './device-profiles-table-filter.component';
 
 @NgModule({
   declarations: [
-    DeviceProfileTabsComponent
+    DeviceProfileTabsComponent,
+    DeviceProfilesTableFilterComponent
   ],
   imports: [
     CommonModule,

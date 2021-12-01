@@ -15,28 +15,23 @@
 ///
 
 import { Component } from '@angular/core';
+import { EntityTableHeaderComponent } from '@home/components/entity/entity-table-header.component';
+import { EntityType } from '@shared/models/entity-type.models';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
-import { EntityTableHeaderComponent } from '../../components/entity/entity-table-header.component';
-import { EntityType } from '@shared/models/entity-type.models';
-import { AssetInfo } from '@shared/models/asset.models';
+import { OtaPackage, OtaPackageInfo } from '@app/shared/models/ota-package.models';
+import { PageLink } from '@app/shared/public-api';
 
 @Component({
-  selector: 'tb-asset-table-header',
-  templateUrl: './asset-table-header.component.html',
-  styleUrls: ['./asset-table-header.component.scss']
+  selector: 'tb-oat-update-table-filter',
+  templateUrl: './oat-update-table-filter.component.html'
 })
-export class AssetTableHeaderComponent extends EntityTableHeaderComponent<AssetInfo> {
+export class OatUpdateTableFilterComponent extends EntityTableHeaderComponent<OtaPackage, PageLink, OtaPackageInfo> {
 
   entityType = EntityType;
 
   constructor(protected store: Store<AppState>) {
     super(store);
-  }
-
-  assetTypeChanged(assetType: string) {
-    this.entitiesTableConfig.componentsData.assetType = assetType;
-    this.refresh();
   }
 
   refresh() {

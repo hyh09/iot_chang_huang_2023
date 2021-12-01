@@ -38,6 +38,7 @@ import { EntityAction } from '@home/models/entity/entity-component.models';
 import { FileSizePipe } from '@shared/pipe/file-size.pipe';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
+import { OatUpdateTableFilterComponent } from './oat-update-table-filter.component';
 
 @Injectable()
 export class OtaUpdateTableConfigResolve implements Resolve<EntityTableConfig<OtaPackage, PageLink, OtaPackageInfo>> {
@@ -52,10 +53,14 @@ export class OtaUpdateTableConfigResolve implements Resolve<EntityTableConfig<Ot
               private fileSize: FileSizePipe) {
     this.config.entityType = EntityType.OTA_PACKAGE;
     this.config.entityComponent = OtaUpdateComponent;
+    this.config.filterComponent = OatUpdateTableFilterComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.OTA_PACKAGE);
     this.config.entityResources = entityTypeResources.get(EntityType.OTA_PACKAGE);
 
     this.config.entityTitle = (otaPackage) => otaPackage ? otaPackage.title : '';
+
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.columns.push(
       new DateEntityTableColumn<OtaPackageInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),

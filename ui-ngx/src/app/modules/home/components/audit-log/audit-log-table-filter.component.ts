@@ -15,28 +15,22 @@
 ///
 
 import { Component } from '@angular/core';
+import { EntityTableHeaderComponent } from '@home/components/entity/entity-table-header.component';
+import { EntityType } from '@shared/models/entity-type.models';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
-import { EntityTableHeaderComponent } from '../../components/entity/entity-table-header.component';
-import { EntityType } from '@shared/models/entity-type.models';
-import { AssetInfo } from '@shared/models/asset.models';
+import { AuditLog } from '@app/shared/public-api';
 
 @Component({
-  selector: 'tb-asset-table-header',
-  templateUrl: './asset-table-header.component.html',
-  styleUrls: ['./asset-table-header.component.scss']
+  selector: 'tb-audit-log-table-filter',
+  templateUrl: './audit-log-table-filter.component.html'
 })
-export class AssetTableHeaderComponent extends EntityTableHeaderComponent<AssetInfo> {
+export class AuditLogTableFilterComponent extends EntityTableHeaderComponent<AuditLog> {
 
   entityType = EntityType;
 
   constructor(protected store: Store<AppState>) {
     super(store);
-  }
-
-  assetTypeChanged(assetType: string) {
-    this.entitiesTableConfig.componentsData.assetType = assetType;
-    this.refresh();
   }
 
   refresh() {

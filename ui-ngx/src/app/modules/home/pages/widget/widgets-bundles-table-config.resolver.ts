@@ -38,7 +38,7 @@ import { Authority } from '@shared/models/authority.enum';
 import { DialogService } from '@core/services/dialog.service';
 import { ImportExportService } from '@home/components/import-export/import-export.service';
 import { Direction } from '@shared/models/page/sort-order';
-import { map } from 'rxjs/operators';
+import { WidgetsBundlesTableFilterComponent } from './widgets-bundles-filter.component';
 
 @Injectable()
 export class WidgetsBundlesTableConfigResolver implements Resolve<EntityTableConfig<WidgetsBundle>> {
@@ -55,12 +55,16 @@ export class WidgetsBundlesTableConfigResolver implements Resolve<EntityTableCon
 
     this.config.entityType = EntityType.WIDGETS_BUNDLE;
     this.config.entityComponent = WidgetsBundleComponent;
+    this.config.filterComponent = WidgetsBundlesTableFilterComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.WIDGETS_BUNDLE);
     this.config.entityResources = entityTypeResources.get(EntityType.WIDGETS_BUNDLE);
     this.config.defaultSortOrder = {property: 'title', direction: Direction.ASC};
 
     this.config.entityTitle = (widgetsBundle) => widgetsBundle ?
       widgetsBundle.title : '';
+
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.columns.push(
       new DateEntityTableColumn<WidgetsBundle>('createdTime', 'common.created-time', this.datePipe, '150px'),

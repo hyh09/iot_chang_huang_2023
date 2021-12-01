@@ -124,7 +124,7 @@ export class AddAlarmRuleDialogComponent extends
         defaultDashboardId: [null, []],
         defaultQueueName: ['', []],
         description: ['', []],
-        dictDeviceIdList: [[]]
+        // dictDeviceIdList: [[]]
       }
     );
     this.transportConfigFormGroup = this.fb.group(
@@ -206,7 +206,7 @@ export class AddAlarmRuleDialogComponent extends
           alarms: this.alarmRulesFormGroup.get('alarms').value,
           provisionConfiguration: deviceProvisionConfiguration
         },
-        dictDeviceIdList: this.alarmRuleDetailsFormGroup.get('dictDeviceIdList').value
+        // dictDeviceIdList: this.alarmRuleDetailsFormGroup.get('dictDeviceIdList').value
       };
       if (this.alarmRuleDetailsFormGroup.get('defaultRuleChainId').value) {
         alarmRuleInfo.defaultRuleChainId = new RuleChainId(this.alarmRuleDetailsFormGroup.get('defaultRuleChainId').value);
