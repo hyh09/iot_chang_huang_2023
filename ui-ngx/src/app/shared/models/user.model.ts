@@ -23,7 +23,9 @@ import { TenantId } from './id/tenant-id';
 export interface User extends BaseData<UserId> {
   tenantId: TenantId;
   customerId: CustomerId;
+  userCode: string;
   email: string;
+  phoneNumber: string;
   authority: Authority;
   firstName: string;
   lastName: string;

@@ -57,6 +57,25 @@
 <div class="mat-padding" fxLayout="column">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
+          <mat-label translate>auth-mng.user-code</mat-label>
+          <input matInput formControlName="userCode" required>
+          <mat-error *ngIf="entityForm.get('userCode').hasError('required')">
+            {{ 'auth-mng.user-code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
+      <mat-form-field class="mat-block">
+        <mat-label translate>auth-mng.phone-number</mat-label>
+        <input matInput formControlName="phoneNumber" required>
+        <mat-error *ngIf="entityForm.get('phoneNumber').hasError('required')">
+          {{ 'auth-mng.phone-number-required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="entityForm.get('phoneNumber').hasError('pattern')">
+          {{ 'auth-mng.phone-number-invalid' | translate }}
+        </mat-error>
+      </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>user.email</mat-label>
         <input matInput formControlName="email" required>

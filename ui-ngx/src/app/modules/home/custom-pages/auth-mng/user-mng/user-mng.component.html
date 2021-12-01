@@ -2,7 +2,7 @@
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
       <fieldset [disabled]="!!entityForm.get('id').value">
-        <mat-form-field class="mat-block">
+        <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
           <mat-label translate>auth-mng.user-code</mat-label>
           <input matInput formControlName="userCode" required>
           <mat-error *ngIf="entityForm.get('userCode').hasError('required')">

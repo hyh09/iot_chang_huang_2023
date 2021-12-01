@@ -348,6 +348,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.FACTORY,
       {
+        type: 'device-mng.factory',
         add: 'device-mng.add-factory',
         details: 'device-mng.factory-details'
       }
@@ -355,6 +356,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.WORK_SHOP,
       {
+        type: 'device-mng.work-shop',
         add: 'device-mng.add-work-shop',
         details: 'device-mng.work-shop-details'
       }
@@ -362,6 +364,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.PROD_LINE,
       {
+        type: 'device-mng.prod-line',
         add: 'device-mng.add-prod-line',
         details: 'device-mng.prod-line-details'
       }
@@ -408,12 +411,14 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.ALARM_RECORD,
       {
+        type: 'device-monitor.alarm-record',
         noEntities: 'device-monitor.no-alarm-records'
       }
     ],
     [
       EntityType.ALARM_RULES,
       {
+        type: 'device-monitor.alarm-rules',
         add: "device-monitor.add-alarm-rule",
         noEntities: 'device-monitor.no-alarm-rules',
         details: "device-monitor.alarm-rule-details",
