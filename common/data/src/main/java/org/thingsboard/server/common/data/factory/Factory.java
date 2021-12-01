@@ -20,6 +20,18 @@ public class Factory {
 
     private String address;
 
+    @ApiModelProperty("国家")
+    private String country;
+
+    @ApiModelProperty("省")
+    private String province;
+
+    @ApiModelProperty("市")
+    private String city;
+
+    @ApiModelProperty("区")
+    private String area;
+
     private String longitude;
 
     private String latitude;
@@ -29,10 +41,6 @@ public class Factory {
     private String mobile;
 
     private String email;
-
-    private UUID adminUserId;
-
-    private String adminUserName;
 
     private String remark;
 

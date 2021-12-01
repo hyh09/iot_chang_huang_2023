@@ -670,4 +670,4 @@ ALTER TABLE public.device ADD COLUMN updated_user uuid;
 ALTER TABLE public.device ADD COLUMN comment character varying(255) COLLATE pg_catalog."default";
 COMMENT ON COLUMN public.device.comment IS '备注';
 ALTER TABLE public.device ADD COLUMN device_no character varying(255) COLLATE pg_catalog."default";
-COMMENT ON COLUMN public.device.comment IS '设备编号';
+COMMENT ON COLUMN public.device.device_no IS '设备编号';
