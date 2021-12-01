@@ -82,11 +82,11 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
         User  user =  userService.findUserById(null,userId);
         if(user.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
         {
-            return  new JudgeUserVo(false,true,userId.getId());
+            return  new JudgeUserVo(false,true,user);
         }
         if(user.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
         {
-            return  new JudgeUserVo(true,false,userId.getId());
+            return  new JudgeUserVo(true,false,user);
         }
 //        JudgeUserVo  judgeUserVo =  new JudgeUserVo();
 //        if(user == null)
@@ -205,22 +205,22 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
     }
 
 
-    private  JudgeUserVo  getJudeUserVoById(List<TenantSysRoleEntity>  tenantSysRoleEntities1,UUID id)
-    {
-        if(!CollectionUtils.isEmpty(tenantSysRoleEntities1))
-        {
-            long count=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
-            if(count>0)
-            {
-                return  new JudgeUserVo(true,false,id);
-            }
-
-            long fCount=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();
-            if(fCount>0)
-            {
-                return  new JudgeUserVo(false,true,id);
-            }
-        }
-        return  null;
-    }
+//    private  JudgeUserVo  getJudeUserVoById(List<TenantSysRoleEntity>  tenantSysRoleEntities1,UUID id)
+//    {
+//        if(!CollectionUtils.isEmpty(tenantSysRoleEntities1))
+//        {
+//            long count=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
+//            if(count>0)
+//            {
+//                return  new JudgeUserVo(true,false,id);
+//            }
+//
+//            long fCount=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();
+//            if(fCount>0)
+//            {
+//                return  new JudgeUserVo(false,true,id);
+//            }
+//        }
+//        return  null;
+//    }
 }
