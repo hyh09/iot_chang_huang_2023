@@ -56,6 +56,12 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
     Page<UserEntity> findTenantAdmins(@Param("tenantId") UUID tenantId,@Param("searchText") String searchText,@Param("roleCode") String roleCode,Pageable pageable);
 
 
+    @Query(value = "select t.*  from  tb_user t  where    t.id  in (select  user_id  from  tb_user_menu_role rr  ,tb_tenant_sys_role re\n" +
+            "                                              where  rr.tenant_sys_role_id  = re.id  and  re.tenant_id= :tenantId " +
+            "                                                and re.role_code=:roleCode  and re.factory_id= :factoryId" +
+            ") and  t.tenant_id= :tenantId  and t.factory_id = :factoryId  and ((t.user_code) like (( :userCode ||'%')) )  and ((t.user_name) like (( :userName ||'%')) )",nativeQuery = true)
+    Page<UserEntity> findFactoryAdmins(@Param("tenantId") UUID tenantId,@Param("factoryId") UUID factoryId,@Param("userCode") String userCode,@Param("userName") String userName,@Param("roleCode") String roleCode,Pageable pageable);
+
 
     @Query("SELECT u FROM UserEntity u WHERE u.tenantId = :tenantId " +
             "AND LOWER(u.searchText) LIKE LOWER(CONCAT(:searchText, '%'))")

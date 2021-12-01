@@ -66,6 +66,9 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
      */
     PageData<User> findTenantAdmins(UUID tenantId, PageLink pageLink);
 
+
+    PageData<User> findFactoryAdmins(UUID tenantId,UUID factoryId, String userCode,String userName, PageLink pageLink);
+
     /**
      * Find customer users by tenantId, customerId and page link.
      *
