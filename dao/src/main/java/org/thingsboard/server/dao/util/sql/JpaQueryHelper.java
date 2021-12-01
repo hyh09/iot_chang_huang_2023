@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.dao.util.ReflectionUtils;
+import org.thingsboard.server.dao.util.anno.JpaOperatorsType;
 
 import javax.persistence.Id;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -219,7 +220,13 @@ public class JpaQueryHelper {
 									in.value(o);
 								}
 								pList.add(in);
-							} else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
+							}else  if(f.getAnnotation(JpaOperatorsType.class) != null)
+							{
+								JpaOperatorsType jpaOperatorsType = 	f.getAnnotation(JpaOperatorsType.class);
+								pList.add(jpaOperatorsType.value().buildPredicate(cb,root,f.getName(),value));
+							}
+
+							else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
 								if(StringUtils.isNotEmpty((String) value) && !value.equals("0")) {  //
 									pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
 								}
