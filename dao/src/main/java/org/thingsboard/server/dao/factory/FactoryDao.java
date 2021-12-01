@@ -27,13 +27,6 @@ public interface FactoryDao extends Dao<Factory>{
     void delFactory(UUID id);
 
     /**
-     * 根据工厂管理员查询
-     * @param factoryAdminId
-     * @return
-     */
-    Factory findFactoryByAdmin(UUID factoryAdminId);
-
-    /**
      * 根据租户查询
      * @param tenantId
      * @return

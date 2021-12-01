@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
@@ -48,23 +47,6 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         log.trace("Executing saveFactory [{}]", factory);
         factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
         Factory factorySave = factoryDao.saveFactory(factory);
-        if (factorySave != null && factory.getId() == null) {
-            //创建管理员账号
-            User adduser = new User();
-            adduser.setPhoneNumber(factorySave.getMobile());
-            adduser.setEmail(factorySave.getEmail());
-            adduser.setUserName(factorySave.getName());
-            adduser.setFactoryId(factorySave.getId());
-            User loginUser = new User();
-            loginUser.setId(new UserId(factorySave.getCreatedUser()));
-            loginUser.setTenantId(new TenantId(factorySave.getTenantId()));
-            User saveUser = userRoleMenuSvc.save(adduser,loginUser);
-
-            //保存管理员信息
-            factorySave.setAdminUserId(saveUser.getId().getId());
-            factorySave.setAdminUserName(saveUser.getUserName());
-            factoryDao.saveFactory(factorySave);
-        }
         return factorySave;
     }
 
@@ -179,9 +161,11 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
             //工厂管理员/工厂用户，拥有所属工厂数据权限
             //查询工厂信息
-            Factory queryFactory = factoryDao.findFactoryByAdmin(judgeUserVo.getUserId());
-            if (queryFactory != null) {
-                resultFactory.add(queryFactory);
+            if(judgeUserVo.getUser() != null && judgeUserVo.getUser().getFactoryId() != null){
+                Factory queryFactory = factoryDao.findById(judgeUserVo.getUser().getFactoryId());
+                if (queryFactory != null) {
+                    resultFactory.add(queryFactory);
+                }
             }
         }
         return resultFactory;

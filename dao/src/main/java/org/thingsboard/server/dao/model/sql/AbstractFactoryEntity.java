@@ -51,6 +51,18 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
     @Column(name = "address")
     private String address;
 
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "province")
+    private String province;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "area")
+    private String area;
+
     @Column(name = "longitude")
     private String longitude;
 
@@ -65,12 +77,6 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
 
     @Column(name = "email")
     private String email;
-
-    @Column(name = "admin_user_id")
-    private UUID adminUserId;
-
-    @Column(name = "admin_user_name")
-    private String adminUserName;
 
     @Column(name = "remark")
     private String remark;
@@ -112,13 +118,15 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.logoIcon = abstractFactoryEntity.getLogoIcon();
         this.logoImages = abstractFactoryEntity.getLogoImages();
         this.address = abstractFactoryEntity.getAddress();
+        this.country = abstractFactoryEntity.getCountry();
+        this.province = abstractFactoryEntity.getProvince();
+        this.city = abstractFactoryEntity.getCity();
+        this.area = abstractFactoryEntity.getArea();
         this.longitude = abstractFactoryEntity.getLongitude();
         this.latitude = abstractFactoryEntity.getLatitude();
         this.mobile = abstractFactoryEntity.getMobile();
         this.email = abstractFactoryEntity.getEmail();
         this.postalCode = abstractFactoryEntity.getPostalCode();
-        this.adminUserId = abstractFactoryEntity.getAdminUserId();
-        this.adminUserName = abstractFactoryEntity.getAdminUserName();
         this.remark = abstractFactoryEntity.getRemark();
         this.tenantId = abstractFactoryEntity.getTenantId();
         this.createdTime = abstractFactoryEntity.getUpdatedTime();
@@ -137,13 +145,15 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.logoIcon = factory.getLogoIcon();
         this.logoImages = factory.getLogoImages();
         this.address = factory.getAddress();
+        this.country = factory.getCountry();
+        this.province = factory.getProvince();
+        this.city = factory.getCity();
+        this.area = factory.getArea();
         this.longitude = factory.getLongitude();
         this.latitude = factory.getLatitude();
         this.mobile = factory.getMobile();
         this.email = factory.getEmail();
         this.postalCode = factory.getPostalCode();
-        this.adminUserId = factory.getAdminUserId();
-        this.adminUserName = factory.getAdminUserName();
         this.remark = factory.getRemark();
         this.tenantId = factory.getTenantId();
         this.createdTime = factory.getUpdatedTime();
@@ -160,13 +170,15 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         factory.setLogoIcon(logoIcon);
         factory.setLogoImages(logoImages);
         factory.setAddress(address);
+        factory.setCountry(country);
+        factory.setProvince(province);
+        factory.setCity(city);
+        factory.setArea(area);
         factory.setLongitude(longitude);
         factory.setLatitude(latitude);
         factory.setMobile(mobile);
         factory.setEmail(email);
         factory.setPostalCode(this.postalCode);
-        factory.setAdminUserId(adminUserId);
-        factory.setAdminUserName(adminUserName);
         factory.setRemark(remark);
         factory.setTenantId(tenantId);
         factory.setCreatedTime(createdTime);

@@ -46,16 +46,22 @@ public class FactoryController extends BaseController  {
     public FactoryVo saveFactory(@RequestBody AddFactoryDto addFactoryDto) throws ThingsboardException {
         try {
             checkNotNull(addFactoryDto);
+            //地址不能为空
+            checkParameter("国家",addFactoryDto.getCountry());
+            checkParameter("省",addFactoryDto.getProvince());
+            checkParameter("市",addFactoryDto.getCity());
+            checkParameter("区",addFactoryDto.getArea());
+            checkParameter("详细地址",addFactoryDto.getAddress());
             //校验名称是否重复
             checkFactoryName(addFactoryDto.getId(),addFactoryDto.getName());
             Factory factory = addFactoryDto.toFactory();
             factory.setTenantId(getCurrentUser().getTenantId().getId());
             if(addFactoryDto.getId() == null){
                 factory.setCreatedUser(getCurrentUser().getUuidId());
-                factory = checkNotNull(factoryService.saveFactory(factory));
+                factory = factoryService.saveFactory(factory);
             }else {
                 factory.setUpdatedUser(getCurrentUser().getUuidId());
-                factory =  checkNotNull(factoryService.updFactory(factory));
+                factory = factoryService.updFactory(factory);
             }
             return new FactoryVo(factory);
         } catch (Exception e) {
