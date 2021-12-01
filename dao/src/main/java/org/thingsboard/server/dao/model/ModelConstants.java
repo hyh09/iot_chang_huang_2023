@@ -107,9 +107,13 @@ public class ModelConstants {
     /**
      * Cassandra contact constants.
      */
+    public static   final  String LONGITUDE_PROPERTY="longitude";
+    public static   final  String LATITUDE_PROPERTY="latitude";
+
     public static final String COUNTRY_PROPERTY = "country";
     public static final String STATE_PROPERTY = "state";
     public static final String CITY_PROPERTY = "city";
+    public static final String COUNTY_LEVEL_PROPERTY="county_level";
     public static final String ADDRESS_PROPERTY = "address";
     public static final String ADDRESS2_PROPERTY = "address2";
     public static final String ZIP_PROPERTY = "zip";
