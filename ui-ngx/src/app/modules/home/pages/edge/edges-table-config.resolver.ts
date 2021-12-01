@@ -82,6 +82,9 @@ export class EdgesTableConfigResolver implements Resolve<EntityTableConfig<EdgeI
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.EDGE);
     this.config.entityResources = entityTypeResources.get(EntityType.EDGE);
 
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
+
     this.config.deleteEntityTitle = edge => this.translate.instant('edge.delete-edge-title', {edgeName: edge.name});
     this.config.deleteEntityContent = () => this.translate.instant('edge.delete-edge-text');
     this.config.deleteEntitiesTitle = count => this.translate.instant('edge.delete-edges-title', {count});
@@ -98,7 +101,7 @@ export class EdgesTableConfigResolver implements Resolve<EntityTableConfig<EdgeI
     };
     this.config.onEntityAction = action => this.onEdgeAction(action);
     this.config.detailsReadonly = () => this.config.componentsData.edgeScope === 'customer_user';
-    this.config.headerComponent = EdgeTableHeaderComponent;
+    this.config.filterComponent = EdgeTableHeaderComponent;
   }
 
   resolve(route: ActivatedRouteSnapshot): Observable<EntityTableConfig<EdgeInfo>> {

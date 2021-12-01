@@ -36,6 +36,7 @@ import { ResourcesLibraryComponent } from '@home/pages/admin/resource/resources-
 import { PageLink } from '@shared/models/page/page-link';
 import { EntityAction } from '@home/models/entity/entity-component.models';
 import { map } from 'rxjs/operators';
+import { RulechainTableFilterComponent } from './resources-library-table-filter.component';
 
 @Injectable()
 export class ResourcesLibraryTableConfigResolver implements Resolve<EntityTableConfig<Resource, PageLink, ResourceInfo>> {
@@ -50,11 +51,14 @@ export class ResourcesLibraryTableConfigResolver implements Resolve<EntityTableC
 
     this.config.entityType = EntityType.TB_RESOURCE;
     this.config.entityComponent = ResourcesLibraryComponent;
+    this.config.filterComponent = RulechainTableFilterComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.TB_RESOURCE);
     this.config.entityResources = entityTypeResources.get(EntityType.TB_RESOURCE);
 
-    this.config.entityTitle = (resource) => resource ?
-      resource.title : '';
+    this.config.entityTitle = (resource) => resource ? resource.title : '';
+
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.columns.push(
       new DateEntityTableColumn<ResourceInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),

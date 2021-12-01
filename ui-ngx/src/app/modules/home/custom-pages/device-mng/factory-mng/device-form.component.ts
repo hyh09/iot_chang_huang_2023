@@ -76,6 +76,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
     this.setMapOfExpandedComp();
+    this.entityForm.updateValueAndValidity();
   }
 
   generateFromArray(entity: ProdDevice): { [key: string]: Array<AbstractControl> } {

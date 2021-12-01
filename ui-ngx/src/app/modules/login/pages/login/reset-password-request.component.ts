@@ -22,6 +22,7 @@ import { PageComponent } from '@shared/components/page.component';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActionNotificationShow } from '@core/notification/notification.actions';
 import { TranslateService } from '@ngx-translate/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'tb-reset-password-request',
@@ -39,8 +40,10 @@ export class ResetPasswordRequestComponent extends PageComponent implements OnIn
   constructor(protected store: Store<AppState>,
               private authService: AuthService,
               private translate: TranslateService,
-              public fb: FormBuilder) {
+              public fb: FormBuilder,
+              private route: ActivatedRoute) {
     super(store);
+    this.requestPasswordRequest.get('email').setValue(this.route.snapshot.queryParams.email || '');
   }
 
   ngOnInit() {

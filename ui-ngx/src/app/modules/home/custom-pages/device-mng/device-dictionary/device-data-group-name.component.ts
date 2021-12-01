@@ -18,6 +18,7 @@ export interface DeviceDataGroupNameDialogData {
 export class DeviceDataGroupNameComponent extends DialogComponent<DeviceDataGroupNameComponent, string> implements OnInit {
 
   form: FormGroup;
+  isEdit: boolean;
 
   constructor(
     protected store: Store<AppState>,
@@ -27,6 +28,7 @@ export class DeviceDataGroupNameComponent extends DialogComponent<DeviceDataGrou
     @Inject(MAT_DIALOG_DATA) public data: DeviceDataGroupNameDialogData
   ) {
     super(store, router, dialogRef);
+    this.isEdit = !!(this.data && this.data.name);
   }
 
   ngOnInit() {

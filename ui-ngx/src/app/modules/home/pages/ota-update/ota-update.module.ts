@@ -20,10 +20,12 @@ import { SharedModule } from '@shared/shared.module';
 import { HomeComponentsModule } from '@home/components/home-components.module';
 import { OtaUpdateRoutingModule } from '@home/pages/ota-update/ota-update-routing.module';
 import { OtaUpdateComponent } from '@home/pages/ota-update/ota-update.component';
+import { OatUpdateTableFilterComponent } from './oat-update-table-filter.component';
 
 @NgModule({
   declarations: [
-    OtaUpdateComponent
+    OtaUpdateComponent,
+    OatUpdateTableFilterComponent
   ],
   imports: [
     CommonModule,

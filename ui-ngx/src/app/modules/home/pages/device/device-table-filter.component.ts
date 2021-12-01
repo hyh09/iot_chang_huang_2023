@@ -37,12 +37,16 @@ export class DeviceTableFilterComponent extends EntityTableHeaderComponent<Devic
 
   deviceProfileChanged(deviceProfileId: DeviceProfileId) {
     this.entitiesTableConfig.componentsData.deviceProfileId = deviceProfileId;
-    this.entitiesTableConfig.table.resetSortAndFilter(true);
+    this.refresh();
   }
 
   onClear(param: string): void {
     this.entitiesTableConfig.componentsData[param] = '';
-    this.entitiesTableConfig.table.resetSortAndFilter(true);
+    this.refresh();
+  }
+
+  refresh() {
+    this.entitiesTableConfig.table.resetSortAndFilter(true, true, true);
   }
 
 }

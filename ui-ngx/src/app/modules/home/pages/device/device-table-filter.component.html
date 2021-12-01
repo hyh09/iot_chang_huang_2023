@@ -16,8 +16,8 @@
 
 -->
 <mat-form-field>
-  <mat-label>{{ 'device-mng.device-name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.deviceName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <mat-label>{{ 'device.name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.deviceName" (keyup.enter)="refresh()" />
   <button
     *ngIf="entitiesTableConfig.componentsData.deviceName"
     matSuffix mat-icon-button aria-label="Clear"
@@ -36,7 +36,7 @@
   <mat-label>{{ 'device.device-state' | translate }}</mat-label>
   <mat-select
     [(ngModel)]="entitiesTableConfig.componentsData.isAllot"
-    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+    (ngModelChange)="refresh()"
   >
     <mat-option value="">{{ 'common.all' | translate }}</mat-option>
     <mat-option [value]="true">{{ 'device.device-state-distributed' | translate }}</mat-option>
@@ -44,7 +44,7 @@
   </mat-select>
 </mat-form-field>
 <div class="action-btns">
-  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+  <button mat-flat-button color="primary" (click)="refresh()">
     {{ 'action.search' | translate }}
   </button>
 </div>
