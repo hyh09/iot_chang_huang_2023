@@ -22,6 +22,7 @@ import { AlarmRulesComponent } from './alarm-rules.component';
 import { AlarmRuleInfo } from '@app/shared/models/custom/device-monitor.models';
 import { AlarmRuleService } from '@app/core/http/custom/alarm-rule.service';
 import { AddAlarmRuleDialogComponent, AddAlarmRuleDialogData } from './add-alarm-rule-dialog.component';
+import { AlarmRulesTableFilterComponent } from './alarm-rules-table-filter.component';
 
 @Injectable()
 export class AlarmRulesTableConfigResolver implements Resolve<EntityTableConfig<AlarmRuleInfo>> {
@@ -36,11 +37,14 @@ export class AlarmRulesTableConfigResolver implements Resolve<EntityTableConfig<
   ) {
     this.config.entityType = EntityType.ALARM_RULES;
     this.config.entityComponent = AlarmRulesComponent;
+    this.config.filterComponent = AlarmRulesTableFilterComponent;
     this.config.entityTabsComponent = AlarmRulesTabsComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.ALARM_RULES);
     this.config.entityResources = entityTypeResources.get(EntityType.ALARM_RULES);
 
     this.config.hideDetailsTabsOnEdit = false;
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.addDialogStyle = {width: '1000px'};
 

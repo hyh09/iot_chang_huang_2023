@@ -25,12 +25,12 @@
                 {{ 'device-profile.name-required' | translate }}
               </mat-error>
             </mat-form-field>
-            <mat-form-field class="mat-block">
+            <!-- <mat-form-field class="mat-block">
               <mat-label translate>device-mng.device-dic</mat-label>
               <mat-select formControlName="dictDeviceIdList" multiple>
                 <mat-option *ngFor="let option of deviceDictionaries" [value]="option.id">{{option.name}}</mat-option>
               </mat-select>
-            </mat-form-field>
+            </mat-form-field> -->
             <mat-form-field class="mat-block">
               <mat-label translate>device-profile.description</mat-label>
               <input matInput formControlName="description" />
