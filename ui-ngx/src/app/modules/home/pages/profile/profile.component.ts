@@ -93,6 +93,8 @@ export class ProfileComponent extends PageComponent implements OnInit, HasConfir
             createdTime: user.createdTime,
             tenantId: user.tenantId,
             customerId: user.customerId,
+            userCode: user.userCode,
+            phoneNumber: user.phoneNumber,
             email: user.email,
             firstName: user.firstName,
             id: user.id,

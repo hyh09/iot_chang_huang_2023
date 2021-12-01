@@ -54,8 +54,8 @@ export class UserMngService {
   }
 
   // 获取当前可用的用户编码
-  public getAvailableCode(): Observable<string> {
-    return this.http.post(`/api/user/getCode`, { key: "1" }, { responseType: 'text' });
+  public getAvailableCode(tenantId?: string): Observable<string> {
+    return this.http.post(`/api/user/getCode`, { key: "1", tenantId }, { responseType: 'text' });
   }
 
 }
