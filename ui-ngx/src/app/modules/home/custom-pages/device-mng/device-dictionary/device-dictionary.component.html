@@ -170,6 +170,7 @@
                 <mat-form-field>
                   <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
                   <mat-select formControlName="dictDataId" [disabled]="(isLoading$ | async) || !isEdit">
+                    <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                     <mat-option *ngFor="let option of entitiesTableConfig.componentsData.dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                   </mat-select>
                 </mat-form-field>

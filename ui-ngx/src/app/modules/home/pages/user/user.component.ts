@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { ChangeDetectorRef, Component, Inject, Optional } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, OnInit, Optional } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { EntityComponent } from '../../components/entity/entity.component';
@@ -23,7 +23,7 @@ import { User } from '@shared/models/user.model';
 import { selectAuth } from '@core/auth/auth.selectors';
 import { map } from 'rxjs/operators';
 import { Authority } from '@shared/models/authority.enum';
-import { isDefinedAndNotNull, isUndefined } from '@core/utils';
+import { isDefinedAndNotNull } from '@core/utils';
 import { EntityTableConfig } from '@home/models/entity/entities-table-config.models';
 
 @Component({
@@ -31,7 +31,9 @@ import { EntityTableConfig } from '@home/models/entity/entities-table-config.mod
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss']
 })
-export class UserComponent extends EntityComponent<User> {
+export class UserComponent extends EntityComponent<User> implements OnInit {
+
+  @Input() userCode: string;
 
   authority = Authority;
 
@@ -48,6 +50,16 @@ export class UserComponent extends EntityComponent<User> {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
 
+  ngOnInit() {
+    if (!this.entityForm.get('userCode').value) {
+      let availableCode = this.userCode || '';
+      if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {
+        availableCode = this.entitiesTableConfig.componentsData.availableCode || '';
+      }
+      this.entityForm.get('userCode').setValue(availableCode);
+    }
+  }
+
   hideDelete() {
     if (this.entitiesTableConfig) {
       return !this.entitiesTableConfig.deleteEnabled(this.entity);
@@ -57,7 +69,7 @@ export class UserComponent extends EntityComponent<User> {
   }
 
   isUserCredentialsEnabled(): boolean {
-      return this.entity.additionalInfo.userCredentialsEnabled === true;
+    return this.entity.additionalInfo.userCredentialsEnabled === true;
   }
 
   isUserCredentialPresent(): boolean {
@@ -67,6 +79,9 @@ export class UserComponent extends EntityComponent<User> {
   buildForm(entity: User): FormGroup {
     return this.fb.group(
       {
+        id: [entity && entity.id ? entity.id : null],
+        userCode: [entity && entity.userCode ? entity.userCode : '', Validators.required],
+        phoneNumber: [entity ? entity.phoneNumber : '', [Validators.required, Validators.pattern(/^(1)\d{10}$/)]],
         email: [entity ? entity.email : '', [Validators.required, Validators.email]],
         firstName: [entity ? entity.firstName : ''],
         lastName: [entity ? entity.lastName : ''],
@@ -85,6 +100,9 @@ export class UserComponent extends EntityComponent<User> {
   }
 
   updateForm(entity: User) {
+    this.entityForm.patchValue({id: entity.id});
+    this.entityForm.patchValue({userCode: entity.userCode});
+    this.entityForm.patchValue({phoneNumber: entity.phoneNumber});
     this.entityForm.patchValue({email: entity.email});
     this.entityForm.patchValue({firstName: entity.firstName});
     this.entityForm.patchValue({lastName: entity.lastName});
