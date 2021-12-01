@@ -2,6 +2,7 @@ package org.thingsboard.server.common.data.vo;
 
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.User;
 
 import java.util.UUID;
 
@@ -33,13 +34,13 @@ public class JudgeUserVo {
      * tenantFlag 租户管理true: userId就是租户管理id
      *  factoryManagementFlag 为true: userId就是工厂管理员id
      */
-    private UUID  userId;
+    private User user;
 
 
-    public JudgeUserVo(Boolean tenantFlag, Boolean factoryManagementFlag, UUID userId) {
+    public JudgeUserVo(Boolean tenantFlag, Boolean factoryManagementFlag, User user) {
         this.tenantFlag = tenantFlag;
         this.factoryManagementFlag = factoryManagementFlag;
-        this.userId = userId;
+        this.user = user;
     }
 
     public JudgeUserVo() {
