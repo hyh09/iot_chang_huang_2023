@@ -70,6 +70,7 @@ public class ModelConstants {
     public  static  final String USER_USER_NAME_PROPERTY="user_name";
     public  static  final String USER_USER_CREATOR_PROPERTY="user_creator";
     public  static  final String USER_USER_TYPE="type";
+    public  static  final  String USER_USER_LEVEL="user_level";
    public  static  final  String USER_USER_FACTORY_ID="factory_Id";
 
     public static final String USER_AUTHORITY_PROPERTY = "authority";

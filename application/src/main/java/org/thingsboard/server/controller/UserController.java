@@ -486,9 +486,10 @@ public class UserController extends BaseController implements DefalutSvc {
             {
                 log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
-                TenantSysRoleEntity  tenantSysRoleEntit= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
+                user.setUserLevel(1);
+                TenantSysRoleEntity  tenantSysRoleEntity= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
                 List<UUID> roleIds = new ArrayList<>();
-                roleIds.add(tenantSysRoleEntit.getId());
+                roleIds.add(tenantSysRoleEntity.getId());
                 user.setRoleIds(roleIds);
 
             }else {
@@ -625,7 +626,7 @@ public class UserController extends BaseController implements DefalutSvc {
                  queryParam.put("factoryId", securityUser.getFactoryId());
                  queryParam.put("type", securityUser.getType());
              }
-
+             queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);
          }catch (Exception  e)
          {

@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.util.sql;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.dao.util.ReflectionUtils;
@@ -14,6 +15,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.*;
 
+@Slf4j
 public class JpaQueryHelper {
 	
 	@SuppressWarnings({"rawtypes","unchecked"})
@@ -244,6 +246,10 @@ public class JpaQueryHelper {
 									}
 								}
 
+							}else  if(f.getType().isAssignableFrom(int.class))
+							{
+								log.info("打印当前得数据:{},====xingjiade==={}",f.getType(),value);
+								pList.add(cb.equal(root.get(f.getName()), value));
 							}
 							else {
 								pList.add(cb.equal(root.get(f.getName()), value));
