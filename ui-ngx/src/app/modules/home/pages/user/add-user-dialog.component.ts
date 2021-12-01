@@ -32,8 +32,10 @@ import {
 import { TenantId } from '@app/shared/models/id/tenant-id';
 import { DialogComponent } from '@shared/components/dialog.component';
 import { Router } from '@angular/router';
+import { EntityTableConfig } from '../../models/entity/entities-table-config.models';
 
 export interface AddUserDialogData {
+  entitiesTableConfig: EntityTableConfig<User>;
   tenantId: string;
   customerId: string;
   authority: Authority;
@@ -56,6 +58,8 @@ export class AddUserDialogComponent extends DialogComponent<AddUserDialogCompone
 
   activationMethod = ActivationMethod.DISPLAY_ACTIVATION_LINK;
 
+  availableCode: string = '';
+
   @ViewChild(UserComponent, {static: true}) userComponent: UserComponent;
 
   constructor(protected store: Store<AppState>,
@@ -65,6 +69,7 @@ export class AddUserDialogComponent extends DialogComponent<AddUserDialogCompone
               private userService: UserService,
               private dialog: MatDialog) {
     super(store, router, dialogRef);
+    this.availableCode = this.data.entitiesTableConfig.componentsData.availableCode;
   }
 
   ngOnInit(): void {

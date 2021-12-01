@@ -62,6 +62,7 @@ import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
@@ -118,7 +119,7 @@ public class UserController extends BaseController implements DefalutSvc {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
-    @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+
     @Autowired  private UserRoleMenuSvc  nuSvc;
     @Autowired  private UserMenuRoleService userMenuRoleService;
 
@@ -157,7 +158,6 @@ public class UserController extends BaseController implements DefalutSvc {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
             }
-
             return user;
         } catch (Exception e) {
             throw handleException(e);
@@ -452,7 +452,7 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理的添加接口")
     @RequestMapping(value = "/user/save", method = RequestMethod.POST)
     @ResponseBody
-    public Object save(@RequestBody User user) throws ThingsboardException {
+    public User save(@RequestBody User user) throws ThingsboardException {
          DataValidator.validateEmail(user.getEmail());
          DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
@@ -481,25 +481,19 @@ public class UserController extends BaseController implements DefalutSvc {
             if(checkSvc.checkValueByKey(vo2)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
-
-
-
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
             user.setUserCreator(securityUser.getId().toString());
-            user.setType(securityUser.getType());
-            user.setFactoryId(securityUser.getFactoryId());
 
-//            if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
-//            {
-//                user.setAuthority(Authority.FACTORY_MANAGEMENT);
-//            }else{
-//                user.setAuthority(Authority.TENANT_ADMIN);
-//            }
+            if(user.getFactoryId()!= null )
+            {
+                user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+            }else {
+                user.setType(securityUser.getType());
+                user.setFactoryId(securityUser.getFactoryId());
+            }
 
-
-
-            log.info("【用户管理模块.用户添加接口】入参{}", user);
+           log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
@@ -547,13 +541,11 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理的【编辑用户接口】")
     @RequestMapping(value="/user/update",method = RequestMethod.POST)
     @ResponseBody
-    public Object update(@RequestBody User user) throws ThingsboardException {
+    public User update(@RequestBody User user) throws ThingsboardException {
         SecurityUser  securityUser =  getCurrentUser();
 
         log.info("打印更新用户的入参:{}",user);
         checkEmailAndPhone(user);
-
-
         UserVo  vo0 = new UserVo();
         vo0.setUserCode(user.getUserCode());
         vo0.setUserId(user.getUuidId().toString());
@@ -650,15 +642,21 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理得 {用户编码 或角色编码}得生成获取")
     @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
     public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
-        try {
+
+            TenantId  tenantId = null;
             SecurityUser securityUser = getCurrentUser();
-            return checkSvc.queryCodeNew(vo, securityUser.getTenantId());
-        }catch (Exception e)
-        {
-             e.printStackTrace();
-            log.info("打印当前异常:{}",e);
-            throw new ThingsboardException("生成编码异常!", ThingsboardErrorCode.GENERAL);
-        }
+            tenantId =securityUser.getTenantId();
+            if(securityUser.getAuthority() == Authority.SYS_ADMIN )
+            {
+                if(vo.getTenantId() == null){
+                    String message=   getMessageByUserId(ErrorMessageEnums.PARAMETER_NOT_NULL);
+                    throw new ThingsboardException(message+"[TenantId]", ThingsboardErrorCode.GENERAL);
+                }
+                tenantId = new TenantId(vo.getTenantId());
+                log.info("当前是系统用户");
+            }
+            return checkSvc.queryCodeNew(vo, tenantId);
+
 
     }
 

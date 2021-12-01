@@ -50,6 +50,7 @@ import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { TenantService } from '@app/core/http/tenant.service';
 import { TenantId } from '@app/shared/models/id/tenant-id';
 import { UserTabsComponent } from '@home/pages/user/user-tabs.component';
+import { UserMngService } from '@app/core/http/custom/user-mng.service';
 
 export interface UsersTableRouteData {
   authority: Authority;
@@ -73,13 +74,17 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
               private translate: TranslateService,
               private datePipe: DatePipe,
               private dialog: MatDialog,
-              private router: Router) {
+              private userMngService: UserMngService) {
 
     this.config.entityType = EntityType.USER;
     this.config.entityComponent = UserComponent;
     this.config.entityTabsComponent = UserTabsComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.USER);
     this.config.entityResources = entityTypeResources.get(EntityType.USER);
+
+    this.config.componentsData = {
+      availableCode: ''
+    };
 
     this.config.columns.push(
       new DateEntityTableColumn<User>('createdTime', 'common.created-time', this.datePipe, '150px'),
@@ -96,13 +101,24 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
 
     this.config.loadEntity = id => this.userService.getUser(id.id);
     this.config.saveEntity = user => this.saveUser(user);
-    this.config.deleteEntity = id => this.userService.deleteUser(id.id);
+    this.config.entityAdded = () => {
+      this.setAvailableCode();
+    }
+    this.config.deleteEntity = id => {
+      return this.userService.deleteUser(id.id).pipe(tap(() => {
+        this.setAvailableCode();
+      }));
+    }
     this.config.onEntityAction = action => this.onUserAction(action);
     this.config.addEntity = () => this.addUser();
   }
 
   resolve(route: ActivatedRouteSnapshot): Observable<EntityTableConfig<User>> {
     const routeParams = route.params;
+    this.config.componentsData = {
+      availableCode: ''
+    };
+    this.setAvailableCode();
     return this.store.pipe(select(selectAuth), take(1)).pipe(
       tap((auth) => {
         this.authUser = auth.userDetails;
@@ -130,6 +146,12 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
         return this.config;
       })
     );
+  }
+
+  setAvailableCode(): void {
+    this.userMngService.getAvailableCode(this.tenantId).subscribe(code => {
+      this.config.componentsData.availableCode = code;
+    });
   }
 
   updateActionCellDescriptors(auth: AuthState) {
@@ -161,6 +183,7 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
+        entitiesTableConfig: this.config,
         tenantId: this.tenantId,
         customerId: this.customerId,
         authority: this.authority

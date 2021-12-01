@@ -143,7 +143,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
-      dictDataId: [data ? data.dictDataId : null]
+      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {

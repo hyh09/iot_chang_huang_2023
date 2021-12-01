@@ -32,6 +32,7 @@
           formControlName="parentId"
           [disabled]="(isLoading$ | async) || !isEdit || !entityForm.get('menuType').value || superMenus.length === 0"
         >
+          <mat-option value="">{{ 'common.none' | translate }}</mat-option>
           <mat-option *ngFor="let menu of superMenus" [value]="menu.id">{{ menu.name }}</mat-option>
         </mat-select>
       </mat-form-field>
