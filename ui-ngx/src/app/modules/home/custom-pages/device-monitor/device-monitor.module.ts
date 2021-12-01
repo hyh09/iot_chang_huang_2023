@@ -12,6 +12,7 @@ import { RunStateChartComponent } from './real-time-monitor/run-state-chart.comp
 import { WarningStatisticsChartComponent } from './real-time-monitor/warning-statistics-chart.component';
 import { DeviceDetailsComponent } from './real-time-monitor/device-details/device-details.component';
 import { PropDataChartComponent } from './real-time-monitor/device-details/prop-data-chart.component';
+import { AlarmRulesTableFilterComponent } from './alarm-rules/alarm-rules-table-filter.component';
 
 @NgModule({
   imports: [
@@ -26,6 +27,7 @@ import { PropDataChartComponent } from './real-time-monitor/device-details/prop-
     AlarmRulesComponent,
     AlarmRulesTabsComponent,
     AddAlarmRuleDialogComponent,
+    AlarmRulesTableFilterComponent,
     RunStateChartComponent,
     WarningStatisticsChartComponent,
     DeviceDetailsComponent,

@@ -143,6 +143,7 @@ import { SnmpDeviceProfileTransportModule } from '@home/components/profile/devic
 import { DeviceCredentialsModule } from '@home/components/device/device-credentials.module';
 import { DeviceProfileCommonModule } from '@home/components/profile/device/common/device-profile-common.module';
 import { FactoryTreeComponent } from './factory-tree/factory-tree.component';
+import { AuditLogTableFilterComponent } from './audit-log/audit-log-table-filter.component';
 
 @NgModule({
   declarations:
@@ -153,6 +154,7 @@ import { FactoryTreeComponent } from './factory-tree/factory-tree.component';
       EntityDetailsPanelComponent,
       AuditLogTableComponent,
       AuditLogDetailsDialogComponent,
+      AuditLogTableFilterComponent,
       EventContentDialogComponent,
       EventTableHeaderComponent,
       EventTableComponent,

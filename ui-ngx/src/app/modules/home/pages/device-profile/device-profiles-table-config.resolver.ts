@@ -42,6 +42,7 @@ import {
   AddDeviceProfileDialogData
 } from '@home/components/profile/add-device-profile-dialog.component';
 import { ImportExportService } from '@home/components/import-export/import-export.service';
+import { DeviceProfilesTableFilterComponent } from './device-profiles-table-filter.component';
 
 @Injectable()
 export class DeviceProfilesTableConfigResolver implements Resolve<EntityTableConfig<DeviceProfile>> {
@@ -57,11 +58,14 @@ export class DeviceProfilesTableConfigResolver implements Resolve<EntityTableCon
 
     this.config.entityType = EntityType.DEVICE_PROFILE;
     this.config.entityComponent = DeviceProfileComponent;
+    this.config.filterComponent = DeviceProfilesTableFilterComponent;
     this.config.entityTabsComponent = DeviceProfileTabsComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.DEVICE_PROFILE);
     this.config.entityResources = entityTypeResources.get(EntityType.DEVICE_PROFILE);
 
     this.config.hideDetailsTabsOnEdit = false;
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.addDialogStyle = {width: '1000px'};
 

@@ -16,7 +16,7 @@
 
 -->
 <mat-form-field>
-  <mat-label>{{ 'edge.name' | translate }}</mat-label>
+  <mat-label>{{ 'rulechain.name' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.table.pageLink.textSearch" (keyup.enter)="refresh()" />
   <button
     *ngIf="entitiesTableConfig.table.pageLink.textSearch"
@@ -26,12 +26,6 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-<tb-entity-subtype-select
-  [showLabel]="true"
-  [entityType]="entityType.EDGE"
-  [ngModel]="entitiesTableConfig.componentsData.edgeType"
-  (ngModelChange)="edgeTypeChanged($event)">
-</tb-entity-subtype-select>
 <div class="action-btns">
   <button mat-flat-button color="primary" (click)="refresh()">
     {{ 'action.search' | translate }}
