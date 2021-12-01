@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
@@ -23,6 +26,7 @@ import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
+import org.thingsboard.server.dao.tool.UserLanguageSvc;
 import org.thingsboard.server.dao.user.UserService;
 
 import java.util.List;
@@ -49,6 +53,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
     @Autowired  private TenantSysRoleService tenantSysRoleService;
     @Autowired  private UserMenuRoleService userMenuRoleService;
     @Autowired protected CheckSvc checkSvc;
+    @Autowired protected UserLanguageSvc userLanguageSvc;
 
 
     {
@@ -205,22 +210,62 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
     }
 
 
-//    private  JudgeUserVo  getJudeUserVoById(List<TenantSysRoleEntity>  tenantSysRoleEntities1,UUID id)
-//    {
-//        if(!CollectionUtils.isEmpty(tenantSysRoleEntities1))
-//        {
-//            long count=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.TENANT_ADMIN.getRoleCode())).count();
-//            if(count>0)
-//            {
-//                return  new JudgeUserVo(true,false,id);
-//            }
-//
-//            long fCount=   tenantSysRoleEntities1.stream().filter(p1 -> p1.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();
-//            if(fCount>0)
-//            {
-//                return  new JudgeUserVo(false,true,id);
-//            }
-//        }
-//        return  null;
-//    }
+    @Override
+    public TenantSysRoleEntity saveRole(UUID tenantId, UUID userId, UUID factoryId) throws ThingsboardException {
+        checkNotNull(tenantId,userId,factoryId);
+        TenantSysRoleEntity entity = new TenantSysRoleEntity();
+        entity.setCreatedUser(userId);
+        entity.setUpdatedUser(userId);
+        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
+        entity.setTenantId(tenantId);
+        entity.setFactoryId(factoryId);
+        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+        entity.setSystemTab("1");
+        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
+        return  rmEntity;
+    }
+
+
+
+    /**
+     * 获取当前登录人的提示信息
+     * @param enums
+     * @return
+     * @throws ThingsboardException
+     */
+    public  String getMessageByUserId(ErrorMessageEnums enums,UUID tenantId,UUID userId) throws ThingsboardException {
+        String message=   userLanguageSvc.getLanguageByUserLang(enums,new TenantId(tenantId),new UserId(userId));
+        return  message;
+    }
+
+
+    public  void  exception(ErrorMessageEnums enums,UUID tenantId,UUID userId,String afterMessage) throws ThingsboardException {
+        throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),getMessageByUserId(ErrorMessageEnums.PARAMETER_NOT_NULL,tenantId,userId)+afterMessage);
+    }
+
+
+    /**
+     * 校验不能为空
+     * @param tenantId
+     * @param userId
+     * @param factoryId
+     * @throws ThingsboardException
+     */
+  public  void checkNotNull(UUID tenantId, UUID userId, UUID factoryId) throws ThingsboardException {
+        if(tenantId == null )
+        {
+            exception(ErrorMessageEnums.PARAMETER_NOT_NULL,tenantId,userId,"【tenantId】");
+        }
+        if(userId == null )
+        {
+            exception(ErrorMessageEnums.PARAMETER_NOT_NULL,tenantId,userId,"【userId】");
+        }
+        if(factoryId == null )
+        {
+            exception(ErrorMessageEnums.PARAMETER_NOT_NULL,tenantId,userId,"【factoryId】");
+        }
+    }
+
+
 }

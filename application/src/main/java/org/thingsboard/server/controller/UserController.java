@@ -89,10 +89,7 @@ import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "用户管理", tags = {"用户管理接口接口"})
@@ -487,10 +484,17 @@ public class UserController extends BaseController implements DefalutSvc {
 
             if(user.getFactoryId()!= null )
             {
+                log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+                TenantSysRoleEntity  tenantSysRoleEntit= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
+                List<UUID> roleIds = new ArrayList<>();
+                roleIds.add(tenantSysRoleEntit.getId());
+                user.setRoleIds(roleIds);
+
             }else {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
+
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
