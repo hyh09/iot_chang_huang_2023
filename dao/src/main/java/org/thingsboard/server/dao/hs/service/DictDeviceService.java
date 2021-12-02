@@ -89,6 +89,21 @@ public interface DictDeviceService {
     List<DictDeviceGroupVO> getGroupInitData();
 
     /**
+     * 2021-11-29 15:22
+     * 查询初始化得数据 分组属性
+     * @return
+     */
+    List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name);
+
+    /**
+     *
+     * @return
+     */
+    Map<String,DictDeviceGroupPropertyVO> getMapPropertyVo();
+
+
+
+    /**
      * @param dictDeviceId
      * @param name
      * @return map: key-name  ,value-name
