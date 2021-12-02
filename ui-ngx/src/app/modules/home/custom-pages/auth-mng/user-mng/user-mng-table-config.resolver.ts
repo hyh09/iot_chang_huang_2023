@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Resolve } from '@angular/router';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { CellActionDescriptor, DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { UserMngComponent } from "./user-mng.component";
@@ -19,6 +19,8 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
 
   private readonly config: EntityTableConfig<UserInfo> = new EntityTableConfig<UserInfo>();
 
+  factoryId: string;
+
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
@@ -34,6 +36,7 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     this.config.entityResources = entityTypeResources.get(EntityType.USER_MNG);
 
     this.config.componentsData = {
+      factoryId: '',
       userCode: '',
       userName: '',
       availableCode: '',
@@ -52,12 +55,25 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     );
   }
 
-  resolve(): EntityTableConfig<UserInfo> {
+  resolve(route: ActivatedRouteSnapshot): EntityTableConfig<UserInfo> {
     this.config.componentsData = {
+      factoryId: '',
       userCode: '',
       userName: '',
       availableCode: '',
       roleList: []
+    }
+
+    if (route.params.factoryId) {
+      this.factoryId = route.params.factoryId;
+      this.config.componentsData.factoryId = this.factoryId;
+      this.config.tableTitle = `${route.queryParams.factoryName}: ${this.translate.instant('device-mng.factory-manager')}`;
+    } else {
+      this.factoryId = '';
+      this.config.tableTitle = this.translate.instant('auth-mng.user-mng');
+      this.roleMngService.getAllRoles().subscribe(res => {
+        this.config.componentsData.roleList = res;
+      });
     }
     
     this.config.searchEnabled = false;
@@ -68,19 +84,19 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
       this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
       this.config.cellActionDescriptors = this.configureCellActions();
     }
-    this.roleMngService.getAllRoles().subscribe(res => {
-      this.config.componentsData.roleList = res;
-    });
 
     this.setAvailableCode();
 
-    this.config.tableTitle = this.translate.instant('auth-mng.user-mng');
     this.config.deleteEntityTitle = userInfo => this.translate.instant('auth-mng.delete-user-title', {userName: userInfo.userName});
     this.config.deleteEntityContent = () => this.translate.instant('auth-mng.delete-user-text');
     this.config.deleteEntitiesTitle = count => this.translate.instant('auth-mng.delete-users-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('auth-mng.delete-users-text');
 
-    this.config.entitiesFetchFunction = pageLink => this.userMngService.getUsers(pageLink, this.config.componentsData);
+    if (this.factoryId) {
+      this.config.entitiesFetchFunction = pageLink => this.userMngService.getFactoryManagers(pageLink, this.config.componentsData);
+    } else {
+      this.config.entitiesFetchFunction = pageLink => this.userMngService.getUsers(pageLink, this.config.componentsData);
+    }
     this.config.loadEntity = id => this.userMngService.getUser(id.id);
     this.config.saveEntity = userInfo => this.userMngService.saveUser(userInfo);
     this.config.entityAdded = () => {

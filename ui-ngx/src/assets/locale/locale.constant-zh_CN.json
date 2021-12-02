@@ -2887,6 +2887,7 @@
     "delete-device-dics-title": "确定要删除 { count, plural, 1 {# 个设备字典} other {# 个设备字典} } 吗？",
     "delete-device-dics-text": "请注意：确认后，所有选定的设备字典将被删除，所有相关的数据将不可恢复。",
     "delete-factory-title": "确定要删除工厂 '{{name}}' 吗？",
+    "delete-factory-text": "请注意：确认后，该工厂及其所有的管理员账号将不可恢复。",
     "delete-work-shop-title": "确定要删除车间 '{{name}}' 吗？",
     "delete-prod-line-title": "确定要删除产线 '{{name}}' 吗？",
     "delete-device-title": "确定要删除设备 '{{name}}' 吗？",
@@ -2998,7 +2999,10 @@
     "group-name": "分组名称",
     "group-name-required": "分组名称必填",
     "duplicate-group-name": "分组名称重复",
-    "edit-group-name": "修改分组名称"
+    "edit-group-name": "修改分组名称",
+    "factory-manager": "工厂管理员",
+    "manage-factory-manager": "管理工厂管理员",
+    "set-factory-manager-permissions": "配置管理员权限"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",

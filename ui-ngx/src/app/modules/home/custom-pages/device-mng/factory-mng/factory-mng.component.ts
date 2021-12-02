@@ -16,6 +16,8 @@ import { WorkShopFormComponent } from './work-shop-form.component';
 import { ProdLineFormComponent } from './prod-line-form.component';
 import { DeviceFormComponent } from './device-form.component';
 import { DistributeDeviceComponent, DistributeDeviceDialogData } from './distribute-device.component';
+import { Router } from '@angular/router';
+import { SetPermissionsComponent, SetPermissionsDialogData } from '../../auth-mng/role-mng/set-permissions.component';
 
 @Component({
   selector: 'tb-factory-mng',
@@ -46,7 +48,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     private factoryMngService: FactoryMngService,
     public utils: UtilsService,
     public dialog: MatDialog,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private router: Router
   ) {
     super(store);
   }
@@ -214,6 +217,24 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     });
   }
 
+  mngFactoryManager(factoryId: string, factoryName: string) {
+    if (factoryId) {
+      this.router.navigate([`/deviceManagement/factoryManagement/${factoryId}/users`], {
+        queryParams: {
+          factoryName
+        }
+      });
+    }
+  }
+
+  setPermissions(factoryId: string) {
+    this.dialog.open<SetPermissionsComponent, SetPermissionsDialogData>(SetPermissionsComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: { factoryId }
+    });
+  }
+
   addWorkShop({ id: factoryId, name: factoryName }: { [key: string]: string }) {
     this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>, BaseData<HasId>>(AddEntityDialogComponent, {
       disableClose: true,
@@ -288,9 +309,11 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     let type = '';
     let fnName: string;
     let params: string | object;
+    let delTxt = '';
     if (entity.rowType === 'factory') {
       type = 'factory';
       fnName = 'deleteFactory';
+      delTxt = this.translate.instant('device-mng.delete-factory-text');
     } else if (entity.rowType === 'workShop') {
       type = 'work-shop';
       fnName = 'deleteWorkShop';
@@ -304,7 +327,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     }
     this.dialogService.confirm(
       this.translate.instant(`device-mng.delete-${type}-title`, { name: entity.name }),
-      '',
+      delTxt,
       this.translate.instant('action.no'),
       this.translate.instant('action.yes'),
       true
