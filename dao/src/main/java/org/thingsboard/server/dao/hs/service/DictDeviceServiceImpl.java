@@ -73,7 +73,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     // 文件Service
     FileService fileService;
 
-    @Autowired
     DictDeviceService dictDeviceService;
 
     /**
@@ -513,6 +512,36 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         return DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(dictDeviceId));
     }
 
+    @Override
+    public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
+        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
+            voList.stream().forEach(vo1->{
+                nameMap.put(vo1.getName(),vo1);
+            });
+        }
+        return  nameMap;
+    }
+
+    @Override
+    public List<DictDeviceGroupPropertyVO>  findAllDictDeviceGroupVO(String name) {
+        List<DictDeviceGroupPropertyVO>  voList  = new ArrayList<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
+        {
+            if(vos.getName().equals(name))
+            {
+                voList.addAll(vos.getGroupPropertyList());
+            }
+        }
+
+        return  voList;
+    }
+
+
     @Autowired
     public void setClientService(ClientService clientService) {
         this.clientService = clientService;
@@ -571,5 +600,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setFileService(FileService fileService) {
         this.fileService = fileService;
+    }
+
+    @Autowired
+    public void setDictDeviceService(DictDeviceService dictDeviceService) {
+        this.dictDeviceService = dictDeviceService;
     }
 }
