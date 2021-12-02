@@ -43,22 +43,6 @@ public interface DeviceMonitorService {
     DeviceProfileVO getDeviceProfileDetail(TenantId tenantId, DeviceProfileId deviceProfileId);
 
     /**
-     * 绑定设备字典到设备配置
-     *
-     * @param tenantId         租户Id
-     * @param dictDeviceIdList 设备字典Id列表
-     * @param deviceProfileId  设备配置Id
-     */
-    void bindDictDeviceToDeviceProfile(TenantId tenantId, List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
-
-    /**
-     * 删除绑定的设备字典
-     *
-     * @param deviceProfileId 设备配置id
-     */
-    void deleteBindDictDevice(DeviceProfileId deviceProfileId);
-
-    /**
      * 更新报警信息状态
      *
      * @param tenantId    租户Id
