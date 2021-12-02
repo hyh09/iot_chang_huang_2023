@@ -49,4 +49,12 @@ public interface TenantDao extends Dao<Tenant> {
 
     PageData<TenantId> findTenantsIds(PageLink pageLink);
 
+    /**
+     * 更新租户坐标
+     * @param x 纬度 latitude
+     * @param y  经度 lo
+     * @param tenantId
+     */
+    void  updateTenantSetLatitudeAndLongitude(String x,String y,UUID tenantId);
+
 }
