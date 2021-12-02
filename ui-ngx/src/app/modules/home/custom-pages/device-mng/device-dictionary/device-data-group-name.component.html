@@ -1,6 +1,7 @@
 <div style="width: 360px;">
   <mat-toolbar color="primary">
-    <h2 translate>device-mng.distribute-device</h2>
+    <h2 *ngIf="!isEdit" translate>device-mng.add-device-data-group</h2>
+    <h2 *ngIf="isEdit" translate>device-mng.edit-group-name</h2>
     <span fxFlex></span>
     <button mat-icon-button (click)="cancel()" type="button">
       <mat-icon class="material-icons">close</mat-icon>

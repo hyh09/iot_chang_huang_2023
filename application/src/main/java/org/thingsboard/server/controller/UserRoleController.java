@@ -103,30 +103,31 @@ public class UserRoleController extends BaseController{
             tenantSysRoleEntity.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
             tenantSysRoleEntity.setFactoryId(securityUser.getFactoryId());
         }
-
+        tenantSysRoleEntity.setSystemTab("0");
         tenantSysRoleEntity.setTenantId(getTenantId().getId());
         List<TenantSysRoleEntity>  result01= tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
-        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
-        {
-            log.info("如果是工厂管理员直接返回,不生成系统生成的工厂管理角色:");
-            return  result01;
-        }
-       Long count1= result01.stream().filter(r->r.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();
-       if(count1>0)
-       {
-           return  result01;
-       }
-        TenantSysRoleEntity entity = new TenantSysRoleEntity();
-        entity.setCreatedUser(securityUser.getUuidId());
-        entity.setUpdatedUser(securityUser.getUuidId());
-        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
-        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
-        entity.setTenantId(getTenantId().getId());
-        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-        entity.setSystemTab("1");
-        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
-        result01.add(rmEntity);
         return  result01;
+//        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+//        {
+//            log.info("如果是工厂管理员直接返回,不生成系统生成的工厂管理角色:");
+//            return  result01;
+//        }
+//       Long count1= result01.stream().filter(r->r.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();
+//       if(count1>0)
+//       {
+//           return  result01;
+//       }
+//        TenantSysRoleEntity entity = new TenantSysRoleEntity();
+//        entity.setCreatedUser(securityUser.getUuidId());
+//        entity.setUpdatedUser(securityUser.getUuidId());
+//        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+//        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
+//        entity.setTenantId(getTenantId().getId());
+//        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+//        entity.setSystemTab("1");
+//        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
+//        result01.add(rmEntity);
+//        return  result01;
     }
 
 
@@ -191,9 +192,8 @@ public class UserRoleController extends BaseController{
         {
             log.info("当前用户是工厂类别的用户");
             queryParam.put("factoryId", securityUser.getFactoryId());
-
-
         }
+        queryParam.put("systemTab","0");
 
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return tenantSysRoleService.pageQuery(queryParam,pageLink);

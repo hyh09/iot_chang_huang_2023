@@ -17,7 +17,10 @@ import java.util.UUID;
 @ApiModel(value = "角色-菜单 绑定对象实体类")
 public class RoleMenuVo {
 
-    @NotNull(message = "[角色id]不能为空")
+    @ApiModelProperty( "如果是工厂管理员新增字段【必传】 ##2021-12-02新增字段")
+    private UUID  factoryId;
+
+//    @NotNull(message = "[角色id]不能为空")
     @ApiModelProperty(value = "角色id")
     private UUID  roleId;
 
@@ -26,6 +29,9 @@ public class RoleMenuVo {
 
     @ApiModelProperty(value = "半选--菜单入参id;{注:为空视为解绑此角色下的菜单}")
     private List<UUID>  semiSelectList;
+
+
+    private UUID  tenantId;
 
 
 

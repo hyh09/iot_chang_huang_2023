@@ -36,6 +36,8 @@ public class JudgeUserVo {
      */
     private User user;
 
+    private  UUID  userId;
+
 
     public JudgeUserVo(Boolean tenantFlag, Boolean factoryManagementFlag, User user) {
         this.tenantFlag = tenantFlag;

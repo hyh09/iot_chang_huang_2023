@@ -41,7 +41,7 @@ public abstract class ContactBased<I extends UUIDBased> extends SearchTextBasedW
 
 
     @NoXss
-    @ApiModelProperty("地址")
+    @ApiModelProperty("地址 ###详细地址")
     protected String address;
     @NoXss
     @ApiModelProperty("地址2")

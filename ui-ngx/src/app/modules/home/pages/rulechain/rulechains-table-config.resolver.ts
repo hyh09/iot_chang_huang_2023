@@ -50,6 +50,7 @@ import { PageLink } from '@shared/models/page/page-link';
 import { Edge } from '@shared/models/edge.models';
 import { mergeMap } from 'rxjs/operators';
 import { PageData } from '@shared/models/page/page-data';
+import { RulechainTableFilterComponent } from './rulechain-table-filter.component';
 
 @Injectable()
 export class RuleChainsTableConfigResolver implements Resolve<EntityTableConfig<RuleChain>> {
@@ -68,9 +69,13 @@ export class RuleChainsTableConfigResolver implements Resolve<EntityTableConfig<
               private router: Router) {
     this.config.entityType = EntityType.RULE_CHAIN;
     this.config.entityComponent = RuleChainComponent;
+    this.config.filterComponent = RulechainTableFilterComponent;
     this.config.entityTabsComponent = RuleChainTabsComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.RULE_CHAIN);
     this.config.entityResources = entityTypeResources.get(EntityType.RULE_CHAIN);
+
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.deleteEntityTitle = ruleChain => this.translate.instant('rulechain.delete-rulechain-title',
       {ruleChainName: ruleChain.name});

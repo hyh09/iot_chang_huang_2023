@@ -69,6 +69,7 @@ import {
   AddEntitiesToEdgeDialogComponent,
   AddEntitiesToEdgeDialogData
 } from '@home/dialogs/add-entities-to-edge-dialog.component';
+import { DashboardsTableFilterComponent } from './dashboards-table-filter.component';
 
 @Injectable()
 export class DashboardsTableConfigResolver implements Resolve<EntityTableConfig<DashboardInfo | Dashboard>> {
@@ -88,9 +89,13 @@ export class DashboardsTableConfigResolver implements Resolve<EntityTableConfig<
 
     this.config.entityType = EntityType.DASHBOARD;
     this.config.entityComponent = DashboardFormComponent;
+    this.config.filterComponent = DashboardsTableFilterComponent;
     this.config.entityTabsComponent = DashboardTabsComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.DASHBOARD);
     this.config.entityResources = entityTypeResources.get(EntityType.DASHBOARD);
+
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
 
     this.config.deleteEntityTitle = dashboard =>
       this.translate.instant('dashboard.delete-dashboard-title', {dashboardTitle: dashboard.title});

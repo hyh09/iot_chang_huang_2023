@@ -195,7 +195,7 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
 
         sql.append("select cast(t1.id as varchar(255)) as id ,t1.phone_number as phoneNumber, t1.active_status as activeStatus,t1.user_code as userCode ,t1.user_creator as userCreator," +
                 "   cast(t1.created_time as varchar(255))  as time, t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName  " +
-                "from  tb_user  t1  where  1=1  ");
+                "from  tb_user  t1  where  1=1  and t1.user_level=0  ");
 
        StringBuffer whereSql  = new StringBuffer();
         if(vo.getRoleId() != null)
@@ -225,6 +225,8 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             whereSql.append(" and t1.factoryId =:factoryId ");
             param.put("factoryId", vo.getFactoryId());
         }
+
+
 //        if((vo.getCreateId() !=null ))
 //        {
 //            whereSql.append(" and t1.user_creator =:userCreator ");

@@ -32,14 +32,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
@@ -89,10 +82,7 @@ import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "用户管理", tags = {"用户管理接口接口"})
@@ -487,10 +477,18 @@ public class UserController extends BaseController implements DefalutSvc {
 
             if(user.getFactoryId()!= null )
             {
+                log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+                user.setUserLevel(1);
+                TenantSysRoleEntity  tenantSysRoleEntity= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
+                List<UUID> roleIds = new ArrayList<>();
+                roleIds.add(tenantSysRoleEntity.getId());
+                user.setRoleIds(roleIds);
+
             }else {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
+
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
@@ -572,12 +570,37 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
-           if(count>0)
+           if(count>0  && user.getFactoryId() != null)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
         user.setRoleIds(user.getRoleIds());
         return  user;
+    }
+
+
+
+    @GetMapping("/user/findFactoryManagers")
+    public PageData<User> findTenantAdmins(@RequestParam(value = "factoryId",required = false) UUID factoryId,
+                                           @RequestParam(value = "userCode",required = false) String userCode,
+                                           @RequestParam(value = "userName",required = false) String userName,
+                                           @RequestParam int pageSize,
+                                           @RequestParam int page,
+                                           @RequestParam(required = false) String textSearch,
+                                           @RequestParam(required = false) String sortProperty,
+                                           @RequestParam(required = false) String sortOrder
+    ) throws ThingsboardException {
+        try {
+            Field field=  ReflectionUtils.getAccessibleField(new UserEntity(),sortProperty);
+            Column annotation = field.getAnnotation(Column.class);
+            SecurityUser authUser = getCurrentUser();
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, annotation.name(), sortOrder);
+             return userService.findFactoryAdmins(authUser.getTenantId(),factoryId,userCode,userName,pageLink);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return  null;
+        }
     }
 
 
@@ -621,7 +644,7 @@ public class UserController extends BaseController implements DefalutSvc {
                  queryParam.put("factoryId", securityUser.getFactoryId());
                  queryParam.put("type", securityUser.getType());
              }
-
+             queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);
          }catch (Exception  e)
          {

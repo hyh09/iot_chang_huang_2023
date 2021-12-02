@@ -1,12 +1,16 @@
 package org.thingsboard.server.dao.hs.utils;
 
 import com.google.common.collect.Maps;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +28,49 @@ import java.util.stream.Collectors;
  */
 public class CommonUtil {
 
+    /**
+     * 生成校验和
+     *
+     * @param checksumAlgorithm 校验和算法
+     * @param data              数据
+     * @return 校验和
+     */
+    @SuppressWarnings("all")
+    public static String generateChecksum(ChecksumAlgorithm checksumAlgorithm, ByteBuffer data) throws ThingsboardException {
+        HashFunction hashFunction;
+        switch (checksumAlgorithm) {
+            case MD5:
+                hashFunction = Hashing.md5();
+                break;
+            case SHA256:
+                hashFunction = Hashing.sha256();
+                break;
+            case SHA384:
+                hashFunction = Hashing.sha384();
+                break;
+            case SHA512:
+                hashFunction = Hashing.sha512();
+                break;
+            case CRC32:
+                hashFunction = Hashing.crc32();
+                break;
+            case MURMUR3_32:
+                hashFunction = Hashing.murmur3_32();
+                break;
+            case MURMUR3_128:
+                hashFunction = Hashing.murmur3_128();
+                break;
+            default:
+                throw new ThingsboardException("不支持的校验和算法！", ThingsboardErrorCode.GENERAL);
+        }
+        return hashFunction.hashBytes(data.array()).toString();
+    }
+
+    /**
+     * 转换为资源列表
+     *
+     * @param t 列表
+     */
     public static <T extends EnumGetter> List<Map<String, String>> toResourceList(Collection<T> t) {
         return t.stream().map(e -> {
             HashMap<String, String> map = Maps.newLinkedHashMap();
@@ -157,7 +204,7 @@ public class CommonUtil {
     public static void checkComponentDuplicateNameOrKey(List<DictDeviceComponentVO> componentList, Set<String> set) throws ThingsboardException {
         for (DictDeviceComponentVO componentVO : componentList) {
             if (componentVO.getPropertyList() != null && !componentVO.getPropertyList().isEmpty()) {
-                for(DictDeviceComponentPropertyVO propertyVO:componentVO.getPropertyList()) {
+                for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                     if (set.contains(propertyVO.getName()))
                         throw new ThingsboardException(propertyVO.getName() + " 重复", ThingsboardErrorCode.GENERAL);
                     else

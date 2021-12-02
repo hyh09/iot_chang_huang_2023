@@ -80,6 +80,12 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private  String type="";
 
     /**
+     * 0为默认
+     * 1为工厂管理员角色
+     */
+    private  int userLevel=0;
+
+    /**
      * 工厂id
      */
     @ApiModelProperty(value = "如果是工厂管理员新增字段【必传】")
@@ -118,6 +124,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.userCreator=user.getUserCreator();
         this.type = user.getType();
         this.factoryId = user.getFactoryId();
+        this.userLevel = user.getUserLevel();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
@@ -191,6 +198,15 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+
+    public int getUserLevel() {
+        return userLevel;
+    }
+
+    public void setUserLevel(int userLevel) {
+        this.userLevel = userLevel;
     }
 
     @Override
