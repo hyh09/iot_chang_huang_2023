@@ -906,6 +906,16 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    @Override
+    public List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException{
+        return deviceDao.findGatewayListVersionByFactory(factoryIds);
+    }
+
+    /**
      *平台设备列表查询
      * @param device
      * @param pageLink

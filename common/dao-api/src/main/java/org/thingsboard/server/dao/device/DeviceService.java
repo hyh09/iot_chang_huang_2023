@@ -150,6 +150,13 @@ public interface DeviceService {
     List<Device> findGatewayNewVersionByFactory(List<UUID> factoryId) throws ThingsboardException;
 
     /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
+
+    /**
      *平台设备列表查询
      * @param device
      * @param pageLink

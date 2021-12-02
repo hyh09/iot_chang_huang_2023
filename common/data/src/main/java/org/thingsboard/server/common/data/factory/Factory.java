@@ -67,6 +67,10 @@ public class Factory {
     private UUID loginUserId;
     @ApiModelProperty("工厂版本")
     private String factoryVersion;
+    @ApiModelProperty("在线状态true-在线，false-离线")
+    private Boolean active;
+    @ApiModelProperty("网关设备名称")
+    private String gatewayName;
 
 
     public Factory() {
