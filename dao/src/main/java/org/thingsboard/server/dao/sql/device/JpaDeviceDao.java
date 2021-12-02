@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,7 +61,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device> implements DeviceDao {
 
+    //版本
     public static final String ATTRIBUTE_VERSION = "version";
+    //在线状态
+    public static final String ATTRIBUTE_ACTIVE = "active";
 
     @Autowired
     private DeviceRepository deviceRepository;
@@ -436,91 +440,174 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         List<Device> resultList = new ArrayList<>();
         try {
             //1.查询工厂关联的所有设备
-            Specification<DeviceEntity> specification = (root, query, cb) -> {
-                List<Predicate> predicates = new ArrayList<>();
-                if(factoryIds != null && factoryIds.size() > 0){
-                    // 下面是一个 IN查询
-                    CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
-                    factoryIds.forEach(in::value);
-                    predicates.add(in);
-                }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
-            };
-            List<DeviceEntity> deviceEntityList = deviceRepository.findAll(specification);
+            List<DeviceEntity> deviceEntityList = this.getDevicesByIds(factoryIds);
             //2.筛选出网关设备
-            List<Device> gatewayList = new ArrayList<>();
-            if(gatewayList != null && gatewayList.size() > 0){
-                //筛选出网关设备
-                Iterator<DeviceEntity> iterator = deviceEntityList.listIterator();
-                while (iterator.hasNext()){
-                    DeviceEntity deviceEntity = iterator.next();
-                    JsonNode gateway = deviceEntity.getAdditionalInfo().get("gateway");
-                    if(gateway != null && gateway.asBoolean()){
-                        gatewayList.add(deviceEntity.toData());
-                        continue;
-                    }else {
-                        iterator.remove();
-                    }
-                }
-            }
-            //3.查询网关设备“版本”共享属性值
-            if(gatewayList != null && gatewayList.size() > 0){
-                List<UUID> deviceIds = gatewayList.stream().map(Device::getId).collect(Collectors.toList()).stream().map(DeviceId::getId).collect(Collectors.toList());
-                List<AttributeKvEntity> attributeKvEntities = attributesDao.findAllByEntityIds(deviceIds, DataConstants.SHARED_SCOPE,this.ATTRIBUTE_VERSION);
-                if(!CollectionUtils.isEmpty(attributeKvEntities)){
-                    gatewayList.forEach(i->{
-                        attributeKvEntities.forEach(j->{
-                            UUID entityId = j.getId().getEntityId();
-                            String attributeKey = j.getId().getAttributeKey();
-                            if(i.getId().getId().toString().equals(entityId.toString()) && this.ATTRIBUTE_VERSION.equals(attributeKey)){
-                                i.setGatewayVersion(j.getStrValue());
-                                i.setGatewayUpdateTs(j.getLastUpdateTs());
-                                return;
-                            }
-                        });
-                    });
-                    //筛选，一个工厂只保留一个最新版本的网关设备。双重自循环筛选最大值
-                    //存放最大值
-                    Iterator<Device> gatewayIterator = gatewayList.iterator();
-                    gatewayList.forEach(i->{
-                        while (gatewayIterator.hasNext()){
-                            Device gateway = gatewayIterator.next();
-                            if(gateway.getFactoryId().toString().equals(i.getFactoryId().toString()) && !gateway.getId().toString().equals(i.getId().toString())){
-                                if(StringUtils.isNotEmpty(gateway.getGatewayVersion()) && StringUtils.isNotEmpty(i.getGatewayVersion())){
-                                    if(this.compareVersion(gateway.getGatewayVersion(),i.getGatewayVersion()) == -1){
-                                        //把所有相同工厂下，版本小的数据移除掉
-                                        //小于要过滤掉
-                                        gatewayIterator.remove();
-                                    }else {
-                                        //大于或等于，重新筛选最大值
-                                        if(CollectionUtils.isNotEmpty(resultList)){
-                                            Iterator<Device> it = resultList.iterator();
-                                            while (it.hasNext()){
-                                                Device gatewayMax = it.next();
-                                                if(gatewayMax.getFactoryId().toString().equals(gateway.getFactoryId().toString())){
-                                                    if(this.compareVersion(gateway.getGatewayVersion(),gatewayMax.getGatewayVersion()) == 1){
-                                                        it.remove();
-                                                        resultList.add(gateway);
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        resultList.add(gateway);
-                                    }
-                                }
+            List<Device> gatewayList = this.getGatewayList(deviceEntityList);
+            //3.查询网关设备“版本”和“在线状态”
+            this.getAttributeResult(gatewayList);
+            //4.筛选，一个工厂只保留一个最新版本的网关设备。双重自循环筛选最大值
+            this.filterMaxVersion(resultList, gatewayList);
 
-                            }
-                        }
-                    });
-                }
-            }
         }catch (Exception e){
             log.error("JpaDeviceDao.findGatewayNewVersionByFactory执行异常",e);
             throw new ThingsboardException("JpaDeviceDao.findGatewayNewVersionByFactory执行异常", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         return resultList;
     }
+
+
+    /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    @Override
+    public List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException{
+        List<Device> resultList = new ArrayList<>();
+        try {
+            //1.查询工厂关联的所有设备
+            List<DeviceEntity> deviceEntityList = this.getDevicesByIds(factoryIds);
+            //2.筛选出网关设备
+            List<Device> gatewayList = this.getGatewayList(deviceEntityList);
+            //3.查询网关设备“版本”和“在线状态”
+            this.getAttributeResult(gatewayList);
+            resultList = gatewayList;
+        }catch (Exception e){
+            log.error("JpaDeviceDao.findGatewayNewVersionByFactory执行异常",e);
+            throw new ThingsboardException("JpaDeviceDao.findGatewayNewVersionByFactory执行异常", ThingsboardErrorCode.ITEM_NOT_FOUND);
+        }
+        return resultList;
+    }
+
+    /**
+     * 筛选，一个工厂只保留一个最新版本的网关设备。双重自循环筛选最大值
+     * @param resultList
+     * @param gatewayList
+     */
+    private void filterMaxVersion(List<Device> resultList, List<Device> gatewayList) {
+        if(CollectionUtils.isNotEmpty(gatewayList)){
+            //4.筛选，一个工厂只保留一个最新版本的网关设备。双重自循环筛选最大值
+            //存放最大值
+            Iterator<Device> gatewayIterator = gatewayList.iterator();
+            gatewayList.forEach(i->{
+                while (gatewayIterator.hasNext()){
+                    Device gateway = gatewayIterator.next();
+                    if(gateway.getFactoryId().toString().equals(i.getFactoryId().toString()) && !gateway.getId().toString().equals(i.getId().toString())){
+                        if(StringUtils.isNotEmpty(gateway.getGatewayVersion()) && StringUtils.isNotEmpty(i.getGatewayVersion())){
+                            if(this.compareVersion(gateway.getGatewayVersion(),i.getGatewayVersion()) == -1){
+                                //把所有相同工厂下，版本小的数据移除掉
+                                //小于要过滤掉
+                                gatewayIterator.remove();
+                            }else {
+                                //大于或等于，重新筛选最大值
+                                if(CollectionUtils.isNotEmpty(resultList)){
+                                    Iterator<Device> it = resultList.iterator();
+                                    while (it.hasNext()){
+                                        Device gatewayMax = it.next();
+                                        if(gatewayMax.getFactoryId().toString().equals(gateway.getFactoryId().toString())){
+                                            if(this.compareVersion(gateway.getGatewayVersion(),gatewayMax.getGatewayVersion()) == 1){
+                                                it.remove();
+                                                resultList.add(gateway);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                resultList.add(gateway);
+                            }
+                        }
+
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * 查询网关设备“版本”和“在线状态”
+     * @param gatewayList
+     */
+    private void getAttributeResult(List<Device> gatewayList) {
+        if(gatewayList != null && gatewayList.size() > 0) {
+            List<UUID> deviceIds = gatewayList.stream().map(Device::getId).collect(Collectors.toList()).stream().map(DeviceId::getId).collect(Collectors.toList());
+            //查询版本（共享属性值）
+            List<AttributeKvEntity> versionAttributeKvEntities = attributesDao.findAllByEntityIds(deviceIds, DataConstants.SHARED_SCOPE, this.ATTRIBUTE_VERSION);
+            if (!CollectionUtils.isEmpty(versionAttributeKvEntities)) {
+                //查询在线状态（服务端属性）
+                List<AttributeKvEntity> activeAttributeKvEntities = attributesDao.findAllByEntityIds(deviceIds, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
+                //给网关设备属性赋值
+                gatewayList.forEach(i -> {
+                    versionAttributeKvEntities.forEach(j -> {
+                        UUID entityId = j.getId().getEntityId();
+                        String attributeKey = j.getId().getAttributeKey();
+                        if (i.getId().getId().toString().equals(entityId.toString()) && this.ATTRIBUTE_VERSION.equals(attributeKey)) {
+                            i.setGatewayVersion(j.getStrValue());
+                            i.setGatewayUpdateTs(j.getLastUpdateTs());
+                            //拿到网关在线状态
+                            if(CollectionUtils.isNotEmpty(activeAttributeKvEntities)){
+                                activeAttributeKvEntities.forEach(active->{
+                                    if(j.getId().getEntityId() != null && active.getId().getEntityId() != null && j.getId().getEntityId().toString().equals(active.getId().getEntityId().toString())){
+                                        i.setActive(active.getBooleanValue());
+                                        return;
+                                    }
+                                });
+                            }
+                            return;
+                        }
+                    });
+                });
+            }
+        }
+    }
+
+    /**
+     * 筛选出网关设备
+     * @param deviceEntityList
+     * @return
+     */
+    @NotNull
+    private List<Device> getGatewayList(List<DeviceEntity> deviceEntityList) {
+        List<Device> gatewayList = new ArrayList<>();
+        if(deviceEntityList != null && deviceEntityList.size() > 0){
+            //筛选出网关设备
+            Iterator<DeviceEntity> iterator = deviceEntityList.listIterator();
+            while (iterator.hasNext()){
+                DeviceEntity deviceEntity = iterator.next();
+                if(deviceEntity.getAdditionalInfo() != null){
+                    JsonNode gateway = deviceEntity.getAdditionalInfo().get("gateway");
+                    if(gateway != null && gateway.asBoolean()){
+                        gatewayList.add(deviceEntity.toData());
+                    }else {
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+        return gatewayList;
+    }
+
+    /**
+     * 查询工厂关联的所有设备
+     * @param factoryIds
+     * @return
+     */
+    @NotNull
+    private List<DeviceEntity> getDevicesByIds(List<UUID> factoryIds) {
+        Specification<DeviceEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(factoryIds != null && factoryIds.size() > 0){
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("factoryId"));
+                factoryIds.forEach(in::value);
+                predicates.add(in);
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        List<DeviceEntity> deviceEntityList = deviceRepository.findAll(specification);
+        return deviceEntityList;
+    }
+
+
 
 
     @Override

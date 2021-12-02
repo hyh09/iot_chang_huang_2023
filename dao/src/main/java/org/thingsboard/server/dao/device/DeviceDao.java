@@ -288,6 +288,13 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      */
    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException ;
 
+    /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
+
 
     List<DeviceEntity>  queryAllByIds(List<UUID> ids);
 

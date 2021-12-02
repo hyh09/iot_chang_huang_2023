@@ -61,6 +61,14 @@ public interface FactoryService {
     List<Factory> findFactoryVersion(Factory factory) throws Exception;
 
     /**
+     *查询工厂本列表
+     * @param factory
+     * @return
+     * @throws Exception
+     */
+    List<Factory> findFactoryVersionList(Factory factory) throws Exception;
+
+    /**
      * 根据登录人角色查询工厂列表
      * @param userId
      * @param tenantId

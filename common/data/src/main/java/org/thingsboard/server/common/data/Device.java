@@ -73,6 +73,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     private List<UUID> deviceIdList;
     //网关版本
+    private Boolean active;
+    //网关版本
     private String gatewayVersion;
     //网关版本更新时间
     private Long gatewayUpdateTs;
@@ -435,6 +437,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setFilterGatewayFlag(Boolean filterGatewayFlag) {
         this.filterGatewayFlag = filterGatewayFlag;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     @Override

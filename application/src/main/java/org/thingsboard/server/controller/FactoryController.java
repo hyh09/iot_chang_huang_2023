@@ -188,6 +188,35 @@ public class FactoryController extends BaseController  {
     }
 
     /**
+     * 查询工厂所有版本列表
+     * @param queryFactoryDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("查询工厂所有版本列表")
+    @ApiImplicitParam(name = "queryFactoryDto",value = "入参对象",dataType = "FactoryVersionDto",paramType = "query")
+    @RequestMapping(value = "/findFactoryVersionList", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FactoryVersionVo> findFactoryVersionList(FactoryVersionDto queryFactoryDto) throws ThingsboardException {
+        try {
+            List<FactoryVersionVo> resultVo = new ArrayList<>();
+            checkParameter("没有获取到登录人所在租户tenantId",getCurrentUser().getTenantId().getId());
+            Factory factory = queryFactoryDto.toFactory();
+            factory.setTenantId(getCurrentUser().getTenantId().getId());
+            factory.setLoginUserId(getCurrentUser().getId().getId());
+            List<Factory> factoryList = factoryService.findFactoryVersionList(factory);
+            if(CollectionUtils.isNotEmpty(factoryList)){
+                factoryList.forEach(i->{
+                    resultVo.add(new FactoryVersionVo(i));
+                });
+            }
+            return resultVo;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
      * 根据登录人角色查询工厂列表
      * @return
      * @throws ThingsboardException
