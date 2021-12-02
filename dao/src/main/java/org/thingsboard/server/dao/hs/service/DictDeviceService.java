@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
@@ -31,7 +32,7 @@ public interface DictDeviceService {
      * @param dictDeviceVO 设备字典入参
      * @param tenantId     租户Id
      */
-    void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException;
+    DictDeviceVO updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException;
 
     /**
      * 获得当前可用设备字典编码
@@ -69,13 +70,6 @@ public interface DictDeviceService {
     void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException;
 
     /**
-     * 获得未配置设备配置的设备字典列表
-     *
-     * @param tenantId 租户Id
-     */
-    List<DictDevice> listDictDeviceUnused(TenantId tenantId);
-
-    /**
      * 获得设备字典分组及分组属性
      *
      * @param dictDeviceId 设备字典Id
@@ -90,30 +84,9 @@ public interface DictDeviceService {
     List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId);
 
     /**
-     * 批量获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceIdList 设备字典Id列表
-     */
-    Map<UUID, DeviceProfileId> listDeviceProfileIdsByDictDeviceIdList(List<UUID> dictDeviceIdList);
-
-    /**
-     * 获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceId 设备字典Id
-     */
-    UUID getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
-
-    /**
      * 获得当前默认初始化的分组及分组属性
      */
     List<DictDeviceGroupVO> getGroupInitData();
-
-    /**
-     * @param dictDeviceId
-     * @param name
-     * @return map: key-name  ,value-name
-     */
-    List<String> findAllByName(UUID dictDeviceId, String name);
 
     /**
      * 2021-11-29 15:22
@@ -127,6 +100,15 @@ public interface DictDeviceService {
      * @return
      */
     Map<String,DictDeviceGroupPropertyVO> getMapPropertyVo();
+
+
+
+    /**
+     * @param dictDeviceId
+     * @param name
+     * @return map: key-name  ,value-name
+     */
+    List<String> findAllByName(UUID dictDeviceId, String name);
 
     /**
      * 获取初始化单位数据
@@ -167,4 +149,13 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     Map<String, DictData> mapAllPropertyToDictData(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 【不分页】获得设备字典绑定的部件
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 部件列表
+     */
+    List<DictDeviceComponent> listDictDeviceComponents(TenantId tenantId, UUID dictDeviceId);
 }
