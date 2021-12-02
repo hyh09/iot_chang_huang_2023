@@ -32,14 +32,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
@@ -577,12 +570,37 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
-           if(count>0)
+           if(count>0  && user.getFactoryId() != null)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
         user.setRoleIds(user.getRoleIds());
         return  user;
+    }
+
+
+
+    @GetMapping("/user/findFactoryManagers")
+    public PageData<User> findTenantAdmins(@RequestParam(value = "factoryId",required = false) UUID factoryId,
+                                           @RequestParam(value = "userCode",required = false) String userCode,
+                                           @RequestParam(value = "userName",required = false) String userName,
+                                           @RequestParam int pageSize,
+                                           @RequestParam int page,
+                                           @RequestParam(required = false) String textSearch,
+                                           @RequestParam(required = false) String sortProperty,
+                                           @RequestParam(required = false) String sortOrder
+    ) throws ThingsboardException {
+        try {
+            Field field=  ReflectionUtils.getAccessibleField(new UserEntity(),sortProperty);
+            Column annotation = field.getAnnotation(Column.class);
+            SecurityUser authUser = getCurrentUser();
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, annotation.name(), sortOrder);
+             return userService.findFactoryAdmins(authUser.getTenantId(),factoryId,userCode,userName,pageLink);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return  null;
+        }
     }
 
 

@@ -78,7 +78,7 @@ public interface UserService {
 	 * @param userName
 	 * @return
 	 */
-	PageData<User> findTenantAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName,PageLink pageLink);
+	PageData<User> findFactoryAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName,PageLink pageLink);
 	
 	void deleteTenantAdmins(TenantId tenantId);
 

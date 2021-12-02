@@ -302,7 +302,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     }
 
     @Override
-    public PageData<User> findTenantAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName, PageLink pageLink) {
+    public PageData<User> findFactoryAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName, PageLink pageLink) {
         return userDao.findFactoryAdmins(tenantId.getId(), factoryId,userCode,userName,pageLink);
     }
 
