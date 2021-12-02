@@ -31,6 +31,9 @@ public class InMenuByUserVo {
     @IsRight(map = {MunuTypeEnum.PC, MunuTypeEnum.APP}, key = "systemType",message = "所传的要在 菜单类型范围中（PC/APP)")
     private String menuType;
 
+    @ApiModelProperty( "如果是工厂管理员新增字段【必传】")
+    private UUID  factoryId;
+
 
     private UUID  tenantId;
 
