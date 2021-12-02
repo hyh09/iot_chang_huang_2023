@@ -20,6 +20,10 @@
 #  accessKeySecret: "Ec2VQIaG2cJM4oqRvGkK06SLowyhTc"
 #  bucketName: "hsyl-iot-test"
 
+hs:
+  file:
+    location: "${HS_FILE_LOCATION:/Users/wwj/Downloads}"
+
 server:
   # Server bind address
   address: "${HTTP_BIND_ADDRESS:0.0.0.0}"
@@ -465,14 +469,18 @@ spring.resources.chain:
     content:
       enabled: "true"
 
-spring.servlet.multipart.max-file-size: "50MB"
-spring.servlet.multipart.max-request-size: "50MB"
+#spring.servlet.multipart.max-file-size: "50MB"
+#spring.servlet.multipart.max-request-size: "50MB"
 
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation: "true"
 spring.jpa.properties.hibernate.order_by.default_null_ordering: "last"
 
 # SQL DAO Configuration
 spring:
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
   data:
     jpa:
       repositories:

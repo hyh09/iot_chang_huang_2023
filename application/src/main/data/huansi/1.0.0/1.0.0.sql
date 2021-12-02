@@ -639,3 +639,41 @@ ALTER TABLE public.device ADD COLUMN comment character varying(255) COLLATE pg_c
 COMMENT ON COLUMN public.device.comment IS '备注';
 ALTER TABLE public.device ADD COLUMN device_no character varying(255) COLLATE pg_catalog."default";
 COMMENT ON COLUMN public.device.comment IS '设备编号';
+
+
+-- Table Definition
+CREATE TABLE IF NOT EXISTS "public"."hs_file" (
+    "id" uuid NOT NULL,
+    "created_time" int8 NOT NULL,
+    "created_user" varchar(255),
+    "updated_time" int8,
+    "updated_user" varchar(255),
+    "tenant_id" uuid,
+    "file_name" varchar(255),
+    "check_sum" varchar(5000),
+    "content_type" varchar(255),
+    "checksum_algorithm" varchar(32),
+    "data_size" int8,
+    "additional_info" varchar,
+    "scope" varchar(255),
+    "entity_id" uuid,
+    "location" varchar(1000),
+    PRIMARY KEY ("id")
+    );
+
+-- Column Comment
+COMMENT ON COLUMN "public"."hs_file"."id" IS 'id';
+COMMENT ON COLUMN "public"."hs_file"."created_time" IS '创建时间';
+COMMENT ON COLUMN "public"."hs_file"."created_user" IS '创建人';
+COMMENT ON COLUMN "public"."hs_file"."updated_time" IS '更新时间';
+COMMENT ON COLUMN "public"."hs_file"."updated_user" IS '更新人';
+COMMENT ON COLUMN "public"."hs_file"."tenant_id" IS '租户Id';
+COMMENT ON COLUMN "public"."hs_file"."file_name" IS '文件名';
+COMMENT ON COLUMN "public"."hs_file"."check_sum" IS '校验和';
+COMMENT ON COLUMN "public"."hs_file"."content_type" IS '类型';
+COMMENT ON COLUMN "public"."hs_file"."checksum_algorithm" IS '校验和算法';
+COMMENT ON COLUMN "public"."hs_file"."data_size" IS '大小';
+COMMENT ON COLUMN "public"."hs_file"."additional_info" IS '附加信息';
+COMMENT ON COLUMN "public"."hs_file"."scope" IS '范围';
+COMMENT ON COLUMN "public"."hs_file"."entity_id" IS '实体Id';
+COMMENT ON COLUMN "public"."hs_file"."location" IS '存储位置';

@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
@@ -31,7 +32,7 @@ public interface DictDeviceService {
      * @param dictDeviceVO 设备字典入参
      * @param tenantId     租户Id
      */
-    void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException;
+    DictDeviceVO updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException;
 
     /**
      * 获得当前可用设备字典编码
@@ -96,9 +97,10 @@ public interface DictDeviceService {
 
     /**
      * 获取初始化单位数据
+     *
      * @return
      */
-    Map<String,String> getUnit();
+    Map<String, String> getUnit();
 
 
     List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);
@@ -132,4 +134,13 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     Map<String, DictData> mapAllPropertyToDictData(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 【不分页】获得设备字典绑定的部件
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 部件列表
+     */
+    List<DictDeviceComponent> listDictDeviceComponents(TenantId tenantId, UUID dictDeviceId);
 }
