@@ -32,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
 public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvCompositeKey> {
 
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
-            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs  ")
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs  order by  tskv.ts asc ")
     List<TsKvEntity> findAllByKeysAndEntityIdAndStartTimeAndEndTime(@Param("entityId") UUID entityId,
                                                      @Param("entityKeys") List<Integer> key,
                                       @Param("startTs") long startTs,
