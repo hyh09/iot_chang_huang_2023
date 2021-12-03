@@ -29,4 +29,10 @@ public class ResultRunStatusByDeviceVo {
     @ApiModelProperty("时间")
     private  Long time;
 
+
+    @ApiModelProperty("标题###2021-12-03新增")
+    private String title="";
+    @ApiModelProperty("单位##2021-12-03新增")
+    private  String unit="";
+
 }
