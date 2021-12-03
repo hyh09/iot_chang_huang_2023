@@ -110,7 +110,12 @@ public class EfficiencyStatisticsController extends BaseController {
     }
 
 
-
+    /**
+     * app端获取运行状态属性
+     * @param deviceId
+     * @return
+     * @throws ThingsboardException
+     */
     @ApiOperation("设备属性分组属性接口")
     @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
     @ResponseBody
