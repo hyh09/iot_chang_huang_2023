@@ -952,7 +952,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return deviceDao.getNotDistributionDevice(tenantId);
     }
 
-
+    /**
+     * 多条件查询设备
+     * @param device
+     * @return
+     */
+    @Override
+    public List<Device> findDeviceListByCdn(Device device){
+        return deviceDao.findDeviceListByCdn(device);
+    }
 
 
 }

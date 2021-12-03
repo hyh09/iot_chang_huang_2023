@@ -228,7 +228,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     if(CollectionUtils.isNotEmpty(productionLineList)){
                         List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
                         //查询设备,过滤掉网关
-                        deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory,productionLineIds));
+                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds));
                     }
                 }
             }
