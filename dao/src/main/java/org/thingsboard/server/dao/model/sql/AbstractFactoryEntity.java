@@ -156,7 +156,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.postalCode = factory.getPostalCode();
         this.remark = factory.getRemark();
         this.tenantId = factory.getTenantId();
-        this.createdTime = factory.getUpdatedTime();
+        this.createdTime = factory.getCreatedTime();
         this.createdUser = factory.getCreatedUser();
         this.updatedTime = factory.getUpdatedTime();
         this.updatedUser = factory.getUpdatedUser();

@@ -48,9 +48,9 @@ public class FactoryController extends BaseController  {
             checkNotNull(addFactoryDto);
             //地址不能为空
             checkParameter("国家",addFactoryDto.getCountry());
-            checkParameter("省",addFactoryDto.getProvince());
+            //checkParameter("省",addFactoryDto.getProvince());
             checkParameter("市",addFactoryDto.getCity());
-            checkParameter("区",addFactoryDto.getArea());
+            //checkParameter("区",addFactoryDto.getArea());
             checkParameter("详细地址",addFactoryDto.getAddress());
             //校验名称是否重复
             checkFactoryName(addFactoryDto.getId(),addFactoryDto.getName());
