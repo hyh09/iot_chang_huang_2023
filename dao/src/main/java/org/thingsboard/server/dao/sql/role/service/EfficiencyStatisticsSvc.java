@@ -69,7 +69,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
+    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId) throws ThingsboardException;
 
 
     //查询当前的分组-分组属性

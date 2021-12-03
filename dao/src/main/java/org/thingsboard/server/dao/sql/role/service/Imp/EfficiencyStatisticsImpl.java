@@ -476,18 +476,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
              log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
-         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
-         if(deviceInfo ==  null){
-             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
+        List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
+             log.info("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
-         }
-           log.info("查询当前的设备信息{}",deviceInfo);
-          List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
-             log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
-           List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
-            log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
+        Map<String, DeviceDictionaryPropertiesVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(DeviceDictionaryPropertiesVo::getName, a -> a,(k1,k2)->k1));
+
+        List<String> keyNames=   propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+        log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
            List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
              log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
@@ -503,10 +500,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             List<ResultRunStatusByDeviceVo>  voList = new ArrayList<>();
             voList =  tsKvEntries.stream().map(TsKvEntry ->{
                       ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
-                      byDeviceVo.setKeyName(TsKvEntry.getKey());
+                      String keyName=TsKvEntry.getKey();
+                DeviceDictionaryPropertiesVo trnaslateVo=   translateMap.get(keyName);
+                      byDeviceVo.setKeyName(keyName);
                       byDeviceVo.setValue(TsKvEntry.getValue().toString());
                       byDeviceVo.setTime(TsKvEntry.getTs());
-                      return     byDeviceVo;
+                      byDeviceVo.setTitle(trnaslateVo != null?trnaslateVo.getTitle():"");
+                      byDeviceVo.setUnit(trnaslateVo != null?trnaslateVo.getUnit():"");
+                return     byDeviceVo;
             }).collect(Collectors.toList());
        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
       log.info("查询到的当前的数据:{}",map);
