@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.thingsboard.common.util.ThingsBoardThreadFactory;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -19,6 +20,8 @@ import org.thingsboard.server.dao.hs.entity.po.FileInfo;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -27,6 +30,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 文件接口实现类
@@ -43,21 +49,27 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
 
     private CommonComponent commonComponent;
 
-//    ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-//
-//    @PostConstruct
-//    public void initExecutor() {
-//        service = Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("hs-file-cleaner"));
-//        service.scheduleAtFixedRate(()->{
-//        }, 1, 20, TimeUnit.SECONDS);
-//    }
-//
-//    @PreDestroy
-//    public void shutdownExecutor() {
-//        if (service != null) {
-//            service.shutdownNow();
-//        }
-//    }
+    ScheduledExecutorService service;
+
+    @PostConstruct
+    public void initExecutor() {
+        service = Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("hs-file-cleaner"));
+        service.scheduleAtFixedRate(() -> this.fileRepository.findAllUnusedFiles(CommonUtil.getYesterdayStartTime()).forEach(e -> {
+            try {
+                this.deleteFile(e.getId().toString());
+                log.info("定时删除文件成功：【{}】", e.getId().toString());
+            } catch (Exception ignore) {
+                log.info("定时删除文件失败：【{}】", e.getId().toString());
+            }
+        }), 60, 60 * 60, TimeUnit.SECONDS);
+    }
+
+    @PreDestroy
+    public void shutdownExecutor() {
+        if (service != null) {
+            service.shutdownNow();
+        }
+    }
 
     /**
      * 上传文件
@@ -109,6 +121,19 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     }
 
     /**
+     * 获得文件详情,不校验是否存在
+     *
+     * @param tenantId 租户Id
+     * @param id       文件Id
+     * @return 文件详情
+     */
+    @Override
+    public FileInfo getFileInfoNotCheckExist(TenantId tenantId, String id) throws ThingsboardException {
+        return this.fileRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(FileEntity::toData)
+                .orElse(null);
+    }
+
+    /**
      * 删除文件
      *
      * @param tenantId 租户Id
@@ -118,6 +143,19 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     @Transactional(rollbackFor = Exception.class)
     public void deleteFile(TenantId tenantId, String id) throws IOException, ThingsboardException {
         var fileInfo = this.fileRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(FileEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("文件不存在！", ThingsboardErrorCode.GENERAL));
+        this.fileRepository.deleteById(toUUID(id));
+        Files.deleteIfExists(Paths.get(fileInfo.getLocation()));
+    }
+
+    /**
+     * 删除文件, 不验证租户
+     *
+     * @param id 文件Id
+     */
+    @Override
+    public void deleteFile(String id) throws IOException, ThingsboardException {
+        var fileInfo = this.fileRepository.findById(toUUID(id)).map(FileEntity::toData)
                 .orElseThrow(() -> new ThingsboardException("文件不存在！", ThingsboardErrorCode.GENERAL));
         this.fileRepository.deleteById(toUUID(id));
         Files.deleteIfExists(Paths.get(fileInfo.getLocation()));
@@ -227,6 +265,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
      * @param entityId  实体Id
      */
     @Override
+    @Transactional
     public void updateFileScope(TenantId tenantId, @NotNull UUID fileId, @NotNull FileScopeEnum scopeEnum, @NotNull UUID entityId) throws ThingsboardException {
         var fileEntity = this.fileRepository.findByTenantIdAndId(tenantId.getId(), fileId)
                 .orElseThrow(() -> new ThingsboardException("文件不存在！", ThingsboardErrorCode.GENERAL));
@@ -261,6 +300,17 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     }
 
     /**
+     * 按范围查询文件列表
+     *
+     * @param tenantId  租户Id
+     * @param scopeEnum 范围
+     */
+    @Override
+    public List<FileInfo> listFileInfosByScope(TenantId tenantId, FileScopeEnum scopeEnum) {
+        return DaoUtil.convertDataList(this.fileRepository.findAllByTenantIdAndScopeOrderByCreatedTimeDesc(tenantId.getId(), scopeEnum.getCode()));
+    }
+
+    /**
      * 删除文件按范围和实体Id
      *
      * @param tenantId  租户Id
@@ -268,6 +318,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
      * @param entityId  实体Id
      */
     @Override
+    @Transactional
     public void deleteFilesByScopeAndEntityId(TenantId tenantId, FileScopeEnum scopeEnum, UUID entityId) {
         this.fileRepository.findAllByTenantIdAndScopeAndEntityIdOrderByCreatedTimeDesc(tenantId.getId(), scopeEnum.getCode(), entityId).forEach(e -> {
             try {
@@ -277,7 +328,6 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
         });
         this.fileRepository.deleteAllByTenantIdAndScopeAndEntityId(tenantId.getId(), scopeEnum.getCode(), entityId);
     }
-
 
     @Autowired
     public void setFileRepository(FileRepository fileRepository) {

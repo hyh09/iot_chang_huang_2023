@@ -13,6 +13,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -158,4 +159,28 @@ public interface DeviceMonitorService {
      * @return 报警记录统计信息
      */
     BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 【看板】查看设备部件实时数据
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param componentId 部件Id
+     */
+    List<DictDeviceComponentPropertyVO> getRtMonitorDeviceComponentDetail(TenantId tenantId, UUID deviceId, UUID componentId) throws ExecutionException, InterruptedException;
+
+    /**
+     * 【App】获得app首页实时监控数据
+     *
+     * @param tenantId 租户Id
+     */
+    AppIndexResult getRTMonitorAppIndexData(TenantId tenantId);
+
+    /**
+     * 【App】获得报警记录统计信息，按今日、昨日、历史
+     *
+     * @param tenantId 租户Id
+     * @param query    查询条件
+     */
+    AppIndexAlarmResult getAppAlarmsRecordDayStatistics(TenantId tenantId, FactoryDeviceQuery query);
 }

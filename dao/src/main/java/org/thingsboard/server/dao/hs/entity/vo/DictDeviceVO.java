@@ -25,6 +25,9 @@ public class DictDeviceVO {
     @ApiModelProperty(value = "3d模型文件Id")
     private String fileId;
 
+    @ApiModelProperty(value = "3d模型文件名", notes = "仅用于显示")
+    private String fileName;
+
     @NotNull
     @ApiModelProperty(value = "编码", required = true)
     private String code;
