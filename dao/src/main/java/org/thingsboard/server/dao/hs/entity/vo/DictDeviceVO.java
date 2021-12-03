@@ -71,4 +71,8 @@ public class DictDeviceVO {
     @Valid
     @ApiModelProperty(value = "部件列表")
     private List<DictDeviceComponentVO> componentList;
+
+    @Valid
+    @ApiModelProperty(value = "标准属性列表")
+    private List<DictDeviceStandardPropertyVO> standardPropertyList;
 }

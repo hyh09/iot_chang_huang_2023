@@ -39,13 +39,12 @@ public class SceneBoardController extends BaseController {
     FileService fileService;
 
     /**
-     * 获得模型库路径列表
+     * 获得模型库列表
      */
-    @ApiOperation(value = "获得模型库路径列表")
-    @GetMapping("/model/location")
-    public List<String> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
-        return this.fileService.listFileInfosByScope(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL).stream()
-                .map(FileInfo::getLocation).collect(Collectors.toList());
+    @ApiOperation(value = "获得模型库列表")
+    @GetMapping("/model")
+    public List<FileInfo> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
+        return this.fileService.listFileInfosByScope(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL);
     }
 
     /**

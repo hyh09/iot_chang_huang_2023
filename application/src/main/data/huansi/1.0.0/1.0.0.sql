@@ -677,3 +677,35 @@ COMMENT ON COLUMN "public"."hs_file"."additional_info" IS '附加信息';
 COMMENT ON COLUMN "public"."hs_file"."scope" IS '范围';
 COMMENT ON COLUMN "public"."hs_file"."entity_id" IS '实体Id';
 COMMENT ON COLUMN "public"."hs_file"."location" IS '存储位置';
+
+-- Table Definition
+CREATE TABLE IF NOT EXISTS  "public"."hs_dict_device_standard_property" (
+                                                             "id" uuid NOT NULL,
+                                                             "content" varchar(255),
+                                                             "name" varchar(255),
+                                                             "created_time" int8 NOT NULL,
+                                                             "created_user" varchar(255),
+                                                             "updated_time" int8,
+                                                             "updated_user" varchar(255),
+                                                             "dict_device_id" uuid,
+                                                             "title" varchar(255),
+                                                             "sort" int8,
+                                                             "dict_data_id" uuid,
+                                                             PRIMARY KEY ("id")
+);
+
+-- Column Comment
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."id" IS 'Id';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."content" IS '内容';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."name" IS '属性名称';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."created_time" IS '创建时间';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."created_user" IS '创建人';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."updated_time" IS '更新时间';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."updated_user" IS '更新人';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."dict_device_id" IS '设备字典Id';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."title" IS '标题';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."sort" IS '排序字段';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."dict_data_id" IS '数据字典Id';
+
+-- Table Comment
+COMMENT ON TABLE "public"."hs_dict_device_standard_property" IS '设备字典-标准属性';

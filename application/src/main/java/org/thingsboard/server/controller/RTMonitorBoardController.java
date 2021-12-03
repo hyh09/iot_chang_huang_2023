@@ -9,18 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
-import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
-import org.thingsboard.server.dao.hs.entity.po.FileInfo;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 实时监控看板接口

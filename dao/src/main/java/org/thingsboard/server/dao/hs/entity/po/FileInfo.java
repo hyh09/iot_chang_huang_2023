@@ -47,7 +47,7 @@ public class FileInfo extends BasePO {
     @ApiModelProperty(value = "范围")
     private String scope;
 
-    @ApiModelProperty(value = "实体大小")
+    @ApiModelProperty(value = "实体Id")
     private String entityId;
 
     @ApiModelProperty(value = "位置")

@@ -92,6 +92,12 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_COMPONENT_PROPERTY_CONTENT = "content";
     public static final String DICT_DEVICE_COMPONENT_PROPERTY_TITLE = "title";
 
+
+    public static final String DICT_DEVICE_STANDARD_PROPERTY_TABLE_NAME = "hs_dict_device_standard_property";
+    public static final String DICT_DEVICE_STANDARD_PROPERTY_NAME = "name";
+    public static final String DICT_DEVICE_STANDARD_PROPERTY_CONTENT = "content";
+    public static final String DICT_DEVICE_STANDARD_PROPERTY_TITLE = "title";
+
     /**
      * 文件
      */
