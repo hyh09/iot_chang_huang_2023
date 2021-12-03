@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
@@ -47,6 +48,8 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         log.trace("Executing saveFactory [{}]", factory);
         factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
         Factory factorySave = factoryDao.saveFactory(factory);
+        //创建工厂管理员角色
+        //userRoleMenuSvc.saveRole();
         return factorySave;
     }
 
@@ -122,25 +125,79 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      */
     @Override
     public List<Factory> findFactoryVersion(Factory factory) throws ThingsboardException{
+        //查询当前登录人能查看的所有工厂
         List<Factory> resultFactory = this.findFactoryListByLoginRole(factory.getLoginUserId(),factory.getTenantId());
         //查询工厂关联的最新版本的网关设备版本信息
         if (CollectionUtils.isNotEmpty(resultFactory)) {
-            //筛选出当前登录人能查看的所有工厂
             List<UUID> factoryIdList = resultFactory.stream().map(Factory::getId).collect(Collectors.toList());
             //查询工厂最大版本
             List<Device> gatewayNewVersionByFactory = deviceService.findGatewayNewVersionByFactory(factoryIdList);
             if(CollectionUtils.isNotEmpty(gatewayNewVersionByFactory)){
                 resultFactory.forEach(i->{
-                    gatewayNewVersionByFactory.forEach(j->{
+                    for (Device j :gatewayNewVersionByFactory){
+                        //筛选网关设备名称
+                        if(StringUtils.isNotEmpty(factory.getGatewayName()) && !factory.getGatewayName().equals(j.getFactoryName())){
+                            continue;
+                        }
                         if(i.getId().toString().equals(j.getFactoryId().toString())){
                             i.setFactoryVersion(j.getGatewayVersion());
-                            i.setPublishTime(j.getGatewayUpdateTs());
+                            if(j.getGatewayUpdateTs() != null){
+                                i.setPublishTime(j.getGatewayUpdateTs());
+                            }
+                            i.setGatewayName(j.getName());
+                            i.setActive(j.getActive());
                         }
-                    });
+                    }
                 });
             }
         }
         return resultFactory;
+    }
+
+    /**
+     *查询工厂所有版本列表
+     * @param factory
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<Factory> findFactoryVersionList(Factory factory) throws Exception{
+        List<Factory> resultFactory = new ArrayList<>();
+        //查询当前登录人能查看的所有工厂
+        List<Factory> factoryByRole = this.findFactoryListByLoginRole(factory.getLoginUserId(),factory.getTenantId());
+        //查询工厂关联的网关设备版本信息
+        if (CollectionUtils.isNotEmpty(factoryByRole)) {
+            List<UUID> factoryIdList = factoryByRole.stream().map(Factory::getId).collect(Collectors.toList());
+            //查询工厂网关设备
+            List<Device> gatewayNewVersionByFactory = deviceService.findGatewayListVersionByFactory(factoryIdList);
+            //返回网关设备信息
+            if(CollectionUtils.isNotEmpty(gatewayNewVersionByFactory)){
+                for(Device m : gatewayNewVersionByFactory){
+                    //筛选网关设备名称
+
+                    if(StringUtils.isNotEmpty(m.getFactoryName()) && StringUtils.isNotEmpty(factory.getGatewayName())){
+                        int i = m.getFactoryName().indexOf(factory.getGatewayName());
+                        if(i == -1){
+                            continue;
+                        }
+                    }
+                    Factory rstFactory = new Factory();
+                    Factory factoryName = factoryByRole.stream().filter(f -> f.getId().toString().equals(m.getFactoryId().toString())).collect(Collectors.toList()).stream().findFirst().get();
+                    if(factoryName != null){
+                        rstFactory.setName(factoryName.getName());
+                    }
+                    rstFactory.setFactoryVersion(m.getGatewayVersion());
+                    if(m.getGatewayUpdateTs() != null){
+                        rstFactory.setPublishTime(m.getGatewayUpdateTs());
+                    }
+                    rstFactory.setGatewayName(m.getName());
+                    rstFactory.setActive(m.getActive());
+                    resultFactory.add(rstFactory);
+                }
+            }
+        }
+        return resultFactory;
+
     }
 
     /**
