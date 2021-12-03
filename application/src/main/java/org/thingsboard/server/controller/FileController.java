@@ -48,15 +48,15 @@ public class FileController extends BaseController {
      * 上传文件
      */
     @ApiOperation(value = "上传文件", notes = "返回文件Id")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
-            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
-            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
-    })
-    @PostMapping(value = "/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
+//            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+//            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
+//    })
+    @PostMapping(value = "/file")
     public String uploadFile(@RequestParam(required = false) String checksum,
                              @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
-                             @RequestParam MultipartFile file) throws ThingsboardException, IOException {
+                             @RequestBody MultipartFile file) throws ThingsboardException, IOException {
         if (file == null || file.isEmpty())
             throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
 
@@ -69,7 +69,7 @@ public class FileController extends BaseController {
      */
     @ApiOperation(value = "分片上传文件", notes = "全部上传后返回文件Id，单个上传成功返回null")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "guid", value = "临时文件名,便于区分", paramType = "query", required = true),
+            @ApiImplicitParam(name = "guid", value = "临时文件名id,便于区分", paramType = "query", required = true),
             @ApiImplicitParam(name = "checksum", value = "文件校验和", paramType = "query"),
             @ApiImplicitParam(name = "checksumChunk", value = "分片文件校验和", paramType = "query"),
             @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
@@ -86,7 +86,7 @@ public class FileController extends BaseController {
                              @RequestParam int chunks,
                              @RequestParam int chunk,
                              @RequestParam String fileName,
-                             @RequestParam MultipartFile file) throws ThingsboardException, IOException {
+                             @RequestBody MultipartFile file) throws ThingsboardException, IOException {
         if (file == null || file.isEmpty())
             throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
 
@@ -104,9 +104,9 @@ public class FileController extends BaseController {
     /**
      * 取消分片上传文件
      */
-    @ApiOperation(value = "分片上传文件")
+    @ApiOperation(value = "取消分片上传文件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "guid", value = "临时文件名,便于区分", paramType = "query", required = true),
+            @ApiImplicitParam(name = "guid", value = "临时文件名id,便于区分", paramType = "query", required = true),
             @ApiImplicitParam(name = "chunks", value = "分块数", paramType = "query", required = true),
     })
     @PostMapping(value = "/file/multipart/cancel")

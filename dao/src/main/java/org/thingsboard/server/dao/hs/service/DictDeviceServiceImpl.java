@@ -26,6 +26,7 @@ import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
 import javax.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -161,7 +162,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         BeanUtils.copyProperties(dictDevice, dictDeviceVO);
 
         Optional.ofNullable(this.fileService.getFileInfoByScopeAndEntityId(tenantId, FileScopeEnum.DICT_DEVICE_MODEL, toUUID(dictDevice.getId())))
-                .ifPresent(e -> dictDeviceVO.setFileId(e.getId()));
+                .ifPresent(e -> {
+                    dictDeviceVO.setFileId(e.getId()).setFileName(e.getFileName());
+                });
 
         return dictDeviceVO;
     }
@@ -221,6 +224,18 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.componentPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
             this.groupPropertyRepository.deleteByDictDeviceId(toUUID(dictDevice.getId()));
+
+            var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(tenantId, FileScopeEnum.DICT_DEVICE_MODEL, toUUID(dictDevice.getId()));
+            Optional.ofNullable(fileInfo).ifPresent(e -> {
+                if (!e.getId().equals(dictDeviceVO.getFileId())) {
+                    try {
+                        this.fileService.deleteFile(e.getId());
+                    } catch (Exception ignore) {
+                        log.info("更新设备字典删除文件失败：【{}】", e.getId());
+                    }
+                }
+            });
+
         } else {
             BeanUtils.copyProperties(dictDeviceVO, dictDevice);
             dictDevice.setTenantId(tenantId.toString());
@@ -514,31 +529,28 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     @Override
     public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
-        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
-        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
-        {
-            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
-            voList.stream().forEach(vo1->{
-                nameMap.put(vo1.getName(),vo1);
+        Map<String, DictDeviceGroupPropertyVO> nameMap = new HashMap<>();
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getGroupInitData();
+        for (DictDeviceGroupVO vo : dictDeviceGroupVOS) {
+            List<DictDeviceGroupPropertyVO> voList = vo.getGroupPropertyList();
+            voList.stream().forEach(vo1 -> {
+                nameMap.put(vo1.getName(), vo1);
             });
         }
-        return  nameMap;
+        return nameMap;
     }
 
     @Override
-    public List<DictDeviceGroupPropertyVO>  findAllDictDeviceGroupVO(String name) {
-        List<DictDeviceGroupPropertyVO>  voList  = new ArrayList<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
-        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
-        {
-            if(vos.getName().equals(name))
-            {
+    public List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name) {
+        List<DictDeviceGroupPropertyVO> voList = new ArrayList<>();
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getGroupInitData();
+        for (DictDeviceGroupVO vos : dictDeviceGroupVOS) {
+            if (vos.getName().equals(name)) {
                 voList.addAll(vos.getGroupPropertyList());
             }
         }
 
-        return  voList;
+        return voList;
     }
 
 

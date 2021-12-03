@@ -113,6 +113,13 @@ public class CommonUtil {
     }
 
     /**
+     * 获得昨天零点的时间
+     */
+    public static Long getYesterdayStartTime() {
+        return LocalDate.now().atStartOfDay().minusDays(1).toInstant(ZoneOffset.of("+8")).toEpochMilli();
+    }
+
+    /**
      * 获得当前的时间
      */
     public static Long getTodayCurrentTime() {
