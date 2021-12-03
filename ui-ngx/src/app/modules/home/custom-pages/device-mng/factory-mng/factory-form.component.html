@@ -8,16 +8,36 @@
           {{ 'device-mng.factory-name-required' | translate }}
         </mat-error>
       </mat-form-field>
+      <div fxLayout="row" fxLayoutGap="10px">
+        <mat-form-field fxFlex class="mat-block">
+          <mat-label translate>contact.country</mat-label>
+          <mat-select formControlName="country" required>
+            <mat-option *ngFor="let country of countries" [value]="country">
+              {{ ('country.' + country) | translate }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="entityForm.get('country').hasError('required')">
+            {{ 'contact.country-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex class="mat-block">
+          <mat-label translate>contact.city</mat-label>
+          <input matInput formControlName="city" required>
+          <mat-error *ngIf="entityForm.get('city').hasError('required')">
+            {{ 'contact.city-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.postal-code</mat-label>
+          <input matInput formControlName="postalCode">
+        </mat-form-field>
+      </div>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.address</mat-label>
         <input matInput formControlName="address" required>
         <mat-error *ngIf="entityForm.get('address').hasError('required')">
           {{ 'device-mng.address-required' | translate }}
         </mat-error>
-      </mat-form-field>
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.postal-code</mat-label>
-        <input matInput formControlName="postalCode">
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.remark</mat-label>
