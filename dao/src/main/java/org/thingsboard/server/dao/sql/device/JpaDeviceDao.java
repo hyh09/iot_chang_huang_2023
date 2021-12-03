@@ -317,7 +317,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     @Override
-    public List<Device> findDeviceListBuyCdn(Device device){
+    public List<Device> findDeviceListByCdn(Device device){
         List<Device> resultList = new ArrayList<>();
         if(device != null){
             Specification<DeviceEntity> specification = (root, query, cb) -> {
@@ -328,12 +328,16 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getName())){
                     predicates.add(cb.like(root.get("name"),"%" + device.getName().trim() + "%"));
                 }
-                if(device.getFactoryId() != null && org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getFactoryId().toString())){
+                if(device.getFactoryId() != null && StringUtils.isNotEmpty(device.getFactoryId().toString())){
                     predicates.add(cb.equal(root.get("factoryId"),device.getFactoryId()));
                 }
-                if(device.getWorkshopId() != null && org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getWorkshopId().toString())){
+                if(device.getWorkshopId() != null && StringUtils.isNotEmpty(device.getWorkshopId().toString())){
                     predicates.add(cb.equal(root.get("workshopId"),device.getWorkshopId()));
                 }
+                if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
+                    predicates.add(cb.equal(root.get("productionLineId"),device.getProductionLineId()));
+                }
+                //产线id批量
                 if(CollectionUtils.isNotEmpty(device.getProductionLineIds())){
                     // 下面是一个 IN查询
                     CriteriaBuilder.In<UUID> in = cb.in(root.get("productionLineId"));

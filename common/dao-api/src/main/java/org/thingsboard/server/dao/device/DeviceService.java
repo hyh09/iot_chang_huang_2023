@@ -178,4 +178,11 @@ public interface DeviceService {
      */
     List<Device> getNotDistributionDevice(TenantId tenantId);
 
+    /**
+     * 多条件查询设备
+     * @param device
+     * @return
+     */
+    List<Device> findDeviceListByCdn(Device device);
+
 }
