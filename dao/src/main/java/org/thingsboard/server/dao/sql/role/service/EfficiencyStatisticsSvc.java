@@ -61,7 +61,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return 返回的是 key:name ,
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
+    Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId) throws ThingsboardException;
 
     /**
      * app端的返回的是描述字段

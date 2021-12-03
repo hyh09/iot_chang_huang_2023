@@ -427,17 +427,21 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
         log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
-        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
-        if(deviceInfo ==  null){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
+//        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
+//        if(deviceInfo ==  null){
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
+//
+//        }
+//        log.info("查询当前的设备信息{}",deviceInfo);
+//        List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
+//        log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
+//        List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
 
-        }
-        log.info("查询当前的设备信息{}",deviceInfo);
-        List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
-        log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
-        List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
+        List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
+        List<String> keyNames=propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+
         log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
         List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
         log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
@@ -529,6 +533,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
+    /**
+     *
+     * @param deviceId  设备id
+     * @param tenantId  租户id
+     * @return
+     * @throws ThingsboardException
+     */
     @Override
     public List<DeviceDictionaryPropertiesVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException {
         List<DeviceDictionaryPropertiesVo>   deviceDictionaryPropertiesVos= new ArrayList<>();
