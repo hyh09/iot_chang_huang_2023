@@ -31,6 +31,10 @@ import org.thingsboard.server.common.data.vo.user.FindUserVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.dao.DictDataEntity;
+import org.thingsboard.server.dao.hs.dao.DictDataRepository;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyRepository;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -74,6 +78,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private TsKvDictionaryRepository dictionaryRepository;
     @Autowired private EffectHistoryKvRepository effectHistoryKvRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired private DictDeviceComponentPropertyRepository componentPropertyRepository;
+    @Autowired private DictDataRepository dictDataRepository;//数据字典
 
 
     private  final  static String  HEADER_0= "设备名称";
@@ -516,6 +522,20 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
         Map<String,List<DictDeviceDataVo>> map = dictDeviceDataVos.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
+        List<DictDeviceComponentPropertyEntity>  componentPropertyEntities = componentPropertyRepository.findAllByDictDeviceId(deviceInfo.getDictDeviceId());
+        log.info("打印获取设备部件的属性:{}",componentPropertyEntities);
+        List<DictDeviceDataVo> partsList=
+                componentPropertyEntities.stream().map(component->{
+            DictDeviceDataVo  vo= new DictDeviceDataVo();
+            vo.setGroupName("部件");
+            vo.setName(component.getName());
+            String title =StringUtils.isBlank(component.getTitle())?component.getName():component.getTitle();
+            vo.setTitle(title);
+            Optional<DictDataEntity>  dictDataEntity  = dictDataRepository.findByTenantIdAndId(tenantId.getId(),component.getDictDataId());
+            vo.setUnit(dictDataEntity.isPresent()?dictDataEntity.get().getUnit():"");
+            return vo;
+        }).collect(Collectors.toList());
+        map.put("部件",partsList);
         return map;
     }
 
