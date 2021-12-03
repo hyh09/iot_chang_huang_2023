@@ -226,7 +226,12 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 //
 //    }
 
-
+    /**
+     * PC端
+     * @param deviceId
+     * @return
+     * @throws ThingsboardException
+     */
     @ApiOperation("设备属性分组后的属性name属性接口--pc端下拉框")
     @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
     @ApiResponses({
@@ -235,7 +240,14 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ResponseBody
     public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         log.info("打印当前的入参:{}",deviceId);
-        return  efficiencyStatisticsSvc.queryDictDevice(deviceId,getTenantId());
+        try {
+            return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            log.info("====>:{}",e);
+            throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
+        }
     }
 
 

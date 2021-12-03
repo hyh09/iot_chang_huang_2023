@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -80,6 +81,6 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId);
+    List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
 
 }
