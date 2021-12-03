@@ -9,11 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
+import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
+import org.thingsboard.server.dao.hs.entity.po.FileInfo;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
+import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -30,6 +36,9 @@ public class RTMonitorBoardController extends BaseController {
 
     @Autowired
     DeviceMonitorService deviceMonitorService;
+
+    @Autowired
+    FileService fileService;
 
     /**
      * 报表界面资源
@@ -86,20 +95,5 @@ public class RTMonitorBoardController extends BaseController {
             isQueryAll = true;
         FactoryDeviceQuery query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId, isQueryAll);
         return this.deviceMonitorService.getBoardAlarmsRecordStatistics(getTenantId(), query);
-    }
-
-    /**
-     * 查询设备详情
-     *
-     * @param id 设备id
-     */
-    @ApiOperation("查询设备详情")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "path", required = true)
-    })
-    @GetMapping("/rtMonitor/device/{id}")
-    public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
-        checkParameter("id", id);
-        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
     }
 }
