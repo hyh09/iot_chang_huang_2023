@@ -121,17 +121,22 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头");
         List<String> strings= new ArrayList<>();
         strings.add(HEADER_0);
-        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        log.info("查询历史耗能的表头{}",keys1);
-        Map<String,String>  map = deviceDictPropertiesSvc.getUnit();
-        log.info("查询历史耗能的表头map{}",map);
+//        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+//        log.info("查询历史耗能的表头{}",keys1);
+//        Map<String,String>  map = deviceDictPropertiesSvc.getUnit();
+//        log.info("查询历史耗能的表头map{}",map);
+//
+//        keys1.stream().forEach(str01->{
+//            strings.add( getKeyNameByUtil(str01,map));
+//                }
+//        );
+        List<DictDeviceGroupPropertyVO>    dictVoList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.ENERGY_002.getgName());
+        dictVoList.stream().forEach(dataVo->{
+            strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
 
-        keys1.stream().forEach(str01->{
-            strings.add( getKeyNameByUtil(str01,map));
-                }
-        );
+        });
         strings.add(HEADER_1);
-        log.info("查询历史耗能的表头keys1{}",keys1);
+        log.info("查询历史耗能的表头keys1{}",strings);
         return strings;
     }
 
