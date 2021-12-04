@@ -699,17 +699,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             Map<String,String>  map1 =  new HashMap<>();
             Map<String,String>  map2 =  new HashMap<>();
 
-            mapOld.forEach((key,value)->{
+            mapOld.forEach((key,value1)->{
               if(!key.equals(keyName))
               {
                   //只会影响到单位能耗计算
                   //
                   //计算公式：总产能/总能耗/分钟数
-                  map1.put(key,value);
+                  map1.put(key,value1);
                 Long  time02 =   (timeValueMap.get(key));
                 Long  t3 =   (time001-time02);
-                  Double  dvalue =  StringUtilToll.div(keyNameValue,value,t3.toString());
-                  map2.put(key,dvalue.toString());
+
+                  Double  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
+                  map2.put(key,aDouble.toString());
               }
             });
 
