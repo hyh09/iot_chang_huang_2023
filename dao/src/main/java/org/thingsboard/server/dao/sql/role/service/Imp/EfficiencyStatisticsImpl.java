@@ -121,17 +121,22 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头");
         List<String> strings= new ArrayList<>();
         strings.add(HEADER_0);
-        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        log.info("查询历史耗能的表头{}",keys1);
-        Map<String,String>  map = deviceDictPropertiesSvc.getUnit();
-        log.info("查询历史耗能的表头map{}",map);
+//        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+//        log.info("查询历史耗能的表头{}",keys1);
+//        Map<String,String>  map = deviceDictPropertiesSvc.getUnit();
+//        log.info("查询历史耗能的表头map{}",map);
+//
+//        keys1.stream().forEach(str01->{
+//            strings.add( getKeyNameByUtil(str01,map));
+//                }
+//        );
+        List<DictDeviceGroupPropertyVO>    dictVoList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.ENERGY_002.getgName());
+        dictVoList.stream().forEach(dataVo->{
+            strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
 
-        keys1.stream().forEach(str01->{
-            strings.add( getKeyNameByUtil(str01,map));
-                }
-        );
+        });
         strings.add(HEADER_1);
-        log.info("查询历史耗能的表头keys1{}",keys1);
+        log.info("查询历史耗能的表头keys1{}",strings);
         return strings;
     }
 
@@ -699,17 +704,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             Map<String,String>  map1 =  new HashMap<>();
             Map<String,String>  map2 =  new HashMap<>();
 
-            mapOld.forEach((key,value)->{
+            mapOld.forEach((key,value1)->{
               if(!key.equals(keyName))
               {
                   //只会影响到单位能耗计算
                   //
                   //计算公式：总产能/总能耗/分钟数
-                  map1.put(key,value);
+                  map1.put(key,value1);
                 Long  time02 =   (timeValueMap.get(key));
                 Long  t3 =   (time001-time02);
-                  Double  dvalue =  StringUtilToll.div(keyNameValue,value,t3.toString());
-                  map2.put(key,dvalue.toString());
+
+                  Double  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
+                  map2.put(key,aDouble.toString());
               }
             });
 
