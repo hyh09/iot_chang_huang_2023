@@ -34,7 +34,7 @@ public class EffectHistoryKvRepository {
     private EntityManager entityManager;
 
 
-    private  String  with_sql=" with table1 as ( select (ts / 60000) as time1, entity_id, key, ts,bool_v,long_v,substring(concat(bool_v,str_v,long_v,dbl_v,json_v),E\'(\\\\-?\\\\d+\\\\.?\\\\d*)\') as value\n" +
+    private  String  with_sql=" with table1 as ( select (ts / 60000) as time1, entity_id, key, ts,bool_v,long_v,substring(concat(long_v,dbl_v,str_v,json_v),E\'(\\\\-?\\\\d+\\\\.?\\\\d*)\') as value\n" +
             "    from ts_kv   where entity_id = :entityId  and  ts>=:startTime and ts<=:endTime  and  key in  (select  key_id  from  ts_kv_dictionary where key  in (:ids) ) ) ";
     private  String select_sql=" select time1, min(ts) as ts";
     private  String from_sql= " from  table1 t1   group by  t1.time1 order by time1  ";
