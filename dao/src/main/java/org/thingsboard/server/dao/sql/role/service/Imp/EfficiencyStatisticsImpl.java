@@ -29,7 +29,6 @@ import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusB
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.PcDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
-import org.thingsboard.server.common.data.vo.user.FindUserVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
@@ -121,15 +120,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头");
         List<String> strings= new ArrayList<>();
         strings.add(HEADER_0);
-//        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-//        log.info("查询历史耗能的表头{}",keys1);
-//        Map<String,String>  map = deviceDictPropertiesSvc.getUnit();
-//        log.info("查询历史耗能的表头map{}",map);
-//
-//        keys1.stream().forEach(str01->{
-//            strings.add( getKeyNameByUtil(str01,map));
-//                }
-//        );
         List<DictDeviceGroupPropertyVO>    dictVoList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.ENERGY_002.getgName());
         dictVoList.stream().forEach(dataVo->{
             strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
@@ -149,12 +139,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public Object queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink) {
-         Map<String,String>  map = deviceDictPropertiesSvc.getUnit() ;
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
-
         }
         String deviceName = deviceInfo.getName();
         //先查询能耗的属性
@@ -167,31 +156,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
          {
              return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
          }
-         List<Map> mapList = new ArrayList<>();
-         for(Map m:list)
-         {
-             Map  map1 = new HashMap();
-             m.forEach((k,v)->{
-
-                 map1.put("设备名称",deviceName);
-                 if(k.equals("ts"))
-                 {
-                     map1.put("createdTime",v); //createdTime
-                 }
-                 if(StringUtils.isNotBlank(map.get(k)))
-                 {
-                     String  strKey = k+"";
-                     map1.put( getKeyNameByUtil(strKey,map),v);
-                 }
-
-             });
-             mapList.add(map1);
-
-         }
-
+        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
         return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
-
-
     }
 
     @Override
@@ -780,16 +746,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
 
-    /**
-     * 获取首页能耗的 单位能耗水 (单位)
-     * @param str01  配置的遥测key
-     * @param map  key 对应的单位
-     * @return
-     */
-    private  String getHomeKeyNameByUtil(String str01,Map  map)
-    {
-        return "单位能耗"+str01+" ("+map.get(str01)+")";
-    }
 
 
 
@@ -858,6 +814,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                     return vo;
                 }).collect(Collectors.toList());
         return  partsList;
+
+    }
+
+
+    private   List<Map> translateTitle(List<Map> list,String deviceName ,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo )
+    {
+        List<Map> mapList = new ArrayList<>();
+
+        for(Map m:list)
+        {
+            Map  map1 = new HashMap();
+            m.forEach((k,v)->{
+                map1.put("设备名称",deviceName);
+                if(k.equals("ts"))
+                {
+                    map1.put("createdTime",v);
+                }
+                DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k);
+                if(dictVO != null) {
+                    map1.put(getHomeKeyNameOnlyUtilNeW(dictVO), v);
+                }
+            });
+            mapList.add(map1);
+        }
+
+        return mapList;
 
     }
 }
