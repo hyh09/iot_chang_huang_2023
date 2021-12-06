@@ -157,10 +157,10 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "【不分页】获得设备字典绑定的部件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true),})
-    @GetMapping("/dict/device/{id}/component")
-    public List<DictDeviceComponent> listDictDeviceComponents(@PathVariable("id") String id) throws ThingsboardException {
-        checkParameter("id", id);
-        return this.dictDeviceService.listDictDeviceComponents(getTenantId(), toUUID(id));
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
+    @GetMapping("/dict/device/component")
+    public List<DictDeviceComponent> listDictDeviceComponents(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        return this.dictDeviceService.listDictDeviceComponents(getTenantId(), toUUID(dictDeviceId));
     }
 }
