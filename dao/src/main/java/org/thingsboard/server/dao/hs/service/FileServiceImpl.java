@@ -20,7 +20,7 @@ import org.thingsboard.server.dao.hs.dao.FileEntity;
 import org.thingsboard.server.dao.hs.dao.FileRepository;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.FileInfo;
-import org.thingsboard.server.dao.hs.entity.vo.FileInfoVO;
+import org.thingsboard.server.dao.hs.entity.vo.FileInfoDictDeviceModelVO;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
@@ -342,12 +342,12 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
      * @return 模型库列表
      */
     @Override
-    public List<FileInfoVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum) {
+    public List<FileInfoDictDeviceModelVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum) {
         var fileInfoList = listFileInfosByScope(tenantId, scopeEnum);
-        var map = this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), fileInfoList.stream().map(FileInfo::getId).map(this::toUUID).collect(Collectors.toList()))
+        var map = this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), fileInfoList.stream().map(FileInfo::getEntityId).map(this::toUUID).collect(Collectors.toList()))
                 .stream().collect(Collectors.toMap(e -> e.getId().toString(), Function.identity()));
         return fileInfoList.stream().map(e -> {
-            FileInfoVO fileInfoVO = new FileInfoVO();
+            FileInfoDictDeviceModelVO fileInfoVO = new FileInfoDictDeviceModelVO();
             BeanUtils.copyProperties(e, fileInfoVO);
             fileInfoVO.setPicture(Optional.ofNullable(map.get(e.getEntityId())).map(DictDeviceEntity::getPicture).orElse(null));
             return fileInfoVO;

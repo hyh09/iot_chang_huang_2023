@@ -42,7 +42,7 @@ public class BoardSceneController extends BaseController {
      */
     @ApiOperation(value = "获得模型库列表")
     @GetMapping("/model")
-    public List<FileInfoVO> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
+    public List<FileInfoDictDeviceModelVO> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
         return this.fileService.listModels(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL);
     }
 

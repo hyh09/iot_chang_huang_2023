@@ -15,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "文件")
-public class FileInfoVO {
+public class FileInfoDictDeviceModelVO {
 
     @ApiModelProperty(value = "租户Id")
     private String tenantId;

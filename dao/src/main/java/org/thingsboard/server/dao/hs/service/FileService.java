@@ -7,7 +7,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.FileInfo;
-import org.thingsboard.server.dao.hs.entity.vo.FileInfoVO;
+import org.thingsboard.server.dao.hs.entity.vo.FileInfoDictDeviceModelVO;
 
 import java.io.IOException;
 import java.util.List;
@@ -139,5 +139,5 @@ public interface FileService {
      * @param scopeEnum 范围
      * @return 模型库列表
      */
-    List<FileInfoVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum);
+    List<FileInfoDictDeviceModelVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum);
 }
