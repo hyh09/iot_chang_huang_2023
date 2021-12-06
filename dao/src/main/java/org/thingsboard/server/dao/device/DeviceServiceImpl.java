@@ -129,6 +129,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     private DictDeviceComponentRepository componentRepository;
     @Autowired private DictDeviceRepository dictDeviceRepository;
 
+    @Autowired
+    private DictDeviceService dictDeviceService;
+
     @Override
     public DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId) {
         log.trace("Executing findDeviceInfoById [{}]", deviceId);
@@ -223,6 +226,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     private Device doSaveDevice(Device device, String accessToken, boolean doValidate) {
+        //如果设备字典为空，则要添加默认字典
+        if(device.getDictDeviceId() == null || StringUtils.isEmpty(device.getDictDeviceId().toString())){
+            device.setDictDeviceId(dictDeviceService.getDefaultDictDeviceId(device.getTenantId()));
+        }
         Device savedDevice = this.saveDeviceWithoutCredentials(device, doValidate);
         if (device.getId() == null) {
             DeviceCredentials deviceCredentials = new DeviceCredentials();

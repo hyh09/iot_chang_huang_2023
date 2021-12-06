@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.memu.Menu;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
@@ -18,10 +22,12 @@ import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
 import org.thingsboard.server.entity.factory.vo.FactoryLevelAllListVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
+import org.thingsboard.server.entity.menu.vo.MenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(value="工厂管理Controller",tags={"工厂管理接口"})
 @RequiredArgsConstructor
@@ -195,22 +201,28 @@ public class FactoryController extends BaseController  {
      */
     @ApiOperation("查询工厂所有版本列表")
     @ApiImplicitParam(name = "queryFactoryDto",value = "入参对象",dataType = "FactoryVersionDto",paramType = "query")
-    @RequestMapping(value = "/findFactoryVersionList", method = RequestMethod.GET)
+    @RequestMapping(value = "/findFactoryVersionList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
-    public List<FactoryVersionVo> findFactoryVersionList(FactoryVersionDto queryFactoryDto) throws ThingsboardException {
+    public PageData<FactoryVersionVo> findFactoryVersionList(@RequestParam int pageSize,
+                                                             @RequestParam int page,
+                                                             FactoryVersionDto queryFactoryDto) throws ThingsboardException {
         try {
+            PageData<FactoryVersionVo> resultPage = new PageData<>();
             List<FactoryVersionVo> resultVo = new ArrayList<>();
             checkParameter("没有获取到登录人所在租户tenantId",getCurrentUser().getTenantId().getId());
             Factory factory = queryFactoryDto.toFactory();
             factory.setTenantId(getCurrentUser().getTenantId().getId());
             factory.setLoginUserId(getCurrentUser().getId().getId());
             List<Factory> factoryList = factoryService.findFactoryVersionList(factory);
+            Boolean hasNext = false;
             if(CollectionUtils.isNotEmpty(factoryList)){
-                factoryList.forEach(i->{
+                List<Factory> collect = factoryList.stream().skip((page * pageSize)).limit(pageSize).collect(Collectors.toList());
+                collect.forEach(i->{
                     resultVo.add(new FactoryVersionVo(i));
                 });
+                hasNext = factoryList.size() > (page * pageSize)?true:false;
             }
-            return resultVo;
+            return new PageData<FactoryVersionVo>(resultVo,page,resultVo.size(),hasNext);
         } catch (Exception e) {
             throw handleException(e);
         }

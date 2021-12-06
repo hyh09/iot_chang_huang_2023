@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -34,6 +35,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
 import org.thingsboard.server.common.data.page.PageData;
@@ -48,6 +50,7 @@ import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
+import org.thingsboard.server.dao.model.sql.MenuEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -615,7 +618,27 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return deviceEntityList;
     }
 
-
+    /**
+     * 分页查询工厂关联的所有设备
+     * @param factoryIds
+     * @return
+     */
+    @NotNull
+    private PageData<DeviceEntity> getDevicesPagesByIds(List<UUID> factoryIds,PageLink pageLink) {
+        Specification<DeviceEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(factoryIds != null && factoryIds.size() > 0){
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("factoryId"));
+                factoryIds.forEach(in::value);
+                predicates.add(in);
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        Pageable pageable = DaoUtil.toPageable(pageLink);
+        Page<DeviceEntity> page = deviceRepository.findAll(specification, pageable);
+        return DaoUtil.pageToPageData(deviceRepository.findAll(specification, pageable));
+    }
 
 
     @Override
