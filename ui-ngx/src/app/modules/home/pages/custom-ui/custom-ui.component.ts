@@ -57,8 +57,8 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
 
   writeFormByHttp() {
     this.dashboardService.getTenantUIInfo().subscribe(ui => {
-      this.systemMngService.getSystemVersion().subscribe(version => {
-        ui.platformVersion = version;
+      this.systemMngService.getSystemVersion().subscribe(res => {
+        ui.platformVersion = (res || {}).version;
         this.patchFormValue(ui);
         this.initData = this.customUiFormGroup.value;
         this.previousData = this.customUiFormGroup.value;

@@ -4,7 +4,7 @@ import { MenuManagementModule } from './menu-mng/menu-mng.module';
 import { AuthMngModule } from './auth-mng/auth-mng.module';
 import { DeviceMonitorModule } from './device-monitor/device-monitor.module';
 import { PotencyModule } from './potency/potency.module';
-import { FactoryVersionModule } from './system-mng/factory-version.module';
+import { FactoryVersionModule } from './system-mng/system-mng.module';
 
 @NgModule({
   exports: [

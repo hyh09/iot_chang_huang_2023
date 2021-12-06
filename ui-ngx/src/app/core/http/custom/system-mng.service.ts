@@ -5,6 +5,11 @@ import { FactoryVersion } from "@app/shared/models/custom/system-mng.models";
 import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 
+export interface SystemVersion {
+  version: string;
+  publishTime: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,8 +28,8 @@ export class SystemMngService {
   }
 
   // 获取系统版本
-  public getSystemVersion(): Observable<string> {
-    return this.http.get(`/api/system/getSystemVersion`, { responseType: 'text' });
+  public getSystemVersion(config?: RequestConfig): Observable<SystemVersion> {
+    return this.http.get<SystemVersion>(`/api/system/getSystemVersion`, defaultHttpOptionsFromConfig(config));
   }
   
 }
