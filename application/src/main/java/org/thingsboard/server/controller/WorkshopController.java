@@ -85,7 +85,7 @@ public class WorkshopController extends BaseController  {
     })
     @RequestMapping(value = "/findWorkshopListByTenant", method = RequestMethod.GET)
     @ResponseBody
-    public List<WorkshopVo> findWorkshopListByTenant(@RequestParam String tenantId,@RequestParam String factoryId) throws ThingsboardException {
+    public List<WorkshopVo> findWorkshopListByTenant(@RequestParam(required = false) String tenantId,@RequestParam(required = false) String factoryId) throws ThingsboardException {
         try {
             List<WorkshopVo> workshopVos = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){
