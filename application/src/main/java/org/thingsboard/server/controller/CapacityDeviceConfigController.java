@@ -2,6 +2,7 @@ package org.thingsboard.server.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +37,14 @@ public class CapacityDeviceConfigController extends BaseController{
 
     @ApiOperation("查询列表接口")
     @RequestMapping(value = "/pageQuery", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ApiImplicitParam(name = "pageQuery",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂id"),
+            @ApiImplicitParam(name = "workshopId", value = "车间id"),
+            @ApiImplicitParam(name = "productionLineId", value = "产线id"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id"),
+            @ApiImplicitParam(name = "deviceName", value = "设备名称"),
+
+    })
     @ResponseBody
     public PageData<CapacityDeviceVo>  pageQuery(
             @RequestParam int pageSize, @RequestParam int page,

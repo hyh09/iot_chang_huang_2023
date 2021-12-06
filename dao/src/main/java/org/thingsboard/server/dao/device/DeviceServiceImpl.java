@@ -981,7 +981,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
           vo1.setFlg(d1.getDeviceFlg());
           vo1.setStatus(getStatusByDevice(d1));
           vo1.setDeviceName(getDictName(tenantId,d1.getDictDeviceId()));
-          vo1.setDeviceName(getDictFileName(tenantId,d1.getDeviceProfileId()));
+          vo1.setDeviceFileName(getDictFileName(tenantId,d1.getDeviceProfileId()));
+          vo1.setCreatedTime(d1.getCreatedTime());
             return  vo1;
         }).collect(Collectors.toList());
 
@@ -992,23 +993,24 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
 
 
+    private final String Yes="已匹配";
 
-    private  Boolean  getStatusByDevice(Device  device)
+    private  String  getStatusByDevice(Device  device)
     {
-         Boolean   flg= false;
+//         Boolean   flg= false;
         if(device.getFactoryId() != null )
         {
-           return  true;
+           return  Yes;
         }
         if(device.getWorkshopId() != null)
         {
-            return  true;
+            return  Yes;
         }
         if(device.getProductionLineId() != null)
         {
-            return  true;
+            return  Yes;
         }
-        return flg;
+        return "未匹配";
 
     }
 
