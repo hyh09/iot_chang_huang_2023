@@ -199,7 +199,7 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
     public void delProductionLine(UUID id){
         Device device = new Device();
         device.setProductionLineId(id);
-        if(CollectionUtils.isNotEmpty(deviceDao.findDeviceListBuyCdn(device))){
+        if(CollectionUtils.isNotEmpty(deviceDao.findDeviceListByCdn(device))){
             /*逻辑删除暂时不用
              ProductionLineEntity productionLineEntity = productionLineRepository.findById(id).get();
             productionLineEntity.setDelFlag("D");

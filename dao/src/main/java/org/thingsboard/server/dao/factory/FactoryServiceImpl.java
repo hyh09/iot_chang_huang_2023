@@ -49,7 +49,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         factory.setCode(PREFIX_ENCODING_GC + String.valueOf(System.currentTimeMillis()));
         Factory factorySave = factoryDao.saveFactory(factory);
         //创建工厂管理员角色
-        //userRoleMenuSvc.saveRole();
+        userRoleMenuSvc.saveRole(factory.getTenantId(),factory.getCreatedUser(),factorySave.getId());
         return factorySave;
     }
 

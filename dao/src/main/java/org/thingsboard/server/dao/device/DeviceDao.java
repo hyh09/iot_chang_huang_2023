@@ -256,7 +256,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @param device
      * @return
      */
-    List<Device> findDeviceListBuyCdn(Device device);
+    List<Device> findDeviceListByCdn(Device device);
 
 
     /**
