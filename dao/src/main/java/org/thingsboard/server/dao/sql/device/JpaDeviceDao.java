@@ -16,6 +16,7 @@
 package org.thingsboard.server.dao.sql.device;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ import org.thingsboard.server.common.data.ota.OtaPackageUtil;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
@@ -51,6 +53,8 @@ import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 import org.thingsboard.server.dao.model.sql.MenuEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
+import org.thingsboard.server.dao.util.BeanToMap;
+import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
@@ -771,6 +775,16 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         device.setAllot(false);
         return this.queryList(device);
     }
+
+    @Override
+    public PageData<Device> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException {
+        Pageable pageable = DaoUtil.toPageable(pageLink);
+        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryByMap(BeanToMap.beanToMapByJackson(vo), DeviceEntity.class),pageable);
+        return  DaoUtil.toPageData(pageData);
+   }
+
+
+
 
     /**
      * 获取父级名称

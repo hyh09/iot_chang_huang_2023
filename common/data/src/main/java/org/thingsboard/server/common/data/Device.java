@@ -17,6 +17,7 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.data.DeviceData;
@@ -30,6 +31,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+
+@Data
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
 public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implements HasName, HasTenantId, HasCustomerId, HasOtaPackage {
@@ -93,7 +96,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private Boolean filterGatewayFlag = false;
     /**********************************以上是非数据库字段***************************************/
 
-
+    private Boolean deviceFlg=false;
 
     public Device() {
         super();

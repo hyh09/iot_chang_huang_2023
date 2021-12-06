@@ -105,19 +105,28 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           selectable: this.deviceOnly ? item.rowType === 'device' : true
         });
       });
+      this.treeData = this.utils.formatTree(treeArr);
       const params = { factoryId: '', workshopId: '', productionLineId: '', deviceId: '' };
       if (this.deviceOnly) {
-        const device = res.deviceVoList[0] || {};
-        this.selectedKeys = [device.key];
-        const { factoryId, workshopId, productionLineId, id: deviceId } = device;
-        Object.assign(params, { factoryId, workshopId, productionLineId, deviceId });
-        this.expandedKeys = [factoryId, workshopId, productionLineId];
+        const firstFactory = this.treeData[0];
+        if (firstFactory && firstFactory.children && firstFactory.children[0]) {
+          const firstWorkshop = firstFactory.children[0];
+          if (firstWorkshop.children && firstWorkshop.children[0]) {
+            const firstProdLine = firstWorkshop.children[0];
+            if (firstProdLine.children[0]) {
+              const firstDevice = firstProdLine.children[0];
+              this.selectedKeys = [firstDevice.key];
+              const { factoryId, workshopId, productionLineId, id: deviceId } = firstDevice;
+              Object.assign(params, { factoryId, workshopId, productionLineId, deviceId });
+              this.expandedKeys = [factoryId, workshopId, productionLineId];
+            }
+          }
+        }
       } else {
         this.selectedKeys = res.factoryList[0] ? [res.factoryList[0].key] : [];
         params.factoryId = this.selectedKeys[0] || '';
         params.factoryId = params.factoryId === '-1' ? '' : params.factoryId;
       }
-      this.treeData = this.utils.formatTree(treeArr);
       if (this.selectedKeys[0]) {
         this.clickNode.emit(params);
         if (this.entitiesTableConfig && this.entitiesTableConfig.componentsData) {

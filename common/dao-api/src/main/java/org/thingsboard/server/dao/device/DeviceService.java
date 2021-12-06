@@ -15,6 +15,8 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.datastax.oss.driver.api.core.paging.OffsetPager;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceInfo;
@@ -32,6 +34,7 @@ import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
 
@@ -184,5 +187,7 @@ public interface DeviceService {
      * @return
      */
     List<Device> findDeviceListByCdn(Device device);
+
+    PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 
 }

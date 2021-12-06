@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
  * 场景配置接口
  *
  * @author wwj
+ * @apiNote 因前端限制，非restful设计。
  * @since 2021.11.22
  */
 @Api(value = "场景配置接口", tags = {"场景配置接口"})
@@ -41,8 +42,8 @@ public class BoardSceneController extends BaseController {
      */
     @ApiOperation(value = "获得模型库列表")
     @GetMapping("/model")
-    public List<FileInfo> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
-        return this.fileService.listFileInfosByScope(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL);
+    public List<FileInfoDictDeviceModelVO> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
+        return this.fileService.listModels(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL);
     }
 
     /**
@@ -152,10 +153,10 @@ public class BoardSceneController extends BaseController {
      */
     @ApiOperation("查询设备详情")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "path", required = true)
+            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "query", required = true)
     })
-    @GetMapping("/rtMonitor/device/{id}")
-    public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
+    @GetMapping("/rtMonitor/device")
+    public DeviceDetailResult getRtMonitorDeviceDetail(@RequestParam("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
         return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
     }

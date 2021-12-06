@@ -1,0 +1,41 @@
+<mat-drawer-container hasBackdrop="false" class="tb-absolute-fill factory-mng-table-wrapper">
+  <mat-drawer-content>
+    <div
+      fxLayout="row"
+      fxLayoutGap="16px"
+      class="mat-padding tb-entity-table tb-absolute-fill"
+    >
+      <div class="mat-elevation-z1 tb-entity-table-content">
+        <mat-toolbar class="mat-table-toolbar">
+          <div class="mat-toolbar-tools">
+            <div fxLayout="row" fxLayoutAlign="start center" fxLayout.xs="column" fxLayoutAlign.xs="center start" class="title-container">
+              <span class="tb-entity-table-title">{{ 'system-mng.system-version' | translate }}</span>
+            </div>
+          </div>
+        </mat-toolbar>
+        <div class="table-container">
+          <nz-table
+            #table
+            [nzData]="tableData"
+            nzTableLayout="fixed"
+            [nzShowPagination]="false"
+            [nzNoResult]="((isLoading$ | async) ? 'common.loading' : 'system-mng.no-system-version') | translate"
+          >
+            <thead>
+              <tr>
+                <th nzWidth="50%">{{ 'system-mng.version' | translate }}</th>
+                <th nzWidth="50%">{{ 'system-mng.publish-time' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let data of tableData">
+                <td>{{data.version}}</td>
+                <td>{{data.publishTime | date: "yyyy-MM-dd HH:mm:ss"}}</td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </div>
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

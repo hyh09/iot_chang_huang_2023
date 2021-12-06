@@ -200,6 +200,7 @@ public class JpaQueryHelper {
 				Predicate p = null;
 				Field idField = null;
 				for(Field f : entityFields){
+					log.info("==打印的===>:{},{},{},{}",f.getType(),f.getName(), queryParam.get(f.getName()),( queryParam.get(f.getName()) instanceof  UUID));
 					if(f.getAnnotation(Id.class) != null){
 						idField = f;
 					}
@@ -220,29 +221,26 @@ public class JpaQueryHelper {
 									in.value(o);
 								}
 								pList.add(in);
-							}else  if(f.getAnnotation(JpaOperatorsType.class) != null)
+							}else if(f.getType().isAssignableFrom(UUID.class) ){
+								if(value instanceof  UUID ){
+									pList.add(cb.equal(root.get(f.getName()).as(UUID.class), value));
+
+								}
+								if(value instanceof  String ){
+
+									pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
+								}
+							}
+							else  if(f.getAnnotation(JpaOperatorsType.class) != null)
 							{
-								JpaOperatorsType jpaOperatorsType = 	f.getAnnotation(JpaOperatorsType.class);
-								pList.add(jpaOperatorsType.value().buildPredicate(cb,root,f.getName(),value));
+						  		  log.info("==================valueJpaOperatorsType======================={}", value);
+						  		  JpaOperatorsType jpaOperatorsType = f.getAnnotation(JpaOperatorsType.class);
+						  		  pList.add(jpaOperatorsType.value().buildPredicate(cb, root, f.getName(), value));
 							}
 
 							else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
 								if(StringUtils.isNotEmpty((String) value) && !value.equals("0")) {  //
 									pList.add(cb.like(root.get(f.getName()).as(String.class), "%" + value + "%"));
-								}
-							}else if(f.getType().isAssignableFrom(UUID.class) ){
-								if(value instanceof  UUID ){
-									System.out.println("==UUID===>" + f.getType());
-									System.out.println("===UUIDvalue==>" + value);
-									System.out.println("==UUIDf.getName()=:"+f.getName());
-									System.out.println("==UUID root.get(f.getName()=:"+root.get(f.getName()));
-									pList.add(cb.equal(root.get(f.getName()).as(UUID.class), value));
-
-								}
-								if(value instanceof  String ){
-									System.out.println("=====>" + f.getType());
-									System.out.println("===value==>" + value);
-									pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
 								}
 							}else  if(f.getType().isAssignableFrom(long.class) )
 							{
