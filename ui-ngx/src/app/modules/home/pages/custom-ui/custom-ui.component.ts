@@ -1,7 +1,6 @@
+import { environment } from './../../../../../environments/environment';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { environment as env } from '@env/environment';
-import { TranslateService } from '@ngx-translate/core';
 import { DashboardService } from '@core/http/dashboard.service';
 import { UIInfo } from '@shared/models/dashboard.models';
 import { Store } from '@ngrx/store';
@@ -11,6 +10,7 @@ import { PageComponent } from '@shared/components/page.component';
 import {ActionTenantUIChangeAll} from "@core/custom/tenant-ui.actions";
 import {TenantUIState} from "@core/custom/tenant-ui.models";
 import {initialState} from "@core/custom/tenant-ui.reducer";
+import { SystemMngService } from '@app/core/http/custom/system-mng.service';
 
 @Component({
   selector: 'tb-custom-ui',
@@ -27,8 +27,8 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
 
   constructor(
     protected store: Store<AppState>,
-    private translate: TranslateService,
     private dashboardService: DashboardService,
+    private systemMngService: SystemMngService,
     private fb: FormBuilder
   ) {
     super(store);
@@ -57,9 +57,12 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
 
   writeFormByHttp() {
     this.dashboardService.getTenantUIInfo().subscribe(ui => {
-      this.patchFormValue(ui);
-      this.initData = this.customUiFormGroup.value;
-      this.previousData = this.customUiFormGroup.value;
+      this.systemMngService.getSystemVersion().subscribe(res => {
+        ui.platformVersion = (res || {}).version;
+        this.patchFormValue(ui);
+        this.initData = this.customUiFormGroup.value;
+        this.previousData = this.customUiFormGroup.value;
+      });
     });
   }
 
@@ -108,8 +111,8 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
       platformMenuColorActive: [null, []],
       platformMenuColorHover: [null, []],
       showNameVersion: [false, []],
-      platformName: [env.appTitle, []],
-      platformVersion: [env.tbVersion, []]
+      platformName: [environment.appTitle, []],
+      platformVersion: ['', []]
     });
     this.initData = this.customUiFormGroup.value;
     this.previousData = this.customUiFormGroup.value;

@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.factory;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
+import org.thingsboard.server.common.data.page.PageLink;
 
 import java.util.List;
 import java.util.UUID;
@@ -66,7 +67,7 @@ public interface FactoryService {
      * @return
      * @throws Exception
      */
-    List<Factory> findFactoryVersionList(Factory factory) throws Exception;
+    List<Factory> findFactoryVersionList(Factory factoryk) throws Exception;
 
     /**
      * 根据登录人角色查询工厂列表
