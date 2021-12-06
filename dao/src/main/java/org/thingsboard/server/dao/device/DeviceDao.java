@@ -335,4 +335,8 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
     PageData<Device> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException;
 
+
+    void   updateFlgById(Boolean deviceFlg, UUID id);
+
+
 }

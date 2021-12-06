@@ -799,7 +799,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
    }
 
 
-
+    @Override
+    public void updateFlgById(Boolean deviceFlg, UUID id) {
+        deviceRepository.updateFlgById(deviceFlg,id);
+    }
 
     /**
      * 获取父级名称

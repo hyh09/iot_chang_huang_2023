@@ -78,6 +78,22 @@ public class CapacityDeviceConfigController extends BaseController{
         }
     }
 
+    @ApiOperation("更新状态")
+    @RequestMapping(value = "/updateFlgById", method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备id"),
+            @ApiImplicitParam(name = "deviceFlg", value = "是否参与产能运算"),
+    })
+    @ResponseBody
+    public String  updateFlgById(
+            @RequestParam UUID deviceId,
+            @RequestParam Boolean deviceFlg
+    ) throws ThingsboardException {
+           deviceService.updateFlgById(deviceFlg,deviceId);
+
+        return "success";
+    }
+
 
     private  UUID  getUidByStr(String str)
     {

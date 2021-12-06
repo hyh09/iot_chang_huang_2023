@@ -1000,6 +1000,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
 
+    @Override
+    public void updateFlgById(Boolean deviceFlg, UUID id) {
+        deviceDao.updateFlgById(deviceFlg,id);
+    }
 
     private final String Yes="已匹配";
 
