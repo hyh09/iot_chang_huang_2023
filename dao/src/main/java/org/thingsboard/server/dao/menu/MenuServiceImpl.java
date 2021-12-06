@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.menu;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.EntityId;
@@ -127,7 +128,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
             }
             if((menuById.getPath() == null && menu.getPath() != null)
                     || (menuById.getPath() != null && menu.getPath() == null)
-                    || (!menuById.getPath().equals(menu.getPath()))){
+                    || (StringUtils.isNotEmpty(menuById.getPath()) && !menuById.getPath().equals(menu.getPath()))){
                 updFalg = true;
             }
             if((menuById.getMenuIcon() != null && menu.getMenuIcon() == null)
