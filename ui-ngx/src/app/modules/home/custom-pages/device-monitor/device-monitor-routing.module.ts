@@ -10,12 +10,6 @@ import { RealTimeMonitorComponent } from './real-time-monitor/real-time-monitor.
 const routes: Routes = [
   {
     path: 'deviceMonitor',
-    data: {
-      breadcrumb: {
-        label: 'device-monitor.device-monitor',
-        icon: 'mdi:device-monitor'
-      }
-    },
     children: [
       {
         path: '',

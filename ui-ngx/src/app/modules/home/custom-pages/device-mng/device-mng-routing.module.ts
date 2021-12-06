@@ -9,12 +9,6 @@ import { FactoryMngComponent } from './factory-mng/factory-mng.component';
 const routes: Routes = [
   {
     path: 'deviceManagement',
-    data: {
-      breadcrumb: {
-        label: 'device-mng.device-mng',
-        icon: 'devices'
-      }
-    },
     children: [
       {
         path: '',
