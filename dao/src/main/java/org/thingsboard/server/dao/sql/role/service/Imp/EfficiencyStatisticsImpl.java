@@ -56,6 +56,7 @@ import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -345,7 +346,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<String>  keys1 = new ArrayList<>();
            keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
           vo.setKeys(keys1);
-
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
         if(vo.getFactoryId() == null)
         {
             vo.setFactoryId(getFirstFactory(tenantId));
@@ -355,17 +356,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if(CollectionUtils.isEmpty(effectTsKvEntities))
         {
             keys1.stream().forEach(s -> {
-                totalValueMap.put(s,"0");
+                totalValueMap.put(translateAppTitle(mapNameToVo,s),"0"+translateAppUnit(mapNameToVo,s));
             });
             appVo.setTotalValue(totalValueMap);
             return appVo;  //如果查询不到; 应该返回的对应的key 且
         }
-
-//        List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
-//                collect(Collectors.toList());
-//        log.info("能效当前的分页之后的数据:{}",pageList);
-//        List<UUID> ids = pageList.stream().map(EffectTsKvEntity::getEntityId).collect(Collectors.toList());
-//        log.info(" 能效-当前的分页之后的数据之设备id的汇总:{}",ids);
         Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
         log.info("查询到的数据转换为设备维度:{}",map);
         Set<UUID> keySet = map.keySet();
@@ -381,10 +376,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             UUID uuid= pageList.get(i);
             listMap.put(uuid,map.get(uuid));
         }
-
-        appVo.setAppDeviceCapVoList(getEntityKeyValue(listMap,tenantId));
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);
+        appVo.setAppDeviceCapVoList(translateListAppTitle(vos,mapNameToVo));
         keys1.stream().forEach(str->{
-            totalValueMap.put(str,getTotalValue(effectTsKvEntities,str));
+            totalValueMap.put(translateAppTitle(mapNameToVo,str),getTotalValue(effectTsKvEntities,str)+translateAppUnit(mapNameToVo,str));
         });
         appVo.setTotalValue(totalValueMap);
         return appVo;
@@ -562,42 +557,49 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private  String  getValueByEntity(EffectTsKvEntity entity)
     {
-        if(entity.getSubtractDouble()>0)
-        {
-            return  entity.getSubtractDouble().toString();
-        }
-        if(entity.getSubtractLong()>0)
-        {
-            return  entity.getSubtractLong().toString();
-
-        }
-        return "0";
+//        if(entity.getSubtractDouble()>0)
+//        {
+//            return  entity.getSubtractDouble().toString();
+//        }
+//        if(entity.getSubtractLong()>0)
+//        {
+//            return  entity.getSubtractLong().toString();
+//
+//        }
+        return entity.getValueLast2();
     }
 
 
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities)
     {
 
-        Double  totalSku =
-                effectTsKvEntities.stream().mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
-
-        Long  totalSku2 =
-                effectTsKvEntities.stream().mapToLong(EffectTsKvEntity::getSubtractLong).sum();
-        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
-        return dvalue+"";
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        return  invoiceAmount.stripTrailingZeros().toPlainString();
+//        Double  totalSku =
+//                effectTsKvEntities.stream().mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
+//
+//        Long  totalSku2 =
+//                effectTsKvEntities.stream().mapToLong(EffectTsKvEntity::getSubtractLong).sum();
+//        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
+////        return dvalue+"";
+//        return  null;
     }
 
 
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,String key)
     {
-
-        Double  totalSku =
-                effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
-
-        Long  totalSku2 =
-                effectTsKvEntities.stream().filter(entity ->  entity.getKeyName().equals(key)).mapToLong(EffectTsKvEntity::getSubtractLong).sum();
-        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
-        return dvalue+"";
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        return  invoiceAmount.stripTrailingZeros().toPlainString();
+//        Double  totalSku =
+//                effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
+//
+//        Long  totalSku2 =
+//                effectTsKvEntities.stream().filter(entity ->  entity.getKeyName().equals(key)).mapToLong(EffectTsKvEntity::getSubtractLong).sum();
+//        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
+//        return dvalue+"";
+//        return  "";
     }
 
  /**
@@ -629,7 +631,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
 
                 value.stream().forEach(effectTsKvEntity -> {
-                    mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValue());
+                    mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValueLast2());
                     timeValueMap.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs2());
                 });
                 appDeviceEnergyVo.setMapValue(mapValue);
@@ -696,29 +698,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
-    /**
-     * 获取历史能耗的表头
-     * @param str01  配置的遥测key
-     * @param map  key 对应的单位
-     * @return
-     */
-    private  String getKeyNameByUtil(String str01,Map  map)
-    {
-       return PRE_HISTORY_ENERGY+str01+AFTER_HISTORY_ENERGY+" ("+map.get(str01)+")";
-    }
 
 
-
-    /**
-     * 获取首页能耗的 水 (单位)
-     * @param str01  配置的遥测key
-     * @param map  key 对应的单位
-     * @return
-     */
-    private  String getHomeKeyNameOnlyUtil(String str01,Map  map)
-    {
-        return ""+str01+" ("+map.get(str01)+")";
-    }
 
 
     /**
@@ -732,6 +713,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
         return ""+title+" ("+dataVo.getUnit()+")";
     }
+
+
+
     /**
      * 能耗分析表头方法
      *  eg:  单位能耗水 (w)
@@ -840,6 +824,48 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
 
         return mapList;
+
+    }
+
+
+    private String translateAppTitle(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,String key)
+    {
+        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
+        if(dictVO != null) {
+            String title =StringUtils.isBlank(dictVO.getTitle())?dictVO.getName():dictVO.getTitle();
+            return  title;
+        }
+        return  key;
+
+    }
+
+    private String translateAppUnit(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,String key)
+    {
+        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
+        if(dictVO != null) {
+            return  " ("+dictVO.getUnit()+")";
+        }
+        return  key;
+
+    }
+
+
+    private List<AppDeviceEnergyVo> translateListAppTitle(List<AppDeviceEnergyVo>  vos,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
+    {
+        List<AppDeviceEnergyVo>    voList = new ArrayList<>();
+        vos.stream().forEach(vo1->{
+         Map<String,String> mapOld =    vo1.getMapValue();
+            Map<String,String> mapnew = new HashMap<>();
+            mapOld.forEach((key1,value1)->{
+                mapnew.put(translateAppTitle(mapNameToVo,key1),value1+translateAppUnit(mapNameToVo,key1));
+            });
+            vo1.setMapValue(mapnew);
+            voList.add(vo1);
+
+        });
+
+        return  voList;
+
 
     }
 }

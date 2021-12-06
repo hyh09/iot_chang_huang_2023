@@ -27,11 +27,17 @@ public class StringUtilToll {
         return pattern.matcher(string).matches();
     }
 
-
-    public static double sub(Double value1, Double value2){
-        BigDecimal b1 = new BigDecimal(value1.toString());
-        BigDecimal b2 = new BigDecimal(value2.toString());
-        return b1.subtract(b2).doubleValue();
+    /**
+     * 减法
+     * @param value1
+     * @param value2
+     * @return
+     */
+    public static String  sub(String value1, String value2){
+        BigDecimal b1 = new BigDecimal(value1);
+        BigDecimal b2 = new BigDecimal(value2);
+        //bigdeciaml.stripTrailingZeros().toPlainString()
+        return b1.subtract(b2).stripTrailingZeros().toPlainString();
     }
 
 
