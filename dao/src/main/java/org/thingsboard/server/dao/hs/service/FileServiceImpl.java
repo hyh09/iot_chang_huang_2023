@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +14,13 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.hs.dao.DictDeviceEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.dao.FileEntity;
 import org.thingsboard.server.dao.hs.dao.FileRepository;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.FileInfo;
+import org.thingsboard.server.dao.hs.entity.vo.FileInfoVO;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
@@ -26,13 +30,12 @@ import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.*;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 文件接口实现类
@@ -48,6 +51,8 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     private FileRepository fileRepository;
 
     private CommonComponent commonComponent;
+
+    private DictDeviceRepository dictDeviceRepository;
 
     ScheduledExecutorService service;
 
@@ -329,6 +334,26 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
         this.fileRepository.deleteAllByTenantIdAndScopeAndEntityId(tenantId.getId(), scopeEnum.getCode(), entityId);
     }
 
+    /**
+     * 获得模型库列表
+     *
+     * @param tenantId  租户Id
+     * @param scopeEnum 范围
+     * @return 模型库列表
+     */
+    @Override
+    public List<FileInfoVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum) {
+        var fileInfoList = listFileInfosByScope(tenantId, scopeEnum);
+        var map = this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), fileInfoList.stream().map(FileInfo::getId).map(this::toUUID).collect(Collectors.toList()))
+                .stream().collect(Collectors.toMap(e -> e.getId().toString(), Function.identity()));
+        return fileInfoList.stream().map(e -> {
+            FileInfoVO fileInfoVO = new FileInfoVO();
+            BeanUtils.copyProperties(e, fileInfoVO);
+            fileInfoVO.setPicture(Optional.ofNullable(map.get(e.getEntityId())).map(DictDeviceEntity::getPicture).orElse(null));
+            return fileInfoVO;
+        }).collect(Collectors.toList());
+    }
+
     @Autowired
     public void setFileRepository(FileRepository fileRepository) {
         this.fileRepository = fileRepository;
@@ -337,5 +362,10 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     @Autowired
     public void setCommonComponent(CommonComponent commonComponent) {
         this.commonComponent = commonComponent;
+    }
+
+    @Autowired
+    public void setDeviceRepository(DictDeviceRepository dictDeviceRepository) {
+        this.dictDeviceRepository = dictDeviceRepository;
     }
 }

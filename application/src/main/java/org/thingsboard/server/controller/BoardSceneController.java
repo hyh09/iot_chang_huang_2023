@@ -42,8 +42,8 @@ public class BoardSceneController extends BaseController {
      */
     @ApiOperation(value = "获得模型库列表")
     @GetMapping("/model")
-    public List<FileInfo> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
-        return this.fileService.listFileInfosByScope(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL);
+    public List<FileInfoVO> getBoardModelLocations() throws ThingsboardException, ExecutionException, InterruptedException, IOException {
+        return this.fileService.listModels(getTenantId(), FileScopeEnum.DICT_DEVICE_MODEL);
     }
 
     /**
