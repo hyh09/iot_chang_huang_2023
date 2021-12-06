@@ -118,22 +118,29 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
             }
             if((menuById.getName() != null && menu.getName() == null)
                     || (menuById.getName() == null && menu.getName() != null)
-                    || !menuById.getName().equals(menu.getName())){
+                    || (StringUtils.isNotEmpty(menuById.getName()) && !menuById.getName().equals(menu.getName()))
+                    || (StringUtils.isEmpty(menuById.getName()) && StringUtils.isNotEmpty(menu.getName()))
+            ){
                 updFalg = true;
             }
             if((menuById.getLangKey() != null && menu.getLangKey() == null)
                     || (menuById.getLangKey() == null && menu.getLangKey() != null)
-                    || !menuById.getLangKey().equals(menu.getLangKey())){
+                    || (StringUtils.isNotEmpty(menuById.getLangKey()) && !menuById.getLangKey().equals(menu.getLangKey()))
+                    || (StringUtils.isEmpty(menuById.getLangKey()) && StringUtils.isNotEmpty(menu.getLangKey()))){
                 updFalg = true;
             }
             if((menuById.getPath() == null && menu.getPath() != null)
                     || (menuById.getPath() != null && menu.getPath() == null)
-                    || (StringUtils.isNotEmpty(menuById.getPath()) && !menuById.getPath().equals(menu.getPath()))){
+                    || (StringUtils.isNotEmpty(menuById.getPath()) && !menuById.getPath().equals(menu.getPath()))
+                    || (StringUtils.isEmpty(menuById.getPath()) && StringUtils.isNotEmpty(menu.getPath()))
+            ){
                 updFalg = true;
             }
             if((menuById.getMenuIcon() != null && menu.getMenuIcon() == null)
                     ||(menuById.getMenuIcon() == null && menu.getMenuIcon() != null)
-                    ||(!menuById.getMenuIcon().equals(menu.getMenuIcon()))){
+                    ||(StringUtils.isNotEmpty(menuById.getMenuIcon()) && !menuById.getMenuIcon().equals(menu.getMenuIcon()))
+                    || (StringUtils.isEmpty(menuById.getMenuIcon()) && StringUtils.isNotEmpty(menu.getMenuIcon()))
+            ){
                 updFalg = true;
             }
             //判断是否需要变更
