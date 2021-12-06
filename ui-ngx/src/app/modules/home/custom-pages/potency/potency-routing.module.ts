@@ -9,12 +9,6 @@ import { RunningStateComponent } from './running-state/running-state.component';
 const routes: Routes = [
   {
     path: 'potency',
-    data: {
-      breadcrumb: {
-        label: 'potency.potency',
-        icon: 'mdi:potency'
-      }
-    },
     children: [
       {
         path: '',

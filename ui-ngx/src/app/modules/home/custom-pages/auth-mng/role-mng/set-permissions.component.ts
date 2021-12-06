@@ -11,12 +11,17 @@ import { UtilsService } from '@app/core/public-api';
 import { NzTreeComponent, NzTreeNode } from 'ng-zorro-antd/tree';
 import { ActionNotificationShow } from '@app/core/notification/notification.actions';
 
+export interface SetPermissionsDialogData {
+  roleId?: string,
+  factoryId?: string
+}
+
 @Component({
   selector: 'tb-set-permissions',
   templateUrl: './set-permissions.component.html',
   styleUrls: ['./set-permissions.component.scss']
 })
-export class SetPermissionsComponent extends DialogComponent<SetPermissionsComponent, HasUUID> implements OnInit {
+export class SetPermissionsComponent extends DialogComponent<SetPermissionsComponent, string> implements OnInit {
 
   public pcMenus: MenuTreeNodeOptions[] = [];
   public appMenus: MenuTreeNodeOptions[] = [];
@@ -31,11 +36,11 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
-    public dialogRef: MatDialogRef<SetPermissionsComponent, HasUUID>,
+    public dialogRef: MatDialogRef<SetPermissionsComponent, string>,
     protected roleMngService: RoleMngService,
     protected translate: TranslateService,
     protected utils: UtilsService,
-    @Inject(MAT_DIALOG_DATA) protected roleId: string
+    @Inject(MAT_DIALOG_DATA) protected data: SetPermissionsDialogData
   ) {
     super(store, router, dialogRef);
   }
@@ -48,7 +53,7 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
   getMenuList(menuType: MenuType) {
     this.pcCheckedKeys = [];
     this.appCheckedKeys = [];
-    this.roleMngService.getMenusByRole(menuType, this.roleId).subscribe(menus => {
+    this.roleMngService.getMenusByRole(menuType, this.data.roleId, this.data.factoryId).subscribe(menus => {
       if (menus) {
         const rootNodeOptions: MenuTreeNodeOptions = {
           title: this.translate.instant('common.select-all'),
@@ -110,7 +115,8 @@ export class SetPermissionsComponent extends DialogComponent<SetPermissionsCompo
     this.roleMngService.setRolePermissions(
       [...pcCheckedIds, ...appCheckedIds],
       [...pcHalfCheckedIds, ...appHalfCheckedIds],
-      this.roleId
+      this.data.roleId,
+      this.data.factoryId
     ).subscribe(() => {
       this.dialogRef.close(null);
       this.store.dispatch(new ActionNotificationShow({

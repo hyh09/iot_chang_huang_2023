@@ -11,7 +11,7 @@ import { map } from "rxjs/operators";
 import { RoleMngService } from "@app/core/http/custom/role-mng.service";
 import { MatDialog } from "@angular/material/dialog";
 import { EntityAction } from "@app/modules/home/models/entity/entity-component.models";
-import { SetPermissionsComponent } from "./set-permissions.component";
+import { SetPermissionsComponent, SetPermissionsDialogData } from "./set-permissions.component";
 import { UtilsService } from "@app/core/public-api";
 
 @Injectable()
@@ -141,10 +141,10 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     if ($event) {
       $event.stopPropagation();
     }
-    this.dialog.open<SetPermissionsComponent, HasUUID>(SetPermissionsComponent, {
+    this.dialog.open<SetPermissionsComponent, SetPermissionsDialogData>(SetPermissionsComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      data: roleId
+      data: { roleId: roleId + '' }
     });
   }
 

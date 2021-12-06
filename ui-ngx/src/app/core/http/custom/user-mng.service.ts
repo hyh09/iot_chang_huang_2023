@@ -4,9 +4,9 @@ import { RequestConfig, defaultHttpOptionsFromConfig } from "@app/core/public-ap
 import { UserInfo } from "@app/shared/models/custom/auth-mng.models";
 import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
 
 interface FetchListFilter {
+  factoryId?: string,
   userCode: string,
   userName: string
 }
@@ -29,6 +29,14 @@ export class UserMngService {
   public getUsers(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<UserInfo>> {
     return this.http.get<PageData<UserInfo>>(
       `/api/user/findAll${pageLink.toQuery()}&userCode=${filterParams.userCode}&userName=${filterParams.userName}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
+  // 获取工厂管理员列表
+  public getFactoryManagers(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<UserInfo>> {
+    return this.http.get<PageData<UserInfo>>(
+      `/api/user/findFactoryManagers${pageLink.toQuery()}&factoryId=${filterParams.factoryId}&userCode=${filterParams.userCode}&userName=${filterParams.userName}`,
       defaultHttpOptionsFromConfig(config)
     );
   }

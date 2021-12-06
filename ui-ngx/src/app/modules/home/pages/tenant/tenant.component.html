@@ -61,6 +61,7 @@
         formControlName="tenantProfileId"
         (tenantProfileUpdated)="onTenantProfileUpdated()">
       </tb-tenant-profile-autocomplete>
+      <tb-contact [parentForm]="entityForm" [isEdit]="isEdit"></tb-contact>
       <div formGroupName="additionalInfo" fxLayout="column">
         <mat-form-field class="mat-block">
           <mat-label translate>tenant.description</mat-label>
@@ -82,7 +83,6 @@
           </section>
         </section>
       </div>
-      <tb-contact [parentForm]="entityForm" [isEdit]="isEdit"></tb-contact>
     </fieldset>
   </form>
 </div>

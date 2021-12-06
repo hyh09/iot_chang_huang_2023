@@ -70,7 +70,7 @@
             [nzData]="tableData"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
-            [nzNoResult]="'device-mng.no-factory-text' | translate"
+            [nzNoResult]="((isLoading$ | async) ? 'common.loading' : 'device-mng.no-factory-text') | translate"
             [nzScroll]="scrollConfig"
           >
             <thead>
@@ -79,7 +79,11 @@
                 <th nzWidth="104px">{{ 'device-mng.logo' | translate }}</th>
                 <th>{{ 'device-mng.address' | translate }}</th>
                 <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
-                <th *ngIf="utils.hasPermission('action.add') || utils.hasPermission('action.delete')" nzWidth="120px" nzRight></th>
+                <th
+                  *ngIf="utils.hasPermission('action.add') || utils.hasPermission('action.delete') || utils.hasPermission('device-mng.distribute-device')
+                  || utils.hasPermission('device-mng.manage-factory-manager') || utils.hasPermission('device-mng.set-factory-manager-permissions')"
+                  nzWidth="240px" nzRight
+                ></th>
               </tr>
             </thead>
             <tbody>
@@ -137,6 +141,28 @@
                           (click)="$event.stopPropagation(); addDevice(item)"
                         >
                           <mat-icon>add</mat-icon>
+                        </button>
+                      </ng-container>
+                      <ng-container *ngIf="item.rowType === 'factory'">
+                        <button
+                          *ngIf="utils.hasPermission('device-mng.manage-factory-manager')"
+                          mat-icon-button
+                          [disabled]="isLoading$ | async"
+                          matTooltip="{{ 'device-mng.manage-factory-manager' | translate }}"
+                          matTooltipPosition="above"
+                          (click)="$event.stopPropagation(); mngFactoryManager(item.id, item.name)"
+                        >
+                          <mat-icon>account_circle</mat-icon>
+                        </button>
+                        <button
+                          *ngIf="utils.hasPermission('device-mng.set-factory-manager-permissions')"
+                          mat-icon-button
+                          [disabled]="isLoading$ | async"
+                          matTooltip="{{ 'device-mng.set-factory-manager-permissions' | translate }}"
+                          matTooltipPosition="above"
+                          (click)="$event.stopPropagation(); setPermissions(item.id)"
+                        >
+                          <mat-icon svgIcon="mdi:config"></mat-icon>
                         </button>
                       </ng-container>
                       <button
