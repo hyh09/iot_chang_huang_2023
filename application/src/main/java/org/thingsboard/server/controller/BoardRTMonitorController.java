@@ -15,6 +15,9 @@ import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 
 /**
  * 实时监控看板接口
@@ -113,5 +116,38 @@ public class BoardRTMonitorController extends BaseController {
     ) throws ThingsboardException {
         FactoryDeviceQuery query = new FactoryDeviceQuery().setDeviceId(deviceId);
         return this.deviceMonitorService.getAlarmsRecordDayStatistics(getTenantId(), query);
+    }
+
+
+    /**
+     * 查询设备详情
+     *
+     * @param id 设备id
+     */
+    @ApiOperation("查询设备详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "path", required = true)
+    })
+    @GetMapping("/rtMonitor/device/{id}")
+    public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("id", id);
+        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
+    }
+
+    /**
+     * 查看设备部件实时数据
+     */
+    @ApiOperation("查看设备部件实时数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "componentId", value = "设备字典部件Id", paramType = "query", required = true),
+    })
+    @GetMapping("/rtMonitor/component}")
+    public List<DictDeviceComponentPropertyVO> getRtMonitorDeviceComponentDetail(
+            @RequestParam("deviceId") String deviceId,
+            @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("componentId", componentId);
+        return this.deviceMonitorService.getRtMonitorDeviceComponentDetail(getTenantId(), toUUID(deviceId), toUUID(componentId));
     }
 }

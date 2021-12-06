@@ -509,6 +509,16 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         return DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(dictDeviceId));
     }
 
+    /**
+     * 获得默认的设备字典Id
+     *
+     * @param tenantId 租户Id
+     */
+    @Override
+    public UUID getDefaultDictDeviceId(TenantId tenantId) {
+        return null;
+    }
+
     @Autowired
     public void setClientService(ClientService clientService) {
         this.clientService = clientService;
