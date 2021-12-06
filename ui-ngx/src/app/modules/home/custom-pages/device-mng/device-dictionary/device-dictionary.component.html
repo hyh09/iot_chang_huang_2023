@@ -58,8 +58,8 @@
           [existingFileName]="entityForm.get('fileName').value"
           [workFromFileObj]="true"
           label="{{ 'device-mng.device-model' | translate }}"
-          allowedExtensions=""
-          accept=""
+          allowedExtensions="glb,gltf"
+          accept=".glb,.gltf"
           [maxSizeByte]="100*1024*1024"
           dropLabel="{{ 'device-mng.drop-model' | translate }}"
           (clear)="entityForm.get('fileId').setValue('')">
