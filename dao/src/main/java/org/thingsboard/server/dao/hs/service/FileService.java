@@ -7,6 +7,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.FileInfo;
+import org.thingsboard.server.dao.hs.entity.vo.FileInfoVO;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,7 +61,7 @@ public interface FileService {
     /**
      * 删除文件, 不验证租户
      *
-     * @param id       文件Id
+     * @param id 文件Id
      */
     void deleteFile(String id) throws IOException, ThingsboardException;
 
@@ -130,4 +131,13 @@ public interface FileService {
      * @param entityId  实体Id
      */
     void deleteFilesByScopeAndEntityId(TenantId tenantId, FileScopeEnum scopeEnum, UUID entityId);
+
+    /**
+     * 获得模型库列表
+     *
+     * @param tenantId  租户Id
+     * @param scopeEnum 范围
+     * @return 模型库列表
+     */
+    List<FileInfoVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum);
 }
