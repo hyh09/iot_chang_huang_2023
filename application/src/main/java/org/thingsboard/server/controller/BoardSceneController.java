@@ -16,9 +16,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * 场景配置接口
@@ -118,9 +116,9 @@ public class BoardSceneController extends BaseController {
     }
 
     /**
-     * 获得设备场景文件路径
+     * 获得设备场景文件
      */
-    @ApiOperation(value = "获得设备场景文件路径")
+    @ApiOperation(value = "获得设备场景文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
     })
