@@ -841,11 +841,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private String translateAppUnit(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,String key)
     {
-        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
-        if(dictVO != null) {
-            return  " ("+dictVO.getUnit()+")";
-        }
-        return  key;
+//        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
+//        if(dictVO != null) {
+//            return  " ("+dictVO.getUnit()+")";
+//        }
+        return  "";
 
     }
 
