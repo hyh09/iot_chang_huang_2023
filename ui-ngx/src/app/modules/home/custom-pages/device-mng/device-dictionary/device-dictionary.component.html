@@ -52,6 +52,23 @@
           formControlName="picture"
           [disabled]="!isEdit"
         ></tb-image-input>
+        <tb-file-input
+          *ngIf="isEdit"
+          formControlName="deviceModel"
+          [existingFileName]="entityForm.get('fileName').value"
+          [workFromFileObj]="true"
+          label="{{ 'device-mng.device-model' | translate }}"
+          allowedExtensions="glb,gltf"
+          accept=".glb,.gltf"
+          [maxSizeByte]="100*1024*1024"
+          dropLabel="{{ 'device-mng.drop-model' | translate }}"
+          (clear)="entityForm.get('fileId').setValue('')">
+        </tb-file-input>
+        <div *ngIf="!isEdit" class="tb-container" style="margin-top: 0;">
+          <label class="tb-title">
+            {{ 'device-mng.device-model' | translate }}{{ 'common.colon' | translate }}{{ entityForm.get('fileName').value || ('common.none' | translate) }}
+          </label>
+        </div>
       </mat-expansion-panel>
       <!--设备属性-->
       <mat-expansion-panel [expanded]="customPropExpanded" (opened)="customPropExpanded = true" (closed)="customPropExpanded = false">
@@ -101,6 +118,34 @@
             nzNotFoundImage="../../../../../../assets/data-empty.svg"
             nzNotFoundContent="{{ 'device-mng.device-prop-empty' | translate }}"
           ></nz-empty>
+        </div>
+      </mat-expansion-panel>
+      <!--标准能耗-->
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.standard-prop' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div 
+          *ngFor="let item of standardPropFormArray().controls; let $index = index"
+          formArrayName="standardPropertyList"
+          fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        >
+          <div fxFlex fxLayout="row" fxLayoutGap="10px" [formGroupName]="$index">
+            <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit">
+              <mat-label>{{ item.get('title').value }}</mat-label>
+              <input matInput formControlName="content" required>
+              <mat-error *ngIf="item.get('content').hasError('required')">
+                {{ 'device-mng.standard-prop-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field class="mat-block" fxFlex>
+              <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
+              <mat-select formControlName="dictDataId" [disabled]="(isLoading$ | async) || !isEdit">
+                <mat-option value="">{{ 'common.none' | translate }}</mat-option>
+                <mat-option *ngFor="let option of entitiesTableConfig.componentsData.dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
       </mat-expansion-panel>
       <!--设备参数-->

@@ -36,6 +36,8 @@ import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { FlowDirective } from '@flowjs/ngx-flow';
 import { TranslateService } from '@ngx-translate/core';
 import { UtilsService } from '@core/services/utils.service';
+import { DialogService } from '@app/core/public-api';
+import { FileSizePipe } from '../pipe/file-size.pipe';
 
 @Component({
   selector: 'tb-file-input',
@@ -56,6 +58,9 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
 
   @Input()
   accept = '*/*';
+
+  @Input()
+  maxSizeByte: number;
 
   @Input()
   noFileText = 'import.no-file';
@@ -129,6 +134,9 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
   @Output()
   fileNameChanged = new EventEmitter<string|string[]>();
 
+  @Output()
+  clear = new EventEmitter();
+
   fileName: string | string[];
   fileContent: any;
   files: File[];
@@ -145,15 +153,28 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
 
   constructor(protected store: Store<AppState>,
               private utils: UtilsService,
-              public translate: TranslateService) {
+              public translate: TranslateService,
+              private dialog: DialogService,
+              private fileSize: FileSizePipe) {
     super(store);
   }
 
   ngAfterViewInit() {
     this.autoUploadSubscription = this.flow.events$.subscribe(event => {
       if (event.type === 'filesAdded') {
+        const files = (event.event[0] as flowjs.FlowFile[]);
+        const sizeOverLimit = files.filter(file => (this.maxSizeByte && this.maxSizeByte < file.size)).length > 0;
+        if (sizeOverLimit) {
+          this.dialog.alert(
+            this.translate.instant('dashboard.cannot-upload-file'),
+            this.translate.instant('dashboard.maximum-upload-file-size', {size: this.fileSize.transform(this.maxSizeByte)})
+          ).subscribe(
+            () => { }
+          );
+          return false;
+        }
         const readers = [];
-        (event.event[0] as flowjs.FlowFile[]).forEach(file => {
+        files.forEach(file => {
           if (this.filterFile(file)) {
             readers.push(this.readerAsFile(file));
           }
@@ -274,6 +295,7 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
     this.fileName = null;
     this.fileContent = null;
     this.files = null;
+    this.clear.emit();
     this.updateModel();
   }
 

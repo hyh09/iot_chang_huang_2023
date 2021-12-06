@@ -37,7 +37,13 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       this.deviceDictionaries = res || [];
     });
     this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
-      this.dataDictionaries = res || [];
+      const arr = res || [];
+      arr.forEach(item => {
+        if (item.unit) {
+          item.name += ` (${item.unit})`;
+        }
+      });
+      this.dataDictionaries = arr;
     });
   }
 

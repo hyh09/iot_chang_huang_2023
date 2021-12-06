@@ -59,6 +59,9 @@ export class CustomerComponent extends ContactBasedComponent<Customer> {
     return this.fb.group(
       {
         title: [entity ? entity.title : '', [Validators.required]],
+        country: [entity ? entity.country : '', [Validators.required]],
+        city: [entity ? entity.city : '', [Validators.required]],
+        address: [entity ? entity.address : '', [Validators.required]],
         additionalInfo: this.fb.group(
           {
             description: [entity && entity.additionalInfo ? entity.additionalInfo.description : ''],

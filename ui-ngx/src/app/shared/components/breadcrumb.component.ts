@@ -76,6 +76,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     if (!lastChild) {
       lastChild = this.lastChild(route);
     }
+    console.log(route)
     let newBreadcrumbs = breadcrumbs;
     if (route.routeConfig && route.routeConfig.data) {
       const breadcrumbConfig = route.routeConfig.data.breadcrumb as BreadCrumbConfig<any>;

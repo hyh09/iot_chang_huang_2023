@@ -34,16 +34,23 @@ export class MenuToggleComponent implements OnInit {
   ngOnInit() {
   }
 
+  onClick() {
+    if (this.section.pages && this.section.pages.length > 0) {
+      this.router.navigateByUrl(this.section.pages[0].path);
+    }
+  }
+
   sectionActive(): boolean {
-    return this.router.isActive(this.section.path, false);
+    if (this.section.pages && this.section.pages.length > 0) {
+      const paths = this.section.pages.map(page => (page.path));
+      return paths.includes(window.location.pathname);
+    } else {
+      return false;
+    }
   }
 
   sectionHeight(): string {
-    if (this.router.isActive(this.section.path, false)) {
-      return this.section.height;
-    } else {
-      return '0px';
-    }
+    return this.sectionActive() ? this.section.height : '0px';
   }
 
   trackBySectionPages(index: number, section: MenuSection){
