@@ -124,4 +124,11 @@ public interface DictDeviceService {
      * @return 部件列表
      */
     List<DictDeviceComponent> listDictDeviceComponents(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 获得默认的设备字典Id
+     *
+     * @param tenantId 租户Id
+     */
+    UUID getDefaultDictDeviceId(TenantId tenantId);
 }
