@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.memu.Menu;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
@@ -18,10 +22,12 @@ import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
 import org.thingsboard.server.entity.factory.vo.FactoryLevelAllListVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
+import org.thingsboard.server.entity.menu.vo.MenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(value="工厂管理Controller",tags={"工厂管理接口"})
 @RequiredArgsConstructor
@@ -46,16 +52,22 @@ public class FactoryController extends BaseController  {
     public FactoryVo saveFactory(@RequestBody AddFactoryDto addFactoryDto) throws ThingsboardException {
         try {
             checkNotNull(addFactoryDto);
+            //地址不能为空
+            checkParameter("国家",addFactoryDto.getCountry());
+            //checkParameter("省",addFactoryDto.getProvince());
+            checkParameter("市",addFactoryDto.getCity());
+            //checkParameter("区",addFactoryDto.getArea());
+            checkParameter("详细地址",addFactoryDto.getAddress());
             //校验名称是否重复
             checkFactoryName(addFactoryDto.getId(),addFactoryDto.getName());
             Factory factory = addFactoryDto.toFactory();
             factory.setTenantId(getCurrentUser().getTenantId().getId());
             if(addFactoryDto.getId() == null){
                 factory.setCreatedUser(getCurrentUser().getUuidId());
-                factory = checkNotNull(factoryService.saveFactory(factory));
+                factory = factoryService.saveFactory(factory);
             }else {
                 factory.setUpdatedUser(getCurrentUser().getUuidId());
-                factory =  checkNotNull(factoryService.updFactory(factory));
+                factory = factoryService.updFactory(factory);
             }
             return new FactoryVo(factory);
         } catch (Exception e) {
@@ -89,10 +101,10 @@ public class FactoryController extends BaseController  {
      * @throws ThingsboardException
      */
     @ApiOperation("查询租户下所有工厂列表")
-    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true)
+    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query")
     @RequestMapping(value = "/findFactoryList", method = RequestMethod.GET)
     @ResponseBody
-    public List<FactoryVo> findFactoryList(@RequestParam String tenantId) throws ThingsboardException {
+    public List<FactoryVo> findFactoryList(@RequestParam(required = false) String tenantId) throws ThingsboardException {
         try {
             List<FactoryVo> factoryVoList = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){
@@ -176,6 +188,41 @@ public class FactoryController extends BaseController  {
                 });
             }
             return resultVo;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
+     * 查询工厂所有版本列表
+     * @param queryFactoryDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("查询工厂所有版本列表")
+    @ApiImplicitParam(name = "queryFactoryDto",value = "入参对象",dataType = "FactoryVersionDto",paramType = "query")
+    @RequestMapping(value = "/findFactoryVersionList", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public PageData<FactoryVersionVo> findFactoryVersionList(@RequestParam int pageSize,
+                                                             @RequestParam int page,
+                                                             FactoryVersionDto queryFactoryDto) throws ThingsboardException {
+        try {
+            PageData<FactoryVersionVo> resultPage = new PageData<>();
+            List<FactoryVersionVo> resultVo = new ArrayList<>();
+            checkParameter("没有获取到登录人所在租户tenantId",getCurrentUser().getTenantId().getId());
+            Factory factory = queryFactoryDto.toFactory();
+            factory.setTenantId(getCurrentUser().getTenantId().getId());
+            factory.setLoginUserId(getCurrentUser().getId().getId());
+            List<Factory> factoryList = factoryService.findFactoryVersionList(factory);
+            Boolean hasNext = false;
+            if(CollectionUtils.isNotEmpty(factoryList)){
+                List<Factory> collect = factoryList.stream().skip((page * pageSize)).limit(pageSize).collect(Collectors.toList());
+                collect.forEach(i->{
+                    resultVo.add(new FactoryVersionVo(i));
+                });
+                hasNext = factoryList.size() > (page * pageSize)?true:false;
+            }
+            return new PageData<FactoryVersionVo>(resultVo,page,resultVo.size(),hasNext);
         } catch (Exception e) {
             throw handleException(e);
         }

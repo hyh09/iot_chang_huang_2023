@@ -18,6 +18,8 @@ interface CommonData {
 export declare type FactoryRowType = 'factory' | 'workShop' | 'prodLine' | 'device';
 
 export interface Factory extends BaseData<FactoryId>, CommonData {
+  country?: string;
+  city?: string;
   address?: string;
   postalCode?: string;
   logoImages?: string;

@@ -97,10 +97,15 @@ public class EfficiencyStatisticsController extends BaseController {
     @ResponseBody
     public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
         try {
-//            if (queryTsKvVo.getEndTime() == null) {
-////                queryTsKvVo.setStartTime(CommonUtils.getZero());
-////                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-////            }
+            if (queryTsKvVo.getEndTime() == null) {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
+            if(queryTsKvVo.getStartTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getHistoryPointTime());
+            }
+
             return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
@@ -110,7 +115,12 @@ public class EfficiencyStatisticsController extends BaseController {
     }
 
 
-
+    /**
+     * app端获取运行状态属性
+     * @param deviceId
+     * @return
+     * @throws ThingsboardException
+     */
     @ApiOperation("设备属性分组属性接口")
     @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
     @ResponseBody

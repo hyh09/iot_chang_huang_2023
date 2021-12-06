@@ -72,10 +72,12 @@
           <mat-label>{{ 'platform.name' | translate }}</mat-label>
           <input matInput type="text" formControlName="platformName">
         </mat-form-field>
-        <mat-form-field fxFill *ngIf="customUiFormGroup.get('showNameVersion').value">
-          <mat-label>{{ 'platform.version' | translate }}</mat-label>
-          <input matInput type="text" formControlName="platformVersion">
-        </mat-form-field>
+        <fieldset disabled>
+          <mat-form-field fxFill *ngIf="customUiFormGroup.get('showNameVersion').value">
+            <mat-label>{{ 'platform.version' | translate }}</mat-label>
+            <input matInput type="text" formControlName="platformVersion">
+          </mat-form-field>
+        </fieldset>
         <div fxLayout='row' fxLayoutAlign='end center' fxLayoutGap='16px'>
           <button mat-raised-button (click)='reset($event)' [disabled]='(isLoading$ | async)'>{{ 'action.reset' | translate }}</button>
           <button mat-raised-button (click)='cancel($event)' [disabled]='(isLoading$ | async)'>{{ 'action.cancel' | translate }}</button>

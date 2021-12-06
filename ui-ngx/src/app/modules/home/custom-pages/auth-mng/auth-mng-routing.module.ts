@@ -24,12 +24,6 @@ export class BindUsersGuard implements CanActivate {
 const routes: Routes = [
   {
     path: 'authManagement',
-    data: {
-      breadcrumb: {
-        label: 'auth-mng.auth-mng',
-        icon: 'verified_user'
-      }
-    },
     children: [
       {
         path: '',

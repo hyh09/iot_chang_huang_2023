@@ -35,9 +35,11 @@ public class WebLogAspect {
     @Pointcut(
             // custom
             "execution(public * org.thingsboard.server.controller.AlarmRecordController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.AlarmRuleController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorAppController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorController.*(..))"
-//                    + "||execution(public * org.thingsboard.server.controller.RTMonitorBoardController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.BoardSceneController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.BoardRTMonitorController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
     )
@@ -96,8 +98,6 @@ public class WebLogAspect {
                 return new ThingsboardException("设备字典编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
             else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_component"))
                 return new ThingsboardException("设备字典部件编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
-            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_device_profile_id_dict_device_id"))
-                return new ThingsboardException("设备字典设备配置关系重复！请联系管理员", ThingsboardErrorCode.GENERAL);
         }
 
         if (exception.getCause() != null) {

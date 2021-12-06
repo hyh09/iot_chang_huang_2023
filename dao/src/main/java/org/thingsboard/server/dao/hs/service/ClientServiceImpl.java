@@ -206,6 +206,17 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 列举车间下全部产线
+     *
+     * @param tenantId   租户Id
+     * @param workshopId 车间Id
+     */
+    @Override
+    public List<ProductionLine> listProductionLinesByTenantIdAndWorkshopId(TenantId tenantId, UUID workshopId) {
+        return DaoUtil.convertDataList(this.productionLineRepository.findAllByTenantIdAndWorkshopIdOrderByCreatedTimeDesc(tenantId.getId(), workshopId));
+    }
+
+    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id

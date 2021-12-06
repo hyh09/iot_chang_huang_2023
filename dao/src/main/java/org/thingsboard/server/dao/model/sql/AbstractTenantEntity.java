@@ -16,12 +16,12 @@
 package org.thingsboard.server.dao.model.sql;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.thingsboard.server.common.data.Tenant;
-import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.TenantProfileId;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
@@ -30,9 +30,7 @@ import org.thingsboard.server.dao.model.SearchTextEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Table;
 import java.util.UUID;
 
 @Data
@@ -43,6 +41,11 @@ public abstract class AbstractTenantEntity<T extends Tenant> extends BaseSqlEnti
 
     @Column(name = ModelConstants.TENANT_TITLE_PROPERTY)
     private String title;
+
+    @Column(name = ModelConstants.LONGITUDE_PROPERTY)
+    private  String longitude;
+    @Column(name = ModelConstants.LATITUDE_PROPERTY)
+    private  String latitude;
 
     @Column(name = ModelConstants.SEARCH_TEXT_PROPERTY)
     private String searchText;
@@ -58,6 +61,12 @@ public abstract class AbstractTenantEntity<T extends Tenant> extends BaseSqlEnti
 
     @Column(name = ModelConstants.CITY_PROPERTY)
     private String city;
+
+    /**
+     * 县
+     */
+    @Column(name = ModelConstants.COUNTY_LEVEL_PROPERTY)
+    protected  String countyLevel;
 
     @Column(name = ModelConstants.ADDRESS_PROPERTY)
     private String address;
@@ -91,10 +100,13 @@ public abstract class AbstractTenantEntity<T extends Tenant> extends BaseSqlEnti
         }
         this.setCreatedTime(tenant.getCreatedTime());
         this.title = tenant.getTitle();
+        this.longitude = tenant.getLongitude();
+        this.latitude = tenant.getLatitude();
         this.region = tenant.getRegion();
         this.country = tenant.getCountry();
         this.state = tenant.getState();
         this.city = tenant.getCity();
+        this.countyLevel = tenant.getCountyLevel();
         this.address = tenant.getAddress();
         this.address2 = tenant.getAddress2();
         this.zip = tenant.getZip();
@@ -110,10 +122,14 @@ public abstract class AbstractTenantEntity<T extends Tenant> extends BaseSqlEnti
         this.setId(tenantEntity.getId());
         this.setCreatedTime(tenantEntity.getCreatedTime());
         this.title = tenantEntity.getTitle();
+        this.longitude = tenantEntity.getLongitude();
+        this.latitude = tenantEntity.getLatitude();
+
         this.region = tenantEntity.getRegion();
         this.country = tenantEntity.getCountry();
         this.state = tenantEntity.getState();
         this.city = tenantEntity.getCity();
+        this.countyLevel = tenantEntity.getCountyLevel();
         this.address = tenantEntity.getAddress();
         this.address2 = tenantEntity.getAddress2();
         this.zip = tenantEntity.getZip();
@@ -141,10 +157,16 @@ public abstract class AbstractTenantEntity<T extends Tenant> extends BaseSqlEnti
         Tenant tenant = new Tenant(new TenantId(this.getUuid()));
         tenant.setCreatedTime(createdTime);
         tenant.setTitle(title);
+
+        tenant.setLongitude(longitude);
+        tenant.setLatitude(latitude);
+
         tenant.setRegion(region);
+
         tenant.setCountry(country);
         tenant.setState(state);
         tenant.setCity(city);
+        tenant.setCountyLevel(countyLevel);
         tenant.setAddress(address);
         tenant.setAddress2(address2);
         tenant.setZip(zip);

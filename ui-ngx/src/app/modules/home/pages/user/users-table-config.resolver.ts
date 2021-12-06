@@ -118,7 +118,6 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
     this.config.componentsData = {
       availableCode: ''
     };
-    this.setAvailableCode();
     return this.store.pipe(select(selectAuth), take(1)).pipe(
       tap((auth) => {
         this.authUser = auth.userDetails;
@@ -132,6 +131,7 @@ export class UsersTableConfigResolver implements Resolve<EntityTableConfig<User>
           this.customerId = routeParams.customerId;
           this.config.entitiesFetchFunction = pageLink => this.userService.getCustomerUsers(this.customerId, pageLink);
         }
+        this.setAvailableCode();
         this.updateActionCellDescriptors(auth);
       }),
       mergeMap(() => this.authority === Authority.TENANT_ADMIN ?

@@ -56,6 +56,7 @@ import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleChainType;
 import org.thingsboard.server.common.data.rule.RuleNode;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
 import org.thingsboard.server.dao.asset.AssetService;
@@ -84,10 +85,12 @@ import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
+import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
+import org.thingsboard.server.dao.tool.UserLanguageSvc;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
@@ -286,6 +289,8 @@ public abstract class BaseController {
     @Autowired protected TenantMenuRoleService tenantMenuRoleService;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     @Autowired  protected TenantSysRoleService tenantSysRoleService;
+    @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired  protected UserLanguageSvc userLanguageSvc;
 
 
     @ExceptionHandler(ThingsboardException.class)
@@ -1037,6 +1042,18 @@ public abstract class BaseController {
                 }
             }
         }
+    }
+
+
+    /**
+     * 获取当前登录人的提示信息
+     * @param enums
+     * @return
+     * @throws ThingsboardException
+     */
+    public  String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
+         String message=   userLanguageSvc.getLanguageByUserLang(enums,getCurrentUser().getTenantId(),new UserId(getCurrentUser().getUuidId()));
+        return  message;
     }
 
 }

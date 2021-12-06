@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.UUID;
+
 /**
  * @program: thingsboard
  * @description: 编码生成查询
@@ -20,4 +22,7 @@ public class CodeVo {
     private  String  key;
     @ApiModelProperty(value = "对应的编码")
     private  String  code;
+
+    @ApiModelProperty(value = "租户id:用于当前是系统管理员的时候")
+    private UUID tenantId;
 }

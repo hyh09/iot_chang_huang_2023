@@ -13,6 +13,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -41,22 +42,6 @@ public interface DeviceMonitorService {
      * @return 设备详情
      */
     DeviceProfileVO getDeviceProfileDetail(TenantId tenantId, DeviceProfileId deviceProfileId);
-
-    /**
-     * 绑定设备字典到设备配置
-     *
-     * @param tenantId         租户Id
-     * @param dictDeviceIdList 设备字典Id列表
-     * @param deviceProfileId  设备配置Id
-     */
-    void bindDictDeviceToDeviceProfile(TenantId tenantId, List<String> dictDeviceIdList, DeviceProfileId deviceProfileId);
-
-    /**
-     * 删除绑定的设备字典
-     *
-     * @param deviceProfileId 设备配置id
-     */
-    void deleteBindDictDevice(DeviceProfileId deviceProfileId);
 
     /**
      * 更新报警信息状态
@@ -169,9 +154,34 @@ public interface DeviceMonitorService {
     /**
      * 【看板】获得报警记录统计信息
      *
-     * @param tenantId 租户Id
-     * @param query    查询参数
+     * @param tenantId  租户Id
+     * @param query     查询参数
+     * @param timeQuery 时间查询参数
      * @return 报警记录统计信息
      */
-    BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query);
+    BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query, TimeQuery timeQuery);
+
+    /**
+     * 【看板】查看设备部件实时数据
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param componentId 部件Id
+     */
+    List<DictDeviceComponentPropertyVO> getRtMonitorDeviceComponentDetail(TenantId tenantId, UUID deviceId, UUID componentId) throws ExecutionException, InterruptedException;
+
+    /**
+     * 【App】获得app首页实时监控数据
+     *
+     * @param tenantId 租户Id
+     */
+    AppIndexResult getRTMonitorAppIndexData(TenantId tenantId);
+
+    /**
+     * 获得报警记录统计信息，按今日、昨日、历史
+     *
+     * @param tenantId 租户Id
+     * @param query    查询条件
+     */
+    AlarmDayResult getAlarmsRecordDayStatistics(TenantId tenantId, FactoryDeviceQuery query);
 }

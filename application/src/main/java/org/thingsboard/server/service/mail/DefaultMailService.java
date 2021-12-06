@@ -214,13 +214,13 @@ public class DefaultMailService implements MailService {
     @Override
     public void sendResetPasswordEmail(String passwordResetLink, String email) throws ThingsboardException {
 
-        String subject = messages.getMessage("reset.password.subject", null, Locale.US);
+        String subject = messages.getMessage("reset.password.subject", null, Locale.SIMPLIFIED_CHINESE);
 
         Map<String, Object> model = new HashMap<>();
         model.put("passwordResetLink", passwordResetLink);
         model.put(TARGET_EMAIL, email);
 
-        String message = mergeTemplateIntoString("reset.password.ftl", model);
+        String message = mergeTemplateIntoString("reset.passwordZhCH.ftl", model);
 
         sendMail(mailSender, mailFrom, email, subject, message);
     }

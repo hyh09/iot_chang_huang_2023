@@ -1,8 +1,10 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
+import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 
 import java.util.UUID;
 
@@ -30,5 +32,15 @@ public interface UserRoleMenuSvc {
      * @throws Exception
      */
     User save(User user,User user1) ;
+
+
+    /**
+     * 由工厂创建工厂管理员角色
+     * @param tenantId 租户id
+     * @param userId  当前登录人;
+     * @param factoryId  工厂id
+     */
+    TenantSysRoleEntity saveRole(UUID tenantId, UUID  userId, UUID  factoryId) throws ThingsboardException;
+
 
 }

@@ -20,6 +20,18 @@ public class Factory {
 
     private String address;
 
+    @ApiModelProperty("国家")
+    private String country;
+
+    @ApiModelProperty("省")
+    private String province;
+
+    @ApiModelProperty("市")
+    private String city;
+
+    @ApiModelProperty("区")
+    private String area;
+
     private String longitude;
 
     private String latitude;
@@ -29,10 +41,6 @@ public class Factory {
     private String mobile;
 
     private String email;
-
-    private UUID adminUserId;
-
-    private String adminUserName;
 
     private String remark;
 
@@ -59,6 +67,10 @@ public class Factory {
     private UUID loginUserId;
     @ApiModelProperty("工厂版本")
     private String factoryVersion;
+    @ApiModelProperty("在线状态true-在线，false-离线")
+    private Boolean active;
+    @ApiModelProperty("网关设备名称")
+    private String gatewayName;
 
 
     public Factory() {

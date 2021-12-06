@@ -95,6 +95,9 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     @Column(name = ModelConstants.USER_USER_TYPE)
     private  String type;
 
+    @Column(name = ModelConstants.USER_USER_LEVEL)
+    private  int userLevel=0;
+
     /**
      * 工厂id
      */
@@ -144,6 +147,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.userCreator = user.getUserCreator();
         this.type  = user.getType();
         this.factoryId = user.getFactoryId();
+        this.userLevel = user.getUserLevel();
 
     }
 
@@ -184,6 +188,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         user.setUserCreator(userCreator);
 
         user.setFactoryId(factoryId);
+        user.setUserLevel(userLevel);
         if(type != null)
         {
             user.setType(type);
@@ -193,4 +198,12 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         return user;
     }
 
+
+    public int getUserLevel() {
+        return userLevel;
+    }
+
+    public void setUserLevel(int userLevel) {
+        this.userLevel = userLevel;
+    }
 }

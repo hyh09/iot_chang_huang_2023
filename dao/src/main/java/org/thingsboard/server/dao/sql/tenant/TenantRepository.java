@@ -17,12 +17,14 @@ package org.thingsboard.server.dao.sql.tenant;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.model.sql.TenantEntity;
 import org.thingsboard.server.dao.model.sql.TenantInfoEntity;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 /**
@@ -53,5 +55,10 @@ public interface TenantRepository extends PagingAndSortingRepository<TenantEntit
 
     @Query("SELECT t.id FROM TenantEntity t")
     Page<UUID> findTenantsIds(Pageable pageable);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update  TenantEntity  t  set t.latitude= :latitude, t.longitude = :longitude where t.id =:tenantId ")
+    void  updateTenantSetLatitudeAndLongitude(@Param("latitude") String latitude,@Param("longitude") String longitude,@Param("tenantId") UUID tenantId);
 
 }

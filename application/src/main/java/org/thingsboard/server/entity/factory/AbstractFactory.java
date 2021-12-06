@@ -42,6 +42,18 @@ public abstract class AbstractFactory{
     @ApiModelProperty("工厂地址")
     public String address;
 
+    @ApiModelProperty("国家")
+    private String country;
+
+    @ApiModelProperty("省")
+    private String province;
+
+    @ApiModelProperty("市")
+    private String city;
+
+    @ApiModelProperty("区")
+    private String area;
+
     @ApiModelProperty("经度")
     public String longitude;
 
@@ -56,12 +68,6 @@ public abstract class AbstractFactory{
 
     @ApiModelProperty("邮箱")
     public String email;
-
-    @ApiModelProperty("工厂管理员用户标识")
-    public UUID adminUserId;
-
-    @ApiModelProperty("工厂管理员用户标识")
-    public String adminUserName;
 
     @ApiModelProperty(name = "备注")
     public String remark;
@@ -95,16 +101,18 @@ public abstract class AbstractFactory{
         this.logoIcon = factory.getLogoIcon();
         this.logoImages = factory.getLogoImages();
         this.address = factory.getAddress();
+        this.country = factory.getCountry();
+        this.province = factory.getProvince();
+        this.city = factory.getCity();
+        this.area = factory.getArea();
         this.longitude = factory.getLongitude();
         this.latitude = factory.getLatitude();
         this.mobile = factory.getMobile();
         this.email = factory.getEmail();
         this.postalCode = factory.getPostalCode();
-        this.adminUserId = factory.getAdminUserId();
-        this.adminUserName = factory.getAdminUserName();
         this.remark = factory.getRemark();
         this.tenantId = factory.getTenantId();
-        this.createdTime = factory.getUpdatedTime();
+        this.createdTime = factory.getCreatedTime();
         this.createdUser = factory.getCreatedUser();
         this.updatedTime = factory.getUpdatedTime();
         this.updatedUser = factory.getUpdatedUser();
@@ -118,13 +126,15 @@ public abstract class AbstractFactory{
         factory.setLogoIcon(logoIcon);
         factory.setLogoImages(logoImages);
         factory.setAddress(address);
+        factory.setCountry(country);
+        factory.setProvince(province);
+        factory.setCity(city);
+        factory.setArea(area);
         factory.setLongitude(longitude);
         factory.setLatitude(latitude);
         factory.setPostalCode(this.postalCode);
         factory.setMobile(mobile);
         factory.setEmail(email);
-        factory.setAdminUserId(adminUserId);
-        factory.setAdminUserName(adminUserName);
         factory.setRemark(remark);
         factory.setTenantId(tenantId);
         factory.setCreatedTime(createdTime);

@@ -46,7 +46,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     this.mapOfCompControl = {};
     this.expandedCompCode = [];
     this.setInitDataGroup();
-    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
+    const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     return this.fb.group({
       id:  [entity ? entity.id : ''],
       code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, Validators.required],
@@ -58,6 +58,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       warrantyPeriod: [entity ? entity.version : ''],
       comment: [entity ? entity.comment : ''],
       picture: [entity ? entity.picture : ''],
+      deviceModel: [null],
+      fileId: [entity ? entity.fileId : ''],
+      fileName: [entity ? entity.fileName : ''],
+      standardPropertyList: this.fb.array(standardPropControls),
       propertyList: this.fb.array(propertyListControls),
       groupList: this.fb.array(groupListControls),
       componentList: this.fb.array(compControls)
@@ -67,8 +71,9 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   updateForm(entity: DeviceDictionary) {
     this.setInitDataGroup();
     this.initDataGroup = [];
-    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
+    const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
+    this.entityForm.controls.standardPropertyList = this.fb.array(standardPropControls);
     this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
@@ -82,6 +87,17 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   generateFromArray(entity: DeviceDictionary): { [key: string]: Array<AbstractControl> } {
+    const standardPropControls: Array<AbstractControl> = [];
+    if (!this.isEdit && this.initDataGroup && this.initDataGroup.length > 0) {
+      for (const property of this.initDataGroup[0].groupPropertyList) {
+        standardPropControls.push(this.createDeviceDataControl(property));
+      }
+    }
+    if (entity && entity.standardPropertyList && entity.standardPropertyList.length > 0) {
+      for (const property of entity.standardPropertyList) {
+        standardPropControls.push(this.createDeviceDataControl(property));
+      }
+    }
     const propertyListControls: Array<AbstractControl> = [];
     if (entity && entity.propertyList && entity.propertyList.length > 0) {
       for (const property of entity.propertyList) {
@@ -105,7 +121,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
         compControls.push(this.createCompListControl(comp));
       }
     }
-    return { propertyListControls, groupListControls, compControls }
+    return { standardPropControls, propertyListControls, groupListControls, compControls }
   }
 
   /**
@@ -127,6 +143,13 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   removeDeviceProperty(index: number) {
     this.devicePropFormArray().removeAt(index);
+  }
+
+  /**
+   * @description 标准能耗相关方法
+   */
+  standardPropFormArray(): FormArray {
+    return this.entityForm.get('standardPropertyList') as FormArray;
   }
 
   /**

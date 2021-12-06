@@ -2,10 +2,6 @@ package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
-import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 
 import java.time.YearMonth;
 import java.time.ZoneOffset;

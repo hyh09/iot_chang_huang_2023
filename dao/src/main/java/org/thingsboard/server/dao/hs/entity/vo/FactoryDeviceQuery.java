@@ -60,4 +60,12 @@ public class FactoryDeviceQuery {
     public boolean isQueryFactoryOnly() {
         return deviceId == null && productionLineId == null && workshopId == null && Boolean.FALSE.equals(isQueryAll);
     }
+
+    public boolean isQueryWorkshopOnly() {
+        return deviceId == null && productionLineId == null && factoryId == null && Boolean.FALSE.equals(isQueryAll);
+    }
+
+    public static FactoryDeviceQuery newQueryAllEntity() {
+        return new FactoryDeviceQuery(null, null, null, null, Boolean.TRUE);
+    }
 }

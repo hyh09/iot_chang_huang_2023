@@ -17,15 +17,23 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.TenantProfileId;
 import org.thingsboard.server.common.data.validation.NoXss;
 
 @EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "租户实体")
 public class Tenant extends ContactBased<TenantId> implements HasTenantId {
 
     private static final long serialVersionUID = 8057243243859922101L;
+
+    @ApiModelProperty("经度【2021-12-01新增字段】")
+    private  String longitude;
+    @ApiModelProperty("纬度【2021-12-01新增字段】")
+    private  String latitude;
 
     @NoXss
     private String title;
@@ -84,6 +92,23 @@ public class Tenant extends ContactBased<TenantId> implements HasTenantId {
         this.tenantProfileId = tenantProfileId;
     }
 
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
     @Override
     public String getSearchText() {
         return getTitle();
@@ -94,6 +119,12 @@ public class Tenant extends ContactBased<TenantId> implements HasTenantId {
         StringBuilder builder = new StringBuilder();
         builder.append("Tenant [title=");
         builder.append(title);
+
+        builder.append(", longitude=");
+        builder.append(longitude);
+        builder.append(", latitude=");
+        builder.append(latitude);
+
         builder.append(", region=");
         builder.append(region);
         builder.append(", tenantProfileId=");
@@ -106,6 +137,8 @@ public class Tenant extends ContactBased<TenantId> implements HasTenantId {
         builder.append(state);
         builder.append(", city=");
         builder.append(city);
+        builder.append(", countyLevel=");
+        builder.append(countyLevel);
         builder.append(", address=");
         builder.append(address);
         builder.append(", address2=");

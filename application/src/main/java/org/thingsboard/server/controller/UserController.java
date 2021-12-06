@@ -32,14 +32,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
@@ -62,6 +55,7 @@ import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
@@ -88,10 +82,7 @@ import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "用户管理", tags = {"用户管理接口接口"})
@@ -118,7 +109,7 @@ public class UserController extends BaseController implements DefalutSvc {
     private final RefreshTokenRepository refreshTokenRepository;
     private final SystemSecurityService systemSecurityService;
     private final ApplicationEventPublisher eventPublisher;
-    @Autowired  private UserRoleMemuSvc userRoleMemuSvc;
+
     @Autowired  private UserRoleMenuSvc  nuSvc;
     @Autowired  private UserMenuRoleService userMenuRoleService;
 
@@ -157,7 +148,6 @@ public class UserController extends BaseController implements DefalutSvc {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
             }
-
             return user;
         } catch (Exception e) {
             throw handleException(e);
@@ -452,7 +442,7 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理的添加接口")
     @RequestMapping(value = "/user/save", method = RequestMethod.POST)
     @ResponseBody
-    public Object save(@RequestBody User user) throws ThingsboardException {
+    public User save(@RequestBody User user) throws ThingsboardException {
          DataValidator.validateEmail(user.getEmail());
          DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
@@ -481,25 +471,27 @@ public class UserController extends BaseController implements DefalutSvc {
             if(checkSvc.checkValueByKey(vo2)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
-
-
-
             TenantId  tenantId  = new TenantId(securityUser.getTenantId().getId());
             user.setTenantId(tenantId);
             user.setUserCreator(securityUser.getId().toString());
-            user.setType(securityUser.getType());
-            user.setFactoryId(securityUser.getFactoryId());
 
-//            if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
-//            {
-//                user.setAuthority(Authority.FACTORY_MANAGEMENT);
-//            }else{
-//                user.setAuthority(Authority.TENANT_ADMIN);
-//            }
+            if(user.getFactoryId()!= null )
+            {
+                log.info("当前保存的是工厂管理员角色用户:{}",user);
+                user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+                user.setUserLevel(1);
+                TenantSysRoleEntity  tenantSysRoleEntity= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
+                List<UUID> roleIds = new ArrayList<>();
+                roleIds.add(tenantSysRoleEntity.getId());
+                user.setRoleIds(roleIds);
 
+            }else {
+                user.setType(securityUser.getType());
+                user.setFactoryId(securityUser.getFactoryId());
 
+            }
 
-            log.info("【用户管理模块.用户添加接口】入参{}", user);
+           log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
@@ -547,13 +539,11 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理的【编辑用户接口】")
     @RequestMapping(value="/user/update",method = RequestMethod.POST)
     @ResponseBody
-    public Object update(@RequestBody User user) throws ThingsboardException {
+    public User update(@RequestBody User user) throws ThingsboardException {
         SecurityUser  securityUser =  getCurrentUser();
 
         log.info("打印更新用户的入参:{}",user);
         checkEmailAndPhone(user);
-
-
         UserVo  vo0 = new UserVo();
         vo0.setUserCode(user.getUserCode());
         vo0.setUserId(user.getUuidId().toString());
@@ -580,12 +570,37 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
-           if(count>0)
+           if(count>0  && user.getFactoryId() != null)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
         user.setRoleIds(user.getRoleIds());
         return  user;
+    }
+
+
+
+    @GetMapping("/user/findFactoryManagers")
+    public PageData<User> findTenantAdmins(@RequestParam(value = "factoryId",required = false) UUID factoryId,
+                                           @RequestParam(value = "userCode",required = false) String userCode,
+                                           @RequestParam(value = "userName",required = false) String userName,
+                                           @RequestParam int pageSize,
+                                           @RequestParam int page,
+                                           @RequestParam(required = false) String textSearch,
+                                           @RequestParam(required = false) String sortProperty,
+                                           @RequestParam(required = false) String sortOrder
+    ) throws ThingsboardException {
+        try {
+            Field field=  ReflectionUtils.getAccessibleField(new UserEntity(),sortProperty);
+            Column annotation = field.getAnnotation(Column.class);
+            SecurityUser authUser = getCurrentUser();
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, annotation.name(), sortOrder);
+             return userService.findFactoryAdmins(authUser.getTenantId(),factoryId,userCode,userName,pageLink);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return  null;
+        }
     }
 
 
@@ -627,8 +642,9 @@ public class UserController extends BaseController implements DefalutSvc {
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
+                 queryParam.put("type", securityUser.getType());
              }
-
+             queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);
          }catch (Exception  e)
          {
@@ -649,15 +665,21 @@ public class UserController extends BaseController implements DefalutSvc {
     @ApiOperation(value = "用户管理得 {用户编码 或角色编码}得生成获取")
     @RequestMapping(value = "/user/getCode",method = RequestMethod.POST)
     public  Object check(@RequestBody @Valid CodeVo vo) throws ThingsboardException {
-        try {
+
+            TenantId  tenantId = null;
             SecurityUser securityUser = getCurrentUser();
-            return checkSvc.queryCodeNew(vo, securityUser.getTenantId());
-        }catch (Exception e)
-        {
-             e.printStackTrace();
-            log.info("打印当前异常:{}",e);
-            throw new ThingsboardException("生成编码异常!", ThingsboardErrorCode.GENERAL);
-        }
+            tenantId =securityUser.getTenantId();
+            if(securityUser.getAuthority() == Authority.SYS_ADMIN )
+            {
+                if(vo.getTenantId() == null){
+                    String message=   getMessageByUserId(ErrorMessageEnums.PARAMETER_NOT_NULL);
+                    throw new ThingsboardException(message+"[TenantId]", ThingsboardErrorCode.GENERAL);
+                }
+                tenantId = new TenantId(vo.getTenantId());
+                log.info("当前是系统用户");
+            }
+            return checkSvc.queryCodeNew(vo, tenantId);
+
 
     }
 

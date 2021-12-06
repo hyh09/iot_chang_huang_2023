@@ -3,6 +3,7 @@ import { UserInfoId } from '../id/custom/user-mng-id.models';
 import { RoleId } from '../id/custom/role-mng.model';
 
 export interface UserInfo extends BaseData<UserInfoId> {
+  factoryId?: string,
   userCode: string,
   userName: string,
   phoneNumber: string,

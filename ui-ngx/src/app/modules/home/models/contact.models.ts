@@ -114,7 +114,6 @@ export const COUNTRIES = [
   'Heard Island and McDonald Islands',
   'Holy See (Vatican City State)',
   'Honduras',
-  'Hong Kong',
   'Hungary',
   'Iceland',
   'India',
@@ -145,7 +144,6 @@ export const COUNTRIES = [
   'Liechtenstein',
   'Lithuania',
   'Luxembourg',
-  'Macao',
   'Macedonia, Republic Of',
   'Madagascar',
   'Malawi',
@@ -232,7 +230,6 @@ export const COUNTRIES = [
   'Sweden',
   'Switzerland',
   'Syrian Arab Republic',
-  'Taiwan',
   'Tajikistan',
   'Tanzania, United Republic of',
   'Thailand',
@@ -250,7 +247,7 @@ export const COUNTRIES = [
   'Ukraine',
   'United Arab Emirates',
   'United Kingdom',
-  'United States',
+  'USA',
   'United States Minor Outlying Islands',
   'Uruguay',
   'Uzbekistan',
@@ -268,7 +265,7 @@ export const COUNTRIES = [
 
 /* tslint:disable */
 export const POSTAL_CODE_PATTERNS = {
-  'United States': '(\\d{5}([\\-]\\d{4})?)',
+  'USA': '(\\d{5}([\\-]\\d{4})?)',
   'Australia': '[0-9]{4}',
   'Austria': '[0-9]{4}',
   'Belgium': '[0-9]{4}',

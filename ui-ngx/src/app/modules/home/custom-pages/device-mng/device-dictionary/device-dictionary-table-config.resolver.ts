@@ -110,7 +110,13 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
 
   getAllDataDictionaries(): void {
     this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
-      this.config.componentsData.dataDictionaries = res || [];
+      const arr = res || [];
+      arr.forEach(item => {
+        if (item.unit) {
+          item.name += ` (${item.unit})`;
+        }
+      });
+      this.config.componentsData.dataDictionaries = arr;
     });
   }
 

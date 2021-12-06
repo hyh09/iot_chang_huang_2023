@@ -57,6 +57,7 @@ import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.entity.device.dto.AddDeviceDto;
 import org.thingsboard.server.entity.device.dto.DeviceListQry;
+import org.thingsboard.server.entity.device.dto.DeviceQry;
 import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -945,13 +946,36 @@ public class DeviceController extends BaseController {
                                                       @RequestParam(required = false) String sortOrder  )
     {
         try {
+            if(StringUtils.isEmpty(sortProperty))
+            {
+                sortProperty="createdTime";
+                sortOrder="";
+            }
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+
           return   deviceService.queryAllByNameLike(factoryId,name,pageLink);
 
         } catch (ThingsboardException e) {
             e.printStackTrace();
             throw  new CustomException("501","获取当前数据异常");
         }
+
+    }
+
+    @ApiOperation("自定义条件查询设备列表")
+    @ApiImplicitParam(name = "deviceQry",value = "入参实体",dataType = "DeviceQry",paramType="body")
+    @RequestMapping(value = "/findDeviceListByCdn", method = RequestMethod.POST)
+    @ResponseBody
+    public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
+        List<DeviceVo> result = new ArrayList<>();
+        deviceQry.setTenantId(getCurrentUser().getTenantId().getId());
+        List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice());
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            deviceListByCdn.forEach(i->{
+                result.add(new DeviceVo(i));
+            });
+        }
+        return result;
 
     }
 

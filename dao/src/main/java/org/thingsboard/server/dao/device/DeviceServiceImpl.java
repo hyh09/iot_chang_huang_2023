@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -52,6 +53,7 @@ import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.device.provision.ProvisionFailedException;
@@ -61,8 +63,9 @@ import org.thingsboard.server.dao.devicecomponent.DeviceComponentDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.dao.exception.DataValidationException;
-import org.thingsboard.server.dao.hs.dao.DictDeviceComponentEntity;
-import org.thingsboard.server.dao.hs.dao.DictDeviceComponentRepository;
+import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.ota.OtaPackageService;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
@@ -125,6 +128,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
     @Autowired
     private DictDeviceComponentRepository componentRepository;
+    @Autowired private DictDeviceRepository dictDeviceRepository;
+
+    @Autowired
+    private DictDeviceService dictDeviceService;
 
     @Override
     public DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId) {
@@ -220,6 +227,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     private Device doSaveDevice(Device device, String accessToken, boolean doValidate) {
+        //如果设备字典为空，则要添加默认字典
+        if(device.getDictDeviceId() == null || StringUtils.isEmpty(device.getDictDeviceId().toString())){
+            device.setDictDeviceId(dictDeviceService.getDefaultDictDeviceId(device.getTenantId()));
+        }
         Device savedDevice = this.saveDeviceWithoutCredentials(device, doValidate);
         if (device.getId() == null) {
             DeviceCredentials deviceCredentials = new DeviceCredentials();
@@ -906,6 +917,16 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    @Override
+    public List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException{
+        return deviceDao.findGatewayListVersionByFactory(factoryIds);
+    }
+
+    /**
      *平台设备列表查询
      * @param device
      * @param pageLink
@@ -942,7 +963,95 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return deviceDao.getNotDistributionDevice(tenantId);
     }
 
+    /**
+     * 多条件查询设备
+     * @param device
+     * @return
+     */
+    @Override
+    public List<Device> findDeviceListByCdn(Device device){
+        return deviceDao.findDeviceListByCdn(device);
+    }
+
+
+    @Override
+    public PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException {
+        log.info("分页查询产能运算配置的接口如参:{}",vo);
+        PageData<Device> pageData =  deviceDao.queryPage(vo,pageLink);
+       List<Device> devices =  pageData.getData();
+
+       UUID  tenantId = vo.getTenantId();
+
+      List<CapacityDeviceVo> voList =   devices.stream().map(d1->{
+            CapacityDeviceVo  vo1 = new CapacityDeviceVo();
+          vo1.setDeviceName(d1.getName());
+          vo1.setDeviceId(d1.getUuidId());
+          vo1.setFlg(d1.getDeviceFlg());
+          vo1.setStatus(getStatusByDevice(d1));
+          vo1.setDeviceName(getDictName(tenantId,d1.getDictDeviceId()));
+          vo1.setDeviceName(getDictFileName(tenantId,d1.getDeviceProfileId()));
+            return  vo1;
+        }).collect(Collectors.toList());
+
+
+         return new PageData<>(voList, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
+
+    }
 
 
 
+
+    private  Boolean  getStatusByDevice(Device  device)
+    {
+         Boolean   flg= false;
+        if(device.getFactoryId() != null )
+        {
+           return  true;
+        }
+        if(device.getWorkshopId() != null)
+        {
+            return  true;
+        }
+        if(device.getProductionLineId() != null)
+        {
+            return  true;
+        }
+        return flg;
+
+    }
+
+    /**
+     * 查询设备字典
+     *
+     */
+    private String getDictName(UUID tenantId, UUID id)
+    {
+        if(id == null)
+        {
+            return  "";
+        }
+        Optional<DictDeviceEntity>  dictDataEntity=   dictDeviceRepository.findByTenantIdAndId(tenantId,id);
+       return (dictDataEntity.isPresent()?dictDataEntity.get().getName():"");
+    }
+
+
+    /**
+     * 查询设备字典
+     *
+     */
+    private String getDictFileName(UUID tenantId, DeviceProfileId deviceProfileId)
+    {
+        if(deviceProfileId == null)
+        {
+            return "";
+        }
+
+        if(deviceProfileId.getId() == null)
+        {
+            return  "";
+        }
+
+        DeviceProfileInfo  dictDataEntity=   deviceProfileService.findDeviceProfileInfoById(new TenantId(tenantId), deviceProfileId);
+        return (dictDataEntity !=null?dictDataEntity.getName():"");
+    }
 }

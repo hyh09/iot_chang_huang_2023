@@ -16,6 +16,8 @@
 package org.thingsboard.server.dao.model;
 
 import lombok.Data;
+import org.thingsboard.server.dao.util.anno.JpaOperatorsType;
+import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -31,6 +33,7 @@ public abstract class BaseSqlEntity<D> implements BaseEntity<D> {
 
     @Id
     @Column(name = ModelConstants.ID_PROPERTY, columnDefinition = "uuid")
+    @JpaOperatorsType(JpaQueryHelper.Operators.eq)
     protected UUID id;
 
     @Column(name = ModelConstants.CREATED_TIME_PROPERTY)

@@ -160,9 +160,9 @@ public class RTMonitorAppController extends BaseController {
 
 
     /**
-     * 首页-获得报警记录统计信息
+     * 首页-获得报警记录统计信息，按月份
      */
-    @ApiOperation(value = "获得报警记录统计信息", notes = "不传工厂id默认为未分配")
+    @ApiOperation(value = "首页-获得报警记录统计信息，按月份", notes = "不传工厂id默认为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
     })
@@ -175,9 +175,24 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
+     * 首页-获得报警记录统计信息，按今日、昨日、历史
+     */
+    @ApiOperation(value = "首页-获得报警记录统计信息，按今日、昨日、历史", notes = "不传工厂id默认为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+    })
+    @GetMapping(value = "/alarmRecord/day/statistics")
+    public AlarmDayResult getAlarmsDay(
+            @RequestParam(required = false) String factoryId
+    ) throws ThingsboardException {
+        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
+        return this.deviceMonitorService.getAlarmsRecordDayStatistics(getTenantId(), query);
+    }
+
+    /**
      * 首页-获得在线设备情况
      */
-    @ApiOperation(value = "获得在线设备情况", notes = "不传工厂id默认为未分配")
+    @ApiOperation(value = "首页-获得在线设备情况", notes = "不传工厂id默认为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
     })
@@ -187,5 +202,16 @@ public class RTMonitorAppController extends BaseController {
     ) throws ThingsboardException {
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
         return this.deviceMonitorService.getRTMonitorOnlineStatusAppData(getTenantId(), query);
+    }
+
+    /**
+     * 首页-实时监控全部信息，包括工厂、设备、预警
+     */
+    @ApiOperation(value = "首页-实时监控全部信息，包括工厂、设备、预警")
+    @ApiImplicitParams({
+    })
+    @GetMapping(value = "/index")
+    public AppIndexResult getIndexData() throws ThingsboardException {
+        return this.deviceMonitorService.getRTMonitorAppIndexData(getTenantId());
     }
 }

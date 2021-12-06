@@ -45,6 +45,8 @@ public class RoleMenuController extends BaseController{
             throw new ThingsboardException("There is a problem with the request for input!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
+        SecurityUser securityUser = getCurrentUser();
+        vo.setTenantId(securityUser.getTenantId().getId());
            roleMenuSvc.binding(vo);
            return  "success";
     }

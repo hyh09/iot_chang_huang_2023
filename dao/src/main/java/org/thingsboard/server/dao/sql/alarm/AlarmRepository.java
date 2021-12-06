@@ -233,4 +233,72 @@ public interface AlarmRepository extends CrudRepository<AlarmEntity, UUID> {
                                                @Param("affectedEntityIds") List<UUID> affectedEntityIds,
                                                @Param("affectedEntityType") String affectedEntityType,
                                                @Param("startTime") Long startTime);
+
+    @Query(value = "SELECT a FROM AlarmEntity a " +
+            "LEFT JOIN RelationEntity re ON a.id = re.toId " +
+            "AND re.relationTypeGroup = 'ALARM' " +
+            "AND re.toType = 'ALARM' " +
+            "AND re.fromId in (:affectedEntityIds) " +
+            "AND re.fromType = :affectedEntityType " +
+            "WHERE a.tenantId = :tenantId " +
+            "AND (a.originatorId in (:affectedEntityIds) or re.fromId IS NOT NULL) " +
+            "AND (:startTime IS NULL OR a.createdTime >= :startTime) " +
+            "AND (:endTime IS NULL OR a.createdTime < :endTime) "
+    )
+    List<AlarmEntity> findAllAlarmsByStartTimeAndEndTime(@Param("tenantId") UUID tenantId,
+                                               @Param("affectedEntityIds") List<UUID> affectedEntityIds,
+                                               @Param("affectedEntityType") String affectedEntityType,
+                                               @Param("startTime") Long startTime,
+                                               @Param("endTime") Long endTime);
+
+    @Query(value = "SELECT count(a) FROM AlarmEntity a " +
+            "LEFT JOIN RelationEntity re ON a.id = re.toId " +
+            "AND re.relationTypeGroup = 'ALARM' " +
+            "AND re.toType = 'ALARM' " +
+            "AND re.fromId in (:affectedEntityIds) " +
+            "AND re.fromType = :affectedEntityType " +
+            "WHERE a.tenantId = :tenantId " +
+            "AND (a.originatorId in (:affectedEntityIds) or re.fromId IS NOT NULL) " +
+            "AND (:startTime IS NULL OR a.createdTime >= :startTime) "
+    )
+    Integer countAllAlarmsByStartTime(@Param("tenantId") UUID tenantId,
+                                      @Param("affectedEntityIds") List<UUID> affectedEntityIds,
+                                      @Param("affectedEntityType") String affectedEntityType,
+                                      @Param("startTime") Long startTime);
+
+    @Query(value = "SELECT count(a) FROM AlarmEntity a " +
+            "LEFT JOIN RelationEntity re ON a.id = re.toId " +
+            "AND re.relationTypeGroup = 'ALARM' " +
+            "AND re.toType = 'ALARM' " +
+            "AND re.fromId in (:affectedEntityIds) " +
+            "AND re.fromType = :affectedEntityType " +
+            "WHERE a.tenantId = :tenantId " +
+            "AND (a.originatorId in (:affectedEntityIds) or re.fromId IS NOT NULL) " +
+            "AND a.createdTime >= :startTime " +
+            "AND a.createdTime < :endTime "
+    )
+    Integer countAllAlarmsByStartTimeAndEndTime(@Param("tenantId") UUID tenantId,
+                                                @Param("affectedEntityIds") List<UUID> affectedEntityIds,
+                                                @Param("affectedEntityType") String affectedEntityType,
+                                                @Param("startTime") Long startTime,
+                                                @Param("endTime") Long endTime);
+
+    @Query(value = "SELECT count(a) FROM AlarmEntity a " +
+            "LEFT JOIN RelationEntity re ON a.id = re.toId " +
+            "AND re.relationTypeGroup = 'ALARM' " +
+            "AND re.toType = 'ALARM' " +
+            "AND re.fromId in (:affectedEntityIds) " +
+            "AND re.fromType = :affectedEntityType " +
+            "WHERE a.tenantId = :tenantId " +
+            "AND (a.originatorId in (:affectedEntityIds) or re.fromId IS NOT NULL) "
+    )
+    Integer countAllAlarmsHistory(@Param("tenantId") UUID tenantId,
+                                  @Param("affectedEntityIds") List<UUID> affectedEntityIds,
+                                  @Param("affectedEntityType") String affectedEntityType);
+
+    Integer countAllByTenantId(UUID tenantId);
+
+    Integer countAllByTenantIdAndCreatedTimeGreaterThan(UUID tenantId, Long startTime);
+
+    Integer countAllByTenantIdAndCreatedTimeBetween(UUID tenantId, Long startTime, Long endTime);
 }

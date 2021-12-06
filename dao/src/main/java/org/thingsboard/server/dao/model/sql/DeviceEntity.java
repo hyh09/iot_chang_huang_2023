@@ -25,6 +25,7 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.util.mapping.JsonBinaryType;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.UUID;
@@ -38,6 +39,8 @@ import java.util.UUID;
 })
 @Table(name = ModelConstants.DEVICE_COLUMN_FAMILY_NAME)
 public class DeviceEntity extends AbstractDeviceEntity<Device> {
+
+
 
     public DeviceEntity() {
         super();

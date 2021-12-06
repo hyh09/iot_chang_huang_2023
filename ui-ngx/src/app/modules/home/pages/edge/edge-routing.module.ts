@@ -192,12 +192,12 @@ const routes: Routes = [
   },
   {
     path: 'edgeManagement',
-    data: {
-      breadcrumb: {
-        label: 'edge.management',
-        icon: 'settings_input_antenna'
-      }
-    },
+    // data: {
+    //   breadcrumb: {
+    //     label: 'edge.management',
+    //     icon: 'settings_input_antenna'
+    //   }
+    // },
     children: [
       {
         path: '',

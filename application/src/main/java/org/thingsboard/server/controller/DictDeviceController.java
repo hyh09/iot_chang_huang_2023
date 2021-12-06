@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
@@ -112,8 +113,7 @@ public class DictDeviceController extends BaseController {
 //        CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
 //        CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
         CommonUtil.checkDuplicateName(dictDeviceVO, Sets.newHashSet());
-        this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
-        return dictDeviceVO;
+        return this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
     }
 
     /**
@@ -149,5 +149,17 @@ public class DictDeviceController extends BaseController {
     @GetMapping("/dict/device/all")
     public List<DictDevice> listAllDictDevice() throws ThingsboardException {
         return this.dictDeviceService.listAllDictDevice(getTenantId());
+    }
+
+    /**
+     * 【不分页】获得设备字典绑定的部件
+     */
+    @ApiOperation(value = "【不分页】获得设备字典绑定的部件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
+    @GetMapping("/dict/device/component")
+    public List<DictDeviceComponent> listDictDeviceComponents(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        return this.dictDeviceService.listDictDeviceComponents(getTenantId(), toUUID(dictDeviceId));
     }
 }

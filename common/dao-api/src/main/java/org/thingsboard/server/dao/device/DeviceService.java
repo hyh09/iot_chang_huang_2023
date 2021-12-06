@@ -15,6 +15,8 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.datastax.oss.driver.api.core.paging.OffsetPager;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceInfo;
@@ -32,6 +34,7 @@ import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
 
@@ -150,6 +153,13 @@ public interface DeviceService {
     List<Device> findGatewayNewVersionByFactory(List<UUID> factoryId) throws ThingsboardException;
 
     /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
+
+    /**
      *平台设备列表查询
      * @param device
      * @param pageLink
@@ -170,5 +180,14 @@ public interface DeviceService {
      * @return
      */
     List<Device> getNotDistributionDevice(TenantId tenantId);
+
+    /**
+     * 多条件查询设备
+     * @param device
+     * @return
+     */
+    List<Device> findDeviceListByCdn(Device device);
+
+    PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 
 }
