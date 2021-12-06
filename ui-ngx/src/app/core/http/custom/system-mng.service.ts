@@ -21,5 +21,10 @@ export class SystemMngService {
       defaultHttpOptionsFromConfig(config)
     );
   }
+
+  // 获取系统版本
+  public getSystemVersion(): Observable<string> {
+    return this.http.get(`/api/system/getSystemVersion`, { responseType: 'text' });
+  }
   
 }
