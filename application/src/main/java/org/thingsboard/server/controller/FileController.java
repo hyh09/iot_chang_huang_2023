@@ -48,11 +48,11 @@ public class FileController extends BaseController {
      * 上传文件
      */
     @ApiOperation(value = "上传文件", notes = "返回文件Id")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
-//            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
-//            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
-//    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
+            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
+    })
     @PostMapping(value = "/file")
     public String uploadFile(@RequestParam(required = false) String checksum,
                              @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
@@ -119,10 +119,10 @@ public class FileController extends BaseController {
      */
     @ApiOperation(value = "下载文件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "文件Id", paramType = "path", required = true),
+            @ApiImplicitParam(name = "id", value = "文件Id", paramType = "query", required = true),
     })
-    @GetMapping("/file/{id}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable("id") String id) throws ThingsboardException, IOException {
+    @GetMapping("/file")
+    public ResponseEntity<Resource> downloadFile(@RequestParam("id") String id) throws ThingsboardException, IOException {
         var fileInfo = this.fileService.getFileInfo(getTenantId(), id);
         var filePath = Paths.get(fileInfo.getLocation());
 
@@ -141,9 +141,9 @@ public class FileController extends BaseController {
      */
     @ApiOperation(value = "删除文件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "文件Id", paramType = "path", required = true),})
-    @DeleteMapping("/file/{id}")
-    public void deleteFile(@PathVariable("id") String id) throws ThingsboardException, IOException {
+            @ApiImplicitParam(name = "id", value = "文件Id", paramType = "query", required = true),})
+    @DeleteMapping("/file")
+    public void deleteFile(@RequestParam("id") String id) throws ThingsboardException, IOException {
         this.fileService.deleteFile(getTenantId(), id);
     }
 
