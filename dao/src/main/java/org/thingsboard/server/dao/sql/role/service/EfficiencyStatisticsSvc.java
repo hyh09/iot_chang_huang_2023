@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -60,7 +61,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return 返回的是 key:name ,
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
+    Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId) throws ThingsboardException;
 
     /**
      * app端的返回的是描述字段
@@ -68,7 +69,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId);
+    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId) throws ThingsboardException;
 
 
     //查询当前的分组-分组属性
@@ -80,6 +81,6 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId);
+    List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
 
 }

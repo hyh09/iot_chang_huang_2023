@@ -124,7 +124,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true),
     })
     @GetMapping("/rtMonitor/device/history")
     public PageData<Map<String, Object>> listRTMonitorHistory(

@@ -5,6 +5,7 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
@@ -81,4 +82,12 @@ public interface ClientService {
      * @param factoryId 工厂Id
      */
     List<Workshop> listAllWorkshopByTenantIdAndFactoryId(TenantId tenantId, UUID factoryId);
+
+    /**
+     * 列举车间下全部产线
+     *
+     * @param tenantId  租户Id
+     * @param workshopId 车间Id
+     */
+    List<ProductionLine> listProductionLinesByTenantIdAndWorkshopId(TenantId tenantId, UUID workshopId);
 }

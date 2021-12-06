@@ -35,9 +35,11 @@ public class WebLogAspect {
     @Pointcut(
             // custom
             "execution(public * org.thingsboard.server.controller.AlarmRecordController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.AlarmRuleController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorAppController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorController.*(..))"
-//                    + "||execution(public * org.thingsboard.server.controller.RTMonitorBoardController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.BoardSceneController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.BoardRTMonitorController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
     )

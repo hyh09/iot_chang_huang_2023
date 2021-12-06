@@ -19,6 +19,8 @@ public enum FileScopeEnum implements EnumGetter {
     DICT_DEVICE_COMPONENT("DICT_DEVICE_COMPONENT", "设备字典部件"),
     FACTORY("FACTORY", "工厂"),
     WORKSHOP("WORKSHOP", "车间"),
+    WORKSHOP_SCENE("WORKSHOP_SCENE", "车间场景"),
+    DEVICE_SCENE("DEVICE_SCENE", "设备场景"),
     PRODUCTION_LINE("PRODUCTION_LINE", "产线");
 
     @JsonValue

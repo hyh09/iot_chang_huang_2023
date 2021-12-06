@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
@@ -27,10 +29,13 @@ import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusB
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.PcDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
-import org.thingsboard.server.common.data.vo.user.FindUserVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.dao.DictDataEntity;
+import org.thingsboard.server.dao.hs.dao.DictDataRepository;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyRepository;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -74,6 +79,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private TsKvDictionaryRepository dictionaryRepository;
     @Autowired private EffectHistoryKvRepository effectHistoryKvRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired private DictDeviceComponentPropertyRepository componentPropertyRepository;
+    @Autowired private DictDataRepository dictDataRepository;//数据字典
 
 
     private  final  static String  HEADER_0= "设备名称";
@@ -113,17 +120,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("查询历史耗能的表头");
         List<String> strings= new ArrayList<>();
         strings.add(HEADER_0);
-        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        log.info("查询历史耗能的表头{}",keys1);
-        Map<String,String>  map = deviceDictPropertiesSvc.getUnit();
-        log.info("查询历史耗能的表头map{}",map);
+        List<DictDeviceGroupPropertyVO>    dictVoList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.ENERGY_002.getgName());
+        dictVoList.stream().forEach(dataVo->{
+            strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
 
-        keys1.stream().forEach(str01->{
-            strings.add( getKeyNameByUtil(str01,map));
-                }
-        );
+        });
         strings.add(HEADER_1);
-        log.info("查询历史耗能的表头keys1{}",keys1);
+        log.info("查询历史耗能的表头keys1{}",strings);
         return strings;
     }
 
@@ -136,12 +139,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public Object queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink) {
-         Map<String,String>  map = deviceDictPropertiesSvc.getUnit() ;
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
-
         }
         String deviceName = deviceInfo.getName();
         //先查询能耗的属性
@@ -154,31 +156,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
          {
              return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
          }
-         List<Map> mapList = new ArrayList<>();
-         for(Map m:list)
-         {
-             Map  map1 = new HashMap();
-             m.forEach((k,v)->{
-
-                 map1.put("设备名称",deviceName);
-                 if(k.equals("ts"))
-                 {
-                     map1.put("createdTime",v); //createdTime
-                 }
-                 if(StringUtils.isNotBlank(map.get(k)))
-                 {
-                     String  strKey = k+"";
-                     map1.put( getKeyNameByUtil(strKey,map),v);
-                 }
-
-             });
-             mapList.add(map1);
-
-         }
-
+        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
         return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
-
-
     }
 
     @Override
@@ -419,17 +398,21 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
         log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
-        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
-        if(deviceInfo ==  null){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
+//        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
+//        if(deviceInfo ==  null){
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
+//
+//        }
+//        log.info("查询当前的设备信息{}",deviceInfo);
+//        List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
+//        log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
+//        List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
 
-        }
-        log.info("查询当前的设备信息{}",deviceInfo);
-        List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
-        log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
-        List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
+        List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
+        List<String> keyNames=propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+
         log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
         List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
         log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
@@ -464,18 +447,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
              log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
-         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
-         if(deviceInfo ==  null){
-             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
+        List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
+             log.info("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
-         }
-           log.info("查询当前的设备信息{}",deviceInfo);
-          List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
-             log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
-           List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
-            log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
+        Map<String, DeviceDictionaryPropertiesVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(DeviceDictionaryPropertiesVo::getName, a -> a,(k1,k2)->k1));
+
+        List<String> keyNames=   propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+        log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
            List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
              log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
@@ -491,10 +471,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             List<ResultRunStatusByDeviceVo>  voList = new ArrayList<>();
             voList =  tsKvEntries.stream().map(TsKvEntry ->{
                       ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
-                      byDeviceVo.setKeyName(TsKvEntry.getKey());
+                      String keyName=TsKvEntry.getKey();
+                DeviceDictionaryPropertiesVo trnaslateVo=   translateMap.get(keyName);
+                      byDeviceVo.setKeyName(keyName);
                       byDeviceVo.setValue(TsKvEntry.getValue().toString());
                       byDeviceVo.setTime(TsKvEntry.getTs());
-                      return     byDeviceVo;
+                      byDeviceVo.setTitle(trnaslateVo != null?trnaslateVo.getTitle():"");
+                      byDeviceVo.setUnit(trnaslateVo != null?trnaslateVo.getUnit():"");
+                return     byDeviceVo;
             }).collect(Collectors.toList());
        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
       log.info("查询到的当前的数据:{}",map);
@@ -516,18 +500,25 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
         Map<String,List<DictDeviceDataVo>> map = dictDeviceDataVos.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
+        map.put("部件",getParts( tenantId,deviceInfo.getDictDeviceId()));
         return map;
     }
 
 
+    /**
+     *
+     * @param deviceId  设备id
+     * @param tenantId  租户id
+     * @return
+     * @throws ThingsboardException
+     */
     @Override
-    public List<DeviceDictionaryPropertiesVo>  queryDictDevice(UUID deviceId, TenantId tenantId) {
+    public List<DeviceDictionaryPropertiesVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException {
         List<DeviceDictionaryPropertiesVo>   deviceDictionaryPropertiesVos= new ArrayList<>();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),deviceId);
-        if(deviceId == null)
+        if(deviceInfo == null )
         {
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
-
+            throw  new ThingsboardException("查询不到此设备!", ThingsboardErrorCode.FAIL_VIOLATION);
         }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
         log.info("查询到的结果dictDeviceDataVos：{}",dictDeviceDataVos);
@@ -535,6 +526,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             return deviceDictionaryPropertiesVos;
         }
+        List<DictDeviceDataVo>  partsList  =  getParts(tenantId,deviceInfo.getDictDeviceId());
+        dictDeviceDataVos.addAll(partsList);
+
+
         return  dictDeviceDataVos.stream().map(dataVo ->{
             String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
             return new  DeviceDictionaryPropertiesVo(dataVo.getName(),title,dataVo.getUnit());
@@ -675,17 +670,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             Map<String,String>  map1 =  new HashMap<>();
             Map<String,String>  map2 =  new HashMap<>();
 
-            mapOld.forEach((key,value)->{
+            mapOld.forEach((key,value1)->{
               if(!key.equals(keyName))
               {
                   //只会影响到单位能耗计算
                   //
                   //计算公式：总产能/总能耗/分钟数
-                  map1.put(key,value);
+                  map1.put(key,value1);
                 Long  time02 =   (timeValueMap.get(key));
                 Long  t3 =   (time001-time02);
-                  Double  dvalue =  StringUtilToll.div(keyNameValue,value,t3.toString());
-                  map2.put(key,dvalue.toString());
+
+                  Double  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
+                  map2.put(key,aDouble.toString());
               }
             });
 
@@ -750,16 +746,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
 
-    /**
-     * 获取首页能耗的 单位能耗水 (单位)
-     * @param str01  配置的遥测key
-     * @param map  key 对应的单位
-     * @return
-     */
-    private  String getHomeKeyNameByUtil(String str01,Map  map)
-    {
-        return "单位能耗"+str01+" ("+map.get(str01)+")";
-    }
 
 
 
@@ -803,5 +789,57 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             }
         });
         return  map;
+    }
+
+
+    /**
+     * 获取部件的属性
+     * @param tenantId 租户
+     * @param dictDeviceId  设备字典
+     * @return
+     */
+    private   List<DictDeviceDataVo>  getParts(TenantId tenantId,UUID  dictDeviceId)
+    {
+        List<DictDeviceComponentPropertyEntity>  componentPropertyEntities = componentPropertyRepository.findAllByDictDeviceId(dictDeviceId);
+        log.info("打印获取设备部件的属性:{}",componentPropertyEntities);
+        List<DictDeviceDataVo> partsList=
+                componentPropertyEntities.stream().map(component->{
+                    DictDeviceDataVo  vo= new DictDeviceDataVo();
+                    vo.setGroupName("部件");
+                    vo.setName(component.getName());
+                    String title =StringUtils.isBlank(component.getTitle())?component.getName():component.getTitle();
+                    vo.setTitle(title);
+                    Optional<DictDataEntity>  dictDataEntity  = dictDataRepository.findByTenantIdAndId(tenantId.getId(),component.getDictDataId());
+                    vo.setUnit(dictDataEntity.isPresent()?dictDataEntity.get().getUnit():"");
+                    return vo;
+                }).collect(Collectors.toList());
+        return  partsList;
+
+    }
+
+
+    private   List<Map> translateTitle(List<Map> list,String deviceName ,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo )
+    {
+        List<Map> mapList = new ArrayList<>();
+
+        for(Map m:list)
+        {
+            Map  map1 = new HashMap();
+            m.forEach((k,v)->{
+                map1.put("设备名称",deviceName);
+                if(k.equals("ts"))
+                {
+                    map1.put("createdTime",v);
+                }
+                DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k);
+                if(dictVO != null) {
+                    map1.put(getHomeKeyNameOnlyUtilNeW(dictVO), v);
+                }
+            });
+            mapList.add(map1);
+        }
+
+        return mapList;
+
     }
 }

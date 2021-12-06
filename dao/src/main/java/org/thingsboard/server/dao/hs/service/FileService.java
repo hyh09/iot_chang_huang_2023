@@ -41,12 +41,28 @@ public interface FileService {
     FileInfo getFileInfo(TenantId tenantId, String id) throws ThingsboardException;
 
     /**
+     * 获得文件详情,不校验是否存在
+     *
+     * @param tenantId 租户Id
+     * @param id       文件Id
+     * @return 文件详情
+     */
+    FileInfo getFileInfoNotCheckExist(TenantId tenantId, String id) throws ThingsboardException;
+
+    /**
      * 删除文件
      *
      * @param tenantId 租户Id
      * @param id       文件Id
      */
     void deleteFile(TenantId tenantId, String id) throws IOException, ThingsboardException;
+
+    /**
+     * 删除文件, 不验证租户
+     *
+     * @param id       文件Id
+     */
+    void deleteFile(String id) throws IOException, ThingsboardException;
 
     /**
      * 分片上传合并文件
@@ -97,6 +113,14 @@ public interface FileService {
      * @param entityId  实体Id
      */
     List<FileInfo> listFileInfosByScopeAndEntityId(TenantId tenantId, FileScopeEnum scopeEnum, UUID entityId);
+
+    /**
+     * 按范围查询文件列表
+     *
+     * @param tenantId  租户Id
+     * @param scopeEnum 范围
+     */
+    List<FileInfo> listFileInfosByScope(TenantId tenantId, FileScopeEnum scopeEnum);
 
     /**
      * 删除文件按范围和实体Id

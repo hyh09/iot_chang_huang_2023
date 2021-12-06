@@ -211,22 +211,27 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
-    @ApiOperation("设备属性分组-分组后的属性属性接口")
-    @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
-    @ResponseBody
-    public  Object queryGroupDict(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-        try {
-            log.info("打印当前的入参:{}", deviceId);
-            return efficiencyStatisticsSvc.queryGroupDict(deviceId, getTenantId());
-        }catch (Exception e)
-        {
-            log.error("【设备属性分组-分组后的属性属性接口】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
-        }
+//    @ApiOperation("设备属性分组-分组后的属性属性接口")
+//    @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
+//    @ResponseBody
+//    public  Object queryGroupDict(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+//        try {
+//            log.info("打印当前的入参:{}", deviceId);
+//            return efficiencyStatisticsSvc.queryGroupDict(deviceId, getTenantId());
+//        }catch (Exception e)
+//        {
+//            log.error("【设备属性分组-分组后的属性属性接口】异常信息:{}",e);
+//            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+//        }
+//
+//    }
 
-    }
-
-
+    /**
+     * PC端
+     * @param deviceId
+     * @return
+     * @throws ThingsboardException
+     */
     @ApiOperation("设备属性分组后的属性name属性接口--pc端下拉框")
     @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
     @ApiResponses({
@@ -235,7 +240,14 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ResponseBody
     public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         log.info("打印当前的入参:{}",deviceId);
-        return  efficiencyStatisticsSvc.queryDictDevice(deviceId,getTenantId());
+        try {
+            return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            log.info("====>:{}",e);
+            throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
+        }
     }
 
 

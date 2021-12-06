@@ -22,10 +22,11 @@ public class DeviceDictionaryPropertiesVo {
 
     @ApiModelProperty("名称")
     private  String name;
+
     @ApiModelProperty("标题")
-    private String title;
+    private String title="";
     @ApiModelProperty("单位")
-    private  String unit;
+    private  String unit="";
 
 
 }
