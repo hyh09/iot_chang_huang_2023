@@ -16,23 +16,29 @@
 
 -->
 <section [formGroup]="parentForm">
-  <mat-form-field class="mat-block">
-    <mat-label translate>contact.country</mat-label>
-    <mat-select formControlName="country">
-      <mat-option *ngFor="let country of countries" [value]="country">
-        {{ country }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <div fxLayout.gt-sm="row" fxLayoutGap.gt-sm="10px">
-    <mat-form-field class="mat-block">
-      <mat-label translate>contact.city</mat-label>
-      <input matInput formControlName="city">
+  <div fxLayout="row" fxLayoutGap="10px">
+    <mat-form-field fxFlex class="mat-block">
+      <mat-label translate>contact.country</mat-label>
+      <mat-select formControlName="country" required>
+        <mat-option *ngFor="let country of countries" [value]="country">
+          {{ ('country.' + country) | translate }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="parentForm.get('country').hasError('required')">
+        {{ 'contact.country-required' | translate }}
+      </mat-error>
     </mat-form-field>
-    <mat-form-field class="mat-block">
+    <mat-form-field fxFlex class="mat-block">
+      <mat-label translate>contact.city</mat-label>
+      <input matInput formControlName="city" required>
+      <mat-error *ngIf="parentForm.get('city').hasError('required')">
+        {{ 'contact.city-required' | translate }}
+      </mat-error>
+    </mat-form-field>
+    <!-- <mat-form-field class="mat-block">
       <mat-label translate>contact.state</mat-label>
       <input matInput formControlName="state">
-    </mat-form-field>
+    </mat-form-field> -->
     <mat-form-field class="mat-block">
       <mat-label translate>contact.postal-code</mat-label>
       <input matInput formControlName="zip">
@@ -43,9 +49,12 @@
   </div>
   <mat-form-field class="mat-block">
     <mat-label translate>contact.address</mat-label>
-    <input matInput formControlName="address">
+    <input matInput formControlName="address" required>
+    <mat-error *ngIf="parentForm.get('address').hasError('required')">
+      {{ 'contact.address-required' | translate }}
+    </mat-error>
   </mat-form-field>
-  <mat-form-field class="mat-block">
+  <mat-form-field *ngIf="showAddress2" class="mat-block">
     <mat-label translate>contact.address2</mat-label>
     <input matInput formControlName="address2">
   </mat-form-field>

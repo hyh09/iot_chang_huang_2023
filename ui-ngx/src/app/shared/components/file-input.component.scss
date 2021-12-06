@@ -61,7 +61,8 @@ $previewSize: 100px !default;
     position: relative;
     height: $previewSize;
     overflow: hidden;
-    border: dashed 2px;
+    border: 2px dashed rgba(0, 0, 0, 0.42);
+    color: rgba(0, 0, 0, 0.54);
 
     label {
       display: flex;
@@ -71,10 +72,16 @@ $previewSize: 100px !default;
       height: 100%;
       font-size: 16px;
       text-align: center;
+      cursor: pointer;
 
       @media #{$mat-gt-sm} {
-        font-size: 24px;
+        font-size: 18px;
       }
     }
+  }
+  
+  .tb-hint{
+    margin-top: 8px;
+    padding-bottom: 0;
   }
 }

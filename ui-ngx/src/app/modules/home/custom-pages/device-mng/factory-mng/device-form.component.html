@@ -81,6 +81,11 @@
           formControlName="picture"
           [readonly]="!!entityForm.get('dictDeviceId').value || !isEdit"
         ></tb-image-input>
+        <div *ngIf="!isEdit" class="tb-container" style="margin-top: 0;">
+          <label class="tb-title">
+            {{ 'device-mng.device-model' | translate }}{{ 'common.colon' | translate }}{{ entityForm.get('fileName').value || ('common.none' | translate) }}
+          </label>
+        </div>
         <fieldset [fxShow]="!!entityForm.get('dictDeviceId').value" [disabled]="true">
           <!--设备属性-->
           <ng-container *ngIf="devicePropFormArray().controls.length > 0">
