@@ -47,10 +47,7 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
-import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
-import org.thingsboard.server.dao.model.sql.DeviceEntity;
-import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
-import org.thingsboard.server.dao.model.sql.MenuEntity;
+import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -699,6 +696,24 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink) {
         Pageable pageable = DaoUtil.toPageable(pageLink);
         Page<DeviceDataVo> deviceEntityPage =  deviceRepository.queryAllByNameLike(factoryId,name,pageable);
+
+        List<DeviceDataVo>  deviceDataVoList =  deviceEntityPage.getContent();
+        List<UUID> idList = deviceDataVoList.stream().map(DeviceDataVo::getDeviceId).collect(Collectors.toList());
+        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
+        Map<UUID,String> map1 = new HashMap<>();
+        list.stream().forEach(l1->{
+            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
+            if(attributeKvCompositeKey != null)
+            {
+                map1.put(attributeKvCompositeKey.getEntityId(),"1");
+            }
+        });
+        deviceDataVoList.stream().forEach(d1->{
+            String str =  map1.get(d1.getDeviceId());
+            d1.setOnlineStatus(org.apache.commons.lang3.StringUtils.isNotEmpty(str)?"1":"0");
+        });
+
+
         return new PageData<DeviceDataVo>((deviceEntityPage.getContent()),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
     }
 
