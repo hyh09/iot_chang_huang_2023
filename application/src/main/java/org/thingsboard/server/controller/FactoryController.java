@@ -95,10 +95,10 @@ public class FactoryController extends BaseController  {
      * @throws ThingsboardException
      */
     @ApiOperation("查询租户下所有工厂列表")
-    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true)
+    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query")
     @RequestMapping(value = "/findFactoryList", method = RequestMethod.GET)
     @ResponseBody
-    public List<FactoryVo> findFactoryList(@RequestParam String tenantId) throws ThingsboardException {
+    public List<FactoryVo> findFactoryList(@RequestParam(required = false) String tenantId) throws ThingsboardException {
         try {
             List<FactoryVo> factoryVoList = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){
