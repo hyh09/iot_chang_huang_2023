@@ -182,11 +182,11 @@ public class RTMonitorAppController extends BaseController {
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
     })
     @GetMapping(value = "/alarmRecord/day/statistics")
-    public AppIndexAlarmResult getAlarmsDay(
+    public AlarmDayResult getAlarmsDay(
             @RequestParam(required = false) String factoryId
     ) throws ThingsboardException {
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
-        return this.deviceMonitorService.getAppAlarmsRecordDayStatistics(getTenantId(), query);
+        return this.deviceMonitorService.getAlarmsRecordDayStatistics(getTenantId(), query);
     }
 
     /**

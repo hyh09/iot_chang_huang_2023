@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.service;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +46,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     DictDeviceGroupPropertyRepository groupPropertyRepository;
     DictDeviceComponentRepository componentRepository;
     DictDeviceComponentPropertyRepository componentPropertyRepository;
+    DictDeviceStandardPropertyRepository standardPropertyRepository;
 
     /**
      * 查询数据字典列表
@@ -125,14 +127,16 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         var dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDataEntity::toData)
                 .orElseThrow(() -> new ThingsboardException("数据字典不存在！", ThingsboardErrorCode.GENERAL));
         var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDataId(toUUID(id)));
+        var standardPropertyList = DaoUtil.convertDataList(this.standardPropertyRepository.findAllByDictDataId(toUUID(id)));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDataId(toUUID(id)));
         
-        if (groupPropertyList.isEmpty() && componentList.isEmpty())
+        if (groupPropertyList.isEmpty() && componentList.isEmpty() && standardPropertyList.isEmpty())
             this.dataRepository.deleteById(toUUID(dictData.getId()));
         else {
-            List<UUID> uuids = Lists.newArrayList();
+            Set<UUID> uuids = Sets.newHashSet();
             uuids.addAll(groupPropertyList.stream().map(DictDeviceGroupProperty::getDictDeviceId).map(this::toUUID).collect(Collectors.toList()));
             uuids.addAll(componentList.stream().map(DictDeviceComponentProperty::getDictDeviceId).map(this::toUUID).collect(Collectors.toList()));
+            uuids.addAll(standardPropertyList.stream().map(DictDeviceStandardProperty::getDictDeviceId).map(this::toUUID).collect(Collectors.toList()));
             if (uuids.isEmpty())
                 throw new ThingsboardException("存在关联的设备字典，但id不存在!请联系管理员!", ThingsboardErrorCode.GENERAL);
             var nameList = DaoUtil.convertDataList(Lists.newArrayList(this.deviceRepository.findAllById(uuids))).stream().map(DictDevice::getName).collect(Collectors.toList());
@@ -209,5 +213,10 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     @Autowired
     public void setComponentPropertyRepository(DictDeviceComponentPropertyRepository componentPropertyRepository) {
         this.componentPropertyRepository = componentPropertyRepository;
+    }
+
+    @Autowired
+    public void setStandardPropertyRepository(DictDeviceStandardPropertyRepository standardPropertyRepository) {
+        this.standardPropertyRepository = standardPropertyRepository;
     }
 }

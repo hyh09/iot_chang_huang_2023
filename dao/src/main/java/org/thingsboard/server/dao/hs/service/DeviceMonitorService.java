@@ -154,11 +154,12 @@ public interface DeviceMonitorService {
     /**
      * 【看板】获得报警记录统计信息
      *
-     * @param tenantId 租户Id
-     * @param query    查询参数
+     * @param tenantId  租户Id
+     * @param query     查询参数
+     * @param timeQuery 时间查询参数
      * @return 报警记录统计信息
      */
-    BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query);
+    BoardAlarmResult getBoardAlarmsRecordStatistics(TenantId tenantId, FactoryDeviceQuery query, TimeQuery timeQuery);
 
     /**
      * 【看板】查看设备部件实时数据
@@ -177,10 +178,10 @@ public interface DeviceMonitorService {
     AppIndexResult getRTMonitorAppIndexData(TenantId tenantId);
 
     /**
-     * 【App】获得报警记录统计信息，按今日、昨日、历史
+     * 获得报警记录统计信息，按今日、昨日、历史
      *
      * @param tenantId 租户Id
      * @param query    查询条件
      */
-    AppIndexAlarmResult getAppAlarmsRecordDayStatistics(TenantId tenantId, FactoryDeviceQuery query);
+    AlarmDayResult getAlarmsRecordDayStatistics(TenantId tenantId, FactoryDeviceQuery query);
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * app首页报警数据
+ * 报警数据按天统计
  *
  * @author wwj
  * @since 2021.12.3
@@ -19,8 +19,8 @@ import lombok.experimental.Accessors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "app首页报警数据")
-public class AppIndexAlarmResult {
+@ApiModel(value = "报警数据按天统计")
+public class AlarmDayResult {
     /**
      * 今日预警次数
      */

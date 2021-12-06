@@ -39,7 +39,7 @@ public class AppIndexResult {
      * 警报数据结果
      */
     @ApiModelProperty("警报数据结果")
-    private AppIndexAlarmResult alarmResult;
+    private AlarmDayResult alarmResult;
 
     /**
      * 工厂列表数据
