@@ -26,7 +26,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/deviceMonitor/board")
-public class RTMonitorBoardController extends BaseController {
+public class BoardRTMonitorController extends BaseController {
 
     @Autowired
     DeviceMonitorService deviceMonitorService;

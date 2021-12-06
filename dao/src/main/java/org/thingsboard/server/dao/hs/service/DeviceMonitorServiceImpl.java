@@ -756,7 +756,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return AppIndexResult.builder()
                 .onLineDeviceCount(count)
                 .offLineDeviceCount(allDeviceIdList.size() - count)
-                .factoryResultList(null)
+                .factoryResultList(factoryList.stream().map(e->map.get(e.getId().toString())).collect(Collectors.toList()))
                 .alarmResult(AlarmDayResult.builder()
                         .historyAlarmTimes(this.alarmRepository.countAllByTenantId(tenantId.getId()))
                         .yesterdayAlarmTimes(this.alarmRepository.countAllByTenantIdAndCreatedTimeBetween(tenantId.getId(), CommonUtil.getYesterdayStartTime(), CommonUtil.getTodayStartTime()))

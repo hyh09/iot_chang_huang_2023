@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/board/setting")
-public class SceneBoardController extends BaseController {
+public class BoardSceneController extends BaseController {
 
     @Autowired
     DeviceMonitorService deviceMonitorService;
@@ -68,18 +68,17 @@ public class SceneBoardController extends BaseController {
     }
 
     /**
-     * 获得车间场景文件路径
+     * 获得车间场景文件
      */
-    @ApiOperation(value = "获得车间场景文件路径")
+    @ApiOperation(value = "获得车间场景文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping("/workshop/scene/location")
-    public String getBoardSettingFileId(
+    public FileInfo getBoardSettingFileId(
             @RequestParam("workshopId") String workshopId) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("workshopId", workshopId);
-        var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
-        return Optional.ofNullable(fileInfo).map(FileInfo::getLocation).orElse(null);
+        return this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
     }
 
     /**
@@ -126,11 +125,10 @@ public class SceneBoardController extends BaseController {
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
     })
     @GetMapping("/device/scene/location")
-    public String getDeviceBoardLocation(
+    public FileInfo getDeviceBoardLocation(
             @RequestParam("deviceId") String deviceId) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
-        var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
-        return Optional.ofNullable(fileInfo).map(FileInfo::getLocation).orElse(null);
+        return this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
     }
 
     /**
