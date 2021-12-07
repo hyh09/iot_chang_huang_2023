@@ -139,6 +139,11 @@ public interface DeviceService {
     void distributionDevice(Device device) throws ThingsboardException;
 
     /**
+     * 建立设备产线实体关系
+     * @param device
+     */
+    void createRelationDeviceFromProductionLine(Device device);
+    /**
      * 移除产线设备
      * @param device
      * @throws ThingsboardException

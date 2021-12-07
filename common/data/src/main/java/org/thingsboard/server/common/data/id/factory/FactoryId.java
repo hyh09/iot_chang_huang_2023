@@ -38,7 +38,7 @@ public class FactoryId extends UUIDBased implements EntityId {
     @JsonIgnore
     @Override
     public EntityType getEntityType() {
-        return EntityType.TENANT_MENU;
+        return EntityType.FACTORY;
     }
 
 }
