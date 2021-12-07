@@ -576,14 +576,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         return  invoiceAmount.stripTrailingZeros().toPlainString();
-//        Double  totalSku =
-//                effectTsKvEntities.stream().mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
-//
-//        Long  totalSku2 =
-//                effectTsKvEntities.stream().mapToLong(EffectTsKvEntity::getSubtractLong).sum();
-//        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
-////        return dvalue+"";
-//        return  null;
     }
 
 
@@ -592,14 +584,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         return  invoiceAmount.stripTrailingZeros().toPlainString();
-//        Double  totalSku =
-//                effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).mapToDouble(EffectTsKvEntity::getSubtractDouble).sum();
-//
-//        Long  totalSku2 =
-//                effectTsKvEntities.stream().filter(entity ->  entity.getKeyName().equals(key)).mapToLong(EffectTsKvEntity::getSubtractLong).sum();
-//        double dvalue =  StringUtilToll.add(totalSku.toString(),totalSku2.toString());
-//        return dvalue+"";
-//        return  "";
     }
 
  /**
