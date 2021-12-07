@@ -179,6 +179,21 @@ export class EntityAutocompleteComponent implements ControlValueAccessor, OnInit
           this.noEntitiesMatchingText = 'asset.no-assets-matching';
           this.entityRequiredText = 'asset.asset-required';
           break;
+        case EntityType.FACTORY:
+          this.entityText = 'device-mng.factory';
+          this.noEntitiesMatchingText = 'device-mng.no-factories-matching';
+          this.entityRequiredText = 'device-mng.factory-required';
+          break;
+        case EntityType.WORK_SHOP:
+          this.entityText = 'device-mng.work-shop';
+          this.noEntitiesMatchingText = 'device-mng.no-work-shops-matching';
+          this.entityRequiredText = 'device-mng.work-shop-required';
+          break;
+        case EntityType.PROD_LINE:
+          this.entityText = 'device-mng.prod-line';
+          this.noEntitiesMatchingText = 'device-mng.no-prod-lines-matching';
+          this.entityRequiredText = 'device-mng.prod-line-required';
+          break;
         case EntityType.DEVICE:
           this.entityText = 'device.device';
           this.noEntitiesMatchingText = 'device.no-devices-matching';

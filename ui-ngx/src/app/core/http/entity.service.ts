@@ -81,6 +81,7 @@ import { Edge, EdgeEvent, EdgeEventType } from '@shared/models/edge.models';
 import { RuleChainMetaData, RuleChainType } from '@shared/models/rule-chain.models';
 import { WidgetService } from '@core/http/widget.service';
 import { DeviceProfileService } from '@core/http/device-profile.service';
+import { FactoryMngService } from './custom/factory-mng.service';
 
 @Injectable({
   providedIn: 'root'
@@ -104,7 +105,8 @@ export class EntityService {
     private otaPackageService: OtaPackageService,
     private widgetService: WidgetService,
     private deviceProfileService: DeviceProfileService,
-    private utils: UtilsService
+    private utils: UtilsService,
+    private factoryMngService: FactoryMngService
   ) { }
 
   private getEntityObservable(entityType: EntityType, entityId: string,
@@ -112,6 +114,15 @@ export class EntityService {
 
     let observable: Observable<BaseData<EntityId>>;
     switch (entityType) {
+      case EntityType.FACTORY:
+        observable = this.factoryMngService.getFactory(entityId, config);
+        break;
+      case EntityType.WORK_SHOP:
+        observable = this.factoryMngService.getWorkShop(entityId, config);
+        break;
+      case EntityType.PROD_LINE:
+        observable = this.factoryMngService.getProdLine(entityId, config);
+        break;
       case EntityType.DEVICE:
         observable = this.deviceService.getDevice(entityId, config);
         break;
@@ -286,6 +297,45 @@ export class EntityService {
     const authUser = getCurrentAuthUser(this.store);
     const customerId = authUser.customerId;
     switch (entityType) {
+      case EntityType.FACTORY:
+        pageLink.sortOrder.property = 'name';
+        entitiesObservable = this.factoryMngService.getAllFactories(pageLink.textSearch, config).pipe(map(res => {
+          const arr: any[] = res || [];
+          arr.forEach(item => (item.id = { entityType: EntityType.FACTORY, id: item.id }));
+          return {
+            data: arr,
+            totalPages: 1,
+            totalElements: arr.length,
+            hasNext: false
+          }
+        }));
+        break;
+      case EntityType.WORK_SHOP:
+        pageLink.sortOrder.property = 'name';
+        entitiesObservable = this.factoryMngService.getAllWorkShops('', '', pageLink.textSearch, config).pipe(map(res => {
+          const arr: any[] = res || [];
+          arr.forEach(item => (item.id = { entityType: EntityType.WORK_SHOP, id: item.id }));
+          return {
+            data: arr,
+            totalPages: 1,
+            totalElements: arr.length,
+            hasNext: false
+          }
+        }));
+        break;
+      case EntityType.PROD_LINE:
+        pageLink.sortOrder.property = 'name';
+        entitiesObservable = this.factoryMngService.getAllProdLines('', '', '', pageLink.textSearch, config).pipe(map(res => {
+          const arr: any[] = res || [];
+          arr.forEach(item => (item.id = { entityType: EntityType.PROD_LINE, id: item.id }));
+          return {
+            data: arr,
+            totalPages: 1,
+            totalElements: arr.length,
+            hasNext: false
+          }
+        }));
+        break;
       case EntityType.DEVICE:
         pageLink.sortOrder.property = 'name';
         if (authUser.authority === Authority.CUSTOMER_USER) {
@@ -620,6 +670,9 @@ export class EntityService {
         entityTypes.push(EntityType.TENANT);
         break;
       case Authority.TENANT_ADMIN:
+        entityTypes.push(EntityType.FACTORY);
+        entityTypes.push(EntityType.WORK_SHOP);
+        entityTypes.push(EntityType.PROD_LINE);
         entityTypes.push(EntityType.DEVICE);
         entityTypes.push(EntityType.ASSET);
         if (authState.edgesSupportEnabled) {
@@ -636,6 +689,9 @@ export class EntityService {
         }
         break;
       case Authority.CUSTOMER_USER:
+        entityTypes.push(EntityType.FACTORY);
+        entityTypes.push(EntityType.WORK_SHOP);
+        entityTypes.push(EntityType.PROD_LINE);
         entityTypes.push(EntityType.DEVICE);
         entityTypes.push(EntityType.ASSET);
         if (authState.edgesSupportEnabled) {
