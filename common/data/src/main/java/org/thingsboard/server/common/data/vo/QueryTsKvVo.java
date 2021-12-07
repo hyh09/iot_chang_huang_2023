@@ -50,6 +50,9 @@ public class QueryTsKvVo {
     @ApiModelProperty("起始页  不传默认是0")
     private  int page=0;
 
+    private UUID tenantId;
+
+
 
     public QueryTsKvVo() {
     }
