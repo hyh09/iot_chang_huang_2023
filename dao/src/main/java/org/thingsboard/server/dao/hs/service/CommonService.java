@@ -80,6 +80,14 @@ public interface CommonService {
     default String UUIDToString(UUID uuid) {
         return uuid == null ? null : uuid.toString();
     }
+    /**
+     * 转换成String
+     *
+     * @param uuid UUID
+     */
+    default String UUIDToStringOrElseNullStr(UUID uuid) {
+        return uuid == null ? "null" : uuid.toString();
+    }
 
     /**
      * 获得近几个月的开始时间

@@ -539,7 +539,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var allDeviceIdList = allDeviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
 
         if (query.getIsQueryAll()) {
-            var DeviceFactoryIdMap = allDeviceList.stream().collect(Collectors.toMap(e -> e.getId().toString(), e -> UUIDToString(e.getFactoryId())));
+            var DeviceFactoryIdMap = allDeviceList.stream().collect(Collectors.toMap(e -> e.getId().toString(), e -> UUIDToStringOrElseNullStr(e.getFactoryId())));
             var factoryList = this.clientService.listAllFactoryByTenantId(tenantId);
             Map<String, Integer> factoryMap = Maps.newHashMap();
 

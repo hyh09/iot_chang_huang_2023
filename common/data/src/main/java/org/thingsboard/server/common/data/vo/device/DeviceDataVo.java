@@ -17,8 +17,6 @@ import java.util.UUID;
  **/
 @Data
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @ApiModel(value = "提供app端--设备返回的属性")
 public class DeviceDataVo {
 
@@ -49,4 +47,22 @@ public class DeviceDataVo {
     @ApiModelProperty(value = "生产线名称")
     private  String  productionLineName;
 
+
+    @ApiModelProperty(value = "在线状态 1是在线,0是不在线")
+    private  String  onlineStatus="0";
+
+    public DeviceDataVo() {
+    }
+
+    public DeviceDataVo(UUID deviceId, String deviceName, String deviceCode, UUID factoryId, String factoryName, UUID workshopId, String workshopName, UUID productionLineId, String productionLineName) {
+        this.deviceId = deviceId;
+        this.deviceName = deviceName;
+        this.deviceCode = deviceCode;
+        this.factoryId = factoryId;
+        this.factoryName = factoryName;
+        this.workshopId = workshopId;
+        this.workshopName = workshopName;
+        this.productionLineId = productionLineId;
+        this.productionLineName = productionLineName;
+    }
 }

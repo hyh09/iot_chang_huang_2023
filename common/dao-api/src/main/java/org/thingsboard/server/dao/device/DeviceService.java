@@ -190,4 +190,6 @@ public interface DeviceService {
 
     PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 
+    void   updateFlgById(Boolean deviceFlg, UUID id);
+
 }
