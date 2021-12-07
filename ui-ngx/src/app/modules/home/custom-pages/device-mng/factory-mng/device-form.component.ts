@@ -35,6 +35,10 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
     this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
       this.deviceDictionaries = res || [];
+      const defaultDicts = this.deviceDictionaries.filter(item => (item.isDefault));
+      if (defaultDicts.length > 0) {
+        this.entityForm.get('dictDeviceId').setValue(defaultDicts[0].id);
+      }
     });
     this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
       const arr = res || [];
@@ -59,7 +63,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       workshopName: [entity && entity.workshopName ? entity.workshopName : this.entitiesTableConfig.componentsData.workshopName],
       productionLineId: [entity && entity.productionLineId ? entity.productionLineId : this.entitiesTableConfig.componentsData.productionLineId],
       productionLineName: [entity && entity.productionLineName ? entity.productionLineName : this.entitiesTableConfig.componentsData.productionLineName],
-      dictDeviceId: [entity ? entity.dictDeviceId : ''],
+      dictDeviceId: [entity && entity.dictDeviceId ? entity.dictDeviceId : ''],
       name: [entity ? entity.name : '', Validators.required],
       deviceNo: [entity ? entity.deviceNo : ''],
       comment: [entity ? entity.comment : ''],
@@ -109,8 +113,8 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
 
   onDeviceDicChange(dictDeviceId: string) {
     if (dictDeviceId) {
-      this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDicInfo => {
-        const { comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDicInfo;
+      this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDictInfo => {
+        const { comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDictInfo;
         this.updateForm({ comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList });
       });
     } else {

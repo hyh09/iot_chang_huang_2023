@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
+import { checkBoxCell, DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
@@ -11,6 +11,7 @@ import { DeviceDictionaryFiltersComponent } from "./device-dictionary-filters.co
 import { map } from "rxjs/operators";
 import { UtilsService } from "@app/core/public-api";
 import { DataDictionaryService } from "@app/core/http/custom/data-dictionary.service";
+import { EntityAction } from "@app/modules/home/models/entity/entity-component.models";
 
 @Injectable()
 export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DeviceDictionary>> {
@@ -53,6 +54,9 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       new EntityTableColumn<DeviceDictionary>('supplier', 'device-mng.supplier', '150px'),
       new EntityTableColumn<DeviceDictionary>('model', 'device-mng.model', '120px'),
       new EntityTableColumn<DeviceDictionary>('version', 'device-mng.version', '100px'),
+      new EntityTableColumn<DeviceDictionary>('isDefault', 'device-mng.default', '60px', entity => {
+        return checkBoxCell(entity.isDefault);
+      }),
       new DateEntityTableColumn<DeviceDictionary>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }
@@ -92,6 +96,7 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
         return result;
       }));
     }
+    this.config.onEntityAction = action => this.onDeviceDictionaryAction(action);
 
     return this.config;
   }
@@ -118,6 +123,17 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       });
       this.config.componentsData.dataDictionaries = arr;
     });
+  }
+
+  onDeviceDictionaryAction(action: EntityAction<DeviceDictionary>): boolean {
+    switch (action.action) {
+      case 'setDefault':
+        this.deviceDictionaryService.setDefault(action.entity.id).subscribe(() => {
+          this.config.table.updateData();
+        });
+        return true;
+    }
+    return false;
   }
 
 }
