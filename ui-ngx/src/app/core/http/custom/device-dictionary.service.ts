@@ -83,4 +83,9 @@ export class DeviceDictionaryService {
     return this.http.get<DeviceDataGroup[]>(`/api/dict/device/group/initData`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 设为默认设备字典
+  public setDefault(dictionaryId: HasUUID, config?: RequestConfig) {
+    return this.http.post(`/api/dict/device/${dictionaryId}/default`, defaultHttpOptionsFromConfig(config));
+  }
+
 }
