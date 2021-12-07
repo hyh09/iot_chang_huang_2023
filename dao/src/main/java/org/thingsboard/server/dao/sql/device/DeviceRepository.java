@@ -18,6 +18,7 @@ package org.thingsboard.server.dao.sql.device;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +27,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -255,11 +257,16 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
 
 
 
-    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceDataVo(t.id,t.name,t.code,f1.id,f1.name,t.workshopId,w1.name,t.productionLineId,p1.name) " +
+    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceDataVo(t.id,t.name,t.code,f1.id,f1.name,t.workshopId,w1.name,t.productionLineId,p1.name,t.picture) " +
             "from DeviceEntity  t LEFT  JOIN  FactoryEntity f1  on  t.factoryId = f1.id" +
               " LEFT JOIN  WorkshopEntity  w1  ON  w1.id = t.workshopId     LEFT JOIN ProductionLineEntity  p1  ON  p1.id = t.productionLineId  "+
             "  where  t.factoryId=?1 and t.name like  %?2%    ")
     Page<DeviceDataVo> queryAllByNameLike(UUID factoryId, String Name, Pageable pageable);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update DeviceEntity d set  d.deviceFlg= :deviceFlg   where    d.id =:id")
+   void  updateFlgById(@Param("deviceFlg") Boolean deviceFlg,@Param("id") UUID id);
 
 
 }

@@ -46,6 +46,7 @@ export type EntityRowClickFunction<T extends BaseData<HasId>> = (event: Event, e
 
 export type CellContentFunction<T extends BaseData<HasId>> = (entity: T, key: string) => string;
 export type CellTooltipFunction<T extends BaseData<HasId>> = (entity: T, key: string) => string | undefined;
+export type CellSwitchFunction<T extends BaseData<HasId>> = (entity: T, flag: boolean) => void;
 export type HeaderCellStyleFunction<T extends BaseData<HasId>> = (key: string) => object;
 export type CellStyleFunction<T extends BaseData<HasId>> = (entity: T, key: string) => object;
 export type CopyCellContent<T extends BaseData<HasId>> = (entity: T, key: string, length: number) => object;
@@ -101,7 +102,9 @@ export class EntityTableColumn<T extends BaseData<HasId>> extends BaseEntityTabl
               public cellTooltipFunction: CellTooltipFunction<T> = () => undefined,
               public isNumberColumn: boolean = false,
               public actionCell: CellActionDescriptor<T> = null,
-              public isIconColumn: boolean = false) {
+              public isIconColumn: boolean = false,
+              public isSwitchColumn: boolean = false,
+              public onSwitch: CellSwitchFunction<T> = () => {}) {
     super('content', key, title, width, sortable);
   }
 }

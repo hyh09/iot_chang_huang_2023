@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.KvEntry;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
@@ -25,6 +26,7 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.InitEntity;
 import org.thingsboard.server.dao.hs.dao.InitRepository;
@@ -68,6 +70,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     // 初始化Repository
     InitRepository initRepository;
+
+    // 工厂Service
+    FactoryService factoryService;
 
     // 工厂Repository
     FactoryRepository factoryRepository;
@@ -217,6 +222,18 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 根据当前登录人查询工厂列表
+     *
+     * @param tenantId 租户Id
+     * @param userId   用户Id
+     * @return 工厂列表
+     */
+    @Override
+    public List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId) {
+        return this.factoryService.findFactoryListByLoginRole(userId.getId(), tenantId.getId());
+    }
+
+    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id
@@ -318,5 +335,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setTsService(TimeseriesService tsService) {
         this.tsService = tsService;
+    }
+
+    @Autowired
+    public void setFactoryService(FactoryService factoryService) {
+        this.factoryService = factoryService;
     }
 }

@@ -5,6 +5,7 @@ import { UserMngTableConfigResolver } from '../auth-mng/user-mng/user-mng-table-
 import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictionary-table-config.resolver';
 import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
 import { FactoryMngComponent } from './factory-mng/factory-mng.component';
+import { ProdCapacitySettingsTableConfigResolver } from './prod-capacity-settings/prod-capacity-settings-table-config.resolver';
 
 const routes: Routes = [
   {
@@ -22,7 +23,7 @@ const routes: Routes = [
           title: 'device-mng.data-dic',
           breadcrumb: {
             label: 'device-mng.data-dic',
-            icon: 'book'
+            icon: 'mdi:data-dictionary'
           }
         },
         resolve: {
@@ -36,7 +37,7 @@ const routes: Routes = [
           title: 'device-mng.device-dic',
           breadcrumb: {
             label: 'device-mng.device-dic',
-            icon: 'book'
+            icon: 'mdi:device-dictionary'
           }
         },
         resolve: {
@@ -74,6 +75,20 @@ const routes: Routes = [
             }
           }
         ]
+      },
+      {
+        path: 'productionCapacitySettings',
+        component: EntitiesTableComponent,
+        data: {
+          title: 'device-mng.prod-capactity-settings',
+          breadcrumb: {
+            label: 'device-mng.prod-capactity-settings',
+            icon: 'mdi:switch-config'
+          }
+        },
+        resolve: {
+          entitiesTableConfig: ProdCapacitySettingsTableConfigResolver
+        }
       }
     ]
   }
@@ -85,7 +100,8 @@ const routes: Routes = [
   providers: [
     DataDictionaryTableConfigResolver,
     DeviceDictionaryTableConfigResolver,
-    UserMngTableConfigResolver
+    UserMngTableConfigResolver,
+    ProdCapacitySettingsTableConfigResolver
   ]
 })
 export class DeviceMngRoutingModule { }

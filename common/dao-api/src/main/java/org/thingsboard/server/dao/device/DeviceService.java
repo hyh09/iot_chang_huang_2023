@@ -55,7 +55,7 @@ public interface DeviceService {
 
     Device saveDevice(Device device);
 
-    Device saveDeviceWithAccessToken(Device device, String accessToken);
+    Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException;
 
     Device saveDeviceWithCredentials(Device device, DeviceCredentials deviceCredentials);
 
@@ -139,6 +139,11 @@ public interface DeviceService {
     void distributionDevice(Device device) throws ThingsboardException;
 
     /**
+     * 建立设备产线实体关系
+     * @param device
+     */
+    void createRelationDeviceFromProductionLine(Device device);
+    /**
      * 移除产线设备
      * @param device
      * @throws ThingsboardException
@@ -189,5 +194,7 @@ public interface DeviceService {
     List<Device> findDeviceListByCdn(Device device);
 
     PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
+
+    void   updateFlgById(Boolean deviceFlg, UUID id);
 
 }

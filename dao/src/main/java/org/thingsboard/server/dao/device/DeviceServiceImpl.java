@@ -44,6 +44,9 @@ import org.thingsboard.server.common.data.devicecomponent.DeviceComponent;
 import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.*;
+import org.thingsboard.server.common.data.id.factory.FactoryId;
+import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -178,7 +181,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     })
     @Transactional
     @Override
-    public Device saveDeviceWithAccessToken(Device device, String accessToken) {
+    public Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException {
         return doSaveDevice(device, accessToken, true);
     }
 
@@ -357,6 +360,14 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         removeDeviceFromCacheById(tenantId, device.getId());
 
         deviceDao.removeById(tenantId, deviceId.getId());
+
+        if(device != null && device.getProductionLineId() != null){
+            //清除实体关系
+            EntityRelation relation = new EntityRelation(
+                    new ProductionLineId(device.getFactoryId()), device.getId(),EntityRelation.CONTAINS_TYPE
+            );
+            relationService.deleteRelation(device.getTenantId(), relation);
+        }
     }
 
     private void removeDeviceFromCacheByName(TenantId tenantId, String name) {
@@ -888,11 +899,25 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      * @throws ThingsboardException
      */
     @Override
-    public void distributionDevice(Device device) throws ThingsboardException{
+    public void distributionDevice(Device device) throws ThingsboardException {
         //移除产线原先的设备（清空该设备的产线、车间、工厂数据）
-        deviceDao.removeProductionLine(device.getDeviceIdList(),device.getUpdatedUser());
+        deviceDao.removeProductionLine(device.getDeviceIdList(), device.getUpdatedUser());
         //添加设备给指定产线
         deviceDao.addProductionLine(device);
+        //建立实体关系
+        this.createRelationDeviceFromProductionLine(device);
+    }
+
+    public void createRelationDeviceFromProductionLine(Device device){
+        if(device != null){
+            if(device.getProductionLineId() != null){
+                //建立实体关系
+                EntityRelation relation = new EntityRelation(
+                        new ProductionLineId(device.getProductionLineId()), device.getId(),EntityRelation.CONTAINS_TYPE
+                );
+                relationService.saveRelation(device.getTenantId(), relation);
+            }
+        }
     }
 
     /**
@@ -989,7 +1014,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
           vo1.setFlg(d1.getDeviceFlg());
           vo1.setStatus(getStatusByDevice(d1));
           vo1.setDeviceName(getDictName(tenantId,d1.getDictDeviceId()));
-          vo1.setDeviceName(getDictFileName(tenantId,d1.getDeviceProfileId()));
+          vo1.setDeviceFileName(getDictFileName(tenantId,d1.getDeviceProfileId()));
+          vo1.setCreatedTime(d1.getCreatedTime());
             return  vo1;
         }).collect(Collectors.toList());
 
@@ -999,24 +1025,29 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
 
+    @Override
+    public void updateFlgById(Boolean deviceFlg, UUID id) {
+        deviceDao.updateFlgById(deviceFlg,id);
+    }
 
+    private final String Yes="已匹配";
 
-    private  Boolean  getStatusByDevice(Device  device)
+    private  String  getStatusByDevice(Device  device)
     {
-         Boolean   flg= false;
+//         Boolean   flg= false;
         if(device.getFactoryId() != null )
         {
-           return  true;
+           return  Yes;
         }
         if(device.getWorkshopId() != null)
         {
-            return  true;
+            return  Yes;
         }
         if(device.getProductionLineId() != null)
         {
-            return  true;
+            return  Yes;
         }
-        return flg;
+        return "未匹配";
 
     }
 

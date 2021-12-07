@@ -3,8 +3,15 @@ package org.thingsboard.server.dao.workshop;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.factory.FactoryId;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
+import org.thingsboard.server.common.data.relation.EntityRelation;
+import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.relation.RelationDao;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -16,9 +23,11 @@ import java.util.UUID;
 public class WorkshopServiceImpl extends AbstractEntityService implements WorkshopService {
 
     private final WorkshopDao workshopDao;
+    private final RelationDao relationDao;
 
-    public WorkshopServiceImpl(WorkshopDao workshopDao){
+    public WorkshopServiceImpl(WorkshopDao workshopDao,RelationDao relationDao){
         this.workshopDao = workshopDao;
+        this.relationDao = relationDao;
     }
 
     /**
@@ -30,7 +39,13 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
     public Workshop saveWorkshop(Workshop workshop) throws ThingsboardException {
         log.trace("Executing saveWorkshop [{}]", workshop);
         workshop.setCode(String.valueOf(System.currentTimeMillis()));
-        return workshopDao.saveWorkshop(workshop);
+        Workshop workshopResult = workshopDao.saveWorkshop(workshop);
+        //建立实体关系
+        EntityRelation relation = new EntityRelation(
+               new FactoryId(workshopResult.getFactoryId()), new WorkshopId(workshopResult.getId()),EntityRelation.CONTAINS_TYPE
+        );
+        relationService.saveRelation(new TenantId(workshopResult.getTenantId()), relation);
+        return workshopResult;
     }
 
     /**
@@ -54,6 +69,14 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
     public void delWorkshop(UUID id){
         log.trace("Executing delWorkshop [{}]", id);
         workshopDao.delWorkshop(id);
+        Workshop byId = workshopDao.findById(id);
+        //清除实体关系
+        if(byId != null && byId.getFactoryId() != null){
+            EntityRelation relation = new EntityRelation(
+                    new FactoryId(byId.getFactoryId()), new WorkshopId(id),EntityRelation.CONTAINS_TYPE
+            );
+            relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
+        }
     }
 
 

@@ -1,7 +1,7 @@
+import { DeviceDictionaryId } from '../id/custom/device-dictionary-id.models';
 import { BaseData } from './../base-data';
-import { DataDictionaryId } from '../id/custom/data-dictionary-id.models';
 
-export interface DataDictionary extends BaseData<DataDictionaryId> {
+export interface DataDictionary extends BaseData<DeviceDictionaryId> {
   code: string;
   icon: string;
   type: string;
@@ -63,7 +63,7 @@ export interface DeviceCompTreeNode extends DeviceComp {
   parent?: DeviceCompTreeNode;
 }
 
-export interface DeviceDictionary extends BaseData<DataDictionaryId> {
+export interface DeviceDictionary extends BaseData<DeviceDictionaryId> {
   code: string;
   type: string;
   supplier: string;
@@ -75,8 +75,18 @@ export interface DeviceDictionary extends BaseData<DataDictionaryId> {
   fileId: string;
   fileName: string;
   comment: string;
+  isDefault: boolean;
   standardPropertyList: Array<DeviceData>;
   propertyList: Array<DeviceProperty>;
   groupList: Array<DeviceDataGroup>;
   componentList: Array<DeviceComp>;
+}
+
+export interface ProdCapacitySettings extends BaseData<any> {
+  deviceId: string;
+  deviceName: string;
+  deviceFileName: string;
+  dictName: string;
+  deviceNo: string;
+  flg: boolean;
 }

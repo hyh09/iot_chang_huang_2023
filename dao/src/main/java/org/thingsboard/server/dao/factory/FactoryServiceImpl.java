@@ -8,13 +8,19 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.id.factory.FactoryId;
+import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.relation.RelationDao;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 
 import javax.transaction.Transactional;
@@ -33,10 +39,12 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     private final FactoryDao factoryDao;
     private final UserRoleMenuSvc userRoleMenuSvc;
     private final DeviceService deviceService;
-    public FactoryServiceImpl(FactoryDao factoryDao,UserRoleMenuSvc userRoleMenuSvc,DeviceService deviceService){
+    private final RelationDao relationDao;
+    public FactoryServiceImpl(FactoryDao factoryDao,UserRoleMenuSvc userRoleMenuSvc,DeviceService deviceService,RelationDao relationDao){
         this.factoryDao = factoryDao;
         this.userRoleMenuSvc = userRoleMenuSvc;
         this.deviceService = deviceService;
+        this.relationDao = relationDao;
     }
 
 
@@ -52,6 +60,11 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         Factory factorySave = factoryDao.saveFactory(factory);
         //创建工厂管理员角色
         userRoleMenuSvc.saveRole(factory.getTenantId(),factory.getCreatedUser(),factorySave.getId());
+        //建立实体关系
+        EntityRelation relation = new EntityRelation(
+                new TenantId(factorySave.getTenantId()), new FactoryId(factorySave.getId()),EntityRelation.CONTAINS_TYPE
+        );
+        relationService.saveRelation(new TenantId(factorySave.getTenantId()), relation);
         return factorySave;
     }
 
@@ -76,6 +89,15 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     public void delFactory(UUID id){
         log.trace("Executing delFactory [{}]", id);
         factoryDao.delFactory(id);
+
+        Factory byId = factoryDao.findById(id);
+        //清除实体关系
+        if(byId != null && byId.getTenantId() != null){
+            EntityRelation relation = new EntityRelation(
+                    new TenantId(byId.getTenantId()), new FactoryId(id),EntityRelation.CONTAINS_TYPE
+            );
+            relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
+        }
     }
 
 

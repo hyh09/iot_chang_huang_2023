@@ -49,7 +49,8 @@ export enum EntityType {
   ALARM_RULES = 'ALARM_RULES',
   DEVICE_HISTORY = 'DEVICE_HISTORY',
   POTENCY = 'POTENCY',
-  FACTORY_VERSION = 'FACTORY_VERSION'
+  FACTORY_VERSION = 'FACTORY_VERSION',
+  PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS'
 }
 
 export enum AliasEntityType {
@@ -443,6 +444,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       {
         noEntities: 'system-settings.no-factory-version'
       }
+    ],
+    [
+      EntityType.PROD_CAPACITY_SETTINGS,
+      {
+        noEntities: 'device.no-devices-text'
+      }
     ]
   ]
 );
@@ -607,6 +614,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.FACTORY_VERSION,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.PROD_CAPACITY_SETTINGS,
       {
         helpLinkId: ''
       }

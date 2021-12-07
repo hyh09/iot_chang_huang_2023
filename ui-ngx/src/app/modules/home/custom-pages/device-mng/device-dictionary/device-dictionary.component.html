@@ -1,3 +1,11 @@
+<div class="tb-details-buttons" fxLayout.xs="column">
+  <button mat-raised-button color="primary"
+          [disabled]="(isLoading$ | async)"
+          (click)="onEntityAction($event, 'setDefault')"
+          [fxShow]="!isEdit && !entity?.isDefault">
+    {{'device-mng.set-default-device-dict' | translate }}
+  </button>
+</div>
 <div class="mat-padding device-dict-wrapper" fxLayout="column">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
