@@ -10,6 +10,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +24,7 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -141,27 +140,31 @@ public class FileController extends BaseController {
     }
 
     /**
-     * 流式下载文件
+     * 大文件流式下载
      */
-    @ApiOperation(value = "流式下载文件")
+    @ApiOperation(value = "大文件流式下载")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "文件Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/file/streaming")
     public void downloadFileStreaming(@RequestParam("id") String id, HttpServletResponse response) throws ThingsboardException, IOException {
         var fileInfo = this.fileService.getFileInfo(getTenantId(), id);
-        var filePath = Paths.get(fileInfo.getLocation());
-        response.setHeader("content-type", "application/octet-stream");
-        response.setContentType("application/octet-stream");
+//        File file = new File(fileInfo.getLocation());
+//        response.reset();
+//        response.setContentType("application/octet-stream");
+//        response.setContentLengthLong(file.length());
+//        response.setCharacterEncoding("utf-8");
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileInfo.getFileName(), StandardCharsets.UTF_8));
-        byte[] buff = new byte[4096];
-        try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(filePath)); OutputStream os = response.getOutputStream();) {
-            int i = bis.read(buff);
-            while (i != -1) {
-                os.write(buff, 0, buff.length);
+        try (InputStream is = new FileInputStream(fileInfo.getLocation()); OutputStream os = response.getOutputStream();) {
+            int read = 0;
+            byte[] bytes = new byte[2048];
+            while ((read = is.read(bytes)) != -1) {
+                os.write(bytes, 0, read);
                 os.flush();
-                i = bis.read(buff);
+                response.flushBuffer();
             }
+            os.flush();
+            response.resetBuffer();
         }
     }
 
