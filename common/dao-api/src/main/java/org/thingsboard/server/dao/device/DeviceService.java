@@ -55,7 +55,7 @@ public interface DeviceService {
 
     Device saveDevice(Device device);
 
-    Device saveDeviceWithAccessToken(Device device, String accessToken);
+    Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException;
 
     Device saveDeviceWithCredentials(Device device, DeviceCredentials deviceCredentials);
 
