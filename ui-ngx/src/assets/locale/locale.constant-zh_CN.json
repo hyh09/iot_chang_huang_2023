@@ -3146,6 +3146,8 @@
     "data-dic": "数据字典",
     "device-dic": "设备字典",
     "factory-mng": "工厂管理",
+    "prod-capactity-settings": "产能运算配置",
+    "in-calculation": "参与产能运算",
     "delete-data-dic-title": "确定要删除数据字典 '{{dataDicName}}' 吗？",
     "delete-data-dic-text": "请注意：确认后，该数据字典及其所有相关数据将不可恢复。",
     "delete-data-dics-title": "确定要删除 { count, plural, 1 {# 个数据字典} other {# 个数据字典} } 吗？",
