@@ -10,5 +10,5 @@ alter table tenant
     add latitude varchar(255);
 
 
- alter table device
-	add flg varchar(255)  default '0';
+alter table device
+    add flg boolean default false;
