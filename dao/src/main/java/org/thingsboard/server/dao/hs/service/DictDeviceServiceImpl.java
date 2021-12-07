@@ -132,7 +132,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                     DictDeviceStandardPropertyVO vo = new DictDeviceStandardPropertyVO();
                     BeanUtils.copyProperties(e, vo);
                     return vo;
-                }).collect(Collectors.toList());;
+                }).collect(Collectors.toList());
 
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
@@ -515,8 +515,31 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param tenantId 租户Id
      */
     @Override
-    public UUID getDefaultDictDeviceId(TenantId tenantId) {
+    @Transactional
+    public UUID getDefaultDictDeviceId(TenantId tenantId) throws ThingsboardException {
         return null;
+    }
+
+    /**
+     * 设置默认设备字典
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    @Transactional
+    public void updateDictDeviceDefault(TenantId tenantId, UUID dictDeviceId) throws ThingsboardException {
+        var r = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), dictDeviceId);
+        if (r.isEmpty())
+            throw new ThingsboardException("设备字典不存在", ThingsboardErrorCode.GENERAL);
+        this.dictDeviceRepository.findByTenantIdAndIsDefaultIsTrue(tenantId.getId()).ifPresent(e -> {
+            e.setIsDefault(Boolean.FALSE);
+            this.dictDeviceRepository.save(e);
+        });
+        r.ifPresent(e -> {
+            e.setIsDefault(Boolean.TRUE);
+            this.dictDeviceRepository.save(e);
+        });
     }
 
     @Autowired

@@ -709,3 +709,7 @@ COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."dict_data_id" IS 
 
 -- Table Comment
 COMMENT ON TABLE "public"."hs_dict_device_standard_property" IS '设备字典-标准属性';
+
+-- December 6, 2021 11:03:14 GMT+8
+ALTER TABLE "public"."hs_dict_device" ADD COLUMN "is_default" bool NOT NULL DEFAULT 'FALSE';
+COMMENT ON COLUMN "public"."hs_dict_device"."is_default" IS '是否默认';

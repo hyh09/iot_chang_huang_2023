@@ -4,6 +4,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.thingsboard.server.dao.hs.dao.HsModelConstants;
+
+import javax.persistence.Column;
 
 /**
  * 设备字典
@@ -92,4 +95,10 @@ public class DictDevice extends BasePO {
      */
     @ApiModelProperty(value = "图片")
     private String picture;
+
+    /**
+     * 是否默认
+     */
+    @ApiModelProperty(value = "是否默认")
+    private Boolean isDefault;
 }

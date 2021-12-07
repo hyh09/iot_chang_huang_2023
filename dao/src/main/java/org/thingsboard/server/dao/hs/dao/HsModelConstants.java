@@ -58,7 +58,7 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_COMMENT = "comment";
     public static final String DICT_DEVICE_ICON = "icon";
     public static final String DICT_DEVICE_PICTURE = "picture";
-    public static final String DICT_DEVICE_FILE_ID = "file_id";
+    public static final String DICT_DEVICE_IS_DEFAULT = "is_default";
 
     public static final String DICT_DEVICE_COMPONENT_TABLE_NAME = "hs_dict_device_component";
     public static final String DICT_DEVICE_COMPONENT_PARENT_ID= "parent_id";
