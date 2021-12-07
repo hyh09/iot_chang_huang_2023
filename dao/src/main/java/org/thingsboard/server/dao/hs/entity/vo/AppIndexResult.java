@@ -44,6 +44,6 @@ public class AppIndexResult {
     /**
      * 工厂列表数据
      */
-    @ApiModelProperty("工厂列表数据")
+    @ApiModelProperty(value = "工厂列表数据", notes = "仅用于登录角色为租户时")
     List<AppIndexFactoryResult> factoryResultList;
 }
