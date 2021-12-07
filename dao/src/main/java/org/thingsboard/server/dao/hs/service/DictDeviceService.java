@@ -130,7 +130,7 @@ public interface DictDeviceService {
      *
      * @param tenantId 租户Id
      */
-    UUID getDefaultDictDeviceId(TenantId tenantId) throws ThingsboardException;
+    UUID getDefaultDictDeviceId(TenantId tenantId);
 
     /**
      * 设置默认设备字典

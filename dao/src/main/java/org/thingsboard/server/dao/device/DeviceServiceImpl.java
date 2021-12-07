@@ -226,7 +226,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return savedDevice;
     }
 
-    private Device doSaveDevice(Device device, String accessToken, boolean doValidate) throws ThingsboardException {
+    private Device doSaveDevice(Device device, String accessToken, boolean doValidate) {
         //如果设备字典为空，则要添加默认字典
         if(device.getDictDeviceId() == null || StringUtils.isEmpty(device.getDictDeviceId().toString())){
             device.setDictDeviceId(dictDeviceService.getDefaultDictDeviceId(device.getTenantId()));

@@ -516,7 +516,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     @Transactional
-    public UUID getDefaultDictDeviceId(TenantId tenantId) throws ThingsboardException {
+    public UUID getDefaultDictDeviceId(TenantId tenantId) {
         return null;
     }
 
