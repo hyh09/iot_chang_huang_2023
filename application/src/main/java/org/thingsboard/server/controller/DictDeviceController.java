@@ -162,4 +162,16 @@ public class DictDeviceController extends BaseController {
         checkParameter("dictDeviceId", dictDeviceId);
         return this.dictDeviceService.listDictDeviceComponents(getTenantId(), toUUID(dictDeviceId));
     }
+
+    /**
+     * 设置默认设备字典
+     */
+    @ApiOperation(value = "设置默认设备字典")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true),})
+    @PostMapping("/dict/device/{id}/default")
+    public void updateDictDeviceDefault(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
+        this.dictDeviceService.updateDictDeviceDefault(getTenantId(), toUUID(id));
+    }
 }
