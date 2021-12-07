@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,7 +22,10 @@ import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -48,11 +52,11 @@ public class FileController extends BaseController {
      * 上传文件
      */
     @ApiOperation(value = "上传文件", notes = "返回文件Id")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
-            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
-            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
-    })
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
+//            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+//            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
+//    })
     @PostMapping(value = "/file")
     public String uploadFile(@RequestParam(required = false) String checksum,
                              @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
@@ -134,6 +138,31 @@ public class FileController extends BaseController {
 //                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + new String(fileInfo.getFileName().getBytes("utf-8"), "ISO8859-1"))
                 .contentLength(resource.contentLength())
                 .body(resource);
+    }
+
+    /**
+     * 流式下载文件
+     */
+    @ApiOperation(value = "流式下载文件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "文件Id", paramType = "query", required = true),
+    })
+    @GetMapping(value = "/file/streaming")
+    public void downloadFileStreaming(@RequestParam("id") String id, HttpServletResponse response) throws ThingsboardException, IOException {
+        var fileInfo = this.fileService.getFileInfo(getTenantId(), id);
+        var filePath = Paths.get(fileInfo.getLocation());
+        response.setHeader("content-type", "application/octet-stream");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileInfo.getFileName(), StandardCharsets.UTF_8));
+        byte[] buff = new byte[4096];
+        try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(filePath)); OutputStream os = response.getOutputStream();) {
+            int i = bis.read(buff);
+            while (i != -1) {
+                os.write(buff, 0, buff.length);
+                os.flush();
+                i = bis.read(buff);
+            }
+        }
     }
 
     /**

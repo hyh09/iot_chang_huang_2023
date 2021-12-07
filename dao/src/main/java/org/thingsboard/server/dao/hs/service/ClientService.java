@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.hs.service;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
@@ -86,8 +87,17 @@ public interface ClientService {
     /**
      * 列举车间下全部产线
      *
-     * @param tenantId  租户Id
+     * @param tenantId   租户Id
      * @param workshopId 车间Id
      */
     List<ProductionLine> listProductionLinesByTenantIdAndWorkshopId(TenantId tenantId, UUID workshopId);
+
+    /**
+     * 根据当前登录人查询工厂列表
+     *
+     * @param tenantId 租户Id
+     * @param userId   用户Id
+     * @return 工厂列表
+     */
+    List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId);
 }

@@ -589,7 +589,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .timesResultList(timesResultList)
                     .build();
         } else if (query.isQueryFactoryOnly()) {
-            var deviceNameMap = allDeviceList.stream().collect(Collectors.toMap(e->e.getId().toString(), Device::getName));
+            var deviceNameMap = allDeviceList.stream().collect(Collectors.toMap(e -> e.getId().toString(), Device::getName));
             Map<String, Integer> deviceMap = Maps.newHashMap();
             var alarmList = this.alarmRepository.findAllAlarmsByStartTimeAndEndTime(tenantId.getId(), allDeviceIdList, EntityType.DEVICE.toString(), timeQuery.getStartTime(), timeQuery.getEndTime());
             int criticalCount = 0;
@@ -621,7 +621,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 });
             }
 
-            var timesResultList = deviceMap.entrySet().stream().map(e-> BoardAlarmTimesResult.builder()
+            var timesResultList = deviceMap.entrySet().stream().map(e -> BoardAlarmTimesResult.builder()
                     .value(deviceNameMap.getOrDefault(e.getKey(), e.getKey()))
                     .num(e.getValue())
                     .build())
@@ -637,7 +637,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .timesResultList(timesResultList)
                     .build();
         } else if (query.isQueryWorkshopOnly()) {
-            var deviceNameMap = allDeviceList.stream().collect(Collectors.toMap(e->e.getId().toString(), Device::getName));
+            var deviceNameMap = allDeviceList.stream().collect(Collectors.toMap(e -> e.getId().toString(), Device::getName));
             Map<String, Integer> deviceMap = Maps.newHashMap();
             var alarmList = this.alarmRepository.findAllAlarmsByStartTimeAndEndTime(tenantId.getId(), allDeviceIdList, EntityType.DEVICE.toString(), timeQuery.getStartTime(), timeQuery.getEndTime());
             int criticalCount = 0;
@@ -669,7 +669,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 });
             }
 
-            var timesResultList = deviceMap.entrySet().stream().map(e-> BoardAlarmTimesResult.builder()
+            var timesResultList = deviceMap.entrySet().stream().map(e -> BoardAlarmTimesResult.builder()
                     .value(deviceNameMap.getOrDefault(e.getKey(), e.getKey()))
                     .num(e.getValue())
                     .build())
@@ -722,7 +722,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     /**
-     * 【App】获得app首页实时监控数据
+     * 【App】获得app首页实时监控数据，租户下全部
      *
      * @param tenantId 租户Id
      */
@@ -756,7 +756,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return AppIndexResult.builder()
                 .onLineDeviceCount(count)
                 .offLineDeviceCount(allDeviceIdList.size() - count)
-                .factoryResultList(factoryList.stream().map(e->map.get(e.getId().toString())).collect(Collectors.toList()))
+                .factoryResultList(factoryList.stream().map(e -> map.get(e.getId().toString())).collect(Collectors.toList()))
                 .alarmResult(AlarmDayResult.builder()
                         .historyAlarmTimes(this.alarmRepository.countAllByTenantId(tenantId.getId()))
                         .yesterdayAlarmTimes(this.alarmRepository.countAllByTenantIdAndCreatedTimeBetween(tenantId.getId(), CommonUtil.getYesterdayStartTime(), CommonUtil.getTodayStartTime()))
