@@ -47,6 +47,10 @@ public class DeviceDataVo {
     @ApiModelProperty(value = "生产线名称")
     private  String  productionLineName;
 
+    @ApiModelProperty(value = "设备的图片")
+    private String picture;
+
+
 
     @ApiModelProperty(value = "在线状态 1是在线,0是不在线")
     private  String  onlineStatus="0";
@@ -64,5 +68,19 @@ public class DeviceDataVo {
         this.workshopName = workshopName;
         this.productionLineId = productionLineId;
         this.productionLineName = productionLineName;
+    }
+
+
+    public DeviceDataVo(UUID deviceId, String deviceName, String deviceCode, UUID factoryId, String factoryName, UUID workshopId, String workshopName, UUID productionLineId, String productionLineName, String picture) {
+        this.deviceId = deviceId;
+        this.deviceName = deviceName;
+        this.deviceCode = deviceCode;
+        this.factoryId = factoryId;
+        this.factoryName = factoryName;
+        this.workshopId = workshopId;
+        this.workshopName = workshopName;
+        this.productionLineId = productionLineId;
+        this.productionLineName = productionLineName;
+        this.picture = picture;
     }
 }

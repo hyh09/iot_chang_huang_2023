@@ -181,7 +181,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     })
     @Transactional
     @Override
-    public Device saveDeviceWithAccessToken(Device device, String accessToken) {
+    public Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException {
         return doSaveDevice(device, accessToken, true);
     }
 

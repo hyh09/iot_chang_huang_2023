@@ -88,16 +88,16 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String uploadFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
-        byte[] bytes = file.getBytes();
-        var calCheckSum = CommonUtil.generateChecksum(checksumAlgorithm, ByteBuffer.wrap(bytes));
-        if (StringUtils.isNotBlank(checksum) && !calCheckSum.equals(checksum))
-            throw new ThingsboardException("文件校验失败", ThingsboardErrorCode.GENERAL);
+//        byte[] bytes = file.getBytes();
+//        var calCheckSum = CommonUtil.generateChecksum(checksumAlgorithm, ByteBuffer.wrap(bytes));
+//        if (StringUtils.isNotBlank(checksum) && !calCheckSum.equals(checksum))
+//            throw new ThingsboardException("文件校验失败", ThingsboardErrorCode.GENERAL);
 
         var fileEntity = new FileEntity(FileInfo.builder()
-                .checkSum(calCheckSum)
+                .checkSum(checksum)
                 .contentType(file.getContentType())
                 .fileName(file.getOriginalFilename())
-                .dataSize((long) bytes.length)
+                .dataSize(file.getSize())
                 .checksumAlgorithm(checksumAlgorithm.toString())
                 .tenantId(tenantId.toString())
                 .build());
@@ -105,10 +105,17 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
 
         var path = commonComponent.toFileRootDir(tenantId);
         var filePath = Paths.get(path.toString(), fileEntity.getId().toString());
-        Files.write(filePath, bytes);
-
         fileEntity.setLocation(filePath.toString());
         this.fileRepository.save(fileEntity);
+
+        try (InputStream is = file.getInputStream(); OutputStream os = Files.newOutputStream(filePath)) {
+            byte[] buffer = new byte[4096];
+            int read = 0;
+            while ((read = is.read(buffer)) > 0) {
+                os.write(buffer, 0, read);
+            }
+        }
+
         return fileEntity.getId().toString();
     }
 
@@ -210,7 +217,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
             Enumeration<InputStream> e = v.elements();
             sis = new SequenceInputStream(e);
             bos = new BufferedOutputStream(new FileOutputStream(filePath.toString()));
-            byte[] bys = new byte[1024];
+            byte[] bys = new byte[4096];
             int len;
             while ((len = sis.read(bys)) != -1) {
                 bos.write(bys, 0, len);

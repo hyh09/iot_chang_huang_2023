@@ -6,6 +6,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.AlarmId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -171,7 +172,7 @@ public interface DeviceMonitorService {
     List<DictDeviceComponentPropertyVO> getRtMonitorDeviceComponentDetail(TenantId tenantId, UUID deviceId, UUID componentId) throws ExecutionException, InterruptedException;
 
     /**
-     * 【App】获得app首页实时监控数据
+     * 【App】获得app首页实时监控数据，租户下全部
      *
      * @param tenantId 租户Id
      */
