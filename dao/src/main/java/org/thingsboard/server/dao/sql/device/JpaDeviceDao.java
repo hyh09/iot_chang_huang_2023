@@ -35,12 +35,14 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
@@ -49,6 +51,7 @@ import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
+import org.thingsboard.server.dao.relation.RelationDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
@@ -81,6 +84,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
     @Autowired
     private FactoryDao factoryDao;
+
+    @Autowired
+    private RelationDao relationDao;
 
     @Override
     protected Class<DeviceEntity> getEntityClass() {
@@ -411,6 +417,13 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 entity.setUpdatedUser(updatedUser);
                 entity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
                 deviceRepository.save(entity);
+                //清除实体关系
+                if(entity.getProductionLineId() != null){
+                    EntityRelation relation = new EntityRelation(
+                            new ProductionLineId(entity.getProductionLineId()), new DeviceId(entity.getId()),EntityRelation.CONTAINS_TYPE
+                    );
+                    relationDao.deleteRelation(new TenantId(entity.getTenantId()), relation);
+                }
             }
         });
 
