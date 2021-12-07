@@ -2349,7 +2349,7 @@
     "password-reset": "密码重置",
     "passwords-mismatch-error": "输入的密码必须相同！",
     "remember-me": "记住我",
-    "request-password-reset": "请求密码重置",
+    "request-password-reset": "请求重置密码",
     "reset-password": "重置密码",
     "sign-in": "登录 ",
     "username": "用户名（邮箱）"
