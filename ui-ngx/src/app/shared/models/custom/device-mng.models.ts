@@ -80,3 +80,12 @@ export interface DeviceDictionary extends BaseData<DataDictionaryId> {
   groupList: Array<DeviceDataGroup>;
   componentList: Array<DeviceComp>;
 }
+
+export interface ProdCapacitySettings extends BaseData<any> {
+  deviceId: string;
+  deviceName: string;
+  deviceFileName: string;
+  dictName: string;
+  deviceNo: string;
+  flg: boolean;
+}
