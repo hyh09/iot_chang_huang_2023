@@ -10,6 +10,7 @@ import { Store } from '@ngrx/store';
 
 export interface CompInfo extends DeviceComp {
   isEdit?: boolean;
+  isView?: boolean;
 }
 
 export interface DeviceCompDialogData {
@@ -25,6 +26,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
 
   compForm: FormGroup;
   isEdit: boolean;
+  isView: boolean;
   compDataExpanded: boolean = true;
   dataDictionaries: DataDictionary[] = [];
 
@@ -40,6 +42,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
 
   ngOnInit() {
     this.isEdit = this.data.compInfo ? this.data.compInfo.isEdit : false;
+    this.isView = this.data.compInfo ? this.data.compInfo.isView : false;
     this.dataDictionaries = this.data.dataDictionaries;
     this.buildForm();
   }
