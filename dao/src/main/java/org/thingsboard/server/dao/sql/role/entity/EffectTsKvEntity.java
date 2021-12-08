@@ -191,11 +191,10 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     {
 
         //如果时间不相同的时候 代表有最大值 和最小值
-        if(ts!=ts2) {
-            valueLast2 =StringUtilToll.sub(valueLast2,valueLast);
+        if(ts.equals(ts2)) {
+            valueLast2 = "0";
         }else {
-            valueLast2 = valueLast2;
-
+            valueLast2 =StringUtilToll.sub(valueLast2,valueLast);
         }
 
 
