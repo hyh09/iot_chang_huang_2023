@@ -17,6 +17,9 @@ package org.thingsboard.server.common.data.id;
 
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.edge.EdgeEventType;
+import org.thingsboard.server.common.data.id.factory.FactoryId;
+import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 
 import java.util.UUID;
 
@@ -77,6 +80,12 @@ public class EntityIdFactory {
                 return new EdgeId(uuid);
             case RPC:
                 return new RpcId(uuid);
+            case FACTORY:
+                return new FactoryId(uuid);
+            case WORKSHOP:
+                return new WorkshopId(uuid);
+            case PRODUCTION_LINE:
+                return new ProductionLineId(uuid);
         }
         throw new IllegalArgumentException("EntityType " + type + " is not supported!");
     }
