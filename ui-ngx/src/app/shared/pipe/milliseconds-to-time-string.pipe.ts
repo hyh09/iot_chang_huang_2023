@@ -36,21 +36,12 @@ export class MillisecondsToTimeStringPipe implements PipeTransform {
       timeString += this.translate.instant('timewindow.days', {days});
     }
     if (hours > 0) {
-      if (timeString.length === 0 && hours === 1) {
-        hours = 0;
-      }
       timeString += this.translate.instant('timewindow.hours', {hours});
     }
     if (minutes > 0) {
-      if (timeString.length === 0 && minutes === 1) {
-        minutes = 0;
-      }
       timeString += this.translate.instant('timewindow.minutes', {minutes});
     }
     if (seconds > 0) {
-      if (timeString.length === 0 && seconds === 1) {
-        seconds = 0;
-      }
       timeString += this.translate.instant('timewindow.seconds', {seconds});
     }
     return timeString;

@@ -65,7 +65,7 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
 
         this.config.columns = [];
         (res || []).forEach((col, index) => {
-          this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col]), () => ({}), false));
+          this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col] || ''), () => ({}), false));
         });
 
         this.config.entitiesFetchFunction = pageLink => {
