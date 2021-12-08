@@ -6,14 +6,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
+import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -36,14 +40,14 @@ public class BulletinBoardController extends BaseController{
     @ApiOperation(value = "【三个时期的总产量】")
     @RequestMapping(value = "/threePeriodsValue", method = RequestMethod.GET)
     @ResponseBody
-    public  ResultHomeCapAppVo  threePeriodsValue(@RequestParam("factoryId") UUID factoryId)
+    public  ResultHomeCapAppVo  threePeriodsValue(@RequestParam(required = false ,value = "factoryId")  String factoryId)
     {
         ResultHomeCapAppVo result = new ResultHomeCapAppVo();
 
         try {
             result.setTodayValue(getValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
             result.setYesterdayValue(getValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(getValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+            result.setHistory(bulletinBoardSvc.getHistoryCapValue(factoryId,getTenantId().getId()));
             return result;
         }catch (Exception e)
         {
@@ -54,10 +58,12 @@ public class BulletinBoardController extends BaseController{
     }
 
 
-    private  String getValueByTime(UUID factoryId, long startTime, long EndTime) throws ThingsboardException {
+    private  String getValueByTime(String factoryId, long startTime, long EndTime) throws ThingsboardException {
         QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
         queryTsKvVo.setTenantId(getTenantId().getId());
-        queryTsKvVo.setFactoryId(factoryId);
+        if(StringUtils.isNotEmpty(factoryId)) {
+            queryTsKvVo.setFactoryId(UUID.fromString(factoryId));
+        }
         queryTsKvVo.setStartTime(startTime);
         queryTsKvVo.setEndTime(EndTime);
         ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
@@ -67,4 +73,7 @@ public class BulletinBoardController extends BaseController{
         }
         return  "0";
     }
+
+
+
 }

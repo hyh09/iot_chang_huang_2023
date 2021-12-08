@@ -2349,7 +2349,7 @@
     "password-reset": "密码重置",
     "passwords-mismatch-error": "输入的密码必须相同！",
     "remember-me": "记住我",
-    "request-password-reset": "请求密码重置",
+    "request-password-reset": "请求重置密码",
     "reset-password": "重置密码",
     "sign-in": "登录 ",
     "username": "用户名（邮箱）"
@@ -2748,6 +2748,7 @@
     "hide": "隐藏",
     "history": "历史",
     "hours": "{ hours, plural, 0 {- 小时 } 1 {# 小时 } other {# 小时 } }",
+    "interval": "时间间隔",
     "last": "最后",
     "last-prefix": "最后",
     "minutes": "{ minutes, plural, 0 {- 分 } 1 {# 分 } other {# 分 } }",

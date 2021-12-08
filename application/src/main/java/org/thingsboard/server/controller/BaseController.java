@@ -73,6 +73,7 @@ import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.factory.FactoryService;
+import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
@@ -291,6 +292,7 @@ public abstract class BaseController {
     @Autowired  protected TenantSysRoleService tenantSysRoleService;
     @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
     @Autowired  protected UserLanguageSvc userLanguageSvc;
+    @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
 
 
     @ExceptionHandler(ThingsboardException.class)
