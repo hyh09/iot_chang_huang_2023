@@ -187,10 +187,11 @@ public class EffectTsKvRepository {
             sonSql.append(" and  d1.production_line_id = :productionLineId");
             param.put("productionLineId", queryTsKvVo.getProductionLineId());
         }
-            if(queryTsKvVo.getDeviceId() == null)
-        {
-            sonSql.append(" and  d1.flg = true");
-        }else {
+//            if(queryTsKvVo.getDeviceId() == null)
+//        {
+//            sonSql.append(" and  d1.flg = true");
+//        }else {
+        if(queryTsKvVo.getDeviceId() != null){
             sonSql.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
