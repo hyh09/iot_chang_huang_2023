@@ -1,6 +1,8 @@
 package org.thingsboard.server.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,9 @@ public class BulletinBoardController extends BaseController{
 
 
     @ApiOperation(value = "【三个时期的总产量】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query")
+    })
     @RequestMapping(value = "/threePeriodsValue", method = RequestMethod.GET)
     @ResponseBody
     public  ResultHomeCapAppVo  threePeriodsValue(@RequestParam(required = false ,value = "factoryId")  String factoryId)
