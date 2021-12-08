@@ -58,108 +58,108 @@ public final class TbActorMailbox implements TbActorCtx {
     }
 
     private void tryInit(int attempt) {
-        try {
-            log.debug("[{}] Trying to init actor, attempt: {}", selfId, attempt);
-            if (!destroyInProgress.get()) {
-                actor.init(this);
-                if (!destroyInProgress.get()) {
-                    ready.set(READY);
-                    tryProcessQueue(false);
-                }
-            }
-        } catch (Throwable t) {
-            log.debug("[{}] Failed to init actor, attempt: {}", selfId, attempt, t);
-            int attemptIdx = attempt + 1;
-            InitFailureStrategy strategy = actor.onInitFailure(attempt, t);
-            if (strategy.isStop() || (settings.getMaxActorInitAttempts() > 0 && attemptIdx > settings.getMaxActorInitAttempts())) {
-                log.info("[{}] Failed to init actor, attempt {}, going to stop attempts.", selfId, attempt, t);
-                stopReason = TbActorStopReason.INIT_FAILED;
-                destroy();
-            } else if (strategy.getRetryDelay() > 0) {
-                log.info("[{}] Failed to init actor, attempt {}, going to retry in attempts in {}ms", selfId, attempt, strategy.getRetryDelay());
-                log.debug("[{}] Error", selfId, t);
-                system.getScheduler().schedule(() -> dispatcher.getExecutor().execute(() -> tryInit(attemptIdx)), strategy.getRetryDelay(), TimeUnit.MILLISECONDS);
-            } else {
-                log.info("[{}] Failed to init actor, attempt {}, going to retry immediately", selfId, attempt);
-                log.debug("[{}] Error", selfId, t);
-                dispatcher.getExecutor().execute(() -> tryInit(attemptIdx));
-            }
-        }
+//        try {
+//            log.debug("[{}] Trying to init actor, attempt: {}", selfId, attempt);
+//            if (!destroyInProgress.get()) {
+//                actor.init(this);
+//                if (!destroyInProgress.get()) {
+//                    ready.set(READY);
+//                    tryProcessQueue(false);
+//                }
+//            }
+//        } catch (Throwable t) {
+//            log.debug("[{}] Failed to init actor, attempt: {}", selfId, attempt, t);
+//            int attemptIdx = attempt + 1;
+//            InitFailureStrategy strategy = actor.onInitFailure(attempt, t);
+//            if (strategy.isStop() || (settings.getMaxActorInitAttempts() > 0 && attemptIdx > settings.getMaxActorInitAttempts())) {
+//                log.info("[{}] Failed to init actor, attempt {}, going to stop attempts.", selfId, attempt, t);
+//                stopReason = TbActorStopReason.INIT_FAILED;
+//                destroy();
+//            } else if (strategy.getRetryDelay() > 0) {
+//                log.info("[{}] Failed to init actor, attempt {}, going to retry in attempts in {}ms", selfId, attempt, strategy.getRetryDelay());
+//                log.debug("[{}] Error", selfId, t);
+//                system.getScheduler().schedule(() -> dispatcher.getExecutor().execute(() -> tryInit(attemptIdx)), strategy.getRetryDelay(), TimeUnit.MILLISECONDS);
+//            } else {
+//                log.info("[{}] Failed to init actor, attempt {}, going to retry immediately", selfId, attempt);
+//                log.debug("[{}] Error", selfId, t);
+//                dispatcher.getExecutor().execute(() -> tryInit(attemptIdx));
+//            }
+//        }
     }
 
     private void enqueue(TbActorMsg msg, boolean highPriority) {
-        if (!destroyInProgress.get()) {
-            if (highPriority) {
-                highPriorityMsgs.add(msg);
-            } else {
-                normalPriorityMsgs.add(msg);
-            }
-            tryProcessQueue(true);
-        } else {
-            if (highPriority && msg.getMsgType().equals(MsgType.RULE_NODE_UPDATED_MSG)) {
-                synchronized (this) {
-                    if (stopReason == TbActorStopReason.INIT_FAILED) {
-                        destroyInProgress.set(false);
-                        stopReason = null;
-                        initActor();
-                    } else {
-                        msg.onTbActorStopped(stopReason);
-                    }
-                }
-            } else {
-                msg.onTbActorStopped(stopReason);
-            }
-        }
+//        if (!destroyInProgress.get()) {
+//            if (highPriority) {
+//                highPriorityMsgs.add(msg);
+//            } else {
+//                normalPriorityMsgs.add(msg);
+//            }
+//            tryProcessQueue(true);
+//        } else {
+//            if (highPriority && msg.getMsgType().equals(MsgType.RULE_NODE_UPDATED_MSG)) {
+//                synchronized (this) {
+//                    if (stopReason == TbActorStopReason.INIT_FAILED) {
+//                        destroyInProgress.set(false);
+//                        stopReason = null;
+//                        initActor();
+//                    } else {
+//                        msg.onTbActorStopped(stopReason);
+//                    }
+//                }
+//            } else {
+//                msg.onTbActorStopped(stopReason);
+//            }
+//        }
     }
 
     private void tryProcessQueue(boolean newMsg) {
-        if (ready.get() == READY) {
-            if (newMsg || !highPriorityMsgs.isEmpty() || !normalPriorityMsgs.isEmpty()) {
-                if (busy.compareAndSet(FREE, BUSY)) {
-                    dispatcher.getExecutor().execute(this::processMailbox);
-                } else {
-                    log.trace("[{}] MessageBox is busy, new msg: {}", selfId, newMsg);
-                }
-            } else {
-                log.trace("[{}] MessageBox is empty, new msg: {}", selfId, newMsg);
-            }
-        } else {
-            log.trace("[{}] MessageBox is not ready, new msg: {}", selfId, newMsg);
-        }
+//        if (ready.get() == READY) {
+//            if (newMsg || !highPriorityMsgs.isEmpty() || !normalPriorityMsgs.isEmpty()) {
+//                if (busy.compareAndSet(FREE, BUSY)) {
+//                    dispatcher.getExecutor().execute(this::processMailbox);
+//                } else {
+//                    log.trace("[{}] MessageBox is busy, new msg: {}", selfId, newMsg);
+//                }
+//            } else {
+//                log.trace("[{}] MessageBox is empty, new msg: {}", selfId, newMsg);
+//            }
+//        } else {
+//            log.trace("[{}] MessageBox is not ready, new msg: {}", selfId, newMsg);
+//        }
     }
 
     private void processMailbox() {
-        boolean noMoreElements = false;
-        for (int i = 0; i < settings.getActorThroughput(); i++) {
-            TbActorMsg msg = highPriorityMsgs.poll();
-            if (msg == null) {
-                msg = normalPriorityMsgs.poll();
-            }
-            if (msg != null) {
-                try {
-                    log.debug("[{}] Going to process message: {}", selfId, msg);
-                    actor.process(msg);
-                } catch (TbRuleNodeUpdateException updateException){
-                    stopReason = TbActorStopReason.INIT_FAILED;
-                    destroy();
-                } catch (Throwable t) {
-                    log.debug("[{}] Failed to process message: {}", selfId, msg, t);
-                    ProcessFailureStrategy strategy = actor.onProcessFailure(t);
-                    if (strategy.isStop()) {
-                        system.stop(selfId);
-                    }
-                }
-            } else {
-                noMoreElements = true;
-                break;
-            }
-        }
-        if (noMoreElements) {
-            busy.set(FREE);
-            dispatcher.getExecutor().execute(() -> tryProcessQueue(false));
-        } else {
-            dispatcher.getExecutor().execute(this::processMailbox);
-        }
+//        boolean noMoreElements = false;
+//        for (int i = 0; i < settings.getActorThroughput(); i++) {
+//            TbActorMsg msg = highPriorityMsgs.poll();
+//            if (msg == null) {
+//                msg = normalPriorityMsgs.poll();
+//            }
+//            if (msg != null) {
+//                try {
+//                    log.debug("[{}] Going to process message: {}", selfId, msg);
+//                    actor.process(msg);
+//                } catch (TbRuleNodeUpdateException updateException){
+//                    stopReason = TbActorStopReason.INIT_FAILED;
+//                    destroy();
+//                } catch (Throwable t) {
+//                    log.debug("[{}] Failed to process message: {}", selfId, msg, t);
+//                    ProcessFailureStrategy strategy = actor.onProcessFailure(t);
+//                    if (strategy.isStop()) {
+//                        system.stop(selfId);
+//                    }
+//                }
+//            } else {
+//                noMoreElements = true;
+//                break;
+//            }
+//        }
+//        if (noMoreElements) {
+//            busy.set(FREE);
+//            dispatcher.getExecutor().execute(() -> tryProcessQueue(false));
+//        } else {
+//            dispatcher.getExecutor().execute(this::processMailbox);
+//        }
     }
 
     @Override
