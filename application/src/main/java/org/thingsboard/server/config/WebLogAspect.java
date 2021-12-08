@@ -42,6 +42,7 @@ public class WebLogAspect {
                     + "||execution(public * org.thingsboard.server.controller.BoardRTMonitorController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.FileController.*(..))"
     )
     public void webLog() {
     }
