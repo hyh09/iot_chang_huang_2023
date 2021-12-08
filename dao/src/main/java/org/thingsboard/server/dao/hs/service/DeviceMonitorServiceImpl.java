@@ -297,7 +297,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                 .unit(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                                 .name(v.getName())
                                 .title(v.getTitle())
-                                .content(kvData.isEmpty() ? v.getContent() : kvData.get().getValue().toString())
+                                .content(kvData.isEmpty() ? v.getContent() : this.formatKvEntryValue(kvData.get()))
                                 .createdTime(kvData.isEmpty() ? v.getCreatedTime() : kvData.get().getTs())
                                 .build();
                     }).collect(Collectors.toList()))
@@ -314,7 +314,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                         .unit(Optional.ofNullable(dictDataMap.get(v.getKey())).map(DictData::getUnit).orElse(null))
                         .name(v.getKey())
                         .title(v.getKey())
-                        .content(v.getValueAsString())
+                        .content(this.formatKvEntryValue(v))
                         .createdTime(v.getTs())
                         .build());
             }
@@ -373,7 +373,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var data = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get()
                 .stream().map(e -> DictDeviceGroupPropertyVO.builder()
-                        .content(e.getValue().toString())
+                        .content(this.formatKvEntryValue(e))
                         .unit(Optional.ofNullable(finalRMap.getOrDefault(groupPropertyName, null))
                                 .map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                         .createdTime(e.getTs())
@@ -414,7 +414,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         List<Map<String, Object>> result = new ArrayList<>();
         Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
-        KvResult.forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), v.getValueAsString()));
+        KvResult.forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
         resultMap.forEach((k, v) -> {
             v.put(HSConstants.CREATED_TIME, k);
             result.add(v);
@@ -713,7 +713,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return DaoUtil.convertDataList(this.componentPropertyRepository.findAllByComponentIdOrderBySortAsc(componentId)).stream().map(e ->
                 DictDeviceComponentPropertyVO.builder()
                         .name(e.getName())
-                        .content(Optional.ofNullable(kvEntryMap.get(e.getName())).map(f -> f.getValue().toString()).orElse(e.getContent()))
+                        .content(Optional.ofNullable(kvEntryMap.get(e.getName())).map(this::formatKvEntryValue).orElse(e.getContent()))
                         .unit(Optional.ofNullable(e.getDictDataId()).map(map::get).map(DictData::getUnit).orElse(null))
                         .title(e.getTitle())
                         .createdTime(Optional.ofNullable(kvEntryMap.get(e.getName())).map(TsKvEntry::getTs).orElse(e.getCreatedTime()))
@@ -825,7 +825,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 var kvData = Optional.ofNullable(kvEntryMap.get(propertyVO.getName()));
                 kvData.ifPresent(k -> {
                     groupPropertyNameList.add(propertyVO.getName());
-                    propertyVO.setContent(kvData.get().getValue().toString());
+                    propertyVO.setContent(this.formatKvEntryValue(kvData.get()));
                     propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
                     propertyVO.setCreatedTime(kvData.get().getTs());
                 });
