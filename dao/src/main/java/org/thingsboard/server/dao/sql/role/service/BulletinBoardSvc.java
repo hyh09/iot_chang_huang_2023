@@ -1,6 +1,9 @@
 package org.thingsboard.server.dao.sql.role.service;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
+
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -10,7 +13,13 @@ import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
  **/
 public interface BulletinBoardSvc {
 
-
+    /**
+     * 历史产能的接口
+     * @param factoryId
+     * @param tenantId
+     * @return
+     */
+   String getHistoryCapValue(String factoryId, UUID tenantId);
 
 
 
@@ -18,5 +27,5 @@ public interface BulletinBoardSvc {
      * 历史产能接口
      *   就是查询当前最大
      */
-   String  historicalCapacity (MaxTsVo MaxTsVo);
+   String  historySumByKey (MaxTsVo MaxTsVo);
 }

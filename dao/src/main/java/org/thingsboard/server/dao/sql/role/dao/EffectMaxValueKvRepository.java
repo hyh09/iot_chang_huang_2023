@@ -35,14 +35,8 @@ public class EffectMaxValueKvRepository {
 
     @PersistenceContext
     private EntityManager entityManager;
-    @Autowired
-    private TenantSysRoleService tenantSysRoleService;
 
-    private  String SELECT_SQL="select entity_id,max(substring(concat(long_v,\n" +
-            "                                      dbl_v,\n" +
-            "                                      str_v,\n" +
-            "                                      json_v),\n" +
-            "                               E'(\\\\-?\\\\d+\\\\.?\\\\d*)')) as value1 from  ts_kv  a1 where  1=1 ";
+
 
 
     private  String SELECT_SQL_10="with tabl1 as ( " +
@@ -125,50 +119,4 @@ public class EffectMaxValueKvRepository {
 
 
 
-    public List<EffectMaxValueKvEntity> queryEntity(MaxTsVo maxTsVo)
-    {
-        Query query = null;
-        StringBuffer  sql = new StringBuffer();
-        Map<String, Object> param = new HashMap<>();
-        sql.append(SELECT_SQL);
-        sql.append(" and a1.entity_id in ( select *  from  device d1  where 1=1 ");
-        if(maxTsVo.getTenantId() != null)
-        {
-            sql.append(" and  d1.tenant_id = :tenantId");
-            param.put("tenantId",maxTsVo.getTenantId());
-        }
-        if(maxTsVo.getFactoryId() != null)
-        {
-            sql.append(" and  d1.factory_id = :factoryId");
-            param.put("factoryId",maxTsVo.getFactoryId());
-        }
-        if(maxTsVo.getWorkshopId() != null)
-        {
-            sql.append(" and  d1.workshop_id = :workshopId");
-            param.put("workshopId",maxTsVo.getWorkshopId());
-        }
-        if(maxTsVo.getProductionLineId() != null)
-        {
-            sql.append(" and  d1.production_line_id = :productionLineId");
-            param.put("productionLineId",maxTsVo.getProductionLineId());
-        }
-        if(!maxTsVo.getCapSign() ) {
-            sql.append(" and  d1.flg = :flg");
-            param.put("flg",maxTsVo.getCapSign());
-        }
-        sql.append(" ) ");
-
-        query= entityManager.createNativeQuery(sql.toString(),"result001");
-        System.out.println("==param==>"+param);
-        if(!CollectionUtils.isEmpty(param)) {
-            for (Map.Entry<String, Object> entry : param.entrySet()) {
-                query.setParameter(entry.getKey(), entry.getValue());
-            }
-        }
-
-        List<EffectMaxValueKvEntity> entityList=query.getResultList();
-        return  entityList;
-
-
-    }
 }
