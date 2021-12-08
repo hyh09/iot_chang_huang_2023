@@ -64,7 +64,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
                 this.deleteFile(e.getId().toString());
                 log.info("定时删除文件成功：【{}】", e.getId().toString());
             } catch (Exception ignore) {
-                log.info("定时删除文件失败：【{}】", e.getId().toString());
+                log.error("定时删除文件失败：【{}】", e.getId().toString());
             }
         }), 60, 60 * 60, TimeUnit.SECONDS);
     }
