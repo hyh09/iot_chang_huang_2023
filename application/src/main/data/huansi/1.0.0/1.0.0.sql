@@ -639,3 +639,11 @@ ALTER TABLE public.device ADD COLUMN comment character varying(255) COLLATE pg_c
 COMMENT ON COLUMN public.device.comment IS '备注';
 ALTER TABLE public.device ADD COLUMN device_no character varying(255) COLLATE pg_catalog."default";
 COMMENT ON COLUMN public.device.comment IS '设备编号';
+
+--2021/12/8工厂车间产线都增加 additional_info
+    ALTER TABLE IF EXISTS public.hs_factory
+    ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
+	ALTER TABLE IF EXISTS public.hs_workshop
+    ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
+	ALTER TABLE IF EXISTS public.hs_production_line
+    ADD COLUMN additional_info character varying COLLATE pg_catalog."default";

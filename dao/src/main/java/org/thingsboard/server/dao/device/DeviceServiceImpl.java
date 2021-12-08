@@ -364,7 +364,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         if(device != null && device.getProductionLineId() != null){
             //清除实体关系
             EntityRelation relation = new EntityRelation(
-                    new ProductionLineId(device.getFactoryId()), device.getId(),EntityRelation.CONTAINS_TYPE
+                    device.getId(),new ProductionLineId(device.getFactoryId()), EntityRelation.CONTAINS_TYPE
             );
             relationService.deleteRelation(device.getTenantId(), relation);
         }
@@ -913,7 +913,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             if(device.getProductionLineId() != null){
                 //建立实体关系
                 EntityRelation relation = new EntityRelation(
-                        new ProductionLineId(device.getProductionLineId()), device.getId(),EntityRelation.CONTAINS_TYPE
+                        device.getId(),new ProductionLineId(device.getProductionLineId()), EntityRelation.CONTAINS_TYPE
                 );
                 relationService.saveRelation(device.getTenantId(), relation);
             }

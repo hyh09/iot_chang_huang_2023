@@ -83,4 +83,9 @@ public interface FactoryService {
      */
     List<Factory> findByName(String name,UUID tenantId);
 
+    /**
+     * 获取实体属性
+     * @param o
+     */
+    String[] getEntityAttributeList(Object o);
 }
