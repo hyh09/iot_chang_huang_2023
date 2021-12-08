@@ -22,7 +22,7 @@
 
 hs:
   file:
-    location: "${HS_FILE_LOCATION:/Users/wwj/Downloads}"
+    location: "${HS_FILE_LOCATION:/upload}"
 
 server:
   # Server bind address
@@ -542,8 +542,8 @@ audit-log:
 
 state:
   # Should be greater then transport.sessions.report_timeout
-  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:600}"
-  defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:60}"
+  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:32}"
+  defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:10}"
   persistToTelemetry: "${PERSIST_STATE_TO_TELEMETRY:false}"
 
 js:
