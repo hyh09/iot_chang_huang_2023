@@ -14,8 +14,10 @@ import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -61,10 +63,11 @@ public class BoardSceneController extends BaseController {
         checkParameter("workshopId", workshopId);
         checkParameter("fileId", fileId);
         var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
+
         if (fileInfo != null && !fileInfo.getId().equals(fileId)) {
             this.fileService.deleteFile(getTenantId(), fileInfo.getId());
-            this.fileService.updateFileScope(getTenantId(), toUUID(fileId), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
         }
+        this.fileService.updateFileScope(getTenantId(), toUUID(fileId), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
     }
 
     /**
@@ -114,8 +117,8 @@ public class BoardSceneController extends BaseController {
         var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
         if (fileInfo != null && !fileInfo.getId().equals(fileId)) {
             this.fileService.deleteFile(getTenantId(), fileInfo.getId());
-            this.fileService.updateFileScope(getTenantId(), toUUID(fileId), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
         }
+        this.fileService.updateFileScope(getTenantId(), toUUID(fileId), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
     }
 
     /**
