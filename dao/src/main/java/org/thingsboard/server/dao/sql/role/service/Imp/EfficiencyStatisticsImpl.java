@@ -310,9 +310,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
             log.info("entity:====>"+entity);
+            capVo.setPicture(entity.getPicture());
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
+
 
             if(entity.getWorkshopId() != null) {
                 Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
@@ -602,6 +604,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             appDeviceEnergyVo.setDeviceId(key.toString());
             EffectTsKvEntity  entity1 =value.get(0);
             if(entity1 != null) {
+                appDeviceEnergyVo.setPicture(entity1.getPicture());
                 appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
                 appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {
