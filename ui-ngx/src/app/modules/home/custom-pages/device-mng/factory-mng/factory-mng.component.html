@@ -28,7 +28,7 @@
             </div>
             <span fxFlex></span>
             <button
-              *ngIf="utils.hasPermission('action.add')"
+              *ngIf="utils.hasPermission('device-mng.add-factory')"
               mat-icon-button [disabled]="isLoading$ | async"
               (click)="addFactory()"
               matTooltip="{{ 'device-mng.add-factory' | translate }}"
@@ -80,7 +80,8 @@
                 <th>{{ 'device-mng.address' | translate }}</th>
                 <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
                 <th
-                  *ngIf="utils.hasPermission('action.add') || utils.hasPermission('action.delete') || utils.hasPermission('device-mng.distribute-device')
+                  *ngIf="utils.hasPermission('device-mng.add-work-shop') || utils.hasPermission('device-mng.add-prod-line')
+                  || utils.hasPermission('device-mng.add-device') || utils.hasPermission('action.delete') || utils.hasPermission('device-mng.distribute-device')
                   || utils.hasPermission('device-mng.manage-factory-manager') || utils.hasPermission('device-mng.set-factory-manager-permissions')"
                   nzWidth="240px" nzRight
                 ></th>
@@ -110,39 +111,38 @@
                     </td>
                     <td>{{ item.address }}</td>
                     <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
-                    <td *ngIf="utils.hasPermission('action.add') || utils.hasPermission('action.delete')" nzRight nzAlign="right">
-                      <ng-container *ngIf="utils.hasPermission('action.add')">
-                        <button
-                          *ngIf="item.rowType === 'factory'"
-                          mat-icon-button
-                          [disabled]="isLoading$ | async"
-                          matTooltip="{{ 'device-mng.add-work-shop' | translate }}"
-                          matTooltipPosition="above"
-                          (click)="$event.stopPropagation(); addWorkShop(item)"
-                        >
-                          <mat-icon>add</mat-icon>
-                        </button>
-                        <button
-                          *ngIf="item.rowType === 'workShop'"
-                          mat-icon-button
-                          [disabled]="isLoading$ | async"
-                          matTooltip="{{ 'device-mng.add-prod-line' | translate }}"
-                          matTooltipPosition="above"
-                          (click)="$event.stopPropagation(); addProdLine(item)"
-                        >
-                          <mat-icon>add</mat-icon>
-                        </button>
-                        <button
-                          *ngIf="item.rowType === 'prodLine'"
-                          mat-icon-button
-                          [disabled]="isLoading$ | async"
-                          matTooltip="{{ 'device-mng.add-device' | translate }}"
-                          matTooltipPosition="above"
-                          (click)="$event.stopPropagation(); addDevice(item)"
-                        >
-                          <mat-icon>add</mat-icon>
-                        </button>
-                      </ng-container>
+                    <td *ngIf="utils.hasPermission('device-mng.add-work-shop') || utils.hasPermission('device-mng.add-prod-line')
+                    || utils.hasPermission('device-mng.add-device') || utils.hasPermission('action.delete')" nzRight nzAlign="right">
+                      <button
+                        *ngIf="item.rowType === 'factory' && utils.hasPermission('device-mng.add-work-shop')"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.add-work-shop' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); addWorkShop(item)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'workShop' && utils.hasPermission('device-mng.add-prod-line')"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.add-prod-line' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); addProdLine(item)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'prodLine' && utils.hasPermission('device-mng.add-device')"
+                        mat-icon-button
+                        [disabled]="isLoading$ | async"
+                        matTooltip="{{ 'device-mng.add-device' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); addDevice(item)"
+                      >
+                        <mat-icon>add</mat-icon>
+                      </button>
                       <ng-container *ngIf="item.rowType === 'factory'">
                         <button
                           *ngIf="utils.hasPermission('device-mng.manage-factory-manager')"
