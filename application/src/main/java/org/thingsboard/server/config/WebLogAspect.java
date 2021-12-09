@@ -50,26 +50,26 @@ public class WebLogAspect {
 
     @Around("webLog()")
     public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        log.info("===============================Start========================");
-        long startTime = System.currentTimeMillis();
-        ServletRequestAttributes attributes = (ServletRequestAttributes)
-                RequestContextHolder.getRequestAttributes();
-        Optional.ofNullable(attributes).ifPresentOrElse((r) -> {
-            HttpServletRequest request = r.getRequest();
-            log.info("IP                 : {}", request.getRemoteAddr());
-            log.info("URL                : {}", request.getRequestURL().toString());
-            log.info("HTTP Method        : {}", request.getMethod());
-            log.info("Params             : {}", request.getQueryString());
-            log.info("In Params          : {}", new Gson().toJson(proceedingJoinPoint.getArgs()));
-            log.info("Class Method       : {}.{}", proceedingJoinPoint.getSignature().getDeclaringTypeName(),
-                    proceedingJoinPoint.getSignature().getName());
-        }, () -> log.debug("ServletRequestAttributes 为 null"));
+//        log.info("===============================Start========================");
+//        long startTime = System.currentTimeMillis();
+//        ServletRequestAttributes attributes = (ServletRequestAttributes)
+//                RequestContextHolder.getRequestAttributes();
+//        Optional.ofNullable(attributes).ifPresentOrElse((r) -> {
+//            HttpServletRequest request = r.getRequest();
+//            log.info("IP                 : {}", request.getRemoteAddr());
+//            log.info("URL                : {}", request.getRequestURL().toString());
+//            log.info("HTTP Method        : {}", request.getMethod());
+//            log.info("Params             : {}", request.getQueryString());
+//            log.info("In Params          : {}", new Gson().toJson(proceedingJoinPoint.getArgs()));
+//            log.info("Class Method       : {}.{}", proceedingJoinPoint.getSignature().getDeclaringTypeName(),
+//                    proceedingJoinPoint.getSignature().getName());
+//        }, () -> log.debug("ServletRequestAttributes 为 null"));
 
         try {
             Object result = proceedingJoinPoint.proceed();
-            log.info("Response           : {}", new Gson().toJson(result));
-            log.info("Response Time      : {} ms", System.currentTimeMillis() - startTime);
-            log.info("================================End=========================");
+//            log.info("Response           : {}", new Gson().toJson(result));
+//            log.info("Response Time      : {} ms", System.currentTimeMillis() - startTime);
+//            log.info("================================End=========================");
             return result;
         } catch (Exception e) {
             throw handleException(e);
