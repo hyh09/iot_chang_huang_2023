@@ -73,11 +73,13 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     this.initDataGroup = [];
     const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
+    this.entityForm.get('deviceModel').setValue(null);
     this.entityForm.controls.standardPropertyList = this.fb.array(standardPropControls);
     this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
     this.setMapOfExpandedComp();
+    this.entityForm.updateValueAndValidity();
   }
 
   setInitDataGroup() {
