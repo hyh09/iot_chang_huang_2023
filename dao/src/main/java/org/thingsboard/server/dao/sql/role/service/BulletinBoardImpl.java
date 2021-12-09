@@ -5,12 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
+import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
@@ -37,9 +40,52 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private EffectMaxValueKvRepository effectMaxValueKvRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EffectTsKvRepository effectTsKvRepository;
+    @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
 
 
+    /**
+     * 查询总能耗的
+     * @return
+     */
+    @Override
+    public List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo vo, TenantId tenantId) {
+        log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
+        List<ConsumptionVo> consumptionVos  =  new ArrayList<>();
 
+        List<String>  keys1 = new ArrayList<>();
+        keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        vo.setKeys(keys1);
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
+        List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
+        log.info("查询到的数据{}",effectTsKvEntities);
+        if(CollectionUtils.isEmpty(effectTsKvEntities))
+        {
+            keys1.stream().forEach(s -> {
+                consumptionVos.add(translateAppTitle(mapNameToVo,s));
+
+            });
+           return  consumptionVos;
+        }
+        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
+        log.info("查询到的数据转换为设备维度:{}",map);
+        Set<UUID> keySet = map.keySet();
+        log.info("打印当前的设备id:{}",keySet);
+        List<UUID> entityIdsAll  = keySet.stream().collect(Collectors.toList());
+        List<UUID>  pageList =  entityIdsAll.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
+                collect(Collectors.toList());
+        Map<UUID,List<EffectTsKvEntity>>  listMap =  new HashMap<>();
+
+
+        for(int i=0;i<pageList.size();i++)
+        {
+            UUID uuid= pageList.get(i);
+            listMap.put(uuid,map.get(uuid));
+        }
+        keys1.stream().forEach(str->{
+            consumptionVos.add(getTotalValue(effectTsKvEntities,str,mapNameToVo));
+        });
+        return consumptionVos;
+    }
 
     @Override
     public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId) {
@@ -140,4 +186,35 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     }
 
 
+
+
+    private ConsumptionVo translateAppTitle(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,String key)
+    {
+        ConsumptionVo  consumptionVo = new ConsumptionVo();
+        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
+        if(dictVO != null) {
+            consumptionVo.setUnit( dictVO.getUnit());
+            consumptionVo.setTitle(dictVO.getTitle());
+        }
+        return  consumptionVo;
+
+    }
+
+
+
+    private  ConsumptionVo getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,String key, Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
+    {
+        ConsumptionVo  consumptionVo = new ConsumptionVo();
+
+        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
+        if(dictVO != null) {
+            consumptionVo.setUnit( dictVO.getUnit());
+            consumptionVo.setTitle(dictVO.getTitle());
+        }
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        String value =  invoiceAmount.stripTrailingZeros().toPlainString();
+        consumptionVo.setValue(value);
+        return  consumptionVo;
+    }
 }

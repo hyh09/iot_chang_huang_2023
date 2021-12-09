@@ -425,7 +425,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         voList =  tsKvEntries.stream().map(TsKvEntry ->{
             ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
             byDeviceVo.setKeyName(TsKvEntry.getKey());
-            byDeviceVo.setValue(TsKvEntry.getValue().toString());
+            byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
             byDeviceVo.setTime(TsKvEntry.getTs());
             return     byDeviceVo;
         }).collect(Collectors.toList());
@@ -469,7 +469,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                       String keyName=TsKvEntry.getKey();
                 DeviceDictionaryPropertiesVo trnaslateVo=   translateMap.get(keyName);
                       byDeviceVo.setKeyName(keyName);
-                      byDeviceVo.setValue(TsKvEntry.getValue().toString());
+                      byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
                       byDeviceVo.setTime(TsKvEntry.getTs());
                       byDeviceVo.setTitle(trnaslateVo != null?trnaslateVo.getTitle():"");
                       byDeviceVo.setUnit(trnaslateVo != null?trnaslateVo.getUnit():"");
