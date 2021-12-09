@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { DataDictionaryService } from '@app/core/http/custom/data-dictionary.service';
 import { DeviceDictionaryService } from '@app/core/http/custom/device-dictionary.service';
 import { AppState, guid } from '@app/core/public-api';
@@ -9,6 +10,7 @@ import { DataDictionary, DeviceComp, DeviceCompTreeNode, DeviceData, DeviceDataG
 import { ProdDevice } from '@app/shared/models/custom/factory-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
+import { DeviceCompFormComponent, DeviceCompDialogData } from '../device-dictionary/device-comp-form.component';
 
 @Component({
   selector: 'tb-device-form',
@@ -29,15 +31,18 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<ProdDevice>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
+    public dialog: MatDialog,
     private deviceDictionaryService: DeviceDictionaryService,
     private dataDictionaryService: DataDictionaryService
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
     this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
       this.deviceDictionaries = res || [];
-      const defaultDicts = this.deviceDictionaries.filter(item => (item.isDefault));
-      if (defaultDicts.length > 0) {
-        this.entityForm.get('dictDeviceId').setValue(defaultDicts[0].id);
+      if (this.isAdd) {
+        const defaultDicts = this.deviceDictionaries.filter(item => (item.isDefault));
+        if (defaultDicts.length > 0) {
+          this.entityForm.get('dictDeviceId').setValue(defaultDicts[0].id);
+        }
       }
     });
     this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
@@ -68,6 +73,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       deviceNo: [entity ? entity.deviceNo : ''],
       comment: [entity ? entity.comment : ''],
       picture: [entity ? entity.picture : ''],
+      fileName: [entity ? entity.fileName : ''],
       type: [entity ? entity.type : ''],
       supplier: [entity ? entity.supplier : ''],
       model: [entity ? entity.model : ''],
@@ -114,13 +120,14 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   onDeviceDicChange(dictDeviceId: string) {
     if (dictDeviceId) {
       this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDictInfo => {
-        const { comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDictInfo;
-        this.updateForm({ comment, picture, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList });
+        const { comment, picture, fileName, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDictInfo;
+        this.updateForm({ comment, picture, fileName, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList });
       });
     } else {
       this.updateForm({
         comment: '',
         picture: '',
+        fileName: '',
         type: '',
         supplier: '',
         model: '',
@@ -191,6 +198,12 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
         compControls.push(this.createCompListControl(subComp));
       }
     }
+    const propertyListControls: Array<AbstractControl> = [];
+    if (comp && comp.propertyList && comp.propertyList.length > 0) {
+      for (const property of comp.propertyList) {
+        propertyListControls.push(this.createDeviceDataControl(property));
+      }
+    }
     const control: AbstractControl =  this.fb.group({
       code: [comp.code ? comp.code : guid()],
       comment: [comp ? comp.comment: ''],
@@ -205,7 +218,8 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       supplier: [comp ? comp.supplier: ''],
       type: [comp ? comp.type: ''],
       version: [comp ? comp.version: ''],
-      warrantyPeriod: [comp ? comp.warrantyPeriod: '']
+      warrantyPeriod: [comp ? comp.warrantyPeriod: ''],
+      propertyList: this.fb.array(propertyListControls)
     });
     this.mapOfCompControl[control.get('code').value] = control;
     return control;
@@ -257,6 +271,17 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     } else {
       this.expandedCompCode.push(data.code);
     }
+  }
+  viewDeviceComp(comp: DeviceCompTreeNode) {
+    console.log(comp)
+    this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        compInfo: { ...comp, isView: true },
+        dataDictionaries: this.dataDictionaries
+      }
+    });
   }
 
 }

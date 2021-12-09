@@ -2352,6 +2352,8 @@
     "request-password-reset": "请求重置密码",
     "reset-password": "重置密码",
     "sign-in": "登录 ",
+    "slide-to-validate": "拖动滑块验证",
+    "slide-verified": "验证通过",
     "username": "用户名（邮箱）"
   },
   "ota-update": {
