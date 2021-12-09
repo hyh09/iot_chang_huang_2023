@@ -11,15 +11,13 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
-import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
-import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
+import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -61,6 +59,36 @@ public class BulletinBoardController extends BaseController{
         }
         return  result;
     }
+
+
+
+
+    @ApiOperation(value = "【看板设备今日耗能量】")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query")
+    })
+    @RequestMapping(value = "/energyConsumptionToday", method = RequestMethod.GET)
+    @ResponseBody
+    public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "factoryId")  String factoryId) throws ThingsboardException {
+        try {
+
+
+        QueryTsKvVo  vo =  new  QueryTsKvVo();
+        vo.setStartTime(CommonUtils.getZero());
+        vo.setEndTime(CommonUtils.getNowTime());
+        if(StringUtils.isNotEmpty(factoryId))
+        {
+            vo.setFactoryId(UUID.fromString(factoryId));
+        }
+        vo.setTenantId(getTenantId().getId());
+       return bulletinBoardSvc.energyConsumptionToday(vo,getTenantId().getId());
+        }catch (Exception  e)
+        {
+            log.error("打印看板设备今日耗能量:{}",e);
+            return  new ConsumptionTodayVo();
+        }
+    }
+
 
 
     private  String getValueByTime(String factoryId, long startTime, long EndTime) throws ThingsboardException {

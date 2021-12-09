@@ -145,6 +145,9 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     @Transient //最后的一个值
     private  String valueLast2;
 
+    @Transient
+    private  String localValue;
+
     public EffectTsKvEntity() {
     }
 
@@ -190,6 +193,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     public  void  subtraction()
     {
 
+        localValue = valueLast2;
         //如果时间不相同的时候 代表有最大值 和最小值
         if(ts.equals(ts2)) {
             valueLast2 = "0";
