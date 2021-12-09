@@ -45,7 +45,7 @@ public class EffectTsKvRepository {
 
 
     public  static  String  SELECT_START_01=" select   table1.id as onlyKeyId ,table1.entity_id,table1.ts as ts, table1.key as key, ty.key as keyName, " +
-            "  d1.name as deviceName,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId," +
+            "  d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId," +
          " table1.valueLast as valueLast  ";
     public  static  String  SELECT_END_02="  table2.ts as ts2,  table2.valueLast as valueLast2" ;
 
