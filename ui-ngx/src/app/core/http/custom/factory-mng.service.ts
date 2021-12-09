@@ -13,6 +13,12 @@ export interface FetchListFilter {
   deviceName?: string
 }
 
+export enum FactoryEntityType {
+  FACTORY = 'FACTORY',
+  WORKSHOP = 'WORKSHOP',
+  PRODUCTION_LINE = 'PRODUCTION_LINE'
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -130,6 +136,11 @@ export class FactoryMngService {
   // 分配设备
   public distributeDevice(params: { deviceIdList: string[]; factoryId: string; workshopId: string; productionLineId: string; }, config?: RequestConfig) {
     return this.http.post(`/api/distributionDevice`, params, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取工厂、车间、产线的实体属性
+  public getEntityProps(entity: FactoryEntityType, config?: RequestConfig): Observable<string[]> {
+    return this.http.get<string[]>(`/api/factory/getEntityAttributeList?entity=${entity}`, defaultHttpOptionsFromConfig(config));
   }
 
 }

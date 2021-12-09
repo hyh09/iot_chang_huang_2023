@@ -241,8 +241,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
         entitiesTableConfig: {
-          entityTranslations: entityTypeTranslations.get(EntityType.WORK_SHOP),
-          entityResources: entityTypeResources.get(EntityType.WORK_SHOP),
+          entityTranslations: entityTypeTranslations.get(EntityType.WORKSHOP),
+          entityResources: entityTypeResources.get(EntityType.WORKSHOP),
           entityComponent: WorkShopFormComponent,
           saveEntity: entity => this.factoryMngService.saveWorkShop(entity),
           componentsData: { factoryId, factoryName },
@@ -260,8 +260,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
         entitiesTableConfig: {
-          entityTranslations: entityTypeTranslations.get(EntityType.PROD_LINE),
-          entityResources: entityTypeResources.get(EntityType.PROD_LINE),
+          entityTranslations: entityTypeTranslations.get(EntityType.PRODUCTION_LINE),
+          entityResources: entityTypeResources.get(EntityType.PRODUCTION_LINE),
           entityComponent: ProdLineFormComponent,
           saveEntity: entity => this.factoryMngService.saveProdLine(entity),
           componentsData: { factoryId, factoryName, workshopId, workshopName },
@@ -358,14 +358,14 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveFactory(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getFactory(id + '');
       } else if (entity.rowType === 'workShop') {
-        entityTranslations = entityTypeTranslations.get(EntityType.WORK_SHOP);
-        entityResources = entityTypeResources.get(EntityType.WORK_SHOP);
+        entityTranslations = entityTypeTranslations.get(EntityType.WORKSHOP);
+        entityResources = entityTypeResources.get(EntityType.WORKSHOP);
         entityComponent = WorkShopFormComponent;
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveWorkShop(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getWorkShop(id + '');
       } else if (entity.rowType === 'prodLine') {
-        entityTranslations = entityTypeTranslations.get(EntityType.PROD_LINE);
-        entityResources = entityTypeResources.get(EntityType.PROD_LINE);
+        entityTranslations = entityTypeTranslations.get(EntityType.PRODUCTION_LINE);
+        entityResources = entityTypeResources.get(EntityType.PRODUCTION_LINE);
         entityComponent = ProdLineFormComponent;
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveProdLine(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getProdLine(id + '');
@@ -389,6 +389,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       this.isDetailsOpen = true;
     } else {
       this.isDetailsOpen = false;
+      this.currentEntityId = '';
     }
   }
 
