@@ -49,6 +49,8 @@ import { MediaBreakpoints } from '@shared/models/constants';
 import { RuleChainId } from '@shared/models/id/rule-chain-id';
 import { ServiceType } from '@shared/models/queue.models';
 import { deepTrim } from '@core/utils';
+import { DeviceDictionaryService } from '@app/core/http/custom/public-api';
+import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
 
 @Component({
   selector: 'tb-device-wizard',
@@ -91,6 +93,8 @@ export class DeviceWizardDialogComponent extends
 
   serviceType = ServiceType.TB_RULE_ENGINE;
 
+  deviceDictionaries: DeviceDictionary[] = [];
+
   private subscriptions: Subscription[] = [];
   private currentDeviceProfileTransportType = DeviceTransportType.DEFAULT;
 
@@ -102,10 +106,12 @@ export class DeviceWizardDialogComponent extends
               private deviceProfileService: DeviceProfileService,
               private deviceService: DeviceService,
               private breakpointObserver: BreakpointObserver,
-              private fb: FormBuilder) {
+              private fb: FormBuilder,
+              private deviceDictionaryService: DeviceDictionaryService) {
     super(store, router, dialogRef);
     this.deviceWizardFormGroup = this.fb.group({
         name: ['', Validators.required],
+        dictDeviceId: [''],
         label: [''],
         gateway: [false],
         overwriteActivityTime: [false],
@@ -117,6 +123,14 @@ export class DeviceWizardDialogComponent extends
         description: ['']
       }
     );
+
+    this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
+      this.deviceDictionaries = res || [];
+      const defaultDicts = this.deviceDictionaries.filter(item => (item.isDefault));
+      if (defaultDicts.length > 0) {
+        this.deviceWizardFormGroup.get('dictDeviceId').setValue(defaultDicts[0].id);
+      }
+    });
 
     this.subscriptions.push(this.deviceWizardFormGroup.get('addProfileType').valueChanges.subscribe(
       (addProfileType: number) => {
@@ -320,6 +334,7 @@ export class DeviceWizardDialogComponent extends
   private createDevice(profileId): Observable<BaseData<HasId>> {
     const device = {
       name: this.deviceWizardFormGroup.get('name').value,
+      dictDeviceId: this.deviceWizardFormGroup.get('dictDeviceId').value,
       label: this.deviceWizardFormGroup.get('label').value,
       deviceProfileId: profileId,
       additionalInfo: {

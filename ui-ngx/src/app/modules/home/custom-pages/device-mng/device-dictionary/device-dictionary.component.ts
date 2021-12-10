@@ -35,8 +35,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceDictionary>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
-    public dialog: MatDialog,
-    protected changeDetectorRef: ChangeDetectorRef
+    public dialog: MatDialog
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
@@ -230,13 +229,13 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
           }));
           setTimeout(() => {
             this.currentTabIndex = this.deviceDataGroupFormArray().controls.length - 1;
-            this.changeDetectorRef.markForCheck();
-            this.changeDetectorRef.detectChanges();
+            this.cd.markForCheck();
+            this.cd.detectChanges();
           });
         } else {
           this.deviceDataGroupFormArray().controls[this.currentTabIndex].get('name').setValue(res);
-          this.changeDetectorRef.markForCheck();
-          this.changeDetectorRef.detectChanges();
+          this.cd.markForCheck();
+          this.cd.detectChanges();
         }
       }
     });
@@ -354,8 +353,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
           this.compListFormArray().push(this.createCompListControl(res));
         }
         this.setMapOfExpandedComp();
-        this.changeDetectorRef.markForCheck();
-        this.changeDetectorRef.detectChanges();
+        this.cd.markForCheck();
+        this.cd.detectChanges();
       }
     });
   }
@@ -382,8 +381,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
         target.controls.propertyList = this.fb.array(propertyListControls);
         target.updateValueAndValidity();
         this.setMapOfExpandedComp();
-        this.changeDetectorRef.markForCheck();
-        this.changeDetectorRef.detectChanges();
+        this.cd.markForCheck();
+        this.cd.detectChanges();
       }
     });
   }

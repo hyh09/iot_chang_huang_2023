@@ -49,7 +49,7 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
       grid: {
         bottom: 5,
         right: 25,
-        left: 6,
+        left: 10,
         containLabel: true
       },
       tooltip: {
