@@ -53,7 +53,7 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
       color: ['#0663ff'],
       grid: {
         bottom: 5,
-        right: 0,
+        right: 25,
         left: 0,
         containLabel: true
       },

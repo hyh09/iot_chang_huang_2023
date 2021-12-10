@@ -685,6 +685,7 @@ export interface Device extends BaseData<DeviceId> {
   tenantId?: TenantId;
   customerId?: CustomerId;
   name: string;
+  dictDeviceId?: string;
   type: string;
   label: string;
   firmwareId?: OtaPackageId;
