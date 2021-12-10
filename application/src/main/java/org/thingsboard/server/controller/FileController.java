@@ -135,11 +135,6 @@ public class FileController extends BaseController {
     @GetMapping(value = "/file/streaming")
     public void downloadFileStreaming(@RequestParam("id") String id, HttpServletResponse response) throws ThingsboardException, IOException {
         var fileInfo = this.fileService.getFileInfo(getTenantId(), id);
-//        File file = new File(fileInfo.getLocation());
-//        response.reset();
-//        response.setContentType("application/octet-stream");
-//        response.setContentLengthLong(file.length());
-//        response.setCharacterEncoding("utf-8");
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileInfo.getFileName(), StandardCharsets.UTF_8));
         try (InputStream is = new FileInputStream(fileInfo.getLocation()); OutputStream os = response.getOutputStream();) {
             int read;
