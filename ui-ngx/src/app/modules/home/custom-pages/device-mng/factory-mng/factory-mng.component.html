@@ -70,6 +70,7 @@
             [nzData]="tableData"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             [nzNoResult]="((isLoading$ | async) ? 'common.loading' : 'device-mng.no-factory-text') | translate"
             [nzScroll]="scrollConfig"
           >

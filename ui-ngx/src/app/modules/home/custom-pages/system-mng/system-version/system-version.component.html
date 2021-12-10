@@ -19,6 +19,7 @@
             [nzData]="tableData"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             [nzNoResult]="((isLoading$ | async) ? 'common.loading' : 'system-mng.no-system-version') | translate"
           >
             <thead>
