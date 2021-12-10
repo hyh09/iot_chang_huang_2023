@@ -919,7 +919,14 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         //添加设备给指定产线
         deviceDao.addProductionLine(device);
         //建立实体关系
-        this.createRelationDeviceFromProductionLine(device);
+        if(CollectionUtils.isEmpty(device.getDeviceIdList())){
+            device.getDeviceIdList().forEach(i->{
+                Device dev = new Device();
+                dev.setId(new DeviceId(i));
+                dev.setProductionLineId(device.getProductionLineId());
+                this.createRelationDeviceFromProductionLine(dev);
+            });
+        }
     }
 
     public void createRelationDeviceFromProductionLine(Device device){
