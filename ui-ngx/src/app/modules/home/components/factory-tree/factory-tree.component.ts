@@ -172,7 +172,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
         this.selectedKeys = [factoryId];
         this.expandedKeys = [];
       } else {
-        this.selectedKeys = [];
+        this.selectedKeys = ['-1'];
         this.expandedKeys = [];
       }
     }

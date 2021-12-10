@@ -134,7 +134,10 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         this.comment = common.getComment();
         this.icon = common.getIcon();
         this.picture = common.getPicture();
-        this.isDefault = common.getIsDefault();
+        if (this.isDefault != null)
+            this.isDefault = common.getIsDefault();
+        else
+            this.isDefault = Boolean.FALSE;
 
         this.setCreatedTimeAndCreatedUser(common);
     }

@@ -151,6 +151,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzImageModule } from 'ng-zorro-antd/image';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { SlideValidatorComponent } from '@app/modules/home/components/slide-validator/slide-validator.component';
 
 
 @NgModule({
@@ -251,7 +252,8 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
     OtaPackageAutocompleteComponent,
     WidgetsBundleSearchComponent,
     CopyButtonComponent,
-    TogglePasswordComponent
+    TogglePasswordComponent,
+    SlideValidatorComponent
   ],
   imports: [
     CommonModule,
@@ -437,7 +439,8 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
     OtaPackageAutocompleteComponent,
     WidgetsBundleSearchComponent,
     CopyButtonComponent,
-    TogglePasswordComponent
+    TogglePasswordComponent,
+    SlideValidatorComponent
   ]
 })
 export class SharedModule { }

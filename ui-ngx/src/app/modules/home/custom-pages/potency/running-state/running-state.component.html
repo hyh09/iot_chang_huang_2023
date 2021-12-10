@@ -5,7 +5,7 @@
   <div fxFlex fxLayout="column" fxLayoutGap="20px" class="right-content">
     <div class="title">{{ 'potency.running-state' | translate }}</div>
     <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start end" class="filters">
-      <mat-form-field>
+      <mat-form-field style="width: 60%; min-width: 200px; max-width: 600px;">
         <mat-label>{{ 'potency.property' | translate }}</mat-label>
         <mat-select multiple [(ngModel)]="selectedProps" (ngModelChange)="onSelectedPropsChange()">
           <mat-option *ngFor="let prop of properties" [value]="prop.name">{{ prop.title }}</mat-option>

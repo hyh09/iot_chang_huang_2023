@@ -165,20 +165,20 @@ public class RTMonitorAppController extends BaseController {
         return this.deviceMonitorService.listAppAlarmsRecord(getTenantId(), query, pageLink);
     }
 
-//    /**
-//     * 首页-获得报警记录统计信息，按月份
-//     */
-//    @ApiOperation(value = "首页-获得报警记录统计信息，按月份", notes = "不传工厂id默认为未分配")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
-//    })
-//    @GetMapping(value = "/alarmRecord/statistics")
-//    public List<AlarmTimesResult> getAlarms(
-//            @RequestParam(required = false) String factoryId
-//    ) throws ThingsboardException {
-//        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
-//        return this.deviceMonitorService.listAppAlarmsRecordStatistics(getTenantId(), query);
-//    }
+    /**
+     * 报警记录-获得报警记录统计信息，按月份
+     */
+    @ApiOperation(value = "报警记录-获得报警记录统计信息，按月份", notes = "不传工厂id默认为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+    })
+    @GetMapping(value = "/alarmRecord/statistics")
+    public List<AlarmTimesResult> getAlarms(
+            @RequestParam(required = false) String factoryId
+    ) throws ThingsboardException {
+        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
+        return this.deviceMonitorService.listAppAlarmsRecordStatistics(getTenantId(), query);
+    }
 
     /**
      * 首页-实时监控全部信息，包括工厂、设备在线情况、预警

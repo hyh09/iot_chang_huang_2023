@@ -2,7 +2,11 @@ package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.kv.DataType;
+import org.thingsboard.server.common.data.kv.KvEntry;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -16,6 +20,25 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 转换遥测数据为保留4位的
+     */
+    default <T extends KvEntry> String formatKvEntryValue(T t) {
+        if (t == null)
+            return null;
+        String result = t.getValueAsString();
+        if (DataType.STRING.equals(t.getDataType()) || DataType.DOUBLE.equals(t.getDataType())) {
+            try {
+                BigDecimal bigDecimal = new BigDecimal(t.getValueAsString());
+                if (bigDecimal.scale() > 4) {
+                    return bigDecimal.setScale(4, RoundingMode.HALF_UP).toPlainString();
+                }
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
 
     /**
      * 转换数据
@@ -80,6 +103,7 @@ public interface CommonService {
     default String UUIDToString(UUID uuid) {
         return uuid == null ? null : uuid.toString();
     }
+
     /**
      * 转换成String
      *

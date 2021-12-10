@@ -40,6 +40,7 @@ import java.util.UUID;
 
 
                                         @ColumnResult(name = "deviceName",type = String.class),
+                                        @ColumnResult(name = "picture",type = String.class),
                                         @ColumnResult(name = "factoryId",type = UUID.class),
                                         @ColumnResult(name = "workshopId",type = UUID.class),
                                         @ColumnResult(name = "productionLineId",type = UUID.class),
@@ -71,6 +72,10 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
     @Transient
   private  String  deviceName;
+
+
+    @Transient
+    private  String  picture;
     /**
      * 工厂
      */
@@ -145,12 +150,15 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     @Transient //最后的一个值
     private  String valueLast2;
 
+    @Transient
+    private  String localValue;
+
     public EffectTsKvEntity() {
     }
 
 
 
-    public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,Long ts,Integer key,String keyName,String deviceName,
+    public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,Long ts,Integer key,String keyName,String deviceName,String picture,
                              UUID factoryId, UUID workshopId, UUID productionLineId, Long ts2, String valueLast, String valueLast2){
         this.onlyKeyId = onlyKeyId;
         this.entityId =entityId;
@@ -161,6 +169,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
 
         this.deviceName =deviceName;
+        this.picture = picture;
 
         this.factoryId = factoryId;
         this.workshopId = workshopId;
@@ -190,12 +199,12 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     public  void  subtraction()
     {
 
+        localValue = valueLast2;
         //如果时间不相同的时候 代表有最大值 和最小值
-        if(ts!=ts2) {
-            valueLast2 =StringUtilToll.sub(valueLast2,valueLast);
+        if(ts.equals(ts2)) {
+            valueLast2 = "0";
         }else {
-            valueLast2 = valueLast2;
-
+            valueLast2 =StringUtilToll.sub(valueLast2,valueLast);
         }
 
 

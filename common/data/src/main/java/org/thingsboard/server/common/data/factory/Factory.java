@@ -80,4 +80,39 @@ public class Factory {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "Factory{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", logoIcon='" + logoIcon + '\'' +
+                ", logoImages='" + logoImages + '\'' +
+                ", address='" + address + '\'' +
+                ", country='" + country + '\'' +
+                ", province='" + province + '\'' +
+                ", city='" + city + '\'' +
+                ", area='" + area + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", email='" + email + '\'' +
+                ", remark='" + remark + '\'' +
+                ", tenantId=" + tenantId +
+                ", createdTime=" + createdTime +
+                ", createdUser=" + createdUser +
+                ", updatedTime=" + updatedTime +
+                ", updatedUser=" + updatedUser +
+                ", delFlag='" + delFlag + '\'' +
+                ", workshopName='" + workshopName + '\'' +
+                ", productionlineName='" + productionlineName + '\'' +
+                ", deviceName='" + deviceName + '\'' +
+                ", publishTime=" + publishTime +
+                ", loginUserId=" + loginUserId +
+                ", factoryVersion='" + factoryVersion + '\'' +
+                ", active=" + active +
+                ", gatewayName='" + gatewayName + '\'' +
+                '}';
+    }
 }

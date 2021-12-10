@@ -40,8 +40,8 @@ export enum EntityType {
   DATA_DICTIONARY = 'DATA_DICTIONARY',
   DEVICE_DICTIONARY = 'DEVICE_DICTIONARY',
   FACTORY = 'FACTORY',
-  WORK_SHOP = 'WORK_SHOP',
-  PROD_LINE = 'PROD_LINE',
+  WORKSHOP = 'WORKSHOP',
+  PRODUCTION_LINE = 'PRODUCTION_LINE',
   MENU = 'MENU',
   USER_MNG = 'USER_MNG',
   ROLE_MNG = 'ROLE_MNG',
@@ -356,7 +356,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
-      EntityType.WORK_SHOP,
+      EntityType.WORKSHOP,
       {
         type: 'device-mng.work-shop',
         add: 'device-mng.add-work-shop',
@@ -364,7 +364,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
-      EntityType.PROD_LINE,
+      EntityType.PRODUCTION_LINE,
       {
         type: 'device-mng.prod-line',
         add: 'device-mng.add-prod-line',
@@ -559,13 +559,13 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       }
     ],
     [
-      EntityType.WORK_SHOP,
+      EntityType.WORKSHOP,
       {
         helpLinkId: ''
       }
     ],
     [
-      EntityType.PROD_LINE,
+      EntityType.PRODUCTION_LINE,
       {
         helpLinkId: ''
       }

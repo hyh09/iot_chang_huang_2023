@@ -79,6 +79,23 @@ public class StringUtilToll {
     }
 
 
+    /**
+     * 保留4位小数
+     */
+    public  static  String roundUp(String num)
+    {
+         if(num == null)
+         {
+             return  "0";
+         }
+        BigDecimal b = new BigDecimal(num);
+        //保留2位小数
+        BigDecimal result = b.setScale(4, BigDecimal.ROUND_HALF_UP);
+        String str=  result.stripTrailingZeros().toPlainString();
+        return  str;
+    }
+
+
 
 
 
