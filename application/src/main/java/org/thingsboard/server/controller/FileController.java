@@ -16,7 +16,6 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.hs.service.FileService;
-import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,8 +39,6 @@ import java.nio.file.Paths;
 public class FileController extends BaseController {
 
     private FileService fileService;
-
-    private CommonComponent commonComponent;
 
     /**
      * 上传文件
@@ -145,8 +142,8 @@ public class FileController extends BaseController {
 //        response.setCharacterEncoding("utf-8");
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileInfo.getFileName(), StandardCharsets.UTF_8));
         try (InputStream is = new FileInputStream(fileInfo.getLocation()); OutputStream os = response.getOutputStream();) {
-            int read = 0;
-            byte[] bytes = new byte[2048];
+            int read;
+            byte[] bytes = new byte[4096];
             while ((read = is.read(bytes)) != -1) {
                 os.write(bytes, 0, read);
                 os.flush();
@@ -173,8 +170,4 @@ public class FileController extends BaseController {
         this.fileService = fileService;
     }
 
-    @Autowired
-    public void setCommonComponent(CommonComponent commonComponent) {
-        this.commonComponent = commonComponent;
-    }
 }
