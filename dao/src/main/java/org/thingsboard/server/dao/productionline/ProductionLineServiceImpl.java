@@ -68,10 +68,10 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
      * @return
      */
     @Override
-    public void delProductionLine(UUID id){
+    public void delProductionLine(UUID id) throws ThingsboardException{
         log.trace("Executing delProductionLine [{}]", id);
-        productionLineDao.delProductionLine( id);
         ProductionLine byId = productionLineDao.findById(id);
+        productionLineDao.delProductionLine( id);
         //清除实体关系
         if(byId != null && byId.getFactoryId() != null){
             EntityRelation relation = new EntityRelation(

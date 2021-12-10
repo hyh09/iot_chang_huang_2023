@@ -151,14 +151,18 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * @param id
      */
     @Override
-    public void delFactory(UUID id){
-
-        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))){
+    public void delFactory(UUID id)throws ThingsboardException {
+        Device device = new Device();
+        device.setFactoryId(id);
+        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))
+                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
            /* 逻辑删除暂时不用
             FactoryEntity factoryEntity = factoryRepository.findById(id).get();
             factoryEntity.setDelFlag("D");
             factoryRepository.save(factoryEntity);*/
             factoryRepository.deleteById(id);
+        }else {
+            throw new ThingsboardException("工厂下有车间/或网关设备不能删除！",ThingsboardErrorCode.GENERAL);
         }
     }
 

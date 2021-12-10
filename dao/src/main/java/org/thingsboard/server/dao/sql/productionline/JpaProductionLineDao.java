@@ -196,15 +196,17 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
      * @param id
      */
     @Override
-    public void delProductionLine(UUID id){
+    public void delProductionLine(UUID id) throws ThingsboardException{
         Device device = new Device();
         device.setProductionLineId(id);
-        if(CollectionUtils.isNotEmpty(deviceDao.findDeviceListByCdn(device))){
+        if(CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
             /*逻辑删除暂时不用
              ProductionLineEntity productionLineEntity = productionLineRepository.findById(id).get();
             productionLineEntity.setDelFlag("D");
             productionLineRepository.save(productionLineEntity);*/
             productionLineRepository.deleteById(id);
+        }else {
+            throw new ThingsboardException("产线下有设备不能删除！",ThingsboardErrorCode.GENERAL);
         }
     }
 

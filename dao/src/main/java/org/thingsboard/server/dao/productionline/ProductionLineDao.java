@@ -25,7 +25,7 @@ public interface ProductionLineDao extends Dao<ProductionLine>{
      * 根据id删除（逻辑删除）
      * @param id
      */
-    void delProductionLine(UUID id);
+    void delProductionLine(UUID id) throws ThingsboardException;
 
     /**
      * 根据车间id删除（逻辑删除）
