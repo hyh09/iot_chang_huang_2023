@@ -30,7 +30,7 @@ public interface FactoryService {
      * @param id
      * @return
      */
-    void delFactory(UUID id);
+    void delFactory(UUID id)throws ThingsboardException ;
 
 
     /**

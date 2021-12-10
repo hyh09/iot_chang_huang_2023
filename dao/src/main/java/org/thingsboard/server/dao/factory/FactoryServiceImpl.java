@@ -87,11 +87,10 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
      * @return
      */
     @Override
-    public void delFactory(UUID id){
+    public void delFactory(UUID id) throws ThingsboardException {
         log.trace("Executing delFactory [{}]", id);
-        factoryDao.delFactory(id);
-
         Factory byId = factoryDao.findById(id);
+        factoryDao.delFactory(id);
         //清除实体关系
         if(byId != null && byId.getTenantId() != null){
             EntityRelation relation = new EntityRelation(
