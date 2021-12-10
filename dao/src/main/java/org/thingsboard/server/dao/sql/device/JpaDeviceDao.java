@@ -807,7 +807,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public PageData<Device> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException {
         Pageable pageable = DaoUtil.toPageable(pageLink);
-        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryByMap(BeanToMap.beanToMapByJackson(vo), DeviceEntity.class),pageable);
+        Map<String, Object> queryParam  =  BeanToMap.beanToMapByJackson(vo);
+        if(vo.getDeviceId() != null)
+        {
+            queryParam.put("id",vo.getDeviceId());
+        }
+        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryByMap(queryParam, DeviceEntity.class),pageable);
         return  DaoUtil.toPageData(pageData);
    }
 
