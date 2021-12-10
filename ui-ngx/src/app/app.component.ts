@@ -56,7 +56,7 @@ export class AppComponent implements OnInit {
               private titleService: TitleService,
               private router: Router) {
 
-    console.log(`HsIoT Version: ${env.tbVersion}`);
+    // console.log(`HsIoT Version: ${env.tbVersion}`);
 
     this.matIconRegistry.addSvgIconSetInNamespace('mdi',
       this.domSanitizer.bypassSecurityTrustResourceUrl('./assets/mdi.svg'));
@@ -116,13 +116,13 @@ export class AppComponent implements OnInit {
   }
 
   setupTranslate() {
-    if (!env.production) {
-      console.log(`Supported Langs: ${env.supportedLangs}`);
-    }
+    // if (!env.production) {
+    //   console.log(`Supported Langs: ${env.supportedLangs}`);
+    // }
     this.translate.addLangs(env.supportedLangs);
-    if (!env.production) {
-      console.log(`Default Lang: ${env.defaultLang}`);
-    }
+    // if (!env.production) {
+    //   console.log(`Default Lang: ${env.defaultLang}`);
+    // }
     this.translate.setDefaultLang(env.defaultLang);
   }
 
