@@ -599,7 +599,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         listMap.forEach((key,value)->{
             AppDeviceEnergyVo appDeviceEnergyVo  = new  AppDeviceEnergyVo();
             Map<String,String> mapValue = new HashMap<>();
+            Map<String,Long> timeValueMap1= new HashMap<>();
             Map<String,Long> timeValueMap = new HashMap<>();
+
 
             appDeviceEnergyVo.setDeviceId(key.toString());
             EffectTsKvEntity  entity1 =value.get(0);
@@ -620,12 +622,25 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 value.stream().forEach(effectTsKvEntity -> {
                     mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValueLast2());
                     timeValueMap.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs2());
+                    timeValueMap1.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs());
+
                 });
                 appDeviceEnergyVo.setMapValue(mapValue);
                 appDeviceEnergyVo.setTimeValueMap(timeValueMap);
+                appDeviceEnergyVo.setTimeValueMap1(timeValueMap1);
             }
 
             appList.add(appDeviceEnergyVo);
+
+            try{
+                ObjectMapper mapper=new ObjectMapper();
+               String   jsonStr=mapper.writeValueAsString(appList);
+               log.info("josn数据:{}",jsonStr);
+            }catch (Exception e)
+            {
+                e.printStackTrace();
+
+            }
 
         });
 
@@ -652,6 +667,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
          log.info("当前设备的总产能:{}",keyNameValue);
 
          Map<String,Long> timeValueMap = energyVo.getTimeValueMap();
+            Map<String,Long> timeValueMap1 = energyVo.getTimeValueMap1();
            Long time001 =  timeValueMap.get(keyName);
          log.info("打印设备的总产能的时间:{}",time001);
 
@@ -666,8 +682,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                   //
                   //计算公式：总产能/总能耗/分钟数
                   map1.put(key,value1);
-                Long  time02 =   (timeValueMap.get(key));
-                Long  t3 =   (time001-time02);
+//                Long  time02 =   (timeValueMap.get(key));
+//                Long  t3 =   (time001-time02);
+                  Long  t01= timeValueMap1.get(key);
+                  Long  t02= timeValueMap.get(key);
+                  log.info("=====>t01{},t02{}",t01,t02);
+                  Long  t3 =   (t02-t01)/60000;
 
                   Double  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
                   map2.put(key,aDouble.toString());

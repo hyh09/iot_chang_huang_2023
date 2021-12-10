@@ -73,8 +73,12 @@ public class AppDeviceEnergyVo {
     @ApiModelProperty("时间")
     private  Long time;
 
+    @JsonIgnore
+    private Map<String,Long> timeValueMap1;
 
     @JsonIgnore
     private Map<String,Long> timeValueMap;
+
+
 
 }
