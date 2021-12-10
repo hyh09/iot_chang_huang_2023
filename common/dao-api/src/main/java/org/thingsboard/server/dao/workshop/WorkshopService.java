@@ -28,7 +28,7 @@ public interface WorkshopService {
      * @param id
      * @return
      */
-    void delWorkshop(UUID id);
+    void delWorkshop(UUID id) throws ThingsboardException ;
 
 
     /**

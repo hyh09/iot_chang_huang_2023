@@ -4,13 +4,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +17,6 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
-import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.servlet.http.HttpServletResponse;
@@ -64,44 +60,37 @@ public class FileController extends BaseController {
             throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
 
         ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm.valueOf(checksumAlgorithmStr.toUpperCase());
-        return this.fileService.uploadFile(getTenantId(), checksum, checksumAlgorithm, file);
+        return this.fileService.saveFile(getTenantId(), checksum, checksumAlgorithm, file);
     }
 
     /**
      * 分片上传文件
      */
-    @ApiOperation(value = "分片上传文件", notes = "全部上传后返回文件Id，单个上传成功返回null")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "guid", value = "临时文件名id,便于区分", paramType = "query", required = true),
-            @ApiImplicitParam(name = "checksum", value = "文件校验和", paramType = "query"),
-            @ApiImplicitParam(name = "checksumChunk", value = "分片文件校验和", paramType = "query"),
-            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
-            @ApiImplicitParam(name = "chunks", value = "分块数", paramType = "query", required = true),
-            @ApiImplicitParam(name = "chunk", value = "分块序号,从1开始", paramType = "query", required = true),
-            @ApiImplicitParam(name = "fileName", value = "文件名", paramType = "query", required = true),
-            @ApiImplicitParam(name = "file", value = "分片文件", paramType = "query", required = true),
-    })
+    @ApiOperation(value = "分片上传文件", notes = "最后一次上传返回文件Id，单个上传成功返回null")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "guid", value = "临时文件名id,便于区分", paramType = "query", required = true),
+//            @ApiImplicitParam(name = "checksum", value = "文件校验和", paramType = "query"),
+//            @ApiImplicitParam(name = "checksumChunk", value = "分片文件校验和", paramType = "query"),
+//            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+//            @ApiImplicitParam(name = "chunks", value = "分块数", paramType = "query", required = true),
+//            @ApiImplicitParam(name = "chunk", value = "分块序号,从1开始", paramType = "query", required = true),
+//            @ApiImplicitParam(name = "fileName", value = "文件名", paramType = "query", required = true),
+//            @ApiImplicitParam(name = "file", value = "分片文件", paramType = "query", required = true),
+//    })
     @PostMapping(value = "/file/multipart")
     public String fileUpload(@RequestParam String guid,
                              @RequestParam(required = false) String checksum,
                              @RequestParam(required = false) String checksumChunk,
                              @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
-                             @RequestParam int chunks,
                              @RequestParam int chunk,
+                             @RequestParam int chunks,
                              @RequestParam String fileName,
                              @RequestBody MultipartFile file) throws ThingsboardException, IOException {
         if (file == null || file.isEmpty())
             throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
 
         ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm.valueOf(checksumAlgorithmStr.toUpperCase());
-        var bytes = file.getBytes();
-        if (StringUtils.isNotBlank(checksumChunk)) {
-            var calCheckSum = CommonUtil.generateChecksum(checksumAlgorithm, ByteBuffer.wrap(bytes));
-            if (!calCheckSum.equals(checksumChunk))
-                throw new ThingsboardException("分片文件校验失败", ThingsboardErrorCode.GENERAL);
-        }
-        Files.write(Paths.get(commonComponent.toFileRootTempDir(getTenantId()).toString(), guid, String.valueOf(chunk)), bytes);
-        return this.fileService.uploadMultiPartFile(getTenantId(), guid, checksum, checksumAlgorithm, chunks, fileName);
+        return this.fileService.saveMultipartFile(getTenantId(), guid, checksum, checksumChunk, checksumAlgorithm, chunk, chunks, fileName, file);
     }
 
     /**

@@ -105,7 +105,7 @@ public class ProductionLineController extends BaseController  {
     }
 
     /**
-     * 查询生产线列表
+     * 查询产线详情
      * @param id
      * @return
      * @throws ThingsboardException
@@ -117,7 +117,7 @@ public class ProductionLineController extends BaseController  {
     public ProductionLine findById(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
-            return checkNotNull(productionLineService.findById(toUUID(id)));
+            return productionLineService.findById(toUUID(id));
         } catch (Exception e) {
             throw handleException(e);
         }

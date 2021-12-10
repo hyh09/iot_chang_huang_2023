@@ -66,10 +66,10 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
      * @return
      */
     @Override
-    public void delWorkshop(UUID id){
+    public void delWorkshop(UUID id) throws ThingsboardException {
         log.trace("Executing delWorkshop [{}]", id);
-        workshopDao.delWorkshop(id);
         Workshop byId = workshopDao.findById(id);
+        workshopDao.delWorkshop(id);
         //清除实体关系
         if(byId != null && byId.getFactoryId() != null){
             EntityRelation relation = new EntityRelation(
