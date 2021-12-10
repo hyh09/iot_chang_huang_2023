@@ -19,4 +19,6 @@ public class HSConstants {
     public static final String CODE_PREFIX_DICT_DEVICE_COMPONENT = "SBBJ";
     public static final String ATTR_ACTIVE = "active";
     public static final String ATTR_DEVICE_ID = "attrDeviceId";
+    public static final String FILE_STR = "file";
+    public static final String TEMP_STR = "temp";
 }

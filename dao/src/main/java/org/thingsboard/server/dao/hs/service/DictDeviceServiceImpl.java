@@ -537,6 +537,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 BeanUtils.copyProperties(e, standardPropertyVO, "id");
                 return standardPropertyVO;
             }).collect(Collectors.toList()));
+            dictDeviceVO.setComponentList(Lists.newArrayList()).setPropertyList(Lists.newArrayList());
             try {
                 var result = this.updateOrSaveDictDevice(dictDeviceVO, tenantId);
                 updateDictDeviceDefault(tenantId, toUUID(result.getId()));
