@@ -122,6 +122,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDictInfo => {
         const { comment, picture, fileName, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDictInfo;
         this.updateForm({ comment, picture, fileName, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList });
+        this.stopExpandPropagation();
       });
     } else {
       this.updateForm({
@@ -137,8 +138,18 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
         groupList: [],
         componentList: []
       });
+      this.stopExpandPropagation();
     }
     this.entityForm.clearValidators();
+  }
+
+  stopExpandPropagation() {
+    setTimeout(() => {
+      document.querySelectorAll('.ant-table-row-expand-icon').forEach(el => {
+        el.removeEventListener('click', ($event: Event) => {$event.stopPropagation()});
+        el.addEventListener('click', ($event: Event) => {$event.stopPropagation()});
+      });
+    });
   }
 
   /**
@@ -270,10 +281,10 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       }
     } else {
       this.expandedCompCode.push(data.code);
+      this.stopExpandPropagation();
     }
   }
   viewDeviceComp(comp: DeviceCompTreeNode) {
-    console.log(comp)
     this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],

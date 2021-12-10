@@ -63,8 +63,8 @@ export class TranslateDefaultCompiler extends TranslateMessageFormatCompiler {
       tokens = messageFormatParser.parse(src.replace(/\{\{/g, '{').replace(/\}\}/g, '}'),
         {cardinal: [], ordinal: []});
     } catch (e) {
-      console.warn(`Failed to parse source: ${src}`);
-      console.error(e);
+      // console.warn(`Failed to parse source: ${src}`);
+      // console.error(e);
       return false;
     }
     const res = tokens.filter(

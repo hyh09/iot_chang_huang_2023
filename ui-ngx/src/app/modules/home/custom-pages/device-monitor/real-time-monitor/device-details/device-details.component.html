@@ -44,6 +44,7 @@
             #deviceDataTable
             [nzData]="group.groupPropertyList || []"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             nzNoResult="{{ 'common.data-empty' | translate }}"
           >
             <tbody>
@@ -62,6 +63,7 @@
             [nzData]="devcieComp"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             nzNoResult="{{ 'common.data-empty' | translate }}"
             class="comp-table"
           >
@@ -88,6 +90,7 @@
                       [nzData]="item.propertyList"
                       nzTableLayout="fixed"
                       [nzShowPagination]="false"
+                      [nzFrontPagination]="false"
                     >
                       <tbody>
                         <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name, data.title)" [class.active]="data.name === currPropName">

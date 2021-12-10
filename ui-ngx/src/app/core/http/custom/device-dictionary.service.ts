@@ -9,7 +9,7 @@ import { PageData } from '@app/shared/models/page/page-data';
 import { HasUUID } from '@app/shared/public-api';
 import { deepClone } from '@app/core/utils';
 
-export interface FetchListFilter {
+interface FetchListFilter {
   code: string,
   name: string,
   supplier: string

@@ -21,10 +21,10 @@ export class PermissionResolver implements Resolve<Permissions>  {
       const menuMap: { [key: string]: TenantMenu } = {};
       const menuBtnMap: { [key: string]: string[] } = {};
       if (menus) {
-        menus.filter(menu => (!menu.isButton && menu.path && !menu.hasChildren)).forEach(menu => {
+        menus.filter(menu => (!menu.isButton && menu.path)).forEach(menu => {
           menuMap[menu.id] = menu;
           menuBtnMap[menu.path] = [];
-          if (menu.path && !firstPath) {
+          if (menu.path && !menu.hasChildren && !firstPath) {
             firstPath = menu.path;
           }
         });
