@@ -28,7 +28,7 @@ public interface ProductionLineService {
      * @param id
      * @return
      */
-    void delProductionLine(UUID id);
+    void delProductionLine(UUID id) throws ThingsboardException;
 
 
     /**
