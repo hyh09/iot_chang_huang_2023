@@ -1,7 +1,6 @@
 package org.thingsboard.server.dao.hs.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,11 +23,10 @@ import org.thingsboard.server.dao.hs.entity.vo.FileInfoDictDeviceModelVO;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.validation.constraints.NotNull;
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -88,11 +86,6 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String saveFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
-//        byte[] bytes = file.getBytes();
-//        var calCheckSum = CommonUtil.generateChecksum(checksumAlgorithm, ByteBuffer.wrap(bytes));
-//        if (StringUtils.isNotBlank(checksum) && !calCheckSum.equals(checksum))
-//            throw new ThingsboardException("文件校验失败", ThingsboardErrorCode.GENERAL);
-
         var fileEntity = new FileEntity(FileInfo.builder()
                 .checkSum(checksum)
                 .contentType(file.getContentType())
@@ -190,7 +183,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
      */
     @Override
     @Transactional
-    public void updateFileScope(TenantId tenantId, @NotNull UUID fileId, @NotNull FileScopeEnum scopeEnum, @NotNull UUID entityId) throws ThingsboardException {
+    public void updateFileScope(@Nonnull TenantId tenantId, @Nonnull UUID fileId, @Nonnull FileScopeEnum scopeEnum, @Nonnull UUID entityId) throws ThingsboardException {
         var fileEntity = this.fileRepository.findByTenantIdAndId(tenantId.getId(), fileId)
                 .orElseThrow(() -> new ThingsboardException("文件不存在！", ThingsboardErrorCode.GENERAL));
         fileEntity.setScope(scopeEnum.getCode());
@@ -206,7 +199,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
      * @param entityId  实体Id
      */
     @Override
-    public FileInfo getFileInfoByScopeAndEntityId(@NotNull TenantId tenantId, @NotNull FileScopeEnum scopeEnum, @NotNull UUID entityId) {
+    public FileInfo getFileInfoByScopeAndEntityId(@Nonnull TenantId tenantId, @Nonnull FileScopeEnum scopeEnum, @Nonnull UUID entityId) {
         return this.fileRepository.findByTenantIdAndScopeAndEntityId(tenantId.getId(), scopeEnum.getCode(), entityId)
                 .map(FileEntity::toData).orElse(null);
     }
@@ -219,7 +212,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
      * @param entityId  实体Id
      */
     @Override
-    public List<FileInfo> listFileInfosByScopeAndEntityId(@NotNull TenantId tenantId, @NotNull FileScopeEnum scopeEnum, @NotNull UUID entityId) {
+    public List<FileInfo> listFileInfosByScopeAndEntityId(@Nonnull TenantId tenantId, @Nonnull FileScopeEnum scopeEnum, @Nonnull UUID entityId) {
         return DaoUtil.convertDataList(this.fileRepository.findAllByTenantIdAndScopeAndEntityIdOrderByCreatedTimeDesc(tenantId.getId(), scopeEnum.getCode(), entityId));
     }
 
@@ -329,6 +322,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
         Vector<InputStream> v = new Vector<>();
         SequenceInputStream sis = null;
         BufferedOutputStream bos = null;
+
         try {
             for (int i = 1; i <= chunks; i++) {
                 var path = this.packageTempFileLocation(tenantId, guid + i);
@@ -385,7 +379,7 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
     public void writeFile(MultipartFile file, Path filePath) throws IOException {
         try (InputStream is = file.getInputStream(); OutputStream os = Files.newOutputStream(filePath)) {
             byte[] buffer = new byte[4096];
-            int read = 0;
+            int read;
             while ((read = is.read(buffer)) > 0) {
                 os.write(buffer, 0, read);
             }
