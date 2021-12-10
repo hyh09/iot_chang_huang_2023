@@ -25,6 +25,10 @@ public class AppDeviceEnergyVo {
      */
     @ApiModelProperty("设备的名称 ")
     private String deviceName;
+
+    @ApiModelProperty("设备图片 ")
+    private  String  picture;
+
     /**
      * 设备的id
      */
