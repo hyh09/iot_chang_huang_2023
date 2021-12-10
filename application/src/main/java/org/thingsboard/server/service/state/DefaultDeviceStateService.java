@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -194,7 +194,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             DeviceState state = stateData.getState();
             state.setLastActivityTime(lastReportedActivity);
             if (!state.isActive()) {
-                log.info("设备在线: [deviceId: {}] [ts: {}] [stateData: {}]", deviceId.toString(), ts, state.toString());
+                log.info("设备在线: [deviceId: {}] [ts: {}] [stateData: {}]", deviceId.toString(), System.currentTimeMillis(), state.toString());
                 state.setActive(true);
                 save(deviceId, ACTIVITY_STATE, true);
                 pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
