@@ -1028,7 +1028,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
           vo1.setDeviceId(d1.getUuidId());
           vo1.setFlg(d1.getDeviceFlg());
           vo1.setStatus(getStatusByDevice(d1));
-          vo1.setDeviceName(getDictName(tenantId,d1.getDictDeviceId()));
+          DictDeviceEntity  dictDeviceEntity =  getDictName(tenantId,d1.getDictDeviceId());
+          vo1.setDictName(dictDeviceEntity.getName());
+          vo1.setDeviceNo(dictDeviceEntity.getModel());
           vo1.setDeviceFileName(getDictFileName(tenantId,d1.getDeviceProfileId()));
           vo1.setCreatedTime(d1.getCreatedTime());
             return  vo1;
@@ -1098,14 +1100,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      * 查询设备字典
      *
      */
-    private String getDictName(UUID tenantId, UUID id)
+    private DictDeviceEntity getDictName(UUID tenantId, UUID id)
     {
+        DictDeviceEntity dictDeviceEntity = new DictDeviceEntity();
         if(id == null)
         {
-            return  "";
+            return  dictDeviceEntity;
         }
         Optional<DictDeviceEntity>  dictDataEntity=   dictDeviceRepository.findByTenantIdAndId(tenantId,id);
-       return (dictDataEntity.isPresent()?dictDataEntity.get().getName():"");
+       return (dictDataEntity.isPresent()?dictDataEntity.get():dictDeviceEntity);
     }
 
 
