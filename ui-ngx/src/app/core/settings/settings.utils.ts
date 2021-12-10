@@ -20,19 +20,19 @@ import * as _moment from 'moment';
 
 export function updateUserLang(translate: TranslateService, userLang: string) {
   let targetLang = userLang;
-  if (!env.production) {
-    console.log(`User lang: ${targetLang}`);
-  }
+  // if (!env.production) {
+  //   console.log(`User lang: ${targetLang}`);
+  // }
   if (!targetLang) {
     targetLang = translate.getBrowserCultureLang();
-    if (!env.production) {
-      console.log(`Fallback to browser lang: ${targetLang}`);
-    }
+    // if (!env.production) {
+    //   console.log(`Fallback to browser lang: ${targetLang}`);
+    // }
   }
   const detectedSupportedLang = detectSupportedLang(targetLang);
-  if (!env.production) {
-    console.log(`Detected supported lang: ${detectedSupportedLang}`);
-  }
+  // if (!env.production) {
+  //   console.log(`Detected supported lang: ${detectedSupportedLang}`);
+  // }
   translate.use(detectedSupportedLang);
   _moment.locale([detectedSupportedLang]);
 }

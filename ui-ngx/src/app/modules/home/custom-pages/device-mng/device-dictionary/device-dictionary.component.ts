@@ -80,6 +80,16 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     this.entityForm.controls.componentList = this.fb.array(compControls);
     this.setMapOfExpandedComp();
     this.entityForm.updateValueAndValidity();
+    this.stopExpandPropagation();
+  }
+
+  stopExpandPropagation() {
+    setTimeout(() => {
+      document.querySelectorAll('.ant-table-row-expand-icon').forEach(el => {
+        el.removeEventListener('click', ($event: Event) => {$event.stopPropagation()});
+        el.addEventListener('click', ($event: Event) => {$event.stopPropagation()});
+      });
+    });
   }
 
   setInitDataGroup() {
@@ -320,6 +330,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     } else {
       this.expandedCompCode.push(data.code);
+      this.stopExpandPropagation();
     }
   }
   addDeviceComp(event: MouseEvent, parentComp?: DeviceCompTreeNode) {
