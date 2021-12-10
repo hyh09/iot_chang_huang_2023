@@ -50,14 +50,17 @@ import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.relation.EntitySearchDirection;
 import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import org.thingsboard.server.common.data.vo.device.AppCapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.device.provision.ProvisionFailedException;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
@@ -69,11 +72,15 @@ import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
+import org.thingsboard.server.dao.sql.factory.FactoryRepository;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
+import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -103,6 +110,13 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
     @Autowired
     private TenantDao tenantDao;
+
+     @Autowired
+     private WorkshopDao workshopDao;
+     @Autowired
+     private ProductionLineDao productionLineDao;
+     @Autowired
+     private FactoryRepository factoryRepository;
 
     @Autowired
     private CustomerDao customerDao;
@@ -1009,6 +1023,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
       List<CapacityDeviceVo> voList =   devices.stream().map(d1->{
             CapacityDeviceVo  vo1 = new CapacityDeviceVo();
+            d1.getPicture();
           vo1.setDeviceName(d1.getName());
           vo1.setDeviceId(d1.getUuidId());
           vo1.setFlg(d1.getDeviceFlg());
@@ -1024,6 +1039,34 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
     }
 
+
+    @Override
+    public PageData<AppCapacityDeviceVo> appQueryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException {
+        log.info("分页查询产能运算配置的接口如参:{}",vo);
+        PageData<Device> pageData =  deviceDao.queryPage(vo,pageLink);
+        List<Device> devices =  pageData.getData();
+
+        UUID  tenantId = vo.getTenantId();
+
+        List<AppCapacityDeviceVo> voList =   devices.stream().map(d1->{
+            AppCapacityDeviceVo  vo1 = new AppCapacityDeviceVo();
+            vo1.setPicture(d1.getPicture());
+            vo1.setDeviceName(d1.getName());
+            vo1.setDeviceId(d1.getUuidId());
+            vo1.setFlg(d1.getDeviceFlg());
+            vo1.setStatus(getStatusByDevice(d1));
+
+
+            vo1.setCreatedTime(d1.getCreatedTime());
+             vo1.setFactoryName(getNameById(tenantId,d1.getFactoryId(),"1"));
+             vo1.setWorkshopName(getNameById(tenantId,d1.getWorkshopId(),"2"));
+             vo1.setProductionLineName(getNameById(tenantId,d1.getProductionLineId(),"3"));
+            return  vo1;
+        }).collect(Collectors.toList());
+
+
+        return new PageData<>(voList, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
+    }
 
     @Override
     public void updateFlgById(Boolean deviceFlg, UUID id) {
@@ -1084,5 +1127,32 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
 
         DeviceProfileInfo  dictDataEntity=   deviceProfileService.findDeviceProfileInfoById(new TenantId(tenantId), deviceProfileId);
         return (dictDataEntity !=null?dictDataEntity.getName():"");
+    }
+
+
+    private  String getNameById(UUID tenantId, UUID id,String type)
+    {
+        if(id == null)
+        {
+            return  "";
+        }
+
+       if(type.equals("1")) {
+           Optional<FactoryEntity> entity = factoryRepository.findByTenantIdAndId(tenantId, id);
+           return entity.isPresent() ? entity.get().getName() : "";
+       }
+       if(type.equals("2"))
+       {
+             Workshop workshop =       workshopDao.findById(id);
+             return  (workshop !=null? workshop.getName():"");
+       }
+       if(type.equals("3"))
+       {
+            ProductionLine productionLine=        productionLineDao.findById(id);
+             return  (productionLine !=null? productionLine.getName():"");
+       }
+
+       return  "";
+
     }
 }
