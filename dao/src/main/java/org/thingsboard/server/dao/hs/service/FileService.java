@@ -30,7 +30,7 @@ public interface FileService {
      * @param file              文件
      * @return 文件Id
      */
-    String uploadFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException;
+    String saveFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException;
 
     /**
      * 获得文件详情
@@ -64,19 +64,6 @@ public interface FileService {
      * @param id 文件Id
      */
     void deleteFile(String id) throws IOException, ThingsboardException;
-
-    /**
-     * 分片上传合并文件
-     *
-     * @param tenantId          租户Id
-     * @param guid              文件上传id
-     * @param checksum          检验和
-     * @param checksumAlgorithm 算法
-     * @param chunks            分片数量
-     * @param fileName          文件名
-     * @return 文件Id
-     */
-    String uploadMultiPartFile(TenantId tenantId, String guid, String checksum, ChecksumAlgorithm checksumAlgorithm, int chunks, String fileName) throws IOException, ThingsboardException;
 
     /**
      * 取消分片上传文件
@@ -140,4 +127,20 @@ public interface FileService {
      * @return 模型库列表
      */
     List<FileInfoDictDeviceModelVO> listModels(TenantId tenantId, FileScopeEnum scopeEnum);
+
+    /**
+     * 保存分片文件
+     *
+     * @param tenantId          租户Id
+     * @param guid              文件上传id
+     * @param checksum          检验和
+     * @param checksumChunk     分片检验和
+     * @param checksumAlgorithm 算法
+     * @param chunk             当前分片
+     * @param chunks            分片数量
+     * @param fileName          文件名
+     * @param file              分片文件
+     * @return 文件Id
+     */
+    String saveMultipartFile(TenantId tenantId, String guid, String checksum, String checksumChunk, ChecksumAlgorithm checksumAlgorithm, int chunk, int chunks, String fileName, MultipartFile file) throws IOException, ThingsboardException;
 }
