@@ -210,6 +210,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .factoryStr(Optional.ofNullable(affiliationDTO.getFactoryMap().get(device.getFactoryId())).map(Factory::getName).orElse(null))
                     .workShopStr(Optional.ofNullable(affiliationDTO.getWorkshopMap().get(device.getWorkshopId())).map(Workshop::getName).orElse(null))
                     .productionLineStr(Optional.ofNullable(affiliationDTO.getProductionLineMap().get(device.getProductionLineId())).map(ProductionLine::getName).orElse(null))
+                    .picture(device.getPicture())
                     .build();
         }).collect(Collectors.toList());
 

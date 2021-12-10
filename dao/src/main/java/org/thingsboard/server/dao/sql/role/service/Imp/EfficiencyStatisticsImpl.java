@@ -310,9 +310,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
             log.info("entity:====>"+entity);
+            capVo.setPicture(entity.getPicture());
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
+
 
             if(entity.getWorkshopId() != null) {
                 Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
@@ -339,7 +341,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId) {
+    public ResultEnergyAppVo    queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId) {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
         Map<String,String> totalValueMap = new HashMap<>();
@@ -425,7 +427,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         voList =  tsKvEntries.stream().map(TsKvEntry ->{
             ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
             byDeviceVo.setKeyName(TsKvEntry.getKey());
-            byDeviceVo.setValue(TsKvEntry.getValue().toString());
+            byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
             byDeviceVo.setTime(TsKvEntry.getTs());
             return     byDeviceVo;
         }).collect(Collectors.toList());
@@ -469,7 +471,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                       String keyName=TsKvEntry.getKey();
                 DeviceDictionaryPropertiesVo trnaslateVo=   translateMap.get(keyName);
                       byDeviceVo.setKeyName(keyName);
-                      byDeviceVo.setValue(TsKvEntry.getValue().toString());
+                      byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
                       byDeviceVo.setTime(TsKvEntry.getTs());
                       byDeviceVo.setTitle(trnaslateVo != null?trnaslateVo.getTitle():"");
                       byDeviceVo.setUnit(trnaslateVo != null?trnaslateVo.getUnit():"");
@@ -602,6 +604,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             appDeviceEnergyVo.setDeviceId(key.toString());
             EffectTsKvEntity  entity1 =value.get(0);
             if(entity1 != null) {
+                appDeviceEnergyVo.setPicture(entity1.getPicture());
                 appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
                 appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {

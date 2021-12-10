@@ -1,8 +1,12 @@
 package org.thingsboard.server.dao.sql.role.service;
 
-import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
+import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -12,6 +16,17 @@ import java.util.UUID;
  * @create: 2021-12-07 10:36
  **/
 public interface BulletinBoardSvc {
+
+
+    List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+
+    /**
+     * 今日能耗量列表
+     *
+     */
+    ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId );
+
+
 
     /**
      * 历史产能的接口

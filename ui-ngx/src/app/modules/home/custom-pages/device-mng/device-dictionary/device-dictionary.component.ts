@@ -73,11 +73,13 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     this.initDataGroup = [];
     const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
+    this.entityForm.get('deviceModel').setValue(null);
     this.entityForm.controls.standardPropertyList = this.fb.array(standardPropControls);
     this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
     this.setMapOfExpandedComp();
+    this.entityForm.updateValueAndValidity();
   }
 
   setInitDataGroup() {
@@ -346,12 +348,14 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     });
   }
-  editDeviceComp(comp: DeviceCompTreeNode) {
+  editDeviceComp(event: MouseEvent, comp: DeviceCompTreeNode) {
+    event.stopPropagation();
+    event.preventDefault();
     this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
-        compInfo: comp,
+        compInfo: { ...comp, isEdit: true },
         dataDictionaries: this.entitiesTableConfig.componentsData.dataDictionaries
       }
     }).afterClosed().subscribe(res => {
@@ -372,7 +376,19 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     });
   }
-  deleteDeviceComp(comp: DeviceCompTreeNode) {
+  viewDeviceComp(comp: DeviceCompTreeNode) {
+    this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        compInfo: { ...comp, isView: true },
+        dataDictionaries: this.entitiesTableConfig.componentsData.dataDictionaries
+      }
+    });
+  }
+  deleteDeviceComp(event: MouseEvent, comp: DeviceCompTreeNode) {
+    event.stopPropagation();
+    event.preventDefault();
     let array: FormArray;
     if (comp.parent) {
       array = this.mapOfCompControl[comp.parent.code].get('componentList') as FormArray;

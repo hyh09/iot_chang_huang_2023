@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.factory;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,10 @@ import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.relation.RelationDao;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 
+import javax.persistence.Column;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,7 +63,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         userRoleMenuSvc.saveRole(factory.getTenantId(),factory.getCreatedUser(),factorySave.getId());
         //建立实体关系
         EntityRelation relation = new EntityRelation(
-                new TenantId(factorySave.getTenantId()), new FactoryId(factorySave.getId()),EntityRelation.CONTAINS_TYPE
+                new FactoryId(factorySave.getId()), new TenantId(factorySave.getTenantId()), EntityRelation.CONTAINS_TYPE
         );
         relationService.saveRelation(new TenantId(factorySave.getTenantId()), relation);
         return factorySave;
@@ -94,7 +95,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         //清除实体关系
         if(byId != null && byId.getTenantId() != null){
             EntityRelation relation = new EntityRelation(
-                    new TenantId(byId.getTenantId()), new FactoryId(id),EntityRelation.CONTAINS_TYPE
+                    new FactoryId(id),new TenantId(byId.getTenantId()), EntityRelation.CONTAINS_TYPE
             );
             relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
         }
@@ -262,6 +263,33 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         queryFactory.setTenantId(tenantId);
         queryFactory.setName(name);
         return factoryDao.findAllByCdn(queryFactory);
+    }
+
+    /**
+     * 获取实体属性
+     * @param o
+     */
+    @Override
+    public String[] getEntityAttributeList(Object o){
+        Map<String, String> fieldMap = new HashMap<>();
+        Map<String, String> map = new HashMap();
+        Class<?> clazz = o.getClass();
+        Field[] fields=clazz.getDeclaredFields();
+        boolean b=false;
+        for (int i = 0; i < fields.length; i++) {
+            // 除过fieldMap中的属性，其他属性都获取
+            if(!fieldMap.containsValue(fields[i].getName())) {
+//                Field field=clazz.getDeclaredField(fields[i].getName());
+                boolean annotationPresent = fields[i].isAnnotationPresent(Column.class);
+                if (annotationPresent) {
+                    // 获取注解值
+                    String name = fields[i].getAnnotation(Column.class).name();
+                    map.put(name, fields[i].getName());
+                }
+            }
+        }
+        System.out.println(map);
+        return null;
     }
 
 }

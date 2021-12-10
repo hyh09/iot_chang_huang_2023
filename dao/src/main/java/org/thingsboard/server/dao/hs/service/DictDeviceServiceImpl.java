@@ -517,7 +517,36 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional
     public UUID getDefaultDictDeviceId(TenantId tenantId) {
-        return null;
+        var id = this.dictDeviceRepository.findByTenantIdAndIsDefaultIsTrue(tenantId.getId()).map(DictDeviceEntity::toData).map(DictDevice::getId).orElse(null);
+        if (id == null) {
+            DictDeviceVO dictDeviceVO = new DictDeviceVO();
+            var initData = this.getGroupInitData();
+            dictDeviceVO.setCode(this.getAvailableCode(tenantId));
+            dictDeviceVO.setName("default");
+            dictDeviceVO.setGroupList(initData.stream().map(e -> DictDeviceGroupVO.builder()
+                    .name(e.getName())
+                    .groupPropertyList(e.getGroupPropertyList().stream().map(f -> {
+                        DictDeviceGroupPropertyVO groupPropertyVO = new DictDeviceGroupPropertyVO();
+                        BeanUtils.copyProperties(f, groupPropertyVO, "id");
+                        return groupPropertyVO;
+                    }).collect(Collectors.toList()))
+                    .build()).collect(Collectors.toList()));
+            // update when initData changed
+            dictDeviceVO.setStandardPropertyList(initData.get(0).getGroupPropertyList().stream().map(e -> {
+                DictDeviceStandardPropertyVO standardPropertyVO = new DictDeviceStandardPropertyVO();
+                BeanUtils.copyProperties(e, standardPropertyVO, "id");
+                return standardPropertyVO;
+            }).collect(Collectors.toList()));
+            try {
+                var result = this.updateOrSaveDictDevice(dictDeviceVO, tenantId);
+                updateDictDeviceDefault(tenantId, toUUID(result.getId()));
+                id = result.getId();
+            } catch (Exception ex) {
+                log.error("生成默认设备字典出错 [{}]", ex.getMessage());
+            }
+        }
+        return toUUID(id);
+
     }
 
     /**
