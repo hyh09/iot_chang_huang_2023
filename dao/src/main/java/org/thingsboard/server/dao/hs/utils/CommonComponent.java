@@ -27,8 +27,9 @@ public class CommonComponent {
      * @param tenantId 租户Id
      */
     public Path toFileRootDir(TenantId tenantId) throws IOException {
-        var path = Paths.get(location, HSConstants.FILE_STR, tenantId.toString());
-        Files.createDirectories(path);
+        // var path = Paths.get(location, HSConstants.FILE_STR, tenantId.toString());
+        // Files.createDirectories(path);
+        var path = Paths.get(location);
         return path;
     }
 
@@ -38,8 +39,9 @@ public class CommonComponent {
      * @param tenantId 租户Id
      */
     public Path toFileRootTempDir(TenantId tenantId) throws IOException {
-        var path = Paths.get(location, HSConstants.FILE_STR, tenantId.toString(), HSConstants.TEMP_STR);
-        Files.createDirectories(path);
+//        var path = Paths.get(location, HSConstants.FILE_STR, tenantId.toString(), HSConstants.TEMP_STR);
+//        Files.createDirectories(path);
+        var path = Paths.get(location);
         return path;
     }
 }
