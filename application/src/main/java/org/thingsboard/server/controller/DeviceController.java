@@ -843,7 +843,10 @@ public class DeviceController extends BaseController {
                 //建立实体关系
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
-            return new DeviceVo(device);
+            savedDevice.setFactoryName(addDeviceDto.getFactoryName());
+            savedDevice.setWorkshopName(addDeviceDto.getWorkshopName());
+            savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());
+            return new DeviceVo(savedDevice);
         } catch (Exception e) {
             throw handleException(e);
         }

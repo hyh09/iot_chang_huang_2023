@@ -6,7 +6,7 @@ import { BaseData, HasId } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
-export interface FetchListFilter {
+interface FetchListFilter {
   name?: string,
   workshopName?: string,
   productionlineName?: string,

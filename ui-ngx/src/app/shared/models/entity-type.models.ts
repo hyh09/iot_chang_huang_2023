@@ -442,7 +442,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.FACTORY_VERSION,
       {
-        noEntities: 'system-settings.no-factory-version'
+        noEntities: 'system-mng.no-factory-version'
       }
     ],
     [
