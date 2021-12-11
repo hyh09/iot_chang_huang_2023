@@ -980,7 +980,38 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      */
     @Override
     public PageData<Device> getTenantDeviceInfoList(Device device,PageLink pageLink){
-        return deviceDao.getTenantDeviceInfoList(device,pageLink);
+        PageData<Device> pageData = deviceDao.getTenantDeviceInfoList(device, pageLink);
+        if(pageData.getData() != null){
+            this.getDeviceProfileName(pageData.getData());
+        }
+        return pageData;
+    }
+
+    /**
+     * 批量查询设备配置名称
+     * @param dataList
+     */
+    private void getDeviceProfileName(List<Device> dataList){
+        if(!CollectionUtils.isEmpty(dataList)){
+            List<UUID> profileIds = dataList.stream().map(m -> m.getDeviceProfileId().getId()).collect(Collectors.toList());
+            if(!CollectionUtils.isEmpty(profileIds)){
+                List<DeviceProfile> deviceProfileByIds = deviceProfileService.findDeviceProfileByIds(profileIds);
+                if(!CollectionUtils.isEmpty(deviceProfileByIds)){
+                    //循环赋值
+                    dataList.forEach(i->{
+                        deviceProfileByIds.forEach(j->{
+                            if(i.getDeviceProfileId().getId().toString().equals(j.getId().getId().toString())){
+                                i.setDeviceProfileName(j.getName());
+                            }
+                        });
+                    });
+
+
+                }
+
+            }
+
+        }
     }
 
     /**
