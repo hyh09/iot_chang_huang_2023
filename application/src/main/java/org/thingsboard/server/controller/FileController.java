@@ -44,11 +44,11 @@ public class FileController extends BaseController {
      * 上传文件
      */
     @ApiOperation(value = "上传文件", notes = "返回文件Id")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
-//            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
-//            @ApiImplicitParam(name = "file", value = "文件", paramType = "query", required = true),
-//    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
+            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+            @ApiImplicitParam(name = "file", value = "文件", paramType = "form", dataType = "file", required = true),
+    })
     @PostMapping(value = "/file")
     public String uploadFile(@RequestParam(required = false) String checksum,
                              @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
@@ -64,16 +64,16 @@ public class FileController extends BaseController {
      * 分片上传文件
      */
     @ApiOperation(value = "分片上传文件", notes = "最后一次上传返回文件Id，单个上传成功返回null")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "guid", value = "临时文件名id,便于区分", paramType = "query", required = true),
-//            @ApiImplicitParam(name = "checksum", value = "文件校验和", paramType = "query"),
-//            @ApiImplicitParam(name = "checksumChunk", value = "分片文件校验和", paramType = "query"),
-//            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
-//            @ApiImplicitParam(name = "chunks", value = "分块数", paramType = "query", required = true),
-//            @ApiImplicitParam(name = "chunk", value = "分块序号,从1开始", paramType = "query", required = true),
-//            @ApiImplicitParam(name = "fileName", value = "文件名", paramType = "query", required = true),
-//            @ApiImplicitParam(name = "file", value = "分片文件", paramType = "query", required = true),
-//    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "guid", value = "临时文件名id,便于区分", paramType = "query", required = true),
+            @ApiImplicitParam(name = "checksum", value = "文件校验和", paramType = "query"),
+            @ApiImplicitParam(name = "checksumChunk", value = "分片文件校验和", paramType = "query"),
+            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+            @ApiImplicitParam(name = "chunks", value = "分块数", paramType = "query", required = true),
+            @ApiImplicitParam(name = "chunk", value = "分块序号,从1开始", paramType = "query", required = true),
+            @ApiImplicitParam(name = "fileName", value = "文件名", paramType = "query", required = true),
+            @ApiImplicitParam(name = "file", value = "分片文件", paramType = "form", dataType = "file", required = true),
+    })
     @PostMapping(value = "/file/multipart")
     public String fileUpload(@RequestParam String guid,
                              @RequestParam(required = false) String checksum,
@@ -104,9 +104,9 @@ public class FileController extends BaseController {
     }
 
     /**
-     * 下载文件
+     * 小文件流式下载
      */
-    @ApiOperation(value = "下载文件")
+    @ApiOperation(value = "小文件流式下载")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "文件Id", paramType = "query", required = true),
     })

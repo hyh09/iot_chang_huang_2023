@@ -22,6 +22,7 @@ import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
@@ -373,7 +374,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         Map<String, String> finalRMap = rMap;
 
         var data = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get()
-                .stream().map(e -> DictDeviceGroupPropertyVO.builder()
+                .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).map(e -> DictDeviceGroupPropertyVO.builder()
                         .content(this.formatKvEntryValue(e))
                         .unit(Optional.ofNullable(finalRMap.getOrDefault(groupPropertyName, null))
                                 .map(dictDataMap::get).map(DictData::getUnit).orElse(null))
@@ -412,10 +413,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
                 .collect(Collectors.toList());
         var KvResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get();
-
         List<Map<String, Object>> result = new ArrayList<>();
         Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
-        KvResult.forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+        if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection()))
+            KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs)).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+        else
+            KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
         resultMap.forEach((k, v) -> {
             v.put(HSConstants.CREATED_TIME, k);
             result.add(v);
