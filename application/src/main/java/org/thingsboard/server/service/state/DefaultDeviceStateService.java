@@ -181,10 +181,9 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     public void onDeviceActivity(TenantId tenantId, DeviceId deviceId, long lastReportedActivity) {
         log.trace("on Device Activity [{}], lastReportedActivity [{}]", deviceId.getId(), lastReportedActivity);
         final DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-//        if (lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()) {
-//            updateActivityState(deviceId, stateData, lastReportedActivity);
-//        }
-        updateActivityState(deviceId, stateData, lastReportedActivity);
+        if (lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()) {
+            updateActivityState(deviceId, stateData, lastReportedActivity);
+        }
         cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
     }
 
