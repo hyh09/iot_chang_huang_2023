@@ -191,7 +191,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
-
+            capVo.setFlg(entity.getFlg());
             if(entity.getWorkshopId() != null) {
                 Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
                 capVo.setWorkshopName(workshop.isPresent()?workshop.get().getName():"");
@@ -574,7 +574,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities)
     {
 
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(m->m.getFlg().equals(true)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         return   StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
