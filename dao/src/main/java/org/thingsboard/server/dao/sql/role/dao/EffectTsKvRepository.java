@@ -55,15 +55,23 @@ public class EffectTsKvRepository {
 
 
 
-    public  static  String QUERY_KEY_ID=" and table2.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key = :key ) ";
 
-    public  static  String QUERY_KEYS_id=" and table2.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key in( :keys ) ) ";
+    /****产能的sql */
+    public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.flg ,d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
+    public  static  String  SELECT_START_CAP=" table3.key as key,(select key from ts_kv_dictionary  where  key_id= table3.key ) as keyName," +
+            " table3.onlyKeyId as onlyKeyId, table3.ts1 as ts, table3.valueLast1 as valueLast, " +
+            "     table3.ts2 as ts2, table3.valueLast2  as valueLast2  ";
 
+    public  static  String  FROM_QUERY_CAP="    from   device  d1 left join  (select table1.id  as onlyKeyId, table1.entity_id ," +
+            "        table1.key as key," +
+            "        table1.valueLast      as valueLast1," +
+            "        table2.valueLast      as valueLast2," +
+            "        table1.ts as ts1," +
+            "        table2.ts  as ts2" +
+            "        from  table2 ," +
+            "        table1 where table1.id = table2.id and table1.rn = table2.rn and  table1.rn = '1' ) " +
+            "        as table3  on  d1.id = table3.entity_id  where  1=1  ";
 
-    //工厂id
-    public  static  String QUERY_factory__ID=" and table2.entity_id in ( select id  from  device  where  factory_id =:factoryId )  ";
-    public  static  String QUERY_workshop__ID=" and table2.entity_id in ( select id  from  device  where  workshop_id =:workshopId )  ";
-    public  static  String QUERY_productionLine__ID=" and table2.entity_id in ( select id  from  device  where  production_line_id = :lineId )  ";
 
 
     /**
@@ -86,42 +94,46 @@ public class EffectTsKvRepository {
             param.put("key", queryTsKvVo.getKey());
         }
         sonSql.append("   and  a1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ");
+
+        StringBuffer  sonSql01 = new StringBuffer();
+
         if(queryTsKvVo.getTenantId() != null)
         {
-            sonSql.append(" and  d1.tenant_id = :tenantId");
+            sonSql01.append(" and  d1.tenant_id = :tenantId");
             param.put("tenantId", queryTsKvVo.getTenantId());
         }
         if(queryTsKvVo.getFactoryId() != null)
         {
-            sonSql.append(" and  d1.factory_id = :factoryId");
+            sonSql01.append(" and  d1.factory_id = :factoryId");
             param.put("factoryId", queryTsKvVo.getFactoryId());
         }
         if(queryTsKvVo.getWorkshopId() != null)
         {
-            sonSql.append(" and  d1.workshop_id = :workshopId");
+            sonSql01.append(" and  d1.workshop_id = :workshopId");
             param.put("workshopId", queryTsKvVo.getWorkshopId());
         }
         if(queryTsKvVo.getProductionLineId() != null)
         {
-            sonSql.append(" and  d1.production_line_id = :productionLineId");
+            sonSql01.append(" and  d1.production_line_id = :productionLineId");
             param.put("productionLineId", queryTsKvVo.getProductionLineId());
         }
         if(queryTsKvVo.getDeviceId() == null)
         {
-            sonSql.append(" and  d1.flg = true");
+         //   sonSql01.append(" and  d1.flg = true");
         }else {
-            sonSql.append(" and  d1.id = :did");
+            sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
-        sonSql.append(" )");
+        sonSql.append(sonSql01).append(" )");
 
         StringBuffer  sql = new StringBuffer();
         String sqlpre =" with table1  as ( "+FIND_SON_QUERY+sonSql+ " ), table2  as ( "+FIND_SON_QUERY_02+ sonSql+" )";
         sql.append(sqlpre);
-        sql.append(SELECT_START_01+" , ");
-        sql.append(SELECT_END_02);
-        sql.append(FROM_QUERY);
-        sql.append(WHERE_QUERY);
+        sql.append(SELECT_START_DEVICE+ " , ").append(SELECT_START_CAP);
+        sql.append(FROM_QUERY_CAP);
+        sql.append(sonSql01);
+        sql.append("  order by  ts2 ");
+//        sql.append(WHERE_QUERY);
 
         param.put("startTime",queryTsKvVo.getStartTime());
         param.put("endTime",queryTsKvVo.getEndTime());
@@ -157,59 +169,71 @@ public class EffectTsKvRepository {
     public  List<EffectTsKvEntity>  queryEntityByKeys(QueryTsKvVo queryTsKvVo,List<String> key )
     {
 
+
         Query query = null;
         Map<String, Object> param = new HashMap<>();
         StringBuffer  sonSql = new StringBuffer();
+
+//        if(StringUtils.isNotBlank(queryTsKvVo.getKey()))
+//        {
+//            sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)  ) ");
+//            param.put("key", queryTsKvVo.getKey());
+//        }
 
         if(!CollectionUtils.isEmpty(key))
         {
             sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)   ) ");
             param.put("keys", key);
         }
+
         sonSql.append("   and  a1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ");
+
+        StringBuffer  sonSql01 = new StringBuffer();
+
         if(queryTsKvVo.getTenantId() != null)
         {
-            sonSql.append(" and  d1.tenant_id = :tenantId");
+            sonSql01.append(" and  d1.tenant_id = :tenantId");
             param.put("tenantId", queryTsKvVo.getTenantId());
         }
         if(queryTsKvVo.getFactoryId() != null)
         {
-            sonSql.append(" and  d1.factory_id = :factoryId");
+            sonSql01.append(" and  d1.factory_id = :factoryId");
             param.put("factoryId", queryTsKvVo.getFactoryId());
         }
         if(queryTsKvVo.getWorkshopId() != null)
         {
-            sonSql.append(" and  d1.workshop_id = :workshopId");
+            sonSql01.append(" and  d1.workshop_id = :workshopId");
             param.put("workshopId", queryTsKvVo.getWorkshopId());
         }
         if(queryTsKvVo.getProductionLineId() != null)
         {
-            sonSql.append(" and  d1.production_line_id = :productionLineId");
+            sonSql01.append(" and  d1.production_line_id = :productionLineId");
             param.put("productionLineId", queryTsKvVo.getProductionLineId());
         }
-//            if(queryTsKvVo.getDeviceId() == null)
-//        {
-//            sonSql.append(" and  d1.flg = true");
-//        }else {
-        if(queryTsKvVo.getDeviceId() != null){
-            sonSql.append(" and  d1.id = :did");
+        if(queryTsKvVo.getDeviceId() == null)
+        {
+            //   sonSql01.append(" and  d1.flg = true");
+        }else {
+            sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
-        sonSql.append(" )");
+        sonSql.append(sonSql01).append(" )");
 
         StringBuffer  sql = new StringBuffer();
         String sqlpre =" with table1  as ( "+FIND_SON_QUERY+sonSql+ " ), table2  as ( "+FIND_SON_QUERY_02+ sonSql+" )";
         sql.append(sqlpre);
-        sql.append(SELECT_START_01+" , ");
-        sql.append(SELECT_END_02);
-        sql.append(FROM_QUERY);
-        sql.append(WHERE_QUERY);
+        sql.append(SELECT_START_DEVICE+ " , ").append(SELECT_START_CAP);
+        sql.append(FROM_QUERY_CAP);
+        sql.append(sonSql01);
+        sql.append("  order by  ts2 ");
+//        sql.append(WHERE_QUERY);
 
         param.put("startTime",queryTsKvVo.getStartTime());
         param.put("endTime",queryTsKvVo.getEndTime());
 
 
         query= entityManager.createNativeQuery(sql.toString(),"result001");
+        System.out.println("==param==>"+param);
         if(!CollectionUtils.isEmpty(param)) {
             for (Map.Entry<String, Object> entry : param.entrySet()) {
                 query.setParameter(entry.getKey(), entry.getValue());
@@ -217,11 +241,13 @@ public class EffectTsKvRepository {
         }
 
         List<EffectTsKvEntity> entityList=query.getResultList();
+        log.debug("==打印的结果:==>"+entityList);
         entityList.stream().forEach(EffectTsKvEntity -> {
-                EffectTsKvEntity.subtraction();
+            EffectTsKvEntity.subtraction();
         });
 
         return  entityList;
+
 
 
     }

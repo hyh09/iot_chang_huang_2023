@@ -36,8 +36,8 @@ public class StringUtilToll {
     public static String  sub(String value1, String value2){
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
-        //bigdeciaml.stripTrailingZeros().toPlainString()
-        return b1.subtract(b2).stripTrailingZeros().toPlainString();
+        BigDecimal  result = b1.subtract(b2).stripTrailingZeros();
+        return  result.compareTo(BigDecimal.ZERO )<0?"0":roundUp(result.toPlainString());
     }
 
 
@@ -53,6 +53,9 @@ public class StringUtilToll {
         return b1.add(b2).doubleValue();
     }
 
+
+
+
     private static final int DEF_DIV_SCALE = 10;
 
     /**
@@ -62,20 +65,28 @@ public class StringUtilToll {
      * @param v2 除数
      * @return 两个参数的商
      */
-    public static double div(String v1,String v2,String v3){
+    public static String div(String v1,String v2,String v3){
+        String zero ="0";
+        if(v1 == null || v2 == null ||  v3 == null)
+        {
+            return  zero;
+
+        }
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
         BigDecimal b3 = new BigDecimal(v3);
         if(b2.compareTo(BigDecimal.ZERO)==0)
         {
-            return 0;
+            return zero;
         }
         if(b3.compareTo(BigDecimal.ZERO)==0)
         {
-            return 0;
+            return zero;
         }
         BigDecimal bigDecimal =  b1.divide(b2, 2, BigDecimal.ROUND_HALF_UP).divide(b3,2, BigDecimal.ROUND_HALF_UP);
-       return bigDecimal.doubleValue();
+        //保留4位小数
+        String str=  bigDecimal.stripTrailingZeros().toPlainString();
+       return str;
     }
 
 
@@ -89,10 +100,22 @@ public class StringUtilToll {
              return  "0";
          }
         BigDecimal b = new BigDecimal(num);
-        //保留2位小数
+        //保留4位小数
         BigDecimal result = b.setScale(4, BigDecimal.ROUND_HALF_UP);
         String str=  result.stripTrailingZeros().toPlainString();
         return  str;
+    }
+
+
+    public  static  Boolean isZero(String v2)
+    {
+        BigDecimal b2 = new BigDecimal(v2);
+        if(b2.compareTo(BigDecimal.ZERO)==0)
+        {
+            return true;
+        }
+        return  false;
+
     }
 
 
