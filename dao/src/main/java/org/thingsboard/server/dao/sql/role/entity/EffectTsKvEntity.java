@@ -69,7 +69,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
      * 前端传入的keyName
      */
     @Transient
-    private String keyName;
+    private String keyName="";
 
     @Transient
   private  String  deviceName;
@@ -109,7 +109,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     private  String valueLast;
 
     @Transient //最后的一个值
-    private  String valueLast2;
+    private  String valueLast2="0";
 
     @Transient
     private  String localValue;

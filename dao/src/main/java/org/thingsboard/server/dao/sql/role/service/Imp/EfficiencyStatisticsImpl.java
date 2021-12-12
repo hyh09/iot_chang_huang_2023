@@ -262,11 +262,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);//包含了总产能的
 
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonlist = mapper.writeValueAsString(vos);
-        log.info("输出打印的所有的能耗的数据:{}",jsonlist);
+//        ObjectMapper mapper = new ObjectMapper();
+//        String jsonlist = mapper.writeValueAsString(vos);
+//        log.info("输出打印的所有的能耗的数据:{}",jsonlist);
 
-        List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName);
+        List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName, headerList);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
         headerList.stream().forEach(str->{
             log.info("打印当前的str:{}",str);
@@ -582,7 +582,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,String key)
     {
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> (StringUtils.isNotBlank(entity.getKeyName())&&entity.getKeyName().equals(key))).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         return  StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
@@ -619,9 +619,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
 
                 value.stream().forEach(effectTsKvEntity -> {
-                    mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValueLast2());
-                    timeValueMap.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs2());
-                    timeValueMap1.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs());
+                    if(effectTsKvEntity.getKeyName() != null) {
+                        mapValue.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getValueLast2());
+                        timeValueMap.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getTs2());
+                        timeValueMap1.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getTs());
+                    }
 
                 });
                 appDeviceEnergyVo.setMapValue(mapValue);
@@ -630,16 +632,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             }
 
             appList.add(appDeviceEnergyVo);
+            log.info("appList:====>{}",appList);
 
-            try{
-                ObjectMapper mapper=new ObjectMapper();
-               String   jsonStr=mapper.writeValueAsString(appList);
-               log.info("josn数据:{}",jsonStr);
-            }catch (Exception e)
-            {
-                e.printStackTrace();
-
-            }
+//            try{
+//                ObjectMapper mapper=new ObjectMapper();
+//               String   jsonStr=mapper.writeValueAsString(appList);
+//               log.info("josn数据:{}",jsonStr);
+//            }catch (Exception e)
+//            {
+//                e.printStackTrace();
+//
+//            }
 
         });
 
@@ -652,7 +655,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @param vos
      * @param keyName 产能key
      */
-    private  List<PcDeviceEnergyVo> unitMap(List<AppDeviceEnergyVo>  vos, String  keyName)
+    private  List<PcDeviceEnergyVo> unitMap(List<AppDeviceEnergyVo>  vos, String  keyName,List<String>  headerList)
     {
         List<PcDeviceEnergyVo> resultList = new ArrayList<>();
         vos.stream().forEach(energyVo->{
@@ -662,7 +665,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setProductionName(energyVo.getProductionName());
             vo.setWorkshopName(energyVo.getWorkshopName());
             Map<String,String>  mapOld =    energyVo.getMapValue();
-         String   keyNameValue =   mapOld.get(keyName);
+            if(CollectionUtils.isEmpty(mapOld))
+            {
+                headerList.stream().forEach(str->{
+                        mapOld.put(str,"0");
+                });
+            }
+            log.info("headerList:====>headerList{}",headerList);
+            log.info("mapOld:====>mapOld{}",mapOld);
+
+            String   keyNameValue1 =   mapOld.get(keyName);
+
+            String   keyNameValue =(StringUtils.isEmpty(keyNameValue1)?"0":keyNameValue1);
          log.info("当前设备的总产能:{}",keyNameValue);
 
          Map<String,Long> timeValueMap = energyVo.getTimeValueMap();
@@ -676,16 +690,21 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             mapOld.forEach((key,value1)->{
               if(!key.equals(keyName))
               {
+                 if(StringUtilToll.isZero(value1))
+                 {
+                     map2.put(key,"0");
+                 } else {
 
-                  //计算公式：总产能/总能耗/分钟数
-                  map1.put(key,value1);
-                  Long  t01= timeValueMap1.get(key);
-                  Long  t02= timeValueMap.get(key);
-                  log.info("=====>t01{},t02{}",t01,t02);
-                  Long  t3 =   (t02-t01)/60000;
+                     //计算公式：总产能/总能耗/分钟数
+                     map1.put(key, value1);
+                     Long t01 = timeValueMap1.get(key);
+                     Long t02 = timeValueMap.get(key);
+                     log.info("=====>t01{},t02{}", t01, t02);
+                     Long t3 = (t02 - t01) / 60000;
 
-                  String  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
-                  map2.put(key,aDouble.toString());
+                     String aDouble = StringUtilToll.div(keyNameValue, value1, t3.toString());
+                     map2.put(key, aDouble.toString());
+                 }
               }
             });
 

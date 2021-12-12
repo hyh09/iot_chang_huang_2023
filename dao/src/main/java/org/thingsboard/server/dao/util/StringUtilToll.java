@@ -107,6 +107,18 @@ public class StringUtilToll {
     }
 
 
+    public  static  Boolean isZero(String v2)
+    {
+        BigDecimal b2 = new BigDecimal(v2);
+        if(b2.compareTo(BigDecimal.ZERO)==0)
+        {
+            return true;
+        }
+        return  false;
+
+    }
+
+
 
 
 

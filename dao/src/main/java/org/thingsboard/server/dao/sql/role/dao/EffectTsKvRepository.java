@@ -129,8 +129,6 @@ public class EffectTsKvRepository {
         StringBuffer  sql = new StringBuffer();
         String sqlpre =" with table1  as ( "+FIND_SON_QUERY+sonSql+ " ), table2  as ( "+FIND_SON_QUERY_02+ sonSql+" )";
         sql.append(sqlpre);
-//        sql.append(SELECT_START_01+" , ");
-//        sql.append(SELECT_END_02);
         sql.append(SELECT_START_DEVICE+ " , ").append(SELECT_START_CAP);
         sql.append(FROM_QUERY_CAP);
         sql.append(sonSql01);
@@ -171,56 +169,71 @@ public class EffectTsKvRepository {
     public  List<EffectTsKvEntity>  queryEntityByKeys(QueryTsKvVo queryTsKvVo,List<String> key )
     {
 
+
         Query query = null;
         Map<String, Object> param = new HashMap<>();
         StringBuffer  sonSql = new StringBuffer();
+
+//        if(StringUtils.isNotBlank(queryTsKvVo.getKey()))
+//        {
+//            sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)  ) ");
+//            param.put("key", queryTsKvVo.getKey());
+//        }
 
         if(!CollectionUtils.isEmpty(key))
         {
             sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)   ) ");
             param.put("keys", key);
         }
+
         sonSql.append("   and  a1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ");
+
+        StringBuffer  sonSql01 = new StringBuffer();
+
         if(queryTsKvVo.getTenantId() != null)
         {
-            sonSql.append(" and  d1.tenant_id = :tenantId");
+            sonSql01.append(" and  d1.tenant_id = :tenantId");
             param.put("tenantId", queryTsKvVo.getTenantId());
         }
         if(queryTsKvVo.getFactoryId() != null)
         {
-            sonSql.append(" and  d1.factory_id = :factoryId");
+            sonSql01.append(" and  d1.factory_id = :factoryId");
             param.put("factoryId", queryTsKvVo.getFactoryId());
         }
         if(queryTsKvVo.getWorkshopId() != null)
         {
-            sonSql.append(" and  d1.workshop_id = :workshopId");
+            sonSql01.append(" and  d1.workshop_id = :workshopId");
             param.put("workshopId", queryTsKvVo.getWorkshopId());
         }
         if(queryTsKvVo.getProductionLineId() != null)
         {
-            sonSql.append(" and  d1.production_line_id = :productionLineId");
+            sonSql01.append(" and  d1.production_line_id = :productionLineId");
             param.put("productionLineId", queryTsKvVo.getProductionLineId());
         }
-
-        if(queryTsKvVo.getDeviceId() != null){
-            sonSql.append(" and  d1.id = :did");
+        if(queryTsKvVo.getDeviceId() == null)
+        {
+            //   sonSql01.append(" and  d1.flg = true");
+        }else {
+            sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
-        sonSql.append(" )");
+        sonSql.append(sonSql01).append(" )");
 
         StringBuffer  sql = new StringBuffer();
         String sqlpre =" with table1  as ( "+FIND_SON_QUERY+sonSql+ " ), table2  as ( "+FIND_SON_QUERY_02+ sonSql+" )";
         sql.append(sqlpre);
-        sql.append(SELECT_START_01+" , ");
-        sql.append(SELECT_END_02);
-        sql.append(FROM_QUERY);
-        sql.append(WHERE_QUERY);
+        sql.append(SELECT_START_DEVICE+ " , ").append(SELECT_START_CAP);
+        sql.append(FROM_QUERY_CAP);
+        sql.append(sonSql01);
+        sql.append("  order by  ts2 ");
+//        sql.append(WHERE_QUERY);
 
         param.put("startTime",queryTsKvVo.getStartTime());
         param.put("endTime",queryTsKvVo.getEndTime());
 
 
         query= entityManager.createNativeQuery(sql.toString(),"result001");
+        System.out.println("==param==>"+param);
         if(!CollectionUtils.isEmpty(param)) {
             for (Map.Entry<String, Object> entry : param.entrySet()) {
                 query.setParameter(entry.getKey(), entry.getValue());
@@ -228,11 +241,13 @@ public class EffectTsKvRepository {
         }
 
         List<EffectTsKvEntity> entityList=query.getResultList();
+        log.debug("==打印的结果:==>"+entityList);
         entityList.stream().forEach(EffectTsKvEntity -> {
-                EffectTsKvEntity.subtraction();
+            EffectTsKvEntity.subtraction();
         });
 
         return  entityList;
+
 
 
     }
