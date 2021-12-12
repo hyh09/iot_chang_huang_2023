@@ -36,8 +36,8 @@ public class StringUtilToll {
     public static String  sub(String value1, String value2){
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
-        //bigdeciaml.stripTrailingZeros().toPlainString()
-        return b1.subtract(b2).stripTrailingZeros().toPlainString();
+        BigDecimal  result = b1.subtract(b2).stripTrailingZeros();
+        return  result.compareTo(BigDecimal.ZERO )<0?"0":roundUp(result.toPlainString());
     }
 
 
@@ -52,6 +52,9 @@ public class StringUtilToll {
         BigDecimal b2 = new BigDecimal(value2);
         return b1.add(b2).doubleValue();
     }
+
+
+
 
     private static final int DEF_DIV_SCALE = 10;
 

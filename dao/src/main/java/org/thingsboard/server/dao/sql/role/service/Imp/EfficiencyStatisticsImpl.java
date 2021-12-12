@@ -219,7 +219,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("打印当前的表头name:{}",headerList);
         List<String>  nameKey=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
 
-//        Map<String,String>  mapUnit  = dictDeviceService.getUnit();
         Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
 
         if(CollectionUtils.isEmpty(nameKey))
@@ -577,7 +576,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
-        return  invoiceAmount.stripTrailingZeros().toPlainString();
+        return   StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
 
 
@@ -585,7 +584,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     {
         BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
-        return  invoiceAmount.stripTrailingZeros().toPlainString();
+        return  StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
 
  /**
