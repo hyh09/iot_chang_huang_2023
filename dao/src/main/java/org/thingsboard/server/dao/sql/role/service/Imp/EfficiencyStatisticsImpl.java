@@ -669,7 +669,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
          Map<String,Long> timeValueMap = energyVo.getTimeValueMap();
             Map<String,Long> timeValueMap1 = energyVo.getTimeValueMap1();
            Long time001 =  timeValueMap.get(keyName);
-         log.info("打印设备的总产能的时间:{}",time001);
 
 
             Map<String,String>  map1 =  new HashMap<>();
@@ -678,18 +677,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             mapOld.forEach((key,value1)->{
               if(!key.equals(keyName))
               {
-                  //只会影响到单位能耗计算
-                  //
+
                   //计算公式：总产能/总能耗/分钟数
                   map1.put(key,value1);
-//                Long  time02 =   (timeValueMap.get(key));
-//                Long  t3 =   (time001-time02);
                   Long  t01= timeValueMap1.get(key);
                   Long  t02= timeValueMap.get(key);
                   log.info("=====>t01{},t02{}",t01,t02);
                   Long  t3 =   (t02-t01)/60000;
 
-                  Double  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
+                  String  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
                   map2.put(key,aDouble.toString());
               }
             });
