@@ -94,6 +94,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private List<UUID> productionLineIds;
     //是否过滤掉网关true是，false否
     private Boolean filterGatewayFlag = false;
+    //设备配置名称
+    private String deviceProfileName;
     /**********************************以上是非数据库字段***************************************/
 
     private Boolean deviceFlg=false;
@@ -114,6 +116,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.type = device.getType();
         this.label = device.getLabel();
         this.deviceProfileId = device.getDeviceProfileId();
+        this.deviceProfileName = device.getDeviceProfileName();
         this.deviceData =device.getDeviceData();
         this.firmwareId = device.getFirmwareId();
         this.softwareId = device.getSoftwareId();
