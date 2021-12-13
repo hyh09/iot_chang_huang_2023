@@ -49,6 +49,8 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
+import org.thingsboard.server.dao.device.YunEnum;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -824,9 +826,11 @@ public class DeviceController extends BaseController {
             device.setTenantId(getCurrentUser().getTenantId());
             Device oldDevice = null;
             String saveType = null;
+            TransportMqttClient.TYPE yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_ADD;
             if (!created) {
                 oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
                 saveType = SAVE_TYPE_ADD_UPDATE;
+                type = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
             } else {
                 checkEntity(null, device, Resource.DEVICE);
                 saveType = SAVE_TYPE_ADD;
@@ -844,6 +848,8 @@ public class DeviceController extends BaseController {
                 //建立实体关系
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
+            //云云对接
+            transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
             savedDevice.setFactoryName(addDeviceDto.getFactoryName());
             savedDevice.setWorkshopName(addDeviceDto.getWorkshopName());
             savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());

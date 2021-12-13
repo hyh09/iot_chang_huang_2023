@@ -59,6 +59,7 @@ import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.audit.AuditLogService;
@@ -276,6 +277,9 @@ public abstract class BaseController {
 
     @Autowired
     protected DictDeviceService dictDeviceService;
+
+    @Autowired
+    protected DefaultTransportService transportService;
 
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
