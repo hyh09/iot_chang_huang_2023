@@ -456,8 +456,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         log.trace("Processing state {} for device {}", stateData, deviceId);
         if (stateData != null) {
             DeviceState state = stateData.getState();
-//            if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
-            if (!isActive(ts, state)) {
+            if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
                 state.setActive(false);
                 state.setLastInactivityAlarmTime(ts);
                 save(deviceId, INACTIVITY_ALARM_TIME, ts);
