@@ -180,7 +180,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     const columns: Array<EntityTableColumn<DeviceInfo>> = [
       new DateEntityTableColumn<DeviceInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<DeviceInfo>('name', 'device.name', '20%'),
-      new EntityTableColumn<DeviceInfo>('deviceProfileName', 'device-profile.device-profile', '20%'),
+      new EntityTableColumn<DeviceInfo>('type', 'device-profile.device-profile', '20%'),
       new EntityTableColumn<DeviceInfo>('factoryName', 'device-mng.factory', '20%'),
       new EntityTableColumn<DeviceInfo>('workshopName', 'device-mng.work-shop', '20%'),
       new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%')
