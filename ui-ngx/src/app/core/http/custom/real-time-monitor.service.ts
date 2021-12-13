@@ -125,19 +125,25 @@ export class RealTimeMonitorService {
     this.webSocket.onmessage = res => {
       if (this.leftDeviceCount > 0) {
         this.leftDeviceCount--;
-      } else {
+      } else if (listenDeviceActive) {
         const _res = JSON.parse(res.data);
         if (_res.data && _res.latestValues) {
           const latestActiveTime = _res.latestValues.active;
           const latestDeviceTime = _res.latestValues.attrDeviceId;
-          const latestActiveInfo = (_res.data.active as Array<string[]>).filter(item => (item[0] === latestActiveTime));
-          const latestDeviceInfo = (_res.data.attrDeviceId as Array<string[]>).filter(item => (item[0] === latestDeviceTime));
-          const isActive = latestActiveInfo[0] && latestActiveInfo[0][1] === 'true';
-          const deviceId = latestDeviceInfo[0] ? (latestDeviceInfo[0][1] || '') : '';
-          onMessage({ deviceId, isActive });
+          if (_res.data.active && _res.data.attrDeviceId) {
+            const latestActiveInfo = (_res.data.active as Array<string[]>).filter(item => (item[0] === latestActiveTime));
+            const latestDeviceInfo = (_res.data.attrDeviceId as Array<string[]>).filter(item => (item[0] === latestDeviceTime));
+            const isActive = latestActiveInfo[0] && latestActiveInfo[0][1] === 'true';
+            const deviceId = latestDeviceInfo[0] ? (latestDeviceInfo[0][1] || '') : '';
+            onMessage({ deviceId, isActive });
+          } else {
+            onMessage({});
+          }
         } else {
           onMessage({});
         }
+      } else {
+        onMessage();
       }
     }
   }
