@@ -60,11 +60,11 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
 
   ngAfterViewInit() {
     this.setTableHeight();
-    window.addEventListener('resize', this.setTableHeight);
+    window.addEventListener('resize', () => { this.setTableHeight(); });
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.setTableHeight);
+    window.removeEventListener('resize', () => { this.setTableHeight(); });
   }
 
   setTableHeight() {
@@ -76,6 +76,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         const totalHeight = $tableContent.clientHeight;
         const tableClientTop = $toolbar.clientHeight + $filter.clientHeight;
         this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` };
+        console.log(this.scrollConfig)
       }
     });
   }
