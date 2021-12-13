@@ -129,6 +129,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
       deviceScope: route.data.devicesType,
       deviceProfileId: null,
       deviceName: '',
+      type: '',
       isAllot: '',
       deviceCredentials$: new Subject<DeviceCredentials>(),
       edgeId: routeParams.edgeId

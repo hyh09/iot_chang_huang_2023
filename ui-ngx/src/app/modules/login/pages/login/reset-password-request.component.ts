@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AuthService } from '@core/auth/auth.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -43,7 +43,8 @@ export class ResetPasswordRequestComponent extends PageComponent implements OnIn
               private translate: TranslateService,
               public fb: FormBuilder,
               private route: ActivatedRoute,
-              private router: Router) {
+              private router: Router,
+              protected cd: ChangeDetectorRef) {
     super(store);
     this.requestPasswordRequest.get('email').setValue(this.route.snapshot.queryParams.email || '');
   }
@@ -54,6 +55,12 @@ export class ResetPasswordRequestComponent extends PageComponent implements OnIn
   disableInputs() {
     this.requestPasswordRequest.disable();
     this.clicked = true;
+  }
+
+  onVerified() {
+    this.verified = true;
+    this.cd.markForCheck();
+    this.cd.detectChanges();
   }
 
   sendResetPasswordLink() {
