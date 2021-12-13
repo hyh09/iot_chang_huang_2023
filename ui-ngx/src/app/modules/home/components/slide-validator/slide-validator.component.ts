@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'tb-slide-validator',
@@ -31,7 +31,7 @@ export class SlideValidatorComponent implements AfterViewInit, OnDestroy {
 
   isSuccess = false;
 
-  constructor() { }
+  constructor(protected cd: ChangeDetectorRef) { }
 
   ngAfterViewInit() {
     this.$box = this.box.nativeElement;
@@ -39,13 +39,13 @@ export class SlideValidatorComponent implements AfterViewInit, OnDestroy {
     this.$slider = this.slider.nativeElement;
 
     this.setSuccessDistance();
-    window.addEventListener('resize', this.setSuccessDistance);
+    window.addEventListener('resize', () => { this.setSuccessDistance(); });
 
     this.$slider.onmousedown = event => { this.mousedownHandler(event); };
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.setSuccessDistance);
+    window.removeEventListener('resize', () => { this.setSuccessDistance(); });
   }
 
   private setSuccessDistance() {
@@ -66,7 +66,6 @@ export class SlideValidatorComponent implements AfterViewInit, OnDestroy {
     const offsetX = this.getOffsetX(moveX - this.downX, 0, this.successMoveDistance);
     this.$bg.style.width = `${offsetX}px`;
     this.$slider.style.left = `${offsetX}px`;
-
     if (offsetX == this.successMoveDistance) {
       this.success();
     }
@@ -101,6 +100,8 @@ export class SlideValidatorComponent implements AfterViewInit, OnDestroy {
     this.$slider.onmousedown = null;
     document.onmousemove = null;
     this.successEmitter.emit();
+    this.cd.markForCheck();
+    this.cd.detectChanges();
   }
 
 }
