@@ -76,7 +76,6 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         const totalHeight = $tableContent.clientHeight;
         const tableClientTop = $toolbar.clientHeight + $filter.clientHeight;
         this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` };
-        console.log(this.scrollConfig)
       }
     });
   }
