@@ -50,7 +50,6 @@ import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
 import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
-import org.thingsboard.server.dao.device.YunEnum;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -830,7 +829,7 @@ public class DeviceController extends BaseController {
             if (!created) {
                 oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
                 saveType = SAVE_TYPE_ADD_UPDATE;
-                type = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
+                yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
             } else {
                 checkEntity(null, device, Resource.DEVICE);
                 saveType = SAVE_TYPE_ADD;
