@@ -34,6 +34,7 @@ import org.thingsboard.server.dao.sql.role.service.rolemenu.RoleMenuVo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -251,7 +252,69 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
         }
 
+        return  getSort(tenantMenuList);
+    }
+
+
+    private  List<TenantMenuVo>  getSort(List<TenantMenuVo> voList)
+    {
+        List<TenantMenuVo> tenantMenuList = new ArrayList<>();
+        if(CollectionUtils.isEmpty(voList))
+        {
+            return  voList;
+        }
+        TenantMenuVo  tenantMenuVo=    getAll(voList);
+        tenantMenuList.add(tenantMenuVo);
+        voList.forEach(TenantMenuVo ->{
+            tenantMenuList.add(TenantMenuVo);
+
+        });
         return  tenantMenuList;
+
+    }
+
+
+
+    private  TenantMenuVo getAll(List<TenantMenuVo> allList)
+    {
+        List<TenantMenuVo>  tenantMenus =  allList.stream().filter(m -> m.getParentId() == null)
+                .map( (m) -> {
+                    m.setChildren(getChildrens(m,allList));
+                    return  m;
+                }).collect(Collectors.toList());
+
+        return  filterList(tenantMenus)  ;
+    }
+
+
+    private TenantMenuVo  filterList( List<TenantMenuVo>  tenantMenus)
+    {
+        for(TenantMenuVo  vo:tenantMenus){
+            List<TenantMenuVo>  voList=   vo.getChildren();
+            if(vo.getIsButton().equals(false) && vo.getHasChildren().equals(false) && StringUtils.isNotBlank(vo.getPath()))
+            {
+                return vo;
+            }
+            if(CollectionUtils.isNotEmpty(voList))
+            {
+               return filterList(voList);
+            }
+        }
+        return new TenantMenuVo();
+    }
+
+
+
+    public List<TenantMenuVo> getChildrens(TenantMenuVo root, List<TenantMenuVo> all) {
+        List<TenantMenuVo> children = all.stream().filter(m -> {
+            return Objects.equals(root.getId(), m.getParentId());
+        }).map(
+                (m) -> {
+                    m.setChildren(getChildrens(m, all));
+                    return m;
+                }
+        ).collect(Collectors.toList());
+        return children;
     }
 
 

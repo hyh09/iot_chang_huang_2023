@@ -1035,12 +1035,12 @@ public abstract class BaseController {
         List<Factory> byName = factoryService.findByName(name, this.getCurrentUser().getTenantId().getId());
         if(org.apache.commons.collections.CollectionUtils.isNotEmpty(byName)){
             if(id == null){
-                log.warn("名称重复");
-                throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                log.warn("工厂名称重复");
+                throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
             }else {
                 if(!byName.get(0).getId().toString().equals(id.toString())){
-                    log.warn("名称重复");
-                    throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                    log.warn("工厂名称重复");
+                    throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
                 }
             }
         }

@@ -1,9 +1,12 @@
 package org.thingsboard.server.common.data.vo.menu;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -48,6 +51,10 @@ public class TenantMenuVo {
     private  String name;
 
     private  Boolean checked=false;
+
+    @JsonIgnore
+    private List<TenantMenuVo> children;
+
 
 
 }
