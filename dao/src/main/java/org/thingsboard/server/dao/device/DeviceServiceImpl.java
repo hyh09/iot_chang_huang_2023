@@ -42,6 +42,7 @@ import org.thingsboard.server.common.data.device.credentials.BasicMqttCredential
 import org.thingsboard.server.common.data.device.data.*;
 import org.thingsboard.server.common.data.devicecomponent.DeviceComponent;
 import org.thingsboard.server.common.data.edge.Edge;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.id.factory.FactoryId;
@@ -196,6 +197,17 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Transactional
     @Override
     public Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException {
+        //同租户下，设备名称不能重复
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(device.getTenantId(), device.getName()));
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            if(device.getId() == null){
+                throw new ThingsboardException("设备名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+            }else {
+                if(device.getName() != null && !device.getId().getId().toString().equals(deviceListByCdn.get(0).getId().getId().toString())){
+                    throw new ThingsboardException("设备名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
+            }
+        }
         return doSaveDevice(device, accessToken, true);
     }
 
@@ -248,6 +260,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         if(device.getDictDeviceId() == null || StringUtils.isEmpty(device.getDictDeviceId().toString())){
             device.setDictDeviceId(dictDeviceService.getDefaultDictDeviceId(device.getTenantId()));
         }
+        //保存设备
         Device savedDevice = this.saveDeviceWithoutCredentials(device, doValidate);
         if (device.getId() == null) {
             DeviceCredentials deviceCredentials = new DeviceCredentials();
@@ -981,9 +994,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Override
     public PageData<Device> getTenantDeviceInfoList(Device device,PageLink pageLink){
         PageData<Device> pageData = deviceDao.getTenantDeviceInfoList(device, pageLink);
-        if(pageData.getData() != null){
+        /*if(pageData.getData() != null){
             this.getDeviceProfileName(pageData.getData());
-        }
+        }*/
         return pageData;
     }
 

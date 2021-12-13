@@ -357,33 +357,6 @@ public class DeviceController extends BaseController {
         }
     }
 
-    @ApiOperation("平台设备列表查询（重写平台原来的列表查询）")
-    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
-    @ResponseBody
-    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page, DeviceListQry deviceListQry) throws ThingsboardException {
-        try {
-            PageData<DeviceInfo> resultPage = new PageData<>();
-            List<DeviceInfo> resultDevices = new ArrayList<>();
-            TenantId tenantId = getCurrentUser().getTenantId();
-            PageLink pageLink = createPageLink(pageSize, page, deviceListQry.getSearchText(), deviceListQry.getSortProperty(), deviceListQry.getSortOrder());
-            Device device = deviceListQry.toDevice();
-            device.setTenantId(tenantId);
-            //查询设备
-            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
-            List<Device> deviceList = menuPageData.getData();
-            if(!CollectionUtils.isEmpty(deviceList)){
-                deviceList.forEach(i->{
-                    resultDevices.add(new DeviceInfo(i));
-                });
-            }
-            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
-            return resultPage;
-        } catch (Exception e) {
-            throw handleException(e);
-        }
-    }
-
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/tenant/devices", params = {"deviceName"}, method = RequestMethod.GET)
     @ResponseBody
@@ -804,6 +777,34 @@ public class DeviceController extends BaseController {
     /*******************************************新增业务接口*******************************************/
     /*******************************************新增业务接口*******************************************/
     /*******************************************新增业务接口*******************************************/
+
+
+    @ApiOperation("平台设备列表查询（重写平台原来的列表查询）")
+    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
+    @ResponseBody
+    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page, DeviceListQry deviceListQry) throws ThingsboardException {
+        try {
+            PageData<DeviceInfo> resultPage = new PageData<>();
+            List<DeviceInfo> resultDevices = new ArrayList<>();
+            TenantId tenantId = getCurrentUser().getTenantId();
+            PageLink pageLink = createPageLink(pageSize, page, deviceListQry.getSearchText(), deviceListQry.getSortProperty(), deviceListQry.getSortOrder());
+            Device device = deviceListQry.toDevice();
+            device.setTenantId(tenantId);
+            //查询设备
+            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
+            List<Device> deviceList = menuPageData.getData();
+            if(!CollectionUtils.isEmpty(deviceList)){
+                deviceList.forEach(i->{
+                    resultDevices.add(new DeviceInfo(i));
+                });
+            }
+            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
+            return resultPage;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
 
     /**
      * 新增/更新设备

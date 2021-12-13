@@ -73,20 +73,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     @Override
     public Factory saveFactory(Factory factory)throws ThingsboardException {
         Boolean create = factory.getId() == null;
-        //校验名称重复
-        Factory check = new Factory();
-        check.setName(factory.getName());
-        check.setTenantId(factory.getTenantId());
-        List<Factory> factoryList = this.commonCondition(check);
-        if(CollectionUtils.isNotEmpty(factoryList)){
-            if (create) {
-                throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-            }else {
-                if(!factoryList.get(0).getId().toString().equals(factory.getId().toString())) {
-                    throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-                }
-            }
-        }
         FactoryEntity factoryEntity = new FactoryEntity(factory);
         if (create) {
             UUID uuid = Uuids.timeBased();
