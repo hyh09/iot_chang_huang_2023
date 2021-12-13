@@ -194,7 +194,6 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             DeviceState state = stateData.getState();
             state.setLastActivityTime(lastReportedActivity);
             if (!state.isActive()) {
-                log.info("设备在线: [deviceId: {}] [ts: {}] [stateData: {}]", deviceId.toString(), System.currentTimeMillis(), state.toString());
                 state.setActive(true);
                 save(deviceId, ACTIVITY_STATE, true);
                 pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
@@ -457,8 +456,8 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         log.trace("Processing state {} for device {}", stateData, deviceId);
         if (stateData != null) {
             DeviceState state = stateData.getState();
-            if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
-                log.info("设备离线: [deviceId: {}] [ts: {}] [stateData: {}]", deviceId.toString(), ts, state.toString());
+//            if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
+            if (!isActive(ts, state)) {
                 state.setActive(false);
                 state.setLastInactivityAlarmTime(ts);
                 save(deviceId, INACTIVITY_ALARM_TIME, ts);

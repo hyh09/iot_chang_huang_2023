@@ -36,6 +36,8 @@ import { EntityTableConfig } from '@home/models/entity/entities-table-config.mod
 import { Subject } from 'rxjs';
 import { OtaUpdateType } from '@shared/models/ota-package.models';
 import { distinctUntilChanged } from 'rxjs/operators';
+import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
+import { DeviceDictionaryService } from '@app/core/http/custom/public-api';
 
 @Component({
   selector: 'tb-device',
@@ -52,13 +54,19 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   otaUpdateType = OtaUpdateType;
 
+  deviceDictionaries: DeviceDictionary[] = [];
+
   constructor(protected store: Store<AppState>,
               protected translate: TranslateService,
               @Inject('entity') protected entityValue: DeviceInfo,
               @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceInfo>,
               public fb: FormBuilder,
-              protected cd: ChangeDetectorRef) {
+              protected cd: ChangeDetectorRef,
+              private deviceDictionaryService: DeviceDictionaryService) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
+    this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
+      this.deviceDictionaries = res || [];
+    });
   }
 
   ngOnInit() {
@@ -83,6 +91,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     const form = this.fb.group(
       {
         name: [entity ? entity.name : '', [Validators.required]],
+        dictDeviceId: [entity && entity.dictDeviceId ? entity.dictDeviceId : ''],
         deviceProfileId: [entity ? entity.deviceProfileId : null, [Validators.required]],
         firmwareId: [entity ? entity.firmwareId : null],
         softwareId: [entity ? entity.softwareId : null],
@@ -113,6 +122,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   updateForm(entity: DeviceInfo) {
     this.entityForm.patchValue({
       name: entity.name,
+      dictDeviceId: entity.dictDeviceId,
       deviceProfileId: entity.deviceProfileId,
       firmwareId: entity.firmwareId,
       softwareId: entity.softwareId,
