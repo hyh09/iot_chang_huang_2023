@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -523,8 +524,8 @@ public class DefaultTransportService implements TransportService {
                 sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, SessionMsgType.POST_TELEMETRY_REQUEST, packCallback);
 
                 //推送给云云
-                this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,SessionMsgType.POST_TELEMETRY_REQUEST,yunyunTopic);
-
+                this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,TransportMqttClient.TYPE.POST_TELEMETRY_REQUEST,yunyunTopic);
+                //this.transportMqttClient.publishDevice(tenantId,deviceId,TransportMqttClient.TYPE.POST_DEVICE_ADD,yunyunTopic);
             }
         }
     }
@@ -545,7 +546,7 @@ public class DefaultTransportService implements TransportService {
                     new TransportTbQueueCallback(new ApiStatsProxyCallback<>(tenantId, customerId, msg.getKvList().size(), callback)));
 
             //推送给云云
-            this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,SessionMsgType.POST_ATTRIBUTES_REQUEST,yunyunTopic);
+            this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,TransportMqttClient.TYPE.POST_ATTRIBUTES_REQUEST,yunyunTopic);
         }
     }
 
@@ -1163,4 +1164,10 @@ public class DefaultTransportService implements TransportService {
     public ExecutorService getCallbackExecutor() {
         return transportCallbackExecutor;
     }
+
+
+    public void publishDevice(TenantId tenantId, DeviceId deviceId, TransportMqttClient.TYPE type) {
+        this.transportMqttClient.publishDevice(tenantId,deviceId,type,yunyunTopic);
+    }
+
 }

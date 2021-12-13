@@ -234,8 +234,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var activeStatusMap = this.clientService.listAllDeviceOnlineStatus(allDeviceIdList);
 
-        var deviceWithoutImageList = devicePageData.getData().stream().filter(e -> StringUtils.isBlank(e.getPicture())).collect(Collectors.toList());
-        var map = Lists.newArrayList(this.dictDeviceRepository.findAllById(deviceWithoutImageList.stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())))
+        var deviceImageList = devicePageData.getData().stream().filter(e -> StringUtils.isNotBlank(e.getPicture())).collect(Collectors.toList());
+        var map = Lists.newArrayList(this.dictDeviceRepository.findAllById(deviceImageList.stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())))
                 .stream().collect(Collectors.toMap(e -> e.getId().toString(), DictDeviceEntity::getPicture, (a, b) -> a));
 
         var resultList = devicePageData.getData().stream().map(e -> {

@@ -26,12 +26,23 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-<tb-device-profile-autocomplete
+<!-- <tb-device-profile-autocomplete
   [ngModel]="entitiesTableConfig.componentsData.deviceProfileId"
   (ngModelChange)="deviceProfileChanged($event)"
   [displayAllOnEmpty]="true"
   [editProfileEnabled]="false">
-</tb-device-profile-autocomplete>
+</tb-device-profile-autocomplete> -->
+<mat-form-field>
+  <mat-label>{{ 'device-profile.device-profile' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.type" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.type"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('type')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
 <mat-form-field>
   <mat-label>{{ 'device.device-state' | translate }}</mat-label>
   <mat-select
