@@ -495,7 +495,7 @@ spring:
 #    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/thingsboard}"
     url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/thingsboard}"
     username: "${SPRING_DATASOURCE_USERNAME:postgres}"
-    password: "${SPRING_DATASOURCE_PASSWORD:admin}"
+    password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
     hikari:
       maximumPoolSize: "${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:16}"
 
@@ -971,3 +971,6 @@ management:
       exposure:
         # Expose metrics endpoint (use value 'prometheus' to enable prometheus metrics).
         include: '${METRICS_ENDPOINTS_EXPOSE:info}'
+yunyun:
+  mqtt_address: "${YUNYUN_MQTT_ADRESS:tcp://47.96.109.1:1883}"
+  mqtt_topic: "${YUNYUN_MQTT_TOPIC:yunyun/device}"
