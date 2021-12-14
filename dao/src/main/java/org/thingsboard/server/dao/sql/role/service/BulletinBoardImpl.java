@@ -153,20 +153,24 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                 tkTodayVo.setTotalValue(entity1.getLocalValue());
                 value.stream().forEach(effectTsKvEntity -> {
                     DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(effectTsKvEntity.getKeyName());
-                    if(dictVO.getTitle().equals(KeyTitleEnums.key_cable.getgName()))
-                    {
-                        tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
-                        electricList.add(tkTodayVo);
-                    }
-                    if(dictVO.getTitle().equals(KeyTitleEnums.key_gas.getgName()))
-                    {
-                        tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
-                        gasList.add(tkTodayVo);
-                    }
-                    if(dictVO.getTitle().equals(KeyTitleEnums.key_water.getgName()))
-                    {
-                        tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
-                        waterList.add(tkTodayVo);
+                    if(dictVO != null){
+
+
+                            if(dictVO.getTitle().equals(KeyTitleEnums.key_cable.getgName()))
+                            {
+                                tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                electricList.add(tkTodayVo);
+                            }
+                            if(dictVO.getTitle().equals(KeyTitleEnums.key_gas.getgName()))
+                            {
+                                tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                gasList.add(tkTodayVo);
+                            }
+                            if(dictVO.getTitle().equals(KeyTitleEnums.key_water.getgName()))
+                            {
+                                tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                waterList.add(tkTodayVo);
+                            }
                     }
                 });
 
