@@ -438,6 +438,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         deviceIdList.forEach(deviceId->{
             if(deviceId != null){
                 DeviceEntity entity = deviceRepository.findById(deviceId).get();
+                UUID productionLineId = entity.getProductionLineId();
                 entity.setId(deviceId);
                 entity.setFactoryId(null);
                 entity.setWorkshopId(null);
@@ -446,9 +447,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 entity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
                 deviceRepository.save(entity);
                 //清除实体关系
-                if(entity.getProductionLineId() != null){
+                if(productionLineId != null){
                     EntityRelation relation = new EntityRelation(
-                            new DeviceId(entity.getId()),new ProductionLineId(entity.getProductionLineId()), EntityRelation.CONTAINS_TYPE
+                            new ProductionLineId(productionLineId), new DeviceId(entity.getId()), EntityRelation.CONTAINS_TYPE
                     );
                     relationDao.deleteRelation(new TenantId(entity.getTenantId()), relation);
                 }

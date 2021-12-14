@@ -392,14 +392,6 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         removeDeviceFromCacheById(tenantId, device.getId());
 
         deviceDao.removeById(tenantId, deviceId.getId());
-
-        if(device != null && device.getProductionLineId() != null){
-            //清除实体关系
-            EntityRelation relation = new EntityRelation(
-                    device.getId(),new ProductionLineId(device.getFactoryId()), EntityRelation.CONTAINS_TYPE
-            );
-            relationService.deleteRelation(device.getTenantId(), relation);
-        }
     }
 
     private void removeDeviceFromCacheByName(TenantId tenantId, String name) {

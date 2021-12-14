@@ -68,7 +68,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         userRoleMenuSvc.saveRole(factory.getTenantId(),factory.getCreatedUser(),factorySave.getId());
         //建立实体关系
         EntityRelation relation = new EntityRelation(
-                new FactoryId(factorySave.getId()), new TenantId(factorySave.getTenantId()), EntityRelation.CONTAINS_TYPE
+                new TenantId(factorySave.getTenantId()),new FactoryId(factorySave.getId()),  EntityRelation.CONTAINS_TYPE
         );
         relationService.saveRelation(new TenantId(factorySave.getTenantId()), relation);
         return factorySave;
@@ -97,12 +97,13 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         Factory byId = factoryDao.findById(id);
         factoryDao.delFactory(id);
         //清除实体关系
-        if(byId != null && byId.getTenantId() != null){
+        deleteEntityRelations(new TenantId(byId.getTenantId()), new FactoryId(id));
+        /*if(byId != null && byId.getTenantId() != null){
             EntityRelation relation = new EntityRelation(
-                    new FactoryId(id),new TenantId(byId.getTenantId()), EntityRelation.CONTAINS_TYPE
+                    new TenantId(byId.getTenantId()),new FactoryId(id), EntityRelation.CONTAINS_TYPE
             );
             relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
-        }
+        }*/
     }
 
 

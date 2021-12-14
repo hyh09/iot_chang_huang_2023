@@ -140,27 +140,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
         var groupVOList = this.listDictDeviceGroups(toUUID(dictDevice.getId()));
 
-        List<DictDeviceComponentVO> rList = new ArrayList<>();
-        var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())));
-        var componentVOList = componentList.stream()
-                .map(e -> {
-                    DictDeviceComponentVO vo = new DictDeviceComponentVO();
-                    BeanUtils.copyProperties(e, vo);
-                    vo.setComponentList(new ArrayList<>());
-                    return vo;
-                }).collect(Collectors.toList());
-
-        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
-        var componentPropertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())));
-        var componentPropertyVOList = componentPropertyList.stream()
-                .map(e -> {
-                    DictDeviceComponentPropertyVO vo = new DictDeviceComponentPropertyVO();
-                    BeanUtils.copyProperties(e, vo);
-                    return vo;
-                }).collect(Collectors.toList());
-        var cMap = componentPropertyVOList.stream().collect(Collectors.groupingBy(DictDeviceComponentPropertyVO::getComponentId));
-
-        this.recursionPackageComponent(rList, pMap, cMap, HSConstants.NULL_STR);
+        var rList = this.listDictDeviceComponents(toUUID(dictDevice.getId()));
 
         DictDeviceVO dictDeviceVO = DictDeviceVO.builder()
                 .standardPropertyList(standardPropertyList)
@@ -404,6 +384,36 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     /**
+     * 获得设备字典部件
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceComponentVO> listDictDeviceComponents(UUID dictDeviceId) {
+        List<DictDeviceComponentVO> rList = new ArrayList<>();
+        var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentVOList = componentList.stream()
+                .map(e -> {
+                    DictDeviceComponentVO vo = new DictDeviceComponentVO();
+                    BeanUtils.copyProperties(e, vo);
+                    vo.setComponentList(new ArrayList<>());
+                    return vo;
+                }).collect(Collectors.toList());
+        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
+        var componentPropertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentPropertyVOList = componentPropertyList.stream()
+                .map(e -> {
+                    DictDeviceComponentPropertyVO vo = new DictDeviceComponentPropertyVO();
+                    BeanUtils.copyProperties(e, vo);
+                    return vo;
+                }).collect(Collectors.toList());
+        var cMap = componentPropertyVOList.stream().collect(Collectors.groupingBy(DictDeviceComponentPropertyVO::getComponentId));
+
+        this.recursionPackageComponent(rList, pMap, cMap, HSConstants.NULL_STR);
+        return rList;
+    }
+
+    /**
      * 获得设备字典分组属性，不包含分组
      *
      * @param dictDeviceId 设备字典Id
@@ -520,7 +530,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @return 部件列表
      */
     @Override
-    public List<DictDeviceComponent> listDictDeviceComponents(TenantId tenantId, UUID dictDeviceId) {
+    public List<DictDeviceComponent> listDictDeviceTileComponents(TenantId tenantId, UUID dictDeviceId) {
         return DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(dictDeviceId));
     }
 
@@ -607,10 +617,30 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public List<DictDeviceTsPropertyResult> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId) {
-        return Stream.concat(
-                this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId).stream().map(e->DictDeviceTsPropertyResult.builder().type(DictDevicePropertyTypeEnum.COMPONENT.getCode()).id(e.getId().toString()).name(e.getName()).title(e.getTitle()).build()),
-                this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId).stream().map(e->DictDeviceTsPropertyResult.builder().type(DictDevicePropertyTypeEnum.DEVICE.getCode()).id(e.getId().toString()).name(e.getName()).title(e.getTitle()).build()))
+        var components = this.listDictDeviceComponents(dictDeviceId);
+        List<DictDeviceTsPropertyResult> results = Lists.newArrayList();
+        components.forEach(r -> {
+            results.addAll(r.getPropertyList().stream().map(e -> DictDeviceTsPropertyResult.builder().type(r.getName()).id(e.getId()).name(e.getName()).title(e.getTitle()).build()).collect(Collectors.toList()));
+            this.packageTsPropertyList(r.getComponentList(), r.getName(), results);
+        });
+        return Stream.concat(results.stream(), this.listDictDeviceGroups(dictDeviceId).stream().flatMap(r -> r.getGroupPropertyList().stream().map(e -> DictDeviceTsPropertyResult.builder().type(r.getName()).id(e.getId()).name(e.getName()).title(e.getTitle()).build())))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 包装属性列表
+     *
+     * @param components 部件列表
+     * @param name       名称
+     * @param results    返回结果
+     */
+    public void packageTsPropertyList(List<DictDeviceComponentVO> components, String name, List<DictDeviceTsPropertyResult> results) {
+        if (components != null && !components.isEmpty()) {
+            components.forEach(r -> {
+                results.addAll(r.getPropertyList().stream().map(e -> DictDeviceTsPropertyResult.builder().type(name).id(e.getId()).name(e.getName()).title(e.getTitle()).build()).collect(Collectors.toList()));
+                this.packageTsPropertyList(r.getComponentList(), name, results);
+            });
+        }
     }
 
     @Autowired
