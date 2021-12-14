@@ -15,7 +15,9 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
+import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
+import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -123,6 +125,15 @@ public class BulletinBoardController extends BaseController{
             log.error("看板接口：【水电气的能耗总量】异常信息{}",e);
             throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
+    }
+
+    @ApiOperation(value = "能耗趋势图(当前所选时间范围内最大30天)")
+    @RequestMapping(value = "/energyConsumptionTrend")
+    public TrendVo energyConsumptionTrend(@RequestBody TrendParameterVo vo)
+    {
+        TrendVo  trendVo  = new  TrendVo();
+        return  trendVo;
+
     }
 
 

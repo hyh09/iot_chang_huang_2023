@@ -53,7 +53,7 @@ public interface EfficiencyStatisticsSvc {
     /**
      * 能耗的查询
      */
-    ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+    ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);
 
     /**
      * PC端的运行状态

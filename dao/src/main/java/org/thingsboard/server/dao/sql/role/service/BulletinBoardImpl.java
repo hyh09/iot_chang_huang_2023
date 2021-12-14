@@ -13,10 +13,14 @@ import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
+import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
+import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.sql.role.dao.EffectMaxValueKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
@@ -41,7 +45,20 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EffectTsKvRepository effectTsKvRepository;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+    @Autowired    DictDeviceService dictDeviceService;
 
+
+    /**
+     *
+     * @param vo
+     * @return
+     */
+    @Override
+    public TrendVo energyConsumptionTrend(TrendParameterVo vo) {
+        String    key =  getKeyNameBy(vo.getKey());
+        log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}",vo,key);
+        return null;
+    }
 
     /**
      * 查询总能耗的
@@ -223,4 +240,28 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         consumptionVo.setValue(value);
         return  consumptionVo;
     }
+
+
+
+    private  String getKeyNameBy(String title){
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
+            if(!CollectionUtils.isEmpty(voList))
+            {
+                for(DictDeviceGroupPropertyVO  m1:voList)
+                {
+                    if(m1.getTitle().equals(title))
+                    {
+                        return m1.getName();
+                    }
+
+                }
+            }
+
+        }
+        return "";
+    }
+
 }
