@@ -448,7 +448,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 //清除实体关系
                 if(entity.getProductionLineId() != null){
                     EntityRelation relation = new EntityRelation(
-                            new DeviceId(entity.getId()),new ProductionLineId(entity.getProductionLineId()), EntityRelation.CONTAINS_TYPE
+                            new ProductionLineId(entity.getProductionLineId()), new DeviceId(entity.getId()), EntityRelation.CONTAINS_TYPE
                     );
                     relationDao.deleteRelation(new TenantId(entity.getTenantId()), relation);
                 }

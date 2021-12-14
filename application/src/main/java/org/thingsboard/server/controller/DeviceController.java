@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -86,9 +87,10 @@ public class DeviceController extends BaseController {
     private static final String TENANT_ID = "tenantId";
     public static final String SAVE_TYPE_ADD = "add ";
     public static final String SAVE_TYPE_ADD_UPDATE = "update ";
+    public static final String GATEWAY = "gateway";
 
     @ApiOperation("云对接查设备详情")
-    @ApiImplicitParam(name = "id",value = "当前id",dataType = "String",paramType="path",required = true)
+    @ApiImplicitParam(name = "deviceId",value = "当前id",dataType = "String",paramType="path",required = true)
     @RequestMapping(value = "/yun/device/{deviceId}", method = RequestMethod.GET)
     @ResponseBody
     public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
@@ -874,7 +876,9 @@ public class DeviceController extends BaseController {
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
             //云云对接
-            transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
+            if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
+                transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
+            }
             savedDevice.setFactoryName(addDeviceDto.getFactoryName());
             savedDevice.setWorkshopName(addDeviceDto.getWorkshopName());
             savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());

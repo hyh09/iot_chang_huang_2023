@@ -48,7 +48,7 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
         Workshop workshopResult = workshopDao.saveWorkshop(workshop);
         //建立实体关系
         EntityRelation relation = new EntityRelation(
-                new WorkshopId(workshopResult.getId()), new FactoryId(workshopResult.getFactoryId()), EntityRelation.CONTAINS_TYPE
+                new FactoryId(workshopResult.getFactoryId()),new WorkshopId(workshopResult.getId()),  EntityRelation.CONTAINS_TYPE
         );
         relationService.saveRelation(new TenantId(workshopResult.getTenantId()), relation);
         return workshopResult;
@@ -79,7 +79,7 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
         //清除实体关系
         if(byId != null && byId.getFactoryId() != null){
             EntityRelation relation = new EntityRelation(
-                    new WorkshopId(id),new FactoryId(byId.getFactoryId()), EntityRelation.CONTAINS_TYPE
+                    new FactoryId(byId.getFactoryId()),new WorkshopId(id), EntityRelation.CONTAINS_TYPE
             );
             relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
         }

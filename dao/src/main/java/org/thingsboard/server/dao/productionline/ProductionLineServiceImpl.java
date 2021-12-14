@@ -49,7 +49,7 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
         ProductionLine productionLineResult = productionLineDao.saveProductionLine(productionLine);
         //建立实体关系
         EntityRelation relation = new EntityRelation(
-                new ProductionLineId(productionLineResult.getId()),new WorkshopId(productionLineResult.getWorkshopId()), EntityRelation.CONTAINS_TYPE
+                new WorkshopId(productionLineResult.getWorkshopId()), new ProductionLineId(productionLineResult.getId()), EntityRelation.CONTAINS_TYPE
         );
         relationService.saveRelation(new TenantId(productionLineResult.getTenantId()), relation);
         return productionLineResult;
@@ -78,9 +78,9 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
         ProductionLine byId = productionLineDao.findById(id);
         productionLineDao.delProductionLine( id);
         //清除实体关系
-        if(byId != null && byId.getFactoryId() != null){
+        if(byId != null && byId.getWorkshopId() != null){
             EntityRelation relation = new EntityRelation(
-                    new ProductionLineId(id),new WorkshopId(byId.getWorkshopId()), EntityRelation.CONTAINS_TYPE
+                    new WorkshopId(byId.getWorkshopId()),new ProductionLineId(id), EntityRelation.CONTAINS_TYPE
             );
             relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
         }
