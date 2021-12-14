@@ -408,10 +408,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         if (temp.isEmpty())
             return new PageData<>(Lists.newArrayList(), 0, 0L, false);
         var count = temp.stream().mapToInt(Integer::intValue).sum();
-        var max = temp.stream().max(Integer::compareTo).orElse(0);
 
         List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
                 .collect(Collectors.toList());
+
         var KvResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get();
         List<Map<String, Object>> result = new ArrayList<>();
         Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
@@ -423,10 +423,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             v.put(HSConstants.CREATED_TIME, k);
             result.add(v);
         });
+        var total = result.size();
 
-        var totalPage = Double.valueOf(Math.ceil(max.doubleValue() / timePageLink.getPageSize())).intValue();
-        var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), max), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), max));
-        return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(max)), timePageLink.getPage() + 1 < totalPage);
+        var totalPage = Double.valueOf(Math.ceil(Double.parseDouble(String.valueOf(total)) / timePageLink.getPageSize())).intValue();
+        var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
+        return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
     }
 
     /**
