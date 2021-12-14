@@ -5,18 +5,20 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
 import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -45,6 +47,17 @@ public class DictDeviceController extends BaseController {
 
     @Autowired
     DefaultTransportService defaultTransportService;
+
+    /**
+     * 获得设备字典界面资源
+     *
+     * @return 字典界面资源
+     */
+    @ApiOperation(value = "获得设备字典界面资源")
+    @GetMapping("/dict/device/resource")
+    public DictDeviceResource listDictDeviceResources() throws ThingsboardException {
+        return new DictDeviceResource().setDictDevicePropertyTypeList(CommonUtil.toResourceList(EnumUtils.getEnumList(DictDevicePropertyTypeEnum.class)));
+    }
 
 
     /**
@@ -118,7 +131,15 @@ public class DictDeviceController extends BaseController {
 //        CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
 //        CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
         CommonUtil.checkDuplicateName(dictDeviceVO, Sets.newHashSet());
-        return this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
+        boolean isSave = false;
+        if (StringUtils.isNotBlank(dictDeviceVO.getId()))
+            isSave = true;
+        var savedDictDeviceVO = this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
+        if (isSave)
+            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_ADD);
+        else
+            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_UPDATE);
+        return savedDictDeviceVO;
     }
 
     /**
@@ -178,5 +199,17 @@ public class DictDeviceController extends BaseController {
     public void updateDictDeviceDefault(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
         this.dictDeviceService.updateDictDeviceDefault(getTenantId(), toUUID(id));
+    }
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     */
+    @ApiOperation(value = "【不分页】获得设备字典全部遥测属性")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
+    @GetMapping("/dict/device/properties")
+    public List<DictDeviceTsPropertyResult> listDictDeviceProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        return this.dictDeviceService.listAllDictDeviceProperties(getTenantId(), toUUID(dictDeviceId));
     }
 }

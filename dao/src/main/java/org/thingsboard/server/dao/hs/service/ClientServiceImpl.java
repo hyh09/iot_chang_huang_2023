@@ -265,7 +265,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
-     * 获得但各个设备的在线状态
+     * 获得各个设备的在线状态
      *
      * @param deviceId 设备Id
      */

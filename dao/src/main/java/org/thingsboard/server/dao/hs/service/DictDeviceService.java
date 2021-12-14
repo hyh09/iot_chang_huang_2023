@@ -7,7 +7,6 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
-import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponentProperty;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.util.List;
@@ -152,4 +151,13 @@ public interface DictDeviceService {
      * @param startTime 设备字典Id
      */
     List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime);
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 遥测属性列表
+     */
+    List<DictDeviceTsPropertyResult> listAllDictDeviceProperties(TenantId tenantId, UUID dictDeviceId);
 }

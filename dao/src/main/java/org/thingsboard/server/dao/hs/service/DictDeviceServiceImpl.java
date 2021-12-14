@@ -18,6 +18,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
@@ -28,6 +29,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 设备字典接口实现类
@@ -96,8 +98,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @SuppressWarnings("Duplicates")
     public PageData<DictDevice> listDictDeviceByQuery(DictDeviceListQuery dictDeviceListQuery, TenantId tenantId, PageLink pageLink) {
-
-        // dynamic query
         Specification<DictDeviceEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
@@ -595,6 +595,21 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) {
         return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndCreatedTimeGreaterThan(tenantId.getId(), startTime));
+    }
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 遥测属性列表
+     */
+    @Override
+    public List<DictDeviceTsPropertyResult> listAllDictDeviceProperties(TenantId tenantId, UUID dictDeviceId) {
+        return Stream.concat(
+                this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId).stream().map(e->DictDeviceTsPropertyResult.builder().type(DictDevicePropertyTypeEnum.COMPONENT.getCode()).id(e.getId().toString()).name(e.getName()).title(e.getTitle()).build()),
+                this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId).stream().map(e->DictDeviceTsPropertyResult.builder().type(DictDevicePropertyTypeEnum.DEVICE.getCode()).id(e.getId().toString()).name(e.getName()).title(e.getTitle()).build()))
+                .collect(Collectors.toList());
     }
 
     @Autowired
