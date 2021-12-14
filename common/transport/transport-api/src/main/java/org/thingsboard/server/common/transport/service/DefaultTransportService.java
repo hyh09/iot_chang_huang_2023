@@ -1166,8 +1166,24 @@ public class DefaultTransportService implements TransportService {
     }
 
 
+    /**
+     * 推送设备消息
+     * @param tenantId
+     * @param deviceId
+     * @param type
+     */
     public void publishDevice(TenantId tenantId, DeviceId deviceId, TransportMqttClient.TYPE type) {
         this.transportMqttClient.publishDevice(tenantId,deviceId,type,yunyunTopic);
+    }
+
+    /**
+     * 推送设备字典消息
+     * @param tenantId
+     * @param dictDeviceId
+     * @param type
+     */
+    public void publishDeviceDict(String tenantId, String dictDeviceId, TransportMqttClient.TYPE type) {
+        this.transportMqttClient.publisDictDevice(tenantId,dictDeviceId,type,yunyunTopic);
     }
 
 }
