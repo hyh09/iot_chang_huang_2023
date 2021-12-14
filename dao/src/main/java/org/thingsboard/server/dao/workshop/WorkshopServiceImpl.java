@@ -77,12 +77,13 @@ public class WorkshopServiceImpl extends AbstractEntityService implements Worksh
         Workshop byId = workshopDao.findById(id);
         workshopDao.delWorkshop(id);
         //清除实体关系
-        if(byId != null && byId.getFactoryId() != null){
+        deleteEntityRelations(new TenantId(byId.getTenantId()), new WorkshopId(id));
+        /*if(byId != null && byId.getFactoryId() != null){
             EntityRelation relation = new EntityRelation(
                     new FactoryId(byId.getFactoryId()),new WorkshopId(id), EntityRelation.CONTAINS_TYPE
             );
             relationDao.deleteRelation(new TenantId(byId.getTenantId()), relation);
-        }
+        }*/
     }
 
 
