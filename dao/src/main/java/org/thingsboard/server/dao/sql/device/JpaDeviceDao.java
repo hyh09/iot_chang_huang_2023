@@ -117,7 +117,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     }
                     if(device.getUpdatedTime() != 0){
                         // 下面是一个区间查询
-                        predicates.add(cb.lessThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
                     }
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
