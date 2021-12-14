@@ -72,6 +72,13 @@ public interface DictDeviceService {
     List<DictDeviceGroupVO> listDictDeviceGroups(UUID dictDeviceId);
 
     /**
+     * 获得设备字典部件
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceComponentVO> listDictDeviceComponents(UUID dictDeviceId);
+
+    /**
      * 获得设备字典分组属性，不包含分组
      *
      * @param dictDeviceId 设备字典Id
@@ -121,13 +128,13 @@ public interface DictDeviceService {
     Map<String, DictData> getNameToDictDataMap(TenantId tenantId, UUID dictDeviceId);
 
     /**
-     * 【不分页】获得设备字典绑定的部件
+     * 【不分页】获得设备字典绑定的部件，平铺
      *
      * @param tenantId     租户Id
      * @param dictDeviceId 设备字典Id
      * @return 部件列表
      */
-    List<DictDeviceComponent> listDictDeviceComponents(TenantId tenantId, UUID dictDeviceId);
+    List<DictDeviceComponent> listDictDeviceTileComponents(TenantId tenantId, UUID dictDeviceId);
 
     /**
      * 获得默认的设备字典Id
