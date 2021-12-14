@@ -609,6 +609,12 @@ public abstract class BaseController {
                 case OTA_PACKAGE:
                     checkOtaPackageId(new OtaPackageId(entityId.getId()), operation);
                     return;
+                case FACTORY:  //忽略权限校验
+                    return;
+                case WORKSHOP://忽略权限校验
+                    return;
+                case PRODUCTION_LINE://忽略权限校验
+                    return;
                 default:
                     throw new IllegalArgumentException("Unsupported entity type: " + entityId.getEntityType());
             }

@@ -37,11 +37,16 @@ import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.id.TbResourceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.id.factory.FactoryId;
+import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.query.EntityCountQuery;
 import org.thingsboard.server.common.data.query.EntityData;
 import org.thingsboard.server.common.data.query.EntityDataPageLink;
 import org.thingsboard.server.common.data.query.EntityDataQuery;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.alarm.AlarmService;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.customer.CustomerService;
@@ -49,11 +54,14 @@ import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
+import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.resource.ResourceService;
 import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.user.UserService;
+import org.thingsboard.server.dao.workshop.WorkshopService;
 
 import static org.thingsboard.server.dao.model.ModelConstants.NULL_UUID;
 import static org.thingsboard.server.dao.service.Validator.validateId;
@@ -104,6 +112,15 @@ public class BaseEntityService extends AbstractEntityService implements EntitySe
     @Autowired
     private OtaPackageService otaPackageService;
 
+    @Autowired
+    private ProductionLineService productionLineService;
+
+    @Autowired
+    private WorkshopService workshopService;
+
+    @Autowired
+    private FactoryService factoryService;
+
     @Override
     public void deleteEntityRelations(TenantId tenantId, EntityId entityId) {
         super.deleteEntityRelations(tenantId, entityId);
@@ -133,6 +150,7 @@ public class BaseEntityService extends AbstractEntityService implements EntitySe
         log.trace("Executing fetchEntityNameAsync [{}]", entityId);
         ListenableFuture<String> entityName;
         ListenableFuture<? extends HasName> hasName;
+        log.info("实体类型："+ entityId.getEntityType());
         switch (entityId.getEntityType()) {
             case ASSET:
                 hasName = assetService.findAssetByIdAsync(tenantId, new AssetId(entityId.getId()));
@@ -169,6 +187,18 @@ public class BaseEntityService extends AbstractEntityService implements EntitySe
                 break;
             case OTA_PACKAGE:
                 hasName = otaPackageService.findOtaPackageInfoByIdAsync(tenantId, new OtaPackageId(entityId.getId()));
+                break;
+            case PRODUCTION_LINE:
+                log.info("产线实体类型："+ entityId.getEntityType());
+                hasName = productionLineService.findProductionLineByIdAsync(tenantId, new ProductionLineId(entityId.getId()));
+                break;
+            case WORKSHOP:
+                log.info("车间实体类型："+ entityId.getEntityType());
+                hasName = workshopService.findWorkshopByIdAsync(tenantId, new WorkshopId(entityId.getId()));
+                break;
+            case FACTORY:
+                log.info("工厂实体类型："+ entityId.getEntityType());
+                hasName = factoryService.findFactoryByIdAsync(tenantId, new FactoryId(entityId.getId()));
                 break;
             default:
                 throw new IllegalStateException("Not Implemented!");
