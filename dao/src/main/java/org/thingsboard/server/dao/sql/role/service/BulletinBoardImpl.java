@@ -215,7 +215,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             consumptionVo.setUnit( dictVO.getUnit());
             consumptionVo.setTitle(dictVO.getTitle());
         }
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = effectTsKvEntities.stream()
+                .filter(entity -> StringUtils.isNotBlank(entity.getKeyName()) && entity.getKeyName().equals(key))
+                .map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String value =  invoiceAmount.stripTrailingZeros().toPlainString();
         consumptionVo.setValue(value);
