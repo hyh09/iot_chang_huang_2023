@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
@@ -41,6 +42,10 @@ public class DictDeviceController extends BaseController {
 
     @Autowired
     DictDeviceService dictDeviceService;
+
+    @Autowired
+    DefaultTransportService defaultTransportService;
+
 
     /**
      * 获得当前可用设备字典编码
