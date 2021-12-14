@@ -7,10 +7,8 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponentProperty;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.util.List;
 import java.util.Map;
@@ -80,6 +78,13 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      */
     List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId);
+
+    /**
+     * 获得设备字典部件属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceComponentPropertyVO> listDictDeviceComponentProperties(UUID dictDeviceId);
 
     /**
      * 获得当前默认初始化的分组及分组属性

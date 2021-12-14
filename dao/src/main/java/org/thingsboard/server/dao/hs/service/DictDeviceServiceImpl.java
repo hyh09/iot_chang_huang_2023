@@ -307,7 +307,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         this.groupPropertyRepository.saveAll(groupPropertyList.stream().map(DictDeviceGroupPropertyEntity::new).collect(Collectors.toList()));
 
         if (dictDeviceVO.getComponentList() != null && !dictDeviceVO.getComponentList().isEmpty()) {
-            this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null, 0);
+            this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null, 0, 0);
         }
 
         return this.getDictDeviceDetail(dictDeviceEntity.getId().toString(), tenantId);
@@ -320,8 +320,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param dictDeviceId  设备字典Id
      * @param parentId      父部件Id
      * @param sort          排序字段
+     * @param pSort         属性排序字段
      */
-    public void recursionSaveComponent(List<DictDeviceComponentVO> componentList, String dictDeviceId, String parentId, int sort) {
+    public void recursionSaveComponent(List<DictDeviceComponentVO> componentList, String dictDeviceId, String parentId, int sort, int pSort) {
         for (DictDeviceComponentVO componentVO : componentList) {
             DictDeviceComponent dictDeviceComponent = new DictDeviceComponent();
             BeanUtils.copyProperties(componentVO, dictDeviceComponent, "id");
@@ -331,7 +332,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.componentRepository.save(dictDeviceComponentEntity);
 
             if (componentVO.getPropertyList() != null && !componentVO.getPropertyList().isEmpty()) {
-                int pSort = 1;
                 List<DictDeviceComponentProperty> propertyList = new ArrayList<>();
                 for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                     var property = new DictDeviceComponentProperty();
@@ -348,7 +348,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }
-            this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString(), sort);
+            this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString(), sort, pSort);
         }
     }
 
@@ -412,6 +412,20 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         return groupPropertyList.stream()
                 .map(g -> DictDeviceGroupPropertyVO.builder()
+                        .id(g.getId()).name(g.getName()).dictDataId(g.getDictDataId()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
+                        .build()).collect(Collectors.toList());
+    }
+
+    /**
+     * 获得设备字典部件属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceComponentPropertyVO> listDictDeviceComponentProperties(UUID dictDeviceId) {
+        var propertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        return propertyList.stream()
+                .map(g -> DictDeviceComponentPropertyVO.builder()
                         .id(g.getId()).name(g.getName()).dictDataId(g.getDictDataId()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
                         .build()).collect(Collectors.toList());
     }
