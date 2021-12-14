@@ -78,12 +78,7 @@ public class EfficiencyStatisticsController extends BaseController {
             {
                 queryTsKvVo.setStartTime(CommonUtils.getHistoryPointTime());
             }
-
-
-
-
-
-            return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
+            return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId(),true);
         }catch (Exception e)
         {
             e.printStackTrace();

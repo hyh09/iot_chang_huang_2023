@@ -337,10 +337,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * 能耗的查询
      * @param vo
      * @param tenantId
+     *   flg 是否查询第一个工厂
      * @return
      */
     @Override
-    public ResultEnergyAppVo    queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId) {
+    public ResultEnergyAppVo    queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId,Boolean flg) {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
         Map<String,String> totalValueMap = new HashMap<>();
@@ -348,7 +349,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
           vo.setKeys(keys1);
         Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && flg)
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }

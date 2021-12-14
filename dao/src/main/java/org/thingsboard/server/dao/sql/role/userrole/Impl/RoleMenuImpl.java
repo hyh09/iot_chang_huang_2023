@@ -32,10 +32,7 @@ import org.thingsboard.server.dao.sql.role.service.rolemenu.OutMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.RoleMenuVo;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -107,7 +104,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         try {
 
              List<TenantMenuVo>  vos= this.queryByUser(vo);
-            log.info("查询当下用户所有入参{}返回的结果{}", vo, vos);
+            log.info("查询当下用户所有l入参{}api.roleMenu.queryAll返回的结果{}", vo, vos);
              if(CollectionUtils.isEmpty(vos))
              {
                  return vos;
@@ -189,7 +186,6 @@ public class RoleMenuImpl implements RoleMenuSvc {
             return ;
 
         }
-//        tenantMenuRoleService.deleteByTenantSysRoleId(roleId);
         voList.forEach(id ->{
             TenantMenuRoleEntity  entity  = new TenantMenuRoleEntity();
             entity.setTenantSysRoleId(roleId);
@@ -263,10 +259,14 @@ public class RoleMenuImpl implements RoleMenuSvc {
         {
             return  voList;
         }
+        Map<UUID,String> map = new HashMap<>();
         TenantMenuVo  tenantMenuVo=    getAll(voList);
-        tenantMenuList.add(tenantMenuVo);
+        if(tenantMenuVo.getId() != null  ) {
+            tenantMenuList.add(tenantMenuVo);
+            map.put(tenantMenuVo.getId(),"1");
+        }
         voList.forEach(TenantMenuVo ->{
-            if(!TenantMenuVo.getId().equals(tenantMenuVo.getId())) {
+            if(StringUtils.isEmpty(map.get(TenantMenuVo.getId()))) {
                 tenantMenuList.add(TenantMenuVo);
             }
 
