@@ -104,6 +104,10 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     @NoXss
     private String lastName;
 
+    private  String tenantTitle;
+    private  String factoryName;
+
+
     public User() {
         super();
     }
