@@ -24,7 +24,7 @@ public interface FactoryDao extends Dao<Factory>{
      * 删除后刷新值(逻辑删除)
      * @param id
      */
-    void delFactory(UUID id);
+    void delFactory(UUID id)throws ThingsboardException ;
 
     /**
      * 根据租户查询

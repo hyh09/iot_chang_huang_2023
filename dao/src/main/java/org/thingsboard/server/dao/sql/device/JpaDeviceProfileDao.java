@@ -15,21 +15,29 @@
  */
 package org.thingsboard.server.dao.sql.device;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceProfileInfo;
 import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceProfileDao;
 import org.thingsboard.server.dao.model.sql.DeviceProfileEntity;
+import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -52,6 +60,33 @@ public class JpaDeviceProfileDao extends JpaAbstractSearchTextDao<DeviceProfileE
     @Override
     public DeviceProfileInfo findDeviceProfileInfoById(TenantId tenantId, UUID deviceProfileId) {
         return deviceProfileRepository.findDeviceProfileInfoById(deviceProfileId);
+    }
+
+    /**
+     * 批量查询设备配置
+     * @param deviceProfileIds
+     * @return
+     */
+    @Override
+    public List<DeviceProfile> findDeviceProfileByIds(List<UUID> deviceProfileIds){
+        List<DeviceProfile> resultList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(deviceProfileIds)){
+            Specification<DeviceProfileEntity> specification = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+                deviceProfileIds.forEach(in::value);
+                predicates.add(in);
+                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            };
+            List<DeviceProfileEntity> all = deviceProfileRepository.findAll(specification);
+            if(CollectionUtils.isNotEmpty(all)){
+                all.forEach(i->{
+                    resultList.add(i.toData());
+                });
+            }
+        }
+        return resultList;
     }
 
     @Override

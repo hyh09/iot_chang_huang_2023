@@ -42,5 +42,6 @@ public class DeviceInfo extends Device {
 
     public DeviceInfo(Device device){
         super(device);
+        this.deviceProfileName = device.getDeviceProfileName();
     }
 }

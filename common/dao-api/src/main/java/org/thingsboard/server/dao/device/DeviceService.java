@@ -48,6 +48,8 @@ public interface DeviceService {
 
     Device findDeviceById(TenantId tenantId, DeviceId deviceId);
 
+    List<Device> getYunDeviceList(Device device);
+
     ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId);
 
     Device findDeviceByTenantIdAndName(TenantId tenantId, String name);

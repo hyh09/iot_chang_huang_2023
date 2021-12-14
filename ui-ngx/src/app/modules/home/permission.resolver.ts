@@ -24,7 +24,7 @@ export class PermissionResolver implements Resolve<Permissions>  {
         menus.filter(menu => (!menu.isButton && menu.path)).forEach(menu => {
           menuMap[menu.id] = menu;
           menuBtnMap[menu.path] = [];
-          if (menu.path && !firstPath) {
+          if (menu.path && !menu.hasChildren && !firstPath) {
             firstPath = menu.path;
           }
         });

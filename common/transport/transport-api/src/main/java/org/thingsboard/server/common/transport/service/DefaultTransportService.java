@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ import org.thingsboard.server.common.transport.auth.GetOrCreateDeviceFromGateway
 import org.thingsboard.server.common.transport.auth.TransportDeviceInfo;
 import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import org.thingsboard.server.common.transport.limits.TransportRateLimitService;
+import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
 import org.thingsboard.server.common.transport.util.DataDecodingEncodingService;
 import org.thingsboard.server.common.transport.util.JsonUtils;
 import org.thingsboard.server.gen.transport.TransportProtos;
@@ -133,6 +135,10 @@ public class DefaultTransportService implements TransportService {
     private long clientSideRpcTimeout;
     @Value("${queue.transport.poll_interval}")
     private int notificationsPollDuration;
+    @Value("${yunyun.mqtt_address}")
+    private String mqttHost;
+    @Value("${yunyun.mqtt_topic}")
+    private String yunyunTopic;
 
     private final Gson gson = new Gson();
     private final TbTransportQueueFactory queueProvider;
@@ -166,6 +172,8 @@ public class DefaultTransportService implements TransportService {
 
     private volatile boolean stopped = false;
 
+    private TransportMqttClient transportMqttClient;
+
     public DefaultTransportService(TbServiceInfoProvider serviceInfoProvider,
                                    TbTransportQueueFactory queueProvider,
                                    TbQueueProducerProvider producerProvider,
@@ -193,6 +201,8 @@ public class DefaultTransportService implements TransportService {
 
     @PostConstruct
     public void init() {
+        this.transportMqttClient =  new TransportMqttClient(mqttHost);
+        this.transportMqttClient.initialize();
         this.ruleEngineProducerStats = statsFactory.createMessagesStats(StatsType.RULE_ENGINE.getName() + ".producer");
         this.tbCoreProducerStats = statsFactory.createMessagesStats(StatsType.CORE.getName() + ".producer");
         this.transportApiStats = statsFactory.createMessagesStats(StatsType.TRANSPORT.getName() + ".producer");
@@ -512,6 +522,10 @@ public class DefaultTransportService implements TransportService {
                 metaData.putValue("ts", tsKv.getTs() + "");
                 JsonObject json = JsonUtils.getJsonObject(tsKv.getKvList());
                 sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, SessionMsgType.POST_TELEMETRY_REQUEST, packCallback);
+
+                //推送给云云
+                this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,TransportMqttClient.TYPE.POST_TELEMETRY_REQUEST,yunyunTopic);
+                //this.transportMqttClient.publishDevice(tenantId,deviceId,TransportMqttClient.TYPE.POST_DEVICE_ADD,yunyunTopic);
             }
         }
     }
@@ -530,6 +544,9 @@ public class DefaultTransportService implements TransportService {
             CustomerId customerId = getCustomerId(sessionInfo);
             sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, SessionMsgType.POST_ATTRIBUTES_REQUEST,
                     new TransportTbQueueCallback(new ApiStatsProxyCallback<>(tenantId, customerId, msg.getKvList().size(), callback)));
+
+            //推送给云云
+            this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,TransportMqttClient.TYPE.POST_ATTRIBUTES_REQUEST,yunyunTopic);
         }
     }
 
@@ -1147,4 +1164,26 @@ public class DefaultTransportService implements TransportService {
     public ExecutorService getCallbackExecutor() {
         return transportCallbackExecutor;
     }
+
+
+    /**
+     * 推送设备消息
+     * @param tenantId
+     * @param deviceId
+     * @param type
+     */
+    public void publishDevice(TenantId tenantId, DeviceId deviceId, TransportMqttClient.TYPE type) {
+        this.transportMqttClient.publishDevice(tenantId,deviceId,type,yunyunTopic);
+    }
+
+    /**
+     * 推送设备字典消息
+     * @param tenantId
+     * @param dictDeviceId
+     * @param type
+     */
+    public void publishDeviceDict(String tenantId, String dictDeviceId, TransportMqttClient.TYPE type) {
+        this.transportMqttClient.publisDictDevice(tenantId,dictDeviceId,type,yunyunTopic);
+    }
+
 }

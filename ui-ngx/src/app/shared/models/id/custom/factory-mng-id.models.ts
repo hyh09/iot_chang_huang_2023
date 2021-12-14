@@ -10,7 +10,7 @@ export class FactoryId implements EntityId {
 }
 
 export class WorkShopId implements EntityId {
-  entityType = EntityType.WORK_SHOP;
+  entityType = EntityType.WORKSHOP;
   id: string;
   constructor(id: string) {
     this.id = id;
@@ -18,7 +18,7 @@ export class WorkShopId implements EntityId {
 }
 
 export class ProdLineId implements EntityId {
-  entityType = EntityType.PROD_LINE;
+  entityType = EntityType.PRODUCTION_LINE;
   id: string;
   constructor(id: string) {
     this.id = id;

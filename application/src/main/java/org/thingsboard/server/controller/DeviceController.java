@@ -49,6 +49,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -85,6 +86,32 @@ public class DeviceController extends BaseController {
     private static final String TENANT_ID = "tenantId";
     public static final String SAVE_TYPE_ADD = "add ";
     public static final String SAVE_TYPE_ADD_UPDATE = "update ";
+
+    @ApiOperation("云对接查设备详情")
+    @ApiImplicitParam(name = "id",value = "当前id",dataType = "String",paramType="path",required = true)
+    @RequestMapping(value = "/yun/device/{deviceId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
+        checkParameter(DEVICE_ID, strDeviceId);
+        try {
+            DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
+            return checkDeviceId(deviceId, Operation.READ);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @ApiOperation("云对接查设备列表")
+    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "Device",paramType="body")
+    @RequestMapping(value = "/yun/devices/{deviceId}", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Device> getYunDeviceList(Device device) throws ThingsboardException {
+        try {
+            return deviceService.getYunDeviceList(device);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.GET)
@@ -352,33 +379,6 @@ public class DeviceController extends BaseController {
             } else {
                 return checkNotNull(deviceService.findDeviceInfosByTenantId(tenantId, pageLink));
             }
-        } catch (Exception e) {
-            throw handleException(e);
-        }
-    }
-
-    @ApiOperation("平台设备列表查询（重写平台原来的列表查询）")
-    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
-    @ResponseBody
-    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page, DeviceListQry deviceListQry) throws ThingsboardException {
-        try {
-            PageData<DeviceInfo> resultPage = new PageData<>();
-            List<DeviceInfo> resultDevices = new ArrayList<>();
-            TenantId tenantId = getCurrentUser().getTenantId();
-            PageLink pageLink = createPageLink(pageSize, page, deviceListQry.getSearchText(), deviceListQry.getSortProperty(), deviceListQry.getSortOrder());
-            Device device = deviceListQry.toDevice();
-            device.setTenantId(tenantId);
-            //查询设备
-            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
-            List<Device> deviceList = menuPageData.getData();
-            if(!CollectionUtils.isEmpty(deviceList)){
-                deviceList.forEach(i->{
-                    resultDevices.add(new DeviceInfo(i));
-                });
-            }
-            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
-            return resultPage;
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -805,6 +805,34 @@ public class DeviceController extends BaseController {
     /*******************************************新增业务接口*******************************************/
     /*******************************************新增业务接口*******************************************/
 
+
+    @ApiOperation("平台设备列表查询（重写平台原来的列表查询）")
+    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
+    @ResponseBody
+    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page, DeviceListQry deviceListQry) throws ThingsboardException {
+        try {
+            PageData<DeviceInfo> resultPage = new PageData<>();
+            List<DeviceInfo> resultDevices = new ArrayList<>();
+            TenantId tenantId = getCurrentUser().getTenantId();
+            PageLink pageLink = createPageLink(pageSize, page, deviceListQry.getSearchText(), deviceListQry.getSortProperty(), deviceListQry.getSortOrder());
+            Device device = deviceListQry.toDevice();
+            device.setTenantId(tenantId);
+            //查询设备
+            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
+            List<Device> deviceList = menuPageData.getData();
+            if(!CollectionUtils.isEmpty(deviceList)){
+                deviceList.forEach(i->{
+                    resultDevices.add(new DeviceInfo(i));
+                });
+            }
+            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
+            return resultPage;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
     /**
      * 新增/更新设备
      * @param addDeviceDto
@@ -823,9 +851,11 @@ public class DeviceController extends BaseController {
             device.setTenantId(getCurrentUser().getTenantId());
             Device oldDevice = null;
             String saveType = null;
+            TransportMqttClient.TYPE yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_ADD;
             if (!created) {
                 oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
                 saveType = SAVE_TYPE_ADD_UPDATE;
+                yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
             } else {
                 checkEntity(null, device, Resource.DEVICE);
                 saveType = SAVE_TYPE_ADD;
@@ -843,7 +873,12 @@ public class DeviceController extends BaseController {
                 //建立实体关系
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
-            return new DeviceVo(device);
+            //云云对接
+            transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
+            savedDevice.setFactoryName(addDeviceDto.getFactoryName());
+            savedDevice.setWorkshopName(addDeviceDto.getWorkshopName());
+            savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());
+            return new DeviceVo(savedDevice);
         } catch (Exception e) {
             throw handleException(e);
         }

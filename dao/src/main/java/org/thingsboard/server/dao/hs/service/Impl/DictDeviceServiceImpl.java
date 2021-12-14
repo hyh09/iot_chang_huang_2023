@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.hs.service;
+package org.thingsboard.server.dao.hs.service.Impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -18,9 +18,11 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
@@ -28,6 +30,7 @@ import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 设备字典接口实现类
@@ -95,9 +98,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public PageData<DictDevice> listDictDeviceByQuery(DictDeviceListQuery dictDeviceListQuery, TenantId tenantId, PageLink pageLink) {
-
-        // dynamic query
+    public PageData<DictDevice> listPageDictDevicesByQuery(DictDeviceListQuery dictDeviceListQuery, TenantId tenantId, PageLink pageLink) {
         Specification<DictDeviceEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
@@ -137,7 +138,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
 
-        var groupVOList = this.listDictDeviceGroup(toUUID(dictDevice.getId()));
+        var groupVOList = this.listDictDeviceGroups(toUUID(dictDevice.getId()));
 
         List<DictDeviceComponentVO> rList = new ArrayList<>();
         var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())));
@@ -183,7 +184,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional
     @SuppressWarnings("Duplicates")
-    public void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException {
+    public void deleteDictDeviceById(String id, TenantId tenantId) throws ThingsboardException {
         DictDevice dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
                 .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
 
@@ -216,7 +217,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional
     @SuppressWarnings("Duplicates")
-    public DictDeviceVO updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException {
+    public DictDeviceVO saveOrUpdateDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException {
         DictDevice dictDevice = new DictDevice();
         DictDeviceEntity dictDeviceEntity;
         if (!StringUtils.isBlank(dictDeviceVO.getId())) {
@@ -307,7 +308,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         this.groupPropertyRepository.saveAll(groupPropertyList.stream().map(DictDeviceGroupPropertyEntity::new).collect(Collectors.toList()));
 
         if (dictDeviceVO.getComponentList() != null && !dictDeviceVO.getComponentList().isEmpty()) {
-            this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null, 0);
+            this.recursionSaveComponent(dictDeviceVO.getComponentList(), dictDeviceEntity.getId().toString(), null, 0, 0);
         }
 
         return this.getDictDeviceDetail(dictDeviceEntity.getId().toString(), tenantId);
@@ -320,8 +321,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param dictDeviceId  设备字典Id
      * @param parentId      父部件Id
      * @param sort          排序字段
+     * @param pSort         属性排序字段
      */
-    public void recursionSaveComponent(List<DictDeviceComponentVO> componentList, String dictDeviceId, String parentId, int sort) {
+    public void recursionSaveComponent(List<DictDeviceComponentVO> componentList, String dictDeviceId, String parentId, int sort, int pSort) {
         for (DictDeviceComponentVO componentVO : componentList) {
             DictDeviceComponent dictDeviceComponent = new DictDeviceComponent();
             BeanUtils.copyProperties(componentVO, dictDeviceComponent, "id");
@@ -331,7 +333,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.componentRepository.save(dictDeviceComponentEntity);
 
             if (componentVO.getPropertyList() != null && !componentVO.getPropertyList().isEmpty()) {
-                int pSort = 1;
                 List<DictDeviceComponentProperty> propertyList = new ArrayList<>();
                 for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                     var property = new DictDeviceComponentProperty();
@@ -348,7 +349,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }
-            this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString(), sort);
+            this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString(), sort, pSort);
         }
     }
 
@@ -378,7 +379,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param dictDeviceId 设备字典Id
      */
     @Override
-    public List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId) {
+    public List<DictDeviceGroupVO> listDictDeviceGroups(UUID dictDeviceId) {
         var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(dictDeviceId));
         var groupUUIDList = groupList.stream().map(e -> toUUID(e.getId())).collect(Collectors.toList());
         List<DictDeviceGroupProperty> groupPropertyList;
@@ -408,7 +409,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param dictDeviceId 设备字典Id
      */
     @Override
-    public List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId) {
+    public List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperties(UUID dictDeviceId) {
         var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         return groupPropertyList.stream()
                 .map(g -> DictDeviceGroupPropertyVO.builder()
@@ -417,11 +418,25 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     /**
+     * 获得设备字典部件属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceComponentPropertyVO> listDictDeviceComponentProperties(UUID dictDeviceId) {
+        var propertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        return propertyList.stream()
+                .map(g -> DictDeviceComponentPropertyVO.builder()
+                        .id(g.getId()).name(g.getName()).dictDataId(g.getDictDataId()).content(g.getContent()).title(g.getTitle()).createdTime(g.getCreatedTime())
+                        .build()).collect(Collectors.toList());
+    }
+
+    /**
      * 获得当前默认初始化的分组及分组属性
      */
     @Override
-    public List<DictDeviceGroupVO> getGroupInitData() {
-        return this.clientService.listDictDeviceInitData();
+    public List<DictDeviceGroupVO> getDictDeviceGroupInitData() {
+        return this.clientService.getDictDeviceInitData();
     }
 
     /**
@@ -431,7 +446,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @return 设备字典列表
      */
     @Override
-    public List<DictDevice> listAllDictDevice(TenantId tenantId) {
+    public List<DictDevice> listDictDevices(TenantId tenantId) {
         return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantId(tenantId.getId()));
     }
 
@@ -441,7 +456,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param dictDeviceId 设备字典Id
      */
     @Override
-    public Map<String, String> mapAllPropertyTitle(UUID dictDeviceId) {
+    public Map<String, String> getDictDeviceNameToTitleMap(UUID dictDeviceId) {
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var map = componentList.stream().collect(Collectors.toMap(DictDeviceComponentProperty::getName, e -> Optional.ofNullable(e.getTitle()).orElse(e.getName()), (a, b) -> a));
@@ -457,7 +472,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param dictDeviceId 设备字典Id
      */
     @Override
-    public Map<String, String> mapAllPropertyDictDataId(UUID dictDeviceId) {
+    public Map<String, String> getNameToDictDataIdMap(UUID dictDeviceId) {
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var map = componentList.stream().reduce(new HashMap<String, String>(), (r, e) -> {
@@ -479,8 +494,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param tenantId     租户Id
      */
     @Override
-    public Map<String, DictData> mapAllPropertyToDictData(TenantId tenantId, UUID dictDeviceId) {
-        var dictDataMap = this.dictDataService.mapAllDictData(tenantId);
+    public Map<String, DictData> getNameToDictDataMap(TenantId tenantId, UUID dictDeviceId) {
+        var dictDataMap = this.dictDataService.getDictDataMap(tenantId);
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var map = componentList.stream().reduce(new HashMap<String, DictData>(), (r, e) -> {
@@ -517,7 +532,37 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional
     public UUID getDefaultDictDeviceId(TenantId tenantId) {
-        return null;
+        var id = this.dictDeviceRepository.findByTenantIdAndIsDefaultIsTrue(tenantId.getId()).map(DictDeviceEntity::toData).map(DictDevice::getId).orElse(null);
+        if (id == null) {
+            DictDeviceVO dictDeviceVO = new DictDeviceVO();
+            var initData = this.getDictDeviceGroupInitData();
+            dictDeviceVO.setCode(this.getAvailableCode(tenantId));
+            dictDeviceVO.setName("default");
+            dictDeviceVO.setGroupList(initData.stream().map(e -> DictDeviceGroupVO.builder()
+                    .name(e.getName())
+                    .groupPropertyList(e.getGroupPropertyList().stream().map(f -> {
+                        DictDeviceGroupPropertyVO groupPropertyVO = new DictDeviceGroupPropertyVO();
+                        BeanUtils.copyProperties(f, groupPropertyVO, "id");
+                        return groupPropertyVO;
+                    }).collect(Collectors.toList()))
+                    .build()).collect(Collectors.toList()));
+            // update when initData changed
+            dictDeviceVO.setStandardPropertyList(initData.get(0).getGroupPropertyList().stream().map(e -> {
+                DictDeviceStandardPropertyVO standardPropertyVO = new DictDeviceStandardPropertyVO();
+                BeanUtils.copyProperties(e, standardPropertyVO, "id");
+                return standardPropertyVO;
+            }).collect(Collectors.toList()));
+            dictDeviceVO.setComponentList(Lists.newArrayList()).setPropertyList(Lists.newArrayList());
+            try {
+                var result = this.saveOrUpdateDictDevice(dictDeviceVO, tenantId);
+                updateDictDeviceDefault(tenantId, toUUID(result.getId()));
+                id = result.getId();
+            } catch (Exception ex) {
+                log.error("生成默认设备字典出错 [{}]", ex.getMessage());
+            }
+        }
+        return toUUID(id);
+
     }
 
     /**
@@ -540,6 +585,32 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             e.setIsDefault(Boolean.TRUE);
             this.dictDeviceRepository.save(e);
         });
+    }
+
+    /**
+     * 获得截止时间之后新增的设备字典
+     *
+     * @param tenantId  租户Id
+     * @param startTime 设备字典Id
+     */
+    @Override
+    public List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) {
+        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndUpdatedTimeGreaterThan(tenantId.getId(), startTime));
+    }
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 遥测属性列表
+     */
+    @Override
+    public List<DictDeviceTsPropertyResult> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId) {
+        return Stream.concat(
+                this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId).stream().map(e->DictDeviceTsPropertyResult.builder().type(DictDevicePropertyTypeEnum.COMPONENT.getCode()).id(e.getId().toString()).name(e.getName()).title(e.getTitle()).build()),
+                this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId).stream().map(e->DictDeviceTsPropertyResult.builder().type(DictDevicePropertyTypeEnum.DEVICE.getCode()).id(e.getId().toString()).name(e.getName()).title(e.getTitle()).build()))
+                .collect(Collectors.toList());
     }
 
     @Autowired

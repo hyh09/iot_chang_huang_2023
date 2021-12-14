@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.hs.service;
+package org.thingsboard.server.dao.hs.service.Impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -22,6 +22,8 @@ import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
+import org.thingsboard.server.dao.hs.service.CommonService;
+import org.thingsboard.server.dao.hs.service.DictDataService;
 
 import javax.persistence.criteria.Predicate;
 import java.util.*;
@@ -58,7 +60,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public PageData<DictData> listDictDataByQuery(TenantId tenantId, DictDataListQuery dictDataListQuery, PageLink pageLink) {
+    public PageData<DictData> listPageDictDataByQuery(TenantId tenantId, DictDataListQuery dictDataListQuery, PageLink pageLink) {
         // dynamic query
         Specification<DictDataEntity> specification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -83,7 +85,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      */
     @Override
     @Transactional
-    public DictDataQuery updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException {
+    public DictDataQuery saveOrUpdateDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException {
         DictData dictData = new DictData();
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
             // Modify
@@ -162,7 +164,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      * @return 全部数据字典
      */
     @Override
-    public List<DictData> listAllDictData(TenantId tenantId) {
+    public List<DictData> listDictData(TenantId tenantId) {
         return DaoUtil.convertDataList(this.dataRepository.findAllByTenantId(tenantId.getId()));
     }
 
@@ -173,7 +175,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      * @return 全部数据字典map
      */
     @Override
-    public Map<String, DictData> mapAllDictData(TenantId tenantId) {
+    public Map<String, DictData> getDictDataMap(TenantId tenantId) {
         return DaoUtil.convertDataList(this.dataRepository.findAllByTenantId(tenantId.getId())).stream().collect(Collectors.toMap(DictData::getId, Function.identity()));
     }
 
@@ -185,7 +187,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      * @return 数据字典map
      */
     @Override
-    public Map<String, DictData> listDictDataByKeys(TenantId tenantId, List<String> keys) {
+    public Map<String, DictData> getDictDataMapByKeys(TenantId tenantId, List<String> keys) {
         return DaoUtil.convertDataList(this.dataRepository.findAllByTenantIdAndKeys(tenantId.getId(), keys))
                 .stream().collect(Collectors.toMap(DictData::getName, Function.identity()));
     }

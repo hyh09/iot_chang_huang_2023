@@ -61,8 +61,10 @@ public class BoardSceneController extends BaseController {
         checkParameter("workshopId", workshopId);
         checkParameter("fileId", fileId);
         var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
-        if (fileInfo != null)
+
+        if (fileInfo != null && !fileInfo.getId().equals(fileId)) {
             this.fileService.deleteFile(getTenantId(), fileInfo.getId());
+        }
         this.fileService.updateFileScope(getTenantId(), toUUID(fileId), FileScopeEnum.WORKSHOP_SCENE, toUUID(workshopId));
     }
 
@@ -111,8 +113,9 @@ public class BoardSceneController extends BaseController {
         checkParameter("deviceId", deviceId);
         checkParameter("fileId", fileId);
         var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
-        if (fileInfo != null)
+        if (fileInfo != null && !fileInfo.getId().equals(fileId)) {
             this.fileService.deleteFile(getTenantId(), fileInfo.getId());
+        }
         this.fileService.updateFileScope(getTenantId(), toUUID(fileId), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
     }
 
@@ -175,6 +178,6 @@ public class BoardSceneController extends BaseController {
             @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("componentId", componentId);
-        return this.deviceMonitorService.getRtMonitorDeviceComponentDetail(getTenantId(), toUUID(deviceId), toUUID(componentId));
+        return this.deviceMonitorService.getRtMonitorDeviceComponentDetailForBoard(getTenantId(), toUUID(deviceId), toUUID(componentId));
     }
 }

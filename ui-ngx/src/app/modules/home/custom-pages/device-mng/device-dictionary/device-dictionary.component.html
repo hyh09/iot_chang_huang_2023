@@ -282,6 +282,7 @@
         [nzData]="compListFormArray().value"
         nzTableLayout="fixed"
         [nzShowPagination]="false"
+        [nzFrontPagination]="false"
         [nzNoResult]="'device-mng.comp-empty' | translate"
         [nzScroll]="{ x: '100%', y: '500px' }"
       >
@@ -300,7 +301,11 @@
         <tbody>
           <ng-container *ngFor="let data of compTable.data">
             <ng-container *ngFor="let item of mapOfExpandedComp[data.code]">
-              <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+              <tr
+                *ngIf="(item.parent && item.parent.expand) || !item.parent"
+                [style.cursor]="!isEdit ? 'pointer' : ''"
+                (click)="!isEdit ? viewDeviceComp(item) : ''"
+              >
                 <td
                   nzBreakWord
                   nzLeft
@@ -334,7 +339,7 @@
                     type="button"
                     matTooltip="{{ 'action.edit' | translate }}"
                     matTooltipPosition="above"
-                    (click)="editDeviceComp(item)"
+                    (click)="editDeviceComp($event, item)"
                   >
                     <mat-icon class="material-icons" >edit</mat-icon>
                   </button>
@@ -343,7 +348,7 @@
                     type="button"
                     matTooltip="{{ 'action.delete' | translate }}"
                     matTooltipPosition="above"
-                    (click)="deleteDeviceComp(item)"
+                    (click)="deleteDeviceComp($event, item)"
                   >
                     <mat-icon class="material-icons" >delete</mat-icon>
                   </button>

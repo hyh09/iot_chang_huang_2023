@@ -31,8 +31,8 @@ public class FactoryId extends UUIDBased implements EntityId {
         super(id);
     }
 
-    public static FactoryId fromString(String tenantMenuId) {
-        return new FactoryId(UUID.fromString(tenantMenuId));
+    public static FactoryId fromString(String factoryId) {
+        return new FactoryId(UUID.fromString(factoryId));
     }
 
     @JsonIgnore

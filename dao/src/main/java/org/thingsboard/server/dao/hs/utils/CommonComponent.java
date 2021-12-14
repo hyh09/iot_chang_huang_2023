@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.hs.utils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.hs.HSConstants;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,9 +27,8 @@ public class CommonComponent {
      * @param tenantId 租户Id
      */
     public Path toFileRootDir(TenantId tenantId) throws IOException {
-//        var path = Paths.get(location, "file", tenantId.toString());
-        var path = Paths.get(location);
-        Files.createDirectories(path);
+         var path = Paths.get(location, tenantId.toString(), String.valueOf(CommonUtil.getTodayCurrentTime()));
+         Files.createDirectories(path);
         return path;
     }
 
@@ -38,8 +38,7 @@ public class CommonComponent {
      * @param tenantId 租户Id
      */
     public Path toFileRootTempDir(TenantId tenantId) throws IOException {
-//        var path = Paths.get(location, "file", tenantId.toString(), "temp");
-        var path = Paths.get(location);
+        var path = Paths.get(location, tenantId.toString(), HSConstants.TEMP_STR);
         Files.createDirectories(path);
         return path;
     }

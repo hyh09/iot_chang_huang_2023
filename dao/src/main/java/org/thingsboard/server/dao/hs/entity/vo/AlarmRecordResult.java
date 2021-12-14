@@ -104,4 +104,10 @@ public class AlarmRecordResult {
     @ApiModelProperty("产线")
     private String productionLineStr;
 
+    /**
+     * 图片
+     */
+    @ApiModelProperty(value = "图片", notes = "仅用于app端显示")
+    private String picture;
+
 }

@@ -39,7 +39,7 @@ export class RealTimeMonitorComponent implements OnDestroy {
   ) { }
 
   ngOnDestroy() {
-    this.realTimeMonitorService.unsubscribe();
+    this.realTimeMonitorService.unsubscribe(true);
   }
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
@@ -64,10 +64,21 @@ export class RealTimeMonitorComponent implements OnDestroy {
         offLineDeviceCount: res.offLineDeviceCount || 0
       }
       this.alarmTimesList = res.alarmTimesList || [];
-      this.realTimeMonitorService.switchDevices(res.deviceIdList);
-      this.realTimeMonitorService.subscribe(res.deviceIdList || [], () => {
-        this.fetchData();
-      });
+      this.realTimeMonitorService.switchDevices(res.deviceIdList, true);
+      this.realTimeMonitorService.subscribe(res.deviceIdList || [], ({ deviceId, isActive }) => {
+        if (deviceId === undefined || isActive === undefined) {
+          return;
+        }
+        const targetDevice = this.deviceList.filter(device => (device.id === deviceId));
+        if (targetDevice.length > 0 && targetDevice[0].isOnLine !== !!isActive) {
+          targetDevice[0].isOnLine = !!isActive;
+          const { onLineDeviceCount, offLineDeviceCount } = this.runStateData;
+          this.runStateData = {
+            onLineDeviceCount: isActive ? (onLineDeviceCount + 1) : (onLineDeviceCount - 1),
+            offLineDeviceCount: isActive ? (offLineDeviceCount - 1) : (offLineDeviceCount + 1)
+          };
+        }
+      }, true);
     });
   }
 

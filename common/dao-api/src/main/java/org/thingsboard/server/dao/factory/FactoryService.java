@@ -1,9 +1,13 @@
 package org.thingsboard.server.dao.factory;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.factory.FactoryId;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +34,7 @@ public interface FactoryService {
      * @param id
      * @return
      */
-    void delFactory(UUID id);
+    void delFactory(UUID id)throws ThingsboardException ;
 
 
     /**
@@ -88,4 +92,7 @@ public interface FactoryService {
      * @param o
      */
     String[] getEntityAttributeList(Object o);
+
+    ListenableFuture<Factory> findFactoryByIdAsync(TenantId callerId, FactoryId factoryId);
+
 }

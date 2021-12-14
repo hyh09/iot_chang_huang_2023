@@ -82,7 +82,7 @@ public class RTMonitorAppController extends BaseController {
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
         var query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
-        return this.deviceMonitorService.getRTMonitorAppData(getTenantId(), query, pageLink);
+        return this.deviceMonitorService.getRTMonitorDataForApp(getTenantId(), query, pageLink);
     }
 
 
@@ -122,7 +122,7 @@ public class RTMonitorAppController extends BaseController {
         checkParameter("groupPropertyName", groupPropertyName);
         checkParameter("startTime", startTime);
         checkParameter("endTime", endTime);
-        return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
+        return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
     }
 
     /**
@@ -162,23 +162,23 @@ public class RTMonitorAppController extends BaseController {
                 .alarmSimpleStatus(AlarmSimpleStatus.ANY).alarmSimpleLevel(AlarmSimpleLevel.ANY).build();
         query.setDeviceId(deviceId).setProductionLineId(productionLineId)
                 .setFactoryId(factoryId).setWorkshopId(workshopId);
-        return this.deviceMonitorService.listAppAlarmsRecord(getTenantId(), query, pageLink);
+        return this.deviceMonitorService.listPageAlarmRecordsForApp(getTenantId(), query, pageLink);
     }
 
-//    /**
-//     * 首页-获得报警记录统计信息，按月份
-//     */
-//    @ApiOperation(value = "首页-获得报警记录统计信息，按月份", notes = "不传工厂id默认为未分配")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
-//    })
-//    @GetMapping(value = "/alarmRecord/statistics")
-//    public List<AlarmTimesResult> getAlarms(
-//            @RequestParam(required = false) String factoryId
-//    ) throws ThingsboardException {
-//        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
-//        return this.deviceMonitorService.listAppAlarmsRecordStatistics(getTenantId(), query);
-//    }
+    /**
+     * 报警记录-获得报警记录统计信息，按月份
+     */
+    @ApiOperation(value = "报警记录-获得报警记录统计信息，按月份", notes = "不传工厂id默认为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+    })
+    @GetMapping(value = "/alarmRecord/statistics")
+    public List<AlarmTimesResult> getAlarms(
+            @RequestParam(required = false) String factoryId
+    ) throws ThingsboardException {
+        FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
+        return this.deviceMonitorService.listAlarmRecordStatisticsForApp(getTenantId(), query);
+    }
 
     /**
      * 首页-实时监控全部信息，包括工厂、设备在线情况、预警
@@ -192,8 +192,8 @@ public class RTMonitorAppController extends BaseController {
             var factoryList = this.clientService.listFactoriesByUserId(getTenantId(), getCurrentUser().getId());
             if (factoryList != null && !factoryList.isEmpty()) {
                 FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryList.get(0).getId().toString());
-                var onlineStatusResult = this.deviceMonitorService.getRTMonitorOnlineStatusAppData(getTenantId(), query);
-                var alarmDayResult = this.deviceMonitorService.getAlarmsRecordDayStatistics(getTenantId(), query);
+                var onlineStatusResult = this.deviceMonitorService.getDeviceOnlineStatusData(getTenantId(), query);
+                var alarmDayResult = this.deviceMonitorService.getAlarmRecordStatisticByDay(getTenantId(), query);
                 return AppIndexResult.builder()
                         .onLineDeviceCount(onlineStatusResult.getOnLineDeviceCount())
                         .offLineDeviceCount(onlineStatusResult.getOffLineDeviceCount())
@@ -205,7 +205,7 @@ public class RTMonitorAppController extends BaseController {
                 return new AppIndexResult();
             }
         } else {
-            return this.deviceMonitorService.getRTMonitorAppIndexData(getTenantId());
+            return this.deviceMonitorService.getRTMonitorIndexDataForApp(getTenantId());
         }
     }
 
@@ -221,7 +221,7 @@ public class RTMonitorAppController extends BaseController {
             @RequestParam(required = false) String factoryId
     ) throws ThingsboardException {
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
-        return this.deviceMonitorService.getRTMonitorOnlineStatusAppData(getTenantId(), query);
+        return this.deviceMonitorService.getDeviceOnlineStatusData(getTenantId(), query);
     }
 
     /**
@@ -236,6 +236,6 @@ public class RTMonitorAppController extends BaseController {
             @RequestParam(required = false) String factoryId
     ) throws ThingsboardException {
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
-        return this.deviceMonitorService.getAlarmsRecordDayStatistics(getTenantId(), query);
+        return this.deviceMonitorService.getAlarmRecordStatisticByDay(getTenantId(), query);
     }
 }

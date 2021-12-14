@@ -81,12 +81,16 @@ import { Edge, EdgeEvent, EdgeEventType } from '@shared/models/edge.models';
 import { RuleChainMetaData, RuleChainType } from '@shared/models/rule-chain.models';
 import { WidgetService } from '@core/http/widget.service';
 import { DeviceProfileService } from '@core/http/device-profile.service';
-import { FactoryMngService } from './custom/factory-mng.service';
+import { FactoryMngService, FactoryEntityType } from './custom/factory-mng.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EntityService {
+
+  private factoryEntityProps: string[] = [];
+  private workshopEntityProps: string[] = [];
+  private prodLineEntityProps: string[] = [];
 
   constructor(
     private http: HttpClient,
@@ -107,7 +111,17 @@ export class EntityService {
     private deviceProfileService: DeviceProfileService,
     private utils: UtilsService,
     private factoryMngService: FactoryMngService
-  ) { }
+  ) {
+    this.factoryMngService.getEntityProps(FactoryEntityType.FACTORY).subscribe(res => {
+      this.factoryEntityProps = res || [];
+    });
+    this.factoryMngService.getEntityProps(FactoryEntityType.WORKSHOP).subscribe(res => {
+      this.workshopEntityProps = res || [];
+    });
+    this.factoryMngService.getEntityProps(FactoryEntityType.PRODUCTION_LINE).subscribe(res => {
+      this.prodLineEntityProps = res || [];
+    });
+  }
 
   private getEntityObservable(entityType: EntityType, entityId: string,
                               config?: RequestConfig): Observable<BaseData<EntityId>> {
@@ -117,10 +131,10 @@ export class EntityService {
       case EntityType.FACTORY:
         observable = this.factoryMngService.getFactory(entityId, config);
         break;
-      case EntityType.WORK_SHOP:
+      case EntityType.WORKSHOP:
         observable = this.factoryMngService.getWorkShop(entityId, config);
         break;
-      case EntityType.PROD_LINE:
+      case EntityType.PRODUCTION_LINE:
         observable = this.factoryMngService.getProdLine(entityId, config);
         break;
       case EntityType.DEVICE:
@@ -310,11 +324,11 @@ export class EntityService {
           }
         }));
         break;
-      case EntityType.WORK_SHOP:
+      case EntityType.WORKSHOP:
         pageLink.sortOrder.property = 'name';
         entitiesObservable = this.factoryMngService.getAllWorkShops('', '', pageLink.textSearch, config).pipe(map(res => {
           const arr: any[] = res || [];
-          arr.forEach(item => (item.id = { entityType: EntityType.WORK_SHOP, id: item.id }));
+          arr.forEach(item => (item.id = { entityType: EntityType.WORKSHOP, id: item.id }));
           return {
             data: arr,
             totalPages: 1,
@@ -323,11 +337,11 @@ export class EntityService {
           }
         }));
         break;
-      case EntityType.PROD_LINE:
+      case EntityType.PRODUCTION_LINE:
         pageLink.sortOrder.property = 'name';
         entitiesObservable = this.factoryMngService.getAllProdLines('', '', '', pageLink.textSearch, config).pipe(map(res => {
           const arr: any[] = res || [];
-          arr.forEach(item => (item.id = { entityType: EntityType.PROD_LINE, id: item.id }));
+          arr.forEach(item => (item.id = { entityType: EntityType.PRODUCTION_LINE, id: item.id }));
           return {
             data: arr,
             totalPages: 1,
@@ -671,8 +685,8 @@ export class EntityService {
         break;
       case Authority.TENANT_ADMIN:
         entityTypes.push(EntityType.FACTORY);
-        entityTypes.push(EntityType.WORK_SHOP);
-        entityTypes.push(EntityType.PROD_LINE);
+        entityTypes.push(EntityType.WORKSHOP);
+        entityTypes.push(EntityType.PRODUCTION_LINE);
         entityTypes.push(EntityType.DEVICE);
         entityTypes.push(EntityType.ASSET);
         if (authState.edgesSupportEnabled) {
@@ -690,8 +704,8 @@ export class EntityService {
         break;
       case Authority.CUSTOMER_USER:
         entityTypes.push(EntityType.FACTORY);
-        entityTypes.push(EntityType.WORK_SHOP);
-        entityTypes.push(EntityType.PROD_LINE);
+        entityTypes.push(EntityType.WORKSHOP);
+        entityTypes.push(EntityType.PRODUCTION_LINE);
         entityTypes.push(EntityType.DEVICE);
         entityTypes.push(EntityType.ASSET);
         if (authState.edgesSupportEnabled) {
@@ -748,7 +762,12 @@ export class EntityService {
         entityFieldKeys.push(entityFields.name.keyName);
         entityFieldKeys.push(entityFields.type.keyName);
         break;
-      case EntityType.DEVICE:
+      case EntityType.FACTORY:
+        entityFieldKeys.push(...this.factoryEntityProps);
+      case EntityType.WORKSHOP:
+        entityFieldKeys.push(...this.workshopEntityProps);
+      case EntityType.PRODUCTION_LINE:
+        entityFieldKeys.push(...this.prodLineEntityProps);
       case EntityType.EDGE:
       case EntityType.ASSET:
         entityFieldKeys.push(entityFields.name.keyName);

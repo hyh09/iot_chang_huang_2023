@@ -28,10 +28,13 @@ public interface CommonService {
         if (t == null)
             return null;
         String result = t.getValueAsString();
-        if (DataType.DOUBLE.equals(t.getDataType())) {
-            BigDecimal bigDecimal = new BigDecimal(t.getValueAsString());
-            if (bigDecimal.scale() > 4) {
-                return bigDecimal.setScale(4, RoundingMode.HALF_UP).toPlainString();
+        if (DataType.STRING.equals(t.getDataType()) || DataType.DOUBLE.equals(t.getDataType())) {
+            try {
+                BigDecimal bigDecimal = new BigDecimal(t.getValueAsString());
+                if (bigDecimal.scale() > 4) {
+                    return bigDecimal.setScale(4, RoundingMode.HALF_UP).toPlainString();
+                }
+            } catch (Exception ignore) {
             }
         }
         return result;

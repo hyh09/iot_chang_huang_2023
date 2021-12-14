@@ -42,6 +42,7 @@ import org.thingsboard.server.common.data.device.credentials.BasicMqttCredential
 import org.thingsboard.server.common.data.device.data.*;
 import org.thingsboard.server.common.data.devicecomponent.DeviceComponent;
 import org.thingsboard.server.common.data.edge.Edge;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.id.factory.FactoryId;
@@ -170,6 +171,11 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     @Override
+    public List<Device> getYunDeviceList(Device device) {
+        return deviceDao.getYunDeviceList(device);
+    }
+
+    @Override
     public ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId) {
         log.trace("Executing findDeviceById [{}]", deviceId);
         validateId(deviceId, INCORRECT_DEVICE_ID + deviceId);
@@ -196,6 +202,17 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Transactional
     @Override
     public Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException {
+        //同租户下，设备名称不能重复
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(device.getTenantId(), device.getName()));
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            if(device.getId() == null){
+                throw new ThingsboardException("设备名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+            }else {
+                if(device.getName() != null && !device.getId().getId().toString().equals(deviceListByCdn.get(0).getId().getId().toString())){
+                    throw new ThingsboardException("设备名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
+            }
+        }
         return doSaveDevice(device, accessToken, true);
     }
 
@@ -248,6 +265,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         if(device.getDictDeviceId() == null || StringUtils.isEmpty(device.getDictDeviceId().toString())){
             device.setDictDeviceId(dictDeviceService.getDefaultDictDeviceId(device.getTenantId()));
         }
+        //保存设备
         Device savedDevice = this.saveDeviceWithoutCredentials(device, doValidate);
         if (device.getId() == null) {
             DeviceCredentials deviceCredentials = new DeviceCredentials();
@@ -919,15 +937,23 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         //添加设备给指定产线
         deviceDao.addProductionLine(device);
         //建立实体关系
-        this.createRelationDeviceFromProductionLine(device);
+        if(!CollectionUtils.isEmpty(device.getDeviceIdList())){
+            device.getDeviceIdList().forEach(i->{
+                Device dev = new Device();
+                dev.setId(new DeviceId(i));
+                dev.setProductionLineId(device.getProductionLineId());
+                this.createRelationDeviceFromProductionLine(dev);
+            });
+        }
     }
 
     public void createRelationDeviceFromProductionLine(Device device){
         if(device != null){
             if(device.getProductionLineId() != null){
                 //建立实体关系
+                //设备到产线
                 EntityRelation relation = new EntityRelation(
-                        device.getId(),new ProductionLineId(device.getProductionLineId()), EntityRelation.CONTAINS_TYPE
+                        new ProductionLineId(device.getProductionLineId()),device.getId(), EntityRelation.CONTAINS_TYPE
                 );
                 relationService.saveRelation(device.getTenantId(), relation);
             }
@@ -973,7 +999,38 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      */
     @Override
     public PageData<Device> getTenantDeviceInfoList(Device device,PageLink pageLink){
-        return deviceDao.getTenantDeviceInfoList(device,pageLink);
+        PageData<Device> pageData = deviceDao.getTenantDeviceInfoList(device, pageLink);
+        /*if(pageData.getData() != null){
+            this.getDeviceProfileName(pageData.getData());
+        }*/
+        return pageData;
+    }
+
+    /**
+     * 批量查询设备配置名称
+     * @param dataList
+     */
+    private void getDeviceProfileName(List<Device> dataList){
+        if(!CollectionUtils.isEmpty(dataList)){
+            List<UUID> profileIds = dataList.stream().map(m -> m.getDeviceProfileId().getId()).collect(Collectors.toList());
+            if(!CollectionUtils.isEmpty(profileIds)){
+                List<DeviceProfile> deviceProfileByIds = deviceProfileService.findDeviceProfileByIds(profileIds);
+                if(!CollectionUtils.isEmpty(deviceProfileByIds)){
+                    //循环赋值
+                    dataList.forEach(i->{
+                        deviceProfileByIds.forEach(j->{
+                            if(i.getDeviceProfileId().getId().toString().equals(j.getId().getId().toString())){
+                                i.setDeviceProfileName(j.getName());
+                            }
+                        });
+                    });
+
+
+                }
+
+            }
+
+        }
     }
 
     /**

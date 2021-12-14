@@ -1,6 +1,6 @@
 import { UtilsService } from '@core/services/utils.service';
 import { FactoryMngService } from './../../../../../core/http/custom/factory-mng.service';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AppState, DialogService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTableTreeNode } from '@app/shared/models/custom/factory-mng.models';
 import { BaseData, EntityType, EntityTypeResource, entityTypeResources, EntityTypeTranslation, entityTypeTranslations, HasId, HasUUID, PageComponent } from '@app/shared/public-api';
@@ -24,7 +24,7 @@ import { SetPermissionsComponent, SetPermissionsDialogData } from '../../auth-mn
   templateUrl: './factory-mng.component.html',
   styleUrls: ['./factory-mng.component.scss']
 })
-export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit {
+export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public isDetailsOpen: boolean = false;
   public filters = FILTERS;
@@ -60,13 +60,24 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
 
   ngAfterViewInit() {
     this.setTableHeight();
-    window.onresize = this.setTableHeight;
+    window.addEventListener('resize', this.setTableHeight);
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', this.setTableHeight);
   }
 
   setTableHeight() {
-    const totalHeight = document.querySelector('.tb-entity-table-content').clientHeight
-    const tableClientTop =  document.querySelector('.mat-table-toolbar').clientHeight + document.querySelector('.entity-filter-header').clientHeight
-    this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` }
+    setTimeout(() => {
+      const $tableContent = document.querySelector('.tb-entity-table-content');
+      const $toolbar = document.querySelector('.mat-table-toolbar');
+      const $filter = document.querySelector('.entity-filter-header');
+      if ($tableContent && $toolbar && $filter) {
+        const totalHeight = $tableContent.clientHeight;
+        const tableClientTop = $toolbar.clientHeight + $filter.clientHeight;
+        this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` };
+      }
+    });
   }
 
   fetchData() {
@@ -241,8 +252,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
         entitiesTableConfig: {
-          entityTranslations: entityTypeTranslations.get(EntityType.WORK_SHOP),
-          entityResources: entityTypeResources.get(EntityType.WORK_SHOP),
+          entityTranslations: entityTypeTranslations.get(EntityType.WORKSHOP),
+          entityResources: entityTypeResources.get(EntityType.WORKSHOP),
           entityComponent: WorkShopFormComponent,
           saveEntity: entity => this.factoryMngService.saveWorkShop(entity),
           componentsData: { factoryId, factoryName },
@@ -260,8 +271,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
         entitiesTableConfig: {
-          entityTranslations: entityTypeTranslations.get(EntityType.PROD_LINE),
-          entityResources: entityTypeResources.get(EntityType.PROD_LINE),
+          entityTranslations: entityTypeTranslations.get(EntityType.PRODUCTION_LINE),
+          entityResources: entityTypeResources.get(EntityType.PRODUCTION_LINE),
           entityComponent: ProdLineFormComponent,
           saveEntity: entity => this.factoryMngService.saveProdLine(entity),
           componentsData: { factoryId, factoryName, workshopId, workshopName },
@@ -358,14 +369,14 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveFactory(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getFactory(id + '');
       } else if (entity.rowType === 'workShop') {
-        entityTranslations = entityTypeTranslations.get(EntityType.WORK_SHOP);
-        entityResources = entityTypeResources.get(EntityType.WORK_SHOP);
+        entityTranslations = entityTypeTranslations.get(EntityType.WORKSHOP);
+        entityResources = entityTypeResources.get(EntityType.WORKSHOP);
         entityComponent = WorkShopFormComponent;
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveWorkShop(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getWorkShop(id + '');
       } else if (entity.rowType === 'prodLine') {
-        entityTranslations = entityTypeTranslations.get(EntityType.PROD_LINE);
-        entityResources = entityTypeResources.get(EntityType.PROD_LINE);
+        entityTranslations = entityTypeTranslations.get(EntityType.PRODUCTION_LINE);
+        entityResources = entityTypeResources.get(EntityType.PRODUCTION_LINE);
         entityComponent = ProdLineFormComponent;
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveProdLine(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getProdLine(id + '');
@@ -389,6 +400,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       this.isDetailsOpen = true;
     } else {
       this.isDetailsOpen = false;
+      this.currentEntityId = '';
     }
   }
 

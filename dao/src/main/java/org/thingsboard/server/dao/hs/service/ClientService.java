@@ -31,7 +31,7 @@ public interface ClientService {
      * @param tenantId 租户Id
      * @param t        extends FactoryDeviceQuery
      */
-    <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t);
+    <T extends FactoryDeviceQuery> DeviceBaseDTO getFactoryBaseInfoByQuery(TenantId tenantId, T t);
 
     /**
      * 查询设备列表
@@ -39,7 +39,7 @@ public interface ClientService {
      * @param tenantId 租户Id
      * @param t        extends FactoryDeviceQuery
      */
-    <T extends FactoryDeviceQuery> List<Device> listDeviceByQuery(TenantId tenantId, T t);
+    <T extends FactoryDeviceQuery> List<Device> listDevicesByQuery(TenantId tenantId, T t);
 
     /**
      * 分页查询设备列表
@@ -48,33 +48,33 @@ public interface ClientService {
      * @param t        extends FactoryDeviceQuery
      * @param pageLink 分页参数
      */
-    <T extends FactoryDeviceQuery> PageData<Device> listDevicePageByQuery(TenantId tenantId, T t, PageLink pageLink);
+    <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQuery(TenantId tenantId, T t, PageLink pageLink);
 
     /**
      * 查询全部设备的在线情况
      *
      * @param allDeviceIdList 设备的UUID列表
      */
-    Map<String, Boolean> listAllDeviceOnlineStatus(List<UUID> allDeviceIdList);
+    Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList);
 
     /**
      * 查询全部设备的工厂、车间、产线信息
      *
      * @param deviceList 设备列表
      */
-    DeviceListAffiliationDTO getDeviceListAffiliation(List<Device> deviceList);
+    DeviceListAffiliationDTO getDevicesAffiliationInfo(List<Device> deviceList);
 
     /**
      * 获得设备字典初始化数据
      */
-    List<DictDeviceGroupVO> listDictDeviceInitData();
+    List<DictDeviceGroupVO> getDictDeviceInitData();
 
     /**
      * 列举全部工厂
      *
      * @param tenantId 租户Id
      */
-    List<Factory> listAllFactoryByTenantId(TenantId tenantId);
+    List<Factory> listFactories(TenantId tenantId);
 
     /**
      * 列举工厂下全部车间
@@ -82,7 +82,7 @@ public interface ClientService {
      * @param tenantId  租户Id
      * @param factoryId 工厂Id
      */
-    List<Workshop> listAllWorkshopByTenantIdAndFactoryId(TenantId tenantId, UUID factoryId);
+    List<Workshop> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId);
 
     /**
      * 列举车间下全部产线
@@ -90,7 +90,7 @@ public interface ClientService {
      * @param tenantId   租户Id
      * @param workshopId 车间Id
      */
-    List<ProductionLine> listProductionLinesByTenantIdAndWorkshopId(TenantId tenantId, UUID workshopId);
+    List<ProductionLine> listProductionLinesByWorkshopId(TenantId tenantId, UUID workshopId);
 
     /**
      * 根据当前登录人查询工厂列表
