@@ -96,8 +96,7 @@ public class DeviceController extends BaseController {
     public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
         checkParameter(DEVICE_ID, strDeviceId);
         try {
-            DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
-            return checkDeviceId(deviceId, Operation.READ);
+            return deviceService.getDeviceInfo(toUUID(strDeviceId));
         } catch (Exception e) {
             throw handleException(e);
         }
