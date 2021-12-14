@@ -87,6 +87,32 @@ public class DeviceController extends BaseController {
     public static final String SAVE_TYPE_ADD = "add ";
     public static final String SAVE_TYPE_ADD_UPDATE = "update ";
 
+    @ApiOperation("云对接查设备详情")
+    @ApiImplicitParam(name = "id",value = "当前id",dataType = "String",paramType="path",required = true)
+    @RequestMapping(value = "/yun/device/{deviceId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
+        checkParameter(DEVICE_ID, strDeviceId);
+        try {
+            DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
+            return checkDeviceId(deviceId, Operation.READ);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @ApiOperation("云对接查设备列表")
+    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "Device",paramType="body")
+    @RequestMapping(value = "/yun/devices/{deviceId}", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Device> getYunDeviceList(Device device) throws ThingsboardException {
+        try {
+            return deviceService.getYunDeviceList(device);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.GET)
     @ResponseBody
