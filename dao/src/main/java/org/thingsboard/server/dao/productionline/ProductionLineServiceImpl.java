@@ -1,7 +1,9 @@
 package org.thingsboard.server.dao.productionline;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.factory.FactoryId;
@@ -16,6 +18,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import static org.thingsboard.server.dao.service.Validator.validateId;
+
 @Service
 @Slf4j
 @Transactional
@@ -23,6 +27,7 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
 
     private static final String DEFAULT_TENANT_REGION = "Global";
     public static final String INCORRECT_MENU_ID = "Incorrect menuId ";
+    public static final String INCORRECT_PRODUCTION_LINE_ID = "不正确的 productionLineId ";
     public static final int ONE = 1;
     private final RelationDao relationDao;
     private final ProductionLineDao productionLineDao;
@@ -104,5 +109,12 @@ public class ProductionLineServiceImpl extends AbstractEntityService implements 
     public ProductionLine findById(UUID id){
         log.trace("Executing findById [{}]", id);
         return productionLineDao.findById(id);
+    }
+
+    @Override
+    public ListenableFuture<ProductionLine> findProductionLineByIdAsync(TenantId callerId, ProductionLineId productionLineId) {
+        log.trace("执行 findProductionLineByIdAsync [{}]", productionLineId);
+        validateId(productionLineId, INCORRECT_PRODUCTION_LINE_ID + productionLineId);
+        return productionLineDao.findProductionLineByIdAsync(callerId, productionLineId.getId());
     }
 }

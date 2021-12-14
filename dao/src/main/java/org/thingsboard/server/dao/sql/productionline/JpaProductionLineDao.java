@@ -16,6 +16,7 @@
 package org.thingsboard.server.dao.sql.productionline;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,8 +26,10 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
@@ -306,6 +309,11 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
             });
         }
         return productionLineList;
+    }
+
+    @Override
+    public ListenableFuture<ProductionLine> findProductionLineByIdAsync(TenantId tenantId, UUID id) {
+        return service.submit(() -> DaoUtil.getData(productionLineRepository.findById(id)));
     }
 
 }
