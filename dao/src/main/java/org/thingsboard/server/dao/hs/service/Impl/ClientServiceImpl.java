@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.hs.service;
+package org.thingsboard.server.dao.hs.service.Impl;
 
 import com.google.common.collect.Lists;
 import lombok.Getter;
@@ -35,6 +35,8 @@ import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.service.ClientService;
+import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
@@ -101,7 +103,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param t extends FactoryDeviceQuery
      */
     @Override
-    public <T extends FactoryDeviceQuery> DeviceBaseDTO getDeviceBase(TenantId tenantId, T t) {
+    public <T extends FactoryDeviceQuery> DeviceBaseDTO getFactoryBaseInfoByQuery(TenantId tenantId, T t) {
         return DeviceBaseDTO.builder()
                 .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
                 .workshop(t.getWorkshopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkshopId()))) : null)
@@ -117,7 +119,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param t        extends FactoryDeviceQuery
      */
     @Override
-    public <T extends FactoryDeviceQuery> List<Device> listDeviceByQuery(TenantId tenantId, T t) {
+    public <T extends FactoryDeviceQuery> List<Device> listDevicesByQuery(TenantId tenantId, T t) {
         return DaoUtil.convertDataList(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t)));
     }
 
@@ -129,7 +131,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param pageLink 分页参数
      */
     @Override
-    public <T extends FactoryDeviceQuery> PageData<Device> listDevicePageByQuery(TenantId tenantId, T t, PageLink pageLink) {
+    public <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQuery(TenantId tenantId, T t, PageLink pageLink) {
         return DaoUtil.toPageData(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t), DaoUtil.toPageable(pageLink)));
     }
 
@@ -139,7 +141,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param allDeviceIdList 设备的UUID列表
      */
     @Override
-    public Map<String, Boolean> listAllDeviceOnlineStatus(List<UUID> allDeviceIdList) {
+    public Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList) {
         if (persistToTelemetry) {
             Map<String, Boolean> map = new HashMap<>();
             for (UUID uuid : allDeviceIdList) {
@@ -158,7 +160,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param deviceList 设备列表
      */
     @Override
-    public DeviceListAffiliationDTO getDeviceListAffiliation(List<Device> deviceList) {
+    public DeviceListAffiliationDTO getDevicesAffiliationInfo(List<Device> deviceList) {
         List<UUID> factoryIds = deviceList.stream().map(Device::getFactoryId).distinct().collect(Collectors.toList());
         List<UUID> workshopIds = deviceList.stream().map(Device::getWorkshopId).distinct().collect(Collectors.toList());
         List<UUID> productionLineIds = deviceList.stream().map(Device::getProductionLineId).distinct().collect(Collectors.toList());
@@ -177,7 +179,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * 获得设备字典初始化数据
      */
     @Override
-    public List<DictDeviceGroupVO> listDictDeviceInitData() {
+    public List<DictDeviceGroupVO> getDictDeviceInitData() {
         List<DictDeviceGroupVO> list = Lists.newArrayList();
         var jsonNodeOptional = this.initRepository.findByScope(InitScopeEnum.DICT_DEVICE_GROUP.getCode()).map(InitEntity::getInitData);
         if (jsonNodeOptional.isEmpty())
@@ -195,7 +197,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param tenantId 租户Id
      */
     @Override
-    public List<Factory> listAllFactoryByTenantId(TenantId tenantId) {
+    public List<Factory> listFactories(TenantId tenantId) {
         return DaoUtil.convertDataList(this.factoryRepository.findAllByTenantIdOrderByCreatedTimeDesc(tenantId.getId()));
     }
 
@@ -206,7 +208,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param factoryId 工厂Id
      */
     @Override
-    public List<Workshop> listAllWorkshopByTenantIdAndFactoryId(TenantId tenantId, UUID factoryId) {
+    public List<Workshop> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId) {
         return DaoUtil.convertDataList(this.workshopRepository.findAllByTenantIdAndFactoryIdOrderByCreatedTimeDesc(tenantId.getId(), factoryId));
     }
 
@@ -217,7 +219,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param workshopId 车间Id
      */
     @Override
-    public List<ProductionLine> listProductionLinesByTenantIdAndWorkshopId(TenantId tenantId, UUID workshopId) {
+    public List<ProductionLine> listProductionLinesByWorkshopId(TenantId tenantId, UUID workshopId) {
         return DaoUtil.convertDataList(this.productionLineRepository.findAllByTenantIdAndWorkshopIdOrderByCreatedTimeDesc(tenantId.getId(), workshopId));
     }
 

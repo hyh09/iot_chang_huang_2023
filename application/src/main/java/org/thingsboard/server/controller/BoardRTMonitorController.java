@@ -67,7 +67,7 @@ public class BoardRTMonitorController extends BaseController {
         if (factoryId == null && workshopId == null && productionLineId == null && deviceId == null)
             isQueryAll = true;
         FactoryDeviceQuery query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId, isQueryAll);
-        return this.deviceMonitorService.getRTMonitorOnlineStatusAppData(getTenantId(), query);
+        return this.deviceMonitorService.getDeviceOnlineStatusData(getTenantId(), query);
     }
 
     /**
@@ -100,7 +100,7 @@ public class BoardRTMonitorController extends BaseController {
             endTime = CommonUtil.getTodayCurrentTime();
         TimeQuery timeQuery = TimeQuery.builder().startTime(startTime).endTime(endTime).build();
         FactoryDeviceQuery query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId, isQueryAll);
-        return this.deviceMonitorService.getBoardAlarmsRecordStatistics(getTenantId(), query, timeQuery);
+        return this.deviceMonitorService.getAlarmRecordStatisticsForBoard(getTenantId(), query, timeQuery);
     }
 
     /**
@@ -115,7 +115,7 @@ public class BoardRTMonitorController extends BaseController {
             @RequestParam(required = false) String deviceId
     ) throws ThingsboardException {
         FactoryDeviceQuery query = new FactoryDeviceQuery().setDeviceId(deviceId);
-        return this.deviceMonitorService.getAlarmsRecordDayStatistics(getTenantId(), query);
+        return this.deviceMonitorService.getAlarmRecordStatisticByDay(getTenantId(), query);
     }
 
 
@@ -148,6 +148,6 @@ public class BoardRTMonitorController extends BaseController {
             @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("componentId", componentId);
-        return this.deviceMonitorService.getRtMonitorDeviceComponentDetail(getTenantId(), toUUID(deviceId), toUUID(componentId));
+        return this.deviceMonitorService.getRtMonitorDeviceComponentDetailForBoard(getTenantId(), toUUID(deviceId), toUUID(componentId));
     }
 }

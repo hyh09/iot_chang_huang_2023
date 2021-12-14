@@ -101,7 +101,7 @@ public class DictDataController extends BaseController {
         validatePageLink(pageLink);
 
         // 查询数据字典列表
-        return this.dictDataService.listDictDataByQuery(getTenantId(), dictDataListQuery, pageLink);
+        return this.dictDataService.listPageDictDataByQuery(getTenantId(), dictDataListQuery, pageLink);
     }
 
     /**
@@ -113,7 +113,7 @@ public class DictDataController extends BaseController {
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
         CommonUtil.checkCode(dictDataQuery.getCode(), HSConstants.CODE_PREFIX_DICT_DATA);
-        return this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
+        return this.dictDataService.saveOrUpdateDictData(dictDataQuery, getTenantId());
     }
 
     /**
@@ -150,6 +150,6 @@ public class DictDataController extends BaseController {
     @ApiOperation(value = "获得数据字典列表")
     @GetMapping("/dict/data/all")
     public List<DictData> listDictDataAll() throws ThingsboardException {
-        return this.dictDataService.listAllDictData(getTenantId());
+        return this.dictDataService.listDictData(getTenantId());
     }
 }

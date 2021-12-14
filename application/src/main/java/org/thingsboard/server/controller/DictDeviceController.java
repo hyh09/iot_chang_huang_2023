@@ -79,7 +79,7 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "获得当前默认初始化的分组及分组属性")
     @GetMapping("/dict/device/group/initData")
     public List<DictDeviceGroupVO> getGroupInitData() throws ThingsboardException {
-        return this.dictDeviceService.getGroupInitData();
+        return this.dictDeviceService.getDictDeviceGroupInitData();
     }
 
     /**
@@ -118,7 +118,7 @@ public class DictDeviceController extends BaseController {
 
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
-        return this.dictDeviceService.listDictDeviceByQuery(dictDeviceListQuery, getTenantId(), pageLink);
+        return this.dictDeviceService.listPageDictDevicesByQuery(dictDeviceListQuery, getTenantId(), pageLink);
     }
 
     /**
@@ -134,7 +134,7 @@ public class DictDeviceController extends BaseController {
         boolean isSave = false;
         if (StringUtils.isNotBlank(dictDeviceVO.getId()))
             isSave = true;
-        var savedDictDeviceVO = this.dictDeviceService.updateOrSaveDictDevice(dictDeviceVO, getTenantId());
+        var savedDictDeviceVO = this.dictDeviceService.saveOrUpdateDictDevice(dictDeviceVO, getTenantId());
         if (isSave)
             this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_ADD);
         else
@@ -165,7 +165,7 @@ public class DictDeviceController extends BaseController {
     @DeleteMapping("/dict/device/{id}")
     public void deleteDictDevice(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
-        this.dictDeviceService.deleteDictDevice(id, getTenantId());
+        this.dictDeviceService.deleteDictDeviceById(id, getTenantId());
     }
 
     /**
@@ -174,7 +174,7 @@ public class DictDeviceController extends BaseController {
     @ApiOperation(value = "【不分页】获得设备字典列表")
     @GetMapping("/dict/device/all")
     public List<DictDevice> listAllDictDevice() throws ThingsboardException {
-        return this.dictDeviceService.listAllDictDevice(getTenantId());
+        return this.dictDeviceService.listDictDevices(getTenantId());
     }
 
     /**
@@ -210,6 +210,6 @@ public class DictDeviceController extends BaseController {
     @GetMapping("/dict/device/properties")
     public List<DictDeviceTsPropertyResult> listDictDeviceProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
         checkParameter("dictDeviceId", dictDeviceId);
-        return this.dictDeviceService.listAllDictDeviceProperties(getTenantId(), toUUID(dictDeviceId));
+        return this.dictDeviceService.listDictDeviceProperties(getTenantId(), toUUID(dictDeviceId));
     }
 }
