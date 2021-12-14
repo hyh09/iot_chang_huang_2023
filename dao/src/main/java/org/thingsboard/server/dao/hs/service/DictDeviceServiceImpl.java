@@ -572,6 +572,17 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         });
     }
 
+    /**
+     * 获得截止时间之后新增的设备字典
+     *
+     * @param tenantId  租户Id
+     * @param startTime 设备字典Id
+     */
+    @Override
+    public List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) throws ThingsboardException {
+        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndCreatedTimeGreaterThan(tenantId.getId(), startTime));
+    }
+
     @Autowired
     public void setClientService(ClientService clientService) {
         this.clientService = clientService;
