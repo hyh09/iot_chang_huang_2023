@@ -579,7 +579,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param startTime 设备字典Id
      */
     @Override
-    public List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) throws ThingsboardException {
+    public List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) {
         return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndCreatedTimeGreaterThan(tenantId.getId(), startTime));
     }
 

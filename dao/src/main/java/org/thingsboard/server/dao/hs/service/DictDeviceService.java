@@ -143,9 +143,8 @@ public interface DictDeviceService {
     /**
      * 获得截止时间之后新增的设备字典
      *
-     * @param tenantId     租户Id
+     * @param tenantId  租户Id
      * @param startTime 设备字典Id
      */
-    List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) throws ThingsboardException;
-
+    List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime);
 }
