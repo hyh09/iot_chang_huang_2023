@@ -104,7 +104,7 @@ public class DeviceController extends BaseController {
 
     @ApiOperation("云对接查设备列表")
     @ApiImplicitParam(name = "device",value = "入参实体",dataType = "Device",paramType="body")
-    @RequestMapping(value = "/yun/devices/{deviceId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/yun/devices", method = RequestMethod.GET)
     @ResponseBody
     public List<Device> getYunDeviceList(Device device) throws ThingsboardException {
         try {
