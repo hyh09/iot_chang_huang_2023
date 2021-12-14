@@ -142,7 +142,7 @@ public class BoardRTMonitorController extends BaseController {
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
             @ApiImplicitParam(name = "componentId", value = "设备字典部件Id", paramType = "query", required = true),
     })
-    @GetMapping("/rtMonitor/component}")
+    @GetMapping("/rtMonitor/component")
     public List<DictDeviceComponentPropertyVO> getRtMonitorDeviceComponentDetail(
             @RequestParam("deviceId") String deviceId,
             @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
