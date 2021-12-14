@@ -57,10 +57,7 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.entity.device.dto.AddDeviceDto;
-import org.thingsboard.server.entity.device.dto.DeviceListQry;
-import org.thingsboard.server.entity.device.dto.DeviceQry;
-import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
+import org.thingsboard.server.entity.device.dto.*;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -103,12 +100,16 @@ public class DeviceController extends BaseController {
     }
 
     @ApiOperation("云对接查设备列表")
-    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "Device",paramType="body")
+    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "YunDeviceDto",paramType="query")
     @RequestMapping(value = "/yun/devices", method = RequestMethod.GET)
     @ResponseBody
-    public List<Device> getYunDeviceList(Device device) throws ThingsboardException {
+    public List<Device> getYunDeviceList(YunDeviceDto device) throws ThingsboardException {
         try {
-            return deviceService.getYunDeviceList(device);
+            Device deviceQry = device.toDevice();
+            if(StringUtils.isNotEmpty(device.getTenantId())){
+                deviceQry.setTenantId(new TenantId(toUUID(device.getTenantId())));
+            }
+            return deviceService.getYunDeviceList(deviceQry);
         } catch (Exception e) {
             throw handleException(e);
         }
