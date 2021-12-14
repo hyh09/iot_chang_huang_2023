@@ -595,7 +595,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime) {
-        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndCreatedTimeGreaterThan(tenantId.getId(), startTime));
+        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndUpdatedTimeGreaterThan(tenantId.getId(), startTime));
     }
 
     /**
