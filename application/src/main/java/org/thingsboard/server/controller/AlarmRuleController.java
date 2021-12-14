@@ -65,7 +65,7 @@ public class AlarmRuleController extends BaseController {
                                                      @RequestParam(required = false, defaultValue = "desc") String sortOrder) throws ThingsboardException {
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
-        return deviceMonitorService.listDeviceProfile(getTenantId(), name, pageLink);
+        return deviceMonitorService.listPageDeviceProfiles(getTenantId(), name, pageLink);
     }
 
     /**

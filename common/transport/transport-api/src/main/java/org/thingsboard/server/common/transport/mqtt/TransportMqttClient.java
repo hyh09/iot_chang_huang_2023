@@ -170,10 +170,31 @@ public class TransportMqttClient {
         }
     }
 
+    public void publisDictDevice(String tenantId, String dictDeviceId, TYPE type, String yunyunTopic) {
+        MqttMessage msg = new MqttMessage();
+        //封装数据
+        JSONObject obj = new JSONObject();
+        obj.put("ts",LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli());
+        obj.put("tenantId",tenantId);
+        obj.put("dictDeviceId",dictDeviceId);
+        obj.put("msgType",type);
+        obj.put("topic",yunyunTopic);
+        msg.setPayload(obj.toJSONString().getBytes());
+        try {
+            // 发送给 云云服务的mqtt
+            mqttClient.publish(yunyunTopic,msg);
+            LOG.info("向云云服务推送设备字典消息：{}",msg);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
     public enum TYPE {
         POST_TELEMETRY_REQUEST,
         POST_ATTRIBUTES_REQUEST,
         POST_DEVICE_ADD,
-        POST_DEVICE_UPDATE
+        POST_DEVICE_UPDATE,
+        POST_DICT_DEVICE_ADD,
+        POST_DICT_DEVICE_UPDATE
     }
 }

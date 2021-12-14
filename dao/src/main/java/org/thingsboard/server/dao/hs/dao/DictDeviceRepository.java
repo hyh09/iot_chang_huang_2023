@@ -32,4 +32,6 @@ public interface DictDeviceRepository extends PagingAndSortingRepository<DictDev
     List<DictDeviceEntity> findAllByTenantIdAndIdIn(UUID tenantId, List<UUID> ids);
 
     Optional<DictDeviceEntity> findByTenantIdAndIsDefaultIsTrue(UUID tenantId);
+
+    List<DictDeviceEntity> findAllByTenantIdAndCreatedTimeGreaterThan(UUID tenantId, Long startTime);
 }

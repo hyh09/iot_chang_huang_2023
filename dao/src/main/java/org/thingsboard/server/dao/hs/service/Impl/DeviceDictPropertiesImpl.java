@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.hs.service;
+package org.thingsboard.server.dao.hs.service.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +8,8 @@ import org.thingsboard.server.dao.hs.dao.DictDeviceGroupPropertyRepository;
 import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
+import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.hs.service.DictDeviceService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,11 +22,12 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Service
-public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc{
+public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
 
     @Autowired private   DictDeviceRepository dictDeviceRepository;
     @Autowired private DictDeviceGroupPropertyRepository groupPropertyRepository;
-    @Autowired    DictDeviceService dictDeviceService;
+    @Autowired
+    DictDeviceService dictDeviceService;
 
     /**
      * 获取当前产能 能耗的数据 由 分组表 改为  hs_init  表中读取  ##hs_init 为程序初始化的数据
@@ -36,7 +39,7 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc{
     @Override
     public List<String> findAllByName(UUID dictDeviceId, String name) {
         List<String> nameList  = new ArrayList<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
         for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
         {
             if(vos.getName().equals(name))
@@ -54,7 +57,7 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc{
     @Override
     public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
         Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
             List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
@@ -75,7 +78,7 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc{
     {
         Map<String, String> map = new HashMap<>();
 
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
         log.info("打印当前的数据:{}",dictDeviceGroupVOS);
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
@@ -89,7 +92,7 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc{
     @Override
     public List<DictDeviceGroupPropertyVO>  findAllDictDeviceGroupVO(String name) {
         List<DictDeviceGroupPropertyVO>  voList  = new ArrayList<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getGroupInitData();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
         for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
         {
             if(vos.getName().equals(name))

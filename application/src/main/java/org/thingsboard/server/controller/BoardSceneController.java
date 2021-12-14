@@ -14,10 +14,8 @@ import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -180,6 +178,6 @@ public class BoardSceneController extends BaseController {
             @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("componentId", componentId);
-        return this.deviceMonitorService.getRtMonitorDeviceComponentDetail(getTenantId(), toUUID(deviceId), toUUID(componentId));
+        return this.deviceMonitorService.getRtMonitorDeviceComponentDetailForBoard(getTenantId(), toUUID(deviceId), toUUID(componentId));
     }
 }
