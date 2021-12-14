@@ -186,7 +186,7 @@ public class DictDeviceController extends BaseController {
     @GetMapping("/dict/device/component")
     public List<DictDeviceComponent> listDictDeviceComponents(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
         checkParameter("dictDeviceId", dictDeviceId);
-        return this.dictDeviceService.listDictDeviceComponents(getTenantId(), toUUID(dictDeviceId));
+        return this.dictDeviceService.listDictDeviceTileComponents(getTenantId(), toUUID(dictDeviceId));
     }
 
     /**
