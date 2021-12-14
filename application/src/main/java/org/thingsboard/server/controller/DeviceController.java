@@ -88,7 +88,7 @@ public class DeviceController extends BaseController {
     public static final String SAVE_TYPE_ADD_UPDATE = "update ";
 
     @ApiOperation("云对接查设备详情")
-    @ApiImplicitParam(name = "id",value = "当前id",dataType = "String",paramType="path",required = true)
+    @ApiImplicitParam(name = "deviceId",value = "当前id",dataType = "String",paramType="path",required = true)
     @RequestMapping(value = "/yun/device/{deviceId}", method = RequestMethod.GET)
     @ResponseBody
     public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
