@@ -51,6 +51,8 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      */
     DeviceInfo findDeviceInfoById(TenantId tenantId, UUID deviceId);
 
+    List<Device> getYunDeviceList(Device device);
+
     /**
      * Save or update device object
      *

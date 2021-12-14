@@ -1,6 +1,10 @@
 package org.thingsboard.server.dao.workshop;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.workshop.WorkshopId;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 
 import java.util.List;
@@ -44,4 +48,7 @@ public interface WorkshopService {
      * @return
      */
     Workshop findById(UUID id);
+
+    ListenableFuture<Workshop> findWorkshopByIdAsync(TenantId callerId, WorkshopId workshopId);
+
 }

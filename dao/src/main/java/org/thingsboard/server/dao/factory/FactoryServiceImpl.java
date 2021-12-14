@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.factory;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -19,6 +20,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.relation.RelationDao;
@@ -30,11 +32,14 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.thingsboard.server.dao.service.Validator.validateId;
+
 @Service
 @Slf4j
 @Transactional
 public class FactoryServiceImpl extends AbstractEntityService implements FactoryService {
 
+    public static final String INCORRECT_FACTORY_ID = "不正确的 factoryId ";
     private static final String PREFIX_ENCODING_GC = "GC";
 
     private final FactoryDao factoryDao;
@@ -290,6 +295,13 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         }
         System.out.println(map);
         return null;
+    }
+
+    @Override
+    public ListenableFuture<Factory> findFactoryByIdAsync(TenantId callerId, FactoryId factoryId) {
+        log.trace("执行 findFactoryByIdAsync [{}]", factoryId);
+        validateId(factoryId, INCORRECT_FACTORY_ID + factoryId);
+        return factoryDao.findByIdAsync(callerId, factoryId.getId());
     }
 
 }

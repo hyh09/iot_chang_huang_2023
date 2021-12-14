@@ -266,7 +266,9 @@ public class RoleMenuImpl implements RoleMenuSvc {
         TenantMenuVo  tenantMenuVo=    getAll(voList);
         tenantMenuList.add(tenantMenuVo);
         voList.forEach(TenantMenuVo ->{
-            tenantMenuList.add(TenantMenuVo);
+            if(!TenantMenuVo.getId().equals(tenantMenuVo.getId())) {
+                tenantMenuList.add(TenantMenuVo);
+            }
 
         });
         return  tenantMenuList;

@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.nimbusds.jose.shaded.json.JSONObject;
-import lombok.Builder;
-import lombok.Data;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -13,11 +11,11 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
-import org.thingsboard.server.common.msg.session.SessionMsgType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -38,6 +36,7 @@ public class TransportMqttClient {
     public boolean isConnected() {
         return this.mqttClient.isConnected();
     }
+
 
     /**
      * 连接Mqtt服务端
@@ -129,7 +128,7 @@ public class TransportMqttClient {
     }
 
 
-    public void publish(TenantId tenantId, DeviceId deviceId, CustomerId customerId, TbMsgMetaData metaData, JsonObject json, SessionMsgType sessionMsgType, String topic) {
+    public void publish(TenantId tenantId, DeviceId deviceId, CustomerId customerId, TbMsgMetaData metaData, JsonObject json, TYPE type,String yunyunTopic) {
         MqttMessage msg = new MqttMessage();
         //封装数据
         JSONObject obj = new JSONObject();
@@ -139,17 +138,63 @@ public class TransportMqttClient {
         obj.put("customerId",customerId.toString());
         obj.put("msg",gson.toJson(json));
         obj.put("tbMsgMetaData",gson.toJson(metaData));
-        obj.put("sessionMsgType",sessionMsgType);
-        obj.put("topic",topic);
+        obj.put("msgType",type);
+        obj.put("topic",yunyunTopic);
         msg.setPayload(obj.toJSONString().getBytes());
         try {
             // 发送给 云云服务得mqtt
-            mqttClient.publish(topic,msg);
+            mqttClient.publish(yunyunTopic,msg);
             LOG.info("向云云服务推送设备消息：{}",msg);
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
 
 
+    public void publishDevice(TenantId tenantId, DeviceId deviceId, TransportMqttClient.TYPE type,String yunyunTopic) {
+        MqttMessage msg = new MqttMessage();
+        //封装数据
+        JSONObject obj = new JSONObject();
+        obj.put("ts",LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli());
+        obj.put("tenantId",tenantId.toString());
+        obj.put("deviceId",deviceId.toString());
+        obj.put("msgType",type);
+        obj.put("topic",yunyunTopic);
+        msg.setPayload(obj.toJSONString().getBytes());
+        try {
+            // 发送给 云云服务得mqtt
+            mqttClient.publish(yunyunTopic,msg);
+            LOG.info("向云云服务推送设备消息：{}",msg);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void publisDictDevice(String tenantId, String dictDeviceId, TYPE type, String yunyunTopic) {
+        MqttMessage msg = new MqttMessage();
+        //封装数据
+        JSONObject obj = new JSONObject();
+        obj.put("ts",LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli());
+        obj.put("tenantId",tenantId);
+        obj.put("dictDeviceId",dictDeviceId);
+        obj.put("msgType",type);
+        obj.put("topic",yunyunTopic);
+        msg.setPayload(obj.toJSONString().getBytes());
+        try {
+            // 发送给 云云服务的mqtt
+            mqttClient.publish(yunyunTopic,msg);
+            LOG.info("向云云服务推送设备字典消息：{}",msg);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public enum TYPE {
+        POST_TELEMETRY_REQUEST,
+        POST_ATTRIBUTES_REQUEST,
+        POST_DEVICE_ADD,
+        POST_DEVICE_UPDATE,
+        POST_DICT_DEVICE_ADD,
+        POST_DICT_DEVICE_UPDATE
     }
 }

@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.productionline;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.dao.Dao;
 
@@ -46,4 +48,6 @@ public interface ProductionLineDao extends Dao<ProductionLine>{
      * @return
      */
     ProductionLine findById(UUID id);
+
+    ListenableFuture<ProductionLine> findProductionLineByIdAsync(TenantId tenantId, UUID id);
 }

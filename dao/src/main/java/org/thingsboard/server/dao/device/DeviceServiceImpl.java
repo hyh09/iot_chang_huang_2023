@@ -171,6 +171,11 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     }
 
     @Override
+    public List<Device> getYunDeviceList(Device device) {
+        return deviceDao.getYunDeviceList(device);
+    }
+
+    @Override
     public ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId) {
         log.trace("Executing findDeviceById [{}]", deviceId);
         validateId(deviceId, INCORRECT_DEVICE_ID + deviceId);
@@ -932,7 +937,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         //添加设备给指定产线
         deviceDao.addProductionLine(device);
         //建立实体关系
-        if(CollectionUtils.isEmpty(device.getDeviceIdList())){
+        if(!CollectionUtils.isEmpty(device.getDeviceIdList())){
             device.getDeviceIdList().forEach(i->{
                 Device dev = new Device();
                 dev.setId(new DeviceId(i));
@@ -946,8 +951,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         if(device != null){
             if(device.getProductionLineId() != null){
                 //建立实体关系
+                //设备到产线
                 EntityRelation relation = new EntityRelation(
-                        device.getId(),new ProductionLineId(device.getProductionLineId()), EntityRelation.CONTAINS_TYPE
+                        new ProductionLineId(device.getProductionLineId()),device.getId(), EntityRelation.CONTAINS_TYPE
                 );
                 relationService.saveRelation(device.getTenantId(), relation);
             }

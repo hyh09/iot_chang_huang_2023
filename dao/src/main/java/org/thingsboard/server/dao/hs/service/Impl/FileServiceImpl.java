@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.hs.service;
+package org.thingsboard.server.dao.hs.service.Impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -20,6 +20,8 @@ import org.thingsboard.server.dao.hs.dao.FileRepository;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.FileInfo;
 import org.thingsboard.server.dao.hs.entity.vo.FileInfoDictDeviceModelVO;
+import org.thingsboard.server.dao.hs.service.CommonService;
+import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 

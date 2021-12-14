@@ -2,11 +2,18 @@ package org.thingsboard.server.common.data.factory;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.thingsboard.server.common.data.HasCustomerId;
+import org.thingsboard.server.common.data.HasName;
+import org.thingsboard.server.common.data.HasOtaPackage;
+import org.thingsboard.server.common.data.HasTenantId;
+import org.thingsboard.server.common.data.id.CustomerId;
+import org.thingsboard.server.common.data.id.OtaPackageId;
+import org.thingsboard.server.common.data.id.TenantId;
 
 import java.util.UUID;
 
 @Data
-public class Factory {
+public class Factory implements HasName,HasCustomerId, HasOtaPackage {
 
     //("工厂标识")
     private UUID id;
@@ -114,5 +121,20 @@ public class Factory {
                 ", active=" + active +
                 ", gatewayName='" + gatewayName + '\'' +
                 '}';
+    }
+
+    @Override
+    public CustomerId getCustomerId() {
+        return null;
+    }
+
+    @Override
+    public OtaPackageId getFirmwareId() {
+        return null;
+    }
+
+    @Override
+    public OtaPackageId getSoftwareId() {
+        return null;
     }
 }

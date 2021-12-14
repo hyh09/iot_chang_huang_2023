@@ -153,20 +153,24 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                 tkTodayVo.setTotalValue(entity1.getLocalValue());
                 value.stream().forEach(effectTsKvEntity -> {
                     DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(effectTsKvEntity.getKeyName());
-                    if(dictVO.getTitle().equals(KeyTitleEnums.key_cable.getgName()))
-                    {
-                        tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
-                        electricList.add(tkTodayVo);
-                    }
-                    if(dictVO.getTitle().equals(KeyTitleEnums.key_gas.getgName()))
-                    {
-                        tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
-                        gasList.add(tkTodayVo);
-                    }
-                    if(dictVO.getTitle().equals(KeyTitleEnums.key_water.getgName()))
-                    {
-                        tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
-                        waterList.add(tkTodayVo);
+                    if(dictVO != null){
+
+
+                            if(dictVO.getTitle().equals(KeyTitleEnums.key_cable.getgName()))
+                            {
+                                tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                electricList.add(tkTodayVo);
+                            }
+                            if(dictVO.getTitle().equals(KeyTitleEnums.key_gas.getgName()))
+                            {
+                                tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                gasList.add(tkTodayVo);
+                            }
+                            if(dictVO.getTitle().equals(KeyTitleEnums.key_water.getgName()))
+                            {
+                                tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                waterList.add(tkTodayVo);
+                            }
                     }
                 });
 
@@ -211,7 +215,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             consumptionVo.setUnit( dictVO.getUnit());
             consumptionVo.setTitle(dictVO.getTitle());
         }
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = effectTsKvEntities.stream()
+                .filter(entity -> StringUtils.isNotBlank(entity.getKeyName()) && entity.getKeyName().equals(key))
+                .map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String value =  invoiceAmount.stripTrailingZeros().toPlainString();
         consumptionVo.setValue(value);

@@ -14,10 +14,8 @@ import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -149,37 +147,5 @@ public class BoardSceneController extends BaseController {
         var fileInfo = this.fileService.getFileInfoByScopeAndEntityId(getTenantId(), FileScopeEnum.DEVICE_SCENE, toUUID(deviceId));
         if (fileInfo != null)
             this.fileService.deleteFile(getTenantId(), fileInfo.getId());
-    }
-
-    /**
-     * 查询设备详情
-     *
-     * @param id 设备id
-     */
-    @ApiOperation("查询设备详情")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "设备Id", paramType = "query", required = true)
-    })
-    @GetMapping("/rtMonitor/device")
-    public DeviceDetailResult getRtMonitorDeviceDetail(@RequestParam("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
-        checkParameter("id", id);
-        return this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id);
-    }
-
-    /**
-     * 查看设备部件实时数据
-     */
-    @ApiOperation("查看设备部件实时数据")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
-            @ApiImplicitParam(name = "componentId", value = "设备字典部件Id", paramType = "query", required = true),
-    })
-    @GetMapping("/rtMonitor/component}")
-    public List<DictDeviceComponentPropertyVO> getRtMonitorDeviceComponentDetail(
-            @RequestParam("deviceId") String deviceId,
-            @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
-        checkParameter("deviceId", deviceId);
-        checkParameter("componentId", componentId);
-        return this.deviceMonitorService.getRtMonitorDeviceComponentDetail(getTenantId(), toUUID(deviceId), toUUID(componentId));
     }
 }

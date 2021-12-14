@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.hs.service;
+package org.thingsboard.server.dao.hs.service.Impl;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
+import org.thingsboard.server.dao.hs.service.OSSService;
 
 import javax.annotation.PostConstruct;
 import java.io.InputStream;

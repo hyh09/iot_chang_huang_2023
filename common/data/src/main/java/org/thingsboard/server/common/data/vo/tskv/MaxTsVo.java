@@ -39,7 +39,7 @@ public class MaxTsVo {
     private List<String> keys;
 
     /**
-     * 产能标记 true是产能的统计
+     * 产能标记 是产能的统计
      */
     private Boolean capSign=false;
 

@@ -36,11 +36,13 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -120,7 +122,21 @@ public class UserController extends BaseController implements DefalutSvc {
     @ResponseBody
     public  User  getAppUserById() throws ThingsboardException {
         SecurityUser authUser = getCurrentUser();
-        return  this.getUserById(authUser.getUuidId().toString());
+        User user =   this.getUserById(authUser.getUuidId().toString());
+        Boolean aBoolean = user.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode());//nuSvc.isTENANT(user.getUuidId());
+        if(aBoolean)
+        {
+            user.setUserName(StringUtils.isEmpty(user.getUserName())?(user.getFirstName()+user.getLastName()):user.getUserName());
+            Tenant  tenant =  tenantService.findTenantById(user.getTenantId());
+            user.setTenantTitle(tenant != null? tenant.getTitle():"");
+        }else {
+
+            Factory  factory =  factoryService.findById(user.getFactoryId());
+            user.setFactoryName(factory!=null?factory.getName():"");
+
+        }
+
+        return  user;
     }
 
 

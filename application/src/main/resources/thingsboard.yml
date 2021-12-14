@@ -973,4 +973,4 @@ management:
         include: '${METRICS_ENDPOINTS_EXPOSE:info}'
 yunyun:
   mqtt_address: "${YUNYUN_MQTT_ADRESS:tcp://47.96.109.1:1883}"
-  mqtt_topic: "${YUNYUN_MQTT_TOPIC:yunyun/device}"
+  mqtt_topic: "${YUNYUN_MQTT_TOPIC:yunyun/msg}"
