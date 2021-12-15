@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -65,10 +66,24 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @return
      */
     @Override
-    public TrendVo energyConsumptionTrend(TrendParameterVo vo) {
-        String    key =  getKeyNameBy(vo.getKey());
-        log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}",vo,key);
-        return null;
+    public TrendVo energyConsumptionTrend(TrendParameterVo vo) throws ThingsboardException {
+        TrendVo resultResults = new TrendVo();
+
+        try {
+            String key = getKeyNameBy(vo.getKey());
+            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
+            vo.setKey(key);
+            List<SolidTrendLineEntity> solidTrendLineEntities = boardTrendChartRepository.getSolidTrendLine(vo);
+            printSolidLineLog(solidTrendLineEntities);
+            resultResults.setSolidLine(convertSolidLineData(solidTrendLineEntities));
+            return resultResults;
+        }catch (Exception e)
+        {
+             e.printStackTrace();
+            resultResults.setCode("0");
+            log.error("看板的能耗趋势图(实线 和虚线)异常{}",e);
+            return  resultResults;
+        }
     }
 
     /**
@@ -263,7 +278,12 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
 
 
-    private  String getKeyNameBy(String title){
+    private  String getKeyNameBy(String title) throws ThingsboardException {
+        String title1 = KeyTitleEnums.getNameByCode(title);
+        if(title1 == null)
+        {
+            throw  new ThingsboardException("入参的key不在范围内,", ThingsboardErrorCode.FAIL_VIOLATION);
+        }
         List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
@@ -272,7 +292,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             {
                 for(DictDeviceGroupPropertyVO  m1:voList)
                 {
-                    if(m1.getTitle().equals(title))
+                    if(m1.getTitle().equals(title1))
                     {
                         return m1.getName();
                     }
