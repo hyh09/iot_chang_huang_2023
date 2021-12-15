@@ -25,7 +25,7 @@ public class QueryFactoryDto{
     @ApiModelProperty(name = "产线名称")
     public String productionlineName;
 
-    @ApiModelProperty(name = "产线名称")
+    @ApiModelProperty(name = "设备名称")
     public String deviceName;
 
     public QueryFactoryDto(){}
