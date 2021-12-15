@@ -262,7 +262,8 @@ public class BaseAlarmService extends AbstractEntityService implements AlarmServ
                     return new AlarmOperationResult(alarm, false);
                 } else {
                     AlarmStatus oldStatus = alarm.getStatus();
-                    AlarmStatus newStatus = oldStatus.isAck() ? AlarmStatus.CLEARED_ACK : AlarmStatus.CLEARED_UNACK;
+//                    AlarmStatus newStatus = oldStatus.isAck() ? AlarmStatus.CLEARED_ACK : AlarmStatus.CLEARED_UNACK;
+                    AlarmStatus newStatus = oldStatus.isAck() ? AlarmStatus.CLEARED_ACK : AlarmStatus.CLEARED_ACK;
                     alarm.setStatus(newStatus);
                     alarm.setClearTs(clearTime);
                     if (details != null) {

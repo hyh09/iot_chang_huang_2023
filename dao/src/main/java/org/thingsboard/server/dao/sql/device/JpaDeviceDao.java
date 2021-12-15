@@ -49,6 +49,7 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.relation.RelationDao;
@@ -75,6 +76,8 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private ClientService clientService;
 
     @Autowired
     private AttributesDao attributesDao;
@@ -744,20 +747,20 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
         List<DeviceDataVo>  deviceDataVoList =  deviceEntityPage.getContent();
         List<UUID> idList = deviceDataVoList.stream().map(DeviceDataVo::getDeviceId).collect(Collectors.toList());
-        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
-        Map<UUID,String> map1 = new HashMap<>();
-        list.stream().forEach(l1->{
-            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
-            if(attributeKvCompositeKey != null)
-            {
-                map1.put(attributeKvCompositeKey.getEntityId(),"1");
-            }
-        });
+//        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
+//        Map<UUID,String> map1 = new HashMap<>();
+//        list.stream().forEach(l1->{
+//            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
+//            if(attributeKvCompositeKey != null)
+//            {
+//                map1.put(attributeKvCompositeKey.getEntityId(),"1");
+//            }
+//        });
+        Map<String, Boolean>   map1= clientService.listDevicesOnlineStatus(idList);
         deviceDataVoList.stream().forEach(d1->{
-            String str =  map1.get(d1.getDeviceId());
-            d1.setOnlineStatus(org.apache.commons.lang3.StringUtils.isNotEmpty(str)?"1":"0");
+            Boolean str =  map1.get(d1.getDeviceId().toString());
+            d1.setOnlineStatus((str)?"1":"0");
         });
-
 
         return new PageData<DeviceDataVo>((deviceEntityPage.getContent()),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
     }
