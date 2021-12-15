@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
@@ -17,10 +18,12 @@ import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.sql.role.dao.EffectMaxValueKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
@@ -46,6 +49,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private EffectTsKvRepository effectTsKvRepository;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     @Autowired    DictDeviceService dictDeviceService;
+    @Autowired private FactoryDao factoryDao;
+
 
 
     /**
@@ -153,7 +158,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @param listMap
      * @return
      */
-    public  ConsumptionTodayVo getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap, UUID tenantId, Map<String, DictDeviceGroupPropertyVO>  mapNameToVo)
+    public  ConsumptionTodayVo getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap, UUID tenantId,
+                                                 Map<String, DictDeviceGroupPropertyVO>  mapNameToVo)
     {
         ConsumptionTodayVo appVo = new  ConsumptionTodayVo();
         List<TkTodayVo> waterList = new ArrayList<>();
@@ -168,6 +174,14 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             if(entity1 != null) {
                 tkTodayVo.setDeviceName(entity1.getDeviceName());
                 tkTodayVo.setTotalValue(entity1.getLocalValue());
+                tkTodayVo.setFactoryId(entity1.getFactoryId());
+
+                if (entity1.getFactoryId() != null) {
+                    Factory  factory =  factoryDao.findById(entity1.getFactoryId());
+                    tkTodayVo.setFactoryName(factory!=null?factory.getName():"");
+                }
+
+
                 value.stream().forEach(effectTsKvEntity -> {
                     DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(effectTsKvEntity.getKeyName());
                     if(dictVO != null){
