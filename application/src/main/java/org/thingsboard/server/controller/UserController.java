@@ -586,7 +586,8 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
-           if(count>0  && user.getFactoryId() != null)
+        log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
+           if(count>0  && user.getFactoryId() == null)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
