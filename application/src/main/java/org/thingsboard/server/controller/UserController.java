@@ -213,15 +213,15 @@ public class UserController extends BaseController implements DefalutSvc {
                          HttpServletRequest request) throws ThingsboardException {
         try {
 
-            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
-                user.setTenantId(getCurrentUser().getTenantId());
-            }
+//            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
+//                user.setTenantId(getCurrentUser().getTenantId());
+//            }
 
             checkEntity(user.getId(), user, Resource.USER);
 
             boolean sendEmail = user.getId() == null && sendActivationMail;
-             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-             user.setFactoryId(null);
+//             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+//             user.setFactoryId(null);
             User savedUser = checkNotNull(userService.saveUser(user));
                 saveRole(savedUser);
 
