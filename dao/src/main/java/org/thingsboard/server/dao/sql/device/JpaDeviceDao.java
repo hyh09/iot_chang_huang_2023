@@ -378,6 +378,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
                     predicates.add(cb.equal(root.get("productionLineId"),device.getProductionLineId()));
                 }
+                if(device.getDictDeviceId() != null && StringUtils.isNotEmpty(device.getDictDeviceId().toString())){
+                    predicates.add(cb.equal(root.get("dictDeviceId"),device.getDictDeviceId()));
+                }
                 //产线id批量
                 if(CollectionUtils.isNotEmpty(device.getProductionLineIds())){
                     // 下面是一个 IN查询

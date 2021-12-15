@@ -875,8 +875,8 @@ public class DeviceController extends BaseController {
                 //建立实体关系
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
-            //云云对接
-            if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
+            //云云对接,过滤网关
+            if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && !addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
                 transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
             }
             savedDevice.setFactoryName(addDeviceDto.getFactoryName());
@@ -1019,8 +1019,23 @@ public class DeviceController extends BaseController {
             });
         }
         return result;
-
     }
 
+    @ApiOperation("查询设备字典下发的设备列表")
+    @ApiImplicitParam(name = "deviceQry" ,value = "入参实体",dataType = "DeviceIssueQry",paramType="query")
+    @RequestMapping(value = "/findDeviceIssueListByCdn", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DeviceVo> findDeviceIssueListByCdn(DeviceIssueQry deviceQry) throws ThingsboardException{
+        List<DeviceVo> result = new ArrayList<>();
+        Device device = deviceQry.toDevice();
+        device.setTenantId(new TenantId(getCurrentUser().getTenantId().getId()));
+        List<Device> deviceListByCdn = deviceService.findDeviceIssueListByCdn(device);
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            deviceListByCdn.forEach(i->{
+                result.add(new DeviceVo(i));
+            });
+        }
+        return result;
 
+    }
 }
