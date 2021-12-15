@@ -88,14 +88,12 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     public DictDataQuery saveOrUpdateDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException {
         DictData dictData = new DictData();
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
-            // Modify
             dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDataQuery.getId())).map(DictDataEntity::toData)
                     .orElseThrow(() -> new ThingsboardException("数据字典不存在", ThingsboardErrorCode.GENERAL));
-            ;
+
             BeanUtils.copyProperties(dictDataQuery, dictData, "id", "code");
             dictData.setType(dictDataQuery.getType().toString());
         } else {
-            // Save
             BeanUtils.copyProperties(dictDataQuery, dictData);
             dictData.setType(dictDataQuery.getType().toString());
             dictData.setTenantId(tenantId.toString());
