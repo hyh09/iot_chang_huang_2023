@@ -20,9 +20,9 @@ public class TrendParameterVo {
      */
     private UUID  tenantId;
 
-    private  String factoryId;
+    private  UUID factoryId;
 
-    private  String workshopId;
+    private  UUID workshopId;
 
     private  Long startTime;
 
