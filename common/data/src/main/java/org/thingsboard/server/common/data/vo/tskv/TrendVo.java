@@ -15,6 +15,9 @@ import java.util.List;
 @Data
 @ToString
 public class TrendVo {
+
+    private String code="1";
+
     private List<TrendLineVo> solidLine;
 
     private List<TrendLineVo> dottedLine;

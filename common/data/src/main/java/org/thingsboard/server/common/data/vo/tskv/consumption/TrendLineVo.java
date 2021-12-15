@@ -17,5 +17,5 @@ public class TrendLineVo {
     private  String  value;
 
     @ApiModelProperty("时间")
-    private  String time;
+    private  Long time;
 }
