@@ -213,9 +213,11 @@ public class UserController extends BaseController implements DefalutSvc {
                          HttpServletRequest request) throws ThingsboardException {
         try {
 
-//            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
-//                user.setTenantId(getCurrentUser().getTenantId());
-//            }
+            if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
+                user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+                user.setUserLevel(3);
+            }
+
 
             checkEntity(user.getId(), user, Resource.USER);
 
@@ -223,7 +225,9 @@ public class UserController extends BaseController implements DefalutSvc {
 //             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
 //             user.setFactoryId(null);
             User savedUser = checkNotNull(userService.saveUser(user));
+            if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
                 saveRole(savedUser);
+            }
 
 
             if (sendEmail) {
@@ -505,6 +509,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
 
+
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
@@ -660,17 +665,12 @@ public class UserController extends BaseController implements DefalutSvc {
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
+             }else {
+
+//                 List<UUID>   uuids =  userRoleSvc.getTenantRoleId(getTenantId().getId());
+//                 queryParam.put("notId", uuids);
+
              }
-
-
-              if(userRoleSvc.isTENANT(userId))
-              {
-                  List<UUID>  uuids  = new ArrayList<>();
-                  uuids.add(userId);
-                  queryParam.put("notId", uuids);
-              }
-
-
              queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);

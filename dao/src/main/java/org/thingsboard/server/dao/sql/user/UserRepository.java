@@ -90,5 +90,9 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
 
 
 
+    @Query("select d  from UserEntity d where d.tenantId = :tenantId and d.userLevel=3")
+    List<UserEntity> queyrTenantManagement(@Param("tenantId") UUID tenantId);
+
+
 
 }
