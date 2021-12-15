@@ -57,6 +57,7 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
      * 被创建者的类型:
      */
     @Column(name = ModelConstants.USER_USER_TYPE)
+    @JpaOperatorsType(JpaQueryHelper.Operators.eq)
     private  String type;
 
     /**

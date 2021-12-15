@@ -39,6 +39,9 @@ public class QueryUserVo {
 
     private  UUID factoryId;
 
+    private  String type;
+
+
 
 
 

@@ -82,6 +82,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     /**
      * 0为默认
      * 1为工厂管理员角色
+     * 3为租户管理员角色
      */
     private  int userLevel=0;
 
