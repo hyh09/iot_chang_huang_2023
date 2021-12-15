@@ -654,12 +654,23 @@ public class UserController extends BaseController implements DefalutSvc {
              }
              PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
              SecurityUser securityUser = getCurrentUser();
+             UUID  userId = securityUser.getUuidId();
              queryParam.put("tenantId", securityUser.getTenantId().getId());
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
-                 queryParam.put("type", securityUser.getType());
              }
+
+
+              if(userRoleSvc.isTENANT(userId))
+              {
+                  List<UUID>  uuids  = new ArrayList<>();
+                  uuids.add(userId);
+                  queryParam.put("notId", uuids);
+              }
+
+
+             queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);
          }catch (Exception  e)
