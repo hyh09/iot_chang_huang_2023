@@ -1,0 +1,142 @@
+<div class="driver-config-wrapper" style="min-width: 500px;">
+  <mat-toolbar color="primary">
+    <h2 translate>{{ isEdit ? 'device-mng.edit-driver-config' : 'device-mng.add-driver-config' }}</h2>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="cancel()" type="button">
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <div mat-dialog-content>
+    <form [formGroup]="form">
+      <mat-form-field>
+        <mat-label translate>device-mng.point-name</mat-label>
+        <input matInput formControlName="pointName" required>
+        <mat-error *ngIf="form.get('pointName').hasError('required')">
+          {{ 'device-mng.point-name-required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="form.get('pointName').hasError('duplicate')">
+          {{ 'device-mng.duplicate-point-name' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.description</mat-label>
+        <input matInput formControlName="description">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.data-type</mat-label>
+        <mat-select formControlName="dataType" required>
+          <mat-option [value]="dataType.BITS">{{ dataType.BITS }}</mat-option>
+          <mat-option [value]="dataType.BYTES">{{ dataType.BYTES }}</mat-option>
+          <mat-option [value]="dataType.STRING">{{ dataType.STRING }}</mat-option>
+          <mat-option [value]="dataType._16FLOAT">{{ dataType._16FLOAT }}</mat-option>
+          <mat-option [value]="dataType._16INT">{{ dataType._16INT }}</mat-option>
+          <mat-option [value]="dataType._16UINT">{{ dataType._16UINT }}</mat-option>
+          <mat-option [value]="dataType._32FLOAT">{{ dataType._32FLOAT }}</mat-option>
+          <mat-option [value]="dataType._32INT">{{ dataType._32INT }}</mat-option>
+          <mat-option [value]="dataType._32UINT">{{ dataType._32UINT }}</mat-option>
+          <mat-option [value]="dataType._64FLOAT">{{ dataType._64FLOAT }}</mat-option>
+          <mat-option [value]="dataType._64INT">{{ dataType._64INT }}</mat-option>
+          <mat-option [value]="dataType._64UINT">{{ dataType._64UINT }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('dataType').hasError('required')">
+          {{ 'device-mng.data-type-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.register-type</mat-label>
+        <mat-select formControlName="registerType" required>
+          <mat-option [value]="registerType.FIRST">{{ registerType.FIRST }}</mat-option>
+          <mat-option [value]="registerType.SECOND">{{ registerType.SECOND }}</mat-option>
+          <mat-option [value]="registerType.THIRD">{{ registerType.THIRD }}</mat-option>
+          <mat-option [value]="registerType.FOURTH">{{ registerType.FOURTH }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('registerType').hasError('required')">
+          {{ 'device-mng.register-type-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.register-address</mat-label>
+        <input matInput formControlName="registerAddress" required>
+        <mat-error *ngIf="form.get('registerAddress').hasError('required')">
+          {{ 'device-mng.register-address-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.length</mat-label>
+        <input matInput formControlName="length" required>
+        <mat-error *ngIf="form.get('length').hasError('required')">
+          {{ 'device-mng.length-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <div fxLayout="row" fxLayoutGap="16px">
+        <mat-form-field fxFlex>
+          <mat-label translate>device-mng.operator</mat-label>
+          <mat-select formControlName="operator" required>
+            <mat-option [value]="operator.PLUS">{{ operator.PLUS }}</mat-option>
+            <mat-option [value]="operator.MINUS">{{ operator.MINUS }}</mat-option>
+            <mat-option [value]="operator.MULTIPLY">{{ operator.MULTIPLY }}</mat-option>
+            <mat-option [value]="operator.DIVIDE">{{ operator.DIVIDE }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('operator').hasError('required')">
+            {{ 'device-mng.operator-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex>
+          <mat-label translate>device-mng.operation-value</mat-label>
+          <input matInput formControlName="operationValue" required>
+          <mat-error *ngIf="form.get('operationValue').hasError('required')">
+            {{ 'device-mng.operation-value-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <mat-form-field>
+        <mat-label translate>device-mng.read-write</mat-label>
+        <mat-select formControlName="readWrite" required>
+          <mat-option [value]="readWrite.READ">{{ ('device-mng.' + readWrite.READ) | translate }}</mat-option>
+          <mat-option [value]="readWrite.WRITE">{{ ('device-mng.' + readWrite.WRITE) | translate }}</mat-option>
+          <mat-option [value]="readWrite.READ_WRITE">{{ ('device-mng.' + readWrite.READ_WRITE) | translate }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('readWrite').hasError('required')">
+          {{ 'device-mng.read-write-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.reverse</mat-label>
+        <mat-select formControlName="reverse" required>
+          <mat-option [value]="littleBig.LITTLE">{{ littleBig.LITTLE }}</mat-option>
+          <mat-option [value]="littleBig.BIG">{{ littleBig.BIG }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('reverse').hasError('required')">
+          {{ 'device-mng.reverse-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label translate>device-mng.little-endian</mat-label>
+        <mat-select formControlName="littleEndian" required>
+          <mat-option [value]="littleBig.LITTLE">{{ littleBig.LITTLE }}</mat-option>
+          <mat-option [value]="littleBig.BIG">{{ littleBig.BIG }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('littleEndian').hasError('required')">
+          {{ 'device-mng.little-endian-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </div>
+  <div mat-dialog-actions fxLayoutAlign="end center">
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      cdkFocusInitial
+      [disabled]="(isLoading$ | async)"
+      (click)="cancel()"
+    >{{ 'action.cancel' | translate }}</button>
+    <button
+      mat-raised-button
+      type="button"
+      color="primary"
+      [disabled]="(isLoading$ | async) || form?.invalid"
+      (click)="save()"
+    >{{ 'action.confirm' | translate }}</button>
+  </div>
+</div>

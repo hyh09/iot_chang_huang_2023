@@ -1,0 +1,183 @@
+<div fxLayout="column" class="distribute-config-wrapper">
+  <mat-toolbar color="primary">
+    <h2>{{ 'device-mng.distribut-config-with-dict-name' | translate:{ deviceDictName: deviceDictInfo.deviceDictName } }}</h2>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="cancel()" type="button">
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <div fxFlex fxLayout="column" mat-dialog-content>
+    <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
+    </mat-progress-bar>
+    <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
+    <mat-horizontal-stepper fxLayout="column" fxFlex linear>
+      <mat-step [stepControl]="deviceForm">
+        <ng-template matStepLabel>{{ 'device-mng.select-device' | translate }}</ng-template>
+        <div class="table-wrapper">
+          <tb-entities-table [entitiesTableConfig]="deviceTableConfig" (selectionChange)="onSelectedDevicesChange($event)"></tb-entities-table>
+        </div>
+        <div fxLayoutAlign="end center" class="step-btn">
+          <button
+            mat-stroked-button matStepperNext
+            [disabled]="deviceForm.get('deviceList').value.length === 0"
+            (click)="form.get('deviceList').patchValue(deviceForm.get('deviceList').value)"
+          >{{ 'action.next-with-label' | translate: { label: ('device-mng.edit-config' | translate) } }}</button>
+        </div>
+      </mat-step>
+      <mat-step>
+        <ng-template matStepLabel>{{ 'device-mng.edit-config' | translate }}</ng-template>
+        <form fxLayout="column" [formGroup]="form" class="config-form">
+          <div fxLayout="row" fxLayoutGap="16px">
+            <mat-form-field style="width: 300px">
+              <mat-label translate>device-mng.protocol-type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option [value]="protocolType.MODBUS">{{ protocolType.MODBUS }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('type').hasError('required')">
+                {{ 'device-mng.protocol-type-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field style="width: 300px">
+              <mat-label translate>device-mng.driver-version</mat-label>
+              <input matInput formControlName="driverVersion" required>
+              <mat-error *ngIf="form.get('driverVersion').hasError('required')">
+                {{ 'device-mng.driver-version-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="config-table-header">
+            <div class="title">
+              {{ 'device-mng.driver-config' | translate }}
+              <span *ngIf="driverConfigFormArray().invalid" class="required-tip">
+                {{ (driverConfigFormArray().controls.length === 0 ? 'device-mng.driver-config-empty-error' : 'device-mng.driver-config-required') | translate }}
+              </span>
+            </div>
+            <div style="width: 80px; margin-right: -12px;">
+              <button
+                mat-icon-button [disabled]="isLoading$ | async"
+                (click)="addConfig()"
+                matTooltip="{{ 'action.add' | translate }}"
+                matTooltipPosition="above">
+                <mat-icon>add</mat-icon>
+              </button>
+              <button
+                mat-icon-button [disabled]="(isLoading$ | async) || selection.selected.length === 0"
+                matTooltip="{{ 'action.delete' | translate }}" matTooltipPosition="above"
+                (click)="batchRemoveConfig()"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div fxFlex style="overflow: auto; margin: 0 -24px;">
+            <table mat-table [dataSource]="driverConfigFormArray().value">
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-checkbox (change)="$event ? masterToggle() : null"
+                                [checked]="selection.hasValue() && isAllSelected()"
+                                [indeterminate]="selection.hasValue() && !isAllSelected()">
+                  </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-checkbox (click)="$event.stopPropagation()"
+                                (change)="$event ? selection.toggle(row) : null"
+                                [checked]="selection.isSelected(row)">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="pointName">
+                <th mat-header-cell *matHeaderCellDef style="width: 150px;" required>{{ 'device-mng.point-name' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 150px;">{{element.pointName}}</td>
+              </ng-container>
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef style="width: 150px;">{{ 'device-mng.description' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 150px;">{{element.description}}</td>
+              </ng-container>
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;">{{ 'device-mng.category' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">{{element.category || ('device-mng.custom' | translate)}}</td>
+              </ng-container>
+              <ng-container matColumnDef="dataType">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;" required>{{ 'device-mng.data-type' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">{{element.dataType}}</td>
+              </ng-container>
+              <ng-container matColumnDef="registerType">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;" required>{{ 'device-mng.register-type' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">{{element.registerType}}</td>
+              </ng-container>
+              <ng-container matColumnDef="registerAddress">
+                <th mat-header-cell *matHeaderCellDef style="width: 150px;" required>{{ 'device-mng.register-address' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 150px;">{{element.registerAddress}}</td>
+              </ng-container>
+              <ng-container matColumnDef="length">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;" required>{{ 'device-mng.length' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">{{element.length}}</td>
+              </ng-container>
+              <ng-container matColumnDef="operate">
+                <th mat-header-cell *matHeaderCellDef style="width: 120px;" required>{{ 'device-mng.operate' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 120px;">{{element.operator}} {{element.operationValue}}</td>
+              </ng-container>
+              <ng-container matColumnDef="readWrite">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;" required>{{ 'device-mng.read-write' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">
+                  {{element.readWrite ? (('device-mng.' + element.readWrite) | translate) : ''}}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="reverse">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;" required>{{ 'device-mng.reverse' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">{{element.reverse}}</td>
+              </ng-container>
+              <ng-container matColumnDef="littleEndian">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;" required>{{ 'device-mng.little-endian' | translate }}</th>
+                <td mat-cell *matCellDef="let element" style="width: 80px;">{{element.littleEndian}}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef style="width: 80px;"></th>
+                <td mat-cell *matCellDef="let element; index as $index" style="width: 80px;">
+                  <div fxLayout="row" fxLayoutAlign="end center">
+                    <button
+                      mat-icon-button [disabled]="(isLoading$ | async)"
+                      matTooltip="{{ 'action.edit' | translate }}" matTooltipPosition="above"
+                      (click)="editConfig(element, $index)"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button [disabled]="(isLoading$ | async)"
+                      matTooltip="{{ 'action.delete' | translate }}" matTooltipPosition="above"
+                      (click)="removeConfig($index)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="configTableColumns; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: configTableColumns;"></tr>
+            </table>
+          </div>
+        </form>
+        <div fxLayoutAlign="end center" class="step-btn">
+          <button mat-stroked-button matStepperPrevious>{{ 'action.back' | translate }}</button>
+        </div>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </div>
+  <div mat-dialog-actions fxLayoutAlign="end center" style="border-top: 1px solid rgba(0, 0, 0, 0.12)">
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      cdkFocusInitial
+      [disabled]="(isLoading$ | async)"
+      (click)="cancel()"
+    >{{ 'action.cancel' | translate }}</button>
+    <button
+      mat-raised-button
+      type="button"
+      color="primary"
+      [disabled]="(isLoading$ | async) || form?.invalid || !form?.dirty"
+      (click)="save()"
+    >{{ 'action.confirm' | translate }}</button>
+  </div>
+</div>

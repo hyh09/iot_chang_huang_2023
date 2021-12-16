@@ -31,7 +31,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
   public filterParams = {
     name: '',
     workshopName: '',
-    productionlineName: '',
+    productionLineName: '',
     deviceName: ''
   }
   public tableData: FactoryTableTreeNode[] = [];
