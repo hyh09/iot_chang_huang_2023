@@ -135,10 +135,10 @@ public class DefaultTransportService implements TransportService {
     private long clientSideRpcTimeout;
     @Value("${queue.transport.poll_interval}")
     private int notificationsPollDuration;
-    @Value("${yunyun.mqtt_address}")
-    private String mqttHost;
-    @Value("${yunyun.mqtt_topic}")
-    private String yunyunTopic;
+    //@Value("${yunyun.mqtt_address}")
+    private String mqttHost = "tcp://47.96.109.1:1883";
+    //@Value("${yunyun.mqtt_topic}")
+    private String yunyunTopic = "yunyun/msg";
 
     private final Gson gson = new Gson();
     private final TbTransportQueueFactory queueProvider;
@@ -524,7 +524,7 @@ public class DefaultTransportService implements TransportService {
                 sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, SessionMsgType.POST_TELEMETRY_REQUEST, packCallback);
 
                 //推送给云云
-                this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,TransportMqttClient.TYPE.POST_TELEMETRY_REQUEST,yunyunTopic);
+                this.transportMqttClient.publish(tenantId, deviceId,metaData,json,TransportMqttClient.TYPE.POST_TELEMETRY_REQUEST,yunyunTopic);
                 //this.transportMqttClient.publishDevice(tenantId,deviceId,TransportMqttClient.TYPE.POST_DEVICE_ADD,yunyunTopic);
             }
         }
@@ -546,7 +546,7 @@ public class DefaultTransportService implements TransportService {
                     new TransportTbQueueCallback(new ApiStatsProxyCallback<>(tenantId, customerId, msg.getKvList().size(), callback)));
 
             //推送给云云
-            this.transportMqttClient.publish(tenantId, deviceId, customerId,metaData,json,TransportMqttClient.TYPE.POST_ATTRIBUTES_REQUEST,yunyunTopic);
+            this.transportMqttClient.publish(tenantId, deviceId,metaData,json,TransportMqttClient.TYPE.POST_ATTRIBUTES_REQUEST,yunyunTopic);
         }
     }
 
