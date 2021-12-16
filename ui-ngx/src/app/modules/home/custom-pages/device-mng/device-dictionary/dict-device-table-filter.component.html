@@ -1,0 +1,60 @@
+<mat-form-field>
+  <mat-label>{{ 'device-mng.device-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.deviceName" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.deviceName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('deviceName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'system-mng.factory-belong' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.factoryName" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.factoryName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('factoryName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'system-mng.work-shop-belong' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workshopName" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.workshopName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('workshopName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'system-mng.prod-line-belong' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.productionLineName" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.productionLineName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('productionLineName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'gateway.gateway-belong' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.gatewayName" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.gatewayName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('gatewayName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="refresh()">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

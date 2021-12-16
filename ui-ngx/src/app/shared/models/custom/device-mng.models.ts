@@ -1,3 +1,4 @@
+import { DeviceInfo } from '@app/shared/public-api';
 import { DeviceDictionaryId } from '../id/custom/device-dictionary-id.models';
 import { BaseData } from './../base-data';
 
@@ -82,6 +83,82 @@ export interface DeviceDictionary extends BaseData<DeviceDictionaryId> {
   componentList: Array<DeviceComp>;
 }
 
+export enum ProtocolType {
+  MODBUS = 'modbus'
+}
+
+export enum Operator {
+  PLUS = '+',
+  MINUS = '-',
+  MULTIPLY = '*',
+  DIVIDE = '/'
+}
+
+export enum ReadWrite {
+  READ = 'READ',
+  WRITE = 'WRITE',
+  READ_WRITE = 'READ_WRITE'
+}
+
+export enum PointDataType {
+  STRING = 'string',
+  BYTES = 'bytes',
+  BITS = 'bits',
+  _16INT = '16int',
+  _16UINT = '16uint',
+  _16FLOAT = '16float',
+  _32INT = '32int',
+  _32UINT = '32uint',
+  _32FLOAT = '32float',
+  _64INT = '64int',
+  _64UINT = '64uint',
+  _64FLOAT = '64float'
+}
+
+export enum RegisterType {
+  FIRST = '01',
+  SECOND = '02',
+  THIRD = '03',
+  FOURTH = '04'
+}
+
+export enum LittleBig {
+  LITTLE = 'little',
+  BIG = 'big'
+}
+
+export interface DriverConfig {
+  pointName?: string;
+  description?: string;
+  category?: string;
+  dataType?: PointDataType;
+  registerType?: RegisterType;
+  registerAddress?: string;
+  length?: string;
+  operator?: Operator;
+  operationValue?: string;
+  readWrite?: ReadWrite;
+  reverse?: LittleBig;
+  littleEndian?: LittleBig;
+}
+
+export interface DeviceDictProp {
+  id: string;
+  name: string;
+  title: string;
+  type: string;
+}
+
+export interface DistributeConfigParams {
+  deviceList: {
+    deviceName: string;
+    gatewayId: string;
+  }[];
+  type: string;
+  driverVersion: string;
+  driverConfigList: DriverConfig[];
+}
+
 export interface ProdCapacitySettings extends BaseData<any> {
   deviceId: string;
   deviceName: string;
@@ -89,4 +166,13 @@ export interface ProdCapacitySettings extends BaseData<any> {
   dictName: string;
   deviceNo: string;
   flg: boolean;
+}
+
+export interface DictDevice extends BaseData<any> {
+  deviceName?: string;
+  gatewayId?: string;
+  gatewayName?: string;
+  factoryName?: string;
+  workshopName?: string;
+  productionLineName?: string;
 }

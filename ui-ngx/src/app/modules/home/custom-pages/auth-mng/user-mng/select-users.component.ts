@@ -9,7 +9,6 @@ import { Store } from "@ngrx/store";
 import { UserInfo } from '@app/shared/models/custom/auth-mng.models';
 import { EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
 import { UserMngFiltersComponent } from './user-mng-filters.component';
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'tb-select-users',

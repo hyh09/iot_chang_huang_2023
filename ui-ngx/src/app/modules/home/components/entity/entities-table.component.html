@@ -159,13 +159,14 @@
                      matSort [matSortActive]="pageLink.sortOrder?.property" [matSortDirection]="pageLink.sortDirection()" matSortDisableClear>
             <ng-container matColumnDef="select" sticky>
               <mat-header-cell *matHeaderCellDef style="width: 30px;">
-                <mat-checkbox (change)="$event ? dataSource.masterToggle() : null"
+                <mat-checkbox (click)="$event.stopPropagation();onSelectionChange()"
+                              (change)="$event ? dataSource.masterToggle() : null"
                               [checked]="dataSource.selection.hasValue() && (dataSource.isAllSelected() | async)"
                               [indeterminate]="dataSource.selection.hasValue() && !(dataSource.isAllSelected() | async)">
                 </mat-checkbox>
               </mat-header-cell>
               <mat-cell *matCellDef="let entity">
-                <mat-checkbox (click)="$event.stopPropagation()"
+                <mat-checkbox (click)="$event.stopPropagation();onSelectionChange()"
                               [fxShow]="entitiesTableConfig.entitySelectionEnabled(entity)"
                               (change)="$event ? dataSource.selection.toggle(entity) : null"
                               [checked]="dataSource.selection.isSelected(entity)">
