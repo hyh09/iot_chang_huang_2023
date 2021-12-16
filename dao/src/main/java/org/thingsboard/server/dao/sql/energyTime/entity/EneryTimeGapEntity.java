@@ -33,22 +33,26 @@ public class EneryTimeGapEntity extends  TenantBaseEntity{
      *中文描述: 设备id	
      */
 
-    @Column(name = ENTITY_ID_COLUMN, columnDefinition = "uuid")
+    @Column(name = "entity_id", columnDefinition = "uuid")
     private UUID entityId;
     /**	
      *中文描述: 遥测的时间ts	
      */
-    @Column(name = KEY_COLUMN)
-    private Long ts;
+    @Column(name = "ts")
+    private long ts;
+
+    @Column(name = "value")
+    private String  value;
     /**	
      *中文描述: 遥测上传的key	
      */
-    @Column(name = TS_COLUMN)
-    private String key;
+    @Column(name = "key_name",columnDefinition="character varying(255)")
+    private String keyName;
     /**	
      *中文描述: 遥测的时间差	
      */	
     @Column(name="time_gap")	
-    private Long timeGap;
+    private long timeGap;
 
- }	
+
+}

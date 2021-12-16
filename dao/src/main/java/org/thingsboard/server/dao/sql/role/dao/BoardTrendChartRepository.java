@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.SolidTrendLineEntity;
@@ -23,7 +24,7 @@ import java.util.Map;
  **/
 @Slf4j
 @Repository
-public class BoardTrendChartRepository {
+public class BoardTrendChartRepository implements DefalutSvc {
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -36,8 +37,8 @@ public class BoardTrendChartRepository {
     private  String  SQL_STEP_02=" )";
 
 
-   private  String SELECT_SQL_03="select days,sum(va1) as sumValue ,max(ts2)  as time01 ,max(time) as time02 from (\n" +
-           "                   select entity_id, days, max(ts) as ts2, (max(long_v) - min(long_v)) as va1, to_char(to_timestamp(max(ts) / 1000) AT TIME ZONE 'UTC-8', 'yyyy-MM-dd HH24:MI:SS')  as time\n" +
+   private  String SELECT_SQL_03="select days,sum(va1) as sumValue ,max(ts2)  as time01,min(ts01) as mints ,max(time) as time02 from (\n" +
+           "                   select entity_id, days, max(ts) as ts2,  min(ts) as ts01,(max(long_v) - min(long_v)) as va1, to_char(to_timestamp(max(ts) / 1000) AT TIME ZONE 'UTC-8', 'yyyy-MM-dd HH24:MI:SS')  as time\n" +
            "                   from table1    group by entity_id, days\n" +
            "               ) as Table2   group by  days ;";
 
@@ -91,6 +92,40 @@ public class BoardTrendChartRepository {
 
 
    }
+
+
+    public List<SolidTrendLineEntity>  getDottedTrendLine(TrendParameterVo  vo){
+       String sql="with  table01 as (     select    floor(t.ts / (1000 * 60 * 60 * 24)) as days,     t.*      from     tb_enery_time_gap t   where " +
+               "    t.ts >= :startTime and t.ts <= :endTime and time_gap > :timeGap and t.key_name=:keyName ) select  days, sum(time_gap) as time01  from table01  group by   days";
+        Query query = null;
+        Map<String, Object> param = new HashMap<>();
+        param.put("startTime",vo.getStartTime());
+        param.put("endTime",vo.getEndTime());
+        param.put("keyName",vo.getKey());
+        param.put("timeGap",ENERGY_TIME_GAP);
+        query= entityManager.createNativeQuery(sql.toString(),"dottedLineTrendLineEntityMap");
+        System.out.println("==param==>"+param);
+        if(!CollectionUtils.isEmpty(param)) {
+            for (Map.Entry<String, Object> entry : param.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        List<SolidTrendLineEntity> entityList=query.getResultList();
+        return  entityList;
+
+   }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
