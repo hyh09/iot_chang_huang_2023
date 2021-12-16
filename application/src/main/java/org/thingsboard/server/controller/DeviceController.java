@@ -57,10 +57,7 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.entity.device.dto.AddDeviceDto;
-import org.thingsboard.server.entity.device.dto.DeviceListQry;
-import org.thingsboard.server.entity.device.dto.DeviceQry;
-import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
+import org.thingsboard.server.entity.device.dto.*;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -96,20 +93,23 @@ public class DeviceController extends BaseController {
     public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
         checkParameter(DEVICE_ID, strDeviceId);
         try {
-            DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
-            return checkDeviceId(deviceId, Operation.READ);
+            return deviceService.getDeviceInfo(toUUID(strDeviceId));
         } catch (Exception e) {
             throw handleException(e);
         }
     }
 
     @ApiOperation("云对接查设备列表")
-    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "Device",paramType="body")
-    @RequestMapping(value = "/yun/devices/{deviceId}", method = RequestMethod.GET)
+    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "YunDeviceDto",paramType="query")
+    @RequestMapping(value = "/yun/devices", method = RequestMethod.GET)
     @ResponseBody
-    public List<Device> getYunDeviceList(Device device) throws ThingsboardException {
+    public List<Device> getYunDeviceList(YunDeviceDto device) throws ThingsboardException {
         try {
-            return deviceService.getYunDeviceList(device);
+            Device deviceQry = device.toDevice();
+            if(StringUtils.isNotEmpty(device.getTenantId())){
+                deviceQry.setTenantId(new TenantId(toUUID(device.getTenantId())));
+            }
+            return deviceService.getYunDeviceList(deviceQry);
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -875,8 +875,8 @@ public class DeviceController extends BaseController {
                 //建立实体关系
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
-            //云云对接
-            if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
+            //云云对接,过滤网关
+            if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && !addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
                 transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
             }
             savedDevice.setFactoryName(addDeviceDto.getFactoryName());
@@ -980,8 +980,8 @@ public class DeviceController extends BaseController {
             @ApiImplicitParam(name = "page", value = "起始页默认0开始"),
     })
    @RequestMapping(value = "app/device/queryAllByNameLike", params = {"pageSize", "page"}, method = RequestMethod.GET)
-   public  PageData<DeviceDataVo>  queryAllByNameLike(@RequestParam("factoryId") UUID factoryId,
-                                                      @RequestParam("name") String  name,
+   public  PageData<DeviceDataVo>  queryAllByNameLike(@RequestParam(value = "factoryId",required = false) UUID factoryId,
+                                                      @RequestParam(value = "name",required = false) String  name,
                                                       @RequestParam int pageSize,
                                                       @RequestParam int page,
                                                       @RequestParam(required = false) String textSearch,
@@ -1019,8 +1019,23 @@ public class DeviceController extends BaseController {
             });
         }
         return result;
-
     }
 
+    @ApiOperation("查询设备字典下发的设备列表")
+    @ApiImplicitParam(name = "deviceQry" ,value = "入参实体",dataType = "DeviceIssueQry",paramType="query")
+    @RequestMapping(value = "/findDeviceIssueListByCdn", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DeviceVo> findDeviceIssueListByCdn(DeviceIssueQry deviceQry) throws ThingsboardException{
+        List<DeviceVo> result = new ArrayList<>();
+        Device device = deviceQry.toDevice();
+        device.setTenantId(new TenantId(getCurrentUser().getTenantId().getId()));
+        List<Device> deviceListByCdn = deviceService.findDeviceIssueListByCdn(device);
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            deviceListByCdn.forEach(i->{
+                result.add(new DeviceVo(i));
+            });
+        }
+        return result;
 
+    }
 }

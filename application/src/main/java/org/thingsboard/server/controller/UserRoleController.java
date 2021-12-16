@@ -30,10 +30,7 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 //import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -100,9 +97,10 @@ public class UserRoleController extends BaseController{
 
         if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
         {
-            tenantSysRoleEntity.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+//            tenantSysRoleEntity.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
             tenantSysRoleEntity.setFactoryId(securityUser.getFactoryId());
         }
+        tenantSysRoleEntity.setType(securityUser.getType());
         tenantSysRoleEntity.setSystemTab("0");
         tenantSysRoleEntity.setTenantId(getTenantId().getId());
         List<TenantSysRoleEntity>  result01= tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
@@ -194,6 +192,7 @@ public class UserRoleController extends BaseController{
             queryParam.put("factoryId", securityUser.getFactoryId());
         }
         queryParam.put("systemTab","0");
+        queryParam.put("type",securityUser.getType());
 
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         return tenantSysRoleService.pageQuery(queryParam,pageLink);
@@ -311,6 +310,9 @@ public class UserRoleController extends BaseController{
             log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
              vo.setFactoryId(securityUser.getFactoryId());
         }
+        vo.setType(securityUser.getType());
+
+
 
         return userRoleMemuSvc.getUserByNotInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 

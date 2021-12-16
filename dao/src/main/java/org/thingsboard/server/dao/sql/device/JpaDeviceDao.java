@@ -49,6 +49,7 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.relation.RelationDao;
@@ -75,6 +76,8 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private ClientService clientService;
 
     @Autowired
     private AttributesDao attributesDao;
@@ -106,18 +109,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public List<Device> getYunDeviceList(Device device){
         List<Device> result = new ArrayList<>();
-        if(device != null){
             Specification<DeviceEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                if(device.getTenantId() != null && device.getTenantId().getId() != null){
-                    predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
-                }
-                if(device.getId() != null && device.getId().getId() != null){
-                    predicates.add(cb.equal(root.get("id"),device.getId().getId()));
-                }
-                if(device.getUpdatedTime() != 0){
-                    // 下面是一个区间查询
-                    predicates.add(cb.lessThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
+                if(device != null){
+                    if(device.getTenantId() != null && device.getTenantId().getId() != null){
+                        predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
+                    }
+                    if(device.getId() != null && device.getId().getId() != null){
+                        predicates.add(cb.equal(root.get("id"),device.getId().getId()));
+                    }
+                    if(device.getUpdatedTime() != 0){
+                        // 下面是一个区间查询
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
+                    }
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -127,7 +131,6 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     result.add(i.toData());
                 });
             }
-        }
         return result;
     }
 
@@ -374,6 +377,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 }
                 if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
                     predicates.add(cb.equal(root.get("productionLineId"),device.getProductionLineId()));
+                }
+                if(device.getDictDeviceId() != null && StringUtils.isNotEmpty(device.getDictDeviceId().toString())){
+                    predicates.add(cb.equal(root.get("dictDeviceId"),device.getDictDeviceId()));
                 }
                 //产线id批量
                 if(CollectionUtils.isNotEmpty(device.getProductionLineIds())){
@@ -741,20 +747,20 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
         List<DeviceDataVo>  deviceDataVoList =  deviceEntityPage.getContent();
         List<UUID> idList = deviceDataVoList.stream().map(DeviceDataVo::getDeviceId).collect(Collectors.toList());
-        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
-        Map<UUID,String> map1 = new HashMap<>();
-        list.stream().forEach(l1->{
-            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
-            if(attributeKvCompositeKey != null)
-            {
-                map1.put(attributeKvCompositeKey.getEntityId(),"1");
-            }
-        });
+//        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
+//        Map<UUID,String> map1 = new HashMap<>();
+//        list.stream().forEach(l1->{
+//            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
+//            if(attributeKvCompositeKey != null)
+//            {
+//                map1.put(attributeKvCompositeKey.getEntityId(),"1");
+//            }
+//        });
+        Map<String, Boolean>   map1= clientService.listDevicesOnlineStatus(idList);
         deviceDataVoList.stream().forEach(d1->{
-            String str =  map1.get(d1.getDeviceId());
-            d1.setOnlineStatus(org.apache.commons.lang3.StringUtils.isNotEmpty(str)?"1":"0");
+            Boolean str =  map1.get(d1.getDeviceId().toString());
+            d1.setOnlineStatus((str)?"1":"0");
         });
-
 
         return new PageData<DeviceDataVo>((deviceEntityPage.getContent()),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
     }

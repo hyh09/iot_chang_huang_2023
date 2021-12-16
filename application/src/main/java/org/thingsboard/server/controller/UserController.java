@@ -213,17 +213,21 @@ public class UserController extends BaseController implements DefalutSvc {
                          HttpServletRequest request) throws ThingsboardException {
         try {
 
-            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
-                user.setTenantId(getCurrentUser().getTenantId());
+            if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
+                user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+                user.setUserLevel(3);
             }
+
 
             checkEntity(user.getId(), user, Resource.USER);
 
             boolean sendEmail = user.getId() == null && sendActivationMail;
-             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-             user.setFactoryId(null);
+//             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+//             user.setFactoryId(null);
             User savedUser = checkNotNull(userService.saveUser(user));
+            if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
                 saveRole(savedUser);
+            }
 
 
             if (sendEmail) {
@@ -505,6 +509,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
 
+
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
@@ -586,7 +591,8 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
-           if(count>0  && user.getFactoryId() != null)
+        log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
+           if(count>0  && user.getFactoryId() == null)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
@@ -654,12 +660,18 @@ public class UserController extends BaseController implements DefalutSvc {
              }
              PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
              SecurityUser securityUser = getCurrentUser();
+             UUID  userId = securityUser.getUuidId();
              queryParam.put("tenantId", securityUser.getTenantId().getId());
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
-                 queryParam.put("type", securityUser.getType());
+             }else {
+
+//                 List<UUID>   uuids =  userRoleSvc.getTenantRoleId(getTenantId().getId());
+//                 queryParam.put("notId", uuids);
+
              }
+             queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);
          }catch (Exception  e)

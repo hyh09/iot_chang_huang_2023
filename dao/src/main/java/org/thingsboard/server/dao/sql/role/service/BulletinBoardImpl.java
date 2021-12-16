@@ -1,12 +1,16 @@
 package org.thingsboard.server.dao.sql.role.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
@@ -16,14 +20,19 @@ import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
 import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
+import org.thingsboard.server.common.data.vo.tskv.consumption.TrendLineVo;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.model.sql.WorkshopEntity;
+import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectMaxValueKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
+import org.thingsboard.server.dao.sql.role.entity.SolidTrendLineEntity;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -44,20 +53,37 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private EffectMaxValueKvRepository effectMaxValueKvRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EffectTsKvRepository effectTsKvRepository;
-    @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
-    @Autowired    DictDeviceService dictDeviceService;
+    @Autowired private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+    @Autowired private DictDeviceService dictDeviceService;
+    @Autowired private FactoryDao factoryDao;
+    @Autowired private BoardTrendChartRepository boardTrendChartRepository;  //趋势图的实线
+
 
 
     /**
-     *
+     *看板的能耗趋势图(实线 和虚线)
      * @param vo
      * @return
      */
     @Override
-    public TrendVo energyConsumptionTrend(TrendParameterVo vo) {
-        String    key =  getKeyNameBy(vo.getKey());
-        log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}",vo,key);
-        return null;
+    public TrendVo energyConsumptionTrend(TrendParameterVo vo) throws ThingsboardException {
+        TrendVo resultResults = new TrendVo();
+
+        try {
+            String key = getKeyNameBy(vo.getKey());
+            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
+            vo.setKey(key);
+            List<SolidTrendLineEntity> solidTrendLineEntities = boardTrendChartRepository.getSolidTrendLine(vo);
+            printSolidLineLog(solidTrendLineEntities);
+            resultResults.setSolidLine(convertSolidLineData(solidTrendLineEntities));
+            return resultResults;
+        }catch (Exception e)
+        {
+             e.printStackTrace();
+            resultResults.setCode("0");
+            log.error("看板的能耗趋势图(实线 和虚线)异常{}",e);
+            return  resultResults;
+        }
     }
 
     /**
@@ -153,7 +179,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @param listMap
      * @return
      */
-    public  ConsumptionTodayVo getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap, UUID tenantId, Map<String, DictDeviceGroupPropertyVO>  mapNameToVo)
+    public  ConsumptionTodayVo getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap, UUID tenantId,
+                                                 Map<String, DictDeviceGroupPropertyVO>  mapNameToVo)
     {
         ConsumptionTodayVo appVo = new  ConsumptionTodayVo();
         List<TkTodayVo> waterList = new ArrayList<>();
@@ -168,6 +195,14 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             if(entity1 != null) {
                 tkTodayVo.setDeviceName(entity1.getDeviceName());
                 tkTodayVo.setTotalValue(entity1.getLocalValue());
+                tkTodayVo.setFactoryId(entity1.getFactoryId());
+
+                if (entity1.getFactoryId() != null) {
+                    Factory  factory =  factoryDao.findById(entity1.getFactoryId());
+                    tkTodayVo.setFactoryName(factory!=null?factory.getName():"");
+                }
+
+
                 value.stream().forEach(effectTsKvEntity -> {
                     DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(effectTsKvEntity.getKeyName());
                     if(dictVO != null){
@@ -243,7 +278,12 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
 
 
-    private  String getKeyNameBy(String title){
+    private  String getKeyNameBy(String title) throws ThingsboardException {
+        String title1 = KeyTitleEnums.getNameByCode(title);
+        if(title1 == null)
+        {
+            throw  new ThingsboardException("入参的key不在范围内,", ThingsboardErrorCode.FAIL_VIOLATION);
+        }
         List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
@@ -252,7 +292,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             {
                 for(DictDeviceGroupPropertyVO  m1:voList)
                 {
-                    if(m1.getTitle().equals(title))
+                    if(m1.getTitle().equals(title1))
                     {
                         return m1.getName();
                     }
@@ -262,6 +302,40 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
         }
         return "";
+    }
+
+    private  void  printSolidLineLog(List<SolidTrendLineEntity>  solidTrendLineEntities )
+    {
+        if(log.isInfoEnabled())
+        {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                String solidTrendLineEntitiesJson = mapper.writeValueAsString(solidTrendLineEntities);
+                log.info("看板的能耗趋势图-实线的数据返回{}",solidTrendLineEntitiesJson);
+            } catch (JsonProcessingException e) {
+                log.error("打印的异常：{}",e);
+            }
+
+        }
+    }
+
+
+    private  List<TrendLineVo> convertSolidLineData(List<SolidTrendLineEntity>  solidTrendLineEntities)
+    {
+        List<TrendLineVo>  trendLineVos = new ArrayList<>();
+        //
+        if(CollectionUtils.isEmpty(solidTrendLineEntities))
+        {
+            log.info("当前查询到的实线数据为空,返回空集合");
+            return   trendLineVos;
+        }
+        trendLineVos =   solidTrendLineEntities.stream().map(m ->{
+            TrendLineVo  trendLineVo = new TrendLineVo();
+            trendLineVo.setTime(m.getTime01());
+            trendLineVo.setValue(m.getSumValue());
+            return trendLineVo;
+        }).collect(Collectors.toList());
+        return  trendLineVos;
     }
 
 }

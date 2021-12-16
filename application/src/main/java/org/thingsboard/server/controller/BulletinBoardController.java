@@ -129,10 +129,9 @@ public class BulletinBoardController extends BaseController{
 
     @ApiOperation(value = "能耗趋势图(当前所选时间范围内最大30天)")
     @RequestMapping(value = "/energyConsumptionTrend")
-    public TrendVo energyConsumptionTrend(@RequestBody TrendParameterVo vo)
-    {
-        TrendVo  trendVo  = new  TrendVo();
-        return  trendVo;
+    public TrendVo energyConsumptionTrend(@RequestBody TrendParameterVo vo) throws ThingsboardException {
+        vo.setTenantId(getTenantId().getId());
+        return bulletinBoardSvc.energyConsumptionTrend(vo);
 
     }
 
