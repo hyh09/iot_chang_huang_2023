@@ -58,6 +58,7 @@ import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.entity.device.dto.*;
+import org.thingsboard.server.entity.device.vo.DeviceIssueVo;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -1025,14 +1026,14 @@ public class DeviceController extends BaseController {
     @ApiImplicitParam(name = "deviceQry" ,value = "入参实体",dataType = "DeviceIssueQry",paramType="query")
     @RequestMapping(value = "/findDeviceIssueListByCdn", method = RequestMethod.GET)
     @ResponseBody
-    public List<DeviceVo> findDeviceIssueListByCdn(DeviceIssueQry deviceQry) throws ThingsboardException{
-        List<DeviceVo> result = new ArrayList<>();
+    public List<DeviceIssueVo> findDeviceIssueListByCdn(DeviceIssueQry deviceQry) throws ThingsboardException{
+        List<DeviceIssueVo> result = new ArrayList<>();
         Device device = deviceQry.toDevice();
         device.setTenantId(new TenantId(getCurrentUser().getTenantId().getId()));
         List<Device> deviceListByCdn = deviceService.findDeviceIssueListByCdn(device);
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             deviceListByCdn.forEach(i->{
-                result.add(new DeviceVo(i));
+                result.add(new DeviceIssueVo(i));
             });
         }
         return result;

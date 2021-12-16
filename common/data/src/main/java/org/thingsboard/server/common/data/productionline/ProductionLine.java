@@ -76,7 +76,7 @@ public class ProductionLine implements HasName,HasCustomerId, HasOtaPackage {
     public ProductionLine (Factory factory,List<UUID> workshopIds){
         this.setWorkshopIds(workshopIds);
         this.setTenantId(factory.getTenantId());
-        this.setName(factory.getProductionlineName());
+        this.setName(factory.getProductionLineName());
     }
 
     @Override

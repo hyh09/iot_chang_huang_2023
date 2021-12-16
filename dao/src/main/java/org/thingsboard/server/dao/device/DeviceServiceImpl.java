@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.BeanUtils;
@@ -1137,12 +1138,15 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      */
     @Override
     public List<Device> findDeviceIssueListByCdn(Device device){
+        List<Device> result = new ArrayList<>();
         //查询所有设备
         List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            //只要网关创建的设备
+            result = this.filterDeviceFromGateway(deviceListByCdn);
 
             //过滤查询条件
-            Iterator<Device> iterator = deviceListByCdn.iterator();
+            Iterator<Device> iterator = result.iterator();
             while (iterator.hasNext()){
                 Device filter = iterator.next();
                 if(!StringUtils.isEmpty(device.getFactoryName()) &&
@@ -1160,20 +1164,65 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
                     iterator.remove();
                     continue;
                 }
-                if(!StringUtils.isEmpty(device.getGatewayName())){
-                    if (StringUtils.isEmpty(filter.getAdditionalInfo())
-                            || filter.getAdditionalInfo().get(GATEWAY) == null
-                            || !filter.getAdditionalInfo().get(GATEWAY).booleanValue() ) {
-                        iterator.remove();
-                        continue;
-                    }else if(StringUtils.isEmpty(filter.getName()) || filter.getName().indexOf(device.getGatewayName()) == -1){
-                        iterator.remove();
-                        continue;
+                if(!StringUtils.isEmpty(device.getGatewayName()) &&
+                        (StringUtils.isEmpty(filter.getGatewayName()) || filter.getGatewayName().indexOf(device.getGatewayName())==-1) ){
+                    iterator.remove();
+                    continue;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 只要网关创建的设备
+     * @param deviceList
+     */
+    public List<Device> filterDeviceFromGateway(List<Device> deviceList){
+        //返回值
+        List<Device> result = new ArrayList<>();
+        //过滤出所有网关
+        List<Device> gateways = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(deviceList)){
+            //1.过滤出所有网关
+            Iterator<Device> it = deviceList.iterator();
+            while (it.hasNext()){
+                Device filter = it.next();
+                if (!StringUtils.isEmpty(filter.getAdditionalInfo())
+                        && filter.getAdditionalInfo().get(GATEWAY) != null
+                        && filter.getAdditionalInfo().get(GATEWAY).booleanValue() ) {
+                    gateways.add(filter);
+                    it.remove();
+                    continue;
+                }
+            }
+            //2.查找出网关下的设备
+            if(!CollectionUtils.isEmpty(gateways)){
+                //查询源于这些网关的设备
+                List<UUID> fromIds = gateways.stream().distinct().map(s -> s.getId().getId()).collect(Collectors.toList());
+                List<EntityRelation> byFromIds = relationService.findByFromIds(fromIds, RelationTypeGroup.COMMON);
+                if(!CollectionUtils.isEmpty(byFromIds)){
+                    Iterator<Device> iterator = deviceList.iterator();
+                    while (iterator.hasNext()){
+                        Device device = iterator.next();
+                        for(EntityRelation relation:byFromIds){
+                            if(device.getId().getId().toString().equals(relation.getTo().getId().toString())){
+                                //赋值所属网关
+                                gateways.forEach(gateway->{
+                                    if(gateway.getName() != null && gateway.getId().getId().toString().equals(relation.getFrom().getId().toString())){
+                                        device.setGatewayName(gateway.getName());
+                                        device.setGatewayId(gateway.getId().getId());
+                                    }
+                                });
+                                result.add(device);
+                                break;
+                            }
+                        }
                     }
                 }
             }
         }
-        return deviceListByCdn;
+        return result;
     }
 
     /**

@@ -394,6 +394,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             if(CollectionUtils.isNotEmpty(all)){
                 for (DeviceEntity i : all){
                     Device deviceBo = i.toData();
+                    //是否只要网关
+                    if(device.getOnlyGatewayFlag()){
+                        JsonNode additionalInfo = i.getAdditionalInfo();
+                        if(additionalInfo == null){
+                            continue;
+                        }else {
+                            JsonNode gateway = additionalInfo.get("gateway");
+                            if(gateway == null || !gateway.asBoolean()){
+                                continue;
+                            }
+                        }
+                    }
+                    //是否过滤掉网关
                     if(device.getFilterGatewayFlag()){
                         //过滤网关
                         JsonNode additionalInfo = i.getAdditionalInfo();
