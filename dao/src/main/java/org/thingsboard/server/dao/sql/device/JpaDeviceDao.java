@@ -757,12 +757,13 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 //            }
 //        });
         Map<String, Boolean>   map1= clientService.listDevicesOnlineStatus(idList);
+        log.info("打印的queryAllByNameLike.map1{}",map1);
         deviceDataVoList.stream().forEach(d1->{
             Boolean str =  map1.get(d1.getDeviceId().toString());
             d1.setOnlineStatus((str)?"1":"0");
         });
 
-        return new PageData<DeviceDataVo>((deviceEntityPage.getContent()),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
+        return new PageData<DeviceDataVo>((deviceDataVoList),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
     }
 
     /**
