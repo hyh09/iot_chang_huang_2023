@@ -128,14 +128,13 @@ public class TransportMqttClient {
     }
 
 
-    public void publish(TenantId tenantId, DeviceId deviceId, CustomerId customerId, TbMsgMetaData metaData, JsonObject json, TYPE type,String yunyunTopic) {
+    public void publish(TenantId tenantId, DeviceId deviceId, TbMsgMetaData metaData, JsonObject json, TYPE type,String yunyunTopic) {
         MqttMessage msg = new MqttMessage();
         //封装数据
         JSONObject obj = new JSONObject();
         obj.put("ts",LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli());
         obj.put("tenantId",tenantId.toString());
         obj.put("deviceId",deviceId.toString());
-        obj.put("customerId",customerId.toString());
         obj.put("msg",gson.toJson(json));
         obj.put("tbMsgMetaData",gson.toJson(metaData));
         obj.put("msgType",type);

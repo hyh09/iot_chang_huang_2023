@@ -20,7 +20,7 @@ public class DeviceIssueQry {
     public String workshopName;
 
     @ApiModelProperty(name = "产线名称")
-    public String productionlineName;
+    public String productionLineName;
 
     @ApiModelProperty(name = "设备名称")
     public String deviceName;
@@ -33,7 +33,7 @@ public class DeviceIssueQry {
         device.setDictDeviceId(dictDeviceId);
         device.setFactoryName(factoryName);
         device.setWorkshopName(workshopName);
-        device.setProductionLineName(productionlineName);
+        device.setProductionLineName(productionLineName);
         device.setName(deviceName);
         device.setGatewayName(gatewayName);
         return device;

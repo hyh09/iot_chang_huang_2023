@@ -74,7 +74,7 @@ public interface DictDataService {
      * @param tenantId 租户Id
      * @return 全部数据字典map
      */
-    Map<String, DictData> getDictDataMap(TenantId tenantId);
+    Map<String, DictData> getIdToDictDataMap(TenantId tenantId);
 
     /**
      * 按keys查询全部数据字典
@@ -83,5 +83,5 @@ public interface DictDataService {
      * @param keys key列表
      * @return 数据字典map
      */
-    Map<String, DictData> getDictDataMapByKeys(TenantId tenantId, List<String> keys);
+    Map<String, DictData> getKeyToDictDataMap(TenantId tenantId, List<String> keys);
 }

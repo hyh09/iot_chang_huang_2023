@@ -394,6 +394,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             if(CollectionUtils.isNotEmpty(all)){
                 for (DeviceEntity i : all){
                     Device deviceBo = i.toData();
+                    //是否只要网关
+                    if(device.getOnlyGatewayFlag()){
+                        JsonNode additionalInfo = i.getAdditionalInfo();
+                        if(additionalInfo == null){
+                            continue;
+                        }else {
+                            JsonNode gateway = additionalInfo.get("gateway");
+                            if(gateway == null || !gateway.asBoolean()){
+                                continue;
+                            }
+                        }
+                    }
+                    //是否过滤掉网关
                     if(device.getFilterGatewayFlag()){
                         //过滤网关
                         JsonNode additionalInfo = i.getAdditionalInfo();
@@ -757,12 +770,13 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 //            }
 //        });
         Map<String, Boolean>   map1= clientService.listDevicesOnlineStatus(idList);
+        log.info("打印的queryAllByNameLike.map1{}",map1);
         deviceDataVoList.stream().forEach(d1->{
             Boolean str =  map1.get(d1.getDeviceId().toString());
             d1.setOnlineStatus((str)?"1":"0");
         });
 
-        return new PageData<DeviceDataVo>((deviceEntityPage.getContent()),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
+        return new PageData<DeviceDataVo>((deviceDataVoList),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
     }
 
     /**

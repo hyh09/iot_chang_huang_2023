@@ -63,7 +63,7 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
     public String workshopName;
 
     //产线名称
-    public String productionlineName;
+    public String productionLineName;
 
     //产线名称
     public String deviceName;
@@ -113,7 +113,7 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
                 ", updatedUser=" + updatedUser +
                 ", delFlag='" + delFlag + '\'' +
                 ", workshopName='" + workshopName + '\'' +
-                ", productionlineName='" + productionlineName + '\'' +
+                ", productionLineName='" + productionLineName + '\'' +
                 ", deviceName='" + deviceName + '\'' +
                 ", publishTime=" + publishTime +
                 ", loginUserId=" + loginUserId +
