@@ -508,7 +508,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public Map<String, DictData> getNameToDictDataMap(TenantId tenantId, UUID dictDeviceId) {
-        var dictDataMap = this.dictDataService.getDictDataMap(tenantId);
+        var dictDataMap = this.dictDataService.getIdToDictDataMap(tenantId);
         var propertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
         var map = componentList.stream().reduce(new HashMap<String, DictData>(), (r, e) -> {
