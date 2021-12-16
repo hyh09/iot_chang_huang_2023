@@ -297,6 +297,7 @@ public abstract class BaseController {
     @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
     @Autowired  protected UserLanguageSvc userLanguageSvc;
     @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
 
 
     @ExceptionHandler(ThingsboardException.class)

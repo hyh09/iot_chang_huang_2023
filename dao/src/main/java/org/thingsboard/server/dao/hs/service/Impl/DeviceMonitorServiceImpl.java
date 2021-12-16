@@ -276,7 +276,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var kvEntryMap = this.timeseriesService.findAllLatest(tenantId, DeviceId.fromString(id)).get()
                 .stream().sorted(Comparator.comparing(TsKvEntry::getKey)).collect(Collectors.toMap(TsKvEntry::getKey, Function.identity(), (key1, key2) -> key1, LinkedHashMap::new));
 
-        Map<String, DictData> dictDataMap = this.dictDataService.getDictDataMap(tenantId);
+        Map<String, DictData> dictDataMap = this.dictDataService.getIdToDictDataMap(tenantId);
 
         List<DictDeviceGroupVO> groupResultList = new ArrayList<>();
         List<DictDeviceComponentVO> componentList = new ArrayList<>();
@@ -298,6 +298,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                         return DictDeviceGroupPropertyVO.builder()
                                 .id(v.getId())
                                 .unit(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null))
+                                .icon(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null))
                                 .name(v.getName())
                                 .title(v.getTitle())
                                 .content(kvData.isEmpty() ? v.getContent() : this.formatKvEntryValue(kvData.get()))
@@ -314,7 +315,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         kvEntryMap.forEach((k, v) -> {
             if (!groupPropertyNameList.contains(k)) {
                 ungrouped.getGroupPropertyList().add(DictDeviceGroupPropertyVO.builder()
-                        .unit(Optional.ofNullable(dictDataMap.get(v.getKey())).map(DictData::getUnit).orElse(null))
                         .name(v.getKey())
                         .title(v.getKey())
                         .content(this.formatKvEntryValue(v))
@@ -366,7 +366,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, count, Aggregation.NONE, "desc"))
                 .collect(Collectors.toList());
 
-        var dictDataMap = this.dictDataService.getDictDataMap(tenantId);
+        var dictDataMap = this.dictDataService.getIdToDictDataMap(tenantId);
         Map<String, String> rMap = Maps.newHashMap();
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData).orElse(null);
         if (device != null && device.getDictDeviceId() != null) {
@@ -450,7 +450,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         if (keyList.isEmpty())
             return propertyVOList;
 
-        var dictDataMap = this.dictDataService.getDictDataMap(tenantId);
+        var dictDataMap = this.dictDataService.getIdToDictDataMap(tenantId);
         Map<String, String> rMap = Maps.newHashMap();
         Map<String, String> nameTitleMap = Maps.newHashMap();
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData).orElse(null);
@@ -714,13 +714,14 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var kvEntryMap = this.timeseriesService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get()
                 .stream().sorted(Comparator.comparing(TsKvEntry::getKey)).collect(Collectors.toMap(TsKvEntry::getKey, Function.identity(), (key1, key2) -> key1, LinkedHashMap::new));
 
-        var map = this.dictDataService.getDictDataMap(tenantId);
+        var map = this.dictDataService.getIdToDictDataMap(tenantId);
 
         return DaoUtil.convertDataList(this.componentPropertyRepository.findAllByComponentIdOrderBySortAsc(componentId)).stream().map(e ->
                 DictDeviceComponentPropertyVO.builder()
                         .name(e.getName())
                         .content(Optional.ofNullable(kvEntryMap.get(e.getName())).map(this::formatKvEntryValue).orElse(e.getContent()))
                         .unit(Optional.ofNullable(e.getDictDataId()).map(map::get).map(DictData::getUnit).orElse(null))
+                        .icon(Optional.ofNullable(e.getDictDataId()).map(map::get).map(DictData::getIcon).orElse(null))
                         .title(e.getTitle())
                         .createdTime(Optional.ofNullable(kvEntryMap.get(e.getName())).map(TsKvEntry::getTs).orElse(e.getCreatedTime()))
                         .build()
@@ -833,6 +834,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     groupPropertyNameList.add(propertyVO.getName());
                     propertyVO.setContent(this.formatKvEntryValue(kvData.get()));
                     propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
+                    propertyVO.setIcon(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null));
                     propertyVO.setCreatedTime(kvData.get().getTs());
                 });
             }

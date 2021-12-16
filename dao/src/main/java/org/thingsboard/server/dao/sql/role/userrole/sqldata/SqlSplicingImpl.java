@@ -226,6 +226,12 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             param.put("factoryId", vo.getFactoryId());
         }
 
+        if(StringUtils.isNotBlank(vo.getType()))
+        {
+            whereSql.append(" and t1.type =:type ");
+            param.put("type", vo.getType());
+        }
+
 
 //        if((vo.getCreateId() !=null ))
 //        {

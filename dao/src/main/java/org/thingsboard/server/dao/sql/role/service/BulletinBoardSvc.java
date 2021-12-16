@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
@@ -24,7 +25,7 @@ public interface BulletinBoardSvc {
      * @param vo
      * @return
      */
-    TrendVo energyConsumptionTrend( TrendParameterVo vo);
+    TrendVo energyConsumptionTrend( TrendParameterVo vo) throws ThingsboardException;
 
 
     List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo queryTsKvVo, TenantId tenantId);

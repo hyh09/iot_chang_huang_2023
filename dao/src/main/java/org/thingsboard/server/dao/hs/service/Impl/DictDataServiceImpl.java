@@ -88,14 +88,12 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
     public DictDataQuery saveOrUpdateDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException {
         DictData dictData = new DictData();
         if (!StringUtils.isBlank(dictDataQuery.getId())) {
-            // Modify
             dictData = this.dataRepository.findByTenantIdAndId(tenantId.getId(), toUUID(dictDataQuery.getId())).map(DictDataEntity::toData)
                     .orElseThrow(() -> new ThingsboardException("数据字典不存在", ThingsboardErrorCode.GENERAL));
-            ;
+
             BeanUtils.copyProperties(dictDataQuery, dictData, "id", "code");
             dictData.setType(dictDataQuery.getType().toString());
         } else {
-            // Save
             BeanUtils.copyProperties(dictDataQuery, dictData);
             dictData.setType(dictDataQuery.getType().toString());
             dictData.setTenantId(tenantId.toString());
@@ -175,7 +173,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      * @return 全部数据字典map
      */
     @Override
-    public Map<String, DictData> getDictDataMap(TenantId tenantId) {
+    public Map<String, DictData> getIdToDictDataMap(TenantId tenantId) {
         return DaoUtil.convertDataList(this.dataRepository.findAllByTenantId(tenantId.getId())).stream().collect(Collectors.toMap(DictData::getId, Function.identity()));
     }
 
@@ -187,7 +185,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
      * @return 数据字典map
      */
     @Override
-    public Map<String, DictData> getDictDataMapByKeys(TenantId tenantId, List<String> keys) {
+    public Map<String, DictData> getKeyToDictDataMap(TenantId tenantId, List<String> keys) {
         return DaoUtil.convertDataList(this.dataRepository.findAllByTenantIdAndKeys(tenantId.getId(), keys))
                 .stream().collect(Collectors.toMap(DictData::getName, Function.identity()));
     }
