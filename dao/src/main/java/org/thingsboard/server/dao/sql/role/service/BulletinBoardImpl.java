@@ -76,6 +76,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             List<SolidTrendLineEntity> solidTrendLineEntities = boardTrendChartRepository.getSolidTrendLine(vo);
             printSolidLineLog(solidTrendLineEntities);
             resultResults.setSolidLine(convertSolidLineData(solidTrendLineEntities));
+            resultResults.setDottedLine(convertSolidLineDataTest(solidTrendLineEntities));
             return resultResults;
         }catch (Exception e)
         {
@@ -333,6 +334,25 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             TrendLineVo  trendLineVo = new TrendLineVo();
             trendLineVo.setTime(m.getTime01());
             trendLineVo.setValue(m.getSumValue());
+            return trendLineVo;
+        }).collect(Collectors.toList());
+        return  trendLineVos;
+    }
+
+
+    private  List<TrendLineVo> convertSolidLineDataTest(List<SolidTrendLineEntity>  solidTrendLineEntities)
+    {
+        List<TrendLineVo>  trendLineVos = new ArrayList<>();
+        //
+        if(CollectionUtils.isEmpty(solidTrendLineEntities))
+        {
+            log.info("当前查询到的实线数据为空,返回空集合");
+            return   trendLineVos;
+        }
+        trendLineVos =   solidTrendLineEntities.stream().map(m ->{
+            TrendLineVo  trendLineVo = new TrendLineVo();
+            trendLineVo.setTime(m.getTime01());
+            trendLineVo.setValue(m.getSumValue()+1);
             return trendLineVo;
         }).collect(Collectors.toList());
         return  trendLineVos;
