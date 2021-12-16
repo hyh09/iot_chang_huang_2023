@@ -2,6 +2,7 @@ package org.thingsboard.server.common.data.vo.tskv.parameter;
 
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.user.DefalutSvc;
 
 import java.util.UUID;
 
@@ -29,4 +30,7 @@ public class TrendParameterVo {
     private  Long  endTime;
 
     private  String key;
+
+
+
 }

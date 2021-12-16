@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.energyTime.dao;	
 	
-import org.thingsboard.server.dao.util.sql.BaseSqlDao;	
+import org.thingsboard.server.dao.sql.energyTime.entity.dto.EneryTimeGapDto;
+import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 import org.thingsboard.server.dao.sql.energyTime.entity.EneryTimeGapEntity;	
 import org.springframework.data.jpa.repository.Modifying;	
 import org.springframework.data.jpa.repository.Query;	
@@ -20,7 +21,6 @@ import java.util.UUID;
 */	
 public interface EneryTimeGapDao extends BaseSqlDao<EneryTimeGapEntity,UUID> {	
 	
-	
-	
+
 	
 }	

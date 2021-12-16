@@ -28,7 +28,22 @@ import javax.persistence.*;
                                         @ColumnResult(name = "days",type = String.class),
                                         @ColumnResult(name = "sumValue",type = String.class),
                                         @ColumnResult(name = "time01",type = Long.class),
-                                        @ColumnResult(name = "time02",type = String.class)
+                                        @ColumnResult(name = "time02",type = String.class),
+                                        @ColumnResult(name = "mints",type = Long.class)
+
+                                }
+                        ),
+                }
+
+        ),
+        @SqlResultSetMapping(
+                name = "dottedLineTrendLineEntityMap",
+                classes = {
+                        @ConstructorResult(
+                                targetClass = SolidTrendLineEntity.class,
+                                columns = {
+                                        @ColumnResult(name = "days",type = String.class),
+                                        @ColumnResult(name = "time01",type = Long.class),
 
                                 }
                         ),
@@ -64,11 +79,21 @@ public class SolidTrendLineEntity extends AbstractTsKvEntity {
     private  String time02;
 
 
-    public SolidTrendLineEntity(String days, String sumValue, Long time01, String time02) {
+    private  Long mints;
+
+
+    public SolidTrendLineEntity(String days, String sumValue, Long time01, String time02,Long mints) {
         this.days = days;
         this.sumValue = sumValue;
         this.time01 = time01;
         this.time02 = time02;
+        this.mints = mints;
+    }
+
+
+    public SolidTrendLineEntity(String days, Long time01) {
+        this.days = days;
+        this.time01 = time01;
     }
 
     /**
