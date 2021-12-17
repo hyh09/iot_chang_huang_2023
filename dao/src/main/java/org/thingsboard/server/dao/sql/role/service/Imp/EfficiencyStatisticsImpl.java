@@ -293,7 +293,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            log.info("打印的产能key:{}",keyName);
             vo.setKey(keyName);
         }
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && vo.getFilterFirstFactory())
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
@@ -496,6 +496,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
+        dictDeviceDataVos.stream().forEach(m1->{
+            if (StringUtils.isBlank(m1.getTitle())) {
+                m1.setTitle(m1.getName());
+            }});
         Map<String,List<DictDeviceDataVo>> map = dictDeviceDataVos.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
         map.put("部件",getParts( tenantId,deviceInfo.getDictDeviceId()));
         return map;

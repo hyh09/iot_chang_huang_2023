@@ -13,6 +13,6 @@ public interface DefalutSvc {
 
     //遥测数据的时间差
     // 1800000=30分钟
-    Long  ENERGY_TIME_GAP=60000L;
+    Long  ENERGY_TIME_GAP=1800000L;
 
 }

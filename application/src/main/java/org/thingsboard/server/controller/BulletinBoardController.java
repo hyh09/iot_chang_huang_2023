@@ -156,6 +156,7 @@ public class BulletinBoardController extends BaseController{
         }
         queryTsKvVo.setStartTime(startTime);
         queryTsKvVo.setEndTime(EndTime);
+        queryTsKvVo.setFilterFirstFactory(false);
         ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
         if(resultCapAppVo != null)
         {
