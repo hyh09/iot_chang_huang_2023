@@ -42,15 +42,17 @@ export class MenuToggleComponent implements OnInit {
 
   sectionActive(): boolean {
     if (this.section.pages && this.section.pages.length > 0) {
-      const paths = this.section.pages.map(page => (page.path));
-      return paths.includes(window.location.pathname);
+      const currPath = window.location.pathname;
+      let paths = this.section.pages.map(page => (page.path));
+      paths = paths.filter(path => (currPath.indexOf(path) >= 0));
+      return paths.length > 0;
     } else {
       return false;
     }
   }
 
   sectionHeight(): string {
-    return this.sectionActive() ? this.section.height : '0px';
+    return this.sectionActive() ? (this.section.height || `${this.section.pages ? (this.section.pages.length * 40) : 0}px`) : '0px';
   }
 
   trackBySectionPages(index: number, section: MenuSection){
