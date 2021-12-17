@@ -71,14 +71,11 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TrendVo resultResults = new TrendVo();
 
         try {
-
-
             String key = getKeyNameBy(vo.getKey());
             log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
             vo.setKey(key);
             Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
             DictDeviceGroupPropertyVO dictDeviceGroupPropertyVO=  mapNameToVo.get(key);
-
             List<SolidTrendLineEntity> solidTrendLineEntities = boardTrendChartRepository.getSolidTrendLine(vo);
             printSolidLineLog(solidTrendLineEntities);
             resultResults.setSolidLine(convertSolidLineData(solidTrendLineEntities));
