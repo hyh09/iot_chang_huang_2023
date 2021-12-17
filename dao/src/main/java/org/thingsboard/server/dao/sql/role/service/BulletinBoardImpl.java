@@ -59,6 +59,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private FactoryDao factoryDao;
     @Autowired private BoardTrendChartRepository boardTrendChartRepository;  //趋势图的实线
 
+    private final  static   String ONE_HOURS="3600000";
 
 
     /**
@@ -366,10 +367,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                                                         DictDeviceGroupPropertyVO dictDeviceGroupPropertyVO)
     {
         List<TrendLineVo>  trendLineVos = new ArrayList<>();
-        //
         if(CollectionUtils.isEmpty(solidTrendLineEntities))
         {
-            log.info("当前查询到的实线数据为空,返回空集合");
             return   trendLineVos;
         }
         String content =   dictDeviceGroupPropertyVO.getContent();
@@ -382,10 +381,10 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                 value01 = 0L;
             }
             Long  count =(( m.getTime01()-m.getMints()) -value01);
-
-            String  va=   StringUtilToll.mul(count.toString(),content);
-            log.info("运算得规则：{}减去{}再减去总得耗时得{}再乘以{}=count{}===>va{}",m.getTime01(),m.getMints(),value01,content,count,va);
-
+            //以小时为设定值 保留2位小数运算
+          String  hours =   StringUtilToll.div(count.toString(),ONE_HOURS);
+            String  va=   StringUtilToll.mul(hours,content);
+            log.info("运算得规则：{}减去{}再减去总得耗时得{}再乘以{}=count{}===>va{}===小时=>{}",m.getTime01(),m.getMints(),value01,content,count,va,hours);
             trendLineVo.setValue(va);
             return trendLineVo;
         }).collect(Collectors.toList());
