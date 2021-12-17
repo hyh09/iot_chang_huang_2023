@@ -209,4 +209,11 @@ public interface DeviceService {
      */
     List<Device> findDeviceIssueListByCdn(Device device);
 
+    /**
+     * 设备ID批量查询
+     * @param deviceIdList
+     * @return
+     */
+    List<Device> findDevicesByIds(List<UUID> deviceIdList);
+
 }
