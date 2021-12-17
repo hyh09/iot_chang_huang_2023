@@ -58,12 +58,12 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
     private UUID updatedUser;
     private String delFlag;
 
-    /**查询条件*/
+    /*********************************************查询条件***********************************/
     //车间名称
     public String workshopName;
 
     //产线名称
-    public String productionlineName;
+    public String productionLineName;
 
     //产线名称
     public String deviceName;
@@ -78,7 +78,7 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
     private Boolean active;
     @ApiModelProperty("网关设备名称")
     private String gatewayName;
-
+    /*********************************************查询条件***********************************/
 
     public Factory() {
 
@@ -113,7 +113,7 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
                 ", updatedUser=" + updatedUser +
                 ", delFlag='" + delFlag + '\'' +
                 ", workshopName='" + workshopName + '\'' +
-                ", productionlineName='" + productionlineName + '\'' +
+                ", productionLineName='" + productionLineName + '\'' +
                 ", deviceName='" + deviceName + '\'' +
                 ", publishTime=" + publishTime +
                 ", loginUserId=" + loginUserId +

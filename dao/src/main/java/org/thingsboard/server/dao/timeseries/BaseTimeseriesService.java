@@ -38,18 +38,13 @@ import org.thingsboard.server.common.data.kv.DeleteTsKvQuery;
 import org.thingsboard.server.common.data.kv.ReadTsKvQuery;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.user.DefalutSvc;
-import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
-import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.service.Validator;
-import org.thingsboard.server.dao.sql.energyTime.entity.EneryTimeGapEntity;
-import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -89,8 +84,6 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
 
     @Autowired
     private EntityViewService entityViewService;
-    @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
-    @Autowired private EneryTimeGapService eneryTimeGapService;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -178,42 +171,6 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
         if (entityId.getEntityType().equals(EntityType.ENTITY_VIEW)) {
             throw new IncorrectParameterException("Telemetry data can't be stored for entity view. Read only");
         }
-        log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
-        log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
-        List<String>   keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        log.info("打印能耗的saveAndRegisterFutures.keys1{}",keys1);
-       Long  count =  keys1.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
-        if(count>0) {
-            ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
-            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
-            try {
-                TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
-                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
-                long  t1=  tsKvEntry.getTs();
-                long  t2=  tsKvEntry1.getTs();
-                long t3 =t1-t2;
-                log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}",(t1-t2));
-                if(t3>ENERGY_TIME_GAP)
-                {
-                    EneryTimeGapEntity  eneryTimeGapEntity = new  EneryTimeGapEntity();
-                    eneryTimeGapEntity.setEntityId(entityId.getId());
-                    eneryTimeGapEntity.setTenantId(tenantId.getId());
-                    eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
-                    eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
-                    eneryTimeGapEntity.setTs(tsKvEntry.getTs());
-                    eneryTimeGapEntity.setTimeGap(t3);
-                    eneryTimeGapService.save(eneryTimeGapEntity);
-                }
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-
-
-        }
-
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
         futures.add(timeseriesDao.save(tenantId, entityId, tsKvEntry, ttl));

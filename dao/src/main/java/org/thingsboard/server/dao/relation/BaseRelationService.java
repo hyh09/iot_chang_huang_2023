@@ -42,11 +42,7 @@ import org.thingsboard.server.dao.entity.EntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -548,6 +544,17 @@ public class BaseRelationService implements RelationService {
             cacheEviction(relation, cache);
             deleteRelation(tenantId, relation);
         }
+    }
+
+    /**
+     * 批量查询来源数据
+     * @param fromIds
+     * @param typeGroup
+     * @return
+     */
+    @Override
+    public List<EntityRelation> findByFromIds(List<UUID> fromIds, RelationTypeGroup typeGroup){
+        return relationDao.findByFromIds(fromIds, typeGroup);
     }
 
     protected void validate(EntityRelation relation) {

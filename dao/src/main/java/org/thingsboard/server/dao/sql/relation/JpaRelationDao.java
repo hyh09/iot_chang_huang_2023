@@ -17,10 +17,12 @@ package org.thingsboard.server.dao.sql.relation;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.relation.EntityRelation;
@@ -28,12 +30,15 @@ import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.model.sql.RelationCompositeKey;
 import org.thingsboard.server.dao.model.sql.RelationEntity;
+import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.relation.RelationDao;
 import org.thingsboard.server.dao.sql.JpaAbstractDaoListeningExecutorService;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Valerii Sosliuk on 5/29/2017.
@@ -185,6 +190,39 @@ public class JpaRelationDao extends JpaAbstractDaoListeningExecutorService imple
                     return relationExistsBeforeDelete;
                 });
     }
+
+    /**
+     * 批量查询来源数据
+     * @param tenantId
+     * @param fromIds
+     * @param typeGroup
+     * @return
+     */
+    @Override
+    public List<EntityRelation> findByFromIds(List<UUID> fromIds, RelationTypeGroup typeGroup){
+        List<EntityRelation> result = new ArrayList<>();
+        Specification<RelationEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if(typeGroup != null){
+                predicates.add(cb.equal(root.get("relationTypeGroup"),typeGroup.name()));
+            }
+            if(CollectionUtils.isNotEmpty(fromIds)){
+                // 下面是一个 IN查询
+                CriteriaBuilder.In<UUID> in = cb.in(root.get("fromId"));
+                fromIds.forEach(in::value);
+                predicates.add(in);
+            }
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        List<RelationEntity> all = relationRepository.findAll(specification);
+        if(CollectionUtils.isNotEmpty(all)){
+            all.forEach(i->{
+                result.add(i.toData());
+            });
+        }
+        return result;
+    }
+
 
     private Specification<RelationEntity> getEntityFieldsSpec(EntityId from, String relationType, RelationTypeGroup typeGroup, EntityType childType) {
         return (root, criteriaQuery, criteriaBuilder) -> {

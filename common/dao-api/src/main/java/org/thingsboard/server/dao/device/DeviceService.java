@@ -200,7 +200,20 @@ public interface DeviceService {
 
     PageData<AppCapacityDeviceVo> appQueryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 
+    void updateFlgById(Boolean deviceFlg, UUID id);
 
-    void   updateFlgById(Boolean deviceFlg, UUID id);
+    /**
+     * 查询设备字典下发的设备列表
+     * @param device
+     * @return
+     */
+    List<Device> findDeviceIssueListByCdn(Device device);
+
+    /**
+     * 设备ID批量查询
+     * @param deviceIdList
+     * @return
+     */
+    List<Device> findDevicesByIds(List<UUID> deviceIdList);
 
 }

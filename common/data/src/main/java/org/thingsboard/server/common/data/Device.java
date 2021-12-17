@@ -111,9 +111,16 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private Boolean filterGatewayFlag = false;
     //设备配置名称
     private String deviceProfileName;
+    @ApiModelProperty(name = "所属网关名称")
+    public String gatewayName;
+    @ApiModelProperty("所属网关标识")
+    private UUID gatewayId;
+    //是否只查网关  默认否
+    private Boolean onlyGatewayFlag = false;
+    private Boolean deviceFlg=false;
     /**********************************以上是非数据库字段***************************************/
 
-    private Boolean deviceFlg=false;
+
 
     public Device() {
         super();

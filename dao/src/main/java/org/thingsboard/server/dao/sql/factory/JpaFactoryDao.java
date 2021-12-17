@@ -185,7 +185,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
             boolean notBlankWorkshopName = StringUtils.isNotBlank(factory.getWorkshopName());
-            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionlineName());
+            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionLineName());
             boolean notBlankDeviceName = StringUtils.isNotBlank(factory.getDeviceName());
 
             /**1.先根据条件查询出所有的 工厂、车间、产线、设备**/

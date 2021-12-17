@@ -20,10 +20,15 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,17 +55,15 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
-import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.entity.device.dto.AddDeviceDto;
-import org.thingsboard.server.entity.device.dto.DeviceListQry;
-import org.thingsboard.server.entity.device.dto.DeviceQry;
-import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
+import org.thingsboard.server.entity.device.dto.*;
+import org.thingsboard.server.entity.device.enums.ReadWriteEnum;
+import org.thingsboard.server.entity.device.vo.DeviceIssueVo;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -69,9 +72,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
@@ -96,20 +97,23 @@ public class DeviceController extends BaseController {
     public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
         checkParameter(DEVICE_ID, strDeviceId);
         try {
-            DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
-            return checkDeviceId(deviceId, Operation.READ);
+            return deviceService.getDeviceInfo(toUUID(strDeviceId));
         } catch (Exception e) {
             throw handleException(e);
         }
     }
 
     @ApiOperation("云对接查设备列表")
-    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "Device",paramType="body")
-    @RequestMapping(value = "/yun/devices/{deviceId}", method = RequestMethod.GET)
+    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "YunDeviceDto",paramType="query")
+    @RequestMapping(value = "/yun/devices", method = RequestMethod.GET)
     @ResponseBody
-    public List<Device> getYunDeviceList(Device device) throws ThingsboardException {
+    public List<Device> getYunDeviceList(YunDeviceDto device) throws ThingsboardException {
         try {
-            return deviceService.getYunDeviceList(device);
+            Device deviceQry = device.toDevice();
+            if(StringUtils.isNotEmpty(device.getTenantId())){
+                deviceQry.setTenantId(new TenantId(toUUID(device.getTenantId())));
+            }
+            return deviceService.getYunDeviceList(deviceQry);
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -853,11 +857,11 @@ public class DeviceController extends BaseController {
             device.setTenantId(getCurrentUser().getTenantId());
             Device oldDevice = null;
             String saveType = null;
-            TransportMqttClient.TYPE yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_ADD;
+            //TransportMqttClient.TYPE yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_ADD;
             if (!created) {
                 oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
                 saveType = SAVE_TYPE_ADD_UPDATE;
-                yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
+                //yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
             } else {
                 checkEntity(null, device, Resource.DEVICE);
                 saveType = SAVE_TYPE_ADD;
@@ -875,10 +879,10 @@ public class DeviceController extends BaseController {
                 //建立实体关系
                 deviceService.createRelationDeviceFromProductionLine(savedDevice);
             }
-            //云云对接
-            if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
+            //云云对接,过滤网关
+            /*if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && !addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
                 transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
-            }
+            }*/
             savedDevice.setFactoryName(addDeviceDto.getFactoryName());
             savedDevice.setWorkshopName(addDeviceDto.getWorkshopName());
             savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());
@@ -1019,8 +1023,105 @@ public class DeviceController extends BaseController {
             });
         }
         return result;
+    }
+
+    @ApiOperation("查询设备字典下发的设备列表")
+    @ApiImplicitParam(name = "deviceQry" ,value = "入参实体",dataType = "DeviceIssueQry",paramType="query")
+    @RequestMapping(value = "/findDeviceIssueListByCdn", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DeviceIssueVo> findDeviceIssueListByCdn(DeviceIssueQry deviceQry) throws ThingsboardException{
+        List<DeviceIssueVo> result = new ArrayList<>();
+        Device device = deviceQry.toDevice();
+        device.setTenantId(new TenantId(getCurrentUser().getTenantId().getId()));
+        List<Device> deviceListByCdn = deviceService.findDeviceIssueListByCdn(device);
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            deviceListByCdn.forEach(i->{
+                result.add(new DeviceIssueVo(i));
+            });
+        }
+        return result;
 
     }
 
+    @ApiOperation("设备配置下发")
+    @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
+    @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
+    @ResponseBody
+    public void deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, MqttException {
+        //下发入参
+        Map mapIssue = new HashMap();
+        //设备信息
+        List listIssueDevice = new ArrayList();
+        //分组
+        Map<String,List<List<Map<String,String>>>> groupMap = new HashMap<>();
+        //网关令牌
+        List<String> credentials = new ArrayList();
 
+        mapIssue.put("DEVICE",listIssueDevice);
+        mapIssue.put("DRIVER_CONFIG",groupMap);
+
+        if(!CollectionUtils.isEmpty(deviceIssueDto.getDriverConfigList())){
+            //协议类型
+            mapIssue.put("PROTOCOL_TYPE",deviceIssueDto.getType());
+            //驱动版本号
+            mapIssue.put("DRIVER_VERSION",deviceIssueDto.getDriverVersion());
+            for (DeviceIssueDto.DriveConig driveConig : deviceIssueDto.getDriverConfigList()){
+                String codeByDesc = ReadWriteEnum.getCodeByDesc(driveConig.getReadWrite());
+                //校验
+                if(StringUtils.isEmpty(codeByDesc)){
+                    throw new ThingsboardException("读写方向的值不符合规范！",ThingsboardErrorCode.FAIL_VIOLATION);
+                }else {
+                    driveConig.setReadWrite(codeByDesc);
+                }
+                //相同类型的点信息集合
+                List<List<Map<String,String>>> groupList = new ArrayList();
+                //点位(点位详细信息的集合，一条就是一个点位)
+                List<Map<String,String>> pointList = new ArrayList<>();
+                //点位详细信息
+                Map<String,String> map = driveConig.savePointMap();
+                pointList.add(map);
+                groupList.add(pointList);
+                //保存点位分组
+                if(StringUtils.isNotEmpty(driveConig.getCategory())){
+                    if(groupMap.get(driveConig.getCategory()) != null){
+                        //相同类型的点位，归到同一个分组内
+                        groupList.addAll(groupMap.get(driveConig.getCategory()));
+                    }
+                    groupMap.put(driveConig.getCategory(),groupList);
+                }else {
+                    groupMap.put("custom",groupList);
+                }
+            }
+            //设备信息
+            if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
+                listIssueDevice.add(deviceIssueDto.getDeviceList().stream().map(s->s.getDeviceName()).collect(Collectors.toList()));
+            }
+            //查询网关令牌
+            List<String> gateways = deviceIssueDto.getDeviceList().stream().distinct().map(s -> s.getGatewayId()).collect(Collectors.toList());
+            if(!CollectionUtils.isEmpty(gateways)){
+                for (String gateway : gateways) {
+                    DeviceCredentials deviceCredentialsByDeviceId = deviceCredentialsService.findDeviceCredentialsByDeviceId(null, new DeviceId(toUUID(gateway)));
+                    if(deviceCredentialsByDeviceId != null){
+                        credentials.add(deviceCredentialsByDeviceId.getCredentialsId());
+                    }
+                    continue;
+                }
+            }
+            mapIssue.put("DEVICE",listIssueDevice);
+            mapIssue.put("DRIVER_CONFIG",groupMap);
+
+            //下发网关
+           /* if(CollectionUtils.isEmpty(credentials)){
+                for (String credential : credentials) {
+                    Gson gson = new GsonBuilder()
+                            .excludeFieldsWithoutExposeAnnotation()
+                            .create();
+                    MqttMessage message = new MqttMessage(gson.toJson("mapIssue").getBytes());
+                    mqttClient = new MqttClient("47.96.109.1:1883","111qqqq");
+                    mqttClient.publish("device/issue/"+"credential", message);
+                }
+            }*/
+        }
+
+    }
 }

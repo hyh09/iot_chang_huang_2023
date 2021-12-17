@@ -109,18 +109,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public List<Device> getYunDeviceList(Device device){
         List<Device> result = new ArrayList<>();
-        if(device != null){
             Specification<DeviceEntity> specification = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                if(device.getTenantId() != null && device.getTenantId().getId() != null){
-                    predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
-                }
-                if(device.getId() != null && device.getId().getId() != null){
-                    predicates.add(cb.equal(root.get("id"),device.getId().getId()));
-                }
-                if(device.getUpdatedTime() != 0){
-                    // 下面是一个区间查询
-                    predicates.add(cb.lessThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
+                if(device != null){
+                    if(device.getTenantId() != null && device.getTenantId().getId() != null){
+                        predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
+                    }
+                    if(device.getId() != null && device.getId().getId() != null){
+                        predicates.add(cb.equal(root.get("id"),device.getId().getId()));
+                    }
+                    if(device.getUpdatedTime() != 0){
+                        // 下面是一个区间查询
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
+                    }
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -130,7 +131,6 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     result.add(i.toData());
                 });
             }
-        }
         return result;
     }
 
@@ -378,6 +378,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
                     predicates.add(cb.equal(root.get("productionLineId"),device.getProductionLineId()));
                 }
+                if(device.getDictDeviceId() != null && StringUtils.isNotEmpty(device.getDictDeviceId().toString())){
+                    predicates.add(cb.equal(root.get("dictDeviceId"),device.getDictDeviceId()));
+                }
                 //产线id批量
                 if(CollectionUtils.isNotEmpty(device.getProductionLineIds())){
                     // 下面是一个 IN查询
@@ -391,6 +394,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             if(CollectionUtils.isNotEmpty(all)){
                 for (DeviceEntity i : all){
                     Device deviceBo = i.toData();
+                    //是否只要网关
+                    if(device.getOnlyGatewayFlag()){
+                        JsonNode additionalInfo = i.getAdditionalInfo();
+                        if(additionalInfo == null){
+                            continue;
+                        }else {
+                            JsonNode gateway = additionalInfo.get("gateway");
+                            if(gateway == null || !gateway.asBoolean()){
+                                continue;
+                            }
+                        }
+                    }
+                    //是否过滤掉网关
                     if(device.getFilterGatewayFlag()){
                         //过滤网关
                         JsonNode additionalInfo = i.getAdditionalInfo();

@@ -16,6 +16,9 @@ import { DeviceFormComponent } from './factory-mng/device-form.component';
 import { DistributeDeviceComponent } from './factory-mng/distribute-device.component';
 import { DeviceDataGroupNameComponent } from './device-dictionary/device-data-group-name.component';
 import { ProdCapacitySettingsFiltersComponent } from './prod-capacity-settings/prod-capacity-settings-filters.component';
+import { DistributeConfigComponent } from './device-dictionary/distribute-config.component';
+import { DictDeviceTableFilterComponent } from './device-dictionary/dict-device-table-filter.component';
+import { DeviceConfigFormComponent } from './device-dictionary/driver-config-form.componen';
 
 @NgModule({
   imports: [
@@ -37,7 +40,10 @@ import { ProdCapacitySettingsFiltersComponent } from './prod-capacity-settings/p
     DeviceFormComponent,
     DistributeDeviceComponent,
     DeviceDataGroupNameComponent,
-    ProdCapacitySettingsFiltersComponent
+    ProdCapacitySettingsFiltersComponent,
+    DistributeConfigComponent,
+    DictDeviceTableFilterComponent,
+    DeviceConfigFormComponent
   ]
 })
 export class DeviceManagementModule { }
