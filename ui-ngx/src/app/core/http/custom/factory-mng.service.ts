@@ -9,7 +9,7 @@ import { map } from "rxjs/operators";
 interface FetchListFilter {
   name?: string,
   workshopName?: string,
-  productionlineName?: string,
+  productionLineName?: string,
   deviceName?: string
 }
 

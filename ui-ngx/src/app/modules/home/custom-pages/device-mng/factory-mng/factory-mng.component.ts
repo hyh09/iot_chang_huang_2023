@@ -31,7 +31,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
   public filterParams = {
     name: '',
     workshopName: '',
-    productionlineName: '',
+    productionLineName: '',
     deviceName: ''
   }
   public tableData: FactoryTableTreeNode[] = [];
@@ -60,11 +60,11 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
 
   ngAfterViewInit() {
     this.setTableHeight();
-    window.addEventListener('resize', this.setTableHeight);
+    window.addEventListener('resize', () => { this.setTableHeight(); });
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.setTableHeight);
+    window.removeEventListener('resize', () => { this.setTableHeight(); });
   }
 
   setTableHeight() {

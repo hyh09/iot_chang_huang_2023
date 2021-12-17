@@ -17,7 +17,13 @@ export class PermissionResolver implements Resolve<Permissions>  {
   resolve(): Observable<Permissions> {
     return this.tenantMenuService.getUserMenus().pipe(map(menus => {
       let firstPath: string = '';
-      const menuSections: MenuSection[] = [];
+      const menuSections: MenuSection[] = []; /*[{
+        id: '0',
+        name: 'home.home',
+        type: 'link',
+        path: '/path',
+        icon: 'home'
+      }];*/
       const menuMap: { [key: string]: TenantMenu } = {};
       const menuBtnMap: { [key: string]: string[] } = {};
       if (menus) {

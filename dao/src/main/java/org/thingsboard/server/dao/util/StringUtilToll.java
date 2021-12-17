@@ -90,6 +90,23 @@ public class StringUtilToll {
     }
 
 
+
+      /*** 精确乘法　*/
+      public static String mul(String v1, String v2) {
+          String zero ="0";
+          if(v2 == null || v2 == null )
+          {
+              return  zero;
+
+          }
+          BigDecimal b1 = new BigDecimal(v1);
+          BigDecimal b2 = new BigDecimal(v2);
+          BigDecimal bigDecimal=  b1.multiply(b2);
+          String str=  bigDecimal.stripTrailingZeros().toPlainString();
+         return  roundUp(str);
+      }
+
+
     /**
      * 保留4位小数
      */

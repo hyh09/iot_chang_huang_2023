@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Service
 @Slf4j
-public class BaseTimeseriesService implements TimeseriesService {
+public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
 
     private static final int INSERTS_PER_ENTRY = 3;
     private static final int DELETES_PER_ENTRY = INSERTS_PER_ENTRY;

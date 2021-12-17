@@ -39,11 +39,11 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
 
   ngAfterViewInit() {
     this.setTreeHeight();
-    window.addEventListener('resize', this.setTreeHeight);
+    window.addEventListener('resize', () => { this.setTreeHeight(); });
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.setTreeHeight);
+    window.removeEventListener('resize', () => { this.setTreeHeight(); });
   }
 
   setTreeHeight() {
