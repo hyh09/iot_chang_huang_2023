@@ -1183,7 +1183,17 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         List<Device> result = new ArrayList<>();
         //过滤出所有网关
         List<Device> gateways = new ArrayList<>();
+
         if(!CollectionUtils.isEmpty(deviceList)){
+            //查询该租户下所有的网关设备
+            Device qryGateway = new Device();
+            qryGateway.setTenantId(deviceList.get(0).getTenantId());
+            qryGateway.setOnlyGatewayFlag(true);
+            List<Device> gatewayListByTenant = deviceDao.findDeviceListByCdn(qryGateway);
+            if(!CollectionUtils.isEmpty(gatewayListByTenant)){
+                gateways = gatewayListByTenant.stream().distinct().collect(Collectors.toList());
+            }
+
             //1.过滤出所有网关
             Iterator<Device> it = deviceList.iterator();
             while (it.hasNext()){
@@ -1290,6 +1300,11 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         }
         return result;
     }
+    @Override
+    public List<Device> findDevicesByIds(List<UUID> deviceIdList){
+        return deviceDao.getDeviceByIdList(deviceIdList);
+    }
+
 
     private final String Yes="已匹配";
 
