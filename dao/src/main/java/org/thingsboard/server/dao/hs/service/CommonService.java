@@ -32,7 +32,7 @@ public interface CommonService {
             try {
                 BigDecimal bigDecimal = new BigDecimal(t.getValueAsString());
                 if (bigDecimal.scale() > 4) {
-                    return bigDecimal.setScale(4, RoundingMode.HALF_UP).toPlainString();
+                    return bigDecimal.setScale(4, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
                 }
             } catch (Exception ignore) {
             }
