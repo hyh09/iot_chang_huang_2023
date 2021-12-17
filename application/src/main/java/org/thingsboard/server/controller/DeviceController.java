@@ -15,26 +15,30 @@
  */
 package org.thingsboard.server.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.util.concurrent.Future;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.thingsboard.mqtt.MqttClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.thingsboard.mqtt.MqttClientConfig;
 import org.thingsboard.rule.engine.api.msg.DeviceCredentialsUpdateNotificationMsg;
 import org.thingsboard.rule.engine.api.msg.DeviceEdgeUpdateMsg;
 import org.thingsboard.server.common.data.*;
@@ -55,6 +59,8 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.config.MqttMessageListener;
+import org.thingsboard.server.config.TransportMqttClient;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -78,10 +84,11 @@ import javax.persistence.Column;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
-
+@Slf4j
 @Api(value="设备管理Controller",tags={"设备管理口"})
 @RestController
 @TbCoreComponent
@@ -1054,13 +1061,13 @@ public class DeviceController extends BaseController {
     @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
     @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
     @ResponseBody
-    public void deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, MqttException {
+    public Map deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
         //下发入参
         Map mapIssue = new HashMap();
         //设备信息
         List listIssueDevice = new ArrayList();
         //分组
-        Map<String,List<List<Map<String,String>>>> groupMap = new HashMap<>();
+        Map<String,List<Map<String,String>>> groupMap = new HashMap<>();
         //网关令牌
         List<String> credentials = new ArrayList();
 
@@ -1080,28 +1087,25 @@ public class DeviceController extends BaseController {
                 }else {
                     driveConig.setReadWrite(codeByDesc);
                 }
-                //相同类型的点信息集合
-                List<List<Map<String,String>>> groupList = new ArrayList();
                 //点位(点位详细信息的集合，一条就是一个点位)
                 List<Map<String,String>> pointList = new ArrayList<>();
                 //点位详细信息
                 Map<String,String> map = driveConig.savePointMap();
                 pointList.add(map);
-                groupList.add(pointList);
                 //保存点位分组
                 if(StringUtils.isNotEmpty(driveConig.getCategory())){
                     if(groupMap.get(driveConig.getCategory()) != null){
                         //相同类型的点位，归到同一个分组内
-                        groupList.addAll(groupMap.get(driveConig.getCategory()));
+                        pointList.addAll(groupMap.get(driveConig.getCategory()));
                     }
-                    groupMap.put(driveConig.getCategory(),groupList);
+                    groupMap.put(driveConig.getCategory(),pointList);
                 }else {
-                    groupMap.put("custom",groupList);
+                    groupMap.put("custom",pointList);
                 }
             }
             //设备信息
             if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
-                listIssueDevice.add(deviceIssueDto.getDeviceList().stream().map(s->s.getDeviceName()).collect(Collectors.toList()));
+                listIssueDevice.addAll(deviceIssueDto.getDeviceList().stream().map(s->s.getDeviceName()).collect(Collectors.toList()));
             }
             //查询网关令牌
             List<String> gateways = deviceIssueDto.getDeviceList().stream().distinct().map(s -> s.getGatewayId()).collect(Collectors.toList());
@@ -1116,19 +1120,29 @@ public class DeviceController extends BaseController {
             }
             mapIssue.put("DEVICE",listIssueDevice);
             mapIssue.put("DRIVER_CONFIG",groupMap);
-
             //下发网关
-           /* if(CollectionUtils.isEmpty(credentials)){
+            if(!CollectionUtils.isEmpty(credentials)){
                 for (String credential : credentials) {
-                    Gson gson = new GsonBuilder()
-                            .excludeFieldsWithoutExposeAnnotation()
-                            .create();
-                    MqttMessage message = new MqttMessage(gson.toJson("mapIssue").getBytes());
-                    mqttClient = new MqttClient("47.96.109.1:1883","111qqqq");
-                    mqttClient.publish("device/issue/"+"credential", message);
+                    TransportMqttClient transportMqttClient = new TransportMqttClient("tcp://47.96.109.1:1883");
+                    transportMqttClient.initialize();
+                    transportMqttClient.publish(JSONObjectUtils.toJSONString(mapIssue),"device/issue/" + credential);
+                    log.info("下发网关为：" + "device/issue/" + credential);
+                    log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
+                    /*MqttClient mqttClient = getMqttClient(credential);
+                    mqttClient.publish("device/issue/" + credential, Unpooled.wrappedBuffer(mapIssue.toString().getBytes()));
+                    */
                 }
-            }*/
+            }
         }
-
+        return mapIssue;
+    }
+    private MqttClient getMqttClient(String credential) throws ExecutionException, InterruptedException {
+        MqttClientConfig clientConfig = new MqttClientConfig();
+        clientConfig.setClientId("MQTT client from test");
+        clientConfig.setUsername(credential);
+        MqttClient mqttClient = MqttClient.create(clientConfig, null);
+        //mqttClient.connect("localhost", 1883).get();
+        mqttClient.connect("47.96.109.1", 1883);
+        return mqttClient;
     }
 }
