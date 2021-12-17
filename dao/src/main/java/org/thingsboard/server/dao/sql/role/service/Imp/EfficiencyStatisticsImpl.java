@@ -293,7 +293,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            log.info("打印的产能key:{}",keyName);
             vo.setKey(keyName);
         }
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && vo.getFilterFirstFactory())
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
