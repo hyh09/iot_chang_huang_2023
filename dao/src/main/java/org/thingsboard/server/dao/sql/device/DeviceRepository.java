@@ -23,6 +23,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.vo.device.DeviceDataSvc;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
@@ -262,6 +263,15 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
               " LEFT JOIN  WorkshopEntity  w1  ON  w1.id = t.workshopId     LEFT JOIN ProductionLineEntity  p1  ON  p1.id = t.productionLineId  "+
             "  where  t.factoryId=?1 and t.name like  %?2%    ")
     Page<DeviceDataVo> queryAllByNameLike(UUID factoryId, String Name, Pageable pageable);
+
+
+    @Query(nativeQuery = true,value = "select cast(t.id as VARCHAR ), t.name,t.code, cast(f1.id as VARCHAR ) as factoryId, f1.name  as factoryName," +
+            " cast(t.workshop_id as VARCHAR )  as workshopId , w1.name as workshopName," +
+            " cast(t.production_line_id as VARCHAR )   as productionLineId ,p1.name as productionLineName, t.picture " +
+            "from device  t LEFT  JOIN  hs_factory f1  on  t.factory_id = f1.id" +
+            " LEFT JOIN  hs_workshop  w1  ON  w1.id = t.workshop_id     LEFT JOIN hs_production_line  p1  ON  p1.id = t.production_line_id  "+
+            "  where  t.factory_id=?1 and t.name like  %?2%  and  position('\"gateway\":true' in t.additional_info)=0")
+    Page<DeviceDataSvc> queryAllByNameLikeNativeQuery(UUID factoryId, String Name, Pageable pageable);
 
     @Transactional
     @Modifying(clearAutomatically = true)
