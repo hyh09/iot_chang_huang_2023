@@ -6,6 +6,7 @@ export interface UserInfo extends BaseData<UserInfoId> {
   factoryId?: string,
   userCode: string,
   userName: string,
+  userLevel?: number,
   phoneNumber: string,
   email: string,
   activeStatus: string,

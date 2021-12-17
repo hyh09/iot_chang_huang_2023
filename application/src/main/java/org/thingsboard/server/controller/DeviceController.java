@@ -67,6 +67,9 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.dao.model.sql.UserEntity;
+import org.thingsboard.server.dao.util.ReflectionUtils;
 import org.thingsboard.server.entity.device.dto.*;
 import org.thingsboard.server.entity.device.enums.ReadWriteEnum;
 import org.thingsboard.server.entity.device.vo.DeviceIssueVo;
@@ -77,7 +80,9 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -1005,7 +1010,9 @@ public class DeviceController extends BaseController {
                 sortProperty="createdTime";
                 sortOrder="";
             }
-            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            Field field=  ReflectionUtils.getAccessibleField(new DeviceEntity(),sortProperty);
+            Column annotation = field.getAnnotation(Column.class);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, annotation.name(),sortOrder);
 
           return   deviceService.queryAllByNameLike(factoryId,name,pageLink);
 

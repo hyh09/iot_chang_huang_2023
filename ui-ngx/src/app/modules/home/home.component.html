@@ -55,10 +55,9 @@
                 (click)="closeSearch()">
           <mat-icon class="material-icons">arrow_back</mat-icon>
         </button>
-        <tb-breadcrumb [fxShow]="!hideUserHome() && !displaySearchMode()"
+        <tb-breadcrumb [fxShow]="!displaySearchMode()"
              fxFlex [activeComponent]="activeComponent" class="mat-toolbar-tools">
         </tb-breadcrumb>
-        <div *ngIf="hideUserHome()" fxFlex></div>
         <div [fxShow]="displaySearchMode()" fxFlex fxLayout="row" class="tb-dark">
           <mat-form-field fxFlex floatLabel="always">
             <mat-label></mat-label>

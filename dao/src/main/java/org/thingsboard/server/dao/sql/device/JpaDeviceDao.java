@@ -44,6 +44,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
+import org.thingsboard.server.common.data.vo.device.DeviceDataSvc;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
@@ -756,19 +757,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink) {
         Pageable pageable = DaoUtil.toPageable(pageLink);
-        Page<DeviceDataVo> deviceEntityPage =  deviceRepository.queryAllByNameLike(factoryId,name,pageable);
-
-        List<DeviceDataVo>  deviceDataVoList =  deviceEntityPage.getContent();
+//        Page<DeviceDataVo> deviceEntityPage =  deviceRepository.queryAllByNameLike(factoryId,name,pageable);
+        Page<DeviceDataSvc> deviceEntityPage =  deviceRepository.queryAllByNameLikeNativeQuery(factoryId,name,pageable);
+        List<DeviceDataVo>  deviceDataVoList =  DeviceDataVo.toData(deviceEntityPage.getContent());
         List<UUID> idList = deviceDataVoList.stream().map(DeviceDataVo::getDeviceId).collect(Collectors.toList());
-//        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
-//        Map<UUID,String> map1 = new HashMap<>();
-//        list.stream().forEach(l1->{
-//            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
-//            if(attributeKvCompositeKey != null)
-//            {
-//                map1.put(attributeKvCompositeKey.getEntityId(),"1");
-//            }
-//        });
         Map<String, Boolean>   map1= clientService.listDevicesOnlineStatus(idList);
         log.info("打印的queryAllByNameLike.map1{}",map1);
         deviceDataVoList.stream().forEach(d1->{

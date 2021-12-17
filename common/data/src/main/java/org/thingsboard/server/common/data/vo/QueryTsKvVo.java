@@ -53,6 +53,10 @@ public class QueryTsKvVo {
     private UUID tenantId;
 
 
+    //是否获取第一个工厂逻辑
+    private  Boolean filterFirstFactory=true;
+
+
 
     public QueryTsKvVo() {
     }

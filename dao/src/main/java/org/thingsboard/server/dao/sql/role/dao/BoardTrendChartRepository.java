@@ -28,17 +28,17 @@ public class BoardTrendChartRepository implements DefalutSvc {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private  String SELECT_SQL_01="with table1 as (\n" +
-            "    select to_char(to_timestamp(k1.ts / 1000) AT TIME ZONE 'UTC-8', 'yyyy-MM-dd HH24:MI:SS') as time\n" +
-            "         , floor(k1.ts / (1000 * 60 * 60 * 24))                                              as days\n" +
-            "         , k1.*\n" +
+    private  String SELECT_SQL_01="with table1 as ( " +
+            "    select to_char(to_timestamp(k1.ts / 1000) AT TIME ZONE 'UTC-8', 'yyyy-MM-dd HH24:MI:SS') as time" +
+            "         , floor(k1.ts / (1000 * 60 * 60 * 24))   as days,k1.ts, k1.entity_id" +
+            "         , to_number(substring(concat(k1.long_v,k1.dbl_v,k1.str_v),E'(\\\\-?\\\\d+\\\\.?\\\\d*)'),'99999999999999999999999999.9999') as val1 " +
             "    from ts_kv k1  where  k1.ts>= :startTime and k1.ts<=:endTime ";
 
     private  String  SQL_STEP_02=" )";
 
 
    private  String SELECT_SQL_03="select days,sum(va1) as sumValue ,max(ts2)  as time01,min(ts01) as mints ,max(time) as time02 from (\n" +
-           "                   select entity_id, days, max(ts) as ts2,  min(ts) as ts01,(max(long_v) - min(long_v)) as va1, to_char(to_timestamp(max(ts) / 1000) AT TIME ZONE 'UTC-8', 'yyyy-MM-dd HH24:MI:SS')  as time\n" +
+           "                   select entity_id, days, max(ts) as ts2,  min(ts) as ts01,(max(val1) - min(val1)) as va1, to_char(to_timestamp(max(ts) / 1000) AT TIME ZONE 'UTC-8', 'yyyy-MM-dd HH24:MI:SS')  as time\n" +
            "                   from table1    group by entity_id, days\n" +
            "               ) as Table2   group by  days ;";
 
@@ -80,15 +80,7 @@ public class BoardTrendChartRepository implements DefalutSvc {
        param.put("startTime",queryVo.getStartTime());
        param.put("endTime",queryVo.getEndTime());
        query= entityManager.createNativeQuery(actualSql.toString(),"solidTrendLineEntityMap");
-       System.out.println("==param==>"+param);
-       if(!CollectionUtils.isEmpty(param)) {
-           for (Map.Entry<String, Object> entry : param.entrySet()) {
-               query.setParameter(entry.getKey(), entry.getValue());
-           }
-       }
-       List<SolidTrendLineEntity> entityList=query.getResultList();
-       return  entityList;
-
+       return getSolidTrendLineEntities(query, param);
 
 
    }
@@ -104,7 +96,13 @@ public class BoardTrendChartRepository implements DefalutSvc {
         param.put("keyName",vo.getKey());
         param.put("timeGap",ENERGY_TIME_GAP);
         query= entityManager.createNativeQuery(sql.toString(),"dottedLineTrendLineEntityMap");
-        System.out.println("==param==>"+param);
+        return getSolidTrendLineEntities(query, param);
+
+    }
+
+
+
+    private List<SolidTrendLineEntity> getSolidTrendLineEntities(Query query, Map<String, Object> param) {
         if(!CollectionUtils.isEmpty(param)) {
             for (Map.Entry<String, Object> entry : param.entrySet()) {
                 query.setParameter(entry.getKey(), entry.getValue());
@@ -112,21 +110,7 @@ public class BoardTrendChartRepository implements DefalutSvc {
         }
         List<SolidTrendLineEntity> entityList=query.getResultList();
         return  entityList;
-
-   }
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
 
 }
