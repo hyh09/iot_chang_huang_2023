@@ -866,7 +866,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             queryParam.put("name",vo.getDeviceName());
 
         }
-        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryByMap(queryParam, DeviceEntity.class),pageable);
+        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryDeviceByMap(queryParam, DeviceEntity.class),pageable);
         return  DaoUtil.toPageData(pageData);
    }
 
