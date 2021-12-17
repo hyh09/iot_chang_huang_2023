@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.alarm.Alarm;
@@ -280,6 +281,11 @@ public abstract class BaseController {
 
     @Autowired
     protected DefaultTransportService transportService;
+/*
+
+    @Autowired
+    protected MqttClient mqttClient;
+*/
 
     @Value("${server.log_controller_error_stack_trace}")
     @Getter

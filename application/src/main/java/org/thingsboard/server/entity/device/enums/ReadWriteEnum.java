@@ -14,7 +14,7 @@ import java.util.Map;
 @Getter
 public enum ReadWriteEnum {
     READ("READ","只读"),
-    WRITE("READ","只写"),
+    WRITE("WRITE","只写"),
     READ_WRITE("READ_WRITE","读写");
 
     private String code;
