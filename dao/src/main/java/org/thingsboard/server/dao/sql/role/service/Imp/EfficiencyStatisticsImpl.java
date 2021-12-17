@@ -496,6 +496,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
+        dictDeviceDataVos.stream().forEach(m1->{
+            if (StringUtils.isBlank(m1.getTitle())) {
+                m1.setTitle(m1.getName());
+            }});
         Map<String,List<DictDeviceDataVo>> map = dictDeviceDataVos.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
         map.put("部件",getParts( tenantId,deviceInfo.getDictDeviceId()));
         return map;
