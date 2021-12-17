@@ -166,16 +166,17 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
-     * 报警记录-获得报警记录统计信息，按月份
+     * 报警记录-获得指定工厂报警记录统计信息，按月份
      */
-    @ApiOperation(value = "报警记录-获得报警记录统计信息，按月份", notes = "不传工厂id默认为未分配")
+    @ApiOperation(value = "报警记录-获得指定工厂报警记录统计信息，按月份")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query", required = true)
     })
     @GetMapping(value = "/alarmRecord/statistics")
     public List<AlarmTimesResult> getAlarms(
-            @RequestParam(required = false) String factoryId
+            @RequestParam String factoryId
     ) throws ThingsboardException {
+        checkParameter("factoryId", factoryId);
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
         return this.deviceMonitorService.listAlarmRecordStatisticsForApp(getTenantId(), query);
     }
@@ -210,31 +211,33 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
-     * 首页-获得在线设备情况
+     * 首页-获得指定工厂在线设备情况
      */
-    @ApiOperation(value = "首页-获得在线设备情况", notes = "不传工厂id默认为未分配")
+    @ApiOperation(value = "首页-获得指定工厂在线设备情况")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query", required = true)
     })
     @GetMapping(value = "/device/onlineStatus/statistics")
     public DeviceOnlineStatusResult getDeviceOnlineStatusStatistics(
-            @RequestParam(required = false) String factoryId
+            @RequestParam String factoryId
     ) throws ThingsboardException {
+        checkParameter("factoryId", factoryId);
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
         return this.deviceMonitorService.getDeviceOnlineStatusData(getTenantId(), query);
     }
 
     /**
-     * 首页-获得报警记录统计信息，按今日、昨日、历史
+     * 首页-获得指定工厂报警记录统计信息，按今日、昨日、历史
      */
-    @ApiOperation(value = "首页-获得报警记录统计信息，按今日、昨日、历史", notes = "不传工厂id默认为未分配")
+    @ApiOperation(value = "首页-获得指定工厂报警记录统计信息，按今日、昨日、历史")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query", required = true)
     })
     @GetMapping(value = "/alarmRecord/day/statistics")
     public AlarmDayResult getAlarmsDay(
-            @RequestParam(required = false) String factoryId
+            @RequestParam String factoryId
     ) throws ThingsboardException {
+        checkParameter("factoryId", factoryId);
         FactoryDeviceQuery query = new FactoryDeviceQuery().setFactoryId(factoryId);
         return this.deviceMonitorService.getAlarmRecordStatisticByDay(getTenantId(), query);
     }
