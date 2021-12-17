@@ -176,26 +176,29 @@ export class AppComponent implements OnInit {
 
   //改变CSS样式
   changeCss(ui: TenantUIState) {
-    let css = '.tb-default .mat-toolbar.mat-primary{';
+    let css = '.tb-default .mat-toolbar.mat-primary {';
     const cssParser = new cssjs();
     cssParser.testMode = false;
     const namespace = 'global-ui-css-' + hashCode(css);
     cssParser.cssPreviewNamespace = namespace;
     if (ui.platformMainColor) {
-      css = css + 'background-color: ' + ui.platformMainColor + ' !important;';
+      css += `background-color: ${ui.platformMainColor} !important;`;
     }
     if (ui.platformTextMainColor) {
-      css = css + 'color: ' + ui.platformTextMainColor + ' !important;';
+      css += `color: ${ui.platformTextMainColor} !important;`;
     }
     css = css + '}';
+    if (ui.platformSecondColor) {
+      css += `.tb-default .tb-menu-toggle-list {background-color: ${ui.platformSecondColor}}`;
+    }
     if (ui.platformButtonColor) {
-      css = css + '.tb-default .mat-raised-button.mat-primary{background-color: ' + ui.platformButtonColor + ' !important;}';
+      css += `.tb-default button.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-icon-button):not(.mat-button-disabled){background-color: ${ui.platformButtonColor} !important;}`;
     }
     if (ui.platformMenuColorActive) {
-      css = css + '.tb-default li.ng-star-inserted .mat-button.tb-active {background-color: ' + ui.platformMenuColorActive + ';}';
+      css += `.tb-default li.ng-star-inserted .mat-button.tb-active {background-color: ${ui.platformMenuColorActive} !important;}`;
     }
     if (ui.platformMenuColorHover) {
-      css = css + '.tb-default li.ng-star-inserted .mat-button:hover {background-color: ' + ui.platformMenuColorHover + ';}';
+      css += `.tb-default li.ng-star-inserted .mat-button:hover {background-color: ${ui.platformMenuColorHover};}`;
     }
     cssParser.createStyleElement(namespace, css, 'nonamespace');
   }

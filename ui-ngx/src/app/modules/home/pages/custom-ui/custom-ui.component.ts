@@ -42,11 +42,11 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
   ngOnInit(): void {
     this.customUiFormGroup.valueChanges.subscribe(data => {
       Reflect.ownKeys(data).forEach(key => data[key.toString()] = data[key.toString()] === '' ? null : data[key.toString()]);
-      if(JSON.stringify(this.initData) !== JSON.stringify(data)){
+      if (JSON.stringify(this.initData) !== JSON.stringify(data)) {
         this.isDirty = true;
         this.previousData = data;
         this.store.dispatch(new ActionTenantUIChangeAll(data));
-      }else{
+      } else {
         this.isDirty = false;
         if(JSON.stringify(this.previousData) !== JSON.stringify(data)){
           this.store.dispatch(new ActionTenantUIChangeAll(data));
@@ -60,6 +60,7 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
       this.systemMngService.getSystemVersion().subscribe(res => {
         ui.platformVersion = (res || {}).version;
         this.patchFormValue(ui);
+        this.isDirty = false;
         this.initData = this.customUiFormGroup.value;
         this.previousData = this.customUiFormGroup.value;
       });
@@ -67,18 +68,7 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
   }
 
   patchFormValue(ui: UIInfo | TenantUIState) {
-    this.customUiFormGroup.get('applicationTitle').patchValue(ui.applicationTitle);
-    this.customUiFormGroup.get('iconImageUrl').patchValue(ui.iconImageUrl);
-    this.customUiFormGroup.get('logoImageUrl').patchValue(ui.logoImageUrl);
-    this.customUiFormGroup.get('logoImageHeight').patchValue(ui.logoImageHeight);
-    this.customUiFormGroup.get('platformMainColor').patchValue(ui.platformMainColor);
-    this.customUiFormGroup.get('platformTextMainColor').patchValue(ui.platformTextMainColor);
-    this.customUiFormGroup.get('platformButtonColor').patchValue(ui.platformButtonColor);
-    this.customUiFormGroup.get('platformMenuColorActive').patchValue(ui.platformMenuColorActive);
-    this.customUiFormGroup.get('platformMenuColorHover').patchValue(ui.platformMenuColorHover);
-    this.customUiFormGroup.get('showNameVersion').patchValue(ui.showNameVersion);
-    this.customUiFormGroup.get('platformName').patchValue(ui.platformName);
-    this.customUiFormGroup.get('platformVersion').patchValue(ui.platformVersion);
+    this.customUiFormGroup.patchValue(ui);
   }
 
   //恢复到tb原始设置
@@ -106,6 +96,7 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
       logoImageUrl: [null, []],
       logoImageHeight: [null, []],
       platformMainColor: [null, []],
+      platformSecondColor: [null, []],
       platformTextMainColor: [null, []],
       platformButtonColor: [null, []],
       platformMenuColorActive: [null, []],

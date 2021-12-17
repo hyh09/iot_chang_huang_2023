@@ -1072,7 +1072,7 @@ mat-label {
 button {
   &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-icon-button):not(.mat-button-disabled) {
     color: #fff;
-    background-color: #2367fa !important;
+    background-color: #2367fa;
   }
   &.mat-icon-button .mat-button-wrapper {
     height: 24px;
