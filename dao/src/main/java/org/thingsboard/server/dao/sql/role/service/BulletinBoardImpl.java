@@ -33,6 +33,7 @@ import org.thingsboard.server.dao.sql.role.dao.EffectMaxValueKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.SolidTrendLineEntity;
+import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -70,13 +71,21 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TrendVo resultResults = new TrendVo();
 
         try {
+
+
             String key = getKeyNameBy(vo.getKey());
             log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
             vo.setKey(key);
+            Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
+            DictDeviceGroupPropertyVO dictDeviceGroupPropertyVO=  mapNameToVo.get(key);
+
             List<SolidTrendLineEntity> solidTrendLineEntities = boardTrendChartRepository.getSolidTrendLine(vo);
             printSolidLineLog(solidTrendLineEntities);
             resultResults.setSolidLine(convertSolidLineData(solidTrendLineEntities));
-            resultResults.setDottedLine(convertSolidLineDataTest(solidTrendLineEntities));
+            List<SolidTrendLineEntity> dottedTrendLineList = boardTrendChartRepository.getDottedTrendLine(vo);
+            Map<String, Long> map = dottedTrendLineList.stream().collect(Collectors.toMap(SolidTrendLineEntity::getDays, SolidTrendLineEntity::getTime01));
+            printSolidLineLog01(dottedTrendLineList);
+            resultResults.setDottedLine(convertSolidLineDataTest(solidTrendLineEntities,map,dictDeviceGroupPropertyVO));
             return resultResults;
         }catch (Exception e)
         {
@@ -320,6 +329,22 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         }
     }
 
+    private  void  printSolidLineLog01(List<SolidTrendLineEntity>  solidTrendLineEntities )
+    {
+        if(log.isInfoEnabled())
+        {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                String solidTrendLineEntitiesJson = mapper.writeValueAsString(solidTrendLineEntities);
+                log.info("看板的能耗趋势图-实线的数据 虚线返回{}",solidTrendLineEntitiesJson);
+            } catch (JsonProcessingException e) {
+                log.error("打印的异常：{}",e);
+            }
+
+        }
+    }
+
+
 
     private  List<TrendLineVo> convertSolidLineData(List<SolidTrendLineEntity>  solidTrendLineEntities)
     {
@@ -340,7 +365,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     }
 
 
-    private  List<TrendLineVo> convertSolidLineDataTest(List<SolidTrendLineEntity>  solidTrendLineEntities)
+    private  List<TrendLineVo> convertSolidLineDataTest(List<SolidTrendLineEntity>  solidTrendLineEntities,Map<String, Long> map ,
+                                                        DictDeviceGroupPropertyVO dictDeviceGroupPropertyVO)
     {
         List<TrendLineVo>  trendLineVos = new ArrayList<>();
         //
@@ -349,10 +375,21 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             log.info("当前查询到的实线数据为空,返回空集合");
             return   trendLineVos;
         }
+        String content =   dictDeviceGroupPropertyVO.getContent();
         trendLineVos =   solidTrendLineEntities.stream().map(m ->{
             TrendLineVo  trendLineVo = new TrendLineVo();
             trendLineVo.setTime(m.getTime01());
-            trendLineVo.setValue(m.getSumValue()+1);
+            Long value01 = map.get(m.getDays());
+            if(value01 == null)
+            {
+                value01 = 0L;
+            }
+            Long  count =(( m.getTime01()-m.getMints()) -value01);
+
+            String  va=   StringUtilToll.mul(count.toString(),content);
+            log.info("运算得规则：{}减去{}再减去总得耗时得{}再乘以{}=count{}===>va{}",m.getTime01(),m.getMints(),value01,content,count,va);
+
+            trendLineVo.setValue(va);
             return trendLineVo;
         }).collect(Collectors.toList());
         return  trendLineVos;

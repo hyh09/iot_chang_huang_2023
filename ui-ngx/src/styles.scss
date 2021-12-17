@@ -1148,6 +1148,12 @@ button.link-button {
   }
 }
 
+th[required]:after {
+  display: inline-block;
+  content: '*';
+  margin-left: 3px;
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {

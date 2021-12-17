@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.transport.mqtt.TransportMqttClient;
 import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
@@ -45,8 +44,8 @@ public class DictDeviceController extends BaseController {
     @Autowired
     DictDeviceService dictDeviceService;
 
-    @Autowired
-    DefaultTransportService defaultTransportService;
+//    @Autowired
+//    DefaultTransportService defaultTransportService;
 
     /**
      * 获得设备字典界面资源
@@ -131,14 +130,14 @@ public class DictDeviceController extends BaseController {
 //        CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
 //        CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
         CommonUtil.checkDuplicateName(dictDeviceVO, Sets.newHashSet());
-        boolean isSave = false;
-        if (StringUtils.isNotBlank(dictDeviceVO.getId()))
-            isSave = true;
+//        boolean isSave = false;
+//        if (StringUtils.isNotBlank(dictDeviceVO.getId()))
+//            isSave = true;
         var savedDictDeviceVO = this.dictDeviceService.saveOrUpdateDictDevice(dictDeviceVO, getTenantId());
-        if (isSave)
-            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_ADD);
-        else
-            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_UPDATE);
+//        if (isSave)
+//            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_ADD);
+//        else
+//            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_UPDATE);
         return savedDictDeviceVO;
     }
 

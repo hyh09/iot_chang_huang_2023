@@ -9,8 +9,9 @@ CREATE TABLE IF NOT EXISTS public.tb_enery_time_gap
     updated_time bigint,
     updated_user uuid,
     entity_id uuid,
-    ts character varying(255) COLLATE pg_catalog."default",
+    key_name character varying(255) COLLATE pg_catalog."default",
     time_gap bigint,
-    key bigint,
+    ts bigint,
+    value character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT tb_enery_time_gap_pkey PRIMARY KEY (id)
 )

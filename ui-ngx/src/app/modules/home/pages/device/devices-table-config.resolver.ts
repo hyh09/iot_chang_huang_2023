@@ -87,7 +87,6 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
               private homeDialogs: HomeDialogsService,
               private translate: TranslateService,
               private datePipe: DatePipe,
-              private router: Router,
               private dialog: MatDialog) {
 
     this.config.entityType = EntityType.DEVICE;
