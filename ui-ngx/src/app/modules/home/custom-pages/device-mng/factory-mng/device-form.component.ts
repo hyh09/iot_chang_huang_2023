@@ -60,7 +60,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
     this.mapOfExpandedComp = {};
     this.mapOfCompControl = {};
     this.expandedCompCode = [];
-    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
+    const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     return this.fb.group({
       factoryId: [entity && entity.factoryId ? entity.factoryId : this.entitiesTableConfig.componentsData.factoryId],
       factoryName: [entity && entity.factoryName ? entity.factoryName : this.entitiesTableConfig.componentsData.factoryName],
@@ -79,6 +79,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       model: [entity ? entity.model : ''],
       warrantyPeriod: [entity ? entity.version : ''],
       version: [entity ? entity.version : ''],
+      standardPropertyList: this.fb.array(standardPropControls),
       propertyList: this.fb.array(propertyListControls),
       groupList: this.fb.array(groupListControls),
       componentList: this.fb.array(compControls)
@@ -86,8 +87,9 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
 
   updateForm(entity: ProdDevice) {
-    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
+    const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
+    this.entityForm.controls.standardPropertyList = this.fb.array(standardPropControls);
     this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
@@ -96,6 +98,12 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
 
   generateFromArray(entity: ProdDevice): { [key: string]: Array<AbstractControl> } {
+    const standardPropControls: Array<AbstractControl> = [];
+    if (entity && entity.standardPropertyList && entity.standardPropertyList.length > 0) {
+      for (const property of entity.standardPropertyList) {
+        standardPropControls.push(this.createDeviceDataControl(property));
+      }
+    }
     const propertyListControls: Array<AbstractControl> = [];
     if (entity && entity.propertyList && entity.propertyList.length > 0) {
       for (const property of entity.propertyList) {
@@ -114,14 +122,14 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
         compControls.push(this.createCompListControl(comp));
       }
     }
-    return { propertyListControls, groupListControls, compControls }
+    return { standardPropControls, propertyListControls, groupListControls, compControls }
   }
 
   onDeviceDicChange(dictDeviceId: string) {
     if (dictDeviceId) {
       this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDictInfo => {
-        const { comment, picture, fileName, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList } = deviceDictInfo;
-        this.updateForm({ comment, picture, fileName, type, supplier, model, warrantyPeriod, version, propertyList, groupList, componentList });
+        const { comment, picture, fileName, type, supplier, model, warrantyPeriod, version, standardPropertyList, propertyList, groupList, componentList } = deviceDictInfo;
+        this.updateForm({ comment, picture, fileName, type, supplier, model, warrantyPeriod, version, standardPropertyList, propertyList, groupList, componentList });
         this.stopExpandPropagation();
       });
     } else {
@@ -134,6 +142,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
         model: '',
         warrantyPeriod: '',
         version: '',
+        standardPropertyList: [],
         propertyList: [],
         groupList: [],
         componentList: []
@@ -166,6 +175,13 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
 
   /**
+   * @description 标准能耗相关方法
+   */
+   standardPropFormArray(): FormArray {
+    return this.entityForm.get('standardPropertyList') as FormArray;
+  }
+
+  /**
    * @description 设备参数相关方法
    */
   deviceDataGroupFormArray(): FormArray {
@@ -179,7 +195,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       name: [data ? data.name : ''],
       content: [data ? data.content: ''],
       title: [data ? data.title : ''],
-      dictDataId: [data ? data.dictDataId : '']
+      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {
