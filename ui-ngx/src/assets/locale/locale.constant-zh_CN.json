@@ -2355,7 +2355,7 @@
     "sign-in": "登录 ",
     "slide-to-validate": "拖动滑块验证",
     "slide-verified": "验证通过",
-    "username": "用户名（邮箱）"
+    "username": "用户名 (邮箱)"
   },
   "ota-update": {
     "add": "添加包",
@@ -3229,7 +3229,7 @@
     "guarantee": "保修期（天）",
     "picture": "设备图片",
     "device-model": "设备模型",
-    "standard-prop": "标准能耗",
+    "standard-prop": "额定能耗 (每小时)",
     "standard-prop-required": "标准值必填",
     "device-prop": "设备属性",
     "add-device-prop": "添加设备属性",
