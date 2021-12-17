@@ -37,6 +37,8 @@ export interface HomeSection {
 }
 
 export interface HomeSectionPlace {
+  id?: string;
+  parentId?: string;
   name: string;
   icon: string;
   isMdiIcon?: boolean;

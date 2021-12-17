@@ -5,6 +5,7 @@ export interface TenantUIState{
   logoImageUrl?: string;
   logoImageHeight?: string;
   platformMainColor?: string;
+  platformSecondColor?: string;
   platformTextMainColor?: string;
   platformButtonColor?: string;
   platformMenuColorActive?: string;
