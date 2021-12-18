@@ -200,7 +200,7 @@ public class EffectTsKvRepository {
         {
             sonSql01.append(" and  d1.factory_id = :factoryId");
             param.put("factoryId", queryTsKvVo.getFactoryId());
-            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+         //   sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
 
         }
         if(queryTsKvVo.getWorkshopId() != null)
