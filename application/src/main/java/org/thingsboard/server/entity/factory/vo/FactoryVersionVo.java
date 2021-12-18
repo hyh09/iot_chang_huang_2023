@@ -19,6 +19,8 @@ public class FactoryVersionVo {
     private Boolean active;
     @ApiModelProperty("网关设备名称")
     private String gatewayName;
+    @ApiModelProperty("工厂logo")
+    private String logoImages;
 
     public FactoryVersionVo(){}
 
@@ -28,6 +30,7 @@ public class FactoryVersionVo {
         this.publishTime =factory.getPublishTime();
         this.gatewayName = factory.getGatewayName();
         this.active = factory.getActive();
+        this.logoImages = factory.getLogoImages();
     }
 
 }
