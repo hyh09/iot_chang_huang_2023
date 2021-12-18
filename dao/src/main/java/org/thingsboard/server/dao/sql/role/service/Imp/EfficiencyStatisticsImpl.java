@@ -442,8 +442,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
              log.info("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
         Map<String, DeviceDictionaryPropertiesVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(DeviceDictionaryPropertiesVo::getName, a -> a,(k1,k2)->k1));
-
-        List<String> keyNames=   propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+        List<String> keyNames=  vo.getKeyNames();
+        if(CollectionUtils.isEmpty(keyNames)) {
+            List<String>   keyNames01= propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+            keyNames =   keyNames01.stream().limit(3).collect(Collectors.toList());
+        }
         log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
            List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
              log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
