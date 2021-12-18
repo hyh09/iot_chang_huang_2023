@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,4 +27,7 @@ public class QueryRunningStatusVo {
 
     @ApiModelProperty("设备id UUID类型")
     private UUID deviceId;
+
+    @ApiModelProperty("所属属性的name;")
+    List<String> keyNames;
 }
