@@ -939,7 +939,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     predicates.add(cb.like(root.get("name"),"%" + pageLink.getTextSearch().trim() + "%"));
                 }
                 if(StringUtils.isNotEmpty(device.getType())){
-                    predicates.add(cb.equal(root.get("type"),device.getType()));
+                    predicates.add(cb.like(root.get("type"),"%" + device.getType().trim() + "%"));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));
