@@ -205,7 +205,6 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
             if(CollectionUtils.isNotEmpty(gatewayNewVersionByFactory)){
                 for(Device m : gatewayNewVersionByFactory){
                     //筛选网关设备名称
-
                     if(StringUtils.isNotEmpty(m.getFactoryName()) && StringUtils.isNotEmpty(factory.getGatewayName())){
                         int i = m.getFactoryName().indexOf(factory.getGatewayName());
                         if(i == -1){
@@ -216,6 +215,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
                     Factory factoryName = factoryByRole.stream().filter(f -> f.getId().toString().equals(m.getFactoryId().toString())).collect(Collectors.toList()).stream().findFirst().get();
                     if(factoryName != null){
                         rstFactory.setName(factoryName.getName());
+                        rstFactory.setLogoImages(factoryName.getLogoImages());
                     }
                     rstFactory.setFactoryVersion(m.getGatewayVersion());
                     if(m.getGatewayUpdateTs() != null){
