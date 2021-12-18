@@ -262,10 +262,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);//包含了总产能的
 
-//        ObjectMapper mapper = new ObjectMapper();
-//        String jsonlist = mapper.writeValueAsString(vos);
-//        log.info("输出打印的所有的能耗的数据:{}",jsonlist);
-
         List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName, headerList);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
         headerList.stream().forEach(str->{
@@ -274,7 +270,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             String title =StringUtils.isBlank(dvo.getTitle())?dvo.getName():dvo.getTitle();
             totalValueList.add(title+": "+getTotalValue(effectTsKvEntities, str)+ " ("+dvo.getUnit()+")");
         });
-        return new PageDataAndTotalValue<Map>(totalValueList,todataByList(resultList, mapNameToVo ), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+        return new PageDataAndTotalValue<Map>(totalValueList,todataByList(resultList, mapNameToVo,keys1 ), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     /**
@@ -755,25 +751,30 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
-
-
-
-
-    private  List<Map>  todataByList(List<PcDeviceEnergyVo>  resultList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo )
+    /**
+     *
+     * @param resultList 返回的的数据
+     * @param mapNameToVo
+     * @return
+     */
+    private  List<Map>  todataByList(List<PcDeviceEnergyVo>  resultList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,List<String>  keys1 )
     {
         List<Map>  mapList = new ArrayList<>();
-//        Map<String,String>  mapUnit  = dictDeviceService.getUnit();
-
         resultList.stream().forEach(vo->{
             Map   map = new HashMap();
             map.put(HEADER_0,vo.getDeviceName());
             map.put(HEADER_DEVICE_ID,vo.getDeviceId());
             Map<String,String> mapData = vo.getMapValue();
+
+             getDefaultMap(keys1,mapData);
+
+
             mapData.forEach((k1,v1)->{
                 DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k1);
                 map.put(getHomeKeyNameOnlyUtilNeW(dictVO),v1);
             });
             Map<String,String> mapData1 = vo.getMapUnitValue();
+            getDefaultMap(keys1,mapData1);
             mapData1.forEach((k1,v1)->{
                 DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k1);
                 map.put(getHomeKeyNameByUtilNeW(dictVO),v1);
@@ -892,6 +893,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         return  voList;
 
+
+    }
+
+
+    /**
+     * 返回默认的
+     * 耗水量: 0 (T)
+     * 耗电量: 0 (KWH)
+     * 耗气量: 0 (T)
+     * @return
+     */
+    private  Map  getDefaultMap(List<String>  keys, Map<String,String> mapData01)
+    {
+//        Map<String,String> mapData  = new HashMap<>();
+        keys.stream().forEach(str->{
+            if(StringUtils.isBlank(mapData01.get(str))) {
+                mapData01.put(str, "0");
+            }
+        });
+        return  mapData01;
 
     }
 }
