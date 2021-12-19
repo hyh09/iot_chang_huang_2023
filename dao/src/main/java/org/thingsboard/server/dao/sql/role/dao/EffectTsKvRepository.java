@@ -175,12 +175,6 @@ public class EffectTsKvRepository {
         Map<String, Object> param = new HashMap<>();
         StringBuffer  sonSql = new StringBuffer();
 
-//        if(StringUtils.isNotBlank(queryTsKvVo.getKey()))
-//        {
-//            sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)  ) ");
-//            param.put("key", queryTsKvVo.getKey());
-//        }
-
         if(!CollectionUtils.isEmpty(key))
         {
             sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)   ) ");

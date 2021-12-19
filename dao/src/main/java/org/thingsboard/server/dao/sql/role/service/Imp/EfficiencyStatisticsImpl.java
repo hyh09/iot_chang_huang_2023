@@ -15,10 +15,7 @@ import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.vo.CustomException;
-import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -436,8 +433,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId tenantId,PageLink pageLink) throws ThingsboardException {
              log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
+
         List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
              log.info("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
@@ -453,7 +451,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
            Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
                      log.info("查询到的当前设备{}的配置的keys属性:{}###mapDict:{}",vo.getDeviceId(),keys,mapDict);
-           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(vo.getDeviceId(),keys,vo.getStartTime(),vo.getEndTime());
+           List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTimePage(vo.getDeviceId(),keys,vo.getStartTime(),vo.getEndTime(), DaoUtil.toPageable(pageLink));
                 log.info("查询到的当前设备{}的配置的entities属性:{}",vo.getDeviceId(),entities);
            List<TsKvEntry> tsKvEntries  = new ArrayList<>();
             entities.stream().forEach(tsKvEntity -> {
