@@ -32,14 +32,14 @@ public class EffectTsKvRepository {
     public static  String FIND_SON_QUERY="select  " +
             " row_number() OVER (PARTITION BY (CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar )) ORDER BY ts )  rn, " +
             "CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar ) id, " +
-            "a1.entity_id,a1.key,a1.ts,  substring(concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v),E'(\\\\-?\\\\d+\\\\.?\\\\d*)') as valueLast  " +
+            "a1.entity_id,a1.key,a1.ts,  concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v) as valueLast  " +
             "from ts_kv  a1  where  a1.ts >=:startTime  and  a1.ts<= :endTime";
 
 
     public static  String FIND_SON_QUERY_02="select  " +
             " row_number() OVER (PARTITION BY (CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar )) ORDER BY ts desc )  rn, " +
             "CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar ) id, " +
-            "a1.entity_id,a1.key,a1.ts,  substring(concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v),E'(\\\\-?\\\\d+\\\\.?\\\\d*)') as valueLast   " +
+            "a1.entity_id,a1.key,a1.ts,  concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v) as valueLast   " +
             "from ts_kv  a1  where  a1.ts >=:startTime  and  a1.ts<= :endTime ";
 
 
@@ -120,7 +120,7 @@ public class EffectTsKvRepository {
         }
         if(queryTsKvVo.getDeviceId() == null)
         {
-         //   sonSql01.append(" and  d1.flg = true");
+            sonSql01.append(" and  d1.flg = true");
         }else {
             sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
