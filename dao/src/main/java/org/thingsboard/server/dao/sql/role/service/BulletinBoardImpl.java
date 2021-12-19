@@ -141,11 +141,21 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Override
     public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId) {
         List<String>  keys1 = new ArrayList<>();
+//        vo.setDeviceId(UUID.fromString("ac0297b3-5656-11ec-a240-955d7c1497e4"));
+
+
         keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         vo.setKeys(keys1);
         Map<String, DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
           List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
         log.info("查询到的数据{}",effectTsKvEntities);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String solidTrendLineEntitiesJson = mapper.writeValueAsString(effectTsKvEntities);
+            log.info("查询到的数据的数据返回{}",solidTrendLineEntitiesJson);
+        } catch (JsonProcessingException e) {
+            log.error("打印的异常：{}",e);
+        }
         Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
         return   getEntityKeyValue(map,tenantId,mapNameToVo);
     }
@@ -196,45 +206,51 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         List<TkTodayVo> gasList = new ArrayList<>();
 
         listMap.forEach((entityId,value)->{
-            TkTodayVo  tkTodayVo  =  new TkTodayVo();
 
-            tkTodayVo.setDeviceId(entityId.toString());
+
             EffectTsKvEntity  entity1 =value.get(0);
-            if(entity1 != null) {
-                tkTodayVo.setDeviceName(entity1.getDeviceName());
-                tkTodayVo.setTotalValue(entity1.getLocalValue());
-                tkTodayVo.setFactoryId(entity1.getFactoryId());
-
-                if (entity1.getFactoryId() != null) {
-                    Factory  factory =  factoryDao.findById(entity1.getFactoryId());
-                    tkTodayVo.setFactoryName(factory!=null?factory.getName():"");
-                }
 
 
                 value.stream().forEach(effectTsKvEntity -> {
                     DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(effectTsKvEntity.getKeyName());
                     if(dictVO != null){
+                        TkTodayVo  tkTodayVo  =  new TkTodayVo();
+                        tkTodayVo.setDeviceId(entityId.toString());
+                        if(entity1 != null) {
+                            tkTodayVo.setDeviceName(entity1.getDeviceName());
+                            tkTodayVo.setFactoryId(entity1.getFactoryId());
+                            if (entity1.getFactoryId() != null) {
+                                Factory factory = factoryDao.findById(entity1.getFactoryId());
+                                tkTodayVo.setFactoryName(factory != null ? factory.getName() : "");
+                            }
+                        }
 
 
                             if(dictVO.getTitle().equals(KeyTitleEnums.key_cable.getgName()))
                             {
                                 tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                tkTodayVo.setTotalValue(effectTsKvEntity.getLocalValue());
+                                tkTodayVo.setTs(effectTsKvEntity.getTs());
                                 electricList.add(tkTodayVo);
                             }
                             if(dictVO.getTitle().equals(KeyTitleEnums.key_gas.getgName()))
                             {
                                 tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                tkTodayVo.setTotalValue(effectTsKvEntity.getLocalValue());
+                                tkTodayVo.setTs(effectTsKvEntity.getTs());
                                 gasList.add(tkTodayVo);
                             }
                             if(dictVO.getTitle().equals(KeyTitleEnums.key_water.getgName()))
                             {
                                 tkTodayVo.setValue(effectTsKvEntity.getValueLast2());
+                                tkTodayVo.setTotalValue(effectTsKvEntity.getLocalValue());
+                                tkTodayVo.setTs(effectTsKvEntity.getTs());
                                 waterList.add(tkTodayVo);
                             }
                     }
                 });
 
-            }
+
 
         });
         appVo.setElectricList(compareToMaxToMin(electricList));

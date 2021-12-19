@@ -47,7 +47,9 @@ import java.util.UUID;
                                         @ColumnResult(name = "productionLineId",type = UUID.class),
                                        @ColumnResult(name = "ts2",type=Long.class),
                                        @ColumnResult(name = "valueLast",type = String.class),
-                                        @ColumnResult(name = "valueLast2",type = String.class)
+                                        @ColumnResult(name = "valueLast2",type = String.class),
+
+                                        @ColumnResult(name = "localValue",type = String.class)
 
                                 }
                         ),
@@ -121,7 +123,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
 
     public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,Long ts,Integer key,String keyName,String deviceName,String picture,Boolean  flg,
-                             UUID factoryId, UUID workshopId, UUID productionLineId, Long ts2, String valueLast, String valueLast2){
+                             UUID factoryId, UUID workshopId, UUID productionLineId, Long ts2, String valueLast, String valueLast2,String  localValue){
 
         this.onlyKeyId = onlyKeyId;
         this.entityId =entityId;
@@ -141,6 +143,8 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
         this.ts2 = ts2;
         this.valueLast = valueLast;
         this.valueLast2 = valueLast2;
+
+        this.localValue = localValue;
     }
 
 
@@ -160,7 +164,7 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     public  void  subtraction()
     {
 
-        localValue = valueLast2;
+//        localValue = valueLast2;
         //如果时间不相同的时候 代表有最大值 和最小值
         if(ts == null || ts2 == null)
         {

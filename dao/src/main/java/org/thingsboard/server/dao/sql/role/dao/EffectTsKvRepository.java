@@ -60,7 +60,7 @@ public class EffectTsKvRepository {
     public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.flg ,d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
     public  static  String  SELECT_START_CAP=" table3.key as key,(select key from ts_kv_dictionary  where  key_id= table3.key ) as keyName," +
             " table3.onlyKeyId as onlyKeyId, table3.ts1 as ts, table3.valueLast1 as valueLast, " +
-            "     table3.ts2 as ts2, table3.valueLast2  as valueLast2  ";
+            "     table3.ts2 as ts2, table3.valueLast2  as valueLast2 ,table3.valueLast2 as localValue ";
 
     public  static  String  FROM_QUERY_CAP="    from   device  d1 left join  (select table1.id  as onlyKeyId, table1.entity_id ," +
             "        table1.key as key," +
