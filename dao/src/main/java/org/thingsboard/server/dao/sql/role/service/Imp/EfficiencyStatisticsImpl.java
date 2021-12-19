@@ -441,15 +441,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         Map<String, DeviceDictionaryPropertiesVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(DeviceDictionaryPropertiesVo::getName, a -> a,(k1,k2)->k1));
         List<String> keyNames=  vo.getKeyNames();
+        List<String> keyPages = new ArrayList<>();
         if(CollectionUtils.isEmpty(keyNames)) {
             List<String>   keyNames01= propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
-            keyNames =   keyNames01.stream().limit(3).collect(Collectors.toList());
+            keyPages =   keyNames01.stream().limit(3).collect(Collectors.toList());
         }else {
-            keyNames.stream().skip((vo.getPage()-1)*vo.getPageSize()).limit(vo.getPageSize()).collect(Collectors.toList());
+            keyPages=  keyNames.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).collect(Collectors.toList());
+
         }
 
-        log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
-           List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
+           List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyPages);
              log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
            Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
@@ -475,6 +476,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             }).collect(Collectors.toList());
        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
       log.info("查询到的当前的数据:{}",map);
+        log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
+
         return map;
     }
 
