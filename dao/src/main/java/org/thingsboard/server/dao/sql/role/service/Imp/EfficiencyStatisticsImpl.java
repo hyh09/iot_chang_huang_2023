@@ -578,7 +578,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities)
     {
 
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(m->m.getFlg().equals(true)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+//        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(m->m.getFlg().equals(true)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+//                BigDecimal::add);
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         return   StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
