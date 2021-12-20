@@ -20,6 +20,7 @@ import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.nio.file.LinkOption;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -132,7 +133,13 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setStartTime(startTime);
             queryTsKvVo.setEndTime(endTime);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-            return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId(), pageLink);
+            Long lo1 = System.currentTimeMillis();
+            PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId(), pageLink);
+            Long lo2 = System.currentTimeMillis();
+            Long t3 = lo2-lo1;
+            log.info("--耗时时间--：{}毫秒",t3);
+            return  obj;
+
         }catch (Exception e)
         {
             log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}",e);

@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @ToString
 @ApiModel(value = "查询运行状态入参")
-public class QueryRunningStatusVo {
+public class AppQueryRunningStatusVo {
 
     @ApiModelProperty("起始时间 Long类型 ")
     private Long startTime;
@@ -30,4 +30,12 @@ public class QueryRunningStatusVo {
 
     @ApiModelProperty("所属属性的name;")
     List<String> keyNames;
+
+    @ApiModelProperty("分页的大小;")
+   private   int pageSize=3;
+    @ApiModelProperty("分页的大小;")
+    private int page=0;
+    private  String textSearch;
+    private String sortProperty;
+    private  String sortOrder;
 }

@@ -32,14 +32,14 @@ public class EffectTsKvRepository {
     public static  String FIND_SON_QUERY="select  " +
             " row_number() OVER (PARTITION BY (CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar )) ORDER BY ts )  rn, " +
             "CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar ) id, " +
-            "a1.entity_id,a1.key,a1.ts,  substring(concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v),E'(\\\\-?\\\\d+\\\\.?\\\\d*)') as valueLast  " +
+            "a1.entity_id,a1.key,a1.ts,  concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v) as valueLast  " +
             "from ts_kv  a1  where  a1.ts >=:startTime  and  a1.ts<= :endTime";
 
 
     public static  String FIND_SON_QUERY_02="select  " +
             " row_number() OVER (PARTITION BY (CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar )) ORDER BY ts desc )  rn, " +
             "CAST (concat(cast(a1.entity_id as VARCHAR ) ,'#',cast(a1.key as varchar) ) as varchar ) id, " +
-            "a1.entity_id,a1.key,a1.ts,  substring(concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v),E'(\\\\-?\\\\d+\\\\.?\\\\d*)') as valueLast   " +
+            "a1.entity_id,a1.key,a1.ts,  concat(a1.long_v,a1.dbl_v,a1.str_v,a1.json_v) as valueLast   " +
             "from ts_kv  a1  where  a1.ts >=:startTime  and  a1.ts<= :endTime ";
 
 
@@ -60,7 +60,7 @@ public class EffectTsKvRepository {
     public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.flg ,d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
     public  static  String  SELECT_START_CAP=" table3.key as key,(select key from ts_kv_dictionary  where  key_id= table3.key ) as keyName," +
             " table3.onlyKeyId as onlyKeyId, table3.ts1 as ts, table3.valueLast1 as valueLast, " +
-            "     table3.ts2 as ts2, table3.valueLast2  as valueLast2  ";
+            "     table3.ts2 as ts2, table3.valueLast2  as valueLast2 ,table3.valueLast2 as localValue ";
 
     public  static  String  FROM_QUERY_CAP="    from   device  d1 left join  (select table1.id  as onlyKeyId, table1.entity_id ," +
             "        table1.key as key," +
@@ -120,7 +120,7 @@ public class EffectTsKvRepository {
         }
         if(queryTsKvVo.getDeviceId() == null)
         {
-         //   sonSql01.append(" and  d1.flg = true");
+            sonSql01.append(" and  d1.flg = true");
         }else {
             sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
@@ -175,12 +175,6 @@ public class EffectTsKvRepository {
         Map<String, Object> param = new HashMap<>();
         StringBuffer  sonSql = new StringBuffer();
 
-//        if(StringUtils.isNotBlank(queryTsKvVo.getKey()))
-//        {
-//            sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)  ) ");
-//            param.put("key", queryTsKvVo.getKey());
-//        }
-
         if(!CollectionUtils.isEmpty(key))
         {
             sonSql.append(" and a1.key in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key  in (:keys)   ) ");
@@ -200,7 +194,7 @@ public class EffectTsKvRepository {
         {
             sonSql01.append(" and  d1.factory_id = :factoryId");
             param.put("factoryId", queryTsKvVo.getFactoryId());
-            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+         //   sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
 
         }
         if(queryTsKvVo.getWorkshopId() != null)
