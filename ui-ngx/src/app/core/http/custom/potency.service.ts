@@ -72,7 +72,7 @@ export class PotencyService {
   }
 
   // 获取设备运行状态
-  public getDeviceRunningState(params: { deviceId: string; startTime: number; endTime: number; }, config?: RequestConfig): Observable<RunningState> {
+  public getDeviceRunningState(params: { deviceId: string; keyNames: string[], startTime: number; endTime: number; }, config?: RequestConfig): Observable<RunningState> {
     return this.http.post<RunningState>(`/api/pc/efficiency/queryTheRunningStatusByDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
