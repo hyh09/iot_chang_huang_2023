@@ -120,7 +120,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           const firstWorkshop = firstFactory.children[0];
           if (firstWorkshop.children && firstWorkshop.children[0]) {
             const firstProdLine = firstWorkshop.children[0];
-            if (firstProdLine.children[0]) {
+            if (firstProdLine.children && firstProdLine.children[0]) {
               const firstDevice = firstProdLine.children[0];
               this.selectedKeys = [firstDevice.key];
               const { factoryId, workshopId, productionLineId, id: deviceId } = firstDevice;
