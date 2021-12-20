@@ -33,6 +33,8 @@ import java.util.UUID;
                                 columns = {
                                         @ColumnResult(name = "onlyKeyId", type = String.class),
                                         @ColumnResult(name = "entity_id", type = UUID.class),
+                                        @ColumnResult(name = "dictDeviceId", type = UUID.class),
+
                                         @ColumnResult(name = "ts" ,type = Long.class),
                                         @ColumnResult(name = "key" ,type = Integer.class),
 
@@ -66,6 +68,9 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
      */
     @Transient
     private String onlyKeyId;
+
+    @Transient
+    private  UUID dictDeviceId;
 
     /**
      * 前端传入的keyName
@@ -122,11 +127,14 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
 
 
-    public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,Long ts,Integer key,String keyName,String deviceName,String picture,Boolean  flg,
+    public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,UUID dictDeviceId,Long ts,Integer key,String keyName,String deviceName,String picture,Boolean  flg,
                              UUID factoryId, UUID workshopId, UUID productionLineId, Long ts2, String valueLast, String valueLast2,String  localValue){
 
         this.onlyKeyId = onlyKeyId;
         this.entityId =entityId;
+
+        this.dictDeviceId =dictDeviceId;
+
         this.ts = ts;
         this.key =(key==null?-1:key);
         this.keyName = keyName;

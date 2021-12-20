@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -29,11 +30,10 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
-import org.thingsboard.server.dao.hs.dao.DictDataEntity;
-import org.thingsboard.server.dao.hs.dao.DictDataRepository;
-import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyEntity;
-import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyRepository;
+import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
@@ -79,6 +79,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private DictDeviceComponentPropertyRepository componentPropertyRepository;
     @Autowired private DictDataRepository dictDataRepository;//数据字典
+    // 设备字典Repository
+    @Autowired  DictDeviceRepository dictDeviceRepository;
+    @Autowired    ClientService clientService;
+
 
 
     private  final  static String  HEADER_0= "设备名称";
@@ -257,7 +261,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             UUID uuid= pageList.get(i);
             listMap.put(uuid,map.get(uuid));
         }
-        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);//包含了总产能的
+
+        var dictDeviceIds = effectTsKvEntities.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(vo.getTenantId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
+
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(finalMap1,listMap,tenantId);//包含了总产能的
 
         List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName, headerList);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
@@ -298,11 +311,23 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
                 collect(Collectors.toList());
         log.info("当前的分页之后的数据:{}",pageList);
+
+        var dictDeviceIds = pageList.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
+        log.info("finalMap1:====>"+finalMap1);
+
         List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
-            log.info("entity:====>"+entity);
-            capVo.setPicture(entity.getPicture());
+
+   log.info("=entity===>"+entity);
+
+            capVo.setPicture(Optional.ofNullable(entity.getPicture()).orElse(Optional.ofNullable(entity.getDictDeviceId()).map(UUID::toString).map(finalMap1::get).map(DictDevice::getPicture).orElse(null)));
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
@@ -371,7 +396,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             UUID uuid= pageList.get(i);
             listMap.put(uuid,map.get(uuid));
         }
-        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);
+
+        var dictDeviceIds = effectTsKvEntities.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
+
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(finalMap1,listMap,tenantId);
         appVo.setAppDeviceCapVoList(translateListAppTitle(vos,mapNameToVo));
         keys1.stream().forEach(str->{
             totalValueMap.put(translateAppTitle(mapNameToVo,str),getTotalValue(effectTsKvEntities,str)+translateAppUnit(mapNameToVo,str));
@@ -597,7 +631,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @param listMap
      * @return
      */
-    public  List<AppDeviceEnergyVo>  getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap,TenantId tenantId)
+    public  List<AppDeviceEnergyVo>  getEntityKeyValue(HashMap<String, DictDevice> finalMap1,Map<UUID,List<EffectTsKvEntity>> listMap,TenantId tenantId)
     {
         List<AppDeviceEnergyVo> appList  = new ArrayList<>();
 
@@ -611,8 +645,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             appDeviceEnergyVo.setDeviceId(key.toString());
             EffectTsKvEntity  entity1 =value.get(0);
             if(entity1 != null) {
-                appDeviceEnergyVo.setPicture(entity1.getPicture());
-                appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
+              //  appDeviceEnergyVo.setPicture(entity1.getPicture());
+                appDeviceEnergyVo.setPicture(Optional.ofNullable(entity1.getPicture()).orElse(Optional.ofNullable(entity1.getDictDeviceId()).map(UUID::toString).map(finalMap1::get).map(DictDevice::getPicture).orElse(null)));
+               appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
                 appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {
                     Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity1.getWorkshopId());

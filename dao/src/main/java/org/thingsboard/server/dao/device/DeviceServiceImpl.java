@@ -17,6 +17,7 @@ package org.thingsboard.server.dao.device;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -64,6 +65,7 @@ import org.thingsboard.server.common.data.vo.device.AppCapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.device.provision.ProvisionFailedException;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
@@ -74,6 +76,7 @@ import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
@@ -1104,11 +1107,18 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         PageData<Device> pageData =  deviceDao.queryPage(vo,pageLink);
         List<Device> devices =  pageData.getData();
 
-        UUID  tenantId = vo.getTenantId();
+        List<UUID> dictDeviceIds = pageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
 
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(vo.getTenantId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
+        UUID  tenantId = vo.getTenantId();
         List<AppCapacityDeviceVo> voList =   devices.stream().map(d1->{
             AppCapacityDeviceVo  vo1 = new AppCapacityDeviceVo();
-            vo1.setPicture(d1.getPicture());
+            vo1.setPicture(Optional.ofNullable(d1.getPicture()).orElse(Optional.ofNullable(d1.getDictDeviceId()).map(UUID::toString).map(finalMap1::get).map(DictDevice::getPicture).orElse(null)));
             vo1.setDeviceName(d1.getName());
             vo1.setDeviceId(d1.getUuidId());
             vo1.setFlg(d1.getDeviceFlg());
