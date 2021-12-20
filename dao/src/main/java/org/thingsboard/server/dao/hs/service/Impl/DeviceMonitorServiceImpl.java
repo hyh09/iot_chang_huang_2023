@@ -235,16 +235,20 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var activeStatusMap = this.clientService.listDevicesOnlineStatus(allDeviceIdList);
 
-        var deviceImageList = devicePageData.getData().stream().filter(e -> StringUtils.isNotBlank(e.getPicture())).collect(Collectors.toList());
-        var map = Lists.newArrayList(this.dictDeviceRepository.findAllById(deviceImageList.stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())))
-                .stream().collect(Collectors.toMap(e -> e.getId().toString(), DictDeviceEntity::getPicture, (a, b) -> a));
+        var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        var map = new HashMap<String, DictDevice>();
+        if (!dictDeviceIds.isEmpty()){
+            map = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b)->a, HashMap::new));
+        }
 
+        HashMap<String, DictDevice> finalMap = map;
         var resultList = devicePageData.getData().stream().map(e -> {
             var idStr = e.getId().toString();
             return RTMonitorDeviceResult.builder()
                     .id(idStr)
                     .name(e.getName())
-                    .image(Optional.ofNullable(map.get(e.getId().toString())).orElse(e.getPicture()))
+                    .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(finalMap::get).map(DictDevice::getPicture).orElse(null)))
                     .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                     .build();
         }).collect(Collectors.toList());
