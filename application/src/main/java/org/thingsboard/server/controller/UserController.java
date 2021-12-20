@@ -238,7 +238,7 @@ public class UserController extends BaseController implements DefalutSvc {
                         userCredentials.getActivateToken());
                 String email = savedUser.getEmail();
                 try {
-                    mailService.sendActivationEmail(activateUrl, email);
+                    mailService.sendActivationEmail(activateUrl, email,user.getAdditionalInfo());
                 } catch (ThingsboardException e) {
                     userService.deleteUser(authUser.getTenantId(), savedUser.getId());
                     throw e;
@@ -279,7 +279,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 String baseUrl = systemSecurityService.getBaseUrl(getTenantId(), getCurrentUser().getCustomerId(), request);
                 String activateUrl = String.format(ACTIVATE_URL_PATTERN, baseUrl,
                         userCredentials.getActivateToken());
-                mailService.sendActivationEmail(activateUrl, email);
+                mailService.sendActivationEmail(activateUrl, email,user.getAdditionalInfo());
             } else {
                 throw new ThingsboardException("User is already activated!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
             }

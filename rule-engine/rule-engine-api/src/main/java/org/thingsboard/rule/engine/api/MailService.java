@@ -20,6 +20,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.thingsboard.server.common.data.ApiFeature;
 import org.thingsboard.server.common.data.ApiUsageStateMailMessage;
 import org.thingsboard.server.common.data.ApiUsageStateValue;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -34,7 +35,7 @@ public interface MailService {
 
     void sendTestMail(JsonNode config, String email) throws ThingsboardException;
 
-    void sendActivationEmail(String activationLink, String email) throws ThingsboardException;
+    void sendActivationEmail(String activationLink, String email, JsonNode additionalInfo) throws ThingsboardException;
 
     void sendAccountActivatedEmail(String loginLink, String email) throws ThingsboardException;
 
