@@ -160,6 +160,7 @@ export interface UIInfo {
   logoImageUrl?: string;
   logoImageHeight?: string;
   platformMainColor?: string;
+  platformSecondColor?: string;
   platformTextMainColor?: string;
   platformMenuColorActive?: string;
   platformMenuColorHover?: string;

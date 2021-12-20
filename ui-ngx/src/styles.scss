@@ -759,6 +759,9 @@ mat-label {
     &.tb-mat-32 {
       @include tb-mat-icon-size(32);
     }
+    &.tb-mat-70 {
+      @include tb-mat-icon-size(70);
+    }
     &.tb-mat-96 {
       @include tb-mat-icon-size(96);
     }
@@ -1072,7 +1075,7 @@ mat-label {
 button {
   &.mat-primary:not(.mat-button):not(.mat-stroked-button):not(.mat-icon-button):not(.mat-button-disabled) {
     color: #fff;
-    background-color: #2367fa !important;
+    background-color: #2367fa;
   }
   &.mat-icon-button .mat-button-wrapper {
     height: 24px;

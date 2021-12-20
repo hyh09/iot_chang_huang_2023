@@ -48,9 +48,10 @@ export class MenuService {
     this.store.pipe(select(selectAuth), take(1)).subscribe((authState: AuthState) => {
       if (authState.authUser) {
         if (authState.authUser.authority !== Authority.SYS_ADMIN) {
-          const menuSections: MenuSection[] = JSON.parse(sessionStorage.getItem('permissions')) || [];
+          const menuSections: MenuSection[] = JSON.parse(sessionStorage.getItem('menuSections')) || [];
+          const homeSections: HomeSection[] = JSON.parse(sessionStorage.getItem('homeSections')) || [];
           this.menuSections$.next(menuSections);
-          this.homeSections$.next([]);
+          this.homeSections$.next(homeSections);
         } else {
           this.menuSections$.next(this.buildSysAdminMenu(authState));
           this.homeSections$.next(this.buildSysAdminHome(authState));
