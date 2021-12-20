@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { PotencyService } from '@app/core/http/custom/potency.service';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { FactoryTreeNodeIds } from '@app/shared/models/custom/factory-mng.models';
 import { RunningState } from '@app/shared/models/custom/potency.models';
-import { Timewindow, historyInterval, DAY, TimeRange, HistoryWindowType, calculateIntervalStartEndTime, PageLink } from '@app/shared/public-api';
+import { Timewindow, historyInterval, TimeRange, HistoryWindowType, calculateIntervalStartEndTime, PageLink, HOUR } from '@app/shared/public-api';
 
 @Component({
   selector: 'tb-running-state',
@@ -13,7 +13,7 @@ import { Timewindow, historyInterval, DAY, TimeRange, HistoryWindowType, calcula
 export class RunningStateComponent {
 
   deviceId: string = '';
-  timewindow: Timewindow = historyInterval(DAY);
+  timewindow: Timewindow = historyInterval(HOUR);
   selectedProps: string[] = [];
   properties: DeviceProp[] = [];
   propertyMap: { [key: string]: DeviceProp; } = {};
@@ -40,10 +40,16 @@ export class RunningStateComponent {
         this.properties.forEach(prop => {
           this.propertyMap[prop.name] = prop;
         });
+        this.getRunningStateData();
       });
+    } else {
+      this.getRunningStateData();
     }
+  }
+
+  private getRunningStateData() {
     this.runningStateData = {};
-    this.potencyService.getDeviceRunningState({ deviceId: this.deviceId, ...this.generateTimeRange() }).subscribe(res => {
+    this.potencyService.getDeviceRunningState({ deviceId: this.deviceId, keyNames: this.displayedProps, ...this.generateTimeRange() }).subscribe(res => {
       this.runningStateData = res || {};
     });
   }
@@ -68,11 +74,13 @@ export class RunningStateComponent {
   onSelectedPropsChange() {
     this.pageLink.page = 0;
     this.displayedProps = this.selectedProps.slice(0, 2);
+    this.fetchData();
   }
 
   onPageChange(pageIndex: number) {
     this.pageLink.page = pageIndex;
     this.displayedProps = this.selectedProps.slice(pageIndex * 2, pageIndex * 2 + 2);
+    this.fetchData();
   }
 
 }
