@@ -45,6 +45,7 @@ import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.energyTime.entity.EneryTimeGapEntity;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
+import org.thingsboard.server.dao.util.CommonUtils;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -190,20 +191,21 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
                 TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
                 log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
                 long  t1=  tsKvEntry.getTs();
-                long  t2=  tsKvEntry1.getTs();
-                long t3 =t1-t2;
-                log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}",(t1-t2));
-                if(t3>ENERGY_TIME_GAP)
-                {
-                    EneryTimeGapEntity  eneryTimeGapEntity = new  EneryTimeGapEntity();
-                    eneryTimeGapEntity.setEntityId(entityId.getId());
-                    eneryTimeGapEntity.setTenantId(tenantId.getId());
-                    eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
-                    eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
-                    eneryTimeGapEntity.setTs(tsKvEntry.getTs());
-                    eneryTimeGapEntity.setTimeGap(t3);
-                    eneryTimeGapService.save(eneryTimeGapEntity);
-                }
+                long  t2=  tsKvEntry1.getTs();//要避免夸天的相减
+              if(CommonUtils.isItToday(t2)) {
+                  long t3 = t1 - t2;
+                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
+                  if (t3 > ENERGY_TIME_GAP) {
+                      EneryTimeGapEntity eneryTimeGapEntity = new EneryTimeGapEntity();
+                      eneryTimeGapEntity.setEntityId(entityId.getId());
+                      eneryTimeGapEntity.setTenantId(tenantId.getId());
+                      eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
+                      eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
+                      eneryTimeGapEntity.setTs(tsKvEntry.getTs());
+                      eneryTimeGapEntity.setTimeGap(t3);
+                      eneryTimeGapService.save(eneryTimeGapEntity);
+                  }
+              }
 
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -139,6 +139,9 @@ public class StringUtilToll {
         BigDecimal b = new BigDecimal(num);
         //保留4位小数
         BigDecimal result = b.setScale(4, BigDecimal.ROUND_HALF_UP);
+        if (result.compareTo(BigDecimal.ZERO) == -1){
+            return  "0";
+        }
         String str=  result.stripTrailingZeros().toPlainString();
         return  str;
     }
