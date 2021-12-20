@@ -87,6 +87,7 @@ export class FactoryMngService {
 
   // 新增/更新设备信息
   public saveDevice(params: BaseData<HasId>, config?: RequestConfig) {
+    delete params['type'];
     return this.http.post(`/api/saveOrUpdDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
