@@ -1,12 +1,15 @@
 package org.thingsboard.server.dao.sql.census.entity;	
 	
-import lombok.Data;	
-import org.hibernate.annotations.DynamicInsert;	
-import org.hibernate.annotations.DynamicUpdate;	
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;	
-	
-import javax.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**	
@@ -75,6 +78,12 @@ public class StatisticalDataEntity  extends TenantBaseEntity {
      *中文描述: 产能的当前值	
      */	
     @Column(name="capacity_value")	
-    private String capacityValue;	
+    private String capacityValue;
+
+    /**
+     * 当前的天
+     */
+    @Column(name="date")
+    private LocalDate date;
 
  }	

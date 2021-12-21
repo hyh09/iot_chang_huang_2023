@@ -1,22 +1,19 @@
-package org.thingsboard.server.dao.sql.census.service;	
-	
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;	
-import org.thingsboard.server.common.data.exception.ThingsboardException;	
-import org.thingsboard.server.dao.util.sql.jpa.BaseSQLServiceImpl;	
-import org.thingsboard.server.dao.sql.census.dao.StatisticalDataDao;	
-import org.thingsboard.server.dao.sql.census.entity.StatisticalDataEntity;	
-import org.thingsboard.server.dao.util.BeanToMap;	
-import org.apache.commons.collections.CollectionUtils;	
-import org.springframework.stereotype.Service;	
-import org.springframework.transaction.annotation.Transactional;	
-import org.slf4j.Logger;	
-import org.slf4j.LoggerFactory;	
-import org.apache.commons.lang3.StringUtils;	
-import java.util.UUID;	
-	
-	
-import java.util.List;	
-import java.util.stream.Collectors;	
+package org.thingsboard.server.dao.sql.census.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.dao.sql.census.dao.StatisticalDataDao;
+import org.thingsboard.server.dao.sql.census.entity.StatisticalDataEntity;
+import org.thingsboard.server.dao.util.BeanToMap;
+import org.thingsboard.server.dao.util.sql.jpa.BaseSQLServiceImpl;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 /**	
   创建时间: 2021-12-21 11:26:27	
   创建人: HU.YUNHUI	
@@ -34,7 +31,9 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
      * @return StatisticalDataEntity	
      */	
     @Transactional	
-    public StatisticalDataEntity save(StatisticalDataEntity statisticalData){	
+    public StatisticalDataEntity save(StatisticalDataEntity statisticalData){
+        LocalDate date = LocalDate.now();
+        statisticalData.setDate(date);
         return super.save(statisticalData);	
     }	
 	
@@ -61,7 +60,15 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
           throw new ThingsboardException("Requested id wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);	
              }	
             return this.updateNonNull(statisticalData.getId(), statisticalData);	
-        }	
+        }
+
+
+      public  StatisticalDataEntity  queryTodayByEntityId(UUID entityId)
+      {
+          LocalDate date = LocalDate.now();
+        return   this.dao.queryAllByEntityIdAndDate(entityId,date);
+
+      }
 	
 	
 	
