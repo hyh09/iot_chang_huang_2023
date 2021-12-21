@@ -20,7 +20,7 @@ import java.util.UUID;
 */	
 @Data	
 @Entity	
-@Table(name="STATISTICAL_DATA")	
+@Table(name="TB_STATISTICAL_DATA")
 @DynamicInsert	
 @DynamicUpdate	
 //@Proxy(lazy = false)	
