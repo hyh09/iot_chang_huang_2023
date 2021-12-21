@@ -82,7 +82,7 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
         log.info("打印当前的数据:{}",dictDeviceGroupVOS);
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
-            Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getUnit));
+            Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getTitle));
             map.putAll(map1);
         }
         return map;

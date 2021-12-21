@@ -43,7 +43,6 @@ public interface DeviceDictPropertiesSvc {
      * 获取初始化单位数据
      * @return
      */
-    @Deprecated
     Map<String,String> getUnit();
 
 
