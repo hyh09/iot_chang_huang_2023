@@ -1,6 +1,6 @@
 import { UtilsService } from '@core/services/utils.service';
 import { FactoryMngService } from './../../../../../core/http/custom/factory-mng.service';
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AppState, DialogService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTableTreeNode } from '@app/shared/models/custom/factory-mng.models';
 import { BaseData, EntityType, EntityTypeResource, entityTypeResources, EntityTypeTranslation, entityTypeTranslations, HasId, HasUUID, PageComponent } from '@app/shared/public-api';

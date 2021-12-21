@@ -1157,6 +1157,11 @@ th[required]:after {
   margin-left: 3px;
 }
 
+*::selection {
+  background: rgb(42, 134, 253) !important;
+  color: #fff !important;
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {
