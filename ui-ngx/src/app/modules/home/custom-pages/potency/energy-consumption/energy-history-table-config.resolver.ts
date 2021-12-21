@@ -2,10 +2,12 @@ import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, Resolve } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";
 import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeTranslations, entityTypeResources } from "@app/shared/public-api";
+import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
 import { Observable, Observer } from "rxjs";
 import { DatePipe } from "@angular/common";
+import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
+import { EnergyHistoryFilterComponent } from "./energy-history-filter.component";
 
 @Injectable()
 export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConfig<any>> {
@@ -23,6 +25,12 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.DEVICE_HISTORY);
     this.config.entityResources = entityTypeResources.get(EntityType.DEVICE_HISTORY);
 
+    this.config.filterComponent = EnergyHistoryFilterComponent;
+
+    this.config.componentsData = {
+      dateRange: null
+    };
+
     this.config.componentsData = {
       totalValue: []
     };
@@ -32,6 +40,11 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
     this.deviceId = route.params.deviceId;
     return new Observable((observer: Observer<EntityTableConfig<any>>) => {
       this.potencyService.getEnergyHistoryTableHeader().subscribe(res => {
+        const now = new Date();
+        this.config.componentsData = {
+          dateRange: [now, now]
+        };
+
         this.config.tableTitle = this.translate.instant('potency.energy-consumption-history');
         this.config.addEnabled = false;
         this.config.searchEnabled = false;
@@ -39,8 +52,6 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
         this.config.detailsPanelEnabled = false;
         this.config.entitiesDeleteEnabled = false;
         this.config.selectionEnabled = false;
-        this.config.useTimePageLink = true;
-        this.config.timeWindowInFilter = true;
 
         this.config.columns = [];
         (res || []).forEach((col, index) => {
@@ -50,7 +61,16 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
         });
         this.config.columns.push(new DateEntityTableColumn<any>('createdTime', 'potency.created-time', this.datePipe, '150px'));
 
-        this.config.entitiesFetchFunction = pageLink => this.potencyService.getEnergyHistoryDatas(pageLink, this.deviceId);
+        this.config.entitiesFetchFunction = pageLink => {
+          let startTime: number, endTime: number;
+          if (this.config.componentsData.dateRange) {
+            startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
+            endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+          }
+          const { pageSize, page, textSearch, sortOrder } = pageLink;
+          const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+          return this.potencyService.getEnergyHistoryDatas(timePageLink, this.deviceId);
+        }
 
         observer.next(this.config);
         observer.complete();
