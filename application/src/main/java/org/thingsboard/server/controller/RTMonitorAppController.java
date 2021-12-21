@@ -108,20 +108,22 @@ public class RTMonitorAppController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
             @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true),
-            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true)
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query")
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
     public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName,
-            @RequestParam Long startTime,
-            @RequestParam Long endTime
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        checkParameter("startTime", startTime);
-        checkParameter("endTime", endTime);
+        if (startTime ==null || startTime ==0)
+            startTime = CommonUtil.getTodayStartTime();
+        if (endTime ==null || endTime ==0)
+            endTime = CommonUtil.getTodayCurrentTime();
         return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
     }
 

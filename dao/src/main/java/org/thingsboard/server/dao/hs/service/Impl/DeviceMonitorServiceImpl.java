@@ -465,7 +465,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         Map<String, String> finalRMap = rMap;
         Map<String, String> finalNameTitleMap = nameTitleMap;
 
-        propertyVOList.addAll(keyList.stream().map(e -> DictDeviceGroupPropertyVO.builder()
+        propertyVOList.addAll(keyList.stream().sorted().map(e -> DictDeviceGroupPropertyVO.builder()
                 .name(e)
                 .title(finalNameTitleMap.getOrDefault(e, e))
                 .unit(Optional.ofNullable(finalRMap.getOrDefault(e, null))
