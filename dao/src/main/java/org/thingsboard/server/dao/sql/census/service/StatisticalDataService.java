@@ -34,7 +34,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
     public  StatisticalDataEntity  todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry,String  title)
     {
         logger.info("打印的数据:{}",tsKvEntry);
-        StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId());
+        StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
         if(entityDatabase == null){
             StatisticalDataEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
                return   this.save(entityNew);
@@ -83,10 +83,10 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
         }
 
 
-      public  StatisticalDataEntity  queryTodayByEntityId(UUID entityId)
+      public  StatisticalDataEntity  queryTodayByEntityId(UUID entityId,long timestamp)
       {
-          LocalDate date = LocalDate.now();
-        return   this.dao.queryAllByEntityIdAndDate(entityId,date);
+//          LocalDate date = LocalDate.now();
+        return   this.dao.queryAllByEntityIdAndDate(entityId, StringUtilToll.getLocalDateByTimestamp(timestamp));
 
       }
 
@@ -107,7 +107,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
               String  capOld = entityDatabase.getElectricFirstValue();//要取今天第一条
               if(capOld == null)
               {
-                  entityNew.setElectricFirstValue(tsKvEntry.getValue().toString());
+                  entityNew.setCapacityFirstValue(tsKvEntry.getValue().toString());
               }
 
               String  capNow= tsKvEntry.getValue().toString();
