@@ -37,6 +37,10 @@ public class StringUtilToll {
      * @return
      */
     public static String  sub(String value1, String value2){
+        if(value1 == null  ||  value2 == null)
+        {
+            return zero;
+        }
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
         BigDecimal  result = b1.subtract(b2).stripTrailingZeros();

@@ -43,27 +43,43 @@ public class StatisticalDataEntity  extends TenantBaseEntity {
      *中文描述: 水的增量值	
      */	
     @Column(name="water_added_value")	
-    private String waterAddedValue;	
+    private String waterAddedValue;
+
+
+    @Column(name="water_first_value")
+    private  String waterFirstValue;
     /**	
      *中文描述: 水的当前值(可以用于天的历史数据)	
      */	
     @Column(name="water_value")	
-    private String waterValue;	
+    private String waterValue;
+
+
     /**	
      *中文描述: 电的增量值	
      */	
     @Column(name="electric_added_value")	
-    private String electricAddedValue;	
+    private String electricAddedValue;
+
+    @Column(name="electric_first_value")
+    private  String electricFirstValue;
     /**	
      *中文描述: 电的当前值	
      */	
     @Column(name="electric_value")	
-    private String electricValue;	
+    private String electricValue;
+
+
+
     /**	
      *中文描述: 气的增量值	
      */	
     @Column(name="gas_added_value")	
-    private String gasAddedValue;	
+    private String gasAddedValue;
+
+
+    @Column(name="gas_first_value")
+    private  String gasFirstValue;
     /**	
      *中文描述: 气的当前值	
      */	
@@ -73,7 +89,10 @@ public class StatisticalDataEntity  extends TenantBaseEntity {
      *中文描述: 产能的增量值	
      */	
     @Column(name="capacity_added_value")	
-    private String capacityAddedValue;	
+    private String capacityAddedValue;
+
+    @Column(name="capacity_first_value")
+    private  String capacityFirstValue;
     /**	
      *中文描述: 产能的当前值	
      */	
