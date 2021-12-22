@@ -1,21 +1,26 @@
 package org.thingsboard.server.dao.hs.service;
 
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 二方库接口
@@ -100,4 +105,25 @@ public interface ClientService {
      * @return 工厂列表
      */
     List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId);
+
+    /**
+     * 分页查询历史遥测数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 历史遥测数据
+     */
+    PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
+
+    /**
+     * 分页查询单个Key历史遥测数据
+     *
+     * @param tenantId          租户Id
+     * @param deviceId          设备Id
+     * @param groupPropertyName 遥测key
+     * @param timePageLink      时间分页参数
+     * @return 历史遥测数据
+     */
+    PageData<DictDeviceGroupPropertyVO> listPageTsHistories(TenantId tenantId, DeviceId deviceId, String groupPropertyName, TimePageLink timePageLink) throws ExecutionException, InterruptedException, ThingsboardException;
 }
