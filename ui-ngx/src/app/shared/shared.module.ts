@@ -15,7 +15,7 @@
 ///
 
 import { NgModule } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FooterComponent } from '@shared/components/footer.component';
 import { LogoComponent } from '@shared/components/logo.component';
 import { TbSnackBarComponent, ToastDirective } from '@shared/components/toast.directive';
@@ -145,14 +145,18 @@ import { OtaPackageAutocompleteComponent } from '@shared/components/ota-package/
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { CopyButtonComponent } from '@shared/components/button/copy-button.component';
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
+import zh from '@angular/common/locales/zh';
 import { NzTreeModule } from 'ng-zorro-antd/tree';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzImageModule } from 'ng-zorro-antd/image';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzTimePickerModule } from 'ng-zorro-antd/time-picker';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { SlideValidatorComponent } from '@app/modules/home/components/slide-validator/slide-validator.component';
 
+registerLocaleData(zh);
 
 @NgModule({
   providers: [
@@ -309,7 +313,9 @@ import { SlideValidatorComponent } from '@app/modules/home/components/slide-vali
     NzTableModule,
     NzImageModule,
     NzSelectModule,
-    NzEmptyModule
+    NzEmptyModule,
+    NzTimePickerModule,
+    NzDatePickerModule
   ],
   exports: [
     FooterComponent,
@@ -407,6 +413,8 @@ import { SlideValidatorComponent } from '@app/modules/home/components/slide-vali
     NzImageModule,
     NzSelectModule,
     NzEmptyModule,
+    NzTimePickerModule,
+    NzDatePickerModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,

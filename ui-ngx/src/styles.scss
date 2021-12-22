@@ -1200,3 +1200,10 @@ th[required]:after {
 .ant-tree .ant-tree-node-content-wrapper.ant-tree-node-selected .ant-tree-title {
   color: #fff !important;
 }
+
+nz-date-picker,
+nz-range-picker,
+nz-time-picker {
+  outline: none !important;
+  box-shadow: none !important;
+}

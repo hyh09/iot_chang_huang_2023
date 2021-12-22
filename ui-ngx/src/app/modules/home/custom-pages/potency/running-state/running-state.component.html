@@ -11,7 +11,14 @@
           <mat-option *ngFor="let prop of properties" [value]="prop.name">{{ prop.title }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <tb-timewindow [(ngModel)]="timewindow" (ngModelChange)="fetchData()" asButton historyOnly></tb-timewindow>
+      <div fxFlexLayout="row" fxLayoutGap="8px" fxLayoutAlign="center center">
+        <nz-time-picker [ngModel]="startTime" [nzAllowEmpty]="false" nzSize="large" disabled nzFormat="HH:mm"></nz-time-picker>
+        <div>~</div>
+        <nz-time-picker
+          [(ngModel)]="endTime" [nzAllowEmpty]="false" (ngModelChange)="onTimeChange()" [nzDisabledHours]="disabledHours"
+          [nzDisabledMinutes]="disabledMinutes" nzHideDisabledOptions [disabled]="!deviceId" [nzClearText]="false" nzSize="large" nzFormat="HH:mm"
+        ></nz-time-picker>
+      </div>
     </div>
     <div fxFlex fxLayout="column" fxLayoutGap="16px" style="padding: 0 24px;">
       <tb-running-state-chart
