@@ -327,7 +327,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
-        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryCapacity(vo,pageLink);
+        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryEnergy(vo,pageLink);
 
         return null;
     }
