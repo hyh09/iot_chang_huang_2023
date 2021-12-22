@@ -311,6 +311,27 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return new PageDataAndTotalValue<Map>(totalValueList,todataByList(resultList, mapNameToVo,keys1 ), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
+
+    /**
+     * pc端的能耗接口
+     * @param vo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     * @throws JsonProcessingException
+     */
+    @Override
+    public PageDataAndTotalValue<Map> queryEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
+        log.info("queryEntityByKeysNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
+        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryCapacity(vo,pageLink);
+
+        return null;
+    }
+
     /**
      * app的产能接口
      * @return
