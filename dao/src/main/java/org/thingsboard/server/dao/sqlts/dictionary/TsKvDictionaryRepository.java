@@ -24,6 +24,7 @@ import org.thingsboard.server.dao.util.SqlTsOrTsLatestAnyDao;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @SqlTsOrTsLatestAnyDao
 public interface TsKvDictionaryRepository extends CrudRepository<TsKvDictionary, TsKvDictionaryCompositeKey> {
@@ -33,4 +34,7 @@ public interface TsKvDictionaryRepository extends CrudRepository<TsKvDictionary,
     @Query("SELECT t FROM TsKvDictionary  t  where  t.key in (:keys)")
     List<TsKvDictionary> findAllByKeyIn(@Param("keys") List<String> keys);
 
+    List<TsKvDictionary> findAllByKeyIdIn(Set<Integer> keyIds);
+
+    Optional<TsKvDictionary> findByKey(String key);
 }
