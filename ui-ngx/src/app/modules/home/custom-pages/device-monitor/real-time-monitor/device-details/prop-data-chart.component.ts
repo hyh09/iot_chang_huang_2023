@@ -65,11 +65,19 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
         boundaryGap: false,
         axisLabel: {
           margin: 16
-        }
+        },
+        minInterval: 600000
       },
       yAxis: {
         type: 'value'
       },
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }
+      ],
       series: [
         {
           name: this.propName,

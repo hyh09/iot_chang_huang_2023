@@ -1,4 +1,3 @@
-import { DeviceInfo } from '@app/shared/public-api';
 import { DeviceDictionaryId } from '../id/custom/device-dictionary-id.models';
 import { BaseData } from './../base-data';
 
@@ -34,7 +33,7 @@ export interface DeviceCompProp {
   name: string;
   content: string;
   dictDataId: string;
-  createdTime: string;
+  createdTime: number;
   componentId: string;
   title: string;
   unit: string;

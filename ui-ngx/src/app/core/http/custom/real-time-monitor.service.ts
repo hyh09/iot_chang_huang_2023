@@ -143,7 +143,19 @@ export class RealTimeMonitorService {
           onMessage({});
         }
       } else {
-        onMessage();
+        const _res = JSON.parse(res.data);
+        const _data = [];
+        if (_res) {
+          const data = _res.data;
+          Object.keys(data).forEach(key => {
+            _data.push({
+              name: key,
+              createdTime: data[key][0][0],
+              content: data[key][0][1]
+            });
+          });
+        }
+        onMessage(_data);
       }
     }
   }
