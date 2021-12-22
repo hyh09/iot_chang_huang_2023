@@ -3143,7 +3143,7 @@
     "online-offline": "在线状态",
     "online": "在线",
     "offline": "离线",
-    "publish-time": "发布时间",
+    "publish-time": "更新时间",
     "no-factory-version": "未找到工厂软件版本",
     "system-version": "系统版本",
     "no-system-version": "未找到版本信息"
@@ -3448,7 +3448,7 @@
     "warning-count": "预警次数",
     "device-details": "设备详情",
     "base-info": "基本信息",
-    "real-time-data-chart": "实时数据图表",
+    "real-time-data-chart": "实时数据趋势",
     "prop-unit": "单位：{{unit}}",
     "real-time-data": "实时数据",
     "see-history": "查看历史",

@@ -74,7 +74,7 @@ export interface DeviceProp {
   name: string;
   content?: string;
   createdTime?: number;
-  dictDataId?: number;
+  dictDataId?: string;
   title: string;
   unit: string;
 }
