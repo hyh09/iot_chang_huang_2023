@@ -42,9 +42,12 @@ import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectHistoryKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
+import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
+import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
@@ -80,6 +83,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     // 设备字典Repository
     @Autowired  DictDeviceRepository dictDeviceRepository;
     @Autowired    ClientService clientService;
+
+
+
+    @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
+    @Autowired private DataToConversionSvc  dataToConversionSvc;
 
 
 
@@ -207,10 +215,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
+    /**
+     *
+     * @param vo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     */
     @Override
-    public PageDataAndTotalValue<AppDeviceCapVo> queryPCCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
-        log.info("queryPCCapAppNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",queryTsKvVo,tenantId);
-        return null;
+    public PageDataAndTotalValue<AppDeviceCapVo> queryPCCapAppNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+        log.info("queryPCCapAppNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
+        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryCapacity(vo,pageLink);
+        List<EnergyEffciencyNewEntity> pageList=  page.getContent();
+        //将查询的结果返回原接口返回的对象
+        List<AppDeviceCapVo>  appDeviceCapVos =  dataToConversionSvc.resultProcessingByCapacityPc(pageList,tenantId);
+     return new PageDataAndTotalValue<AppDeviceCapVo>(dataToConversionSvc.getTotalValue(pageList),appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+
     }
 
     @Override
