@@ -55,7 +55,7 @@ export class RunningStateChartComponent implements AfterViewInit, OnDestroy, OnC
       color: ['#0663ff'],
       grid: {
         bottom: 5,
-        right: 0,
+        right: 25,
         left: 0,
         containLabel: true
       },
@@ -72,6 +72,13 @@ export class RunningStateChartComponent implements AfterViewInit, OnDestroy, OnC
       yAxis: {
         type: 'value'
       },
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }
+      ],
       series: [
         {
           name: this.title,

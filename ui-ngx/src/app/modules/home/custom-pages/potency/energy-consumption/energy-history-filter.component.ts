@@ -5,10 +5,10 @@ import { Store } from '@ngrx/store';
 import { differenceInCalendarDays } from 'date-fns';
 
 @Component({
-  selector: 'tb-energy-consumption-overview',
-  templateUrl: './energy-consumption-overview.component.html'
+  selector: 'tb-energy-history-filter',
+  templateUrl: './energy-history-filter.component.html'
 })
-export class EnergyConsumptionOverviewComponent extends EntityTableHeaderComponent<object> {
+export class EnergyHistoryFilterComponent extends EntityTableHeaderComponent<object> {
 
   today = new Date();
 
