@@ -41,6 +41,39 @@ import java.util.UUID;
                         ),
                 }
 
+        ),
+        @SqlResultSetMapping(
+                name = "energyEffciencyNewEntity_02",
+                classes = {
+                        @ConstructorResult(
+                                targetClass = EnergyEffciencyNewEntity.class,
+                                columns = {
+                                        @ColumnResult(name = "entity_id", type = UUID.class),
+
+
+                                        @ColumnResult(name = "dictDeviceId", type = UUID.class),
+                                        @ColumnResult(name = "deviceName",type = String.class),
+                                        @ColumnResult(name = "picture",type = String.class),
+                                        @ColumnResult(name = "factoryId",type = UUID.class),
+                                        @ColumnResult(name = "workshopId",type = UUID.class),
+                                        @ColumnResult(name = "productionLineId",type = UUID.class),
+
+                                        //产能
+                                        @ColumnResult(name = "capacity_added_value",type = String.class),
+
+                                        //水
+                                        @ColumnResult(name = "water_added_value",type = String.class),
+
+
+                                        //电
+                                        @ColumnResult(name = "electric_added_value",type = String.class),
+
+                                        //气
+                                        @ColumnResult(name = "gas_added_value",type = String.class),
+                                }
+                        )
+                }
+
         )
 
 })
@@ -106,5 +139,33 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
         this.productionLineId = productionLineId;
 
         this.capacityAddedValue =capacityAddedValue;
+    }
+
+
+    public EnergyEffciencyNewEntity(
+            UUID entityId,UUID dictDeviceId, String deviceName, String picture, UUID factoryId, UUID workshopId, UUID productionLineId,
+            String capacityAddedValue,
+            String waterAddedValue,
+            String electricAddedValue,
+            String gasAddedValue
+    ) {
+        this.entityId = entityId;
+        this.dictDeviceId = dictDeviceId;
+        this.deviceName = deviceName;
+        this.picture = picture;
+        this.factoryId = factoryId;
+        this.workshopId = workshopId;
+        this.productionLineId = productionLineId;
+
+        this.capacityAddedValue =capacityAddedValue;
+
+        //水
+        this.waterAddedValue = waterAddedValue;
+
+        //电
+        this.electricAddedValue = electricAddedValue;
+
+        //气
+        this.gasAddedValue = gasAddedValue;
     }
 }
