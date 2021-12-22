@@ -20,7 +20,6 @@ import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.nio.file.LinkOption;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -69,7 +68,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
         try {
             QueryTsKvVo queryTsKvVo = new QueryTsKvVo(startTime, endTime, deviceId, productionLineId, workshopId, factoryId);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-            return efficiencyStatisticsSvc.queryPCCapApp(queryTsKvVo, getTenantId(), pageLink);
+            return efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo, getTenantId(), pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();
