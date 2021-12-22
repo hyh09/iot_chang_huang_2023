@@ -102,6 +102,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
           StatisticalDataEntity  entityNew = new  StatisticalDataEntity();
           entityNew.setEntityId(entityDatabase.getEntityId());
           entityNew.setId(entityDatabase.getId());
+          entityNew.setTs(tsKvEntry.getTs());
           if(title.equals(KeyTitleEnums.key_capacity.getgName()))
           {
               String  capOld = entityDatabase.getCapacityFirstValue();//要取今天第一条
@@ -170,6 +171,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
     private   StatisticalDataEntity     setEntityProperOnSave  (EntityId entityId,TsKvEntry tsKvEntry,String  title){
         StatisticalDataEntity  entityNew = new  StatisticalDataEntity();
         entityNew.setEntityId(entityId.getId());
+        entityNew.setTs(tsKvEntry.getTs());
         if(title.equals(KeyTitleEnums.key_capacity.getgName()))
         {
             entityNew.setCapacityFirstValue(tsKvEntry.getValue().toString());

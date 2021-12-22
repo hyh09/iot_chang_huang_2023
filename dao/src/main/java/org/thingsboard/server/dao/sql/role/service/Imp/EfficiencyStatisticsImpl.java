@@ -1,14 +1,12 @@
 package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -208,6 +206,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return new PageDataAndTotalValue<AppDeviceCapVo>(getTotalValue(effectTsKvEntities),appDeviceCapVoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
+
+    @Override
+    public PageDataAndTotalValue<AppDeviceCapVo> queryPCCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+        log.info("queryPCCapAppNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",queryTsKvVo,tenantId);
+        return null;
+    }
 
     @Override
     public PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
@@ -509,6 +513,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 return     byDeviceVo;
             }).collect(Collectors.toList());
        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
+        keyPages.stream().forEach(str->{
+            List<ResultRunStatusByDeviceVo> voList1 = map.get(str);
+           if(CollectionUtils.isEmpty(voList1))
+           {
+               map.put(str,new ArrayList<>());
+           }
+        });
       log.info("查询到的当前的数据:{}",map);
         log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
 
