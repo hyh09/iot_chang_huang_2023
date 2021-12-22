@@ -36,11 +36,13 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -120,7 +122,21 @@ public class UserController extends BaseController implements DefalutSvc {
     @ResponseBody
     public  User  getAppUserById() throws ThingsboardException {
         SecurityUser authUser = getCurrentUser();
-        return  this.getUserById(authUser.getUuidId().toString());
+        User user =   this.getUserById(authUser.getUuidId().toString());
+        Boolean aBoolean = user.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode());//nuSvc.isTENANT(user.getUuidId());
+        if(aBoolean)
+        {
+            user.setUserName(StringUtils.isEmpty(user.getUserName())?(user.getFirstName()+user.getLastName()):user.getUserName());
+            Tenant  tenant =  tenantService.findTenantById(user.getTenantId());
+            user.setTenantTitle(tenant != null? tenant.getTitle():"");
+        }else {
+
+            Factory  factory =  factoryService.findById(user.getFactoryId());
+            user.setFactoryName(factory!=null?factory.getName():"");
+
+        }
+
+        return  user;
     }
 
 
@@ -197,17 +213,21 @@ public class UserController extends BaseController implements DefalutSvc {
                          HttpServletRequest request) throws ThingsboardException {
         try {
 
-            if (Authority.TENANT_ADMIN.equals(getCurrentUser().getAuthority())) {
-                user.setTenantId(getCurrentUser().getTenantId());
+            if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
+                user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+                user.setUserLevel(3);
             }
+
 
             checkEntity(user.getId(), user, Resource.USER);
 
             boolean sendEmail = user.getId() == null && sendActivationMail;
-             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-             user.setFactoryId(null);
+//             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+//             user.setFactoryId(null);
             User savedUser = checkNotNull(userService.saveUser(user));
+            if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
                 saveRole(savedUser);
+            }
 
 
             if (sendEmail) {
@@ -218,7 +238,7 @@ public class UserController extends BaseController implements DefalutSvc {
                         userCredentials.getActivateToken());
                 String email = savedUser.getEmail();
                 try {
-                    mailService.sendActivationEmail(activateUrl, email);
+                    mailService.sendActivationEmail(activateUrl, email,user.getAdditionalInfo());
                 } catch (ThingsboardException e) {
                     userService.deleteUser(authUser.getTenantId(), savedUser.getId());
                     throw e;
@@ -259,7 +279,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 String baseUrl = systemSecurityService.getBaseUrl(getTenantId(), getCurrentUser().getCustomerId(), request);
                 String activateUrl = String.format(ACTIVATE_URL_PATTERN, baseUrl,
                         userCredentials.getActivateToken());
-                mailService.sendActivationEmail(activateUrl, email);
+                mailService.sendActivationEmail(activateUrl, email,user.getAdditionalInfo());
             } else {
                 throw new ThingsboardException("User is already activated!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
             }
@@ -489,6 +509,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
 
+
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
@@ -570,7 +591,8 @@ public class UserController extends BaseController implements DefalutSvc {
         user.setId( UserId.fromString(user.getStrId()));
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
-           if(count>0  && user.getFactoryId() != null)
+        log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
+           if(count>0  && user.getFactoryId() == null)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
@@ -638,12 +660,18 @@ public class UserController extends BaseController implements DefalutSvc {
              }
              PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
              SecurityUser securityUser = getCurrentUser();
+             UUID  userId = securityUser.getUuidId();
              queryParam.put("tenantId", securityUser.getTenantId().getId());
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
-                 queryParam.put("type", securityUser.getType());
+             }else {
+
+//                 List<UUID>   uuids =  userRoleSvc.getTenantRoleId(getTenantId().getId());
+//                 queryParam.put("notId", uuids);
+
              }
+             queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
              return userService.findAll(queryParam, pageLink);
          }catch (Exception  e)

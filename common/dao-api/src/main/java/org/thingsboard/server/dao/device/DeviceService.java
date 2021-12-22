@@ -34,6 +34,7 @@ import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.vo.device.AppCapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
@@ -46,6 +47,8 @@ public interface DeviceService {
     DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId);
 
     Device findDeviceById(TenantId tenantId, DeviceId deviceId);
+
+    List<Device> getYunDeviceList(Device device);
 
     ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId);
 
@@ -195,6 +198,22 @@ public interface DeviceService {
 
     PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 
-    void   updateFlgById(Boolean deviceFlg, UUID id);
+    PageData<AppCapacityDeviceVo> appQueryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
+
+    void updateFlgById(Boolean deviceFlg, UUID id);
+
+    /**
+     * 查询设备字典下发的设备列表
+     * @param device
+     * @return
+     */
+    List<Device> findDeviceIssueListByCdn(Device device);
+
+    /**
+     * 设备ID批量查询
+     * @param deviceIdList
+     * @return
+     */
+    List<Device> findDevicesByIds(List<UUID> deviceIdList);
 
 }

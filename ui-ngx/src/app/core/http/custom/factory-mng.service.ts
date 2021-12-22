@@ -6,10 +6,10 @@ import { BaseData, HasId } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
-export interface FetchListFilter {
+interface FetchListFilter {
   name?: string,
   workshopName?: string,
-  productionlineName?: string,
+  productionLineName?: string,
   deviceName?: string
 }
 
@@ -87,6 +87,7 @@ export class FactoryMngService {
 
   // 新增/更新设备信息
   public saveDevice(params: BaseData<HasId>, config?: RequestConfig) {
+    delete params['type'];
     return this.http.post(`/api/saveOrUpdDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 

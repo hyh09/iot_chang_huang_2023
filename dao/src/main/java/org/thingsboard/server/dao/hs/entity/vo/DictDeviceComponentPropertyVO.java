@@ -43,4 +43,7 @@ public class DictDeviceComponentPropertyVO {
 
     @ApiModelProperty(value = "单位", notes = "仅用于遥测数据展示")
     private String unit;
+
+    @ApiModelProperty(value = "图标", notes = "仅用于遥测数据展示")
+    private String icon;
 }

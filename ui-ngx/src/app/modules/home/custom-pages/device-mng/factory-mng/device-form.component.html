@@ -106,6 +106,29 @@
               </ng-container>
             </div>
           </ng-container>
+          <!--标准能耗-->
+          <ng-container *ngIf="standardPropFormArray().controls.length > 0">
+            <div style="font-size: 15px; margin: 20px 0 16px;">{{ 'device-mng.standard-prop' | translate }}</div>
+            <div 
+              *ngFor="let item of standardPropFormArray().controls; let $index = index"
+              formArrayName="standardPropertyList"
+              fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+            >
+              <div fxFlex fxLayout="row" fxLayoutGap="10px" [formGroupName]="$index">
+                <mat-form-field class="mat-block mat-form-field-disabled" fxFlex>
+                  <mat-label>{{ item.get('title').value }}</mat-label>
+                  <input matInput formControlName="content">
+                </mat-form-field>
+                <mat-form-field class="mat-block" fxFlex>
+                  <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
+                  <mat-select formControlName="dictDataId" disabled>
+                    <mat-option value="">{{ 'common.none' | translate }}</mat-option>
+                    <mat-option *ngFor="let option of dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </ng-container>
           <!--设备参数-->
           <ng-container *ngIf="deviceDataGroupFormArray().controls.length > 0">
             <div style="font-size: 15px; margin-top: 10px;">{{ 'device-mng.device-data' | translate }}</div>
@@ -136,6 +159,7 @@
                     <mat-form-field class="mat-block">
                       <mat-label translate>device-mng.data-dic</mat-label>
                       <mat-select formControlName="dictDataId" disabled>
+                        <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                         <mat-option *ngFor="let option of dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                       </mat-select>
                     </mat-form-field>
@@ -160,6 +184,7 @@
           [nzData]="compListFormArray().value"
           nzTableLayout="fixed"
           [nzShowPagination]="false"
+          [nzFrontPagination]="false"
           [nzNoResult]="'device-mng.comp-empty' | translate"
           [nzScroll]="{ x: '100%', y: '500px' }"
         >

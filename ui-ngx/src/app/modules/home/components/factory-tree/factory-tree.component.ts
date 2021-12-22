@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FactoryMngService } from '@app/core/http/custom/factory-mng.service';
 import { AppState, TreeNodeEmitEvent, UtilsService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTreeNodeIds, FactoryTreeNodeOptions } from '@app/shared/models/custom/factory-mng.models';
@@ -11,7 +11,7 @@ import { EntityTableHeaderComponent } from '../entity/entity-table-header.compon
   templateUrl: './factory-tree.component.html',
   styleUrls: ['./factory-tree.component.scss']
 })
-export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implements OnInit, AfterViewInit {
+export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implements OnInit, AfterViewInit, OnDestroy {
 
   searchValue: string = '';
   treeData: FactoryTreeNodeOptions[] = [];
@@ -39,14 +39,21 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
 
   ngAfterViewInit() {
     this.setTreeHeight();
-    window.onresize = this.setTreeHeight;
+    window.addEventListener('resize', () => { this.setTreeHeight(); });
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', () => { this.setTreeHeight(); });
   }
 
   setTreeHeight() {
     setTimeout(() => {
-      const totalHeight = document.querySelector('.factory-tree').clientHeight;
-      const searchHeight = 46;
-      this.scrollHeight = `${totalHeight - searchHeight}px`;
+      const $factoryTree = document.querySelector('.factory-tree');
+      if ($factoryTree) {
+        const totalHeight = $factoryTree.clientHeight;
+        const searchHeight = 46;
+        this.scrollHeight = `${totalHeight - searchHeight}px`;
+      }
     });
   }
 
@@ -113,7 +120,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           const firstWorkshop = firstFactory.children[0];
           if (firstWorkshop.children && firstWorkshop.children[0]) {
             const firstProdLine = firstWorkshop.children[0];
-            if (firstProdLine.children[0]) {
+            if (firstProdLine.children && firstProdLine.children[0]) {
               const firstDevice = firstProdLine.children[0];
               this.selectedKeys = [firstDevice.key];
               const { factoryId, workshopId, productionLineId, id: deviceId } = firstDevice;

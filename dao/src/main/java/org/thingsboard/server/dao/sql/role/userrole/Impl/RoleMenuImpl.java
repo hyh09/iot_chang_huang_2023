@@ -32,9 +32,7 @@ import org.thingsboard.server.dao.sql.role.service.rolemenu.OutMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.RoleMenuVo;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -106,7 +104,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         try {
 
              List<TenantMenuVo>  vos= this.queryByUser(vo);
-            log.info("查询当下用户所有入参{}返回的结果{}", vo, vos);
+            log.info("查询当下用户所有l入参{}api.roleMenu.queryAll返回的结果{}", vo, vos);
              if(CollectionUtils.isEmpty(vos))
              {
                  return vos;
@@ -188,7 +186,6 @@ public class RoleMenuImpl implements RoleMenuSvc {
             return ;
 
         }
-//        tenantMenuRoleService.deleteByTenantSysRoleId(roleId);
         voList.forEach(id ->{
             TenantMenuRoleEntity  entity  = new TenantMenuRoleEntity();
             entity.setTenantSysRoleId(roleId);
@@ -251,7 +248,75 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
         }
 
+        return  getSort(tenantMenuList);
+    }
+
+
+    private  List<TenantMenuVo>  getSort(List<TenantMenuVo> voList)
+    {
+        List<TenantMenuVo> tenantMenuList = new ArrayList<>();
+        if(CollectionUtils.isEmpty(voList))
+        {
+            return  voList;
+        }
+        Map<UUID,String> map = new HashMap<>();
+        TenantMenuVo  tenantMenuVo=    getAll(voList);
+        if(tenantMenuVo.getId() != null  ) {
+            tenantMenuList.add(tenantMenuVo);
+            map.put(tenantMenuVo.getId(),"1");
+        }
+        voList.forEach(TenantMenuVo ->{
+            if(StringUtils.isEmpty(map.get(TenantMenuVo.getId()))) {
+                tenantMenuList.add(TenantMenuVo);
+            }
+
+        });
         return  tenantMenuList;
+
+    }
+
+
+
+    private  TenantMenuVo getAll(List<TenantMenuVo> allList)
+    {
+        List<TenantMenuVo>  tenantMenus =  allList.stream().filter(m -> m.getParentId() == null)
+                .map( (m) -> {
+                    m.setChildren(getChildrens(m,allList));
+                    return  m;
+                }).collect(Collectors.toList());
+
+        return  filterList(tenantMenus)  ;
+    }
+
+
+    private TenantMenuVo  filterList( List<TenantMenuVo>  tenantMenus)
+    {
+        for(TenantMenuVo  vo:tenantMenus){
+            List<TenantMenuVo>  voList=   vo.getChildren();
+            if(vo.getIsButton().equals(false) && vo.getHasChildren().equals(false) && StringUtils.isNotBlank(vo.getPath()))
+            {
+                return vo;
+            }
+            if(CollectionUtils.isNotEmpty(voList))
+            {
+               return filterList(voList);
+            }
+        }
+        return new TenantMenuVo();
+    }
+
+
+
+    public List<TenantMenuVo> getChildrens(TenantMenuVo root, List<TenantMenuVo> all) {
+        List<TenantMenuVo> children = all.stream().filter(m -> {
+            return Objects.equals(root.getId(), m.getParentId());
+        }).map(
+                (m) -> {
+                    m.setChildren(getChildrens(m, all));
+                    return m;
+                }
+        ).collect(Collectors.toList());
+        return children;
     }
 
 

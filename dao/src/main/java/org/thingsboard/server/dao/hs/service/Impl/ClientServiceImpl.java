@@ -1,0 +1,346 @@
+package org.thingsboard.server.dao.hs.service.Impl;
+
+import com.google.common.collect.Lists;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.DataConstants;
+import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.kv.AttributeKvEntry;
+import org.thingsboard.server.common.data.kv.KvEntry;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.attributes.AttributesService;
+import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.factory.FactoryService;
+import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.dao.InitEntity;
+import org.thingsboard.server.dao.hs.dao.InitRepository;
+import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
+import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
+import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.service.ClientService;
+import org.thingsboard.server.dao.hs.service.CommonService;
+import org.thingsboard.server.dao.model.sql.*;
+import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
+import org.thingsboard.server.dao.sql.device.DeviceRepository;
+import org.thingsboard.server.dao.sql.factory.FactoryRepository;
+import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
+import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
+import org.thingsboard.server.dao.timeseries.TimeseriesService;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.Predicate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * 二方库接口实现类
+ *
+ * @author wwj
+ * @since 2021.11.1
+ */
+@Service
+@Slf4j
+@Transactional(readOnly = true, rollbackFor = Exception.class)
+public class ClientServiceImpl extends AbstractEntityService implements ClientService, CommonService {
+
+    @PersistenceContext
+    protected EntityManager entityManager;
+
+    @Value("${state.persistToTelemetry:false}")
+    @Getter
+    private boolean persistToTelemetry;
+
+    // 初始化Repository
+    InitRepository initRepository;
+
+    // 工厂Service
+    FactoryService factoryService;
+
+    // 工厂Repository
+    FactoryRepository factoryRepository;
+
+    // 车间Repository
+    WorkshopRepository workshopRepository;
+
+    // 产线Repository
+    ProductionLineRepository productionLineRepository;
+
+    // 设备Repository
+    DeviceRepository deviceRepository;
+
+    // 属性Repository
+    AttributeKvRepository attributeKvRepository;
+
+    // 属性Service
+    AttributesService attributesService;
+
+    // 遥测Service
+    TimeseriesService tsService;
+
+    /**
+     * 查询设备基本信息、工厂、车间、产线、设备等
+     *
+     * @param t extends FactoryDeviceQuery
+     */
+    @Override
+    public <T extends FactoryDeviceQuery> DeviceBaseDTO getFactoryBaseInfoByQuery(TenantId tenantId, T t) {
+        return DeviceBaseDTO.builder()
+                .factory(t.getFactoryId() != null ? DaoUtil.getData(this.factoryRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getFactoryId()))) : null)
+                .workshop(t.getWorkshopId() != null ? DaoUtil.getData(this.workshopRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getWorkshopId()))) : null)
+                .productionLine(t.getProductionLineId() != null ? DaoUtil.getData(this.productionLineRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getProductionLineId()))) : null)
+                .device(t.getDeviceId() != null ? DaoUtil.getData(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(t.getDeviceId()))) : null)
+                .build();
+    }
+
+    /**
+     * 查询设备列表
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @Override
+    public <T extends FactoryDeviceQuery> List<Device> listDevicesByQuery(TenantId tenantId, T t) {
+        return DaoUtil.convertDataList(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t)));
+    }
+
+    /**
+     * 分页查询设备列表
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     * @param pageLink 分页参数
+     */
+    @Override
+    public <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQuery(TenantId tenantId, T t, PageLink pageLink) {
+        return DaoUtil.toPageData(this.deviceRepository.findAll(this.getDeviceQuerySpecification(tenantId, t), DaoUtil.toPageable(pageLink)));
+    }
+
+    /**
+     * 查询全部设备的在线情况
+     *
+     * @param allDeviceIdList 设备的UUID列表
+     */
+    @Override
+    public Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList) {
+        if (persistToTelemetry) {
+            Map<String, Boolean> map = new HashMap<>();
+            for (UUID uuid : allDeviceIdList) {
+                map.put(uuid.toString(), this.getDeviceOnlineStatus(DeviceId.fromString(UUIDToString(uuid))));
+            }
+            return map;
+        } else {
+            return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
+                    .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
+        }
+    }
+
+    /**
+     * 查询全部设备的工厂、车间、产线信息
+     *
+     * @param deviceList 设备列表
+     */
+    @Override
+    public DeviceListAffiliationDTO getDevicesAffiliationInfo(List<Device> deviceList) {
+        List<UUID> factoryIds = deviceList.stream().map(Device::getFactoryId).distinct().collect(Collectors.toList());
+        List<UUID> workshopIds = deviceList.stream().map(Device::getWorkshopId).distinct().collect(Collectors.toList());
+        List<UUID> productionLineIds = deviceList.stream().map(Device::getProductionLineId).distinct().collect(Collectors.toList());
+
+        return DeviceListAffiliationDTO.builder()
+                .factoryMap(DaoUtil.convertDataList(Lists.newArrayList(this.factoryRepository.findAllById(factoryIds))).stream()
+                        .collect(Collectors.toMap(Factory::getId, Function.identity(), (a, b) -> a)))
+                .workshopMap(DaoUtil.convertDataList(Lists.newArrayList(this.workshopRepository.findAllById(workshopIds))).stream()
+                        .collect(Collectors.toMap(Workshop::getId, Function.identity(), (a, b) -> a)))
+                .productionLineMap(DaoUtil.convertDataList(Lists.newArrayList(this.productionLineRepository.findAllById(productionLineIds))).stream()
+                        .collect(Collectors.toMap(ProductionLine::getId, Function.identity(), (a, b) -> a)))
+                .build();
+    }
+
+    /**
+     * 获得设备字典初始化数据
+     */
+    @Override
+    public List<DictDeviceGroupVO> getDictDeviceInitData() {
+        List<DictDeviceGroupVO> list = Lists.newArrayList();
+        var jsonNodeOptional = this.initRepository.findByScope(InitScopeEnum.DICT_DEVICE_GROUP.getCode()).map(InitEntity::getInitData);
+        if (jsonNodeOptional.isEmpty())
+            return list;
+
+        var jsonNode = jsonNodeOptional.get();
+
+        jsonNode.forEach(e -> list.add(convertValue(e, DictDeviceGroupVO.class)));
+        return list;
+    }
+
+    /**
+     * 列举全部工厂
+     *
+     * @param tenantId 租户Id
+     */
+    @Override
+    public List<Factory> listFactories(TenantId tenantId) {
+        return DaoUtil.convertDataList(this.factoryRepository.findAllByTenantIdOrderByCreatedTimeDesc(tenantId.getId()));
+    }
+
+    /**
+     * 列举工厂下全部车间
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     */
+    @Override
+    public List<Workshop> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId) {
+        return DaoUtil.convertDataList(this.workshopRepository.findAllByTenantIdAndFactoryIdOrderByCreatedTimeDesc(tenantId.getId(), factoryId));
+    }
+
+    /**
+     * 列举车间下全部产线
+     *
+     * @param tenantId   租户Id
+     * @param workshopId 车间Id
+     */
+    @Override
+    public List<ProductionLine> listProductionLinesByWorkshopId(TenantId tenantId, UUID workshopId) {
+        return DaoUtil.convertDataList(this.productionLineRepository.findAllByTenantIdAndWorkshopIdOrderByCreatedTimeDesc(tenantId.getId(), workshopId));
+    }
+
+    /**
+     * 根据当前登录人查询工厂列表
+     *
+     * @param tenantId 租户Id
+     * @param userId   用户Id
+     * @return 工厂列表
+     */
+    @Override
+    public List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId) {
+        return this.factoryService.findFactoryListByLoginRole(userId.getId(), tenantId.getId());
+    }
+
+    /**
+     * 组装设备请求 specification
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+
+            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+                // do nothing
+            } else if (!StringUtils.isBlank(t.getDeviceId())) {
+                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+            } else if (!StringUtils.isBlank(t.getFactoryId())) {
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+            } else {
+                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+            }
+
+            query.orderBy(cb.desc(root.get("createdTime")));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        };
+    }
+
+    /**
+     * 获得各个设备的在线状态
+     *
+     * @param deviceId 设备Id
+     */
+    @SuppressWarnings("Duplicates")
+    public boolean getDeviceOnlineStatus(DeviceId deviceId) {
+        try {
+            if (persistToTelemetry) {
+                List<TsKvEntry> tData = tsService.findLatest(TenantId.SYS_TENANT_ID, deviceId, Lists.newArrayList(HSConstants.ATTR_ACTIVE)).get();
+                if (tData != null) {
+                    for (KvEntry entry : tData) {
+                        if (entry != null && !org.springframework.util.StringUtils.isEmpty(entry.getKey()) && entry.getKey().equals(HSConstants.ATTR_ACTIVE)) {
+                            return entry.getBooleanValue().orElse(false);
+                        }
+                    }
+                }
+            } else {
+                List<AttributeKvEntry> aData = attributesService.find(TenantId.SYS_TENANT_ID, deviceId, DataConstants.SERVER_SCOPE, Lists.newArrayList(HSConstants.ATTR_ACTIVE)).get();
+                if (aData != null) {
+                    for (KvEntry entry : aData) {
+                        if (entry != null && !org.springframework.util.StringUtils.isEmpty(entry.getKey()) && entry.getKey().equals(HSConstants.ATTR_ACTIVE)) {
+                            return entry.getBooleanValue().orElse(false);
+                        }
+                    }
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Autowired
+    public void setInitRepository(InitRepository initRepository) {
+        this.initRepository = initRepository;
+    }
+
+    @Autowired
+    public void setFactoryRepository(FactoryRepository factoryRepository) {
+        this.factoryRepository = factoryRepository;
+    }
+
+    @Autowired
+    public void setWorkshopRepository(WorkshopRepository workshopRepository) {
+        this.workshopRepository = workshopRepository;
+    }
+
+    @Autowired
+    public void setProductionLineRepository(ProductionLineRepository productionLineRepository) {
+        this.productionLineRepository = productionLineRepository;
+    }
+
+    @Autowired
+    public void setDeviceRepository(DeviceRepository deviceRepository) {
+        this.deviceRepository = deviceRepository;
+    }
+
+    @Autowired
+    public void setAttributeKvRepository(AttributeKvRepository attributeKvRepository) {
+        this.attributeKvRepository = attributeKvRepository;
+    }
+
+    @Autowired
+    public void setAttributesService(AttributesService attributesService) {
+        this.attributesService = attributesService;
+    }
+
+    @Autowired
+    public void setTsService(TimeseriesService tsService) {
+        this.tsService = tsService;
+    }
+
+    @Autowired
+    public void setFactoryService(FactoryService factoryService) {
+        this.factoryService = factoryService;
+    }
+}

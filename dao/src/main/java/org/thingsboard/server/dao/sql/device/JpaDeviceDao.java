@@ -44,11 +44,13 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
+import org.thingsboard.server.common.data.vo.device.DeviceDataSvc;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.relation.RelationDao;
@@ -75,6 +77,8 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
 
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private ClientService clientService;
 
     @Autowired
     private AttributesDao attributesDao;
@@ -101,6 +105,34 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public DeviceInfo findDeviceInfoById(TenantId tenantId, UUID deviceId) {
         return DaoUtil.getData(deviceRepository.findDeviceInfoById(deviceId));
+    }
+
+    @Override
+    public List<Device> getYunDeviceList(Device device){
+        List<Device> result = new ArrayList<>();
+            Specification<DeviceEntity> specification = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                if(device != null){
+                    if(device.getTenantId() != null && device.getTenantId().getId() != null){
+                        predicates.add(cb.equal(root.get("tenantId"),device.getTenantId().getId()));
+                    }
+                    if(device.getId() != null && device.getId().getId() != null){
+                        predicates.add(cb.equal(root.get("id"),device.getId().getId()));
+                    }
+                    if(device.getUpdatedTime() != 0){
+                        // 下面是一个区间查询
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("updatedTime"), device.getUpdatedTime()));
+                    }
+                }
+                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            };
+            List<DeviceEntity> all = deviceRepository.findAll(specification);
+            if(CollectionUtils.isNotEmpty(all)){
+                all.forEach(i->{
+                    result.add(i.toData());
+                });
+            }
+        return result;
     }
 
     @Override
@@ -347,6 +379,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
                     predicates.add(cb.equal(root.get("productionLineId"),device.getProductionLineId()));
                 }
+                if(device.getDictDeviceId() != null && StringUtils.isNotEmpty(device.getDictDeviceId().toString())){
+                    predicates.add(cb.equal(root.get("dictDeviceId"),device.getDictDeviceId()));
+                }
                 //产线id批量
                 if(CollectionUtils.isNotEmpty(device.getProductionLineIds())){
                     // 下面是一个 IN查询
@@ -360,6 +395,19 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             if(CollectionUtils.isNotEmpty(all)){
                 for (DeviceEntity i : all){
                     Device deviceBo = i.toData();
+                    //是否只要网关
+                    if(device.getOnlyGatewayFlag()){
+                        JsonNode additionalInfo = i.getAdditionalInfo();
+                        if(additionalInfo == null){
+                            continue;
+                        }else {
+                            JsonNode gateway = additionalInfo.get("gateway");
+                            if(gateway == null || !gateway.asBoolean()){
+                                continue;
+                            }
+                        }
+                    }
+                    //是否过滤掉网关
                     if(device.getFilterGatewayFlag()){
                         //过滤网关
                         JsonNode additionalInfo = i.getAdditionalInfo();
@@ -410,6 +458,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         deviceIdList.forEach(deviceId->{
             if(deviceId != null){
                 DeviceEntity entity = deviceRepository.findById(deviceId).get();
+                UUID productionLineId = entity.getProductionLineId();
                 entity.setId(deviceId);
                 entity.setFactoryId(null);
                 entity.setWorkshopId(null);
@@ -418,9 +467,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 entity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
                 deviceRepository.save(entity);
                 //清除实体关系
-                if(entity.getProductionLineId() != null){
+                if(productionLineId != null){
                     EntityRelation relation = new EntityRelation(
-                            new DeviceId(entity.getId()),new ProductionLineId(entity.getProductionLineId()), EntityRelation.CONTAINS_TYPE
+                            new ProductionLineId(productionLineId), new DeviceId(entity.getId()), EntityRelation.CONTAINS_TYPE
                     );
                     relationDao.deleteRelation(new TenantId(entity.getTenantId()), relation);
                 }
@@ -708,26 +757,18 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink) {
         Pageable pageable = DaoUtil.toPageable(pageLink);
-        Page<DeviceDataVo> deviceEntityPage =  deviceRepository.queryAllByNameLike(factoryId,name,pageable);
-
-        List<DeviceDataVo>  deviceDataVoList =  deviceEntityPage.getContent();
+//        Page<DeviceDataVo> deviceEntityPage =  deviceRepository.queryAllByNameLike(factoryId,name,pageable);
+        Page<DeviceDataSvc> deviceEntityPage =  deviceRepository.queryAllByNameLikeNativeQuery(factoryId,name,pageable);
+        List<DeviceDataVo>  deviceDataVoList =  DeviceDataVo.toData(deviceEntityPage.getContent());
         List<UUID> idList = deviceDataVoList.stream().map(DeviceDataVo::getDeviceId).collect(Collectors.toList());
-        List<AttributeKvEntity> list = attributesDao.findAllByEntityIds(idList, DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
-        Map<UUID,String> map1 = new HashMap<>();
-        list.stream().forEach(l1->{
-            AttributeKvCompositeKey  attributeKvCompositeKey =   l1.getId();
-            if(attributeKvCompositeKey != null)
-            {
-                map1.put(attributeKvCompositeKey.getEntityId(),"1");
-            }
-        });
+        Map<String, Boolean>   map1= clientService.listDevicesOnlineStatus(idList);
+        log.info("打印的queryAllByNameLike.map1{}",map1);
         deviceDataVoList.stream().forEach(d1->{
-            String str =  map1.get(d1.getDeviceId());
-            d1.setOnlineStatus(org.apache.commons.lang3.StringUtils.isNotEmpty(str)?"1":"0");
+            Boolean str =  map1.get(d1.getDeviceId().toString());
+            d1.setOnlineStatus((str)?"1":"0");
         });
 
-
-        return new PageData<DeviceDataVo>((deviceEntityPage.getContent()),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
+        return new PageData<DeviceDataVo>((deviceDataVoList),deviceEntityPage.getTotalPages(),deviceEntityPage.getTotalElements(),deviceEntityPage.hasNext());
     }
 
     /**
@@ -807,7 +848,17 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public PageData<Device> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException {
         Pageable pageable = DaoUtil.toPageable(pageLink);
-        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryByMap(BeanToMap.beanToMapByJackson(vo), DeviceEntity.class),pageable);
+        Map<String, Object> queryParam  =  BeanToMap.beanToMapByJackson(vo);
+        if(vo.getDeviceId() != null)
+        {
+            queryParam.put("id",vo.getDeviceId());
+        }
+        if(StringUtils.isNotEmpty(vo.getDeviceName()))
+        {
+            queryParam.put("name",vo.getDeviceName());
+
+        }
+        Page<DeviceEntity> pageData =  deviceRepository.findAll(JpaQueryHelper.createQueryDeviceByMap(queryParam, DeviceEntity.class),pageable);
         return  DaoUtil.toPageData(pageData);
    }
 
@@ -888,7 +939,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     predicates.add(cb.like(root.get("name"),"%" + pageLink.getTextSearch().trim() + "%"));
                 }
                 if(StringUtils.isNotEmpty(device.getType())){
-                    predicates.add(cb.equal(root.get("type"),device.getType()));
+                    predicates.add(cb.like(root.get("type"),"%" + device.getType().trim() + "%"));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[0]));

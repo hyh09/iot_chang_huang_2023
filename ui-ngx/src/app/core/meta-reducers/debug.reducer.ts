@@ -23,11 +23,11 @@ export function debug(
 ): ActionReducer<AppState> {
   return (state, action) => {
     const newState = reducer(state, action);
-    console.log(`[DEBUG] action: ${action.type}`, {
-      payload: (action as any).payload,
-      oldState: state,
-      newState
-    });
+    // console.log(`[DEBUG] action: ${action.type}`, {
+    //   payload: (action as any).payload,
+    //   oldState: state,
+    //   newState
+    // });
     return newState;
   };
 }

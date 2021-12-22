@@ -647,3 +647,8 @@ COMMENT ON COLUMN public.device.comment IS '设备编号';
     ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
 	ALTER TABLE IF EXISTS public.hs_production_line
     ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
+
+--修改hs_device_component字段picture长度
+alter table hs_device_component alter column picture type character varying(1000000);
+
+

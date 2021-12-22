@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -15,10 +16,7 @@ import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.vo.CustomException;
-import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -32,11 +30,10 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
-import org.thingsboard.server.dao.hs.dao.DictDataEntity;
-import org.thingsboard.server.dao.hs.dao.DictDataRepository;
-import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyEntity;
-import org.thingsboard.server.dao.hs.dao.DictDeviceComponentPropertyRepository;
+import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
@@ -82,6 +79,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private DictDeviceComponentPropertyRepository componentPropertyRepository;
     @Autowired private DictDataRepository dictDataRepository;//数据字典
+    // 设备字典Repository
+    @Autowired  DictDeviceRepository dictDeviceRepository;
+    @Autowired    ClientService clientService;
+
 
 
     private  final  static String  HEADER_0= "设备名称";
@@ -191,7 +192,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
-
+            capVo.setFlg(entity.getFlg());
             if(entity.getWorkshopId() != null) {
                 Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity.getWorkshopId());
                 capVo.setWorkshopName(workshop.isPresent()?workshop.get().getName():"");
@@ -219,7 +220,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.info("打印当前的表头name:{}",headerList);
         List<String>  nameKey=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
 
-//        Map<String,String>  mapUnit  = dictDeviceService.getUnit();
         Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
 
         if(CollectionUtils.isEmpty(nameKey))
@@ -261,13 +261,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             UUID uuid= pageList.get(i);
             listMap.put(uuid,map.get(uuid));
         }
-        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);//包含了总产能的
 
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonlist = mapper.writeValueAsString(vos);
-        log.info("输出打印的所有的能耗的数据:{}",jsonlist);
+        var dictDeviceIds = effectTsKvEntities.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(vo.getTenantId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
 
-        List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName);
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(finalMap1,listMap,tenantId);//包含了总产能的
+
+        List<PcDeviceEnergyVo>  resultList=   unitMap(vos,keyName, headerList);
         log.info("具体的返回包含单位能耗数据:{}",resultList);
         headerList.stream().forEach(str->{
             log.info("打印当前的str:{}",str);
@@ -275,7 +280,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             String title =StringUtils.isBlank(dvo.getTitle())?dvo.getName():dvo.getTitle();
             totalValueList.add(title+": "+getTotalValue(effectTsKvEntities, str)+ " ("+dvo.getUnit()+")");
         });
-        return new PageDataAndTotalValue<Map>(totalValueList,todataByList(resultList, mapNameToVo ), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+        return new PageDataAndTotalValue<Map>(totalValueList,todataByList(resultList, mapNameToVo,keys1 ), page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     /**
@@ -294,7 +299,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            log.info("打印的产能key:{}",keyName);
             vo.setKey(keyName);
         }
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && vo.getFilterFirstFactory())
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
@@ -306,11 +311,23 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EffectTsKvEntity>  pageList =  effectTsKvEntities.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
                 collect(Collectors.toList());
         log.info("当前的分页之后的数据:{}",pageList);
+
+        var dictDeviceIds = pageList.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
+        log.info("finalMap1:====>"+finalMap1);
+
         List<AppDeviceCapVo> appDeviceCapVoList = new ArrayList<>();
         pageList.stream().forEach(entity->{
             AppDeviceCapVo  capVo = new AppDeviceCapVo();
-            log.info("entity:====>"+entity);
-            capVo.setPicture(entity.getPicture());
+
+   log.info("=entity===>"+entity);
+
+            capVo.setPicture(Optional.ofNullable(entity.getPicture()).orElse(Optional.ofNullable(entity.getDictDeviceId()).map(UUID::toString).map(finalMap1::get).map(DictDevice::getPicture).orElse(null)));
             capVo.setValue(getValueByEntity(entity));
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
@@ -338,10 +355,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * 能耗的查询
      * @param vo
      * @param tenantId
+     *   flg 是否查询第一个工厂
      * @return
      */
     @Override
-    public ResultEnergyAppVo    queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId) {
+    public ResultEnergyAppVo    queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId,Boolean flg) {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
         Map<String,String> totalValueMap = new HashMap<>();
@@ -349,7 +367,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
            keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
           vo.setKeys(keys1);
         Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && flg)
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
@@ -378,7 +396,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             UUID uuid= pageList.get(i);
             listMap.put(uuid,map.get(uuid));
         }
-        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(listMap,tenantId);
+
+        var dictDeviceIds = effectTsKvEntities.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, DictDevice> finalMap = new HashMap<>();
+        if (!dictDeviceIds.isEmpty()){
+            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
+        }
+        HashMap<String, DictDevice> finalMap1 = finalMap;
+
+        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(finalMap1,listMap,tenantId);
         appVo.setAppDeviceCapVoList(translateListAppTitle(vos,mapNameToVo));
         keys1.stream().forEach(str->{
             totalValueMap.put(translateAppTitle(mapNameToVo,str),getTotalValue(effectTsKvEntities,str)+translateAppUnit(mapNameToVo,str));
@@ -397,18 +424,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
         log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
-//        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),vo.getDeviceId());
-//        if(deviceInfo ==  null){
-//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查不到该设备");
-//
-//        }
-//        log.info("查询当前的设备信息{}",deviceInfo);
-//        List<DictDeviceGroupPropertyVO>   dictDeviceGroupPropertyVOList =   dictDeviceService.listDictDeviceGroupProperty(deviceInfo.getDictDeviceId());
-//        log.info("查询到的当前设备{}的配置的属性:{}",vo.getDeviceId(),dictDeviceGroupPropertyVOList);
-//        List<String> keyNames=   dictDeviceGroupPropertyVOList.stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
 
         List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
-        List<String> keyNames=propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+        List<String> keyNames  = vo.getKeyNames();
+        if(CollectionUtils.isEmpty(vo.getKeyNames())) {
+            List<String>    keyNames0 = propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+             keyNames =   keyNames0.stream().limit(3).collect(Collectors.toList());
+          log.info("打印前三个属性:{}",keyNames);
+        }
 
         log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
         List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
@@ -444,16 +467,24 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId tenantId,PageLink pageLink) throws ThingsboardException {
              log.info("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
+
         List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
              log.info("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
         Map<String, DeviceDictionaryPropertiesVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(DeviceDictionaryPropertiesVo::getName, a -> a,(k1,k2)->k1));
+        List<String> keyNames=  vo.getKeyNames();
+        List<String> keyPages = new ArrayList<>();
+        if(CollectionUtils.isEmpty(keyNames)) {
+            List<String>   keyNames01= propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+            keyPages =   keyNames01.stream().limit(3).collect(Collectors.toList());
+        }else {
+            keyPages=  keyNames.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).collect(Collectors.toList());
 
-        List<String> keyNames=   propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
-        log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
-           List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
+        }
+
+           List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyPages);
              log.info("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
            List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
            Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
@@ -479,6 +510,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             }).collect(Collectors.toList());
        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
       log.info("查询到的当前的数据:{}",map);
+        log.info("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
+
         return map;
     }
 
@@ -496,6 +529,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
+        dictDeviceDataVos.stream().forEach(m1->{
+            if (StringUtils.isBlank(m1.getTitle())) {
+                m1.setTitle(m1.getName());
+            }});
         Map<String,List<DictDeviceDataVo>> map = dictDeviceDataVos.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
         map.put("部件",getParts( tenantId,deviceInfo.getDictDeviceId()));
         return map;
@@ -575,37 +612,42 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities)
     {
 
+//        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(m->m.getFlg().equals(true)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+//                BigDecimal::add);
         BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
-        return  invoiceAmount.stripTrailingZeros().toPlainString();
+        return   StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
 
 
     private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,String key)
     {
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> entity.getKeyName().equals(key)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> (StringUtils.isNotBlank(entity.getKeyName())&&entity.getKeyName().equals(key))).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
-        return  invoiceAmount.stripTrailingZeros().toPlainString();
+        return  StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
 
  /**
      * @param listMap
      * @return
      */
-    public  List<AppDeviceEnergyVo>  getEntityKeyValue(Map<UUID,List<EffectTsKvEntity>> listMap,TenantId tenantId)
+    public  List<AppDeviceEnergyVo>  getEntityKeyValue(HashMap<String, DictDevice> finalMap1,Map<UUID,List<EffectTsKvEntity>> listMap,TenantId tenantId)
     {
         List<AppDeviceEnergyVo> appList  = new ArrayList<>();
 
         listMap.forEach((key,value)->{
             AppDeviceEnergyVo appDeviceEnergyVo  = new  AppDeviceEnergyVo();
             Map<String,String> mapValue = new HashMap<>();
+            Map<String,Long> timeValueMap1= new HashMap<>();
             Map<String,Long> timeValueMap = new HashMap<>();
+
 
             appDeviceEnergyVo.setDeviceId(key.toString());
             EffectTsKvEntity  entity1 =value.get(0);
             if(entity1 != null) {
-                appDeviceEnergyVo.setPicture(entity1.getPicture());
-                appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
+              //  appDeviceEnergyVo.setPicture(entity1.getPicture());
+                appDeviceEnergyVo.setPicture(Optional.ofNullable(entity1.getPicture()).orElse(Optional.ofNullable(entity1.getDictDeviceId()).map(UUID::toString).map(finalMap1::get).map(DictDevice::getPicture).orElse(null)));
+               appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
                 appDeviceEnergyVo.setTime(entity1.getTs2());
                 if (entity1.getWorkshopId() != null) {
                     Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity1.getWorkshopId());
@@ -618,14 +660,30 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
 
                 value.stream().forEach(effectTsKvEntity -> {
-                    mapValue.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getValueLast2());
-                    timeValueMap.put(effectTsKvEntity.getKeyName(),effectTsKvEntity.getTs2());
+                    if(effectTsKvEntity.getKeyName() != null) {
+                        mapValue.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getValueLast2());
+                        timeValueMap.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getTs2());
+                        timeValueMap1.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getTs());
+                    }
+
                 });
                 appDeviceEnergyVo.setMapValue(mapValue);
                 appDeviceEnergyVo.setTimeValueMap(timeValueMap);
+                appDeviceEnergyVo.setTimeValueMap1(timeValueMap1);
             }
 
             appList.add(appDeviceEnergyVo);
+            log.info("appList:====>{}",appList);
+
+//            try{
+//                ObjectMapper mapper=new ObjectMapper();
+//               String   jsonStr=mapper.writeValueAsString(appList);
+//               log.info("josn数据:{}",jsonStr);
+//            }catch (Exception e)
+//            {
+//                e.printStackTrace();
+//
+//            }
 
         });
 
@@ -638,7 +696,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @param vos
      * @param keyName 产能key
      */
-    private  List<PcDeviceEnergyVo> unitMap(List<AppDeviceEnergyVo>  vos, String  keyName)
+    private  List<PcDeviceEnergyVo> unitMap(List<AppDeviceEnergyVo>  vos, String  keyName,List<String>  headerList)
     {
         List<PcDeviceEnergyVo> resultList = new ArrayList<>();
         vos.stream().forEach(energyVo->{
@@ -648,12 +706,23 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setProductionName(energyVo.getProductionName());
             vo.setWorkshopName(energyVo.getWorkshopName());
             Map<String,String>  mapOld =    energyVo.getMapValue();
-         String   keyNameValue =   mapOld.get(keyName);
+            if(CollectionUtils.isEmpty(mapOld))
+            {
+                headerList.stream().forEach(str->{
+                        mapOld.put(str,"0");
+                });
+            }
+            log.info("headerList:====>headerList{}",headerList);
+            log.info("mapOld:====>mapOld{}",mapOld);
+
+            String   keyNameValue1 =   mapOld.get(keyName);
+
+            String   keyNameValue =(StringUtils.isEmpty(keyNameValue1)?"0":keyNameValue1);
          log.info("当前设备的总产能:{}",keyNameValue);
 
          Map<String,Long> timeValueMap = energyVo.getTimeValueMap();
+            Map<String,Long> timeValueMap1 = energyVo.getTimeValueMap1();
            Long time001 =  timeValueMap.get(keyName);
-         log.info("打印设备的总产能的时间:{}",time001);
 
 
             Map<String,String>  map1 =  new HashMap<>();
@@ -662,15 +731,21 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             mapOld.forEach((key,value1)->{
               if(!key.equals(keyName))
               {
-                  //只会影响到单位能耗计算
-                  //
-                  //计算公式：总产能/总能耗/分钟数
-                  map1.put(key,value1);
-                Long  time02 =   (timeValueMap.get(key));
-                Long  t3 =   (time001-time02);
+                 if(StringUtilToll.isZero(value1))
+                 {
+                     map2.put(key,"0");
+                 } else {
 
-                  Double  aDouble =  StringUtilToll.div(keyNameValue,value1,t3.toString());
-                  map2.put(key,aDouble.toString());
+                     //计算公式：总产能/总能耗/分钟数
+                     map1.put(key, value1);
+                     Long t01 = timeValueMap1.get(key);
+                     Long t02 = timeValueMap.get(key);
+                     log.info("=====>t01{},t02{}", t01, t02);
+                     Long t3 = (t02 - t01) / 60000;
+
+                     String aDouble = StringUtilToll.div(keyNameValue, value1, t3.toString());
+                     map2.put(key, aDouble.toString());
+                 }
               }
             });
 
@@ -716,25 +791,30 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
-
-
-
-
-    private  List<Map>  todataByList(List<PcDeviceEnergyVo>  resultList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo )
+    /**
+     *
+     * @param resultList 返回的的数据
+     * @param mapNameToVo
+     * @return
+     */
+    private  List<Map>  todataByList(List<PcDeviceEnergyVo>  resultList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,List<String>  keys1 )
     {
         List<Map>  mapList = new ArrayList<>();
-//        Map<String,String>  mapUnit  = dictDeviceService.getUnit();
-
         resultList.stream().forEach(vo->{
             Map   map = new HashMap();
             map.put(HEADER_0,vo.getDeviceName());
             map.put(HEADER_DEVICE_ID,vo.getDeviceId());
             Map<String,String> mapData = vo.getMapValue();
+
+             getDefaultMap(keys1,mapData);
+
+
             mapData.forEach((k1,v1)->{
                 DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k1);
                 map.put(getHomeKeyNameOnlyUtilNeW(dictVO),v1);
             });
             Map<String,String> mapData1 = vo.getMapUnitValue();
+            getDefaultMap(keys1,mapData1);
             mapData1.forEach((k1,v1)->{
                 DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k1);
                 map.put(getHomeKeyNameByUtilNeW(dictVO),v1);
@@ -853,6 +933,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         return  voList;
 
+
+    }
+
+
+    /**
+     * 返回默认的
+     * 耗水量: 0 (T)
+     * 耗电量: 0 (KWH)
+     * 耗气量: 0 (T)
+     * @return
+     */
+    private  Map  getDefaultMap(List<String>  keys, Map<String,String> mapData01)
+    {
+//        Map<String,String> mapData  = new HashMap<>();
+        keys.stream().forEach(str->{
+            if(StringUtils.isBlank(mapData01.get(str))) {
+                mapData01.put(str, "0");
+            }
+        });
+        return  mapData01;
 
     }
 }

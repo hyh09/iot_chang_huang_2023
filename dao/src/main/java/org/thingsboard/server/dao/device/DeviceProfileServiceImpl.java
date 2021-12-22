@@ -73,11 +73,7 @@ import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.tenant.TenantDao;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -136,6 +132,17 @@ public class DeviceProfileServiceImpl extends AbstractEntityService implements D
         log.trace("Executing findDeviceProfileById [{}]", deviceProfileId);
         Validator.validateId(deviceProfileId, INCORRECT_DEVICE_PROFILE_ID + deviceProfileId);
         return deviceProfileDao.findById(tenantId, deviceProfileId.getId());
+    }
+
+    /**
+     * 批量查询
+     * @param deviceProfileIds
+     * @return
+     */
+    @Override
+    public List<DeviceProfile>  findDeviceProfileByIds(List<UUID> deviceProfileIds) {
+        log.trace("Executing findDeviceProfileByIds [{}]", deviceProfileIds);
+        return deviceProfileDao.findDeviceProfileByIds(deviceProfileIds);
     }
 
     @Override

@@ -153,6 +153,6 @@ public class AlarmRecordController extends BaseController {
                 .alarmSimpleStatus(status).alarmSimpleLevel(level).build();
         query.setDeviceId(deviceId).setProductionLineId(productionLineId)
         .setFactoryId(factoryId).setWorkshopId(workshopId);
-        return this.deviceMonitorService.listAlarmsRecord(getTenantId(), query, pageLink);
+        return this.deviceMonitorService.listPageAlarmRecords(getTenantId(), query, pageLink);
     }
 }

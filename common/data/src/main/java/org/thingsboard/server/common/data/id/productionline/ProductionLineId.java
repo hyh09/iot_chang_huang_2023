@@ -31,8 +31,8 @@ public class ProductionLineId extends UUIDBased implements EntityId {
         super(id);
     }
 
-    public static ProductionLineId fromString(String tenantMenuId) {
-        return new ProductionLineId(UUID.fromString(tenantMenuId));
+    public static ProductionLineId fromString(String productionLineId) {
+        return new ProductionLineId(UUID.fromString(productionLineId));
     }
 
     @JsonIgnore

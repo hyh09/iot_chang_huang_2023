@@ -40,16 +40,12 @@ public class EffectMaxValueKvRepository {
 
 
     private  String SELECT_SQL_10="with tabl1 as ( " +
-            "select (to_number(max(substring(concat(long_v, " +
-            "                                           dbl_v," +
-            "                                           str_v," +
-            "                                           json_v)," +
-            "                                    E'(\\\\-?\\\\d+\\\\.?\\\\d*)')),'9999999.99' ))  as value1 from  ts_kv " +
+           "select max(to_number(substring(concat(long_v,dbl_v,str_v),E'(\\\\-?\\\\d+\\\\.?\\\\d*)'),'99999999999999999999999999.9999')) as va1 from  ts_kv " +
             "where 1=1 ";
 
 
     private  String SUMSQL="    group  by  entity_id) " +
-            "            select cast((value1) as VARCHAR) as maxValue from  tabl1  ";
+            "            select cast((va1) as VARCHAR) as maxValue from  tabl1  ";
 
 
 
@@ -81,9 +77,9 @@ public class EffectMaxValueKvRepository {
             sql.append(" and  d1.production_line_id = :productionLineId");
             param.put("productionLineId",maxTsVo.getProductionLineId());
         }
-        if(!maxTsVo.getCapSign() ) {
+        if(maxTsVo.getCapSign() ) {
             sql.append(" and  d1.flg = :flg");
-            param.put("flg",maxTsVo.getCapSign());
+            param.put("flg",true);
         }
         sql.append(" ) ");
         sql.append(" and  key  in (select  key_id  from  ts_kv_dictionary  ts  where  ts.key = :key ) ");

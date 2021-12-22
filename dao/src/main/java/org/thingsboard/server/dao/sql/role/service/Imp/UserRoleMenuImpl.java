@@ -20,17 +20,21 @@ import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.CheckSvc;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
+import org.thingsboard.server.dao.sql.user.UserRepository;
 import org.thingsboard.server.dao.tool.UserLanguageSvc;
 import org.thingsboard.server.dao.user.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @program: thingsboard
@@ -54,10 +58,28 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
     @Autowired  private UserMenuRoleService userMenuRoleService;
     @Autowired protected CheckSvc checkSvc;
     @Autowired protected UserLanguageSvc userLanguageSvc;
+    @Autowired private UserRepository userRepository;
 
 
     {
 
+    }
+
+    /**
+     * 查询该角色下用户
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<UUID> getTenantRoleId(UUID tenantId) {
+        List<UserEntity>  entities =  userRepository.queyrTenantManagement(tenantId);
+        log.info("===查询该租户的系统管理员:>{}",entities);
+        if(CollectionUtils.isEmpty(entities))
+        {
+            return  new ArrayList<>();
+        }
+        List<UUID> uuidList = entities.stream().map(UserEntity::getId).collect(Collectors.toList());
+        return  uuidList;
     }
 
     @Override

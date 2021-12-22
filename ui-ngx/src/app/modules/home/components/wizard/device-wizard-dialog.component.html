@@ -46,6 +46,14 @@
               </mat-error>
             </mat-form-field>
             <mat-form-field class="mat-block">
+              <mat-label translate>device-mng.device-dic</mat-label>
+              <mat-select formControlName="dictDeviceId">
+                <mat-option *ngFor="let option of deviceDictionaries" [value]="option.id">
+                  {{ option.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="mat-block">
               <mat-label translate>device.label</mat-label>
               <input matInput formControlName="label">
             </mat-form-field>

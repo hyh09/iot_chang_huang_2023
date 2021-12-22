@@ -5,6 +5,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
@@ -53,7 +54,7 @@ public interface EfficiencyStatisticsSvc {
     /**
      * 能耗的查询
      */
-    ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+    ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);
 
     /**
      * PC端的运行状态
@@ -69,7 +70,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId) throws ThingsboardException;
+    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId  tenantId,PageLink pageLink) throws ThingsboardException;
 
 
     //查询当前的分组-分组属性

@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.productionline;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.dao.Dao;
 
@@ -25,7 +27,7 @@ public interface ProductionLineDao extends Dao<ProductionLine>{
      * 根据id删除（逻辑删除）
      * @param id
      */
-    void delProductionLine(UUID id);
+    void delProductionLine(UUID id) throws ThingsboardException;
 
     /**
      * 根据车间id删除（逻辑删除）
@@ -46,4 +48,6 @@ public interface ProductionLineDao extends Dao<ProductionLine>{
      * @return
      */
     ProductionLine findById(UUID id);
+
+    ListenableFuture<ProductionLine> findProductionLineByIdAsync(TenantId tenantId, UUID id);
 }

@@ -131,7 +131,7 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
      * @param id
      */
     @Override
-    public void delWorkshop(UUID id){
+    public void delWorkshop(UUID id) throws ThingsboardException {
         //判断下面有没有产线
         if(CollectionUtils.isEmpty(productionLineDao.findProductionLineList(null,id,null))){
             /* 逻辑删除暂时不用
@@ -139,6 +139,8 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             workshopEntity.setDelFlag("D");
             workshopRepository.save(workshopEntity);*/
             workshopRepository.deleteById(id);
+        }else {
+            throw new ThingsboardException("车间下有产线不能删除！",ThingsboardErrorCode.GENERAL);
         }
     }
 

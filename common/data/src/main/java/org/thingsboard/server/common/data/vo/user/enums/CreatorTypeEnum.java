@@ -9,6 +9,7 @@ package org.thingsboard.server.common.data.vo.user.enums;
 
 public enum CreatorTypeEnum {
 
+//    TENANT_ADMIN("TENANT_ADMIN","租户管理员"),
     TENANT_CATEGORY("TENANT_CATEGORY","由租户创建的"),
     FACTORY_MANAGEMENT("FACTORY_MANAGEMENT","由工厂创建的,工厂列表级别"),
 

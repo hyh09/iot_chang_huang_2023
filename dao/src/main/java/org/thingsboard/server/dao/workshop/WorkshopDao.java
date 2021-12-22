@@ -27,7 +27,7 @@ public interface WorkshopDao extends Dao<Workshop>{
      * 删除(逻辑删除)
      * @param id
      */
-    void delWorkshop(UUID id);
+    void delWorkshop(UUID id) throws ThingsboardException ;
 
     /**
      * 根据工厂删除后刷新值(逻辑删除)

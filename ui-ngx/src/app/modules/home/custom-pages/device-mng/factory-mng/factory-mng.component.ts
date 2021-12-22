@@ -1,6 +1,6 @@
 import { UtilsService } from '@core/services/utils.service';
 import { FactoryMngService } from './../../../../../core/http/custom/factory-mng.service';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AppState, DialogService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTableTreeNode } from '@app/shared/models/custom/factory-mng.models';
 import { BaseData, EntityType, EntityTypeResource, entityTypeResources, EntityTypeTranslation, entityTypeTranslations, HasId, HasUUID, PageComponent } from '@app/shared/public-api';
@@ -24,14 +24,14 @@ import { SetPermissionsComponent, SetPermissionsDialogData } from '../../auth-mn
   templateUrl: './factory-mng.component.html',
   styleUrls: ['./factory-mng.component.scss']
 })
-export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit {
+export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public isDetailsOpen: boolean = false;
   public filters = FILTERS;
   public filterParams = {
     name: '',
     workshopName: '',
-    productionlineName: '',
+    productionLineName: '',
     deviceName: ''
   }
   public tableData: FactoryTableTreeNode[] = [];
@@ -60,13 +60,24 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
 
   ngAfterViewInit() {
     this.setTableHeight();
-    window.onresize = this.setTableHeight;
+    window.addEventListener('resize', () => { this.setTableHeight(); });
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', () => { this.setTableHeight(); });
   }
 
   setTableHeight() {
-    const totalHeight = document.querySelector('.tb-entity-table-content').clientHeight
-    const tableClientTop =  document.querySelector('.mat-table-toolbar').clientHeight + document.querySelector('.entity-filter-header').clientHeight
-    this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` }
+    setTimeout(() => {
+      const $tableContent = document.querySelector('.tb-entity-table-content');
+      const $toolbar = document.querySelector('.mat-table-toolbar');
+      const $filter = document.querySelector('.entity-filter-header');
+      if ($tableContent && $toolbar && $filter) {
+        const totalHeight = $tableContent.clientHeight;
+        const tableClientTop = $toolbar.clientHeight + $filter.clientHeight;
+        this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` };
+      }
+    });
   }
 
   fetchData() {

@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.entity.vo;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,30 +24,36 @@ public class BoardAlarmLevelProportionResult {
     /**
      * 总数
      */
+    @ApiModelProperty("总数")
     private Integer count;
 
     /**
      * 危险警报总数
      */
+    @ApiModelProperty("危险警报总数")
     private Integer criticalCount;
 
     /**
      * 重要警报总数
      */
+    @ApiModelProperty("重要警报总数")
     private Integer majorCount;
 
     /**
      * 次要警报总数
      */
+    @ApiModelProperty("次要警报总数")
     private Integer minorCount;
 
     /**
      * 警告警报总数
      */
+    @ApiModelProperty("警告警报总数")
     private Integer warningCount;
 
     /**
      * 不确定警报总数
      */
+    @ApiModelProperty("不确定警报总数")
     private Integer indeterminateCount;
 }

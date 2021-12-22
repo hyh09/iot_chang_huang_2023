@@ -51,7 +51,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         this.devcieComp = res.componentList || [];
         this.setMapOfExpandedComp();
         if (isMqtt) {
-          this.fetchPropHistoryData(this.currPropName, this.currPropTitle, () => { this.subscribe(); });
+          this.fetchPropHistoryData(this.currPropName, this.currPropTitle);
         } else if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
           const { name, title } = this.deviceData[0].groupPropertyList[0];
           this.fetchPropHistoryData(name, title, () => { this.subscribe(); });
@@ -70,11 +70,11 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
       if (propData.isShowChart) {
         this.propHistoryData = propData.propertyVOList || [];
-        callFn && callFn();
         this.showRealTimeChart = true;
       } else {
         this.showRealTimeChart = false;
       }
+      callFn && callFn();
     });
   }
 

@@ -6,7 +6,7 @@ export const FILTERS = [{
   propName: 'workshopName'
 }, {
   langKey: 'device-mng.prod-line-name',
-  propName: 'productionlineName'
+  propName: 'productionLineName'
 }, {
   langKey: 'device-mng.device-name',
   propName: 'deviceName'

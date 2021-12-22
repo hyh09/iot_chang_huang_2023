@@ -73,20 +73,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     @Override
     public Factory saveFactory(Factory factory)throws ThingsboardException {
         Boolean create = factory.getId() == null;
-        //校验名称重复
-        Factory check = new Factory();
-        check.setName(factory.getName());
-        check.setTenantId(factory.getTenantId());
-        List<Factory> factoryList = this.commonCondition(check);
-        if(CollectionUtils.isNotEmpty(factoryList)){
-            if (create) {
-                throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-            }else {
-                if(!factoryList.get(0).getId().toString().equals(factory.getId().toString())) {
-                    throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-                }
-            }
-        }
         FactoryEntity factoryEntity = new FactoryEntity(factory);
         if (create) {
             UUID uuid = Uuids.timeBased();
@@ -151,14 +137,18 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * @param id
      */
     @Override
-    public void delFactory(UUID id){
-
-        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))){
+    public void delFactory(UUID id)throws ThingsboardException {
+        Device device = new Device();
+        device.setFactoryId(id);
+        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))
+                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
            /* 逻辑删除暂时不用
             FactoryEntity factoryEntity = factoryRepository.findById(id).get();
             factoryEntity.setDelFlag("D");
             factoryRepository.save(factoryEntity);*/
             factoryRepository.deleteById(id);
+        }else {
+            throw new ThingsboardException("工厂下有车间/或网关设备不能删除！",ThingsboardErrorCode.GENERAL);
         }
     }
 
@@ -195,7 +185,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
             boolean notBlankWorkshopName = StringUtils.isNotBlank(factory.getWorkshopName());
-            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionlineName());
+            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionLineName());
             boolean notBlankDeviceName = StringUtils.isNotBlank(factory.getDeviceName());
 
             /**1.先根据条件查询出所有的 工厂、车间、产线、设备**/

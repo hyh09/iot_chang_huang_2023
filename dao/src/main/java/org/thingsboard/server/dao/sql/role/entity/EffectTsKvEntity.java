@@ -33,6 +33,8 @@ import java.util.UUID;
                                 columns = {
                                         @ColumnResult(name = "onlyKeyId", type = String.class),
                                         @ColumnResult(name = "entity_id", type = UUID.class),
+                                        @ColumnResult(name = "dictDeviceId", type = UUID.class),
+
                                         @ColumnResult(name = "ts" ,type = Long.class),
                                         @ColumnResult(name = "key" ,type = Integer.class),
 
@@ -41,12 +43,15 @@ import java.util.UUID;
 
                                         @ColumnResult(name = "deviceName",type = String.class),
                                         @ColumnResult(name = "picture",type = String.class),
+                                        @ColumnResult(name = "flg",type = Boolean.class),
                                         @ColumnResult(name = "factoryId",type = UUID.class),
                                         @ColumnResult(name = "workshopId",type = UUID.class),
                                         @ColumnResult(name = "productionLineId",type = UUID.class),
                                        @ColumnResult(name = "ts2",type=Long.class),
                                        @ColumnResult(name = "valueLast",type = String.class),
-                                        @ColumnResult(name = "valueLast2",type = String.class)
+                                        @ColumnResult(name = "valueLast2",type = String.class),
+
+                                        @ColumnResult(name = "localValue",type = String.class)
 
                                 }
                         ),
@@ -64,11 +69,14 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     @Transient
     private String onlyKeyId;
 
+    @Transient
+    private  UUID dictDeviceId;
+
     /**
      * 前端传入的keyName
      */
     @Transient
-    private String keyName;
+    private String keyName="";
 
     @Transient
   private  String  deviceName;
@@ -76,6 +84,9 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
     @Transient
     private  String  picture;
+    @Transient
+    private  Boolean  flg=false;
+
     /**
      * 工厂
      */
@@ -94,61 +105,18 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
 
 
-//    protected Boolean booleanValue;
-
     /**
      * 如果 ts2 和 ts的值一样 ，就视为 一条数据
      */
     @Transient
     private Long ts2;
 
-//    @Transient  //bool_v
-//    private Boolean bollV2;
-
-
-
-//    @Transient //str_v
-//    protected String strV2;
-//
-//    @Transient
-//    protected Long longV2;
-//
-//    @Transient
-//    protected Double doubleValue2;
-//
-//    @Transient
-//    protected String jsonValue2;
-
-
-
-
-
-//    /**
-//     * 用于计算总产能的数据
-//     *   long类型的产能差
-//     */
-//    @Transient private Long subtractLong=0L;
-//
-//    /**
-//     * 用于计算总产能的数据
-//     *   Doubble类型的产能差
-//     */
-//    @Transient private Double subtractDouble=0.00;
-
-//    @Transient private Double subtractStr=0.00;
-
-//    /**
-//     * 用于计算总产能的数据
-//     *   String类型的产能差
-//     */
-//    @Transient private Object subtract;
-
 
     @Transient //最后的一个值
     private  String valueLast;
 
     @Transient //最后的一个值
-    private  String valueLast2;
+    private  String valueLast2="0";
 
     @Transient
     private  String localValue;
@@ -158,18 +126,24 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
 
 
 
-    public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,Long ts,Integer key,String keyName,String deviceName,String picture,
-                             UUID factoryId, UUID workshopId, UUID productionLineId, Long ts2, String valueLast, String valueLast2){
+
+    public  EffectTsKvEntity(String  onlyKeyId,UUID entityId,UUID dictDeviceId,Long ts,Integer key,String keyName,String deviceName,String picture,Boolean  flg,
+                             UUID factoryId, UUID workshopId, UUID productionLineId, Long ts2, String valueLast, String valueLast2,String  localValue){
+
         this.onlyKeyId = onlyKeyId;
         this.entityId =entityId;
+
+        this.dictDeviceId =dictDeviceId;
+
         this.ts = ts;
-        this.key =key;
+        this.key =(key==null?-1:key);
         this.keyName = keyName;
 
 
 
         this.deviceName =deviceName;
         this.picture = picture;
+       this.flg =flg;
 
         this.factoryId = factoryId;
         this.workshopId = workshopId;
@@ -177,10 +151,9 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
         this.ts2 = ts2;
         this.valueLast = valueLast;
         this.valueLast2 = valueLast2;
+
+        this.localValue = localValue;
     }
-
-
-
 
 
 
@@ -199,12 +172,19 @@ public class EffectTsKvEntity extends AbstractTsKvEntity {
     public  void  subtraction()
     {
 
-        localValue = valueLast2;
+//        localValue = valueLast2;
         //如果时间不相同的时候 代表有最大值 和最小值
-        if(ts.equals(ts2)) {
-            valueLast2 = "0";
+        if(ts == null || ts2 == null)
+        {
+            //时间为空说明是没有遥测数据的
+            valueLast2 ="0";
         }else {
-            valueLast2 =StringUtilToll.sub(valueLast2,valueLast);
+
+                if (ts.equals(ts2)) {
+                    valueLast2 = "0";
+                } else {
+                    valueLast2 = StringUtilToll.sub(valueLast2, valueLast);
+                }
         }
 
 

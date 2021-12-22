@@ -15,7 +15,9 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
+import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
+import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -42,17 +44,25 @@ public class BulletinBoardController extends BaseController{
 
     @ApiOperation(value = "【三个时期的总产量】")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query")
+            @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query"),
+            @ApiImplicitParam(name = "workshopId",value = "工厂的",dataType = "string",paramType = "query"),
+            @ApiImplicitParam(name = "productionLineId",value = "工厂的",dataType = "string",paramType = "query"),
+            @ApiImplicitParam(name = "deviceId",value = "工厂的",dataType = "string",paramType = "query")
+
     })
     @RequestMapping(value = "/threePeriodsValue", method = RequestMethod.GET)
     @ResponseBody
-    public  ResultHomeCapAppVo  threePeriodsValue(@RequestParam(required = false ,value = "factoryId")  String factoryId)
+    public  ResultHomeCapAppVo  threePeriodsValue(@RequestParam(required = false ,value = "factoryId")  String factoryId,
+                                                  @RequestParam(required = false ,value = "workshopId")  String workshopId,
+                                                  @RequestParam(required = false ,value = "productionLineId")  String productionLineId,
+                                                  @RequestParam(required = false ,value = "deviceId")  String deviceId
+                                                  )
     {
         ResultHomeCapAppVo result = new ResultHomeCapAppVo();
 
         try {
-            result.setTodayValue(getValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+            result.setTodayValue(getValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+            result.setYesterdayValue(getValueByTime(factoryId,workshopId, productionLineId,deviceId,CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
             result.setHistory(bulletinBoardSvc.getHistoryCapValue(factoryId,getTenantId().getId()));
             return result;
         }catch (Exception e)
@@ -117,18 +127,36 @@ public class BulletinBoardController extends BaseController{
         }
     }
 
+    @ApiOperation(value = "能耗趋势图(当前所选时间范围内最大30天)")
+    @RequestMapping(value = "/energyConsumptionTrend")
+    public TrendVo energyConsumptionTrend(@RequestBody TrendParameterVo vo) throws ThingsboardException {
+        vo.setTenantId(getTenantId().getId());
+        return bulletinBoardSvc.energyConsumptionTrend(vo);
+
+    }
 
 
 
 
-    private  String getValueByTime(String factoryId, long startTime, long EndTime) throws ThingsboardException {
+
+    private  String getValueByTime(String factoryId,String workshopId,String productionLineId, String deviceId,long startTime, long EndTime) throws ThingsboardException {
         QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
         queryTsKvVo.setTenantId(getTenantId().getId());
         if(StringUtils.isNotEmpty(factoryId)) {
             queryTsKvVo.setFactoryId(UUID.fromString(factoryId));
         }
+        if(StringUtils.isNotEmpty(workshopId)) {
+            queryTsKvVo.setWorkshopId(UUID.fromString(workshopId));
+        }
+        if(StringUtils.isNotEmpty(productionLineId)) {
+            queryTsKvVo.setProductionLineId(UUID.fromString(productionLineId));
+        }
+        if(StringUtils.isNotEmpty(deviceId)) {
+            queryTsKvVo.setDeviceId(UUID.fromString(deviceId));
+        }
         queryTsKvVo.setStartTime(startTime);
         queryTsKvVo.setEndTime(EndTime);
+        queryTsKvVo.setFilterFirstFactory(false);
         ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
         if(resultCapAppVo != null)
         {

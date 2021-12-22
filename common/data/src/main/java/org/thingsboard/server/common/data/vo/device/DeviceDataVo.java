@@ -2,12 +2,13 @@ package org.thingsboard.server.common.data.vo.device;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.thingsboard.server.common.data.StringUtils;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @program: thingsboard
@@ -82,5 +83,37 @@ public class DeviceDataVo {
         this.productionLineId = productionLineId;
         this.productionLineName = productionLineName;
         this.picture = picture;
+    }
+
+
+    public static   List<DeviceDataVo>   toData(List<DeviceDataSvc> deviceDataSvcList)
+    {
+
+        List<DeviceDataVo> stationDictVOS = deviceDataSvcList.stream().map(m1 -> {
+            DeviceDataVo stationDictVO = new DeviceDataVo();
+            stationDictVO.setDeviceId(strToUuid(m1.getId()));
+            stationDictVO.setDeviceCode(m1.getCode());
+            stationDictVO.setDeviceName(m1.getName());
+            stationDictVO.setPicture(m1.getPicture());
+            stationDictVO.setFactoryId(strToUuid(m1.getFactoryId()));
+            stationDictVO.setFactoryName(m1.getFactoryName());
+            stationDictVO.setWorkshopId(strToUuid(m1.getWorkshopId()));
+            stationDictVO.setWorkshopName(m1.getWorkshopName());
+            stationDictVO.setProductionLineId(strToUuid(m1.getProductionLineId()));
+            stationDictVO.setProductionLineName(m1.getProductionLineName());
+            return stationDictVO;
+        }).collect(Collectors.toList());
+        return  stationDictVOS;
+
+    }
+
+    private static UUID   strToUuid(String str)
+    {
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(str))
+        {
+            return  UUID.fromString(str);
+        }
+        return null;
+
     }
 }

@@ -70,6 +70,7 @@
             [nzData]="tableData"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             [nzNoResult]="((isLoading$ | async) ? 'common.loading' : 'device-mng.no-factory-text') | translate"
             [nzScroll]="scrollConfig"
           >
@@ -81,8 +82,10 @@
                 <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
                 <th
                   *ngIf="utils.hasPermission('device-mng.add-work-shop') || utils.hasPermission('device-mng.add-prod-line')
-                  || utils.hasPermission('device-mng.add-device') || utils.hasPermission('action.delete') || utils.hasPermission('device-mng.distribute-device')
-                  || utils.hasPermission('device-mng.manage-factory-manager') || utils.hasPermission('device-mng.set-factory-manager-permissions')"
+                  || utils.hasPermission('device-mng.add-device') || utils.hasPermission('device-mng.manage-factory-manager')
+                  || utils.hasPermission('device-mng.set-factory-manager-permissions') || utils.hasPermission('device-mng.delete-factory')
+                  || utils.hasPermission('device-mng.delete-work-shop') || utils.hasPermission('device-mng.delete-prod-line')
+                  || utils.hasPermission('device-mng.delete-device') || utils.hasPermission('device-mng.distribute-device')"
                   nzWidth="240px" nzRight
                 ></th>
               </tr>
@@ -112,7 +115,10 @@
                     <td>{{ item.address }}</td>
                     <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
                     <td *ngIf="utils.hasPermission('device-mng.add-work-shop') || utils.hasPermission('device-mng.add-prod-line')
-                    || utils.hasPermission('device-mng.add-device') || utils.hasPermission('action.delete')" nzRight nzAlign="right">
+                    || utils.hasPermission('device-mng.add-device') || utils.hasPermission('device-mng.manage-factory-manager')
+                    || utils.hasPermission('device-mng.set-factory-manager-permissions') || utils.hasPermission('device-mng.delete-factory')
+                    || utils.hasPermission('device-mng.delete-work-shop') || utils.hasPermission('device-mng.delete-prod-line')
+                    || utils.hasPermission('device-mng.delete-device') || utils.hasPermission('device-mng.distribute-device')" nzRight nzAlign="right">
                       <button
                         *ngIf="item.rowType === 'factory' && utils.hasPermission('device-mng.add-work-shop')"
                         mat-icon-button
@@ -176,10 +182,40 @@
                         <mat-icon svgIcon="mdi:distribute"></mat-icon>
                       </button>
                       <button
-                        *ngIf="utils.hasPermission('action.delete')"
+                        *ngIf="item.rowType === 'factory' && utils.hasPermission('device-mng.delete-factory')"
                         mat-icon-button
                         [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
-                        matTooltip="{{ 'action.delete' | translate }}"
+                        matTooltip="{{ 'device-mng.delete-factory' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); del(item)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'workShop' && utils.hasPermission('device-mng.delete-work-shop')"
+                        mat-icon-button
+                        [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
+                        matTooltip="{{ 'device-mng.delete-work-shop' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); del(item)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'prodLine' && utils.hasPermission('device-mng.delete-prod-line')"
+                        mat-icon-button
+                        [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
+                        matTooltip="{{ 'device-mng.delete-prod-line' | translate }}"
+                        matTooltipPosition="above"
+                        (click)="$event.stopPropagation(); del(item)"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <button
+                        *ngIf="item.rowType === 'device' && utils.hasPermission('device-mng.delete-device')"
+                        mat-icon-button
+                        [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
+                        matTooltip="{{ 'device-mng.delete-device' | translate }}"
                         matTooltipPosition="above"
                         (click)="$event.stopPropagation(); del(item)"
                       >

@@ -102,12 +102,10 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     // 缓存权限数据
     this.route.data.subscribe(({ permissions }) => {
       if (permissions) {
-        sessionStorage.setItem('permissions', JSON.stringify(permissions.menuSections));
+        sessionStorage.setItem('menuSections', JSON.stringify(permissions.menuSections));
+        sessionStorage.setItem('homeSections', JSON.stringify(permissions.homeSections));
         sessionStorage.setItem('menuBtnMap', JSON.stringify(permissions.menuBtnMap));
         this.menuService.buildMenu();
-        if (window.location.pathname === '/home' && permissions.firstPath) {
-          this.router.navigateByUrl(permissions.firstPath);
-        }
       }
     });
 
@@ -224,10 +222,6 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     this.store.pipe(select(selectPlatformName)).subscribe(res => this.name = res);
     this.store.pipe(select(selectPlatformVersion)).subscribe(res => this.version = res);
     this.store.pipe(select(selectShowNameVersion)).subscribe(res => this.showNameVersion = res);
-  }
-
-  hideUserHome(): boolean {
-    return this.authUser.authority !== Authority.SYS_ADMIN && window.location.pathname === '/home';
   }
   
 }
