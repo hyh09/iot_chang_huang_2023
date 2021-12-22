@@ -68,6 +68,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
         try {
             QueryTsKvVo queryTsKvVo = new QueryTsKvVo(startTime, endTime, deviceId, productionLineId, workshopId, factoryId);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            queryTsKvVo.setTenantId(getTenantId().getId());
             return efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo, getTenantId(), pageLink);
         }catch (Exception e)
         {
