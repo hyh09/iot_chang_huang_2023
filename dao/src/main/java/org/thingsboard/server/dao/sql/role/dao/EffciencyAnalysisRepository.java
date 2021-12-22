@@ -26,7 +26,8 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
     @PersistenceContext
     private EntityManager entityManager;
-    private  String FIND_SON_QUERY="select *  from tb_statistical_data  t1 where   t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
+    private  String FIND_SON_QUERY="select t1.entity_id,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) as capacity_added_value" +
+            " from tb_statistical_data  t1 where   t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
     public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
     public  static  String  SELECT_TS_CAP =" ,tb.capacity_added_value  ";
 
@@ -74,7 +75,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
             sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
-        sonSql.append(sonSql01).append(" )");
+        sonSql.append(sonSql01).append("  ) group by  t1.entity_id ");
         StringBuffer  sql = new StringBuffer();
         String sqlpre =" with table1  as ( "+FIND_SON_QUERY+sonSql+ " )";
         sql.append(sqlpre);
