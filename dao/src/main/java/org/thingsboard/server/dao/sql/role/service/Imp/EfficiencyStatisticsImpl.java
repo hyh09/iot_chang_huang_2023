@@ -1073,6 +1073,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     private  String  computeUnitEnergyConsumption(String capacityValue,String value1,Long lastTime,Long firstTime)
     {
+     if(lastTime == null)
+     {
+         return "0";
+     }
+     if(firstTime == null)  //一般不存在
+     {
+         firstTime =0L;
+     }
         Long t3 = (lastTime - firstTime) / 60000;
         String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
         return  aDouble;
@@ -1087,18 +1095,24 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private   List<String>  getTotalValueNewMethod(List<EnergyEffciencyNewEntity> pageList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
     {
         List<String>  totalValueList  = new ArrayList<>();
-        BigDecimal invoiceAmount = pageList.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                .map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String waterTotalValue= StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_water,waterTotalValue));
 
-        BigDecimal invoiceAmount02 = pageList.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount02 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                .map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String electricTotalValue= StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_cable,electricTotalValue));
 
 
-        BigDecimal invoiceAmount03 = pageList.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount03 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
+                .map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_gas,value03));
