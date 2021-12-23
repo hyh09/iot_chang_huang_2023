@@ -56,7 +56,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       version: [entity ? entity.version : ''],
       warrantyPeriod: [entity ? entity.version : ''],
       comment: [entity ? entity.comment : ''],
-      picture: [entity ? entity.picture : ''],
+      picture: [{
+        value: entity ? entity.picture : '',
+        disabled: !this.isEdit
+      }],
       deviceModel: [null],
       fileId: [entity ? entity.fileId : ''],
       fileName: [entity ? entity.fileName : ''],
@@ -177,7 +180,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
-      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
+      dictDataId: [{
+        value: data && data.dictDataId ? data.dictDataId : '',
+        disabled: !this.isEdit
+      }]
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {

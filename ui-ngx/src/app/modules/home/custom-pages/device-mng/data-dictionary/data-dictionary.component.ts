@@ -28,20 +28,22 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
     return this.fb.group(
       {
         id:  [entity ? entity.id : ''],
-        code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, [Validators.required]],
-        name: [entity ? entity.name : '', [Validators.required]],
-        type: [entity ? entity.type : null, [Validators.required]],
+        code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, Validators.required],
+        name: [entity ? entity.name : '', Validators.required],
+        type: [entity ? entity.type : null, Validators.required],
         unit: [entity ? entity.unit : ''],
         comment: [entity ? entity.comment : ''],
         icon: [entity ? entity.icon : ''],
-        picture: [entity ? entity.picture : '']
+        picture: [{
+          value: entity ? entity.picture : '',
+          disabled: !this.isEdit
+        }]
       }
     );
   }
 
   updateForm(entity: DataDictionary) {
     this.entityForm.patchValue(entity);
-    console.log(this.entityForm.get('id').value)
   }
 
 }

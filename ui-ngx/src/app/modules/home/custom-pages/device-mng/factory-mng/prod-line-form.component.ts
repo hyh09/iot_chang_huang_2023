@@ -31,8 +31,7 @@ export class ProdLineFormComponent extends EntityComponent<ProdLine> {
       workshopId: [entity && entity.workshopId ? entity.workshopId : this.entitiesTableConfig.componentsData.workshopId],
       workshopName: [entity && entity.workshopName ? entity.workshopName : this.entitiesTableConfig.componentsData.workshopName],
       name: [entity ? entity.name : '', Validators.required],
-      remark: [entity ? entity.remark : ''],
-      logoImages: [entity ? entity.logoImages : '']
+      remark: [entity ? entity.remark : '']
     });
   }
 
