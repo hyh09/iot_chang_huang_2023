@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
 import { CellActionDescriptor, checkBoxCell, DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeResources, entityTypeTranslations, HasUUID } from "@app/shared/public-api";
+import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { DeviceDictionary } from "@app/shared/models/custom/device-mng.models";

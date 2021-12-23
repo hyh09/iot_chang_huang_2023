@@ -49,7 +49,7 @@ import { MediaBreakpoints } from '@shared/models/constants';
 import { RuleChainId } from '@shared/models/id/rule-chain-id';
 import { ServiceType } from '@shared/models/queue.models';
 import { deepTrim } from '@core/utils';
-import { DeviceDictionaryService } from '@app/core/http/custom/public-api';
+import { DeviceDictionaryService } from '@app/core/http/public-api';
 import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
 
 @Component({
