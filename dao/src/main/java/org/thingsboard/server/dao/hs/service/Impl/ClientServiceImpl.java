@@ -372,7 +372,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             if (count == 0)
                 return new PageData<>();
 
-            int queryCount = (timePageLink.getPage() + 1) * timePageLink.getPageSize();
+            int queryCount = Math.min((timePageLink.getPage() + 1) * timePageLink.getPageSize(), count);
 
             List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), Math.min(queryCount, count), Aggregation.NONE, "desc"))
                     .collect(Collectors.toList());
@@ -411,7 +411,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             if (count == 0)
                 return new PageData<>();
 
-            int queryCount = (timePageLink.getPage() + 1) * timePageLink.getPageSize();
+            int queryCount = Math.min((timePageLink.getPage() + 1) * timePageLink.getPageSize(), count);
 
             List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), Math.min(queryCount, count), Aggregation.NONE, "desc"))
                     .collect(Collectors.toList());
