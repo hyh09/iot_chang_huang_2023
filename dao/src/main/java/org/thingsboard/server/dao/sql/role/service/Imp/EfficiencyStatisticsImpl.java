@@ -19,6 +19,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
+import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
@@ -327,9 +328,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
-        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryCapacity(vo,pageLink);
-
-        return null;
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryEnergy(vo,pageLink);
+        List<EnergyEffciencyNewEntity> pageList=  page.getContent();
+        //将查询的结果返回原接口返回的对象 包含单位能耗
+        List<Map>  appDeviceCapVos =  this.resultProcessingByEnergyPc(pageList,mapNameToVo);
+        List<String>  totalValueList = getTotalValueNewMethod(pageList,mapNameToVo);
+        return new PageDataAndTotalValue<Map>(totalValueList,appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     /**
@@ -1011,4 +1016,101 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return  mapData01;
 
     }
+
+
+    /*****
+     * PC端的能耗列表接口
+     * @param resultList     返回的结果
+     * @param mapNameToVo  能耗的title  和具体的能耗的信息
+     * @return
+     */
+    private  List<Map>  resultProcessingByEnergyPc(List<EnergyEffciencyNewEntity>  resultList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
+    {
+        List<Map>  mapList = new ArrayList<>();
+        resultList.stream().forEach(vo->{
+            Map   map = new HashMap();
+            map.put(HEADER_0,vo.getDeviceName());
+            map.put(HEADER_DEVICE_ID,vo.getEntityId());
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),vo.getWaterAddedValue());//耗水量 (T)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),vo.getElectricAddedValue());//耗电量 (KWH)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),vo.getGasAddedValue());//耗气量 (T)
+
+            String   capacityValue =vo.getCapacityAddedValue();
+            //
+            map.put(setKeyTitle(mapNameToVo, KeyTitleEnums.key_water,false),
+                    computeUnitEnergyConsumption(capacityValue,vo.getWaterAddedValue(),vo.getWaterLastTime(),vo.getWaterFirstTime()));
+            map.put(setKeyTitle(mapNameToVo, KeyTitleEnums.key_cable,false),
+                    computeUnitEnergyConsumption(capacityValue,vo.getElectricAddedValue(),vo.getElectricLastTime(),vo.getElectricFirstTime()));
+            map.put(setKeyTitle(mapNameToVo, KeyTitleEnums.key_gas,false),
+                    computeUnitEnergyConsumption(capacityValue,vo.getGasAddedValue(),vo.getGasLastTime(),vo.getGasFirstTime()));
+           mapList.add(map);
+        });
+        return mapList;
+    }
+
+    /**
+     *
+     * @param mapNameToVo
+     * @param enums
+     * @param type  true表示:  耗气量 (T)
+     *              false 表示: 单位能耗耗气量 (T)
+     * @return
+     */
+    private  String setKeyTitle(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,KeyTitleEnums  enums,Boolean  type)
+    {
+        DictDeviceGroupPropertyVO  groupPropertyVO =   mapNameToVo.get(enums.getgName());
+        if(type )
+        {
+          return   getHomeKeyNameOnlyUtilNeW(groupPropertyVO);
+        }
+        return   getHomeKeyNameByUtilNeW(groupPropertyVO);
+    }
+
+
+    /**
+     * 计算单位能耗
+     * @return
+     */
+    private  String  computeUnitEnergyConsumption(String capacityValue,String value1,Long lastTime,Long firstTime)
+    {
+        Long t3 = (lastTime - firstTime) / 60000;
+        String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
+        return  aDouble;
+    }
+
+
+    /**
+     *
+     * @param pageList
+     * @return
+     */
+    private   List<String>  getTotalValueNewMethod(List<EnergyEffciencyNewEntity> pageList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
+    {
+        List<String>  totalValueList  = new ArrayList<>();
+        BigDecimal invoiceAmount = pageList.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        String waterTotalValue= StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
+        totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_water,waterTotalValue));
+
+        BigDecimal invoiceAmount02 = pageList.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        String electricTotalValue= StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
+        totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_cable,electricTotalValue));
+
+
+        BigDecimal invoiceAmount03 = pageList.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
+        totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_gas,value03));
+      return  totalValueList;
+
+    }
+
+    private  String  addTotalValueList(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,KeyTitleEnums  enums,String value )
+    {
+        DictDeviceGroupPropertyVO dvo=  mapNameToVo.get(enums.getgName());
+        String title =StringUtils.isBlank(dvo.getTitle())?dvo.getName():dvo.getTitle();
+         return (title+": "+value+ " ("+dvo.getUnit()+")");
+    }
+
 }
