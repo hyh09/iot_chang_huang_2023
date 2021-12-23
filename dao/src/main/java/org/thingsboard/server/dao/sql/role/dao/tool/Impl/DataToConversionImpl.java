@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
@@ -16,9 +17,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @program: thingsboard
@@ -85,5 +84,15 @@ public class DataToConversionImpl implements DataToConversionSvc {
         return   StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
     }
 
-
+    /**
+     *
+     * @param pageList  具体的数据
+     * @param tenantId  租户id
+     * @param mapNameToVo  描述 和 单位 等
+     * @return
+     */
+    @Override
+    public List<Map> resultProcessingByEnergyPc(List<EnergyEffciencyNewEntity> pageList, TenantId tenantId, Map<String, DictDeviceGroupPropertyVO> mapNameToVo) {
+       return  null;
+    }
 }
