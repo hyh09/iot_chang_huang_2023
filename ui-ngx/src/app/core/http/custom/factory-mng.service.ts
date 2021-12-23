@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { Factory, FactoryMngList, ProdDevice, ProdLine, WorkShop } from "@app/shared/models/custom/factory-mng.models";
 import { BaseData, HasId } from "@app/shared/public-api";
 import { Observable } from "rxjs";

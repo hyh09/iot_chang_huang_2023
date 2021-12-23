@@ -35,3 +35,18 @@ export * from './rule-chain.service';
 export * from './tenant.service';
 export * from './user.service';
 export * from './widget.service';
+
+export * from './custom/alarm-record.service';
+export * from './custom/alarm-rule.service';
+export * from './custom/data-dictionary.service';
+export * from './custom/device-dictionary.service';
+export * from './custom/factory-mng.service';
+export * from './custom/file.service';
+export * from './custom/menu-mng.service';
+export * from './custom/potency.service';
+export * from './custom/prod-capacity-settings';
+export * from './custom/real-time-monitor.service';
+export * from './custom/role-mng.service';
+export * from './custom/system-mng.service';
+export * from './custom/tenant-menu.service';
+export * from './custom/user-mng.service';
