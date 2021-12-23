@@ -55,6 +55,14 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
 
+    /**
+     * 能耗的查询接口  【pc端】
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     * @throws JsonProcessingException
+     */
     PageDataAndTotalValue<Map> queryEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
 
@@ -65,13 +73,34 @@ public interface EfficiencyStatisticsSvc {
      ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
 
+    /**
+     * APP产能接口
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     */
      ResultCapAppVo queryCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+
+
+    /**
+     * app端的能耗返回  注意返回和Pc不一样的
+     *  如果工厂id为空查询该租户下第一个工厂数据
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     */
+    ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId,PageLink pageLink);
 
 
     /**
      * 能耗的查询
      */
+    @Deprecated
     ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);
+
+
 
     /**
      * PC端的运行状态

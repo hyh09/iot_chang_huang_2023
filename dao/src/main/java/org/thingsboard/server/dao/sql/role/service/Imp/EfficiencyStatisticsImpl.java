@@ -418,6 +418,31 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
     /**
+     * App端的能耗接口
+     * @param vo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+        ResultEnergyAppVo  result  = new ResultEnergyAppVo();
+        log.info("【APP端】queryAppEntityByKeysNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryEnergy(vo,pageLink);
+        List<EnergyEffciencyNewEntity> pageList=  page.getContent();
+        //将查询的结果返回原接口返回的对象 包含单位能耗
+        List<AppDeviceEnergyVo>  appDeviceCapVos =  dataToConversionSvc.resultProcessingByEnergyApp(pageList,mapNameToVo,tenantId);
+        result.setAppDeviceCapVoList(appDeviceCapVos);
+        result.setTotalValue(getTotalValueApp(pageList,mapNameToVo));
+        return result;
+    }
+
+    /**
      * 能耗的查询
      * @param vo
      * @param tenantId
@@ -1100,7 +1125,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     /**
-     *
+     *Pc能耗的返回
      * @param pageList
      * @return
      */
@@ -1129,6 +1154,40 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_gas,value03));
       return  totalValueList;
+
+    }
+
+
+    /**
+     *APP能耗的返回
+     * @param pageList
+     * @return
+     */
+    private   Map<String,String>  getTotalValueApp(List<EnergyEffciencyNewEntity> pageList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
+    {
+        Map<String,String>  resultMap  = new HashMap<>();
+        BigDecimal invoiceAmount = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                .map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String waterTotalValue= StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
+        resultMap.put(KeyTitleEnums.key_water.getgName(),waterTotalValue);
+
+        BigDecimal invoiceAmount02 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                .map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String electricTotalValue= StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
+        resultMap.put(KeyTitleEnums.key_cable.getgName(),electricTotalValue);
+
+
+        BigDecimal invoiceAmount03 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
+                .map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
+        resultMap.put(KeyTitleEnums.key_gas.getgName(),electricTotalValue);
+        return  resultMap;
 
     }
 
