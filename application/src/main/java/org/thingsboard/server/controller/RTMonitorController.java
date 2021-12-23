@@ -10,6 +10,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
@@ -122,14 +123,14 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
     })
     @GetMapping("/rtMonitor/device/history")
     public PageData<Map<String, Object>> listRTMonitorHistory(
             @RequestParam String deviceId,
             @RequestParam int page,
             @RequestParam int pageSize,
-            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "ts") String sortProperty,
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam Long startTime,
             @RequestParam(required = false) Long endTime
@@ -138,8 +139,11 @@ public class RTMonitorController extends BaseController {
         checkParameter("startTime", startTime);
         if (endTime == null || endTime <= 0L)
             endTime = CommonUtil.getTodayCurrentTime();
+        if (HSConstants.CREATED_TIME.equalsIgnoreCase(sortProperty))
+            sortProperty = HSConstants.TS;
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
         validatePageLink(pageLink);
         return this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, pageLink);
     }
+
 }

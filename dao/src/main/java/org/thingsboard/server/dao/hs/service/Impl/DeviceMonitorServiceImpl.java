@@ -22,7 +22,6 @@ import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
@@ -32,6 +31,7 @@ import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.service.*;
+import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.model.sql.AlarmEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
@@ -65,6 +65,9 @@ import java.util.stream.IntStream;
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
 public class DeviceMonitorServiceImpl extends AbstractEntityService implements DeviceMonitorService, CommonService {
+
+    // 工具
+    CommonComponent commonComponent;
 
     // 设备配置Repository
     DeviceProfileRepository deviceProfileRepository;
@@ -237,9 +240,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
         var map = new HashMap<String, DictDevice>();
-        if (!dictDeviceIds.isEmpty()){
+        if (!dictDeviceIds.isEmpty()) {
             map = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
-                    .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b)->a, HashMap::new));
+                    .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
         }
 
         HashMap<String, DictDevice> finalMap = map;
@@ -403,36 +406,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
-        var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
-
-        List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), 1, Aggregation.COUNT, timePageLink.getSortOrder().getDirection().toString()))
-                .collect(Collectors.toList());
-
-        var temp = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), tempQueries).get()
-                .stream().map(KvEntry::getValue).map(e -> Integer.valueOf(String.valueOf(e))).collect(Collectors.toList());
-        if (temp.isEmpty())
-            return new PageData<>(Lists.newArrayList(), 0, 0L, false);
-        var count = temp.stream().mapToInt(Integer::intValue).sum();
-
-        List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
-                .collect(Collectors.toList());
-
-        var KvResult = this.timeseriesService.findAll(tenantId, DeviceId.fromString(deviceId), queries).get();
-        List<Map<String, Object>> result = new ArrayList<>();
-        Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
-        if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection()))
-            KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs)).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
-        else
-            KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
-        resultMap.forEach((k, v) -> {
-            v.put(HSConstants.CREATED_TIME, k);
-            result.add(v);
-        });
-        var total = result.size();
-
-        var totalPage = Double.valueOf(Math.ceil(Double.parseDouble(String.valueOf(total)) / timePageLink.getPageSize())).intValue();
-        var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
-        return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
+        return this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), timePageLink);
     }
 
     /**
@@ -465,7 +439,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         Map<String, String> finalRMap = rMap;
         Map<String, String> finalNameTitleMap = nameTitleMap;
 
-        propertyVOList.addAll(keyList.stream().map(e -> DictDeviceGroupPropertyVO.builder()
+        propertyVOList.addAll(keyList.stream().sorted().map(e -> DictDeviceGroupPropertyVO.builder()
                 .name(e)
                 .title(finalNameTitleMap.getOrDefault(e, e))
                 .unit(Optional.ofNullable(finalRMap.getOrDefault(e, null))
@@ -794,7 +768,22 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     /**
+     * 分页查询设备分组属性历史数据
+     *
+     * @param tenantId          租户Id
+     * @param deviceId          设备Id
+     * @param groupPropertyName 属性名称
+     * @param timePageLink      时间分页参数
+     * @return 设备分组属性历史数据
+     */
+    @Override
+    public PageData<DictDeviceGroupPropertyVO> listPageGroupPropertyHistories(TenantId tenantId, String deviceId, String groupPropertyName, TimePageLink timePageLink) throws ExecutionException, InterruptedException, ThingsboardException {
+        return this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), groupPropertyName, timePageLink);
+    }
+
+    /**
      * 获得近几个月报警次数
+     *
      *
      * @param tenantId        租户id
      * @param allDeviceIdList 设备id列表
@@ -834,10 +823,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         for (DictDeviceComponentVO componentVO : componentList) {
             for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                 var kvData = Optional.ofNullable(kvEntryMap.get(propertyVO.getName()));
+                propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
                 kvData.ifPresent(k -> {
                     groupPropertyNameList.add(propertyVO.getName());
                     propertyVO.setContent(this.formatKvEntryValue(kvData.get()));
-                    propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
                     propertyVO.setIcon(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null));
                     propertyVO.setCreatedTime(kvData.get().getTs());
                 });
@@ -902,5 +891,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Autowired
     public void setComponentPropertyRepository(DictDeviceComponentPropertyRepository componentPropertyRepository) {
         this.componentPropertyRepository = componentPropertyRepository;
+    }
+
+    @Autowired
+    public void setCommonComponent(CommonComponent commonComponent) {
+        this.commonComponent = commonComponent;
     }
 }

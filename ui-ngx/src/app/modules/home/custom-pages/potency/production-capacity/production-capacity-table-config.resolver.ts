@@ -3,11 +3,13 @@ import { Injectable } from "@angular/core";
 import { Resolve } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";
 import { EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeTranslations, entityTypeResources } from "@app/shared/public-api";
+import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
 import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
 import { map } from 'rxjs/operators';
 import { ProductionCapacityOverviewComponent } from './production-capacity-overview.component';
+import { ConsoleLogger } from '@angular/compiler-cli/src/ngtsc/logging';
+import { getTheEndOfDay, getTheStartOfDay } from '@app/core/utils';
 
 @Injectable()
 export class ProductionCapacityTableConfigResolver implements Resolve<EntityTableConfig<DeviceCapacity>> {
@@ -29,6 +31,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       workshopId: '',
       productionLineId: '',
       deviceId: '',
+      dateRange: null,
       totalCapacity: 0
     }
 
@@ -40,11 +43,13 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
 
   resolve(): EntityTableConfig<DeviceCapacity> {
 
+    const now = new Date();
     this.config.componentsData = {
       factoryId: '',
       workshopId: '',
       productionLineId: '',
       deviceId: '',
+      dateRange: [now, now],
       totalCapacity: 0
     }
 
@@ -55,13 +60,18 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
     this.config.detailsPanelEnabled = false;
     this.config.entitiesDeleteEnabled = false;
     this.config.selectionEnabled = false;
-    this.config.useTimePageLink = true;
-    this.config.timeWindowInFilter = true;
     this.config.loadDataOnInit = false;
 
     this.config.entitiesFetchFunction = pageLink => {
       const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-      return this.potencyService.getDeviceCapacityList(pageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
+      let startTime: number, endTime: number;
+      if (this.config.componentsData.dateRange) {
+        startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
+        endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+      }
+      const { pageSize, page, textSearch, sortOrder } = pageLink;
+      const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+      return this.potencyService.getDeviceCapacityList(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
         this.config.componentsData.totalCapacity = res.totalValue || 0;
         return res;
       }));

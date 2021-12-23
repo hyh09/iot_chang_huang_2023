@@ -4,7 +4,7 @@
       <div class="title">{{ 'device-monitor.base-info' | translate }}</div>
       <div fxLayout="row" fxLayoutGap="16px">
         <div class="image-wrapper">
-          <img [src]="baseInfo.picture ? baseInfo.picture : '../../../../../../../assets/image-empty.svg'" />
+          <img [src]="baseInfo.picture ? baseInfo.picture : '../../../../../../../assets/device-image-empty.svg'" />
         </div>
         <div fxFlex class="description">
           <div class="desc-item">{{ 'device-monitor.device-name-with-suffix' | translate }}{{ baseInfo.name }}</div>
@@ -16,7 +16,7 @@
     </div>
     <div fxFlex fxLayout="column" fxLayoutGap="16px" class="line-chart-wrapper">
       <div [fxShow]="showRealTimeChart" class="line-chart-item">
-        <tb-prop-data-chart [propName]="currPropTitle" [data]="propHistoryData"></tb-prop-data-chart>
+        <tb-prop-data-chart [propName]="currPropTitle || currPropName" [data]="propHistoryData"></tb-prop-data-chart>
       </div>
       <div class="line-chart-item">
         <tb-warning-statistics-chart [data]="alarmTimesList"></tb-warning-statistics-chart>

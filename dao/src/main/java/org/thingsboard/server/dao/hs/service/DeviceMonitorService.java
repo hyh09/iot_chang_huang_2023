@@ -185,4 +185,15 @@ public interface DeviceMonitorService {
      * @param query    查询条件
      */
     AlarmDayResult getAlarmRecordStatisticByDay(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 分页查询设备分组属性历史数据
+     *
+     * @param tenantId          租户Id
+     * @param deviceId          设备Id
+     * @param groupPropertyName 属性名称
+     * @param timePageLink      时间分页参数
+     * @return 设备分组属性历史数据
+     */
+    PageData<DictDeviceGroupPropertyVO> listPageGroupPropertyHistories(TenantId tenantId, String deviceId, String groupPropertyName, TimePageLink timePageLink) throws ExecutionException, InterruptedException, ThingsboardException;
 }

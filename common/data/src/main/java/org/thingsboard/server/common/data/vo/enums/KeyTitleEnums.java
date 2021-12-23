@@ -1,7 +1,5 @@
 package org.thingsboard.server.common.data.vo.enums;
 
-import org.thingsboard.server.common.data.exception.ThingsboardException;
-
 /**
  * @program: thingsboard
  * @description: 用于分类统计
@@ -12,6 +10,9 @@ public enum KeyTitleEnums {
     key_water("耗水量","1"), //水
     key_gas("耗气量","2"),//气
     key_cable("耗电量","3"),//电
+
+
+    key_capacity("总产能","0"),//总产能
 
     ;
 

@@ -1,0 +1,8 @@
+<nz-range-picker
+  nzFormat="yyyy/MM/dd"
+  nzSize="large"
+  [nzDisabledDate]="disabledDate"
+  [nzAllowClear]="false"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+  (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+></nz-range-picker>

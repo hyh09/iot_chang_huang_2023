@@ -43,7 +43,7 @@ public class TestMailService {
                 currentActivateToken = activationLink.split("=")[1];
                 return null;
             }
-        }).when(mailService).sendActivationEmail(Mockito.anyString(), Mockito.anyString());
+        }).when(mailService).sendActivationEmail(Mockito.anyString(), Mockito.anyString(),null);
         Mockito.doAnswer(new Answer<Void>() {
             public Void answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();

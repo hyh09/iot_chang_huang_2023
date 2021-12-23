@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hs.utils;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -20,6 +21,18 @@ import java.nio.file.Paths;
 public class CommonComponent {
     @Value("${hs.file.location}")
     private String location;
+
+    @Value("${database.ts_latest.type:sql}")
+    @Getter
+    private String sqlType;
+
+    /**
+     * 是否cassandra持久
+     */
+    public boolean isPersistToCassandra() {
+        return this.getSqlType().toLowerCase().contains("cassandra");
+    }
+
 
     /**
      * 转换为文件目录

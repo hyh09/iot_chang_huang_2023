@@ -456,3 +456,17 @@ export function randomAlphanumeric(length: number): string {
   }
   return result;
 }
+
+export function getTheStartOfDay(date: Date, timestamp: boolean = true): Date | number {
+  if (!date) return null;
+  const _date = new Date(date.toDateString());
+  return timestamp ? _date.getTime() : _date;
+}
+
+export function getTheEndOfDay(date: Date, timestamp: boolean = true): Date | number {
+  if (!date) return null;
+  const _date = new Date(date);
+  _date.setDate(_date.getDate() + 1);
+  const time = (getTheStartOfDay(_date) as number) - 1;
+  return timestamp ? time : new Date(time);
+}

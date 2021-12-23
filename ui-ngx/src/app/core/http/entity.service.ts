@@ -81,7 +81,7 @@ import { Edge, EdgeEvent, EdgeEventType } from '@shared/models/edge.models';
 import { RuleChainMetaData, RuleChainType } from '@shared/models/rule-chain.models';
 import { WidgetService } from '@core/http/widget.service';
 import { DeviceProfileService } from '@core/http/device-profile.service';
-import { FactoryMngService, FactoryEntityType } from './custom/factory-mng.service';
+import { FactoryMngService, FactoryEntityType } from '@core/http/custom/factory-mng.service';
 
 @Injectable({
   providedIn: 'root'

@@ -21,35 +21,32 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.kv.Aggregation;
-import org.thingsboard.server.common.data.kv.BaseDeleteTsKvQuery;
-import org.thingsboard.server.common.data.kv.BaseReadTsKvQuery;
-import org.thingsboard.server.common.data.kv.DeleteTsKvQuery;
-import org.thingsboard.server.common.data.kv.ReadTsKvQuery;
-import org.thingsboard.server.common.data.kv.TsKvEntry;
+import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.service.Validator;
+import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.energyTime.entity.EneryTimeGapEntity;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.util.CommonUtils;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -61,6 +58,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Service
 @Slf4j
 public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
+
+    private  Map<String, String> dataInitMap = new ConcurrentHashMap<>();
+
+    private  List<String> globalEneryList = new ArrayList<>();
 
     private static final int INSERTS_PER_ENTRY = 3;
     private static final int DELETES_PER_ENTRY = INSERTS_PER_ENTRY;
@@ -92,6 +93,7 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
     private EntityViewService entityViewService;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EneryTimeGapService eneryTimeGapService;
+    @Autowired private StatisticalDataService statisticalDataService;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -181,9 +183,18 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
         }
         log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
         log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
-        List<String>   keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        log.info("打印能耗的saveAndRegisterFutures.keys1{}",keys1);
-       Long  count =  keys1.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
+        if(CollectionUtils.isEmpty(globalEneryList)) {
+            List<String> keys1 = deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+            globalEneryList.addAll(keys1);
+        }
+        if(CollectionUtils.isEmpty(dataInitMap))
+        {
+            Map<String,String>   map=  deviceDictPropertiesSvc.getUnit();
+            dataInitMap=map;
+        }
+
+        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
+       Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
         if(count>0) {
             ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
             log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
@@ -214,6 +225,13 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
             }
 
 
+        }
+
+         String  title =    dataInitMap.get(tsKvEntry.getKey());
+        if(StringUtils.isNotBlank(title))
+        {
+            log.info("打印当前的数据打印标题{}",title);
+            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
         }
 
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
