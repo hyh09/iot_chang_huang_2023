@@ -45,7 +45,9 @@ import { ActionNotificationShow } from '@core/notification/notification.actions'
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { AlertDialogComponent } from '@shared/components/dialog/alert-dialog.component';
 import { OAuth2ClientInfo, PlatformType } from '@shared/models/oauth2.models';
-import { isDefinedAndNotNull, isMobileApp } from '@core/utils';
+import { isMobileApp } from '@core/utils';
+import {ActionTenantUIChangeAll} from "@core/custom/tenant-ui.actions";
+import {initialState} from "@core/custom/tenant-ui.reducer";
 
 @Injectable({
     providedIn: 'root'
@@ -190,6 +192,12 @@ export class AuthService {
           this.clearJwtToken();
         }
       );
+  }
+
+  private resetTheme() {
+    setTimeout(() => {
+      this.store.dispatch(new ActionTenantUIChangeAll(initialState));
+    }, 500);
   }
 
   private notifyUserLoaded(isUserLoaded: boolean) {
@@ -613,7 +621,9 @@ export class AuthService {
   }
 
   private clearJwtToken() {
-    this.setUserFromJwtToken(null, null, true);
+    this.setUserFromJwtToken(null, null, true).subscribe(() => {
+      this.resetTheme();
+    });
   }
 
   private userForceFullscreen(authPayload: AuthPayload): boolean {
