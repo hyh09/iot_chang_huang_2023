@@ -61,7 +61,11 @@ public interface EfficiencyStatisticsSvc {
     /**
      * 产能接口
      */
+     @Deprecated
      ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+
+
+     ResultCapAppVo queryCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
     /**

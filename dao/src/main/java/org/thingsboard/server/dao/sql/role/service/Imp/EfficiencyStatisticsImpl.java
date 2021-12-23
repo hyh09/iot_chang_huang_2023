@@ -405,6 +405,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
+    @Override
+    public ResultCapAppVo queryCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+        ResultCapAppVo  resultCapAppVo = new ResultCapAppVo();
+        //app的接口调用Pc端
+        PageDataAndTotalValue<AppDeviceCapVo>   pageDataAndTotalValue =   this.queryPCCapAppNewMethod(queryTsKvVo,tenantId,pageLink);
+        List<AppDeviceCapVo> data =   pageDataAndTotalValue.getData();
+         String totalValue =  pageDataAndTotalValue.getTotalValue().toString();
+        resultCapAppVo.setTotalValue(totalValue);
+        resultCapAppVo.setAppDeviceCapVoList(dataToConversionSvc.fillDevicePicture(data,tenantId));
+        return resultCapAppVo;
+    }
+
     /**
      * 能耗的查询
      * @param vo

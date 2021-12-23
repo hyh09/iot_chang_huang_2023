@@ -4,19 +4,16 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.CustomException;
-import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
-import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -44,6 +41,27 @@ public class EfficiencyStatisticsController extends BaseController {
     /**
      *
      */
+    @ApiOperation(value = "【app端查询产能接口】  老接口 只是为了比对返回结果用")
+    @RequestMapping(value = "/queryCapacityTest", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultCapAppVo queryCapacityTest(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
+        try {
+            if(queryTsKvVo.getEndTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
+
+            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
+        }
+    }
+
+
+
     @ApiOperation(value = "【app端查询产能接口】")
     @RequestMapping(value = "/queryCapacity", method = RequestMethod.POST)
     @ResponseBody
@@ -54,14 +72,14 @@ public class EfficiencyStatisticsController extends BaseController {
                 queryTsKvVo.setStartTime(CommonUtils.getZero());
                 queryTsKvVo.setEndTime(CommonUtils.getNowTime());
             }
-            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
+            PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), "", "", "");
+            return efficiencyStatisticsSvc.queryCapAppNewMethod(queryTsKvVo, getTenantId(),pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
     }
-
 
     /**
      *
