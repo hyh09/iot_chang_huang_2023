@@ -567,7 +567,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             List<ResultRunStatusByDeviceVo> voList1 = map.get(str);
            if(CollectionUtils.isEmpty(voList1))
            {
-               map.put(str,new ArrayList<>());
+               map.put(str,getDefaultValue(translateMap,str));
            }
         });
       log.info("查询到的当前的数据:{}",map);
@@ -1126,5 +1126,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         String title =StringUtils.isBlank(dvo.getTitle())?dvo.getName():dvo.getTitle();
          return (title+": "+value+ " ("+dvo.getUnit()+")");
     }
+
+
+    /**
+     * App运行状态如果没有查询到
+     * 返回默认值
+     * @return
+     */
+    private  List<ResultRunStatusByDeviceVo>  getDefaultValue(Map<String, DeviceDictionaryPropertiesVo> translateMap,String  str)
+    {
+        List<ResultRunStatusByDeviceVo>  resultList = new ArrayList<>();
+        DeviceDictionaryPropertiesVo  properties =   translateMap.get(str);
+        ResultRunStatusByDeviceVo  vo = new ResultRunStatusByDeviceVo();
+        vo.setTitle(properties.getTitle());
+        vo.setKeyName(properties.getName());
+        vo.setValue("0");
+        vo.setUnit(properties.getUnit());
+        resultList.add(vo);
+        return  resultList;
+
+    }
+
+
+
+
+
+
+
 
 }
