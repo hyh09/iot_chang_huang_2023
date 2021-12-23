@@ -181,9 +181,10 @@ public class DataToConversionImpl implements DataToConversionSvc {
     private  Map  getAppEnergyVarMap(EnergyEffciencyNewEntity entity)
     {
         Map  map = new HashMap();
-        map.put(KeyTitleEnums.key_water.getgName(),entity.getWaterAddedValue());
-        map.put(KeyTitleEnums.key_gas.getgName(),entity.getGasAddedValue());
-        map.put(KeyTitleEnums.key_cable.getgName(),entity.getElectricAddedValue());
+        map.put(KeyTitleEnums.key_water.getgName(),(StringUtils.isNotEmpty(entity.getWaterAddedValue())?entity.getWaterAddedValue():"0"));
+        map.put(KeyTitleEnums.key_gas.getgName(),(StringUtils.isNotEmpty(entity.getGasAddedValue())?entity.getGasAddedValue():"0"));
+        map.put(KeyTitleEnums.key_cable.getgName(),(StringUtils.isNotEmpty(entity.getElectricAddedValue())?entity.getElectricAddedValue():"0"));
+
         return  map;
 
     }
