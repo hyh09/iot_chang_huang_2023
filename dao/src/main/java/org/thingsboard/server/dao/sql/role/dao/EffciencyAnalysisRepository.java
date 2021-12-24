@@ -5,11 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 
 import javax.persistence.Query;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +49,13 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     public  static  String  FROM_QUERY_CAP_02="    from   device  d1 left join table1 tb on  d1.id = tb.entity_id  where 1=1 " ;
 
 
+
+     /***  */
+     public  static  String SELECT_EVERY_DAY_SUM="select date,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) increment_capacity," +
+             " sum(to_number(t.capacity_value,'99999999999999999999999999.9999')) history_capacity, sum(to_number(t.electric_added_value,'99999999999999999999999999.9999')) increment_electric,\n" +
+             "       sum(to_number(t.electric_value,'99999999999999999999999999.9999')) history_electric,  sum(to_number(t.gas_added_value,'99999999999999999999999999.9999')) increment_gas,\n" +
+             "       sum(to_number(t.gas_value,'99999999999999999999999999.9999')) history_gas,sum(to_number(t.water_added_value,'99999999999999999999999999.9999')) increment_water,\n" +
+             "       sum(to_number(t.water_value,'99999999999999999999999999.9999')) history_water  from  tb_statistical_data t  where t.ts>= :startTime and t.entity_id in ( select id from device d1 where 1=1   \n" ;
 
 
 
@@ -116,6 +126,30 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
 
     /**
+     * 统计各个
+     *   ###2021-12-24 用于统计昨天 今天 历史的数据
+     * @param vo
+     * @return
+     */
+    public List<CensusSqlByDayEntity> queryCensusSqlByDay(TsSqlDayVo vo)
+    {
+        Query query = null;
+        Map<String, Object> param = new HashMap<>();
+        param.put("startTime",vo.getStartTime());
+        StringBuffer  sonSql = new StringBuffer();
+
+        StringBuffer  sonSql01 = new StringBuffer();
+        sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        sonSql.append(sonSql01).append("  ) ");
+
+        StringBuffer  sql = new StringBuffer();
+        sql.append(SELECT_EVERY_DAY_SUM).append(sonSql).append("   group by  date ");
+        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_01");
+        return  list;
+    }
+
+
+    /**
      * sql片段
      * @param queryTsKvVo
      * @param sonSql01
@@ -150,6 +184,9 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
             param.put("did", queryTsKvVo.getDeviceId());
         }
      }
+
+
+
 
 
 

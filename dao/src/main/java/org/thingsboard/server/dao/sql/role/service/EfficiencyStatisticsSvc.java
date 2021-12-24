@@ -130,4 +130,7 @@ public interface EfficiencyStatisticsSvc {
      */
     List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
 
+
+
+
 }
