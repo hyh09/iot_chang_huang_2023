@@ -144,7 +144,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
         if(vo.getEndTime() != null )
         {
-            sonSql01.append(" and  t.endTime = :endTime");
+            sonSql.append(" and  t.ts <= :endTime");
             param.put("endTime", vo.getEndTime());
         }
 

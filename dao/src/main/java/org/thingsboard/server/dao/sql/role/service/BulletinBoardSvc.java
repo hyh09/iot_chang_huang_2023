@@ -27,7 +27,7 @@ public interface BulletinBoardSvc {
     TrendVo energyConsumptionTrend( TrendParameterVo vo) throws ThingsboardException;
 
 
-    @Deprecated
+//    @Deprecated
     List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
     /**
