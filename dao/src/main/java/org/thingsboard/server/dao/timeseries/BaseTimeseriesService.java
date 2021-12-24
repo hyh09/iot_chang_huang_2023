@@ -181,8 +181,8 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
         if (entityId.getEntityType().equals(EntityType.ENTITY_VIEW)) {
             throw new IncorrectParameterException("Telemetry data can't be stored for entity view. Read only");
         }
-        log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
-        log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
+//        log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
+//        log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
         if(CollectionUtils.isEmpty(globalEneryList)) {
             List<String> keys1 = deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
             globalEneryList.addAll(keys1);
@@ -193,19 +193,19 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
             dataInitMap=map;
         }
 
-        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
+//        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
         if(count>0) {
             ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
-            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
+//            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
             try {
                 TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
-                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
+//                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
                 long  t1=  tsKvEntry.getTs();
                 long  t2=  tsKvEntry1.getTs();//要避免夸天的相减
               if(CommonUtils.isItToday(t2)) {
                   long t3 = t1 - t2;
-                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
+//                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
                   if (t3 > ENERGY_TIME_GAP) {
                       EneryTimeGapEntity eneryTimeGapEntity = new EneryTimeGapEntity();
                       eneryTimeGapEntity.setEntityId(entityId.getId());
@@ -230,7 +230,7 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
          String  title =    dataInitMap.get(tsKvEntry.getKey());
         if(StringUtils.isNotBlank(title))
         {
-            log.info("打印当前的数据打印标题{}",title);
+//            log.info("打印当前的数据打印标题{}",title);
             statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
         }
 

@@ -99,7 +99,8 @@ public class EfficiencyStatisticsController extends BaseController {
                 queryTsKvVo.setStartTime(CommonUtils.getHistoryPointTime());
             }
             PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), "", "", "");
-            return efficiencyStatisticsSvc.queryAppEntityByKeysNewMethod(queryTsKvVo, getTenantId(),pageLink);
+            queryTsKvVo.setTenantId(getTenantId().getId());
+            return efficiencyStatisticsSvc.queryAppEntityByKeysNewMethod(queryTsKvVo, getTenantId(),pageLink,true);
         }catch (Exception e)
         {
             e.printStackTrace();

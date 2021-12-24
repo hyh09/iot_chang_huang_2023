@@ -430,10 +430,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink,Boolean flg) {
         ResultEnergyAppVo  result  = new ResultEnergyAppVo();
         log.info("【APP端】queryAppEntityByKeysNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && flg)
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
