@@ -38,7 +38,7 @@ import { Customer } from '@app/shared/models/customer.model';
 import { AssetService } from '@core/http/asset.service';
 import { EntityViewService } from '@core/http/entity-view.service';
 import { AttributeScope, DataKeyType } from '@shared/models/telemetry/telemetry.models';
-import { defaultHttpOptionsFromConfig, RequestConfig } from '@core/http/http-utils';
+import { defaultHttpOptionsFromConfig, RequestConfig } from './http-utils';
 import { RuleChainService } from '@core/http/rule-chain.service';
 import { AliasInfo, StateParams, SubscriptionInfo } from '@core/api/widget-api.models';
 import { DataKey, Datasource, DatasourceType, KeyInfo } from '@app/shared/models/widget.models';
@@ -81,7 +81,7 @@ import { Edge, EdgeEvent, EdgeEventType } from '@shared/models/edge.models';
 import { RuleChainMetaData, RuleChainType } from '@shared/models/rule-chain.models';
 import { WidgetService } from '@core/http/widget.service';
 import { DeviceProfileService } from '@core/http/device-profile.service';
-import { FactoryMngService, FactoryEntityType } from '@core/http/custom/factory-mng.service';
+import { FactoryEntityType, FactoryMngService } from './custom/factory-mng.service';
 
 @Injectable({
   providedIn: 'root'

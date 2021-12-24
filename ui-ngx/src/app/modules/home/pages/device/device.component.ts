@@ -37,7 +37,7 @@ import { Subject } from 'rxjs';
 import { OtaUpdateType } from '@shared/models/ota-package.models';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
-import { DeviceDictionaryService } from '@app/core/http/custom/public-api';
+import { DeviceDictionaryService } from '@app/core/http/public-api';
 
 @Component({
   selector: 'tb-device',

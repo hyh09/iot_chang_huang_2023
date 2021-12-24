@@ -58,7 +58,6 @@
           label="{{ 'device-mng.picture' | translate }}"
           maxSizeByte="524288"
           formControlName="picture"
-          [disabled]="!isEdit"
         ></tb-image-input>
         <tb-file-input
           *ngIf="isEdit"
@@ -128,7 +127,7 @@
           ></nz-empty>
         </div>
       </mat-expansion-panel>
-      <!--标准能耗-->
+      <!--额定能耗-->
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ 'device-mng.standard-prop' | translate }}</mat-panel-title>
@@ -148,7 +147,7 @@
             </mat-form-field>
             <mat-form-field class="mat-block" fxFlex>
               <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
-              <mat-select formControlName="dictDataId" [disabled]="(isLoading$ | async) || !isEdit">
+              <mat-select formControlName="dictDataId">
                 <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                 <mat-option *ngFor="let option of entitiesTableConfig.componentsData.dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
               </mat-select>
@@ -222,7 +221,7 @@
                 </fieldset>
                 <mat-form-field>
                   <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
-                  <mat-select formControlName="dictDataId" [disabled]="(isLoading$ | async) || !isEdit">
+                  <mat-select formControlName="dictDataId">
                     <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                     <mat-option *ngFor="let option of entitiesTableConfig.componentsData.dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                   </mat-select>
@@ -294,7 +293,7 @@
             <th nzWidth="100px">{{ 'device-mng.model' | translate }}</th>
             <th nzWidth="150px">{{ 'device-mng.version' | translate }}</th>
             <th nzWidth="150px">{{ 'device-mng.guarantee' | translate }}</th>
-            <th nzWidth="104px">{{ 'device-mng.comp-picture' | translate }}</th>
+            <!-- <th nzWidth="104px">{{ 'device-mng.comp-picture' | translate }}</th> -->
             <th *ngIf="isEdit" nzWidth="150px" nzRight></th>
           </tr>
         </thead>
@@ -319,11 +318,11 @@
                 <td nzBreakWord>{{ item.model }}</td>
                 <td nzBreakWord>{{ item.version }}</td>
                 <td nzBreakWord>{{ item.warrantyPeriod }}</td>
-                <td>
+                <!-- <td>
                   <div *ngIf="item.picture" class="image-wrapper">
                     <img nz-image [nzSrc]="item.picture" />
                   </div>
-                </td>
+                </td> -->
                 <td *ngIf="isEdit" nzRight nzAlign="right">
                   <button
                     mat-icon-button

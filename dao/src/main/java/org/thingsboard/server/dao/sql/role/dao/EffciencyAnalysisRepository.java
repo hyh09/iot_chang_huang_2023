@@ -33,11 +33,15 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
     /***效能接口*/
     private  String FIND_SON_QUERY_02="select t1.entity_id,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) as capacity_added_value" +
-            " ,sum(to_number(water_added_value,'99999999999999999999999999.9999')) as water_added_value,sum(to_number(electric_added_value,'99999999999999999999999999.9999')) as electric_added_value,sum(to_number(gas_added_value,'99999999999999999999999999.9999')) as gas_added_value " +
+            " ,sum(to_number(water_added_value,'99999999999999999999999999.9999')) as water_added_value,sum(to_number(electric_added_value,'99999999999999999999999999.9999')) as electric_added_value,sum(to_number(gas_added_value,'99999999999999999999999999.9999')) as gas_added_value, " +
+            " min(water_first_time) as water_first_time,max(water_last_time) as water_last_time,"+
+            " min(electric_first_time) as electric_first_time,max(electric_last_time) as electric_last_time,"+
+            " min(gas_first_time) as gas_first_time,max(gas_last_time) as gas_last_time"+
             " from tb_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
     public  static  String  SELECT_START_DEVICE_02 =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
 
-    public  static  String  SELECT_TS_CAP_02 =" ,tb.capacity_added_value,tb.water_added_value,tb.electric_added_value,tb.gas_added_value   ";
+    public  static  String  SELECT_TS_CAP_02 =" ,tb.capacity_added_value,tb.water_added_value,tb.electric_added_value,tb.gas_added_value, " +
+            "    tb.water_first_time,tb.water_last_time,tb.electric_first_time, tb.electric_last_time,tb.gas_first_time,tb.gas_last_time ";
 
     public  static  String  FROM_QUERY_CAP_02="    from   device  d1 left join table1 tb on  d1.id = tb.entity_id  where 1=1 " ;
 

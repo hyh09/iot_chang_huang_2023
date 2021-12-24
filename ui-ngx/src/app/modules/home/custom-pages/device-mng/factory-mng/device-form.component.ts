@@ -195,7 +195,10 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       name: [data ? data.name : ''],
       content: [data ? data.content: ''],
       title: [data ? data.title : ''],
-      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
+      dictDataId: [{
+        value: data && data.dictDataId ? data.dictDataId : '',
+        disabled: true
+      }]
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {

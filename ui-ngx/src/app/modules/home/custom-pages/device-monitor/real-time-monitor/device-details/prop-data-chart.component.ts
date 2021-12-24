@@ -71,13 +71,6 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
       yAxis: {
         type: 'value'
       },
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 0,
-          end: 100
-        }
-      ],
       series: [
         {
           name: this.propName,

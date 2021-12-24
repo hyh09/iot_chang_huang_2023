@@ -29,7 +29,6 @@ export interface Factory extends BaseData<FactoryId>, CommonData {
 export interface WorkShop extends BaseData<WorkShopId>, CommonData {
   factoryId?: string;
   factoryName?: string;
-  logoImages?: string;
   bgImages?: string;
   rowType: FactoryRowType;
 }
@@ -39,7 +38,6 @@ export interface ProdLine extends BaseData<ProdLineId>, CommonData {
   factoryName?: string;
   workshopId?: string;
   workshopName?: string;
-  logoImages?: string;
   rowType: FactoryRowType;
 }
 

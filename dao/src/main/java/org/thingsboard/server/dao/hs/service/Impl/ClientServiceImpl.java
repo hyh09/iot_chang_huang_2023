@@ -55,7 +55,6 @@ import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
-import org.thingsboard.server.dao.sqlts.timescale.TsKvTimescaleRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
@@ -311,23 +310,22 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
         } else {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
-            if (keyList.isEmpty())
+            var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
+            if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
-            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), 1, Aggregation.COUNT, timePageLink.getSortOrder().getDirection().toString()))
-                    .collect(Collectors.toList());
-
-            var temp = this.tsService.findAll(tenantId, deviceId, tempQueries).get()
-                    .stream().map(KvEntry::getValue).map(e -> Integer.valueOf(String.valueOf(e))).collect(Collectors.toList());
-            if (temp.isEmpty())
+            var pageData = this.tsRepository.findTss(deviceId.getId(), Sets.newHashSet(keyIds), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
+            if (pageData.getContent().isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
-            var count = temp.stream().mapToInt(Integer::intValue).sum();
 
-            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
-                    .collect(Collectors.toList());
+            var time1 = pageData.getContent().get(0);
+            var time2 = pageData.getContent().get(pageData.getContent().size() - 1);
 
-            var KvResult = this.tsService.findAll(tenantId, deviceId, queries).get();
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTs(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+            kvEntityResult.forEach(e -> e.setStrKey(keyIdToKeyMap.getOrDefault(e.getKey(), HSConstants.NULL_STR)));
+            var KvResult = DaoUtil.convertDataList(kvEntityResult);
+
             List<Map<String, Object>> result = new ArrayList<>();
             Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
             if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection()))
@@ -338,11 +336,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
             });
-            var total = result.size();
-
-            var totalPage = Double.valueOf(Math.ceil(Double.parseDouble(String.valueOf(total)) / timePageLink.getPageSize())).intValue();
-            var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
-            return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
+            return new PageData<>(result, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
         }
     }
 
@@ -356,6 +350,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @return 历史遥测数据
      */
     @Override
+    @SuppressWarnings("all")
     public PageData<DictDeviceGroupPropertyVO> listPageTsHistories(TenantId tenantId, DeviceId deviceId, String groupPropertyName, TimePageLink timePageLink) throws ExecutionException, InterruptedException, ThingsboardException {
         if (this.commonComponent.isPersistToCassandra()) {
             List<String> keyList = new ArrayList<>() {{
@@ -397,24 +392,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var totalPage = Double.valueOf(Math.ceil(Double.parseDouble(String.valueOf(count)) / timePageLink.getPageSize())).intValue();
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(count)), timePageLink.getPage() + 1 < totalPage);
         } else {
-            List<String> keyList = new ArrayList<>() {{
-                add(groupPropertyName);
-            }};
-            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), 1, Aggregation.COUNT, "desc"))
-                    .collect(Collectors.toList());
-
-            var tempResult = this.tsService.findAll(tenantId, deviceId, tempQueries).get()
-                    .stream().collect(Collectors.toMap(TsKvEntry::getKey, Function.identity()));
-            if (tempResult.isEmpty())
-                return new PageData<>();
-            int count = Integer.parseInt(String.valueOf(tempResult.get(groupPropertyName).getValue()));
-            if (count == 0)
-                return new PageData<>();
-
-            int queryCount = Math.min((timePageLink.getPage() + 1) * timePageLink.getPageSize(), count);
-
-            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), Math.min(queryCount, count), Aggregation.NONE, "desc"))
-                    .collect(Collectors.toList());
+            var keyId = this.tsDictionaryRepository.findByKey(groupPropertyName).map(TsKvDictionary::getKeyId)
+                    .orElseThrow(() -> new ThingsboardException("keyId不存在", ThingsboardErrorCode.GENERAL));
+            var pageData = this.tsRepository.findAll(deviceId.getId(), keyId, timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
+            if (pageData.getContent().isEmpty())
+                return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
             Map<String, DictData> rMap = new HashMap<>();
             var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId.getId())).map(DeviceEntity::toData).orElse(null);
@@ -423,18 +405,14 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             }
             Map<String, DictData> finalRMap = rMap;
 
-            var result = this.tsService.findAll(tenantId, deviceId, queries).get()
-                    .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).map(e -> DictDeviceGroupPropertyVO.builder()
-                            .content(this.formatKvEntryValue(e))
-                            .unit(Optional.ofNullable(finalRMap.getOrDefault(groupPropertyName, null))
-                                    .map(DictData::getUnit).orElse(null))
-                            .createdTime(e.getTs())
-                            .build())
-                    .collect(Collectors.toList());
-
-            var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), queryCount), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), queryCount));
-            var totalPage = Double.valueOf(Math.ceil(Double.parseDouble(String.valueOf(count)) / timePageLink.getPageSize())).intValue();
-            return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(count)), timePageLink.getPage() + 1 < totalPage);
+            pageData.getContent().forEach(e -> e.setStrKey(groupPropertyName));
+            var r = pageData.getContent().stream().map(TsKvEntity::toData).map(v -> DictDeviceGroupPropertyVO.builder()
+                    .content(this.formatKvEntryValue(v))
+                    .unit(Optional.ofNullable(finalRMap.getOrDefault(groupPropertyName, null))
+                            .map(DictData::getUnit).orElse(null))
+                    .createdTime(v.getTs())
+                    .build()).collect(Collectors.toList());
+            return new PageData<>(r, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
         }
     }
 

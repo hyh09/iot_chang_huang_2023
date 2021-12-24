@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { RequestConfig, defaultHttpUploadOptions, defaultHttpOptionsFromConfig } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { ChecksumAlgorithm } from "@app/shared/models/ota-package.models";
 import { Observable } from "rxjs";
 
