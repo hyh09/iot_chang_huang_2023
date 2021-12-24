@@ -3,6 +3,9 @@ package org.thingsboard.server.common.data.vo;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.StringUtils;
+
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -32,6 +35,32 @@ public class TsSqlDayVo extends  AbstractDeviceVo{
         vo.setProductionLineId(this.productionLineId);
         vo.setDeviceId(this.deviceId);
         return  vo;
+
+    }
+
+    /**
+     * 由入参的String构造 实体
+     * @return
+     */
+    public static TsSqlDayVo constructionTsSqlDayVo(
+            String factoryId,String workshopId,String productionLineId,String deviceId
+    )
+    {
+        TsSqlDayVo  vo =  new TsSqlDayVo();
+        if(StringUtils.isNotEmpty(factoryId)) {
+            vo.setFactoryId(UUID.fromString(factoryId));
+        }
+        if(StringUtils.isNotEmpty(workshopId)) {
+            vo.setWorkshopId(UUID.fromString(workshopId));
+        }
+        if(StringUtils.isNotEmpty(productionLineId)) {
+            vo.setProductionLineId(UUID.fromString(productionLineId));
+        }
+        if(StringUtils.isNotEmpty(deviceId)) {
+            vo.setDeviceId(UUID.fromString(deviceId));
+        }
+
+        return vo;
 
     }
 

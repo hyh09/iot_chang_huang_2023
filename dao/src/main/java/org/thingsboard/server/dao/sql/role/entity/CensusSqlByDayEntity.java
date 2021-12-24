@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.sql.role.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.dao.util.sql.entity.AbstractStatisticalDataEntity;
 
 import javax.persistence.*;
@@ -105,4 +106,7 @@ public class CensusSqlByDayEntity  extends AbstractStatisticalDataEntity {
         this.incrementWater = incrementWater;
         this.historyWater = historyWater;
     }
+
+
+
 }

@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -273,6 +274,24 @@ public class CommonUtils {
             return true;
         }
 
+        return  false;
+
+    }
+
+
+    /**
+     * 判断是不是今天的数据
+     * @param localDate
+     * @return
+     */
+    public  static   Boolean  itIsToday(LocalDate localDate)
+    {
+        LocalDate  nowDate = LocalDate.now();// 今天
+        int i =  nowDate.compareTo(localDate);
+        if(i == 0 )
+        {
+            return  true;
+        }
         return  false;
 
     }
