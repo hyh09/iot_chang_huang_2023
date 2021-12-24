@@ -21,7 +21,7 @@ import java.util.UUID;
 @Repository
 public interface DictDeviceRepository extends PagingAndSortingRepository<DictDeviceEntity, UUID>, JpaSpecificationExecutor<DictDeviceEntity> {
 
-    @Query("select new DictDeviceEntity(d.id, d.name) from DictDeviceEntity d where d.tenantId = :tenantId order by d.createdTime desc")
+    @Query("select new DictDeviceEntity(d.id, d.name, d.isDefault) from DictDeviceEntity d where d.tenantId = :tenantId order by d.createdTime desc")
     List<DictDeviceEntity> findAllByTenantId(@Param("tenantId") UUID tenantId);
 
     Optional<DictDeviceEntity> findByTenantIdAndId(UUID tenantId, UUID id);
@@ -29,9 +29,9 @@ public interface DictDeviceRepository extends PagingAndSortingRepository<DictDev
     @Query("select d.code from DictDeviceEntity d where d.tenantId = :tenantId")
     List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 
-    @Query("select d from DictDeviceEntity d" +
-            " LEFT JOIN DeviceProfileDictDeviceEntity p on d.id = p.dictDeviceId" +
-            " where p.id is null and d.tenantId =:tenantId" +
-            " order by d.createdTime desc")
-    List<DictDeviceEntity> findAllDictDeviceUnusedByTenantId(@Param("tenantId") UUID tenantId);
+    List<DictDeviceEntity> findAllByTenantIdAndIdIn(UUID tenantId, List<UUID> ids);
+
+    Optional<DictDeviceEntity> findByTenantIdAndIsDefaultIsTrue(UUID tenantId);
+
+    List<DictDeviceEntity> findAllByTenantIdAndUpdatedTimeGreaterThan(UUID tenantId, Long startTime);
 }

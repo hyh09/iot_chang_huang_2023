@@ -50,6 +50,13 @@ public class QueryTsKvVo {
     @ApiModelProperty("起始页  不传默认是0")
     private  int page=0;
 
+    private UUID tenantId;
+
+
+    //是否获取第一个工厂逻辑
+    private  Boolean filterFirstFactory=true;
+
+
 
     public QueryTsKvVo() {
     }

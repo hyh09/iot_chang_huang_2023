@@ -15,9 +15,25 @@
     limitations under the License.
 
 -->
+<mat-form-field>
+  <mat-label>{{ 'asset.name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.table.pageLink.textSearch" (keyup.enter)="refresh()" />
+  <button
+    *ngIf="entitiesTableConfig.table.pageLink.textSearch"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="entitiesTableConfig.table.pageLink.textSearch = ''; refresh()"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
 <tb-entity-subtype-select
   [showLabel]="true"
   [entityType]="entityType.ASSET"
   [ngModel]="entitiesTableConfig.componentsData.assetType"
   (ngModelChange)="assetTypeChanged($event)">
 </tb-entity-subtype-select>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="refresh()">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

@@ -112,6 +112,17 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
 
 
 
+    /**
+     * 查询用户编码的
+     */
+    public  TenantSysRoleEntity  queryAllByFactoryId(String roleCode,UUID tenantId,UUID factoryId)
+    {
+        return   this.dao.queryAllByFactoryId(roleCode,tenantId,factoryId);
+    }
+
+
+
+
 
 
 

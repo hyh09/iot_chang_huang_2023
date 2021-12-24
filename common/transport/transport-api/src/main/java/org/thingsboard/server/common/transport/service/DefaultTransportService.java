@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -134,6 +135,7 @@ public class DefaultTransportService implements TransportService {
     @Value("${queue.transport.poll_interval}")
     private int notificationsPollDuration;
 
+
     private final Gson gson = new Gson();
     private final TbTransportQueueFactory queueProvider;
     private final TbQueueProducerProvider producerProvider;
@@ -165,6 +167,7 @@ public class DefaultTransportService implements TransportService {
     private final Map<String, RpcRequestMetadata> toServerRpcPendingMap = new ConcurrentHashMap<>();
 
     private volatile boolean stopped = false;
+
 
     public DefaultTransportService(TbServiceInfoProvider serviceInfoProvider,
                                    TbTransportQueueFactory queueProvider,
@@ -530,6 +533,7 @@ public class DefaultTransportService implements TransportService {
             CustomerId customerId = getCustomerId(sessionInfo);
             sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, SessionMsgType.POST_ATTRIBUTES_REQUEST,
                     new TransportTbQueueCallback(new ApiStatsProxyCallback<>(tenantId, customerId, msg.getKvList().size(), callback)));
+
         }
     }
 
@@ -1147,4 +1151,5 @@ public class DefaultTransportService implements TransportService {
     public ExecutorService getCallbackExecutor() {
         return transportCallbackExecutor;
     }
+
 }

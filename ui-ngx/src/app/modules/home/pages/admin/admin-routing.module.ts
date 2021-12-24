@@ -47,10 +47,10 @@ const routes: Routes = [
     path: 'settings',
     data: {
       auth: [Authority.SYS_ADMIN, Authority.TENANT_ADMIN],
-      breadcrumb: {
-        label: 'admin.system-settings',
-        icon: 'settings'
-      }
+      // breadcrumb: {
+      //   label: 'admin.system-settings',
+      //   icon: 'settings'
+      // }
     },
     children: [
       {

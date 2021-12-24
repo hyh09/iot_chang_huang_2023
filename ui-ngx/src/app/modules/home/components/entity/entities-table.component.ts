@@ -1,19 +1,4 @@
-///
-/// Copyright © 2016-2021 The Thingsboard Authors
-///
-/// Licensed under the Apache License, Version 2.0 (the "License");
-/// you may not use this file except in compliance with the License.
-/// You may obtain a copy of the License at
-///
-///     http://www.apache.org/licenses/LICENSE-2.0
-///
-/// Unless required by applicable law or agreed to in writing, software
-/// distributed under the License is distributed on an "AS IS" BASIS,
-/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-/// See the License for the specific language governing permissions and
-/// limitations under the License.
-///
-
+import { EventEmitter, Output } from '@angular/core';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -21,7 +6,6 @@ import {
   Component,
   ComponentFactoryResolver,
   ElementRef,
-  EventEmitter,
   Input,
   OnChanges,
   OnInit,
@@ -75,6 +59,9 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
 
   @Input()
   entitiesTableConfig: EntityTableConfig<BaseData<HasId>>;
+
+  @Output()
+  selectionChange: EventEmitter<BaseData<HasId>[]> = new EventEmitter<BaseData<HasId>[]>();
 
   translations: EntityTypeTranslation;
 
@@ -350,6 +337,12 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     }
   }
 
+  onSelectionChange() {
+    setTimeout(() => {
+      this.selectionChange.emit(this.dataSource.selection.selected);
+    });
+  }
+
   onRowClick($event: Event, entity) {
     if (!this.entitiesTableConfig.handleRowClick($event, entity)) {
       this.toggleEntityDetails($event, entity);
@@ -478,8 +471,10 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     this.updateData();
   }
 
-  resetSortAndFilter(update: boolean = true, preserveTimewindow: boolean = false) {
-    this.pageLink.textSearch = null;
+  resetSortAndFilter(update: boolean = true, preserveTimewindow: boolean = false, preserveTextSearch: boolean = false) {
+    if (!preserveTextSearch) {
+      this.pageLink.textSearch = null;
+    }
     if (this.entitiesTableConfig.useTimePageLink && !preserveTimewindow) {
       this.timewindow = this.entitiesTableConfig.defaultTimewindowInterval;
     }
@@ -554,7 +549,7 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       const index = row * this.entitiesTableConfig.columns.length + col;
       let res = this.cellContentCache[index];
       if (isUndefined(res)) {
-        if (!column.isIconColumn) {
+        if (!column.isIconColumn && !column.isSwitchColumn) {
           res = this.domSanitizer.bypassSecurityTrustHtml(column.cellContentFunction(entity, column.key));
         } else {
           res = column.cellContentFunction(entity, column.key);

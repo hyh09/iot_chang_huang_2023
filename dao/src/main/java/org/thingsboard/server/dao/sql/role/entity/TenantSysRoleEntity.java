@@ -10,6 +10,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.CreationTimestamp;	
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.util.anno.JpaOperatorsType;
+import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 	
 import javax.persistence.*;
@@ -55,6 +57,7 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
      * 被创建者的类型:
      */
     @Column(name = ModelConstants.USER_USER_TYPE)
+    @JpaOperatorsType(JpaQueryHelper.Operators.eq)
     private  String type;
 
     /**
@@ -69,6 +72,7 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
      * 0不是系统生成
      */
     @Column(name = "system_tab")
+    @JpaOperatorsType(JpaQueryHelper.Operators.eq)
     private String  systemTab="0";
 
 

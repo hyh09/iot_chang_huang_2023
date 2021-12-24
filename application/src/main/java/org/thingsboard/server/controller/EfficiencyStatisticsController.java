@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
@@ -74,7 +76,11 @@ public class EfficiencyStatisticsController extends BaseController {
                 queryTsKvVo.setStartTime(CommonUtils.getZero());
                 queryTsKvVo.setEndTime(CommonUtils.getNowTime());
             }
-            return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId());
+            if(queryTsKvVo.getStartTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getHistoryPointTime());
+            }
+            return efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo, getTenantId(),true);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -86,13 +92,19 @@ public class EfficiencyStatisticsController extends BaseController {
     @ApiOperation(value = "【app端查询当前设备的运行状态】")
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody AppQueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
         try {
-//            if (queryTsKvVo.getEndTime() == null) {
-//                queryTsKvVo.setStartTime(CommonUtils.getZero());
-//                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-//            }
-            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId());
+            if (queryTsKvVo.getEndTime() == null) {
+                queryTsKvVo.setStartTime(CommonUtils.getZero());
+                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+            }
+            if(queryTsKvVo.getStartTime() == null )
+            {
+                queryTsKvVo.setStartTime(CommonUtils.getHistoryPointTime());
+            }
+            PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), queryTsKvVo.getTextSearch(), queryTsKvVo.getSortProperty(), queryTsKvVo.getSortOrder());
+
+            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -101,7 +113,12 @@ public class EfficiencyStatisticsController extends BaseController {
     }
 
 
-
+    /**
+     * app端获取运行状态属性
+     * @param deviceId
+     * @return
+     * @throws ThingsboardException
+     */
     @ApiOperation("设备属性分组属性接口")
     @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
     @ResponseBody

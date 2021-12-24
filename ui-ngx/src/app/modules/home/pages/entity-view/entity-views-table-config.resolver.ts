@@ -86,6 +86,9 @@ export class EntityViewsTableConfigResolver implements Resolve<EntityTableConfig
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.ENTITY_VIEW);
     this.config.entityResources = entityTypeResources.get(EntityType.ENTITY_VIEW);
 
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
+
     this.config.addDialogStyle = {maxWidth: '800px'};
 
     this.config.deleteEntityTitle = entityView =>
@@ -107,7 +110,7 @@ export class EntityViewsTableConfigResolver implements Resolve<EntityTableConfig
     this.config.detailsReadonly = () => (this.config.componentsData.entityViewScope === 'customer_user' ||
       this.config.componentsData.entityViewScope === 'edge_customer_user');
 
-    this.config.headerComponent = EntityViewTableHeaderComponent;
+    this.config.filterComponent = EntityViewTableHeaderComponent;
 
   }
 

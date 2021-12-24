@@ -29,6 +29,7 @@ import { SendTestSmsDialogComponent } from '@home/pages/admin/send-test-sms-dial
 import { HomeSettingsComponent } from '@home/pages/admin/home-settings.component';
 import { ResourcesLibraryComponent } from '@home/pages/admin/resource/resources-library.component';
 import {CustomUiComponent} from "@home/pages/custom-ui/custom-ui.component";
+import { RulechainTableFilterComponent } from './resource/resources-library-table-filter.component';
 
 @NgModule({
   declarations:
@@ -41,6 +42,7 @@ import {CustomUiComponent} from "@home/pages/custom-ui/custom-ui.component";
       OAuth2SettingsComponent,
       HomeSettingsComponent,
       ResourcesLibraryComponent,
+      RulechainTableFilterComponent,
       CustomUiComponent
     ],
   imports: [

@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.alarm.Alarm;
@@ -56,8 +57,10 @@ import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleChainType;
 import org.thingsboard.server.common.data.rule.RuleNode;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.audit.AuditLogService;
@@ -72,6 +75,7 @@ import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.factory.FactoryService;
+import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
@@ -84,10 +88,12 @@ import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
+import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
+import org.thingsboard.server.dao.tool.UserLanguageSvc;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
@@ -273,6 +279,14 @@ public abstract class BaseController {
     @Autowired
     protected DictDeviceService dictDeviceService;
 
+    @Autowired
+    protected DefaultTransportService transportService;
+/*
+
+    @Autowired
+    protected MqttClient mqttClient;
+*/
+
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
     private boolean logControllerErrorStackTrace;
@@ -286,6 +300,10 @@ public abstract class BaseController {
     @Autowired protected TenantMenuRoleService tenantMenuRoleService;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     @Autowired  protected TenantSysRoleService tenantSysRoleService;
+    @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired  protected UserLanguageSvc userLanguageSvc;
+    @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
 
 
     @ExceptionHandler(ThingsboardException.class)
@@ -451,7 +469,7 @@ public abstract class BaseController {
             validateId(userId, "Incorrect userId " + userId);
             User user = userService.findUserById(getCurrentUser().getTenantId(), userId);
             checkNotNull(user);
-            accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
+//            accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
             return user;
         } catch (Exception e) {
             throw handleException(e, false);
@@ -597,6 +615,12 @@ public abstract class BaseController {
                     return;
                 case OTA_PACKAGE:
                     checkOtaPackageId(new OtaPackageId(entityId.getId()), operation);
+                    return;
+                case FACTORY:  //忽略权限校验
+                    return;
+                case WORKSHOP://忽略权限校验
+                    return;
+                case PRODUCTION_LINE://忽略权限校验
                     return;
                 default:
                     throw new IllegalArgumentException("Unsupported entity type: " + entityId.getEntityType());
@@ -1028,15 +1052,27 @@ public abstract class BaseController {
         List<Factory> byName = factoryService.findByName(name, this.getCurrentUser().getTenantId().getId());
         if(org.apache.commons.collections.CollectionUtils.isNotEmpty(byName)){
             if(id == null){
-                log.warn("名称重复");
-                throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                log.warn("工厂名称重复");
+                throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
             }else {
                 if(!byName.get(0).getId().toString().equals(id.toString())){
-                    log.warn("名称重复");
-                    throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                    log.warn("工厂名称重复");
+                    throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
                 }
             }
         }
+    }
+
+
+    /**
+     * 获取当前登录人的提示信息
+     * @param enums
+     * @return
+     * @throws ThingsboardException
+     */
+    public  String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
+         String message=   userLanguageSvc.getLanguageByUserLang(enums,getCurrentUser().getTenantId(),new UserId(getCurrentUser().getUuidId()));
+        return  message;
     }
 
 }

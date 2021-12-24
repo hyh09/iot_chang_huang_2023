@@ -2,7 +2,7 @@
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
       <fieldset [disabled]="!!entityForm.get('id').value">
-        <mat-form-field class="mat-block">
+        <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
           <mat-label translate>auth-mng.user-code</mat-label>
           <input matInput formControlName="userCode" required>
           <mat-error *ngIf="entityForm.get('userCode').hasError('required')">
@@ -37,7 +37,7 @@
           {{ 'auth-mng.email-invalid' | translate }}
         </mat-error>
       </mat-form-field>
-      <mat-form-field class="mat-block">
+      <mat-form-field *ngIf="isAdd && !entityForm.get('factoryId').value || !isAdd && entityForm.get('userLevel').value === 0" class="mat-block">
         <mat-label translate>auth-mng.roles</mat-label>
         <mat-select formControlName="roleIds" multiple>
           <mat-option

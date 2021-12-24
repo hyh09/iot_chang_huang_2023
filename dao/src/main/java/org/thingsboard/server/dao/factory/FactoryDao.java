@@ -24,14 +24,7 @@ public interface FactoryDao extends Dao<Factory>{
      * 删除后刷新值(逻辑删除)
      * @param id
      */
-    void delFactory(UUID id);
-
-    /**
-     * 根据工厂管理员查询
-     * @param factoryAdminId
-     * @return
-     */
-    Factory findFactoryByAdmin(UUID factoryAdminId);
+    void delFactory(UUID id)throws ThingsboardException ;
 
     /**
      * 根据租户查询

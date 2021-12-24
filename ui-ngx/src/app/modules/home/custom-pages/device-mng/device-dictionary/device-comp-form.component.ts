@@ -1,14 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppState } from '@app/core/core.state';
-import { DeviceComp } from '@app/shared/models/custom/device-mng.models';
+import { DeviceComp, DataDictionary, DeviceData } from '@app/shared/models/custom/device-mng.models';
 import { DialogComponent } from '@app/shared/public-api';
 import { Store } from '@ngrx/store';
 
-export interface DeviceCompDialogData extends DeviceComp {
-  isEdit?: boolean
+export interface CompInfo extends DeviceComp {
+  isEdit?: boolean;
+  isView?: boolean;
+}
+
+export interface DeviceCompDialogData {
+  compInfo?: CompInfo;
+  dataDictionaries: DataDictionary[];
 }
 
 @Component({
@@ -17,35 +23,49 @@ export interface DeviceCompDialogData extends DeviceComp {
 })
 export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormComponent, DeviceCompDialogData> implements OnInit {
 
-  public compForm: FormGroup;
-  public isEdit: boolean;
+  compForm: FormGroup;
+  isEdit: boolean;
+  isView: boolean;
+  compDataExpanded: boolean = true;
+  dataDictionaries: DataDictionary[] = [];
 
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
     public dialogRef: MatDialogRef<DeviceCompFormComponent, DeviceCompDialogData>,
     protected fb: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) protected compInfo: DeviceCompDialogData
+    @Inject(MAT_DIALOG_DATA) protected data: DeviceCompDialogData
   ) {
     super(store, router, dialogRef);
   }
 
   ngOnInit() {
-    this.isEdit = this.compInfo ? this.compInfo.isEdit : false;
+    this.isEdit = this.data.compInfo ? this.data.compInfo.isEdit : false;
+    this.isView = this.data.compInfo ? this.data.compInfo.isView : false;
+    this.dataDictionaries = this.data.dataDictionaries;
     this.buildForm();
   }
 
   buildForm() {
+    const compInfo = this.data.compInfo;
+    const propertyListControls: Array<AbstractControl> = [];
+    if (compInfo && compInfo.propertyList && compInfo.propertyList.length > 0) {
+      for (const property of compInfo.propertyList) {
+        propertyListControls.push(this.createPropertyListControl(property));
+      }
+    }
     this.compForm = this.fb.group({
-      name: [this.compInfo ? this.compInfo.name : '', Validators.required],
-      type: [this.compInfo ? this.compInfo.type : ''],
-      supplier: [this.compInfo ? this.compInfo.supplier : ''],
-      model: [this.compInfo ? this.compInfo.model : ''],
-      version: [this.compInfo ? this.compInfo.version : ''],
-      warrantyPeriod: [this.compInfo ? this.compInfo.warrantyPeriod : ''],
-      comment: [this.compInfo ? this.compInfo.comment : ''],
-      picture: [this.compInfo ? this.compInfo.picture : '']
+      name: [compInfo ? compInfo.name : '', Validators.required],
+      type: [compInfo ? compInfo.type : ''],
+      supplier: [compInfo ? compInfo.supplier : ''],
+      model: [compInfo ? compInfo.model : ''],
+      version: [compInfo ? compInfo.version : ''],
+      warrantyPeriod: [compInfo ? compInfo.warrantyPeriod : ''],
+      comment: [compInfo ? compInfo.comment : ''],
+      picture: [compInfo ? compInfo.picture : ''],
+      propertyList: this.fb.array(propertyListControls)
     });
+    this.compForm.markAsDirty();
   }
 
   cancel() {
@@ -55,10 +75,35 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
   save() {
     if (this.compForm.valid) {
       this.dialogRef.close({
-        ...(this.compInfo || {}),
+        ...(this.data.compInfo || {}),
         ...this.compForm.value
       });
     }
+  }
+
+  /**
+   * @description 部件参数相关方法
+   */
+  compDataFormArray(): FormArray {
+    return this.compForm.get('propertyList') as FormArray;
+  }
+  createPropertyListControl(data?: DeviceData): AbstractControl {
+    return this.fb.group({
+      name: [data ? data.name : '', Validators.required],
+      content: [data ? data.content : '', Validators.required],
+      title: [data ? data.title : ''],
+      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
+    });
+  }
+  addCompData(event: MouseEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.compDataFormArray().push(this.createPropertyListControl());
+    this.compForm.updateValueAndValidity();
+  }
+  removeCompData(index: number) {
+    this.compDataFormArray().removeAt(index);
+    this.compForm.updateValueAndValidity();
   }
 
 }

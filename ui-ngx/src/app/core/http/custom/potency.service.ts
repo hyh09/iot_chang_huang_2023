@@ -1,9 +1,10 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
-import { PageData, PageLink } from "@app/shared/public-api";
+import { PageData, TimePageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
-import { DeviceCapacityList, DeviceEnergyConsumptionList } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumptionList, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceProp } from "@app/shared/models/custom/device-monitor.models";
 
 interface FilterParams {
   factoryId?: string;
@@ -23,7 +24,7 @@ export class PotencyService {
   ) { }
 
   // 查询设备产能列表
-  public getDeviceCapacityList(pageLink: PageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceCapacityList> {
+  public getDeviceCapacityList(pageLink: TimePageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceCapacityList> {
     let queryStr: string[] = [];
     if (params) {
       Object.keys(params).forEach(key => {
@@ -39,7 +40,7 @@ export class PotencyService {
   }
 
   // 获取能耗分析数据列表
-  public getEnergyConsumptionDatas(pageLink: PageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceEnergyConsumptionList> {
+  public getEnergyConsumptionDatas(pageLink: TimePageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceEnergyConsumptionList> {
     let queryStr: string[] = [];
     if (params) {
       Object.keys(params).forEach(key => {
@@ -58,11 +59,21 @@ export class PotencyService {
   }
 
   // 获取设备能耗历史数据列表
-  public getEnergyHistoryDatas(pageLink: PageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
+  public getEnergyHistoryDatas(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
     return this.http.get<PageData<object>>(
       `/api/pc/efficiency/queryEnergyHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)
     );
+  }
+
+  // 获取设备的参数
+  public getDeviceProps(deviceId: string, config?: RequestConfig): Observable<DeviceProp[]> {
+    return this.http.get<DeviceProp[]>(`/api/pc/efficiency/queryDictName?deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取设备运行状态
+  public getDeviceRunningState(params: { deviceId: string; keyNames: string[], startTime: number; endTime: number; }, config?: RequestConfig): Observable<RunningState> {
+    return this.http.post<RunningState>(`/api/pc/efficiency/queryTheRunningStatusByDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
 }

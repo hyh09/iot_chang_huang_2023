@@ -1,7 +1,6 @@
+import { environment } from './../../../../../environments/environment';
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { environment as env } from '@env/environment';
-import { TranslateService } from '@ngx-translate/core';
 import { DashboardService } from '@core/http/dashboard.service';
 import { UIInfo } from '@shared/models/dashboard.models';
 import { Store } from '@ngrx/store';
@@ -11,6 +10,7 @@ import { PageComponent } from '@shared/components/page.component';
 import {ActionTenantUIChangeAll} from "@core/custom/tenant-ui.actions";
 import {TenantUIState} from "@core/custom/tenant-ui.models";
 import {initialState} from "@core/custom/tenant-ui.reducer";
+import { SystemMngService } from '@app/core/http/custom/system-mng.service';
 
 @Component({
   selector: 'tb-custom-ui',
@@ -27,8 +27,8 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
 
   constructor(
     protected store: Store<AppState>,
-    private translate: TranslateService,
     private dashboardService: DashboardService,
+    private systemMngService: SystemMngService,
     private fb: FormBuilder
   ) {
     super(store);
@@ -42,11 +42,11 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
   ngOnInit(): void {
     this.customUiFormGroup.valueChanges.subscribe(data => {
       Reflect.ownKeys(data).forEach(key => data[key.toString()] = data[key.toString()] === '' ? null : data[key.toString()]);
-      if(JSON.stringify(this.initData) !== JSON.stringify(data)){
+      if (JSON.stringify(this.initData) !== JSON.stringify(data)) {
         this.isDirty = true;
         this.previousData = data;
         this.store.dispatch(new ActionTenantUIChangeAll(data));
-      }else{
+      } else {
         this.isDirty = false;
         if(JSON.stringify(this.previousData) !== JSON.stringify(data)){
           this.store.dispatch(new ActionTenantUIChangeAll(data));
@@ -57,25 +57,18 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
 
   writeFormByHttp() {
     this.dashboardService.getTenantUIInfo().subscribe(ui => {
-      this.patchFormValue(ui);
-      this.initData = this.customUiFormGroup.value;
-      this.previousData = this.customUiFormGroup.value;
+      this.systemMngService.getSystemVersion().subscribe(res => {
+        ui.platformVersion = (res || {}).version;
+        this.patchFormValue(ui);
+        this.isDirty = false;
+        this.initData = this.customUiFormGroup.value;
+        this.previousData = this.customUiFormGroup.value;
+      });
     });
   }
 
   patchFormValue(ui: UIInfo | TenantUIState) {
-    this.customUiFormGroup.get('applicationTitle').patchValue(ui.applicationTitle);
-    this.customUiFormGroup.get('iconImageUrl').patchValue(ui.iconImageUrl);
-    this.customUiFormGroup.get('logoImageUrl').patchValue(ui.logoImageUrl);
-    this.customUiFormGroup.get('logoImageHeight').patchValue(ui.logoImageHeight);
-    this.customUiFormGroup.get('platformMainColor').patchValue(ui.platformMainColor);
-    this.customUiFormGroup.get('platformTextMainColor').patchValue(ui.platformTextMainColor);
-    this.customUiFormGroup.get('platformButtonColor').patchValue(ui.platformButtonColor);
-    this.customUiFormGroup.get('platformMenuColorActive').patchValue(ui.platformMenuColorActive);
-    this.customUiFormGroup.get('platformMenuColorHover').patchValue(ui.platformMenuColorHover);
-    this.customUiFormGroup.get('showNameVersion').patchValue(ui.showNameVersion);
-    this.customUiFormGroup.get('platformName').patchValue(ui.platformName);
-    this.customUiFormGroup.get('platformVersion').patchValue(ui.platformVersion);
+    this.customUiFormGroup.patchValue(ui);
   }
 
   //恢复到tb原始设置
@@ -103,13 +96,14 @@ export class CustomUiComponent extends PageComponent implements OnInit, HasDirty
       logoImageUrl: [null, []],
       logoImageHeight: [null, []],
       platformMainColor: [null, []],
+      platformSecondColor: [null, []],
       platformTextMainColor: [null, []],
       platformButtonColor: [null, []],
       platformMenuColorActive: [null, []],
       platformMenuColorHover: [null, []],
       showNameVersion: [false, []],
-      platformName: [env.appTitle, []],
-      platformVersion: [env.tbVersion, []]
+      platformName: [environment.appTitle, []],
+      platformVersion: ['', []]
     });
     this.initData = this.customUiFormGroup.value;
     this.previousData = this.customUiFormGroup.value;

@@ -3,6 +3,9 @@ package org.thingsboard.server.dao.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.regex.Pattern;
 
 /**
@@ -13,6 +16,9 @@ import java.util.regex.Pattern;
  **/
 
 public class StringUtilToll {
+
+    private final static String zero ="0";
+
 
     /**
      * 判断一个字符串是否是数字。
@@ -27,11 +33,21 @@ public class StringUtilToll {
         return pattern.matcher(string).matches();
     }
 
-
-    public static double sub(Double value1, Double value2){
-        BigDecimal b1 = new BigDecimal(value1.toString());
-        BigDecimal b2 = new BigDecimal(value2.toString());
-        return b1.subtract(b2).doubleValue();
+    /**
+     * 减法
+     * @param value1
+     * @param value2
+     * @return
+     */
+    public static String  sub(String value1, String value2){
+        if(value1 == null  ||  value2 == null)
+        {
+            return zero;
+        }
+        BigDecimal b1 = new BigDecimal(value1);
+        BigDecimal b2 = new BigDecimal(value2);
+        BigDecimal  result = b1.subtract(b2).stripTrailingZeros();
+        return  result.compareTo(BigDecimal.ZERO )<0?"0":roundUp(result.toPlainString());
     }
 
 
@@ -47,6 +63,9 @@ public class StringUtilToll {
         return b1.add(b2).doubleValue();
     }
 
+
+
+
     private static final int DEF_DIV_SCALE = 10;
 
     /**
@@ -56,13 +75,105 @@ public class StringUtilToll {
      * @param v2 除数
      * @return 两个参数的商
      */
-    public static double div(String v1,String v2,String v3){
+    public static String div(String v1,String v2,String v3){
+        if(v1 == null || v2 == null ||  v3 == null)
+        {
+            return  zero;
+
+        }
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
         BigDecimal b3 = new BigDecimal(v3);
-//      return   b1.multiply(b2).multiply(b3).doubleValue();
+        if(b2.compareTo(BigDecimal.ZERO)==0)
+        {
+            return zero;
+        }
+        if(b3.compareTo(BigDecimal.ZERO)==0)
+        {
+            return zero;
+        }
         BigDecimal bigDecimal =  b1.divide(b2, 2, BigDecimal.ROUND_HALF_UP).divide(b3,2, BigDecimal.ROUND_HALF_UP);
-       return bigDecimal.doubleValue();
+        //保留4位小数
+        String str=  bigDecimal.stripTrailingZeros().toPlainString();
+       return str;
+    }
+
+
+    public static String div(String v1,String v2){
+        if(v1 == null || v2 == null)
+        {
+            return  zero;
+
+        }
+        BigDecimal b1 = new BigDecimal(v1);
+        BigDecimal b2 = new BigDecimal(v2);
+        if(b2.compareTo(BigDecimal.ZERO)==0)
+        {
+            return zero;
+        }
+        BigDecimal bigDecimal =  b1.divide(b2, 2, BigDecimal.ROUND_HALF_UP);
+        String str=  bigDecimal.stripTrailingZeros().toPlainString();
+        return str;
+    }
+
+
+
+      /*** 精确乘法　*/
+      public static String mul(String v1, String v2) {
+          String zero ="0";
+          if(v2 == null || v2 == null )
+          {
+              return  zero;
+
+          }
+          BigDecimal b1 = new BigDecimal(v1);
+          BigDecimal b2 = new BigDecimal(v2);
+          BigDecimal bigDecimal=  b1.multiply(b2);
+          String str=  bigDecimal.stripTrailingZeros().toPlainString();
+         return  roundUp(str);
+      }
+
+
+    /**
+     * 保留4位小数
+     */
+    public  static  String roundUp(String num)
+    {
+         if(num == null)
+         {
+             return  "0";
+         }
+        BigDecimal b = new BigDecimal(num);
+        //保留4位小数
+        BigDecimal result = b.setScale(4, BigDecimal.ROUND_HALF_UP);
+        if (result.compareTo(BigDecimal.ZERO) == -1){
+            return  "0";
+        }
+        String str=  result.stripTrailingZeros().toPlainString();
+        return  str;
+    }
+
+
+    public  static  Boolean isZero(String v2)
+    {
+        BigDecimal b2 = new BigDecimal(v2);
+        if(b2.compareTo(BigDecimal.ZERO)==0)
+        {
+            return true;
+        }
+        return  false;
+
+    }
+
+    /**
+     * 将时间戳转换天
+     * @param timestamp
+     * @return
+     */
+    public  static LocalDate getLocalDateByTimestamp(long timestamp)
+    {
+        LocalDate localDate = Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.ofHours(8)).toLocalDate();
+        return  localDate;
     }
 
 

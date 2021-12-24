@@ -23,7 +23,13 @@ public interface RoleMenuSvc {
 
     List<TenantMenuVo> queryAllNew(InMenuByUserVo vo) throws Exception;
 
-    List<TenantMenuVo> queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception;
+    /**
+     * 查询当前用户所拥有的菜单
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    List<TenantMenuVo> queryByUser(InMenuByUserVo vo) throws Exception;
 
     /**
      * 删除批量角色 菜单关系

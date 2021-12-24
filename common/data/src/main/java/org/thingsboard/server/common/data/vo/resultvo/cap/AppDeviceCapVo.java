@@ -22,6 +22,9 @@ public class AppDeviceCapVo {
      */
     @ApiModelProperty("设备的名称 ")
     private String deviceName;
+
+    @ApiModelProperty("设备图片 ")
+    private  String  picture;
     /**
      * 设备的id
      */
@@ -44,4 +47,10 @@ public class AppDeviceCapVo {
     @ApiModelProperty("设备所属的产线 产线名称 ")
     private String productionName;
 
+
+    /**
+     * 设备所属的产线 产线名称
+     */
+    @ApiModelProperty("是否加入产能运算 ")
+    private Boolean flg;
 }

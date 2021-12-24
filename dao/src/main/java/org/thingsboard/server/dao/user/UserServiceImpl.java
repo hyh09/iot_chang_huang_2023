@@ -166,7 +166,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         log.info("【用户管理.用户添加的接口添加】"+user);
 
 
-            user.setAuthority(Authority.CUSTOMER_USER);
+            user.setAuthority(Authority.TENANT_ADMIN);
 
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
@@ -302,6 +302,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     }
 
     @Override
+    public PageData<User> findFactoryAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName, PageLink pageLink) {
+        return userDao.findFactoryAdmins(tenantId.getId(), factoryId,userCode,userName,pageLink);
+    }
+
+    @Override
     public void deleteTenantAdmins(TenantId tenantId) {
         log.trace("Executing deleteTenantAdmins, tenantId [{}]", tenantId);
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
@@ -402,6 +407,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public Object changeOthersPassword(PasswordVo vo) {
         return (userCredentialsDao.updatePassword(UUID.fromString(vo.getUserId()), vo.getPassword())>0?"success":"fail");
+    }
+
+    @Override
+    public int updateEnableByUserId(UUID userId, boolean enabled)
+    {
+        return userCredentialsDao.updateEnableByUserId(userId,enabled);
     }
 
     private int increaseFailedLoginAttempts(User user) {

@@ -41,28 +41,6 @@ CREATE TABLE IF NOT EXISTS "public"."hs_device_component" (
 ;
 
 -- ----------------------------
--- Table structure for hs_device_profile_dict_device
--- ----------------------------
-CREATE TABLE IF NOT EXISTS "public"."hs_device_profile_dict_device" (
-                                                          "created_time" int8 NOT NULL,
-                                                          "created_user" varchar(255) COLLATE "pg_catalog"."default",
-                                                          "updated_time" int8,
-                                                          "updated_user" varchar(255) COLLATE "pg_catalog"."default",
-                                                          "device_profile_id" uuid,
-                                                          "dict_device_id" uuid,
-                                                          "id" uuid NOT NULL
-)
-;
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."created_time" IS '创建时间';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."created_user" IS '创建人';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."updated_time" IS '更新时间';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."updated_user" IS '更新人';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."device_profile_id" IS '设备配置id';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."dict_device_id" IS '设备字典id';
-COMMENT ON COLUMN "public"."hs_device_profile_dict_device"."id" IS 'id';
-COMMENT ON TABLE "public"."hs_device_profile_dict_device" IS '设备配置-设备字典关联表';
-
--- ----------------------------
 -- Table structure for hs_dict_data
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "public"."hs_dict_data" (
@@ -500,16 +478,6 @@ CREATE TABLE IF NOT EXISTS "public"."tb_user_menu_role" (
 ALTER TABLE "public"."hs_device_component" ADD CONSTRAINT "hs_device_component_pkey" PRIMARY KEY ("id");
 
 -- ----------------------------
--- Uniques structure for table hs_device_profile_dict_device
--- ----------------------------
-ALTER TABLE "public"."hs_device_profile_dict_device" ADD CONSTRAINT "uk_device_profile_id_dict_device_id" UNIQUE ("dict_device_id", "device_profile_id");
-
--- ----------------------------
--- Primary Key structure for table hs_device_profile_dict_device
--- ----------------------------
-ALTER TABLE "public"."hs_device_profile_dict_device" ADD CONSTRAINT "hs_device_profile_dict_device_pkey" PRIMARY KEY ("id");
-
--- ----------------------------
 -- Uniques structure for table hs_dict_data
 -- ----------------------------
 ALTER TABLE "public"."hs_dict_data" ADD CONSTRAINT "uk_dict_data_code_and_tenant_id" UNIQUE ("tenant_id", "code");
@@ -654,3 +622,155 @@ ALTER TABLE public.tb_user
     ADD COLUMN type character varying(255) COLLATE pg_catalog."default";
 ALTER TABLE public.tb_user
     ADD COLUMN factory_id uuid;
+
+--设备表新增字段
+ALTER TABLE public.device ADD COLUMN production_line_id uuid;
+ALTER TABLE public.device ADD COLUMN workshop_id uuid;
+ALTER TABLE public.device ADD COLUMN factory_id uuid;
+ALTER TABLE public.device ADD COLUMN code character varying(1000) COLLATE pg_catalog."default";
+ALTER TABLE public.device ADD COLUMN picture character varying(1000000) COLLATE pg_catalog."default";
+ALTER TABLE public.device ADD COLUMN icon character varying(255) COLLATE pg_catalog."default";
+ALTER TABLE public.device ADD COLUMN dict_device_id uuid;
+ALTER TABLE public.device ADD COLUMN created_time bigint ;
+ALTER TABLE public.device ADD COLUMN created_user uuid;
+ALTER TABLE public.device ADD COLUMN updated_time bigint;
+ALTER TABLE public.device ADD COLUMN updated_user uuid;
+ALTER TABLE public.device ADD COLUMN comment character varying(255) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.device.comment IS '备注';
+ALTER TABLE public.device ADD COLUMN device_no character varying(255) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.device.comment IS '设备编号';
+
+--2021/12/8工厂车间产线都增加 additional_info
+    ALTER TABLE IF EXISTS public.hs_factory
+    ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
+	ALTER TABLE IF EXISTS public.hs_workshop
+    ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
+	ALTER TABLE IF EXISTS public.hs_production_line
+    ADD COLUMN additional_info character varying COLLATE pg_catalog."default";
+
+--修改hs_device_component字段picture长度
+alter table hs_device_component alter column picture type character varying(1000000);
+
+--factory增加字段
+
+ALTER TABLE public.hs_factory
+    ADD COLUMN country character varying(1000) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.hs_factory.country IS '国家';
+
+ALTER TABLE public.hs_factory
+    ADD COLUMN province character varying(1000) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.hs_factory.province IS '省';
+
+ALTER TABLE public.hs_factory
+    ADD COLUMN city character varying(1000) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.hs_factory.city IS '市';
+
+ALTER TABLE public.hs_factory
+    ADD COLUMN area character varying(1000) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.hs_factory.area IS '区';
+
+--删除列
+ALTER TABLE hs_factory DROP COLUMN admin_user_id;
+ALTER TABLE hs_factory DROP COLUMN admin_user_name;
+
+----修改表结构得 v1.2需 涉及到需求
+ALTER TABLE tb_user add COLUMN user_level integer DEFAULT 0;
+
+alter table tenant
+    add county_level varchar(255);
+alter table tenant
+    add longitude varchar(255);
+alter table tenant
+    add latitude varchar(255);
+
+
+alter table device
+    add flg boolean default false;
+
+----修改表结构得 v1.2需 涉及到需求
+ALTER TABLE tb_user add COLUMN user_level integer DEFAULT 0;
+
+alter table tenant
+    add county_level varchar(255);
+alter table tenant
+    add longitude varchar(255);
+alter table tenant
+    add latitude varchar(255);
+
+alter table device
+    add flg boolean default false;
+
+
+
+-- Table Definition
+CREATE TABLE IF NOT EXISTS "public"."hs_file" (
+  "id" uuid NOT NULL,
+  "created_time" int8 NOT NULL,
+  "created_user" varchar(255),
+    "updated_time" int8,
+    "updated_user" varchar(255),
+    "tenant_id" uuid,
+    "file_name" varchar(255),
+    "check_sum" varchar(5000),
+    "content_type" varchar(255),
+    "checksum_algorithm" varchar(32),
+    "data_size" int8,
+    "additional_info" varchar,
+    "scope" varchar(255),
+    "entity_id" uuid,
+    "location" varchar(1000),
+    PRIMARY KEY ("id")
+    );
+
+-- Column Comment
+COMMENT ON COLUMN "public"."hs_file"."id" IS 'id';
+COMMENT ON COLUMN "public"."hs_file"."created_time" IS '创建时间';
+COMMENT ON COLUMN "public"."hs_file"."created_user" IS '创建人';
+COMMENT ON COLUMN "public"."hs_file"."updated_time" IS '更新时间';
+COMMENT ON COLUMN "public"."hs_file"."updated_user" IS '更新人';
+COMMENT ON COLUMN "public"."hs_file"."tenant_id" IS '租户Id';
+COMMENT ON COLUMN "public"."hs_file"."file_name" IS '文件名';
+COMMENT ON COLUMN "public"."hs_file"."check_sum" IS '校验和';
+COMMENT ON COLUMN "public"."hs_file"."content_type" IS '类型';
+COMMENT ON COLUMN "public"."hs_file"."checksum_algorithm" IS '校验和算法';
+COMMENT ON COLUMN "public"."hs_file"."data_size" IS '大小';
+COMMENT ON COLUMN "public"."hs_file"."additional_info" IS '附加信息';
+COMMENT ON COLUMN "public"."hs_file"."scope" IS '范围';
+COMMENT ON COLUMN "public"."hs_file"."entity_id" IS '实体Id';
+COMMENT ON COLUMN "public"."hs_file"."location" IS '存储位置';
+
+-- Table Definition
+CREATE TABLE IF NOT EXISTS  "public"."hs_dict_device_standard_property" (
+                                                                            "id" uuid NOT NULL,
+                                                                            "content" varchar(255),
+    "name" varchar(255),
+    "created_time" int8 NOT NULL,
+    "created_user" varchar(255),
+    "updated_time" int8,
+    "updated_user" varchar(255),
+    "dict_device_id" uuid,
+    "title" varchar(255),
+    "sort" int8,
+    "dict_data_id" uuid,
+    PRIMARY KEY ("id")
+    );
+
+-- Column Comment
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."id" IS 'Id';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."content" IS '内容';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."name" IS '属性名称';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."created_time" IS '创建时间';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."created_user" IS '创建人';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."updated_time" IS '更新时间';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."updated_user" IS '更新人';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."dict_device_id" IS '设备字典Id';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."title" IS '标题';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."sort" IS '排序字段';
+COMMENT ON COLUMN "public"."hs_dict_device_standard_property"."dict_data_id" IS '数据字典Id';
+
+-- Table Comment
+COMMENT ON TABLE "public"."hs_dict_device_standard_property" IS '设备字典-标准属性';
+
+-- December 6, 2021 11:03:14 GMT+8
+ALTER TABLE "public"."hs_dict_device" ADD COLUMN "is_default" bool NOT NULL DEFAULT 'FALSE';
+COMMENT ON COLUMN "public"."hs_dict_device"."is_default" IS '是否默认';

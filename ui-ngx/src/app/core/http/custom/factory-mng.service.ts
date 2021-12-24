@@ -4,12 +4,19 @@ import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-ap
 import { Factory, FactoryMngList, ProdDevice, ProdLine, WorkShop } from "@app/shared/models/custom/factory-mng.models";
 import { BaseData, HasId } from "@app/shared/public-api";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 
-export interface FetchListFilter {
+interface FetchListFilter {
   name?: string,
   workshopName?: string,
-  productionlineName?: string,
+  productionLineName?: string,
   deviceName?: string
+}
+
+export enum FactoryEntityType {
+  FACTORY = 'FACTORY',
+  WORKSHOP = 'WORKSHOP',
+  PRODUCTION_LINE = 'PRODUCTION_LINE'
 }
 
 @Injectable({
@@ -80,6 +87,7 @@ export class FactoryMngService {
 
   // 新增/更新设备信息
   public saveDevice(params: BaseData<HasId>, config?: RequestConfig) {
+    delete params['type'];
     return this.http.post(`/api/saveOrUpdDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
@@ -94,23 +102,46 @@ export class FactoryMngService {
   }
 
   // 获取所有工厂
-  public getAllFactories(config?: RequestConfig): Observable<Factory[]> {
-    return this.http.get<Factory[]>(`/api/factory/findFactoryListByLoginRole`, defaultHttpOptionsFromConfig(config));
+  public getAllFactories(factoryName?: string, config?: RequestConfig): Observable<Factory[]> {
+    return this.http.get<Factory[]>(`/api/factory/findFactoryListByLoginRole`, defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+      if (factoryName) {
+        return res.filter(item => (item.name && item.name.indexOf(factoryName) >= 0));
+      } else {
+        return res;
+      }
+    }));
   }
 
   // 获取所有车间
-  public getAllWorkShops(factoryId?: string, tenantId?: string, config?: RequestConfig): Observable<WorkShop[]> {
-    return this.http.get<WorkShop[]>(`/api/workshop/findWorkshopListByTenant?factoryId=${factoryId || ''}&tenantId=${tenantId || ''}`, defaultHttpOptionsFromConfig(config));
+  public getAllWorkShops(factoryId?: string, tenantId?: string, workshopName?: string, config?: RequestConfig): Observable<WorkShop[]> {
+    return this.http.get<WorkShop[]>(`/api/workshop/findWorkshopListByTenant?factoryId=${factoryId || ''}&tenantId=${tenantId || ''}`, defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+      if (workshopName) {
+        return res.filter(item => (item.name && item.name.indexOf(workshopName) >= 0));
+      } else {
+        return res;
+      }
+    }));
   }
 
   // 获取所有产线
-  public getAllProdLines(factoryId?: string, workshopId?: string, tenantId?: string, config?: RequestConfig): Observable<ProdLine[]> {
-    return this.http.get<ProdLine[]>(`/api/productionLine/findProductionLineList?factoryId=${factoryId || ''}&workshopId=${workshopId || ''}&tenantId=${tenantId || ''}`, defaultHttpOptionsFromConfig(config));
+  public getAllProdLines(factoryId?: string, workshopId?: string, tenantId?: string, prodLineName?: string, config?: RequestConfig): Observable<ProdLine[]> {
+    return this.http.get<ProdLine[]>(`/api/productionLine/findProductionLineList?factoryId=${factoryId || ''}&workshopId=${workshopId || ''}&tenantId=${tenantId || ''}`, defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+      if (prodLineName) {
+        return res.filter(item => (item.name && item.name.indexOf(prodLineName) >= 0));
+      } else {
+        return res;
+      }
+    }));
   }
 
   // 分配设备
   public distributeDevice(params: { deviceIdList: string[]; factoryId: string; workshopId: string; productionLineId: string; }, config?: RequestConfig) {
     return this.http.post(`/api/distributionDevice`, params, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取工厂、车间、产线的实体属性
+  public getEntityProps(entity: FactoryEntityType, config?: RequestConfig): Observable<string[]> {
+    return this.http.get<string[]>(`/api/factory/getEntityAttributeList?entity=${entity}`, defaultHttpOptionsFromConfig(config));
   }
 
 }

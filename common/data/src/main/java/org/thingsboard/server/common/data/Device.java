@@ -17,6 +17,8 @@ package org.thingsboard.server.common.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.data.DeviceData;
@@ -30,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+
+@Data
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
 public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implements HasName, HasTenantId, HasCustomerId, HasOtaPackage {
@@ -39,27 +43,41 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private TenantId tenantId;
     private CustomerId customerId;
     @NoXss
+    @ApiModelProperty("设备名称")
     private String name;
+    //设备配置名称
     @NoXss
+    @ApiModelProperty("设备配置名称")
     private String type;
     @NoXss
+    @ApiModelProperty("标签")
     private String label;
+    @ApiModelProperty("设备配置id")
     private DeviceProfileId deviceProfileId;
+    @ApiModelProperty("设备详细信息")
     private transient DeviceData deviceData;
     @JsonIgnore
     private byte[] deviceDataBytes;
 
     private OtaPackageId firmwareId;
     private OtaPackageId softwareId;
-
+    @ApiModelProperty("车间标识")
     private UUID workshopId;
+    @ApiModelProperty("工厂标识")
     private UUID factoryId;
+    @ApiModelProperty("设备字典标识")
     private UUID dictDeviceId;
+    @ApiModelProperty("设备编码")
     private String code;
+    @ApiModelProperty("产线标识")
     private UUID productionLineId;
+    @ApiModelProperty("设备图片")
     private String picture;
+    @ApiModelProperty("设备图标")
     private String icon;
+    @ApiModelProperty("设备备注")
     private String comment;
+    @ApiModelProperty("设备机台编号")
     private String deviceNo;
     public long createdTime;
 
@@ -72,6 +90,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     /**********************************以下是非数据库字段***************************************/
 
     private List<UUID> deviceIdList;
+    //网关版本
+    private Boolean active;
     //网关版本
     private String gatewayVersion;
     //网关版本更新时间
@@ -89,6 +109,15 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private List<UUID> productionLineIds;
     //是否过滤掉网关true是，false否
     private Boolean filterGatewayFlag = false;
+    //设备配置名称
+    private String deviceProfileName;
+    @ApiModelProperty(name = "所属网关名称")
+    public String gatewayName;
+    @ApiModelProperty("所属网关标识")
+    private UUID gatewayId;
+    //是否只查网关  默认否
+    private Boolean onlyGatewayFlag = false;
+    private Boolean deviceFlg=false;
     /**********************************以上是非数据库字段***************************************/
 
 
@@ -109,6 +138,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.type = device.getType();
         this.label = device.getLabel();
         this.deviceProfileId = device.getDeviceProfileId();
+        this.deviceProfileName = device.getDeviceProfileName();
         this.deviceData =device.getDeviceData();
         this.firmwareId = device.getFirmwareId();
         this.softwareId = device.getSoftwareId();
@@ -148,8 +178,13 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.setProductionLineIds(productionLineIds);
         this.setTenantId(new TenantId(factory.getTenantId()));
         this.setName(factory.getDeviceName());
-        this.setTenantId(new TenantId(factory.getTenantId()));
     }
+
+    public Device(TenantId tenantId, String name){
+        this.setTenantId(tenantId);
+        this.setName(name);
+    }
+
     public Device (UUID tenantId){
         this.setTenantId(new TenantId(tenantId));
     }
@@ -435,6 +470,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     public void setFilterGatewayFlag(Boolean filterGatewayFlag) {
         this.filterGatewayFlag = filterGatewayFlag;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     @Override

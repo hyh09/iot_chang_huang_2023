@@ -45,6 +45,8 @@ public class RoleMenuController extends BaseController{
             throw new ThingsboardException("There is a problem with the request for input!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
+        SecurityUser securityUser = getCurrentUser();
+        vo.setTenantId(securityUser.getTenantId().getId());
            roleMenuSvc.binding(vo);
            return  "success";
     }
@@ -60,6 +62,7 @@ public class RoleMenuController extends BaseController{
     public List<TenantMenuVo> queryAllNew(@RequestBody @Valid InMenuByUserVo vo) throws Exception {
         SecurityUser securityUser = getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
+        vo.setUserId(securityUser.getUuidId());
          return   roleMenuSvc.queryAllNew(vo);
 
     }
@@ -77,7 +80,7 @@ public class RoleMenuController extends BaseController{
             SecurityUser securityUser = getCurrentUser();
             vo.setTenantId(securityUser.getTenantId().getId());
             vo.setUserId(securityUser.getUuidId());
-            return roleMenuSvc.queryByUser(vo, securityUser.getTenantId(), securityUser.getId());
+            return roleMenuSvc.queryByUser(vo);
         }catch (Exception e)
         {
             log.info("查询当前登录人的用户:{}",e);

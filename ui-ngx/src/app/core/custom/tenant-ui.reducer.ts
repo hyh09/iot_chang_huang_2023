@@ -9,6 +9,7 @@ export const initialState: TenantUIState = {
   logoImageUrl: null,
   logoImageHeight: null,
   platformMainColor: null,
+  platformSecondColor: null,
   platformTextMainColor: null,
   platformMenuColorActive: null,
   platformMenuColorHover: null,

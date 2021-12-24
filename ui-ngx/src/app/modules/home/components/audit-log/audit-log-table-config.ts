@@ -41,6 +41,7 @@ import {
   AuditLogDetailsDialogComponent,
   AuditLogDetailsDialogData
 } from '@home/components/audit-log/audit-log-details-dialog.component';
+import { AuditLogTableFilterComponent } from './audit-log-table-filter.component';
 
 export class AuditLogTableConfig extends EntityTableConfig<AuditLog, TimePageLink> {
 
@@ -54,12 +55,15 @@ export class AuditLogTableConfig extends EntityTableConfig<AuditLog, TimePageLin
               public customerId: CustomerId = null,
               updateOnInit = true) {
     super();
+    this.filterComponent = AuditLogTableFilterComponent;
     this.loadDataOnInit = updateOnInit;
-    this.tableTitle = '';
+    this.tableTitle = this.translate.instant('audit-log.audit-logs');
+    this.timeWindowInFilter = true;
+    this.refreshEnabled = false;
+    this.searchEnabled = false;
     this.useTimePageLink = true;
     this.detailsPanelEnabled = false;
     this.selectionEnabled = false;
-    this.searchEnabled = true;
     this.addEnabled = false;
     this.entitiesDeleteEnabled = false;
     this.actionsColumnTitle = 'audit-log.details';

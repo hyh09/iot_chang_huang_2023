@@ -171,7 +171,9 @@ export class AuthService {
   public loginAsUser(userId: string) {
     return this.http.get<LoginResponse>(`/api/user/${userId}/token`, defaultHttpOptions()).pipe(
       tap((loginResponse: LoginResponse) => {
-          this.setUserFromJwtToken(loginResponse.token, loginResponse.refreshToken, true);
+          this.setUserFromJwtToken(loginResponse.token, loginResponse.refreshToken, true).subscribe(() => {
+            window.location.href = '/home';
+          });
         }
       ));
   }
@@ -241,13 +243,13 @@ export class AuthService {
     let result: UrlTree = null;
     if (isAuthenticated) {
       if (!path || path === 'login' || this.forceDefaultPlace(authState, path, params)) {
-        if (this.redirectUrl) {
-          const redirectUrl = this.redirectUrl;
-          this.redirectUrl = null;
-          result = this.router.parseUrl(redirectUrl);
-        } else {
+        // if (this.redirectUrl) {
+        //   const redirectUrl = this.redirectUrl;
+        //   this.redirectUrl = null;
+        //   result = this.router.parseUrl(redirectUrl);
+        // } else {
           result = this.router.parseUrl('home');
-        }
+        // }
         if (authState.authUser.authority === Authority.TENANT_ADMIN || authState.authUser.authority === Authority.CUSTOMER_USER) {
           if (this.userHasDefaultDashboard(authState)) {
             const dashboardId = authState.userDetails.additionalInfo.defaultDashboardId;

@@ -7,15 +7,14 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.service.state.DeviceStateService;
 
 import java.util.List;
 import java.util.Map;
@@ -97,7 +96,7 @@ public class RTMonitorController extends BaseController {
             @RequestParam String groupPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        return this.deviceMonitorService.listGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, CommonUtil.getTodayStartTime(), CommonUtil.getTodayCurrentTime());
+        return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, CommonUtil.getTodayStartTime(), CommonUtil.getTodayCurrentTime());
     }
 
     /**
@@ -110,7 +109,7 @@ public class RTMonitorController extends BaseController {
     @GetMapping("/rtMonitor/device/history/header")
     public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId) throws ThingsboardException {
         checkParameter("deviceId", deviceId);
-        return this.deviceMonitorService.listDictDeviceGroupPropertyTitle(getTenantId(), deviceId);
+        return this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId);
     }
 
     /**
@@ -131,7 +130,7 @@ public class RTMonitorController extends BaseController {
             @RequestParam String deviceId,
             @RequestParam int page,
             @RequestParam int pageSize,
-            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "ts") String sortProperty,
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam Long startTime,
             @RequestParam(required = false) Long endTime
@@ -140,8 +139,11 @@ public class RTMonitorController extends BaseController {
         checkParameter("startTime", startTime);
         if (endTime == null || endTime <= 0L)
             endTime = CommonUtil.getTodayCurrentTime();
+        if (HSConstants.CREATED_TIME.equalsIgnoreCase(sortProperty))
+            sortProperty = HSConstants.TS;
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
         validatePageLink(pageLink);
-        return this.deviceMonitorService.listDeviceTelemetryHistory(getTenantId(), deviceId, pageLink);
+        return this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, pageLink);
     }
+
 }

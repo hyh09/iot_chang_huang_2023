@@ -89,6 +89,9 @@ export class AssetsTableConfigResolver implements Resolve<EntityTableConfig<Asse
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.ASSET);
     this.config.entityResources = entityTypeResources.get(EntityType.ASSET);
 
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
+
     this.config.deleteEntityTitle = asset => this.translate.instant('asset.delete-asset-title', {assetName: asset.name});
     this.config.deleteEntityContent = () => this.translate.instant('asset.delete-asset-text');
     this.config.deleteEntitiesTitle = count => this.translate.instant('asset.delete-assets-title', {count});
@@ -106,7 +109,7 @@ export class AssetsTableConfigResolver implements Resolve<EntityTableConfig<Asse
     this.config.onEntityAction = action => this.onAssetAction(action);
     this.config.detailsReadonly = () => (this.config.componentsData.assetScope === 'customer_user' || this.config.componentsData.assetScope === 'edge_customer_user');
 
-    this.config.headerComponent = AssetTableHeaderComponent;
+    this.config.filterComponent = AssetTableHeaderComponent;
 
   }
 

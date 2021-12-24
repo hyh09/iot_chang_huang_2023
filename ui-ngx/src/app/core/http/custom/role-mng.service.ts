@@ -86,13 +86,13 @@ export class RoleMngService {
   }
 
   // 根据菜单类型和角色获取菜单列表
-  public getMenusByRole(menuType: MenuType, roleId?: string, config?: RequestConfig): Observable<MenuTreeNodeOptions[]> {
-    return this.http.post<MenuTreeNodeOptions[]>(`/api/roleMenu/queryAll`, { menuType, roleId }, defaultHttpOptionsFromConfig(config));
+  public getMenusByRole(menuType: MenuType, roleId?: string, factoryId?: string, config?: RequestConfig): Observable<MenuTreeNodeOptions[]> {
+    return this.http.post<MenuTreeNodeOptions[]>(`/api/roleMenu/queryAll`, { menuType, roleId, factoryId }, defaultHttpOptionsFromConfig(config));
   }
 
   // 配置角色下的菜单及按钮权限
-  public setRolePermissions(menuVoList: string[], semiSelectList: string[], roleId: string) {
-    return this.http.post(`/api/roleMenu/binding`, { menuVoList, semiSelectList, roleId }, { responseType: 'text' });
+  public setRolePermissions(menuVoList: string[], semiSelectList: string[], roleId: string, factoryId: string) {
+    return this.http.post(`/api/roleMenu/binding`, { menuVoList, semiSelectList, roleId, factoryId }, { responseType: 'text' });
   }
 
 }

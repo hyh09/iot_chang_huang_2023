@@ -1,6 +1,6 @@
 <div fxLayout="row" fxLayoutGap="16px" class="real-time-monitor-wrapper">
   <div class="left-content">
-    <tb-factory-tree (clickNode)="fetchData($event)"></tb-factory-tree>
+    <tb-factory-tree #factoryTree (clickNode)="fetchData($event)"></tb-factory-tree>
   </div>
   <div class="center-content">
     <div fxLayout="row" class="device-list" [class.empty]="deviceList.length === 0">
@@ -11,7 +11,7 @@
           <div class="device-status">
             {{ (device.isOnLine ? 'device-monitor.on-line' : 'device-monitor.off-line') | translate }}
           </div>
-          <img [src]="device.image ? device.image : '../../../../../../assets/image-empty.svg'" />
+          <img [src]="device.image ? device.image : '../../../../../../assets/device-image-empty.svg'" />
         </div>
       </div>
       <nz-empty
@@ -22,6 +22,7 @@
     </div>
     <mat-paginator
       [length]="totalDevices"
+      [pageIndex]="pageLink.page"
       [pageSize]="pageLink.pageSize"
       hidePageSize
       showFirstLastButtons

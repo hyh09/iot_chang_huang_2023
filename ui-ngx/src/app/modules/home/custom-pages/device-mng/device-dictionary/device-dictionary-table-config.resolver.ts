@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
+import { CellActionDescriptor, checkBoxCell, DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
+import { EntityType, entityTypeResources, entityTypeTranslations, HasUUID } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { DeviceDictionary } from "@app/shared/models/custom/device-mng.models";
@@ -10,6 +10,10 @@ import { DeviceDictionaryComponent } from "./device-dictionary.component";
 import { DeviceDictionaryFiltersComponent } from "./device-dictionary-filters.component";
 import { map } from "rxjs/operators";
 import { UtilsService } from "@app/core/public-api";
+import { DataDictionaryService } from "@app/core/http/custom/data-dictionary.service";
+import { EntityAction } from "@app/modules/home/models/entity/entity-component.models";
+import { MatDialog } from "@angular/material/dialog";
+import { DistributeConfigComponent, DistributeConfigDialogData } from "./distribute-config.component";
 
 @Injectable()
 export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableConfig<DeviceDictionary>> {
@@ -20,7 +24,9 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
     private translate: TranslateService,
     private datePipe: DatePipe,
     private deviceDictionaryService: DeviceDictionaryService,
-    private utils: UtilsService
+    private dataDictionaryService: DataDictionaryService,
+    private utils: UtilsService,
+    public dialog: MatDialog
   ) {
     this.config.entityType = EntityType.DEVICE_DICTIONARY;
     this.config.entityComponent = DeviceDictionaryComponent;
@@ -32,7 +38,9 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       code: '',
       name: '',
       supplier: '',
-      availableCode: ''
+      availableCode: '',
+      initDataGroup: [],
+      dataDictionaryList: []
     }
 
     this.config.addDialogStyle = {width: '900px'};
@@ -49,6 +57,9 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       new EntityTableColumn<DeviceDictionary>('supplier', 'device-mng.supplier', '150px'),
       new EntityTableColumn<DeviceDictionary>('model', 'device-mng.model', '120px'),
       new EntityTableColumn<DeviceDictionary>('version', 'device-mng.version', '100px'),
+      new EntityTableColumn<DeviceDictionary>('isDefault', 'device-mng.default', '60px', entity => {
+        return checkBoxCell(entity.isDefault);
+      }),
       new DateEntityTableColumn<DeviceDictionary>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }
@@ -58,10 +69,14 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       code: '',
       name: '',
       supplier: '',
-      availableCode: ''
+      availableCode: '',
+      initDataGroup: [],
+      dataDictionaries: []
     }
     
     this.setAvailableCode();
+    this.getInitDataGroup();
+    this.getAllDataDictionaries();
 
     this.config.tableTitle = this.translate.instant('device-mng.device-dic');
     this.config.searchEnabled = false;
@@ -70,6 +85,7 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
       this.config.addEnabled = this.utils.hasPermission('device-mng.add-device-dic');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
       this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+      this.config.cellActionDescriptors = this.configureCellActions();
     }
 
     this.config.entitiesFetchFunction = pageLink => this.deviceDictionaryService.getDeviceDictionaries(pageLink, this.config.componentsData);
@@ -84,14 +100,80 @@ export class DeviceDictionaryTableConfigResolver implements Resolve<EntityTableC
         return result;
       }));
     }
+    this.config.onEntityAction = action => this.onDeviceDictionaryAction(action);
 
     return this.config;
   }
 
+  configureCellActions(): Array<CellActionDescriptor<DeviceDictionary>> {
+    const actions: Array<CellActionDescriptor<DeviceDictionary>> = [];
+    if (this.utils.hasPermission('device-mng.distribut-config')) {
+      actions.push({
+        name: this.translate.instant('device-mng.distribut-config'),
+        mdiIcon: 'mdi:distribute-config',
+        isEnabled: (entity) => (!!(entity && entity.id)),
+        onAction: ($event, entity) => this.distributeConfig($event, entity)
+      });
+    }
+    return actions;
+  }
+
+  onDeviceDictAction(action: EntityAction<DeviceDictionary>): boolean {
+    switch (action.action) {
+      case 'distributeConfig':
+        this.distributeConfig(action.event, action.entity);
+        return true;
+    }
+    return false;
+  }
+
+  distributeConfig($event: Event, deviceDict: DeviceDictionary) {
+    if ($event) {
+      $event.stopPropagation();
+    }
+    this.dialog.open<DistributeConfigComponent, DistributeConfigDialogData>(DistributeConfigComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        deviceDictId: deviceDict.id + '',
+        deviceDictName: deviceDict.name
+      }
+    });
+  }
+
   setAvailableCode(): void {
     this.deviceDictionaryService.getAvailableCode().subscribe(code => {
-      this.config.componentsData.availableCode = code
+      this.config.componentsData.availableCode = code;
     });
+  }
+
+  getInitDataGroup(): void {
+    this.deviceDictionaryService.getDeviceInitDataGroup().subscribe(res => {
+      this.config.componentsData.initDataGroup = res || [];
+    });
+  }
+
+  getAllDataDictionaries(): void {
+    this.dataDictionaryService.getAllDataDictionaries().subscribe(res => {
+      const arr = res || [];
+      arr.forEach(item => {
+        if (item.unit) {
+          item.name += ` (${item.unit})`;
+        }
+      });
+      this.config.componentsData.dataDictionaries = arr;
+    });
+  }
+
+  onDeviceDictionaryAction(action: EntityAction<DeviceDictionary>): boolean {
+    switch (action.action) {
+      case 'setDefault':
+        this.deviceDictionaryService.setDefault(action.entity.id).subscribe(() => {
+          this.config.table.updateData();
+        });
+        return true;
+    }
+    return false;
   }
 
 }

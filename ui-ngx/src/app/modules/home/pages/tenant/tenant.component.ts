@@ -54,6 +54,9 @@ export class TenantComponent extends ContactBasedComponent<TenantInfo> {
       {
         title: [entity ? entity.title : '', [Validators.required]],
         tenantProfileId: [entity ? entity.tenantProfileId : null, [Validators.required]],
+        country: [entity ? entity.country : '', [Validators.required]],
+        city: [entity ? entity.city : '', [Validators.required]],
+        address: [entity ? entity.address : '', [Validators.required]],
         additionalInfo: this.fb.group(
           {
             description: [entity && entity.additionalInfo ? entity.additionalInfo.description : ''],

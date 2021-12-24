@@ -234,6 +234,9 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
         entityTableMap.put(EntityType.TENANT, "tenant");
         entityTableMap.put(EntityType.API_USAGE_STATE, SELECT_API_USAGE_STATE);
         entityTableMap.put(EntityType.EDGE, "edge");
+        entityTableMap.put(EntityType.FACTORY,"hs_factory");
+        entityTableMap.put(EntityType.WORKSHOP,"hs_workshop");
+        entityTableMap.put(EntityType.PRODUCTION_LINE,"hs_production_line");
     }
 
     public static EntityType[] RELATION_QUERY_ENTITY_TYPES = new EntityType[]{

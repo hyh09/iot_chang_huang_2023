@@ -14,12 +14,14 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.vo.enums.MenuCheckEnum;
+import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.menu.QueryMenuByRoleVo;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
 import org.thingsboard.server.dao.sql.role.entity.TenantMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
 import org.thingsboard.server.dao.sql.role.userrole.sqldata.SqlVo;
@@ -28,13 +30,9 @@ import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.OutMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.RoleMenuVo;
-//import org.thingsboard.server.service.userrole.RoleMenuSvc;
-//import org.thingsboard.server.service.userrole.SqlSplicingSvc;
-//import org.thingsboard.server.service.userrole.sqldata.SqlVo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,12 +45,20 @@ public class RoleMenuImpl implements RoleMenuSvc {
     @Autowired private TenantMenuService  menuService;//租户菜单接口
     @Autowired  private SqlSplicingSvc splicingSvc;
     @Autowired private UserService userService;
+    @Autowired  private UserRoleMenuSvc userRoleMenuSvc;
 
 
 
     @Override
     public void  binding(RoleMenuVo vo) throws ThingsboardException {
         log.info("角色绑定菜单的入参:{}",vo);
+        if(vo.getFactoryId() != null)
+        {
+            TenantSysRoleEntity  tenantSysRoleEntity= roleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),vo.getTenantId(),vo.getFactoryId());
+             vo.setRoleId(tenantSysRoleEntity.getId());
+        }
+
+
         TenantSysRoleEntity roleEntity = roleService.findById(vo.getRoleId());
         if (roleEntity == null) {
             throw new ThingsboardException(" Role ID does not exist !", ThingsboardErrorCode.ITEM_NOT_FOUND);
@@ -96,16 +102,27 @@ public class RoleMenuImpl implements RoleMenuSvc {
     @Override
     public List<TenantMenuVo> queryAllNew(InMenuByUserVo vo) throws Exception {
         try {
-            log.info("1.先查询租户下的所有菜单入参{}", vo);
-            List<TenantMenu> menus = menuService.getTenantMenuListByTenantId(vo.getMenuType(), vo.getTenantId());
-            List<TenantMenuVo> vos = listToVo(menus);
-            log.info("2.先查询租户下的所有菜单入参{}返回的结果{}", vo, menus);
-            if (CollectionUtils.isEmpty(menus)) {
-                return vos;
-            }
+
+             List<TenantMenuVo>  vos= this.queryByUser(vo);
+            log.info("查询当下用户所有l入参{}api.roleMenu.queryAll返回的结果{}", vo, vos);
+             if(CollectionUtils.isEmpty(vos))
+             {
+                 return vos;
+             }
+
             //2.用当前的角色查询所绑定的菜单：  tb_tenant_menu_role
             TenantMenuRoleEntity entity = new TenantMenuRoleEntity();
-            entity.setTenantSysRoleId(vo.getRoleId());
+             if(vo.getFactoryId() != null )
+             {
+                 TenantSysRoleEntity  tenantSysRoleEntity= roleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),vo.getTenantId(),vo.getFactoryId());
+                 entity.setTenantSysRoleId(tenantSysRoleEntity.getId());
+             }else {
+                 entity.setTenantSysRoleId(vo.getRoleId());
+             }
+
+
+
+
             List<TenantMenuRoleEntity> entityList = tenantMenuRoleService.findAllByTenantMenuRoleEntity(entity);
             log.info("3.先查询租户下的所有菜单入参{}返回的结果{}", vo, entityList);
             if (CollectionUtils.isEmpty(entityList)) {
@@ -120,7 +137,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
 
             }
-            log.info("4.先查询租户下的所有菜单入参{}返回的结果{}", vo, menus);
+            log.info("4.先查询租户下的所有菜单入参{}返回的结果{}", vo, vos);
             return vos;
         }catch (Exception e)
         {
@@ -130,8 +147,8 @@ public class RoleMenuImpl implements RoleMenuSvc {
     }
 
     @Override
-    public List<TenantMenuVo>queryByUser(InMenuByUserVo vo, TenantId tenantId, UserId userId) throws Exception {
-        User user = userService.findUserById(tenantId, userId);
+    public List<TenantMenuVo>queryByUser(InMenuByUserVo vo) throws Exception {
+        User user = userService.findUserById(new TenantId(vo.getTenantId()), new UserId(vo.getUserId()));
         List<TenantMenuVo>  menusd = new ArrayList<>();
 
         log.info("=user===>{}",user);
@@ -140,7 +157,8 @@ public class RoleMenuImpl implements RoleMenuSvc {
             //返回系统菜单;
             return menusd;
         }
-        if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+       // if(user.getAuthority() == Authority.TENANT_ADMIN && StringUtils.isEmpty(user.getUserCode()))
+        if(userRoleMenuSvc.isTENANT(vo.getUserId()))
         {
                 List<TenantMenu>  menus =   menuService.getTenantMenuListByTenantId(vo.getMenuType(),vo.getTenantId());
             return listToVo(menus);
@@ -168,7 +186,6 @@ public class RoleMenuImpl implements RoleMenuSvc {
             return ;
 
         }
-//        tenantMenuRoleService.deleteByTenantSysRoleId(roleId);
         voList.forEach(id ->{
             TenantMenuRoleEntity  entity  = new TenantMenuRoleEntity();
             entity.setTenantSysRoleId(roleId);
@@ -231,7 +248,75 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
         }
 
+        return  getSort(tenantMenuList);
+    }
+
+
+    private  List<TenantMenuVo>  getSort(List<TenantMenuVo> voList)
+    {
+        List<TenantMenuVo> tenantMenuList = new ArrayList<>();
+        if(CollectionUtils.isEmpty(voList))
+        {
+            return  voList;
+        }
+        Map<UUID,String> map = new HashMap<>();
+        TenantMenuVo  tenantMenuVo=    getAll(voList);
+        if(tenantMenuVo.getId() != null  ) {
+            tenantMenuList.add(tenantMenuVo);
+            map.put(tenantMenuVo.getId(),"1");
+        }
+        voList.forEach(TenantMenuVo ->{
+            if(StringUtils.isEmpty(map.get(TenantMenuVo.getId()))) {
+                tenantMenuList.add(TenantMenuVo);
+            }
+
+        });
         return  tenantMenuList;
+
+    }
+
+
+
+    private  TenantMenuVo getAll(List<TenantMenuVo> allList)
+    {
+        List<TenantMenuVo>  tenantMenus =  allList.stream().filter(m -> m.getParentId() == null)
+                .map( (m) -> {
+                    m.setChildren(getChildrens(m,allList));
+                    return  m;
+                }).collect(Collectors.toList());
+
+        return  filterList(tenantMenus)  ;
+    }
+
+
+    private TenantMenuVo  filterList( List<TenantMenuVo>  tenantMenus)
+    {
+        for(TenantMenuVo  vo:tenantMenus){
+            List<TenantMenuVo>  voList=   vo.getChildren();
+            if(vo.getIsButton().equals(false) && vo.getHasChildren().equals(false) && StringUtils.isNotBlank(vo.getPath()))
+            {
+                return vo;
+            }
+            if(CollectionUtils.isNotEmpty(voList))
+            {
+               return filterList(voList);
+            }
+        }
+        return new TenantMenuVo();
+    }
+
+
+
+    public List<TenantMenuVo> getChildrens(TenantMenuVo root, List<TenantMenuVo> all) {
+        List<TenantMenuVo> children = all.stream().filter(m -> {
+            return Objects.equals(root.getId(), m.getParentId());
+        }).map(
+                (m) -> {
+                    m.setChildren(getChildrens(m, all));
+                    return m;
+                }
+        ).collect(Collectors.toList());
+        return children;
     }
 
 

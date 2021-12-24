@@ -6,6 +6,8 @@ import { PotencyRoutingModule } from './potency-routing.module';
 import { ProductionCapacityOverviewComponent } from './production-capacity/production-capacity-overview.component';
 import { EnergyConsumptionOverviewComponent } from './energy-consumption/energy-consumption-overview.component';
 import { RunningStateComponent } from './running-state/running-state.component';
+import { RunningStateChartComponent } from './running-state/running-state-chart.component';
+import { EnergyHistoryFilterComponent } from './energy-consumption/energy-history-filter.component';
 
 @NgModule({
   imports: [
@@ -17,7 +19,9 @@ import { RunningStateComponent } from './running-state/running-state.component';
   declarations: [
     ProductionCapacityOverviewComponent,
     EnergyConsumptionOverviewComponent,
-    RunningStateComponent
+    RunningStateComponent,
+    RunningStateChartComponent,
+    EnergyHistoryFilterComponent
   ]
 })
 export class PotencyModule { }

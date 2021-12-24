@@ -24,4 +24,9 @@ public class DictDeviceDataVo {
 
     //分组下面的name
     private  String  name;
+
+    private String  title;
+
+    private  String unit;
+
 }

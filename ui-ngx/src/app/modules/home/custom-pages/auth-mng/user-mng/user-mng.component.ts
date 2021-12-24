@@ -28,7 +28,9 @@ export class UserMngComponent extends EntityComponent<UserInfo> {
     return this.fb.group(
       {
         id: [entity && entity.id ? entity.id : null],
+        factoryId: [entity && entity.factoryId ? entity.factoryId : this.entitiesTableConfig.componentsData.factoryId],
         userCode: [entity && entity.userCode ? entity.userCode : this.entitiesTableConfig.componentsData.availableCode, Validators.required],
+        userLevel: [entity ? entity.userLevel : null],
         userName: [entity ? entity.userName : '', Validators.required],
         phoneNumber: [entity ? entity.phoneNumber : '', [Validators.required, Validators.pattern(/^(1)\d{10}$/)]],
         email: [entity ? entity.email : '', [Validators.required, Validators.email]],

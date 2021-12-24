@@ -8,20 +8,35 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.memu.Menu;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.model.sql.AbstractFactoryEntity;
+import org.thingsboard.server.dao.model.sql.AbstractProductionLineEntity;
+import org.thingsboard.server.dao.model.sql.AbstractWorkshopEntity;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
+import org.thingsboard.server.dao.util.BeanToMap;
+import org.thingsboard.server.entity.factory.AbstractFactory;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
 import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
 import org.thingsboard.server.entity.factory.vo.FactoryLevelAllListVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
+import org.thingsboard.server.entity.menu.vo.MenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @Api(value="工厂管理Controller",tags={"工厂管理接口"})
 @RequiredArgsConstructor
@@ -46,16 +61,22 @@ public class FactoryController extends BaseController  {
     public FactoryVo saveFactory(@RequestBody AddFactoryDto addFactoryDto) throws ThingsboardException {
         try {
             checkNotNull(addFactoryDto);
+            //地址不能为空
+            checkParameter("国家",addFactoryDto.getCountry());
+            //checkParameter("省",addFactoryDto.getProvince());
+            checkParameter("市",addFactoryDto.getCity());
+            //checkParameter("区",addFactoryDto.getArea());
+            checkParameter("详细地址",addFactoryDto.getAddress());
             //校验名称是否重复
             checkFactoryName(addFactoryDto.getId(),addFactoryDto.getName());
             Factory factory = addFactoryDto.toFactory();
             factory.setTenantId(getCurrentUser().getTenantId().getId());
             if(addFactoryDto.getId() == null){
                 factory.setCreatedUser(getCurrentUser().getUuidId());
-                factory = checkNotNull(factoryService.saveFactory(factory));
+                factory = factoryService.saveFactory(factory);
             }else {
                 factory.setUpdatedUser(getCurrentUser().getUuidId());
-                factory =  checkNotNull(factoryService.updFactory(factory));
+                factory = factoryService.updFactory(factory);
             }
             return new FactoryVo(factory);
         } catch (Exception e) {
@@ -89,10 +110,10 @@ public class FactoryController extends BaseController  {
      * @throws ThingsboardException
      */
     @ApiOperation("查询租户下所有工厂列表")
-    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query",required = true)
+    @ApiImplicitParam(name = "tenantId",value = "租户标识",dataType = "string",paramType = "query")
     @RequestMapping(value = "/findFactoryList", method = RequestMethod.GET)
     @ResponseBody
-    public List<FactoryVo> findFactoryList(@RequestParam String tenantId) throws ThingsboardException {
+    public List<FactoryVo> findFactoryList(@RequestParam(required = false) String tenantId) throws ThingsboardException {
         try {
             List<FactoryVo> factoryVoList = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){
@@ -182,6 +203,41 @@ public class FactoryController extends BaseController  {
     }
 
     /**
+     * 查询工厂所有版本列表
+     * @param queryFactoryDto
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("查询工厂所有版本列表")
+    @ApiImplicitParam(name = "queryFactoryDto",value = "入参对象",dataType = "FactoryVersionDto",paramType = "query")
+    @RequestMapping(value = "/findFactoryVersionList", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public PageData<FactoryVersionVo> findFactoryVersionList(@RequestParam int pageSize,
+                                                             @RequestParam int page,
+                                                             FactoryVersionDto queryFactoryDto) throws ThingsboardException {
+        try {
+            PageData<FactoryVersionVo> resultPage = new PageData<>();
+            List<FactoryVersionVo> resultVo = new ArrayList<>();
+            checkParameter("没有获取到登录人所在租户tenantId",getCurrentUser().getTenantId().getId());
+            Factory factory = queryFactoryDto.toFactory();
+            factory.setTenantId(getCurrentUser().getTenantId().getId());
+            factory.setLoginUserId(getCurrentUser().getId().getId());
+            List<Factory> factoryList = factoryService.findFactoryVersionList(factory);
+            Boolean hasNext = false;
+            if(CollectionUtils.isNotEmpty(factoryList)){
+                List<Factory> collect = factoryList.stream().skip((page * pageSize)).limit(pageSize).collect(Collectors.toList());
+                collect.forEach(i->{
+                    resultVo.add(new FactoryVersionVo(i));
+                });
+                hasNext = factoryList.size() > (page * pageSize)?true:false;
+            }
+            return new PageData<FactoryVersionVo>(resultVo,page,resultVo.size(),hasNext);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    /**
      * 根据登录人角色查询工厂列表
      * @return
      * @throws ThingsboardException
@@ -202,5 +258,39 @@ public class FactoryController extends BaseController  {
         } catch (Exception e) {
             throw handleException(e);
         }
+    }
+
+    @ApiOperation("获取实体属性(工厂、车间、产线)")
+    @ApiImplicitParam(name = "entity",value = "入参对象（FACYORY/WORKSHOP/PRODUCTION_LINE）",dataType = "String",paramType = "query")
+    @RequestMapping(value = "/getEntityAttributeList", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> getEntityAttributeList(String entity) throws IllegalAccessException {
+        List<String> list = new ArrayList<>();
+        Class<?> clazz = null;
+        Boolean flag = false;
+        if(EntityType.FACTORY.name().equals(entity)){
+            flag = true;
+            clazz = AbstractFactoryEntity.class;
+        }
+        if(EntityType.WORKSHOP.name().equals(entity)){
+            flag = true;
+            clazz = AbstractWorkshopEntity.class;
+        }
+        if(EntityType.PRODUCTION_LINE.name().equals(entity)){
+            flag = true;
+            clazz = AbstractProductionLineEntity.class;
+        }
+        if(flag){
+            for(; clazz != Object.class;clazz = clazz.getSuperclass()){
+                Field[] fields = clazz.getDeclaredFields();
+                for (Field field : fields) {
+                    list.add(field.getName());
+                    // 获取bean的属性和值
+                    field.setAccessible(true);
+                }
+
+            }
+        }
+        return list;
     }
 }

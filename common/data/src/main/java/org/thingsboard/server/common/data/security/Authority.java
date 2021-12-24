@@ -19,7 +19,8 @@ public enum Authority {
     
     SYS_ADMIN(0),
     TENANT_ADMIN(1),
-    CUSTOMER_USER(2),
+    CUSTOMER_USER(2),// 普通
+//    FACTORY_MANAGEMENT(3),
     REFRESH_TOKEN(10);
 
     private int code;

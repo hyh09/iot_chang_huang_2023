@@ -1,13 +1,20 @@
 package org.thingsboard.server.common.data.productionline;
 
 import lombok.Data;
+import org.thingsboard.server.common.data.HasCustomerId;
+import org.thingsboard.server.common.data.HasName;
+import org.thingsboard.server.common.data.HasOtaPackage;
+import org.thingsboard.server.common.data.HasTenantId;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.CustomerId;
+import org.thingsboard.server.common.data.id.OtaPackageId;
+import org.thingsboard.server.common.data.id.TenantId;
 
 import java.util.List;
 import java.util.UUID;
 
 @Data
-public class ProductionLine{
+public class ProductionLine implements HasName,HasCustomerId, HasOtaPackage {
 
     private UUID id;
 
@@ -69,7 +76,21 @@ public class ProductionLine{
     public ProductionLine (Factory factory,List<UUID> workshopIds){
         this.setWorkshopIds(workshopIds);
         this.setTenantId(factory.getTenantId());
-        this.setName(factory.getProductionlineName());
-        this.setTenantId(factory.getTenantId());
+        this.setName(factory.getProductionLineName());
+    }
+
+    @Override
+    public CustomerId getCustomerId() {
+        return null;
+    }
+
+    @Override
+    public OtaPackageId getFirmwareId() {
+        return null;
+    }
+
+    @Override
+    public OtaPackageId getSoftwareId() {
+        return null;
     }
 }

@@ -65,8 +65,8 @@ export class RealTimeMonitorService {
   }
 
   // 获取设备历史数据表头
-  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<{ name: string }[]> {
-    return this.http.get<{ name: string }[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
+  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<{ name: string; title: string }[]> {
+    return this.http.get<{ name: string; title: string }[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备历史数据列表
@@ -78,17 +78,17 @@ export class RealTimeMonitorService {
   }
 
   // 开启订阅
-  public subscribe(deviceIdList: string[], onMessage: Function) {
+  public subscribe(deviceIdList: string[], onMessage: Function, listenDeviceActive = false) {
     this.leftDeviceCount = deviceIdList.length;
     if (!this.isActive) {
       this.isActive = true;
       if (!this.isOpened && !this.isOpening) {
         this.isOpening = true;
         if (AuthService.isJwtTokenValid()) {
-          this.openSocket(AuthService.getJwtToken(),deviceIdList, onMessage);
+          this.openSocket(AuthService.getJwtToken(),deviceIdList, onMessage, listenDeviceActive);
         } else {
           this.authService.refreshJwtToken().subscribe(() => {
-            this.openSocket(AuthService.getJwtToken(), deviceIdList, onMessage);
+            this.openSocket(AuthService.getJwtToken(), deviceIdList, onMessage, listenDeviceActive);
           }, () => {
             this.isOpening = false;
             this.authService.logout(true);
@@ -98,19 +98,19 @@ export class RealTimeMonitorService {
     }
   }
 
-  private openSocket(token: string, deviceIdList: string[], onMessage: Function) {
+  private openSocket(token: string, deviceIdList: string[], onMessage: Function, listenDeviceActive = false) {
     this.webSocket = new WebSocket(`${this.telemetryUri}?token=${token}`);
     this.webSocket.onopen = () => {
       this.isOpened = true;
       this.isOpening = false;
       setTimeout(() => {
-        this.switchDevices(deviceIdList);
+        this.switchDevices(deviceIdList, listenDeviceActive);
       }, 1000);
     }
     this.webSocket.onerror = () => {
       this.isOpening = false;
       setTimeout(() => {
-        this.subscribe(deviceIdList, onMessage)
+        this.subscribe(deviceIdList, onMessage, listenDeviceActive);
       }, 3000);
     }
     this.webSocket.onclose = () => {
@@ -118,58 +118,98 @@ export class RealTimeMonitorService {
         this.isActive = false;
         this.isOpened = false;
         setTimeout(() => {
-          this.subscribe(deviceIdList, onMessage)
+          this.subscribe(deviceIdList, onMessage, listenDeviceActive);
         }, 3000);
       }
     }
-    this.webSocket.onmessage = () => {
+    this.webSocket.onmessage = res => {
       if (this.leftDeviceCount > 0) {
         this.leftDeviceCount--;
+      } else if (listenDeviceActive) {
+        const _res = JSON.parse(res.data);
+        if (_res.data && _res.latestValues) {
+          const latestActiveTime = _res.latestValues.active;
+          const latestDeviceTime = _res.latestValues.attrDeviceId;
+          if (_res.data.active && _res.data.attrDeviceId) {
+            const latestActiveInfo = (_res.data.active as Array<string[]>).filter(item => (item[0] === latestActiveTime));
+            const latestDeviceInfo = (_res.data.attrDeviceId as Array<string[]>).filter(item => (item[0] === latestDeviceTime));
+            const isActive = latestActiveInfo[0] && latestActiveInfo[0][1] === 'true';
+            const deviceId = latestDeviceInfo[0] ? (latestDeviceInfo[0][1] || '') : '';
+            onMessage({ deviceId, isActive });
+          } else {
+            onMessage({});
+          }
+        } else {
+          onMessage({});
+        }
       } else {
-        onMessage();
+        const _res = JSON.parse(res.data);
+        const _data = [];
+        if (_res) {
+          const data = _res.data;
+          Object.keys(data).forEach(key => {
+            _data.push({
+              name: key,
+              createdTime: data[key][0][0],
+              content: data[key][0][1]
+            });
+          });
+        }
+        onMessage(_data);
       }
     }
   }
 
   // 切换订阅设备
-  public switchDevices(deviceIdList: string[]) {
+  public switchDevices(deviceIdList: string[], listenDeviceActive = false) {
     if (this.isActive && this.isOpened) {
       if (this.tempDeviceIdList.length > 0) {
-        this.webSocket.send(JSON.stringify({
-          tsSubCmds: this.tempDeviceIdList.map(deviceId => ({
-            entityType: "DEVICE",
-            entityId: deviceId,
-            scope: "LATEST_TELEMETRY",
-            unsubscribe: true
-          }))
-        }));
+        const msg: { attrSubCmds?: any; tsSubCmds?: any } = {};
+        const content: any[] = [{
+          cmdId: 0,
+          entityType: 'DEVICE',
+          entityId: null,
+          scope: listenDeviceActive ? 'SERVER_SCOPE' : 'LATEST_TELEMETRY',
+          unsubscribe: true
+        }];
+        if (listenDeviceActive) {
+          content.forEach(item => (item.keys = 'active'));
+        }
+        listenDeviceActive ? (msg.attrSubCmds = content) : (msg.tsSubCmds = content);
+        this.webSocket.send(JSON.stringify(msg));
         this.tempDeviceIdList = [];
         this.leftDeviceCount = 0;
       }
       if (deviceIdList && deviceIdList.length > 0) {
         this.tempDeviceIdList = deviceIdList;
-        this.webSocket.send(JSON.stringify({
-          tsSubCmds: deviceIdList.map(deviceId => ({
-            entityType: "DEVICE",
-            entityId: deviceId,
-            scope: "LATEST_TELEMETRY"
-          }))
+        const msg: { attrSubCmds?: any; tsSubCmds?: any } = {};
+        const content: any[] = this.tempDeviceIdList.map((deviceId, index) => ({
+          cmdId: index,
+          entityType: "DEVICE",
+          entityId: deviceId,
+          scope: listenDeviceActive ? 'SERVER_SCOPE' : 'LATEST_TELEMETRY'
         }));
+        if (listenDeviceActive) {
+          content.forEach(item => (item.keys = 'active'));
+        }
+        listenDeviceActive ? (msg.attrSubCmds = content) : (msg.tsSubCmds = content);
+        this.webSocket.send(JSON.stringify(msg));
       }
     }
   }
 
   // 关闭订阅
-  public unsubscribe() {
+  public unsubscribe(listenDeviceActive = false) {
     if (this.isActive && this.isOpened) {
       if (this.tempDeviceIdList.length > 0) {
         this.webSocket.send(JSON.stringify({
-          tsSubCmds: this.tempDeviceIdList.map(deviceId => ({
-            entityType: "DEVICE",
-            entityId: deviceId,
-            scope: "LATEST_TELEMETRY",
+          tsSubCmds: [{
+            cmdId: 0,
+            entityType: 'DEVICE',
+            entityId: null,
+            scope: listenDeviceActive ? 'SERVER_SCOPE' : 'LATEST_TELEMETRY',
             unsubscribe: true
-          }))
+          }]
         }));
         this.tempDeviceIdList = [];
         this.leftDeviceCount = 0;

@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceInfo;
@@ -25,6 +26,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.Dao;
 import org.thingsboard.server.dao.TenantEntityDao;
@@ -48,6 +50,8 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return the device info object
      */
     DeviceInfo findDeviceInfoById(TenantId tenantId, UUID deviceId);
+
+    List<Device> getYunDeviceList(Device device);
 
     /**
      * Save or update device object
@@ -256,7 +260,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @param device
      * @return
      */
-    List<Device> findDeviceListBuyCdn(Device device);
+    List<Device> findDeviceListByCdn(Device device);
 
 
     /**
@@ -287,6 +291,13 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return
      */
    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException ;
+
+    /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
 
 
     List<DeviceEntity>  queryAllByIds(List<UUID> ids);
@@ -322,5 +333,12 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return
      */
     List<Device> getNotDistributionDevice(TenantId tenantId);
+
+
+    PageData<Device> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException;
+
+
+    void   updateFlgById(Boolean deviceFlg, UUID id);
+
 
 }

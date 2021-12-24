@@ -9,15 +9,18 @@ import org.thingsboard.server.common.data.factory.Factory;
 @ApiModel(value = "FactoryVersionDto",description = "查询工厂最新版本")
 public class FactoryVersionDto {
 
-    @ApiModelProperty("所属工厂")
+    @ApiModelProperty(value = "所属工厂",required = false)
     private String factoryName;
-    @ApiModelProperty("发布时间")
+    @ApiModelProperty(value = "网关设备名称",required = false)
+    private String gatewayName;
+    @ApiModelProperty(value = "发布时间",required = false)
     private long publishTime;
 
     public Factory toFactory(){
         Factory factory = new Factory();
         factory.setName(this.factoryName);
         factory.setPublishTime(this.publishTime);
+        factory.setName(this.gatewayName);
         return factory;
     }
 }

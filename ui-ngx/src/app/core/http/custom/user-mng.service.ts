@@ -4,9 +4,9 @@ import { RequestConfig, defaultHttpOptionsFromConfig } from "@app/core/public-ap
 import { UserInfo } from "@app/shared/models/custom/auth-mng.models";
 import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
 
 interface FetchListFilter {
+  factoryId?: string,
   userCode: string,
   userName: string
 }
@@ -33,6 +33,14 @@ export class UserMngService {
     );
   }
 
+  // 获取工厂管理员列表
+  public getFactoryManagers(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<UserInfo>> {
+    return this.http.get<PageData<UserInfo>>(
+      `/api/user/findFactoryManagers${pageLink.toQuery()}&factoryId=${filterParams.factoryId}&userCode=${filterParams.userCode}&userName=${filterParams.userName}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
   // 获取用户详情
   public getUser(userId: string, config?: RequestConfig): Observable<UserInfo> {
     return this.http.get<UserInfo>(`/api/user/${userId}`, defaultHttpOptionsFromConfig(config));
@@ -54,8 +62,8 @@ export class UserMngService {
   }
 
   // 获取当前可用的用户编码
-  public getAvailableCode(): Observable<string> {
-    return this.http.post(`/api/user/getCode`, { key: "1" }, { responseType: 'text' });
+  public getAvailableCode(tenantId?: string): Observable<string> {
+    return this.http.post(`/api/user/getCode`, { key: "1", tenantId }, { responseType: 'text' });
   }
 
 }

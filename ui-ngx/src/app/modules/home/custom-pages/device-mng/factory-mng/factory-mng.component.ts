@@ -1,6 +1,6 @@
 import { UtilsService } from '@core/services/utils.service';
 import { FactoryMngService } from './../../../../../core/http/custom/factory-mng.service';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AppState, DialogService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTableTreeNode } from '@app/shared/models/custom/factory-mng.models';
 import { BaseData, EntityType, EntityTypeResource, entityTypeResources, EntityTypeTranslation, entityTypeTranslations, HasId, HasUUID, PageComponent } from '@app/shared/public-api';
@@ -15,21 +15,23 @@ import { EntityTableConfig } from '@app/modules/home/models/entity/entities-tabl
 import { WorkShopFormComponent } from './work-shop-form.component';
 import { ProdLineFormComponent } from './prod-line-form.component';
 import { DeviceFormComponent } from './device-form.component';
-import { DistributeDeviceComponent } from './distribute-device.component';
+import { DistributeDeviceComponent, DistributeDeviceDialogData } from './distribute-device.component';
+import { Router } from '@angular/router';
+import { SetPermissionsComponent, SetPermissionsDialogData } from '../../auth-mng/role-mng/set-permissions.component';
 
 @Component({
   selector: 'tb-factory-mng',
   templateUrl: './factory-mng.component.html',
   styleUrls: ['./factory-mng.component.scss']
 })
-export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit {
+export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public isDetailsOpen: boolean = false;
   public filters = FILTERS;
   public filterParams = {
     name: '',
     workshopName: '',
-    productionlineName: '',
+    productionLineName: '',
     deviceName: ''
   }
   public tableData: FactoryTableTreeNode[] = [];
@@ -46,7 +48,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     private factoryMngService: FactoryMngService,
     public utils: UtilsService,
     public dialog: MatDialog,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private router: Router
   ) {
     super(store);
   }
@@ -57,13 +60,24 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
 
   ngAfterViewInit() {
     this.setTableHeight();
-    window.onresize = this.setTableHeight;
+    window.addEventListener('resize', () => { this.setTableHeight(); });
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', () => { this.setTableHeight(); });
   }
 
   setTableHeight() {
-    const totalHeight = document.querySelector('.tb-entity-table-content').clientHeight
-    const tableClientTop =  document.querySelector('.mat-table-toolbar').clientHeight + document.querySelector('.entity-filter-header').clientHeight
-    this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` }
+    setTimeout(() => {
+      const $tableContent = document.querySelector('.tb-entity-table-content');
+      const $toolbar = document.querySelector('.mat-table-toolbar');
+      const $filter = document.querySelector('.entity-filter-header');
+      if ($tableContent && $toolbar && $filter) {
+        const totalHeight = $tableContent.clientHeight;
+        const tableClientTop = $toolbar.clientHeight + $filter.clientHeight;
+        this.scrollConfig = { x: '100%', y: `${totalHeight - tableClientTop - 60}px` };
+      }
+    });
   }
 
   fetchData() {
@@ -90,7 +104,17 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         device.rowType = 'device';
         device.key = device.id + '';
       });
-      arr.push(...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList);
+      res.notDistributionList.forEach(device => {
+        device.parentId = '-1';
+        device.rowType = 'device';
+        device.key = device.id;
+      });
+      arr.push(
+        ...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList, ...res.notDistributionList
+      );
+      if (res.notDistributionList.length > 0) {
+        arr.push({key: '-1', name: this.translate.instant('device-mng.undistributed-device')});
+      }
       arr.forEach(item => {
         tableArr.push({
           id: item.key,
@@ -195,11 +219,30 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityTranslations: entityTypeTranslations.get(EntityType.FACTORY),
           entityResources: entityTypeResources.get(EntityType.FACTORY),
           entityComponent: FactoryFormComponent,
-          saveEntity: entity => this.factoryMngService.saveFactory(entity)
+          saveEntity: entity => this.factoryMngService.saveFactory(entity),
+          addDialogStyle: { width: '608px' }
         }
       }
     }).afterClosed().subscribe(res => {
       res && this.fetchData();
+    });
+  }
+
+  mngFactoryManager(factoryId: string, factoryName: string) {
+    if (factoryId) {
+      this.router.navigate([`/deviceManagement/factoryManagement/${factoryId}/users`], {
+        queryParams: {
+          factoryName
+        }
+      });
+    }
+  }
+
+  setPermissions(factoryId: string) {
+    this.dialog.open<SetPermissionsComponent, SetPermissionsDialogData>(SetPermissionsComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: { factoryId }
     });
   }
 
@@ -209,11 +252,12 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
         entitiesTableConfig: {
-          entityTranslations: entityTypeTranslations.get(EntityType.WORK_SHOP),
-          entityResources: entityTypeResources.get(EntityType.WORK_SHOP),
+          entityTranslations: entityTypeTranslations.get(EntityType.WORKSHOP),
+          entityResources: entityTypeResources.get(EntityType.WORKSHOP),
           entityComponent: WorkShopFormComponent,
           saveEntity: entity => this.factoryMngService.saveWorkShop(entity),
-          componentsData: { factoryId, factoryName }
+          componentsData: { factoryId, factoryName },
+          addDialogStyle: { width: '608px' }
         }
       }
     }).afterClosed().subscribe(res => {
@@ -227,11 +271,12 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: {
         entitiesTableConfig: {
-          entityTranslations: entityTypeTranslations.get(EntityType.PROD_LINE),
-          entityResources: entityTypeResources.get(EntityType.PROD_LINE),
+          entityTranslations: entityTypeTranslations.get(EntityType.PRODUCTION_LINE),
+          entityResources: entityTypeResources.get(EntityType.PRODUCTION_LINE),
           entityComponent: ProdLineFormComponent,
           saveEntity: entity => this.factoryMngService.saveProdLine(entity),
-          componentsData: { factoryId, factoryName, workshopId, workshopName }
+          componentsData: { factoryId, factoryName, workshopId, workshopName },
+          addDialogStyle: { width: '608px' }
         }
       }
     }).afterClosed().subscribe(res => {
@@ -249,7 +294,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           entityResources: entityTypeResources.get(EntityType.DEVICE),
           entityComponent: DeviceFormComponent,
           saveEntity: entity => this.factoryMngService.saveDevice(entity),
-          componentsData: { factoryId, factoryName, workshopId, workshopName, productionLineId, productionLineName }
+          componentsData: { factoryId, factoryName, workshopId, workshopName, productionLineId, productionLineName },
+          addDialogStyle: { width: '948px' }
         }
       }
     }).afterClosed().subscribe(res => {
@@ -258,10 +304,12 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
   }
 
   distributeDevice(deviceIdList?: string[]) {
-    this.dialog.open<DistributeDeviceComponent, string[]>(DistributeDeviceComponent, {
+    this.dialog.open<DistributeDeviceComponent, DistributeDeviceDialogData>(DistributeDeviceComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      data: deviceIdList || Array.from(this.checkedDeviceIdList)
+      data: {
+        deviceIdList: deviceIdList || Array.from(this.checkedDeviceIdList)
+      }
     }).afterClosed().subscribe(res => {
       res && this.fetchData();
       this.checkedDeviceIdList.clear();
@@ -272,9 +320,11 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     let type = '';
     let fnName: string;
     let params: string | object;
+    let delTxt = '';
     if (entity.rowType === 'factory') {
       type = 'factory';
       fnName = 'deleteFactory';
+      delTxt = this.translate.instant('device-mng.delete-factory-text');
     } else if (entity.rowType === 'workShop') {
       type = 'work-shop';
       fnName = 'deleteWorkShop';
@@ -288,7 +338,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     }
     this.dialogService.confirm(
       this.translate.instant(`device-mng.delete-${type}-title`, { name: entity.name }),
-      '',
+      delTxt,
       this.translate.instant('action.no'),
       this.translate.instant('action.yes'),
       true
@@ -319,14 +369,14 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveFactory(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getFactory(id + '');
       } else if (entity.rowType === 'workShop') {
-        entityTranslations = entityTypeTranslations.get(EntityType.WORK_SHOP);
-        entityResources = entityTypeResources.get(EntityType.WORK_SHOP);
+        entityTranslations = entityTypeTranslations.get(EntityType.WORKSHOP);
+        entityResources = entityTypeResources.get(EntityType.WORKSHOP);
         entityComponent = WorkShopFormComponent;
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveWorkShop(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getWorkShop(id + '');
       } else if (entity.rowType === 'prodLine') {
-        entityTranslations = entityTypeTranslations.get(EntityType.PROD_LINE);
-        entityResources = entityTypeResources.get(EntityType.PROD_LINE);
+        entityTranslations = entityTypeTranslations.get(EntityType.PRODUCTION_LINE);
+        entityResources = entityTypeResources.get(EntityType.PRODUCTION_LINE);
         entityComponent = ProdLineFormComponent;
         saveEntity = (entity: BaseData<HasId>) => this.factoryMngService.saveProdLine(entity);
         loadEntity = (id: HasUUID) => this.factoryMngService.getProdLine(id + '');
@@ -350,6 +400,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
       this.isDetailsOpen = true;
     } else {
       this.isDetailsOpen = false;
+      this.currentEntityId = '';
     }
   }
 

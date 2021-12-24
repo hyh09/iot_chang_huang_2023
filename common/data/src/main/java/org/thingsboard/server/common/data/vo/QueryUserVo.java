@@ -37,5 +37,12 @@ public class QueryUserVo {
 
     private  UUID createId;
 
+    private  UUID factoryId;
+
+    private  String type;
+
+
+
+
 
 }

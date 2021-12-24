@@ -86,7 +86,7 @@ public class ProductionLineController extends BaseController  {
     })
     @RequestMapping(value = "/findProductionLineList", method = RequestMethod.GET)
     @ResponseBody
-    public List<ProductionLineVo> findProductionLineList(@RequestParam String tenantId,@RequestParam String workshopId,@RequestParam String factoryId) throws ThingsboardException {
+    public List<ProductionLineVo> findProductionLineList(@RequestParam(required = false) String tenantId,@RequestParam(required = false) String workshopId,@RequestParam (required = false)String factoryId) throws ThingsboardException {
         try {
             List<ProductionLineVo> productionLineVos = new ArrayList<>();
             if(StringUtils.isEmpty(tenantId)){
@@ -105,7 +105,7 @@ public class ProductionLineController extends BaseController  {
     }
 
     /**
-     * 查询生产线列表
+     * 查询产线详情
      * @param id
      * @return
      * @throws ThingsboardException
@@ -117,7 +117,7 @@ public class ProductionLineController extends BaseController  {
     public ProductionLine findById(@PathVariable("id") String id) throws ThingsboardException {
         try {
             checkParameter("id",id);
-            return checkNotNull(productionLineService.findById(toUUID(id)));
+            return productionLineService.findById(toUUID(id));
         } catch (Exception e) {
             throw handleException(e);
         }

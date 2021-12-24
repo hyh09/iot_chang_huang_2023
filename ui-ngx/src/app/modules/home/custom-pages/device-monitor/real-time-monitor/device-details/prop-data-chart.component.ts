@@ -37,12 +37,14 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
   init() {
     if (!this.chart) return;
     const chartData = this.data.map(item => {
-      return [new Date(item.createdTime), item.content]
+      return [new Date(item.createdTime), item.content];
     });
+    const unit = this.data[0] && this.data[0].unit ? this.data[0].unit : '';
     const option = {
       title: {
         text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.propName ? ` - ${this.propName}` : ''}`,
-        left: 0,
+        subtext: unit ? this.translate.instant('device-monitor.prop-unit', { unit: unit }) : '',
+        left: -5,
         textStyle: {
           fontSize: 16,
           color: 'rgba(0, 0, 0, 0.87)'
@@ -51,8 +53,8 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
       color: ['#0663ff'],
       grid: {
         bottom: 5,
-        right: 30,
-        left: 20,
+        right: 25,
+        left: 0,
         containLabel: true
       },
       tooltip: {
@@ -63,12 +65,19 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
         boundaryGap: false,
         axisLabel: {
           margin: 16
-        }
+        },
+        minInterval: 600000
       },
       yAxis: {
-        type: 'value',
-        name: this.data[0] && this.data[0].unit ? this.translate.instant('device-monitor.prop-unit', { unit: this.data[0].unit }) : ''
+        type: 'value'
       },
+      dataZoom: [
+        {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }
+      ],
       series: [
         {
           name: this.propName,
@@ -77,7 +86,7 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
           symbol: 'none',
           smooth: true,
           tooltip: {
-            formatter: '{b}：{c}'
+            formatter: `{b}：{c}${unit}`
           }
         }
       ]

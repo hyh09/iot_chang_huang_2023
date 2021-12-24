@@ -31,14 +31,14 @@ public class FactoryId extends UUIDBased implements EntityId {
         super(id);
     }
 
-    public static FactoryId fromString(String tenantMenuId) {
-        return new FactoryId(UUID.fromString(tenantMenuId));
+    public static FactoryId fromString(String factoryId) {
+        return new FactoryId(UUID.fromString(factoryId));
     }
 
     @JsonIgnore
     @Override
     public EntityType getEntityType() {
-        return EntityType.TENANT_MENU;
+        return EntityType.FACTORY;
     }
 
 }

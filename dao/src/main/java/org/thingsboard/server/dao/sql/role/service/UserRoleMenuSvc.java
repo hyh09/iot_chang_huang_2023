@@ -1,9 +1,12 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
+import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -13,6 +16,16 @@ import java.util.UUID;
  * @create: 2021-11-02 10:28
  **/
 public interface UserRoleMenuSvc {
+
+    /**
+     * 查询当前的租户
+     * @param tenantId
+     * @return
+     */
+    List<UUID> getTenantRoleId(UUID tenantId);
+
+    //判断当前用户是不是租户
+    Boolean  isTENANT(UUID userId);
 
     //判断当人角色
     JudgeUserVo  decideUser(UserId userId);
@@ -27,5 +40,15 @@ public interface UserRoleMenuSvc {
      * @throws Exception
      */
     User save(User user,User user1) ;
+
+
+    /**
+     * 由工厂创建工厂管理员角色
+     * @param tenantId 租户id
+     * @param userId  当前登录人;
+     * @param factoryId  工厂id
+     */
+    TenantSysRoleEntity saveRole(UUID tenantId, UUID  userId, UUID  factoryId) throws ThingsboardException;
+
 
 }

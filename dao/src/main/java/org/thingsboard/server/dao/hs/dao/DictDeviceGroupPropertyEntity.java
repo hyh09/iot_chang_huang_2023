@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.dao;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -89,7 +90,7 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
         this.title = common.getTitle();
         this.sort = common.getSort();
 
-        if (common.getDictDataId() != null)
+        if (common.getDictDataId() != null && !StringUtils.isBlank(common.getDictDataId()))
             this.dictDataId = UUID.fromString(common.getDictDataId());
 
 

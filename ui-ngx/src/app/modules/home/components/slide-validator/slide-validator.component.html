@@ -1,0 +1,7 @@
+<div #slideValidator class="slide-validator" onselectstart="return false;">
+  <div #slideBg class="bg-color"></div>
+  <div class="txt">{{ slideTxt | translate }}</div>
+  <div #slider fxLayoutAlign="center center" class="slider" [style.cursor]="isSuccess ? 'default': ''">
+    <mat-icon [svgIcon]="slideIcon"></mat-icon>
+  </div>
+</div>

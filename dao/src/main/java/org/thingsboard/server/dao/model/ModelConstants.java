@@ -70,7 +70,8 @@ public class ModelConstants {
     public  static  final String USER_USER_NAME_PROPERTY="user_name";
     public  static  final String USER_USER_CREATOR_PROPERTY="user_creator";
     public  static  final String USER_USER_TYPE="type";
-   public  static  final  String USER_USER_FACTORY_ID="factoryId";
+    public  static  final  String USER_USER_LEVEL="user_level";
+   public  static  final  String USER_USER_FACTORY_ID="factory_Id";
 
     public static final String USER_AUTHORITY_PROPERTY = "authority";
     public static final String USER_FIRST_NAME_PROPERTY = "first_name";
@@ -107,9 +108,13 @@ public class ModelConstants {
     /**
      * Cassandra contact constants.
      */
+    public static   final  String LONGITUDE_PROPERTY="longitude";
+    public static   final  String LATITUDE_PROPERTY="latitude";
+
     public static final String COUNTRY_PROPERTY = "country";
     public static final String STATE_PROPERTY = "state";
     public static final String CITY_PROPERTY = "city";
+    public static final String COUNTY_LEVEL_PROPERTY="county_level";
     public static final String ADDRESS_PROPERTY = "address";
     public static final String ADDRESS2_PROPERTY = "address2";
     public static final String ZIP_PROPERTY = "zip";

@@ -70,11 +70,11 @@ export interface DeviceBaseInfo {
 }
 
 export interface DeviceProp {
-  id: string;
+  id?: string;
   name: string;
-  content: string;
-  createdTime: number;
-  dictDataId: number;
+  content?: string;
+  createdTime?: number;
+  dictDataId?: string;
   title: string;
   unit: string;
 }

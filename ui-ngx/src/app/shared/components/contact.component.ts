@@ -27,6 +27,9 @@ export class ContactComponent {
   @Input()
   parentForm: FormGroup;
 
+  @Input()
+  showAddress2: boolean = true;
+
   @Input() isEdit: boolean;
 
   countries = COUNTRIES;

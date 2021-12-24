@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.common.data;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.id.UUIDBased;
 import org.thingsboard.server.common.data.validation.NoXss;
@@ -25,14 +26,25 @@ public abstract class ContactBased<I extends UUIDBased> extends SearchTextBasedW
     private static final long serialVersionUID = 5047448057830660988L;
 
     @NoXss
+    @ApiModelProperty("国家")
     protected String country;
     @NoXss
+    @ApiModelProperty("省")
     protected String state;
     @NoXss
+    @ApiModelProperty("市")
     protected String city;
+
     @NoXss
+    @ApiModelProperty("县级【本次新增字段】")
+    protected  String countyLevel;
+
+
+    @NoXss
+    @ApiModelProperty("地址 ###详细地址")
     protected String address;
     @NoXss
+    @ApiModelProperty("地址2")
     protected String address2;
     @NoXss
     protected String zip;
@@ -53,6 +65,7 @@ public abstract class ContactBased<I extends UUIDBased> extends SearchTextBasedW
         super(contact);
         this.country = contact.getCountry();
         this.state = contact.getState();
+        this.countyLevel = contact.getCountyLevel();
         this.city = contact.getCity();
         this.address = contact.getAddress();
         this.address2 = contact.getAddress2();
@@ -125,4 +138,12 @@ public abstract class ContactBased<I extends UUIDBased> extends SearchTextBasedW
         this.email = email;
     }
 
+
+    public String getCountyLevel() {
+        return countyLevel;
+    }
+
+    public void setCountyLevel(String countyLevel) {
+        this.countyLevel = countyLevel;
+    }
 }

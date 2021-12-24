@@ -40,15 +40,17 @@ export enum EntityType {
   DATA_DICTIONARY = 'DATA_DICTIONARY',
   DEVICE_DICTIONARY = 'DEVICE_DICTIONARY',
   FACTORY = 'FACTORY',
-  WORK_SHOP = 'WORK_SHOP',
-  PROD_LINE = 'PROD_LINE',
+  WORKSHOP = 'WORKSHOP',
+  PRODUCTION_LINE = 'PRODUCTION_LINE',
   MENU = 'MENU',
   USER_MNG = 'USER_MNG',
   ROLE_MNG = 'ROLE_MNG',
   ALARM_RECORD = 'ALARM_RECORD',
   ALARM_RULES = 'ALARM_RULES',
   DEVICE_HISTORY = 'DEVICE_HISTORY',
-  POTENCY = 'POTENCY'
+  POTENCY = 'POTENCY',
+  FACTORY_VERSION = 'FACTORY_VERSION',
+  PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS'
 }
 
 export enum AliasEntityType {
@@ -348,20 +350,23 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.FACTORY,
       {
+        type: 'device-mng.factory',
         add: 'device-mng.add-factory',
         details: 'device-mng.factory-details'
       }
     ],
     [
-      EntityType.WORK_SHOP,
+      EntityType.WORKSHOP,
       {
+        type: 'device-mng.work-shop',
         add: 'device-mng.add-work-shop',
         details: 'device-mng.work-shop-details'
       }
     ],
     [
-      EntityType.PROD_LINE,
+      EntityType.PRODUCTION_LINE,
       {
+        type: 'device-mng.prod-line',
         add: 'device-mng.add-prod-line',
         details: 'device-mng.prod-line-details'
       }
@@ -408,12 +413,14 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     [
       EntityType.ALARM_RECORD,
       {
+        type: 'device-monitor.alarm-record',
         noEntities: 'device-monitor.no-alarm-records'
       }
     ],
     [
       EntityType.ALARM_RULES,
       {
+        type: 'device-monitor.alarm-rules',
         add: "device-monitor.add-alarm-rule",
         noEntities: 'device-monitor.no-alarm-rules',
         details: "device-monitor.alarm-rule-details",
@@ -428,6 +435,18 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
     ],
     [
       EntityType.POTENCY,
+      {
+        noEntities: 'device.no-devices-text'
+      }
+    ],
+    [
+      EntityType.FACTORY_VERSION,
+      {
+        noEntities: 'system-mng.no-factory-version'
+      }
+    ],
+    [
+      EntityType.PROD_CAPACITY_SETTINGS,
       {
         noEntities: 'device.no-devices-text'
       }
@@ -540,13 +559,13 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       }
     ],
     [
-      EntityType.WORK_SHOP,
+      EntityType.WORKSHOP,
       {
         helpLinkId: ''
       }
     ],
     [
-      EntityType.PROD_LINE,
+      EntityType.PRODUCTION_LINE,
       {
         helpLinkId: ''
       }
@@ -589,6 +608,18 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.POTENCY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.FACTORY_VERSION,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.PROD_CAPACITY_SETTINGS,
       {
         helpLinkId: ''
       }

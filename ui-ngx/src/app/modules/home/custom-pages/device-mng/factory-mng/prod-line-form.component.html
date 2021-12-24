@@ -1,4 +1,4 @@
-<div class="mat-padding" style="min-width: 560px;">
+<div class="mat-padding">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
       <div class="mat-block" style="padding-bottom: 12px; color: #666;">
@@ -18,12 +18,12 @@
         <mat-label translate>device-mng.remark</mat-label>
         <input matInput formControlName="remark">
       </mat-form-field>
-      <tb-image-input
+      <!-- <tb-image-input
         label="{{ 'device-mng.logo' | translate }}"
         maxSizeByte="524288"
         formControlName="logoImages"
         [disabled]="!isEdit"
-      ></tb-image-input>
+      ></tb-image-input> -->
     </fieldset>
   </form>
 </div>

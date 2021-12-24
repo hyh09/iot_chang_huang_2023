@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
+import org.thingsboard.common.util.baidumap.BaiduMaps;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -39,10 +40,7 @@ import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -75,20 +73,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     @Override
     public Factory saveFactory(Factory factory)throws ThingsboardException {
         Boolean create = factory.getId() == null;
-        //校验名称重复
-        Factory check = new Factory();
-        check.setName(factory.getName());
-        check.setTenantId(factory.getTenantId());
-        List<Factory> factoryList = this.commonCondition(check);
-        if(CollectionUtils.isNotEmpty(factoryList)){
-            if (create) {
-                throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-            }else {
-                if(!factoryList.get(0).getId().toString().equals(factory.getId().toString())) {
-                    throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-                }
-            }
-        }
         FactoryEntity factoryEntity = new FactoryEntity(factory);
         if (create) {
             UUID uuid = Uuids.timeBased();
@@ -98,6 +82,20 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             factoryRepository.deleteById(factoryEntity.getUuid());
             factoryEntity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
+        //获取经纬度
+        String address = factoryEntity.getCountry() + factoryEntity.getProvince() + factoryEntity.getCity() + factoryEntity.getArea() + factoryEntity.getAddress();
+        if(StringUtils.isNotBlank(address)){
+            Map<String, String> coordinate = BaiduMaps.getCoordinate(address);
+            if(coordinate != null){
+                if(StringUtils.isNotBlank(coordinate.get("longitude"))){
+                    factoryEntity.setLongitude(coordinate.get("longitude"));
+                }
+                if(StringUtils.isNotBlank(coordinate.get("latitude"))){
+                    factoryEntity.setLatitude(coordinate.get("latitude"));
+                }
+            }
+        }
+
         FactoryEntity entity = factoryRepository.save(factoryEntity);
         if(entity != null){
             return entity.toData();
@@ -139,25 +137,20 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * @param id
      */
     @Override
-    public void delFactory(UUID id){
-
-        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))){
+    public void delFactory(UUID id)throws ThingsboardException {
+        Device device = new Device();
+        device.setFactoryId(id);
+        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))
+                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
            /* 逻辑删除暂时不用
             FactoryEntity factoryEntity = factoryRepository.findById(id).get();
             factoryEntity.setDelFlag("D");
             factoryRepository.save(factoryEntity);*/
             factoryRepository.deleteById(id);
+        }else {
+            throw new ThingsboardException("工厂下有车间/或网关设备不能删除！",ThingsboardErrorCode.GENERAL);
         }
     }
-
-
-    /**
-     * 根据工厂管理员查询
-     * @param factoryAdminId
-     * @return
-     */
-    @Override
-    public Factory findFactoryByAdmin(UUID factoryAdminId){return factoryRepository.findFactoryByAdmin(factoryAdminId);}
 
     /**
      * 根据租户查询
@@ -192,7 +185,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
             boolean notBlankWorkshopName = StringUtils.isNotBlank(factory.getWorkshopName());
-            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionlineName());
+            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionLineName());
             boolean notBlankDeviceName = StringUtils.isNotBlank(factory.getDeviceName());
 
             /**1.先根据条件查询出所有的 工厂、车间、产线、设备**/
@@ -206,7 +199,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 }
                 if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
                     //工厂管理员/工厂用户，拥有该工厂数据权限
-                    predicates.add(cb.equal(root.get("adminUserId"), judgeUserVo.getUserId()));
+                    if(judgeUserVo.getUser() != null && judgeUserVo.getUser().getFactoryId() != null){
+                        predicates.add(cb.equal(root.get("id"), judgeUserVo.getUser().getFactoryId()));
+                    }
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -223,7 +218,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     if(CollectionUtils.isNotEmpty(productionLineList)){
                         List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
                         //查询设备,过滤掉网关
-                        deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory,productionLineIds));
+                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds));
                     }
                 }
             }

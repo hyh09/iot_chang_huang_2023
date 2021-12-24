@@ -4,7 +4,7 @@
       <div class="title">{{ 'device-monitor.base-info' | translate }}</div>
       <div fxLayout="row" fxLayoutGap="16px">
         <div class="image-wrapper">
-          <img [src]="baseInfo.picture ? baseInfo.picture : '../../../../../../../assets/image-empty.svg'" />
+          <img [src]="baseInfo.picture ? baseInfo.picture : '../../../../../../../assets/device-image-empty.svg'" />
         </div>
         <div fxFlex class="description">
           <div class="desc-item">{{ 'device-monitor.device-name-with-suffix' | translate }}{{ baseInfo.name }}</div>
@@ -16,7 +16,7 @@
     </div>
     <div fxFlex fxLayout="column" fxLayoutGap="16px" class="line-chart-wrapper">
       <div [fxShow]="showRealTimeChart" class="line-chart-item">
-        <tb-prop-data-chart [propName]="currPropName" [data]="propHistoryData"></tb-prop-data-chart>
+        <tb-prop-data-chart [propName]="currPropTitle || currPropName" [data]="propHistoryData"></tb-prop-data-chart>
       </div>
       <div class="line-chart-item">
         <tb-warning-statistics-chart [data]="alarmTimesList"></tb-warning-statistics-chart>
@@ -44,11 +44,12 @@
             #deviceDataTable
             [nzData]="group.groupPropertyList || []"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             nzNoResult="{{ 'common.data-empty' | translate }}"
           >
             <tbody>
-              <tr *ngFor="let data of deviceDataTable.data" (click)="fetchPropHistoryData(data.name)" [class.active]="data.name === currPropName">
-                <td width="33%">{{data.name}}</td>
+              <tr *ngFor="let data of deviceDataTable.data" (click)="fetchPropHistoryData(data.name, data.title)" [class.active]="data.name === currPropName">
+                <td width="33%">{{data.title || data.name}}</td>
                 <td width="33%">{{data.content}}{{data.unit}}</td>
                 <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
               </tr>
@@ -62,6 +63,7 @@
             [nzData]="devcieComp"
             nzTableLayout="fixed"
             [nzShowPagination]="false"
+            [nzFrontPagination]="false"
             nzNoResult="{{ 'common.data-empty' | translate }}"
             class="comp-table"
           >
@@ -88,10 +90,11 @@
                       [nzData]="item.propertyList"
                       nzTableLayout="fixed"
                       [nzShowPagination]="false"
+                      [nzFrontPagination]="false"
                     >
                       <tbody>
-                        <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name)" [class.active]="data.name === currPropName">
-                          <td width="33%" [nzIndentSize]="item.level! * 5">{{data.name}}</td>
+                        <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name, data.title)" [class.active]="data.name === currPropName">
+                          <td width="33%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
                           <td width="33%">{{data.content}}{{data.unit}}</td>
                           <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                         </tr>

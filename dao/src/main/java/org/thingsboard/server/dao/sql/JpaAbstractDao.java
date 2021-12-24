@@ -53,7 +53,7 @@ public abstract class JpaAbstractDao<E extends BaseEntity<D>, D>
         try {
             entity = getEntityClass().getConstructor(domain.getClass()).newInstance(domain);
         } catch (Exception e) {
-            log.error("Can't create entity for domain object {}", domain, e);
+            log.error("Can't create entity for domain oblject {}", domain, e);
             throw new IllegalArgumentException("Can't create entity for domain object {" + domain + "}", e);
         }
         setSearchText(entity);
@@ -80,6 +80,7 @@ public abstract class JpaAbstractDao<E extends BaseEntity<D>, D>
     @Override
     public ListenableFuture<D> findByIdAsync(TenantId tenantId, UUID key) {
         log.debug("Get entity by key async {}", key);
+        Optional<E> byId = getCrudRepository().findById(key);
         return service.submit(() -> DaoUtil.getData(getCrudRepository().findById(key)));
     }
 

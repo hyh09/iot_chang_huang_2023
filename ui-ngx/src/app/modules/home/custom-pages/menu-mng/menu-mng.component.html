@@ -17,6 +17,7 @@
         <mat-select
           formControlName="menuType"
           required
+          [disabled]="(isLoading$ | async) || !isEdit"
           (selectionChange)="entityForm.get('parentId').setValue('');getSuperMenus()"
         >
           <mat-option [value]="menuType.PC">{{ 'menu-mng.pc-menu' | translate }}</mat-option>
@@ -32,12 +33,13 @@
           formControlName="parentId"
           [disabled]="(isLoading$ | async) || !isEdit || !entityForm.get('menuType').value || superMenus.length === 0"
         >
+          <mat-option value="">{{ 'common.none' | translate }}</mat-option>
           <mat-option *ngFor="let menu of superMenus" [value]="menu.id">{{ menu.name }}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field class="mat-block">
         <mat-label translate>menu-mng.is-button-or-not</mat-label>
-        <mat-select formControlName="isButton">
+        <mat-select formControlName="isButton" [disabled]="(isLoading$ | async) || !isEdit">
           <mat-option [value]="true">{{ 'action.yes' | translate }}</mat-option>
           <mat-option [value]="false">{{ 'action.no' | translate }}</mat-option>
         </mat-select>

@@ -101,6 +101,13 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
             whereSql.append(" and t1.user_code =:userCode ");
             param.put("userCode",vo.getUserCode());
         }
+        if((vo.getTenantId()) != null)
+        {
+            whereSql.append(" and t1.tenant_id =:tenantId ");
+            param.put("tenantId",vo.getTenantId());
+        }
+
+
         if(StringUtils.isNoneBlank(vo.getUserId()))
         {
 
@@ -188,7 +195,7 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
 
         sql.append("select cast(t1.id as varchar(255)) as id ,t1.phone_number as phoneNumber, t1.active_status as activeStatus,t1.user_code as userCode ,t1.user_creator as userCreator," +
                 "   cast(t1.created_time as varchar(255))  as time, t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName  " +
-                "from  tb_user  t1  where  1=1  ");
+                "from  tb_user  t1  where  1=1  and t1.user_level=0  ");
 
        StringBuffer whereSql  = new StringBuffer();
         if(vo.getRoleId() != null)
@@ -199,24 +206,38 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
         }
         if(StringUtils.isNoneBlank(vo.getUserName()))
         {
-            whereSql.append(" and t1.user_name =:userName ");
-            param.put("userName", vo.getUserName());
+            whereSql.append(" and t1.user_name like :userName ");
+            param.put("userName", "%"+vo.getUserName()+"%");
         }
         if(StringUtils.isNoneBlank(vo.getUserCode()))
         {
-            whereSql.append(" and t1.user_code =:userCode ");
-            param.put("userCode", vo.getUserCode());
+            whereSql.append(" and t1.user_code like :userCode ");
+            param.put("userCode","%"+vo.getUserCode()+"%");
         }
         if((vo.getTenantId() !=null ))
         {
             whereSql.append(" and t1.tenant_id =:tenantId ");
             param.put("tenantId", vo.getTenantId());
         }
-        if((vo.getCreateId() !=null ))
+
+        if(vo.getFactoryId() != null)
         {
-            whereSql.append(" and t1.user_creator =:userCreator ");
-            param.put("userCreator", vo.getCreateId().toString());
+            whereSql.append(" and t1.factory_Id =:factoryId ");
+            param.put("factoryId", vo.getFactoryId());
         }
+
+        if(StringUtils.isNotBlank(vo.getType()))
+        {
+            whereSql.append(" and t1.type =:type ");
+            param.put("type", vo.getType());
+        }
+
+
+//        if((vo.getCreateId() !=null ))
+//        {
+//            whereSql.append(" and t1.user_creator =:userCreator ");
+//            param.put("userCreator", vo.getCreateId().toString());
+//        }
 
         return  new  SqlVo(sql+whereSql.toString(),param);
     }

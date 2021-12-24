@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.service.telemetry.sub;
 
+import lombok.Setter;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class TelemetrySubscriptionUpdate {
     private int subscriptionId;
     private int errorCode;
     private String errorMsg;
+    @Setter
     private Map<String, List<Object>> data;
 
     public TelemetrySubscriptionUpdate(int subscriptionId, List<TsKvEntry> data) {

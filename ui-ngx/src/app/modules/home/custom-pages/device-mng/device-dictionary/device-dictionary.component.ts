@@ -1,14 +1,15 @@
-import { ChangeDetectorRef, Component, Inject, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AppState } from '@app/core/core.state';
 import { guid } from '@app/core/utils';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
-import { DeviceDataGroup, DeviceDictionary, DeviceProperty, DeviceData, DeviceComp, DeviceCompTreeNode } from '@app/shared/models/custom/device-mng.models';
+import { DeviceDataGroup, DeviceDictionary, DeviceProperty, DeviceData, DeviceComp, DeviceCompTreeNode, DataDictionary } from '@app/shared/models/custom/device-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { DeviceCompDialogData, DeviceCompFormComponent } from './device-comp-form.component';
+import { DeviceDataGroupNameComponent, DeviceDataGroupNameDialogData } from './device-data-group-name.component';
 
 @Component({
   selector: 'tb-device-dictionary',
@@ -17,13 +18,15 @@ import { DeviceCompDialogData, DeviceCompFormComponent } from './device-comp-for
 })
 export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary> {
 
-  public customPropExpanded: boolean = true;
-  public groupDataExpanded: boolean = true;
-  public currentTabIndex: number = 0;
-  public compExpanded: boolean = true;
-  public mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
-  public mapOfCompControl: { [code: string]: AbstractControl } = {};
-  public expandedCompCode: Array<string> = [];
+  customPropExpanded: boolean = true;
+  groupDataExpanded: boolean = true;
+  currentTabIndex: number = 0;
+  compExpanded: boolean = true;
+  mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
+  mapOfCompControl: { [code: string]: AbstractControl } = {};
+  expandedCompCode: Array<string> = [];
+  initDataGroup: DeviceDataGroup[] = [];
+  initDataGroupNames: string[] = [];
 
   constructor(
     protected store: Store<AppState>,
@@ -41,11 +44,12 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     this.mapOfExpandedComp = {};
     this.mapOfCompControl = {};
     this.expandedCompCode = [];
-    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
+    this.setInitDataGroup();
+    const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     return this.fb.group({
       id:  [entity ? entity.id : ''],
-      code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, [Validators.required]],
-      name: [entity ? entity.name : '', [Validators.required]],
+      code: [entity && entity.code ? entity.code : this.entitiesTableConfig.componentsData.availableCode, Validators.required],
+      name: [entity ? entity.name : '', Validators.required],
       type: [entity ? entity.type : ''],
       supplier: [entity ? entity.supplier : ''],
       model: [entity ? entity.model : ''],
@@ -53,6 +57,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       warrantyPeriod: [entity ? entity.version : ''],
       comment: [entity ? entity.comment : ''],
       picture: [entity ? entity.picture : ''],
+      deviceModel: [null],
+      fileId: [entity ? entity.fileId : ''],
+      fileName: [entity ? entity.fileName : ''],
+      standardPropertyList: this.fb.array(standardPropControls),
       propertyList: this.fb.array(propertyListControls),
       groupList: this.fb.array(groupListControls),
       componentList: this.fb.array(compControls)
@@ -60,15 +68,47 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   updateForm(entity: DeviceDictionary) {
-    const { propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
+    this.setInitDataGroup();
+    this.initDataGroup = [];
+    const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
     this.entityForm.patchValue(entity);
+    this.entityForm.get('deviceModel').setValue(null);
+    this.entityForm.controls.standardPropertyList = this.fb.array(standardPropControls);
     this.entityForm.controls.propertyList = this.fb.array(propertyListControls);
     this.entityForm.controls.groupList = this.fb.array(groupListControls);
     this.entityForm.controls.componentList = this.fb.array(compControls);
     this.setMapOfExpandedComp();
+    this.entityForm.updateValueAndValidity();
+    this.stopExpandPropagation();
+  }
+
+  stopExpandPropagation() {
+    setTimeout(() => {
+      document.querySelectorAll('.ant-table-row-expand-icon').forEach(el => {
+        el.removeEventListener('click', ($event: Event) => {$event.stopPropagation()});
+        el.addEventListener('click', ($event: Event) => {$event.stopPropagation()});
+      });
+    });
+  }
+
+  setInitDataGroup() {
+    this.initDataGroup = this.entitiesTableConfig.componentsData.initDataGroup;
+    this.initDataGroupNames = this.initDataGroup.map(item => (item.name));
+    this.initDataGroup.forEach(group => (group.editable = false));
   }
 
   generateFromArray(entity: DeviceDictionary): { [key: string]: Array<AbstractControl> } {
+    const standardPropControls: Array<AbstractControl> = [];
+    if (!this.isEdit && this.initDataGroup && this.initDataGroup.length > 0) {
+      for (const property of this.initDataGroup[0].groupPropertyList) {
+        standardPropControls.push(this.createDeviceDataControl(property));
+      }
+    }
+    if (entity && entity.standardPropertyList && entity.standardPropertyList.length > 0) {
+      for (const property of entity.standardPropertyList) {
+        standardPropControls.push(this.createDeviceDataControl(property));
+      }
+    }
     const propertyListControls: Array<AbstractControl> = [];
     if (entity && entity.propertyList && entity.propertyList.length > 0) {
       for (const property of entity.propertyList) {
@@ -76,6 +116,11 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     }
     const groupListControls: Array<AbstractControl> = [];
+    if (!this.isEdit && this.initDataGroup && this.initDataGroup.length > 0) {
+      for (const group of this.initDataGroup) {
+        groupListControls.push(this.createGroupListControl(group));
+      }
+    }
     if (entity && entity.groupList && entity.groupList.length > 0) {
       for (const group of entity.groupList) {
         groupListControls.push(this.createGroupListControl(group));
@@ -87,7 +132,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
         compControls.push(this.createCompListControl(comp));
       }
     }
-    return { propertyListControls, groupListControls, compControls }
+    return { standardPropControls, propertyListControls, groupListControls, compControls }
   }
 
   /**
@@ -112,6 +157,13 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   /**
+   * @description 标准能耗相关方法
+   */
+  standardPropFormArray(): FormArray {
+    return this.entityForm.get('standardPropertyList') as FormArray;
+  }
+
+  /**
    * @description 设备参数相关方法
    */
   deviceDataGroupFormArray(): FormArray {
@@ -122,9 +174,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   createDeviceDataControl(data?: DeviceData): AbstractControl {
     return this.fb.group({
-      name: [data ? data.name : ''],
-      content: [data ? data.content: ''],
-      title: [data ? data.title: '']
+      name: [data ? data.name : '', Validators.required],
+      content: [data ? data.content: '', Validators.required],
+      title: [data ? data.title : ''],
+      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {
@@ -137,41 +190,58 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     return this.fb.group({
       name: [dataGroup ? dataGroup.name : '', [Validators.required]],
       groupPropertyList: this.fb.array(controls),
-      isEdit: [false]
+      editable: [dataGroup && dataGroup.editable !== undefined ? dataGroup.editable : !this.initDataGroupNames.includes(dataGroup ? dataGroup.name : '')]
     });
   }
   addDeviceData(event: MouseEvent) {
     event.stopPropagation();
     event.preventDefault();
     this.deviceDataFormArray(this.currentTabIndex).push(this.createDeviceDataControl());
+    this.entityForm.updateValueAndValidity();
   }
   removeDeviceData(index: number) {
     this.deviceDataFormArray(this.currentTabIndex).removeAt(index);
+    this.entityForm.updateValueAndValidity();
   }
-  addDeviceDataGroup() {
-    this.deviceDataGroupFormArray().push(this.createGroupListControl());
-    setTimeout(() => {
-      this.currentTabIndex = this.deviceDataGroupFormArray().controls.length - 1;
-      this.editDataGroupName(this.deviceDataGroupFormArray().controls[this.currentTabIndex]);
+  addOrEditDeviceDataGroup(name?: string, event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    let existNames = (this.entityForm.get('groupList').value as Array<DeviceDataGroup>).map(group => (group.name));
+    if (name) {
+      existNames = existNames.filter(item => (item !== name));
+    }
+    this.dialog.open<DeviceDataGroupNameComponent, DeviceDataGroupNameDialogData>(DeviceDataGroupNameComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        name: name || '',
+        existNames
+      }
+    }).afterClosed().subscribe(res => {
+      if (res) {
+        if (!name) {
+          this.deviceDataGroupFormArray().push(this.createGroupListControl({
+            name: res || '',
+            groupPropertyList: [],
+            editable: true
+          }));
+          setTimeout(() => {
+            this.currentTabIndex = this.deviceDataGroupFormArray().controls.length - 1;
+            this.cd.markForCheck();
+            this.cd.detectChanges();
+          });
+        } else {
+          this.deviceDataGroupFormArray().controls[this.currentTabIndex].get('name').setValue(res);
+          this.cd.markForCheck();
+          this.cd.detectChanges();
+        }
+      }
     });
   }
   removeDeviceDataGroup(index: number) {
     this.deviceDataGroupFormArray().removeAt(index);
-  }
-  editDataGroupName(groupControl: AbstractControl) {
-    this.deviceDataGroupFormArray().controls.forEach(control => {
-      control.get('isEdit').setValue(false);
-    });
-    groupControl.get('isEdit').setValue(true);
-    setTimeout(() => {
-      document.getElementById(`tab-input-${this.currentTabIndex}`).focus();
-    });
-  }
-  setDataGroupName(groupControl: AbstractControl) {
-    if (!groupControl.get('name').value) {
-      groupControl.get('name').setValue(this.translate.instant('device-mng.custom'));
-    }
-    groupControl.get('isEdit').setValue(false);
   }
 
   /**
@@ -185,6 +255,12 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     if (comp && comp.componentList && comp.componentList.length > 0) {
       for (const subComp of comp.componentList) {
         compControls.push(this.createCompListControl(subComp));
+      }
+    }
+    const propertyListControls: Array<AbstractControl> = [];
+    if (comp && comp.propertyList && comp.propertyList.length > 0) {
+      for (const property of comp.propertyList) {
+        propertyListControls.push(this.createDeviceDataControl(property));
       }
     }
     const control: AbstractControl =  this.fb.group({
@@ -201,7 +277,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       supplier: [comp ? comp.supplier: ''],
       type: [comp ? comp.type: ''],
       version: [comp ? comp.version: ''],
-      warrantyPeriod: [comp ? comp.warrantyPeriod: '']
+      warrantyPeriod: [comp ? comp.warrantyPeriod: ''],
+      propertyList: this.fb.array(propertyListControls)
     });
     this.mapOfCompControl[control.get('code').value] = control;
     return control;
@@ -252,6 +329,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     } else {
       this.expandedCompCode.push(data.code);
+      this.stopExpandPropagation();
     }
   }
   addDeviceComp(event: MouseEvent, parentComp?: DeviceCompTreeNode) {
@@ -259,7 +337,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     event.preventDefault();
     this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        dataDictionaries: this.entitiesTableConfig.componentsData.dataDictionaries
+      }
     }).afterClosed().subscribe(res => {
       if (res) {
         if (parentComp) {
@@ -272,22 +353,52 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
           this.compListFormArray().push(this.createCompListControl(res));
         }
         this.setMapOfExpandedComp();
+        this.cd.markForCheck();
+        this.cd.detectChanges();
       }
     });
   }
-  editDeviceComp(comp: DeviceCompTreeNode) {
+  editDeviceComp(event: MouseEvent, comp: DeviceCompTreeNode) {
+    event.stopPropagation();
+    event.preventDefault();
     this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      data: comp
+      data: {
+        compInfo: { ...comp, isEdit: true },
+        dataDictionaries: this.entitiesTableConfig.componentsData.dataDictionaries
+      }
     }).afterClosed().subscribe(res => {
       if (res) {
-        this.mapOfCompControl[comp.code].patchValue(res);
+        const target = this.mapOfCompControl[comp.code] as FormGroup;
+        target.patchValue(res);
+        const propertyListControls: Array<AbstractControl> = [];
+        if (res && res.propertyList && res.propertyList.length > 0) {
+          for (const property of res.propertyList) {
+            propertyListControls.push(this.createDeviceDataControl(property));
+          }
+        }
+        target.controls.propertyList = this.fb.array(propertyListControls);
+        target.updateValueAndValidity();
         this.setMapOfExpandedComp();
+        this.cd.markForCheck();
+        this.cd.detectChanges();
       }
     });
   }
-  deleteDeviceComp(comp: DeviceCompTreeNode) {
+  viewDeviceComp(comp: DeviceCompTreeNode) {
+    this.dialog.open<DeviceCompFormComponent, DeviceCompDialogData, DeviceComp>(DeviceCompFormComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        compInfo: { ...comp, isView: true },
+        dataDictionaries: this.entitiesTableConfig.componentsData.dataDictionaries
+      }
+    });
+  }
+  deleteDeviceComp(event: MouseEvent, comp: DeviceCompTreeNode) {
+    event.stopPropagation();
+    event.preventDefault();
     let array: FormArray;
     if (comp.parent) {
       array = this.mapOfCompControl[comp.parent.code].get('componentList') as FormArray;

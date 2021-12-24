@@ -43,7 +43,7 @@ import { CustomerService } from '@core/http/customer.service';
 import { Customer } from '@app/shared/models/customer.model';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { BroadcastService } from '@core/services/broadcast.service';
-import { DeviceTableHeaderComponent } from '@modules/home/pages/device/device-table-header.component';
+import { DeviceTableFilterComponent } from '@app/modules/home/pages/device/device-table-filter.component';
 import { MatDialog } from '@angular/material/dialog';
 import {
   DeviceCredentialsDialogComponent,
@@ -69,6 +69,7 @@ import {
   AddEntitiesToEdgeDialogComponent,
   AddEntitiesToEdgeDialogData
 } from '@home/dialogs/add-entities-to-edge-dialog.component';
+import { DistributeDeviceComponent, DistributeDeviceDialogData } from '../../custom-pages/device-mng/factory-mng/distribute-device.component';
 
 @Injectable()
 export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<DeviceInfo>> {
@@ -86,7 +87,6 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
               private homeDialogs: HomeDialogsService,
               private translate: TranslateService,
               private datePipe: DatePipe,
-              private router: Router,
               private dialog: MatDialog) {
 
     this.config.entityType = EntityType.DEVICE;
@@ -102,6 +102,9 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     this.config.deleteEntitiesTitle = count => this.translate.instant('device.delete-devices-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('device.delete-devices-text');
 
+    this.config.refreshEnabled = false;
+    this.config.searchEnabled = false;
+
     this.config.loadEntity = id => this.deviceService.getDeviceInfo(id.id);
     this.config.saveEntity = device => {
       return this.deviceService.saveDevice(device).pipe(
@@ -115,7 +118,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     this.config.detailsReadonly = () =>
       (this.config.componentsData.deviceScope === 'customer_user' || this.config.componentsData.deviceScope === 'edge_customer_user');
 
-    this.config.headerComponent = DeviceTableHeaderComponent;
+    this.config.filterComponent = DeviceTableFilterComponent;
 
   }
 
@@ -124,6 +127,9 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     this.config.componentsData = {
       deviceScope: route.data.devicesType,
       deviceProfileId: null,
+      deviceName: '',
+      type: '',
+      isAllot: '',
       deviceCredentials$: new Subject<DeviceCredentials>(),
       edgeId: routeParams.edgeId
     };
@@ -173,13 +179,16 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
   configureColumns(deviceScope: string): Array<EntityTableColumn<DeviceInfo>> {
     const columns: Array<EntityTableColumn<DeviceInfo>> = [
       new DateEntityTableColumn<DeviceInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),
-      new EntityTableColumn<DeviceInfo>('name', 'device.name', '25%'),
-      new EntityTableColumn<DeviceInfo>('deviceProfileName', 'device-profile.device-profile', '25%'),
-      new EntityTableColumn<DeviceInfo>('label', 'device.label', '25%')
+      new EntityTableColumn<DeviceInfo>('name', 'device.name', '20%'),
+      new EntityTableColumn<DeviceInfo>('type', 'device-profile.device-profile', '20%'),
+      new EntityTableColumn<DeviceInfo>('factoryName', 'device-mng.factory', '20%'),
+      new EntityTableColumn<DeviceInfo>('workshopName', 'device-mng.work-shop', '20%'),
+      new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%')
+      // new EntityTableColumn<DeviceInfo>('label', 'device.label', '25%')
     ];
     if (deviceScope === 'tenant') {
       columns.push(
-        new EntityTableColumn<DeviceInfo>('customerTitle', 'customer.customer', '25%'),
+        // new EntityTableColumn<DeviceInfo>('customerTitle', 'customer.customer', '25%'),
         new EntityTableColumn<DeviceInfo>('customerIsPublic', 'device.public', '60px',
           entity => {
             return checkBoxCell(entity.customerIsPublic);
@@ -196,20 +205,21 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
   }
 
   configureEntityFunctions(deviceScope: string): void {
+    this.config.entitiesFetchFunction = pageLink => this.deviceService.getDeviceInfos(pageLink, this.config.componentsData);
     if (deviceScope === 'tenant') {
-      this.config.entitiesFetchFunction = pageLink =>
-        this.deviceService.getTenantDeviceInfosByDeviceProfileId(pageLink,
-          this.config.componentsData.deviceProfileId !== null ?
-            this.config.componentsData.deviceProfileId.id : '');
+      // this.config.entitiesFetchFunction = pageLink =>
+      //   this.deviceService.getTenantDeviceInfosByDeviceProfileId(pageLink,
+      //     this.config.componentsData.deviceProfileId !== null ?
+      //       this.config.componentsData.deviceProfileId.id : '');
       this.config.deleteEntity = id => this.deviceService.deleteDevice(id.id);
     } else if (deviceScope === 'edge' || deviceScope === 'edge_customer_user') {
       this.config.entitiesFetchFunction = pageLink =>
         this.deviceService.getEdgeDevices(this.config.componentsData.edgeId, pageLink, this.config.componentsData.edgeType);
     } else {
-      this.config.entitiesFetchFunction = pageLink =>
-        this.deviceService.getCustomerDeviceInfosByDeviceProfileId(this.customerId, pageLink,
-          this.config.componentsData.deviceProfileId !== null ?
-            this.config.componentsData.deviceProfileId.id : '');
+      // this.config.entitiesFetchFunction = pageLink =>
+      //   this.deviceService.getCustomerDeviceInfosByDeviceProfileId(this.customerId, pageLink,
+      //     this.config.componentsData.deviceProfileId !== null ?
+      //       this.config.componentsData.deviceProfileId.id : '');
       this.config.deleteEntity = id => this.deviceService.unassignDeviceFromCustomer(id.id);
     }
   }
@@ -225,17 +235,23 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
           onAction: ($event, entity) => this.makePublic($event, entity)
         },
         {
-          name: this.translate.instant('device.assign-to-customer'),
-          icon: 'assignment_ind',
+          name: this.translate.instant('device-mng.distribute-device'),
+          mdiIcon: 'mdi:distribute',
           isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
-          onAction: ($event, entity) => this.assignToCustomer($event, [entity.id])
+          onAction: ($event, entity) => this.distributeDevice($event, [entity.id], entity.additionalInfo && entity.additionalInfo.gateway)
         },
-        {
-          name: this.translate.instant('device.unassign-from-customer'),
-          icon: 'assignment_return',
-          isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
-          onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
-        },
+        // {
+        //   name: this.translate.instant('device.assign-to-customer'),
+        //   icon: 'assignment_ind',
+        //   isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
+        //   onAction: ($event, entity) => this.assignToCustomer($event, [entity.id])
+        // },
+        // {
+        //   name: this.translate.instant('device.unassign-from-customer'),
+        //   icon: 'assignment_return',
+        //   isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
+        //   onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
+        // },
         {
           name: this.translate.instant('device.make-private'),
           icon: 'reply',
@@ -439,6 +455,22 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     );
   }
 
+  distributeDevice($event: Event, deviceIds: Array<DeviceId>, factoryOnly: boolean = false) {
+    if ($event) {
+      $event.stopPropagation();
+    }
+    this.dialog.open<DistributeDeviceComponent, DistributeDeviceDialogData>(DistributeDeviceComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        deviceIdList: deviceIds.map(item => (item.id)),
+        factoryOnly
+      }
+    }).afterClosed().subscribe(res => {
+      res && this.config.table.updateData();
+    });
+  }
+
   assignToCustomer($event: Event, deviceIds: Array<DeviceId>) {
     if ($event) {
       $event.stopPropagation();
@@ -543,6 +575,9 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
     switch (action.action) {
       case 'makePublic':
         this.makePublic(action.event, action.entity);
+        return true;
+      case 'distributeDevice':
+        this.distributeDevice(action.event, [action.entity.id], action.entity.additionalInfo && action.entity.additionalInfo.gateway);
         return true;
       case 'assignToCustomer':
         this.assignToCustomer(action.event, [action.entity.id]);

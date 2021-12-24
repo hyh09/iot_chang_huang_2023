@@ -129,7 +129,7 @@ export class AlarmRulesComponent extends EntityComponent<AlarmRuleInfo> {
         firmwareId: [entity ? entity.firmwareId : null],
         softwareId: [entity ? entity.softwareId : null],
         description: [entity ? entity.description : '', []],
-        dictDeviceIdList: [entity ? (entity.dictDeviceIdList || []) : []]
+        // dictDeviceIdList: [entity ? (entity.dictDeviceIdList || []) : []]
       }
     );
     form.get('type').valueChanges.subscribe(() => {
@@ -209,7 +209,7 @@ export class AlarmRulesComponent extends EntityComponent<AlarmRuleInfo> {
     this.entityForm.patchValue({firmwareId: entity.firmwareId}, {emitEvent: false});
     this.entityForm.patchValue({softwareId: entity.softwareId}, {emitEvent: false});
     this.entityForm.patchValue({description: entity.description}, {emitEvent: false});
-    this.entityForm.patchValue({dictDeviceIdList: entity.dictDeviceIdList || []}, {emitEvent: false});
+    // this.entityForm.patchValue({dictDeviceIdList: entity.dictDeviceIdList || []}, {emitEvent: false});
   }
 
   prepareFormValue(formValue: any): any {

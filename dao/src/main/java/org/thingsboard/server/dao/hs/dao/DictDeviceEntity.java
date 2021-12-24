@@ -2,9 +2,11 @@ package org.thingsboard.server.dao.hs.dao;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
@@ -95,6 +97,12 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
     @Column(name = HsModelConstants.DICT_DEVICE_PICTURE)
     private String picture;
 
+    /**
+     * 是否默认
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_IS_DEFAULT)
+    private Boolean isDefault;
+
     public DictDeviceEntity() {
     }
 
@@ -102,6 +110,13 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         super();
         this.id = id;
         this.name = name;
+    }
+
+    public DictDeviceEntity(UUID id, String name, boolean isDefault) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.isDefault = isDefault;
     }
 
     public DictDeviceEntity(DictDevice common) {
@@ -119,6 +134,10 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         this.comment = common.getComment();
         this.icon = common.getIcon();
         this.picture = common.getPicture();
+        if (this.isDefault != null)
+            this.isDefault = common.getIsDefault();
+        else
+            this.isDefault = Boolean.FALSE;
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -142,6 +161,7 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         common.setComment(comment);
         common.setIcon(icon);
         common.setPicture(picture);
+        common.setIsDefault(isDefault);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

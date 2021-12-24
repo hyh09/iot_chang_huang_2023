@@ -262,5 +262,23 @@ public class CommonUtils {
     }
 
 
+    //判断是否是当天的时间
+    //判断是否是当天的时间
+    public static Boolean  isItToday(long  time)
+    {
+        long    todayZero =  getZero();
+        long  now =getNowTime();
+        if(time>=todayZero &&  time <=now)
+        {
+            return true;
+        }
+
+        return  false;
+
+    }
+
+
+
+
 
 }

@@ -9,9 +9,15 @@ package org.thingsboard.server.dao.hs;
 public class HSConstants {
     public static final String NULL_STR = "null";
     public static final String CREATED_TIME = "createdTime";
+    public static final String DESC = "desc";
+    public static final String ASC = "asc";
+    public static final String TS = "ts";
     public static final String UNGROUPED = "未分组";
     public static final String CODE_PREFIX_DICT_DATA = "SJZD";
     public static final String CODE_PREFIX_DICT_DEVICE = "SBZD";
     public static final String CODE_PREFIX_DICT_DEVICE_COMPONENT = "SBBJ";
     public static final String ATTR_ACTIVE = "active";
+    public static final String ATTR_DEVICE_ID = "attrDeviceId";
+    public static final String FILE_STR = "file";
+    public static final String TEMP_STR = "temp";
 }

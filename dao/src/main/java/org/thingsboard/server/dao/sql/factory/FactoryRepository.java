@@ -33,6 +33,8 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
 
     Optional<FactoryEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
+    List<FactoryEntity> findAllByTenantIdOrderByCreatedTimeDesc(UUID tenantId);
+
 //    @Query("SELECT org.thingsboard.server.dao.model.sql.FactoryInfoEntity(f,w,p) " +
 //            "FROM FactoryEntity f " +
 //            "LEFT JOIN WorkshopEntity w on f.id = w.factoryId " +
@@ -50,13 +52,6 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
     @Query(value = "select * from hs_factory where if(?1!='',name=?1,1=1) and if(?2!='',code=?2,1=1)" ,nativeQuery = true)
     List<FactoryEntity> findFactoryListBuyCdn(@Param("name") String name,@Param("code") String code );
 
-    /**
-     * 根据工厂管理员查询
-     * @param factoryAdminId
-     * @return
-     */
-    @Query("SELECT t FROM FactoryEntity t WHERE t.adminUserId = :factoryAdminId ")
-    Factory findFactoryByAdmin(@Param("factoryAdminId")UUID factoryAdminId);
 
     /**
      * 根据租户查询

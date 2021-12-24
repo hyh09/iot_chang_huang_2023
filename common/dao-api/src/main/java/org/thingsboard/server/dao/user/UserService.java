@@ -69,6 +69,16 @@ public interface UserService {
     PageData<User> findUsersByTenantId(TenantId tenantId, PageLink pageLink);
 
     PageData<User> findTenantAdmins(TenantId tenantId, PageLink pageLink);
+
+	/**
+	 * 查询工厂管理员
+	 * @param tenantId
+	 * @param factoryId
+	 * @param userCode
+	 * @param userName
+	 * @return
+	 */
+	PageData<User> findFactoryAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName,PageLink pageLink);
 	
 	void deleteTenantAdmins(TenantId tenantId);
 
@@ -89,4 +99,7 @@ public interface UserService {
 	public List<String> findAllCodesByTenantId(UUID tenantId);
 
 	Object  changeOthersPassword(PasswordVo vo);
+
+
+	 int updateEnableByUserId(UUID userId, boolean enabled);
 }

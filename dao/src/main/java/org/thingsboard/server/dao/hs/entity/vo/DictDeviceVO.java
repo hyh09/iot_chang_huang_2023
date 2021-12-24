@@ -22,6 +22,12 @@ public class DictDeviceVO {
     @ApiModelProperty(value = "设备字典Id,null或空则为新增")
     private String id;
 
+    @ApiModelProperty(value = "3d模型文件Id")
+    private String fileId;
+
+    @ApiModelProperty(value = "3d模型文件名", notes = "仅用于显示")
+    private String fileName;
+
     @NotNull
     @ApiModelProperty(value = "编码", required = true)
     private String code;
@@ -65,4 +71,8 @@ public class DictDeviceVO {
     @Valid
     @ApiModelProperty(value = "部件列表")
     private List<DictDeviceComponentVO> componentList;
+
+    @Valid
+    @ApiModelProperty(value = "标准属性列表")
+    private List<DictDeviceStandardPropertyVO> standardPropertyList;
 }

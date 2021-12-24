@@ -2,12 +2,13 @@ import { Injectable } from "@angular/core";
 import { Resolve, Router } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";
 import { EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeTranslations, entityTypeResources } from "@app/shared/public-api";
+import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
 import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
 import { map } from 'rxjs/operators';
 import { Observable, Observer } from "rxjs";
 import { EnergyConsumptionOverviewComponent } from "./energy-consumption-overview.component";
+import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
 
 @Injectable()
 export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTableConfig<any>> {
@@ -32,6 +33,7 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       workshopId: '',
       productionLineId: '',
       deviceId: '',
+      dateRange: null,
       totalValue: []
     };
 
@@ -44,11 +46,13 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
   }
 
   resolve(): Observable<EntityTableConfig<any>> {
+    const now = new Date();
     this.config.componentsData = {
       factoryId: '',
       workshopId: '',
       productionLineId: '',
       deviceId: '',
+      dateRange: [now, now],
       totalValue: []
     };
     return new Observable((observer: Observer<EntityTableConfig<any>>) => {
@@ -60,17 +64,22 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
         this.config.detailsPanelEnabled = false;
         this.config.entitiesDeleteEnabled = false;
         this.config.selectionEnabled = false;
-        this.config.useTimePageLink = true;
-        this.config.timeWindowInFilter = true;
 
         this.config.columns = [];
         (res || []).forEach((col, index) => {
-          this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col]), () => ({}), false));
+          this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col] || ''), () => ({}), false));
         });
 
         this.config.entitiesFetchFunction = pageLink => {
           const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-          return this.potencyService.getEnergyConsumptionDatas(pageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
+          let startTime: number, endTime: number;
+          if (this.config.componentsData.dateRange) {
+            startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
+            endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+          }
+          const { pageSize, page, textSearch, sortOrder } = pageLink;
+          const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+          return this.potencyService.getEnergyConsumptionDatas(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
             this.config.componentsData.totalValue = res.totalValue || [];
             return res;
           }));

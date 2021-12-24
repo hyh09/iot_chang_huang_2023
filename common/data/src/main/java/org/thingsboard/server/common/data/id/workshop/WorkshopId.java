@@ -31,14 +31,14 @@ public class WorkshopId extends UUIDBased implements EntityId {
         super(id);
     }
 
-    public static WorkshopId fromString(String tenantMenuId) {
-        return new WorkshopId(UUID.fromString(tenantMenuId));
+    public static WorkshopId fromString(String workshopId) {
+        return new WorkshopId(UUID.fromString(workshopId));
     }
 
     @JsonIgnore
     @Override
     public EntityType getEntityType() {
-        return EntityType.TENANT_MENU;
+        return EntityType.WORKSHOP;
     }
 
 }

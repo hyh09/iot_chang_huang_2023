@@ -46,6 +46,11 @@ public abstract class DataValidator<D extends BaseData<?>> {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
 
+    //只允许字母和数字的
+    public static final String ONLY_LETTER_OR_NUMBER = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]*";
+
+
+
     private static Validator fieldsValidator;
 
     static {
@@ -91,9 +96,34 @@ public abstract class DataValidator<D extends BaseData<?>> {
 
     public static void validateEmail(String email) {
         if (!doValidateEmail(email)) {
-            throw new DataValidationException("Invalid email address format '" + email + "'!");
+//            throw new DataValidationException("Invalid email address format '" + email + "'!");
+            throw new DataValidationException("无效的邮箱格式【 " + email + "】!");
+
         }
     }
+
+    /**
+     * 校验编码 例如：用户的编码  角色的编码 只允许为:  字母+数字
+     * @param code
+     */
+    public  static  void validateCode(String code)
+    {
+       if(!doValidateCode(code))
+       {
+           throw new DataValidationException("无效的格式【 " + code + "】！编码要为 字母和数字的组合！");
+       }
+    }
+
+
+    private  static  boolean doValidateCode(String code)
+    {
+        if(code ==  null)
+        {
+            return  false;
+        }
+      return code.matches(ONLY_LETTER_OR_NUMBER);
+    }
+
 
     private static boolean doValidateEmail(String email) {
         if (email == null) {

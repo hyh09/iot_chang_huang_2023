@@ -32,16 +32,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.thingsboard.rule.engine.api.MailService;
 import org.thingsboard.rule.engine.api.TbEmail;
-import org.thingsboard.server.common.data.AdminSettings;
-import org.thingsboard.server.common.data.ApiFeature;
-import org.thingsboard.server.common.data.ApiUsageRecordKey;
-import org.thingsboard.server.common.data.ApiUsageStateMailMessage;
-import org.thingsboard.server.common.data.ApiUsageStateValue;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.enums.LanguageTypeEnums;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.settings.AdminSettingsService;
 import org.thingsboard.server.queue.usagestats.TbApiUsageClient;
@@ -50,6 +47,7 @@ import org.thingsboard.server.service.apiusage.TbApiUsageStateService;
 import javax.annotation.PostConstruct;
 import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -184,17 +182,20 @@ public class DefaultMailService implements MailService {
     }
 
     @Override
-    public void sendActivationEmail(String activationLink, String email) throws ThingsboardException {
-
-        String subject = messages.getMessage("activation.subject", null, Locale.US);
-
-        Map<String, Object> model = new HashMap<>();
-        model.put("activationLink", activationLink);
-        model.put(TARGET_EMAIL, email);
-
-        String message = mergeTemplateIntoString("activation.ftl", model);
-
-        sendMail(mailSender, mailFrom, email, subject, message);
+    public void sendActivationEmail(String activationLink, String email, JsonNode additionalInfo) throws ThingsboardException {
+        try {
+            LanguageTypeEnums enums = LanguageTypeEnums.getLocaleByType(additionalInfo);
+            String subject = messages.getMessage("activation.subject", null, enums.getLocale());
+            Map<String, Object> model = new HashMap<>();
+            model.put("activationLink", activationLink);
+            model.put(TARGET_EMAIL, email);
+            String templateLocation = "activation"+enums.getFileSuffix()+".ftl";
+            String message = mergeTemplateIntoString(templateLocation, model);
+            sendMail(mailSender, mailFrom, email, subject, message);
+        }catch (Exception  e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -213,15 +214,11 @@ public class DefaultMailService implements MailService {
 
     @Override
     public void sendResetPasswordEmail(String passwordResetLink, String email) throws ThingsboardException {
-
-        String subject = messages.getMessage("reset.password.subject", null, Locale.US);
-
+        String subject = messages.getMessage("reset.password.subject", null, Locale.SIMPLIFIED_CHINESE);
         Map<String, Object> model = new HashMap<>();
         model.put("passwordResetLink", passwordResetLink);
         model.put(TARGET_EMAIL, email);
-
-        String message = mergeTemplateIntoString("reset.password.ftl", model);
-
+        String message = mergeTemplateIntoString("reset.passwordZhCH.ftl", model);
         sendMail(mailSender, mailFrom, email, subject, message);
     }
 
