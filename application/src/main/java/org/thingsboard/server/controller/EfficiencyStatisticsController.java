@@ -100,7 +100,7 @@ public class EfficiencyStatisticsController extends BaseController {
             }
             PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), "", "", "");
             queryTsKvVo.setTenantId(getTenantId().getId());
-            return efficiencyStatisticsSvc.queryAppEntityByKeysNewMethod(queryTsKvVo, getTenantId(),pageLink);
+            return efficiencyStatisticsSvc.queryAppEntityByKeysNewMethod(queryTsKvVo, getTenantId(),pageLink,true);
         }catch (Exception e)
         {
             e.printStackTrace();
