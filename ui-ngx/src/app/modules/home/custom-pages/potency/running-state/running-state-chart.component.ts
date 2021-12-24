@@ -1,4 +1,5 @@
-import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
+import { viewPortResize } from '@app/core/utils';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
 
@@ -7,7 +8,7 @@ import * as echarts from 'echarts';
   template: `<div #runningStateChart class="running-state-chart"></div>`,
   styleUrls: ['./running-state-chart.component.scss']
 })
-export class RunningStateChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class RunningStateChartComponent implements AfterViewInit, OnChanges {
 
   @Input() title: string;
   @Input() unit: string;
@@ -23,14 +24,12 @@ export class RunningStateChartComponent implements AfterViewInit, OnDestroy, OnC
 
   ngAfterViewInit() {
     this.chart = echarts.init(this.runningStateChart.nativeElement, null, { locale: 'ZH' });
-    window.addEventListener('resize', this.chart.resize);
+    viewPortResize.subscribe(() => {
+      this.chart.resize();
+    });
     setTimeout(() => {
       this.init();
     });
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('resize', this.chart.resize);
   }
 
   ngOnChanges() {

@@ -38,7 +38,7 @@ import {
   selectTenantUI
 } from "@core/custom/tenant-ui.selectors";
 import { ActivatedRoute, Router } from '@angular/router';
-import { MenuService } from '@app/core/public-api';
+import { MenuService, viewPortResize } from '@app/core/public-api';
 import { Authority } from '@app/shared/public-api';
 
 const screenfull = _screenfull as _screenfull.Screenfull;
@@ -143,6 +143,9 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
         })
       )
       .subscribe();
+    window.addEventListener('resize', () => {
+      viewPortResize.next(null);
+    });
   }
 
   sidenavClicked() {
@@ -151,9 +154,17 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
     }
   }
 
+  toggleSideNav() {
+    this.sidenav.toggle();
+    setTimeout(() => {
+      viewPortResize.next(null);
+    }, 300);
+  }
+
   toggleFullscreen() {
     if (screenfull.isEnabled) {
       screenfull.toggle();
+      viewPortResize.next(null);
     }
   }
 
