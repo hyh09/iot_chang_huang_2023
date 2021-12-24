@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
+import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
@@ -681,7 +682,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public ResultHomeCapAppVo queryThreePeriodsCapacity(TsSqlDayVo vo) {
         ResultHomeCapAppVo  resultVO = new ResultHomeCapAppVo();
-        vo.setStartTime(CommonUtils.getYesterdayZero());
+        if(vo.getStartTime() ==  null)  //如果有值，则是看板的调用
+        {
+            vo.setStartTime(CommonUtils.getYesterdayZero());
+        }
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
         Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
         LocalDate   localDate=  LocalDate.now();
@@ -699,6 +703,56 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             resultVO.setHistory(StringUtilToll.roundUp(nowDate.getHistoryCapacity()));
         }
         return resultVO;
+    }
+
+
+    /**
+     * 今天 昨天 历史的 能耗  app
+     * @param vo
+     * @return
+     */
+    @Override
+    public ResultHomeEnergyAppVo queryAppThreePeriodsEnergy(TsSqlDayVo vo) {
+        ResultHomeEnergyAppVo  resultHomeEnergyAppVo  = new  ResultHomeEnergyAppVo();
+        Map<String,String> yesterdayMap  = new HashMap<>();
+        Map<String,String> todayMap  = new HashMap<>();
+        Map<String,String> historyMap  = new HashMap<>();
+
+        if(vo.getStartTime() ==  null)  //如果有值，则是看板的调用
+        {
+            vo.setStartTime(CommonUtils.getYesterdayZero());
+        }
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
+        LocalDate   localDate=  LocalDate.now();
+        LocalDate yesterday = localDate.plusDays(-1);
+        CensusSqlByDayEntity  data01 = appleMap.get(yesterday);
+//        if(data01 != null)
+//        {
+                yesterdayMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null?StringUtilToll.roundUp(data01.getIncrementWater()):"0"));
+                yesterdayMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ? StringUtilToll.roundUp(data01.getIncrementElectric()):"0"));
+                yesterdayMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getIncrementGas()):"0"));
+
+               historyMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryWater()):"0"));
+               historyMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryElectric()):"0"));
+               historyMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryGas()):"0"));
+//        }
+        CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
+//        if(nowDate != null)
+//        {
+       todayMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null?StringUtilToll.roundUp(data01.getIncrementWater()):"0"));
+       todayMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ? StringUtilToll.roundUp(data01.getIncrementElectric()):"0"));
+       todayMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getIncrementGas()):"0"));
+
+
+        historyMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryWater()):"0"));
+            historyMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryElectric()):"0"));
+            historyMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryGas()):"0"));
+//        }
+        resultHomeEnergyAppVo.setHistory(historyMap);
+        resultHomeEnergyAppVo.setTodayValue(todayMap);
+        resultHomeEnergyAppVo.setYesterdayValue(yesterdayMap);
+        return resultHomeEnergyAppVo;
     }
 
     /**

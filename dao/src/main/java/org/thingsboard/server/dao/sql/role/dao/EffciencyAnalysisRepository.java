@@ -142,6 +142,12 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
         sonSql.append(sonSql01).append("  ) ");
 
+        if(vo.getEndTime() != null )
+        {
+            sonSql01.append(" and  t.endTime = :endTime");
+            param.put("endTime", vo.getEndTime());
+        }
+
         StringBuffer  sql = new StringBuffer();
         sql.append(SELECT_EVERY_DAY_SUM).append(sonSql).append("   group by  date ");
         List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_01");
