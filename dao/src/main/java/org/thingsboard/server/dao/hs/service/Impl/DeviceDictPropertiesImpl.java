@@ -55,6 +55,21 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
     }
 
     @Override
+    public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVoByTitle() {
+        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
+            voList.stream().forEach(vo1->{
+                nameMap.put(vo1.getTitle(),vo1);
+            });
+        }
+        return  nameMap;
+    }
+
+
+    @Override
     public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
         Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
         List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();

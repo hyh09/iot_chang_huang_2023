@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, TimePageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { DeviceCapacityList, DeviceEnergyConsumptionList, RunningState } from '@app/shared/models/custom/potency.models';

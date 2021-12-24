@@ -1,9 +1,6 @@
 package org.thingsboard.server.dao.hs.service;
 
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 
 import java.util.List;
@@ -38,6 +35,11 @@ public interface DeviceDictPropertiesSvc {
      * @return
      */
     Map<String,DictDeviceGroupPropertyVO> getMapPropertyVo();
+
+    /**
+     *通过标题取数据
+     */
+    Map<String,DictDeviceGroupPropertyVO> getMapPropertyVoByTitle();
 
     /**
      * 获取初始化单位数据
