@@ -20,7 +20,7 @@ metadata:
   name: tb-js-executor
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-js-executor
@@ -58,7 +58,7 @@ metadata:
   name: tb-mqtt-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-mqtt-transport
@@ -136,7 +136,7 @@ metadata:
   name: tb-http-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-http-transport
@@ -211,7 +211,7 @@ metadata:
   name: tb-coap-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-coap-transport
@@ -280,7 +280,7 @@ metadata:
   name: tb-lwm2m-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-lwm2m-transport
@@ -349,7 +349,7 @@ metadata:
   name: tb-web-ui
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-web-ui
