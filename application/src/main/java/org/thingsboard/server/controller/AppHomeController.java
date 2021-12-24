@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
@@ -163,7 +164,8 @@ public class AppHomeController extends BaseController{
         }
         queryTsKvVo.setStartTime(startTime);
         queryTsKvVo.setEndTime(EndTime);
-        ResultEnergyAppVo resultEnergyAppVo =   efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId(),false);
+        PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), "", "", "");
+        ResultEnergyAppVo resultEnergyAppVo =   efficiencyStatisticsSvc.queryAppEntityByKeysNewMethod(queryTsKvVo,getTenantId(),pageLink,false);
         if(resultEnergyAppVo != null)
         {
             return  resultEnergyAppVo.getTotalValue();
