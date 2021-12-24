@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -79,6 +80,11 @@ public class JpaSqlTool {
     {
         Query query = null;
         query= entityManager.createNativeQuery(sql.toString(),resultSetMapping);
+        if(!CollectionUtils.isEmpty(param)) {
+            for (Map.Entry<String, Object> entry : param.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+        }
         List<T> list = query.getResultList();
         return  list;
     }

@@ -145,7 +145,7 @@ public class StringUtilToll {
          }
         BigDecimal b = new BigDecimal(num);
         //保留4位小数
-        BigDecimal result = b.setScale(4, BigDecimal.ROUND_HALF_UP);
+        BigDecimal result = b.setScale(2, BigDecimal.ROUND_HALF_UP);
         if (result.compareTo(BigDecimal.ZERO) == -1){
             return  "0";
         }
@@ -175,6 +175,9 @@ public class StringUtilToll {
         LocalDate localDate = Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.ofHours(8)).toLocalDate();
         return  localDate;
     }
+
+
+
 
 
 
