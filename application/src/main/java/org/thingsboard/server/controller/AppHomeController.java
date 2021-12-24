@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
@@ -49,10 +50,14 @@ public class AppHomeController extends BaseController{
         ResultHomeCapAppVo result = new ResultHomeCapAppVo();
 
         try {
-            result.setTodayValue(getValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(getValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
-            return result;
+            TsSqlDayVo tsSqlDayVo = new  TsSqlDayVo();
+            tsSqlDayVo.setFactoryId(factoryId);
+            tsSqlDayVo.setTenantId(getTenantId().getId());
+           return efficiencyStatisticsSvc.queryThreePeriodsCapacity(tsSqlDayVo);
+//            result.setTodayValue(getValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+//            result.setYesterdayValue(getValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+//            result.setHistory(getValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+//            return result;
         }catch (Exception e)
         {
             e.printStackTrace();

@@ -20,6 +20,7 @@ import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
@@ -47,15 +48,18 @@ import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectHistoryKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -666,6 +670,35 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
             return new  DeviceDictionaryPropertiesVo(dataVo.getName(),title,dataVo.getUnit());
         }).collect(Collectors.toList());
+    }
+
+
+    /**
+     * 昨天 今天 历史的产能接口
+     * @param vo
+     * @return
+     */
+    @Override
+    public ResultHomeCapAppVo queryThreePeriodsCapacity(TsSqlDayVo vo) {
+        ResultHomeCapAppVo  resultVO = new ResultHomeCapAppVo();
+        vo.setStartTime(CommonUtils.getYesterdayZero());
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
+        LocalDate   localDate=  LocalDate.now();
+        LocalDate yesterday = localDate.plusDays(-1);
+        CensusSqlByDayEntity  data01 = appleMap.get(yesterday);
+        if(data01 != null)
+        {
+            resultVO.setYesterdayValue(StringUtilToll.roundUp(data01.getIncrementCapacity()));
+            resultVO.setHistory(StringUtilToll.roundUp(data01.getHistoryCapacity()));
+        }
+        CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
+        if(nowDate != null)
+        {
+            resultVO.setTodayValue(StringUtilToll.roundUp(nowDate.getIncrementCapacity()));
+            resultVO.setHistory(StringUtilToll.roundUp(nowDate.getHistoryCapacity()));
+        }
+        return resultVO;
     }
 
     /**
