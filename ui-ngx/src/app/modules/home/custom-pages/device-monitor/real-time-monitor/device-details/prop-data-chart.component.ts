@@ -1,4 +1,5 @@
-import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
+import { viewPortResize } from '@app/core/utils';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
@@ -10,7 +11,7 @@ import * as echarts from 'echarts';
             </div>`,
   styleUrls: ['../chart.component.scss']
 })
-export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class PropDataChartComponent implements AfterViewInit, OnChanges {
   
   @Input() propName: string;
   @Input() data: DeviceProp[];
@@ -23,11 +24,9 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
 
   ngAfterViewInit() {
     this.chart = echarts.init(this.propDataChart.nativeElement);
-    window.addEventListener('resize', this.chart.resize);
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('resize', this.chart.resize);
+    viewPortResize.subscribe(() => {
+      this.chart.resize();
+    });
   }
 
   ngOnChanges() {

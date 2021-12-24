@@ -1,6 +1,7 @@
 import { TranslateService } from '@ngx-translate/core';
-import { AfterViewInit, Component, ElementRef, Input, ViewChild, OnChanges, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, ViewChild, OnChanges } from '@angular/core';
 import * as echarts from 'echarts';
+import { viewPortResize } from '@app/core/utils';
 
 @Component({
   selector: 'tb-run-state-chart',
@@ -9,7 +10,7 @@ import * as echarts from 'echarts';
             </div>`,
   styleUrls: ['./chart.component.scss']
 })
-export class RunStateChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class RunStateChartComponent implements AfterViewInit, OnChanges {
 
   @Input() data: {
     onLineDeviceCount: number;
@@ -24,11 +25,12 @@ export class RunStateChartComponent implements AfterViewInit, OnDestroy, OnChang
 
   ngAfterViewInit() {
     this.chart = echarts.init(this.runStateChart.nativeElement);
-    window.addEventListener('resize', this.chart.resize);
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('resize', this.chart.resize);
+    viewPortResize.subscribe(() => {
+      this.chart.resize();
+      setTimeout(() => {
+        this.chart.resize();
+      }, 100);
+    });
   }
 
   ngOnChanges() {
