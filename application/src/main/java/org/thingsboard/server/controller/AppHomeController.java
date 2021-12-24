@@ -86,10 +86,13 @@ public class AppHomeController extends BaseController{
         ResultHomeEnergyAppVo result = new ResultHomeEnergyAppVo();
 
         try {
-            result.setTodayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
-            return result;
+             TsSqlDayVo vo = TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
+                    vo.setTenantId(getTenantId().getId());
+            return  efficiencyStatisticsSvc.queryAppThreePeriodsEnergy(vo);
+//            result.setTodayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+//            result.setYesterdayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+//            result.setHistory(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+//            return result;
         }catch (Exception e)
         {
             e.printStackTrace();

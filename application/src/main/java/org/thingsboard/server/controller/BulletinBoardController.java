@@ -113,6 +113,7 @@ public class BulletinBoardController extends BaseController{
     public List<ConsumptionVo> totalEnergyConsumption(
           @RequestBody  QueryTsKvVo  vo
     ) throws ThingsboardException {
+        log.info("=====QueryTsKvVo.totalEnergyConsumption==>:"+vo);
         try {
             if(vo.getEndTime() == null )
             {

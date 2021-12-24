@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.ToString;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.id.TenantId;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  * @create: 2021-12-24 10:27
  **/
 @Data
-@ToString
+
 @ApiModel(value = "查询产能的入参实体")
 public class TsSqlDayVo extends  AbstractDeviceVo{
 
@@ -65,4 +66,30 @@ public class TsSqlDayVo extends  AbstractDeviceVo{
     }
 
 
+
+    public  static  TsSqlDayVo  constructionByQueryTsKvVo(QueryTsKvVo queryTsKvVo, TenantId tenantId)
+    {
+        TsSqlDayVo vo = new TsSqlDayVo();
+        vo.setTenantId(tenantId.getId());
+        vo.setFactoryId(queryTsKvVo.getFactoryId());
+        vo.setWorkshopId(queryTsKvVo.getWorkshopId());
+        vo.setProductionLineId(queryTsKvVo.getProductionLineId());
+        vo.setDeviceId(queryTsKvVo.getDeviceId());
+        return  vo;
+
+    }
+
+
+    @Override
+    public String toString() {
+        return "TsSqlDayVo{" +
+                "startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", deviceId=" + deviceId +
+                ", productionLineId=" + productionLineId +
+                ", workshopId=" + workshopId +
+                ", factoryId=" + factoryId +
+                ", tenantId=" + tenantId +
+                '}';
+    }
 }

@@ -31,7 +31,7 @@ public interface DeviceDictPropertiesSvc {
     List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name);
 
     /**
-     *
+     *初始化的数据的
      * @return
      */
     Map<String,DictDeviceGroupPropertyVO> getMapPropertyVo();

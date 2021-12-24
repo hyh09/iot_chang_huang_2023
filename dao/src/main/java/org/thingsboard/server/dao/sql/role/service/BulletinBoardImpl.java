@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
@@ -27,12 +28,14 @@ import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
-import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepository;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectMaxValueKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.SolidTrendLineEntity;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
@@ -58,6 +61,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private DictDeviceService dictDeviceService;
     @Autowired private FactoryDao factoryDao;
     @Autowired private BoardTrendChartRepository boardTrendChartRepository;  //趋势图的实线
+    @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
 
     private final  static   String ONE_HOURS="3600000";
 
@@ -98,8 +102,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * 查询总能耗的
      * @return
      */
-    @Override
-    public List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo vo, TenantId tenantId) {
+//    @Override
+    public List<ConsumptionVo> totalEnergyConsumptionOld(QueryTsKvVo vo, TenantId tenantId) {
         log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
         List<ConsumptionVo> consumptionVos  =  new ArrayList<>();
 
@@ -136,6 +140,26 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             consumptionVos.add(getTotalValue(effectTsKvEntities,str,mapNameToVo));
         });
         return consumptionVos;
+    }
+
+
+    @Override
+    public List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo v1, TenantId tenantId) {
+        List<ConsumptionVo>  result = new ArrayList<>();
+        TsSqlDayVo vo = TsSqlDayVo.constructionByQueryTsKvVo(v1,tenantId);
+        if(vo.getStartTime() ==  null )  //如果有值，则是看板的调用
+        {
+            vo.setStartTime(CommonUtils.getYesterdayZero());
+            vo.setEndTime(CommonUtils.getYesterdayLastTime());
+        }
+        log.info("==totalEnergyConsumption====>{}",vo);
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+
+        result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
+        result.add(calculationTotal(entities,KeyTitleEnums.key_cable,titleMapToVo));
+        result.add(calculationTotal(entities,KeyTitleEnums.key_gas,titleMapToVo));
+        return result;
     }
 
     @Override
@@ -407,4 +431,34 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return  trendLineVos;
     }
 
+
+
+    private  ConsumptionVo calculationTotal (List<CensusSqlByDayEntity> entities,KeyTitleEnums enums,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo )
+    {
+        ConsumptionVo  consumptionVo   = new  ConsumptionVo();
+        String value  = "0";
+        if(enums ==KeyTitleEnums.key_water ) {
+            BigDecimal water0 = entities.stream()
+                    .map(CensusSqlByDayEntity::getIncrementWater).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                            BigDecimal::add);
+             value =  water0.stripTrailingZeros().toPlainString();
+        }else  if(enums == KeyTitleEnums.key_cable ){
+            BigDecimal electric1 = entities.stream()
+                    .map(CensusSqlByDayEntity::getIncrementElectric).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                            BigDecimal::add);
+            value =  electric1.stripTrailingZeros().toPlainString();
+
+        }else {
+            BigDecimal gas2 = entities.stream()
+                    .map(CensusSqlByDayEntity::getIncrementGas).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                            BigDecimal::add);
+            value =  gas2.stripTrailingZeros().toPlainString();
+
+        }
+        consumptionVo.setValue(value);
+        consumptionVo.setTitle(enums.getgName());
+        DictDeviceGroupPropertyVO dict =     mapNameToVo.get(enums.getgName());
+        consumptionVo.setUnit(dict.getUnit());
+        return  consumptionVo;
+    }
 }

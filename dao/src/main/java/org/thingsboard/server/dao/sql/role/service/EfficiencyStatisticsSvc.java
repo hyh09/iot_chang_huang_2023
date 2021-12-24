@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
+import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
@@ -131,10 +132,15 @@ public interface EfficiencyStatisticsSvc {
 
     /*********
      *今天  昨天 历史的产能 接口
+     *  app 和 看板 共用
      */
     ResultHomeCapAppVo queryThreePeriodsCapacity(TsSqlDayVo  vo);
 
-
+    /***********
+     * 今天 昨天 历史 的能耗 【APP端】
+     *
+     */
+    ResultHomeEnergyAppVo queryAppThreePeriodsEnergy(TsSqlDayVo vo);
 
 
 
