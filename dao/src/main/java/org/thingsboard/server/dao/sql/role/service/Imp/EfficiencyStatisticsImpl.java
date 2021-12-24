@@ -405,6 +405,43 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
+    @Override
+    public ResultCapAppVo queryCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+        ResultCapAppVo  resultCapAppVo = new ResultCapAppVo();
+        //app的接口调用Pc端
+        PageDataAndTotalValue<AppDeviceCapVo>   pageDataAndTotalValue =   this.queryPCCapAppNewMethod(queryTsKvVo,tenantId,pageLink);
+        List<AppDeviceCapVo> data =   pageDataAndTotalValue.getData();
+         String totalValue =  pageDataAndTotalValue.getTotalValue().toString();
+        resultCapAppVo.setTotalValue(totalValue);
+        resultCapAppVo.setAppDeviceCapVoList(dataToConversionSvc.fillDevicePicture(data,tenantId));
+        return resultCapAppVo;
+    }
+
+    /**
+     * App端的能耗接口
+     * @param vo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+        ResultEnergyAppVo  result  = new ResultEnergyAppVo();
+        log.info("【APP端】queryAppEntityByKeysNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
+        if(vo.getFactoryId() == null)
+        {
+            vo.setFactoryId(getFirstFactory(tenantId));
+        }
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryEnergy(vo,pageLink);
+        List<EnergyEffciencyNewEntity> pageList=  page.getContent();
+        //将查询的结果返回原接口返回的对象 包含单位能耗
+        List<AppDeviceEnergyVo>  appDeviceCapVos =  dataToConversionSvc.resultProcessingByEnergyApp(pageList,mapNameToVo,tenantId);
+        result.setAppDeviceCapVoList(appDeviceCapVos);
+        result.setTotalValue(getTotalValueApp(pageList,mapNameToVo));
+        return result;
+    }
+
     /**
      * 能耗的查询
      * @param vo
@@ -567,7 +604,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             List<ResultRunStatusByDeviceVo> voList1 = map.get(str);
            if(CollectionUtils.isEmpty(voList1))
            {
-               map.put(str,new ArrayList<>());
+               map.put(str,getDefaultValue(translateMap,str));
            }
         });
       log.info("查询到的当前的数据:{}",map);
@@ -1073,6 +1110,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     private  String  computeUnitEnergyConsumption(String capacityValue,String value1,Long lastTime,Long firstTime)
     {
+     if(lastTime == null)
+     {
+         return "0";
+     }
+     if(firstTime == null)  //一般不存在
+     {
+         firstTime =0L;
+     }
         Long t3 = (lastTime - firstTime) / 60000;
         String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
         return  aDouble;
@@ -1080,29 +1125,69 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     /**
-     *
+     *Pc能耗的返回
      * @param pageList
      * @return
      */
     private   List<String>  getTotalValueNewMethod(List<EnergyEffciencyNewEntity> pageList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
     {
         List<String>  totalValueList  = new ArrayList<>();
-        BigDecimal invoiceAmount = pageList.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                .map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String waterTotalValue= StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_water,waterTotalValue));
 
-        BigDecimal invoiceAmount02 = pageList.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount02 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                .map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String electricTotalValue= StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_cable,electricTotalValue));
 
 
-        BigDecimal invoiceAmount03 = pageList.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+        BigDecimal invoiceAmount03 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
+                .map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                 BigDecimal::add);
         String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
         totalValueList.add(addTotalValueList(mapNameToVo,KeyTitleEnums.key_gas,value03));
       return  totalValueList;
+
+    }
+
+
+    /**
+     *APP能耗的返回
+     * @param pageList
+     * @return
+     */
+    private   Map<String,String>  getTotalValueApp(List<EnergyEffciencyNewEntity> pageList,Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
+    {
+        Map<String,String>  resultMap  = new HashMap<>();
+        BigDecimal invoiceAmount = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                .map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String waterTotalValue= StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
+        resultMap.put(KeyTitleEnums.key_water.getgName(),waterTotalValue);
+
+        BigDecimal invoiceAmount02 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                .map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String electricTotalValue= StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
+        resultMap.put(KeyTitleEnums.key_cable.getgName(),electricTotalValue);
+
+
+        BigDecimal invoiceAmount03 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
+                .map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
+        resultMap.put(KeyTitleEnums.key_gas.getgName(),electricTotalValue);
+        return  resultMap;
 
     }
 
@@ -1112,5 +1197,32 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         String title =StringUtils.isBlank(dvo.getTitle())?dvo.getName():dvo.getTitle();
          return (title+": "+value+ " ("+dvo.getUnit()+")");
     }
+
+
+    /**
+     * App运行状态如果没有查询到
+     * 返回默认值
+     * @return
+     */
+    private  List<ResultRunStatusByDeviceVo>  getDefaultValue(Map<String, DeviceDictionaryPropertiesVo> translateMap,String  str)
+    {
+        List<ResultRunStatusByDeviceVo>  resultList = new ArrayList<>();
+        DeviceDictionaryPropertiesVo  properties =   translateMap.get(str);
+        ResultRunStatusByDeviceVo  vo = new ResultRunStatusByDeviceVo();
+        vo.setTitle(properties.getTitle());
+        vo.setKeyName(properties.getName());
+        vo.setValue("0");
+        vo.setUnit(properties.getUnit());
+        resultList.add(vo);
+        return  resultList;
+
+    }
+
+
+
+
+
+
+
 
 }

@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.sql.role.dao.tool;
 
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
+import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 
@@ -31,15 +32,15 @@ public interface DataToConversionSvc {
      */
     String getTotalValue(List<EnergyEffciencyNewEntity> effectTsKvEntities);
 
-
     /**
-     *      * Pc端的能耗的
-     *      *    注意data返回的需要标题 和标题接口一致;
-     * @param pageList  具体的数据
-     * @param tenantId  租户id
-     * @param mapNameToVo  描述 和 单位 等
+     * 图片的处理 设备的图片
+     * @param appDeviceCapVoList
+     * @param tenantId
      * @return
      */
-    List<Map>  resultProcessingByEnergyPc(List<EnergyEffciencyNewEntity> pageList,TenantId tenantId,Map<String, DictDeviceGroupPropertyVO>  mapNameToVo);
+    List<AppDeviceCapVo>  fillDevicePicture(List<AppDeviceCapVo> appDeviceCapVoList,TenantId tenantId);
+
+
+    List<AppDeviceEnergyVo>   resultProcessingByEnergyApp(List<EnergyEffciencyNewEntity> pageList, Map<String, DictDeviceGroupPropertyVO> mapNameToVo,TenantId tenantId);
 
 }
