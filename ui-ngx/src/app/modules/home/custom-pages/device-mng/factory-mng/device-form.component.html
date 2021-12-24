@@ -25,7 +25,6 @@
             nzShowSearch
             nzPlaceHolder="{{ 'device-mng.select-device-dic-tip' | translate }}"
             nzNotFoundContent="{{ 'device-mng.no-device-dics-text' | translate }}"
-            [ngModel]="entityForm.get('dictDeviceId').value"
             (ngModelChange)="onDeviceDicChange($event)"
             (click)="$event.stopPropagation()"
             style="width: 250px;"
@@ -106,7 +105,7 @@
               </ng-container>
             </div>
           </ng-container>
-          <!--标准能耗-->
+          <!--额定能耗-->
           <ng-container *ngIf="standardPropFormArray().controls.length > 0">
             <div style="font-size: 15px; margin: 20px 0 16px;">{{ 'device-mng.standard-prop' | translate }}</div>
             <div 
@@ -121,7 +120,7 @@
                 </mat-form-field>
                 <mat-form-field class="mat-block" fxFlex>
                   <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
-                  <mat-select formControlName="dictDataId" disabled>
+                  <mat-select formControlName="dictDataId">
                     <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                     <mat-option *ngFor="let option of dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                   </mat-select>
@@ -158,7 +157,7 @@
                     </mat-form-field>
                     <mat-form-field class="mat-block">
                       <mat-label translate>device-mng.data-dic</mat-label>
-                      <mat-select formControlName="dictDataId" disabled>
+                      <mat-select formControlName="dictDataId">
                         <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                         <mat-option *ngFor="let option of dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                       </mat-select>
@@ -196,7 +195,7 @@
               <th nzWidth="100px">{{ 'device-mng.model' | translate }}</th>
               <th nzWidth="150px">{{ 'device-mng.version' | translate }}</th>
               <th nzWidth="150px">{{ 'device-mng.guarantee' | translate }}</th>
-              <th nzWidth="116px">{{ 'device-mng.comp-picture' | translate }}</th>
+              <!-- <th nzWidth="116px">{{ 'device-mng.comp-picture' | translate }}</th> -->
             </tr>
           </thead>
           <tbody>
@@ -216,11 +215,11 @@
                   <td nzBreakWord>{{ item.model }}</td>
                   <td nzBreakWord>{{ item.version }}</td>
                   <td nzBreakWord>{{ item.warrantyPeriod }}</td>
-                  <td>
+                  <!-- <td>
                     <div *ngIf="item.picture" style="padding: 5px 0;">
                       <img nz-image [nzSrc]="item.picture" style="max-width: 80px; max-height: 80px; object-fit: contain; cursor: pointer;" />
                     </div>
-                  </td>
+                  </td> -->
                 </tr>
               </ng-container>
             </ng-container>

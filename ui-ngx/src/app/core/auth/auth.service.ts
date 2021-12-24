@@ -45,7 +45,9 @@ import { ActionNotificationShow } from '@core/notification/notification.actions'
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { AlertDialogComponent } from '@shared/components/dialog/alert-dialog.component';
 import { OAuth2ClientInfo, PlatformType } from '@shared/models/oauth2.models';
-import { isDefinedAndNotNull, isMobileApp } from '@core/utils';
+import { isMobileApp } from '@core/utils';
+import {ActionTenantUIChangeAll} from "@core/custom/tenant-ui.actions";
+import {initialState} from "@core/custom/tenant-ui.reducer";
 
 @Injectable({
     providedIn: 'root'
@@ -192,6 +194,12 @@ export class AuthService {
       );
   }
 
+  private resetTheme() {
+    setTimeout(() => {
+      this.store.dispatch(new ActionTenantUIChangeAll(initialState));
+    }, 500);
+  }
+
   private notifyUserLoaded(isUserLoaded: boolean) {
     this.store.dispatch(new ActionAuthLoadUser({isUserLoaded}));
   }
@@ -243,13 +251,13 @@ export class AuthService {
     let result: UrlTree = null;
     if (isAuthenticated) {
       if (!path || path === 'login' || this.forceDefaultPlace(authState, path, params)) {
-        if (this.redirectUrl) {
-          const redirectUrl = this.redirectUrl;
-          this.redirectUrl = null;
-          result = this.router.parseUrl(redirectUrl);
-        } else {
+        // if (this.redirectUrl) {
+        //   const redirectUrl = this.redirectUrl;
+        //   this.redirectUrl = null;
+        //   result = this.router.parseUrl(redirectUrl);
+        // } else {
           result = this.router.parseUrl('home');
-        }
+        // }
         if (authState.authUser.authority === Authority.TENANT_ADMIN || authState.authUser.authority === Authority.CUSTOMER_USER) {
           if (this.userHasDefaultDashboard(authState)) {
             const dashboardId = authState.userDetails.additionalInfo.defaultDashboardId;
@@ -613,7 +621,9 @@ export class AuthService {
   }
 
   private clearJwtToken() {
-    this.setUserFromJwtToken(null, null, true);
+    this.setUserFromJwtToken(null, null, true).subscribe(() => {
+      this.resetTheme();
+    });
   }
 
   private userForceFullscreen(authPayload: AuthPayload): boolean {

@@ -1,9 +1,9 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { RequestConfig, defaultHttpOptionsFromConfig } from "@app/core/public-api";
 import { AlarmLevelType, AlarmRecord, AlarmStatusType } from "@app/shared/models/custom/device-monitor.models";
 import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 
 interface FetchListFilter {
   factoryId: string;

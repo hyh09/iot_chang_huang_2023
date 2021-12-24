@@ -1,9 +1,5 @@
 package org.thingsboard.server.dao.hs;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * 常量类
  *
@@ -13,6 +9,9 @@ import lombok.Setter;
 public class HSConstants {
     public static final String NULL_STR = "null";
     public static final String CREATED_TIME = "createdTime";
+    public static final String DESC = "desc";
+    public static final String ASC = "asc";
+    public static final String TS = "ts";
     public static final String UNGROUPED = "未分组";
     public static final String CODE_PREFIX_DICT_DATA = "SJZD";
     public static final String CODE_PREFIX_DICT_DEVICE = "SBZD";

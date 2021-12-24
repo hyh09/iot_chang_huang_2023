@@ -37,7 +37,7 @@
           {{ 'auth-mng.email-invalid' | translate }}
         </mat-error>
       </mat-form-field>
-      <mat-form-field *ngIf="entityForm.get('userLevel').value === 0" class="mat-block">
+      <mat-form-field *ngIf="isAdd && !entityForm.get('factoryId').value || !isAdd && entityForm.get('userLevel').value === 0" class="mat-block">
         <mat-label translate>auth-mng.roles</mat-label>
         <mat-select formControlName="roleIds" multiple>
           <mat-option

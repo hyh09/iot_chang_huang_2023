@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
 import org.thingsboard.server.dao.hs.entity.vo.*;
@@ -104,25 +105,65 @@ public class RTMonitorAppController extends BaseController {
     /**
      * 设备监控-实时监控-查询设备详情-分组属性历史数据
      */
-    @ApiOperation(value = "实时监控-查询设备详情-分组属性历史数据", notes = "默认一天")
+    @ApiOperation(value = "实时监控-查询设备详情-分组属性历史数据", notes = "默认当天")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
             @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true),
-            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true)
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query")
     })
     @GetMapping("/rtMonitor/device/groupProperty/history")
     public HistoryVO listRTMonitorGroupPropertyHistory(
             @RequestParam String deviceId,
             @RequestParam String groupPropertyName,
-            @RequestParam Long startTime,
-            @RequestParam Long endTime
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        checkParameter("startTime", startTime);
-        checkParameter("endTime", endTime);
+        if (startTime ==null || startTime ==0)
+            startTime = CommonUtil.getTodayStartTime();
+        if (endTime ==null || endTime ==0)
+            endTime = CommonUtil.getTodayCurrentTime();
         return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
+    }
+
+    /**
+     * 设备监控-实时监控-查询设备详情-分组属性历史数据-【分页】
+     */
+    @ApiOperation(value = "设备监控-实时监控-查询设备详情-分组属性历史数据-【分页】", notes = "默认当天")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "ts"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "groupPropertyName", value = "分组属性名称", paramType = "query", required = true),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device/groupProperty/history/page")
+    public PageData<DictDeviceGroupPropertyVO> listPageRTMonitorGroupPropertyHistory(
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false, defaultValue = "ts") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam String deviceId,
+            @RequestParam String groupPropertyName,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime
+    ) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("groupPropertyName", groupPropertyName);
+        if (startTime ==null || startTime ==0)
+            startTime = CommonUtil.getTodayStartTime();
+        if (endTime ==null || endTime ==0)
+            endTime = CommonUtil.getTodayCurrentTime();
+        if (!sortProperty.toLowerCase().contains(HSConstants.TS))
+            sortProperty = HSConstants.TS;
+        TimePageLink timePageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
+        validatePageLink(timePageLink);
+        return this.deviceMonitorService.listPageGroupPropertyHistories(getTenantId(), deviceId, groupPropertyName, timePageLink);
     }
 
     /**

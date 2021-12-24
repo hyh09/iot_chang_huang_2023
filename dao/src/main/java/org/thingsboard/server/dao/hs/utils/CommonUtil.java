@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hs.utils;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;

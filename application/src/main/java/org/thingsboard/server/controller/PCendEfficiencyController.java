@@ -20,7 +20,6 @@ import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.nio.file.LinkOption;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -69,7 +68,8 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
         try {
             QueryTsKvVo queryTsKvVo = new QueryTsKvVo(startTime, endTime, deviceId, productionLineId, workshopId, factoryId);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-            return efficiencyStatisticsSvc.queryPCCapApp(queryTsKvVo, getTenantId(), pageLink);
+            queryTsKvVo.setTenantId(getTenantId().getId());
+            return efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo, getTenantId(), pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -95,18 +95,18 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
-    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据")
+    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###老接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
             @ApiImplicitParam(name = "endTime", value = "结束时间"),
             @ApiImplicitParam(name = "deviceId", value = "设备id")
     })
-    @RequestMapping(value = "/queryEntityByKeys", method = RequestMethod.GET)
+    @RequestMapping(value = "/queryEntityByKeysTest", method = RequestMethod.GET)
     @ApiResponses({
             @ApiResponse(code = 200, message =queryEnergyHistory_messg),
     })
     @ResponseBody
-    public Object queryEntityByKeys(
+    public Object queryEntityByKeysTest(
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,
@@ -146,6 +146,62 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
+
+
+
+
+    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###新接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id")
+    })
+    @RequestMapping(value = "/queryEntityByKeys", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+    })
+    @ResponseBody
+    public Object queryEntityByKeys(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId,
+            @RequestParam(required = false) UUID productionLineId,
+            @RequestParam(required = false) UUID workshopId,
+            @RequestParam(required = false) UUID factoryId
+    ) throws ThingsboardException {
+        try {
+            if ( startTime == null  || endTime == null) {
+                startTime=(CommonUtils.getZero());
+                endTime=(CommonUtils.getNowTime());
+            }
+
+            QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+            queryTsKvVo.setDeviceId(deviceId);
+            queryTsKvVo.setProductionLineId(productionLineId);
+            queryTsKvVo.setWorkshopId(workshopId);
+            queryTsKvVo.setFactoryId(factoryId);
+            queryTsKvVo.setStartTime(startTime);
+            queryTsKvVo.setEndTime(endTime);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            Long lo1 = System.currentTimeMillis();
+            PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
+            Long lo2 = System.currentTimeMillis();
+            Long t3 = lo2-lo1;
+            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
+            return  obj;
+
+        }catch (Exception e)
+        {
+            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
+
 
 
 

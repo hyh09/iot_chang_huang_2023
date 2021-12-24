@@ -55,6 +55,21 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
     }
 
     @Override
+    public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVoByTitle() {
+        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
+        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
+        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
+        {
+            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
+            voList.stream().forEach(vo1->{
+                nameMap.put(vo1.getTitle(),vo1);
+            });
+        }
+        return  nameMap;
+    }
+
+
+    @Override
     public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
         Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
         List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
@@ -82,7 +97,7 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
         log.info("打印当前的数据:{}",dictDeviceGroupVOS);
         for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
         {
-            Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getUnit));
+            Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getTitle));
             map.putAll(map1);
         }
         return map;

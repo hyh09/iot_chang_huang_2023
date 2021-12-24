@@ -41,4 +41,6 @@ public interface TsKvLatestRepository extends CrudRepository<TsKvLatestEntity, T
             "WHERE ts_kv_latest.entity_id IN :entityIds ORDER BY ts_kv_dictionary.key", nativeQuery = true)
     List<String> findAllKeysByEntityIds(@Param("entityIds") List<UUID> entityIds);
 
+    @Query(value = "select distinct ts_kv_latest.key from ts_kv_latest where ts_kv_latest.entity_id = :entityId", nativeQuery = true)
+    List<Integer> findAllKeyIdsByEntityId(@Param("entityId") UUID entityId);
 }

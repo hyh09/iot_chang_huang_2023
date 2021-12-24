@@ -59,6 +59,8 @@ import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
+import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
@@ -67,9 +69,6 @@ import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
-import org.thingsboard.server.common.data.vo.user.CodeVo;
-import org.thingsboard.server.common.data.vo.user.UserVo;
-import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
@@ -238,7 +237,7 @@ public class UserController extends BaseController implements DefalutSvc {
                         userCredentials.getActivateToken());
                 String email = savedUser.getEmail();
                 try {
-                    mailService.sendActivationEmail(activateUrl, email);
+                    mailService.sendActivationEmail(activateUrl, email,user.getAdditionalInfo());
                 } catch (ThingsboardException e) {
                     userService.deleteUser(authUser.getTenantId(), savedUser.getId());
                     throw e;
@@ -279,7 +278,7 @@ public class UserController extends BaseController implements DefalutSvc {
                 String baseUrl = systemSecurityService.getBaseUrl(getTenantId(), getCurrentUser().getCustomerId(), request);
                 String activateUrl = String.format(ACTIVATE_URL_PATTERN, baseUrl,
                         userCredentials.getActivateToken());
-                mailService.sendActivationEmail(activateUrl, email);
+                mailService.sendActivationEmail(activateUrl, email,user.getAdditionalInfo());
             } else {
                 throw new ThingsboardException("User is already activated!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
             }
@@ -592,7 +591,7 @@ public class UserController extends BaseController implements DefalutSvc {
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
         log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
-           if(count>0  && user.getFactoryId() == null)
+           if(count>0  && user.getUserLevel()==0)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }

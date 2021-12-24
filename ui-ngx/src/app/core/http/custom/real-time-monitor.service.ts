@@ -1,11 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { AuthService } from "@app/core/auth/auth.service";
-import { RequestConfig, defaultHttpOptionsFromConfig, WINDOW } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { DeviceDetails, DevicePropHistory, RealTimeData } from "@app/shared/models/custom/device-monitor.models";
 import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
 import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
+import { WINDOW } from "@app/core/services/window.service";
 
 @Injectable({
   providedIn: 'root'
@@ -143,7 +144,19 @@ export class RealTimeMonitorService {
           onMessage({});
         }
       } else {
-        onMessage();
+        const _res = JSON.parse(res.data);
+        const _data = [];
+        if (_res) {
+          const data = _res.data;
+          Object.keys(data).forEach(key => {
+            _data.push({
+              name: key,
+              createdTime: data[key][0][0],
+              content: data[key][0][1]
+            });
+          });
+        }
+        onMessage(_data);
       }
     }
   }

@@ -3,6 +3,9 @@ package org.thingsboard.server.dao.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.regex.Pattern;
 
 /**
@@ -37,6 +40,10 @@ public class StringUtilToll {
      * @return
      */
     public static String  sub(String value1, String value2){
+        if(value1 == null  ||  value2 == null)
+        {
+            return zero;
+        }
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
         BigDecimal  result = b1.subtract(b2).stripTrailingZeros();
@@ -139,6 +146,9 @@ public class StringUtilToll {
         BigDecimal b = new BigDecimal(num);
         //保留4位小数
         BigDecimal result = b.setScale(4, BigDecimal.ROUND_HALF_UP);
+        if (result.compareTo(BigDecimal.ZERO) == -1){
+            return  "0";
+        }
         String str=  result.stripTrailingZeros().toPlainString();
         return  str;
     }
@@ -153,6 +163,17 @@ public class StringUtilToll {
         }
         return  false;
 
+    }
+
+    /**
+     * 将时间戳转换天
+     * @param timestamp
+     * @return
+     */
+    public  static LocalDate getLocalDateByTimestamp(long timestamp)
+    {
+        LocalDate localDate = Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.ofHours(8)).toLocalDate();
+        return  localDate;
     }
 
 
