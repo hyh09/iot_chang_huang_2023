@@ -439,17 +439,20 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         String value  = "0";
         if(enums ==KeyTitleEnums.key_water ) {
             BigDecimal water0 = entities.stream()
+                    .filter(m1->StringUtils.isNotEmpty(m1.getIncrementWater()))
                     .map(CensusSqlByDayEntity::getIncrementWater).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                             BigDecimal::add);
              value =  water0.stripTrailingZeros().toPlainString();
         }else  if(enums == KeyTitleEnums.key_cable ){
             BigDecimal electric1 = entities.stream()
+                    .filter(m1->StringUtils.isNotEmpty(m1.getIncrementElectric()))
                     .map(CensusSqlByDayEntity::getIncrementElectric).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                             BigDecimal::add);
             value =  electric1.stripTrailingZeros().toPlainString();
 
         }else {
             BigDecimal gas2 = entities.stream()
+                    .filter(m1->StringUtils.isNotEmpty(m1.getIncrementGas()))
                     .map(CensusSqlByDayEntity::getIncrementGas).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                             BigDecimal::add);
             value =  gas2.stripTrailingZeros().toPlainString();
