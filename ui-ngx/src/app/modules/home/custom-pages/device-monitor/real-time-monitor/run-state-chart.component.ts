@@ -39,6 +39,12 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
 
   init() {
     if (!this.chart) return;
+    const online = this.translate.instant('device-monitor.on-line-device');
+    const offline = this.translate.instant('device-monitor.off-line-device');
+    const chartData = [
+      { value: this.data.onLineDeviceCount || 0, name: online },
+      { value: this.data.offLineDeviceCount || 0, name: offline }
+    ];
     const option = {
       title: {
         text: this.translate.instant('device-monitor.run-state-overview'),
@@ -54,8 +60,18 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
         trigger: 'item'
       },
       legend: {
-        align: 'right',
-        right: 0
+        align: 'left',
+        right: 0,
+        formatter: (name: string) => {
+          switch(name) {
+            case online:
+              return this.translate.instant('device-monitor.on-line-device-with-value', { count: chartData[0].value });
+            case offline:
+              return this.translate.instant('device-monitor.off-line-device-with-value', { count: chartData[1].value });
+            default:
+              return '';
+          }
+        }
       },
       series: [
         {
@@ -63,12 +79,9 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
           radius: '60%',
           center: ['50%', '55%'],
           minAngle: 5,
-          data: [
-            { value: this.data.onLineDeviceCount || 0, name: this.translate.instant('device-monitor.on-line-device') },
-            { value: this.data.offLineDeviceCount || 0, name: this.translate.instant('device-monitor.off-line-device') }
-          ],
+          data: chartData,
           tooltip: {
-            formatter: `{b}：{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
+            formatter: `{b}${this.translate.instant('common.colon')}{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
           },
           emphasis: {
             itemStyle: {
