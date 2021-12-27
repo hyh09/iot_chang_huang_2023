@@ -430,10 +430,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink,Boolean flg) {
         ResultEnergyAppVo  result  = new ResultEnergyAppVo();
         log.info("【APP端】queryAppEntityByKeysNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && flg)
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
@@ -1155,9 +1155,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             Map   map = new HashMap();
             map.put(HEADER_0,vo.getDeviceName());
             map.put(HEADER_DEVICE_ID,vo.getEntityId());
-            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),vo.getWaterAddedValue());//耗水量 (T)
-            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),vo.getElectricAddedValue());//耗电量 (KWH)
-            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),vo.getGasAddedValue());//耗气量 (T)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),StringUtilToll.roundUp(vo.getWaterAddedValue()));//耗水量 (T)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),StringUtilToll.roundUp(vo.getElectricAddedValue()));//耗电量 (KWH)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),StringUtilToll.roundUp(vo.getGasAddedValue()));//耗气量 (T)
 
             String   capacityValue =vo.getCapacityAddedValue();
             //

@@ -88,13 +88,14 @@ public interface EfficiencyStatisticsSvc {
      * @param queryTsKvVo
      * @param tenantId
      * @param pageLink
+     * @param flg 是否过滤掉第一个工厂
      * @return
      */
-    ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId,PageLink pageLink);
+    ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId,PageLink pageLink,Boolean flg);
 
 
     /**
-     * 能耗的查询
+     * 能耗的查询  queryAppEntityByKeysNewMethod
      */
     @Deprecated
     ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);

@@ -111,6 +111,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
 
         pageList.stream().forEach(m1->{
             AppDeviceEnergyVo  vo = new AppDeviceEnergyVo();
+            vo.setDeviceId(m1.getEntityId().toString());
             vo.setDeviceName(m1.getDeviceName());
             vo.setWorkshopName(getWorkShopName(m1.getWorkshopId(),tenantId));
             vo.setProductionName(getProductionLineNameById(m1.getProductionLineId(),tenantId));
