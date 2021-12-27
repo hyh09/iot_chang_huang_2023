@@ -44,7 +44,8 @@ export class PermissionResolver implements Resolve<Permissions>  {
             path: menu.path,
             icon: menu.tenantMenuIcon,
             isMdiIcon: (menu.tenantMenuIcon || '').startsWith('mdi:'),
-            parentId: menu.parentId
+            parentId: menu.parentId,
+            notExact: true
           };
           const homeSection: HomeSectionPlace = {
             id: menu.id,

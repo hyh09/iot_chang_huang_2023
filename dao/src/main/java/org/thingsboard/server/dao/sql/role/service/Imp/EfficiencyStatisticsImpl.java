@@ -20,6 +20,8 @@ import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
+import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
@@ -47,15 +49,18 @@ import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectHistoryKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -425,10 +430,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink) {
+    public ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo vo, TenantId tenantId, PageLink pageLink,Boolean flg) {
         ResultEnergyAppVo  result  = new ResultEnergyAppVo();
         log.info("【APP端】queryAppEntityByKeysNewMethod打印入参的pc端查询产能接口入参:{}租户id{}",vo,tenantId);
-        if(vo.getFactoryId() == null)
+        if(vo.getFactoryId() == null && flg)
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
@@ -666,6 +671,90 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
             return new  DeviceDictionaryPropertiesVo(dataVo.getName(),title,dataVo.getUnit());
         }).collect(Collectors.toList());
+    }
+
+
+    /**
+     * 昨天 今天 历史的产能接口
+     * @param vo
+     * @return
+     */
+    @Override
+    public ResultHomeCapAppVo queryThreePeriodsCapacity(TsSqlDayVo vo) {
+        ResultHomeCapAppVo  resultVO = new ResultHomeCapAppVo();
+        if(vo.getStartTime() ==  null)  //如果有值，则是看板的调用
+        {
+            vo.setStartTime(CommonUtils.getYesterdayZero());
+        }
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
+        LocalDate   localDate=  LocalDate.now();
+        LocalDate yesterday = localDate.plusDays(-1);
+        CensusSqlByDayEntity  data01 = appleMap.get(yesterday);
+        if(data01 != null)
+        {
+            resultVO.setYesterdayValue(StringUtilToll.roundUp(data01.getIncrementCapacity()));
+            resultVO.setHistory(StringUtilToll.roundUp(data01.getHistoryCapacity()));
+        }
+        CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
+        if(nowDate != null)
+        {
+            resultVO.setTodayValue(StringUtilToll.roundUp(nowDate.getIncrementCapacity()));
+            resultVO.setHistory(StringUtilToll.roundUp(nowDate.getHistoryCapacity()));
+        }
+        return resultVO;
+    }
+
+
+    /**
+     * 今天 昨天 历史的 能耗  app
+     * @param vo
+     * @return
+     */
+    @Override
+    public ResultHomeEnergyAppVo queryAppThreePeriodsEnergy(TsSqlDayVo vo) {
+        ResultHomeEnergyAppVo  resultHomeEnergyAppVo  = new  ResultHomeEnergyAppVo();
+        Map<String,String> yesterdayMap  = new HashMap<>();
+        Map<String,String> todayMap  = new HashMap<>();
+        Map<String,String> historyMap  = new HashMap<>();
+
+        if(vo.getStartTime() ==  null)  //如果有值，则是看板的调用
+        {
+            vo.setStartTime(CommonUtils.getYesterdayZero());
+        }
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
+        log.info("queryAppThreePeriodsEnergy.appleMap:{}",appleMap);
+
+        LocalDate   localDate=  LocalDate.now();
+        LocalDate yesterday = localDate.plusDays(-1);
+        CensusSqlByDayEntity  data01 = appleMap.get(yesterday);
+//        if(data01 != null)
+//        {
+                yesterdayMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null?StringUtilToll.roundUp(data01.getIncrementWater()):"0"));
+                yesterdayMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ? StringUtilToll.roundUp(data01.getIncrementElectric()):"0"));
+                yesterdayMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getIncrementGas()):"0"));
+
+               historyMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryWater()):"0"));
+               historyMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryElectric()):"0"));
+               historyMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryGas()):"0"));
+//        }
+        CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
+//        if(nowDate != null)
+//        {
+       todayMap.put(KeyTitleEnums.key_water.getgName(),(nowDate != null?StringUtilToll.roundUp(nowDate.getIncrementWater()):"0"));
+       todayMap.put(KeyTitleEnums.key_cable.getgName(),(nowDate != null ? StringUtilToll.roundUp(nowDate.getIncrementElectric()):"0"));
+       todayMap.put(KeyTitleEnums.key_gas.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getIncrementGas()):"0"));
+
+
+        historyMap.put(KeyTitleEnums.key_water.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getHistoryWater()):"0"));
+            historyMap.put(KeyTitleEnums.key_cable.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getHistoryElectric()):"0"));
+            historyMap.put(KeyTitleEnums.key_gas.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getHistoryGas()):"0"));
+//        }
+        resultHomeEnergyAppVo.setHistory(historyMap);
+        resultHomeEnergyAppVo.setTodayValue(todayMap);
+        resultHomeEnergyAppVo.setYesterdayValue(yesterdayMap);
+        return resultHomeEnergyAppVo;
     }
 
     /**
@@ -1068,9 +1157,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             Map   map = new HashMap();
             map.put(HEADER_0,vo.getDeviceName());
             map.put(HEADER_DEVICE_ID,vo.getEntityId());
-            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),vo.getWaterAddedValue());//耗水量 (T)
-            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),vo.getElectricAddedValue());//耗电量 (KWH)
-            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),vo.getGasAddedValue());//耗气量 (T)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),StringUtilToll.roundUp(vo.getWaterAddedValue()));//耗水量 (T)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),StringUtilToll.roundUp(vo.getElectricAddedValue()));//耗电量 (KWH)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),StringUtilToll.roundUp(vo.getGasAddedValue()));//耗气量 (T)
 
             String   capacityValue =vo.getCapacityAddedValue();
             //

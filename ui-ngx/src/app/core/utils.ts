@@ -15,7 +15,7 @@
 ///
 
 import _ from 'lodash';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { finalize, share } from 'rxjs/operators';
 import { Datasource } from '@app/shared/models/widget.models';
 import { EntityId } from '@shared/models/id/entity-id';
@@ -470,3 +470,5 @@ export function getTheEndOfDay(date: Date, timestamp: boolean = true): Date | nu
   const time = (getTheStartOfDay(_date) as number) - 1;
   return timestamp ? time : new Date(time);
 }
+
+export const viewPortResize = new BehaviorSubject('resize');

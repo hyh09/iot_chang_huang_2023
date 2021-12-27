@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
@@ -61,10 +62,13 @@ public class BulletinBoardController extends BaseController{
         ResultHomeCapAppVo result = new ResultHomeCapAppVo();
 
         try {
-            result.setTodayValue(getValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getValueByTime(factoryId,workshopId, productionLineId,deviceId,CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(bulletinBoardSvc.getHistoryCapValue(factoryId,getTenantId().getId()));
-            return result;
+            TsSqlDayVo tsSqlDayVo =    TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
+            tsSqlDayVo.setTenantId(getTenantId().getId());
+            return efficiencyStatisticsSvc.queryThreePeriodsCapacity(tsSqlDayVo);
+//            result.setTodayValue(getValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+//            result.setYesterdayValue(getValueByTime(factoryId,workshopId, productionLineId,deviceId,CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+//            result.setHistory(bulletinBoardSvc.getHistoryCapValue(factoryId,getTenantId().getId()));
+//            return result;
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -109,6 +113,7 @@ public class BulletinBoardController extends BaseController{
     public List<ConsumptionVo> totalEnergyConsumption(
           @RequestBody  QueryTsKvVo  vo
     ) throws ThingsboardException {
+        log.info("=====QueryTsKvVo.totalEnergyConsumption==>:"+vo);
         try {
             if(vo.getEndTime() == null )
             {
