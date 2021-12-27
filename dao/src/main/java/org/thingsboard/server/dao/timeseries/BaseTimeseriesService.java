@@ -41,13 +41,11 @@ import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
-import org.thingsboard.server.dao.sql.energyTime.entity.EneryTimeGapEntity;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
-import org.thingsboard.server.dao.util.CommonUtils;
+import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -94,6 +92,7 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EneryTimeGapService eneryTimeGapService;
     @Autowired private StatisticalDataService statisticalDataService;
+    @Autowired private EnergyChartService energyChartService;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -193,45 +192,49 @@ public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
             dataInitMap=map;
         }
 
-//        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
-       Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
-        if(count>0) {
-            ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
-//            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
-            try {
-                TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
-//                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
-                long  t1=  tsKvEntry.getTs();
-                long  t2=  tsKvEntry1.getTs();//要避免夸天的相减
-              if(CommonUtils.isItToday(t2)) {
-                  long t3 = t1 - t2;
-//                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
-                  if (t3 > ENERGY_TIME_GAP) {
-                      EneryTimeGapEntity eneryTimeGapEntity = new EneryTimeGapEntity();
-                      eneryTimeGapEntity.setEntityId(entityId.getId());
-                      eneryTimeGapEntity.setTenantId(tenantId.getId());
-                      eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
-                      eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
-                      eneryTimeGapEntity.setTs(tsKvEntry.getTs());
-                      eneryTimeGapEntity.setTimeGap(t3);
-                      eneryTimeGapService.save(eneryTimeGapEntity);
-                  }
-              }
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-
-
-        }
+////        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
+//       Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
+//        if(count>0) {
+//            ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
+////            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
+//            try {
+//                TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
+////                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
+//                long  t1=  tsKvEntry.getTs();
+//                long  t2=  tsKvEntry1.getTs();//要避免夸天的相减
+//              if(CommonUtils.isItToday(t2)) {
+//                  long t3 = t1 - t2;
+////                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
+//                  if (t3 > ENERGY_TIME_GAP) {
+//                      EneryTimeGapEntity eneryTimeGapEntity = new EneryTimeGapEntity();
+//                      eneryTimeGapEntity.setEntityId(entityId.getId());
+//                      eneryTimeGapEntity.setTenantId(tenantId.getId());
+//                      eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
+//                      eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
+//                      eneryTimeGapEntity.setTs(tsKvEntry.getTs());
+//                      eneryTimeGapEntity.setTimeGap(t3);
+//                      eneryTimeGapService.save(eneryTimeGapEntity);
+//                  }
+//              }
+//
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//        }
 
          String  title =    dataInitMap.get(tsKvEntry.getKey());
         if(StringUtils.isNotBlank(title))
         {
 //            log.info("打印当前的数据打印标题{}",title);
             statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
+        }
+        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
+        if(count>0) {
+            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
         }
 
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));

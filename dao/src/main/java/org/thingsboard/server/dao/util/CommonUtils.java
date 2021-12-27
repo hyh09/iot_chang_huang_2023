@@ -8,7 +8,7 @@ import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -295,6 +295,64 @@ public class CommonUtils {
         return  false;
 
     }
+
+
+    /**
+     *  获取所在时间所在时间片段
+     *   每隔30分钟统计一次
+     * @param ts
+     * @return
+     */
+    public  static  Long  getTimeClip(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        if(minute >30)
+        {
+             localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
+        }else {
+             localDateTime1  =  LocalDateTime.of(year,month,day,hour,30,0,0);
+
+        }
+       return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+    /**
+     * localDateTime转long
+     * @param localDateTime
+     * @return
+     */
+    public static long getTimestampOfDateTime(LocalDateTime localDateTime) {
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = localDateTime.atZone(zone).toInstant();
+        return instant.toEpochMilli();
+    }
+
+
+    /**
+     * long 转 LocalDateTime
+     * @param l
+     * @return
+     */
+    public static LocalDateTime longToDateTime(long l){
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault());
+    }
+
+    /**
+     * long 转 LocalTime
+     * @param l
+     * @return
+     */
+    public static LocalTime longToLocalTime(long l){
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault()).toLocalTime();
+    }
+
 
 
 
