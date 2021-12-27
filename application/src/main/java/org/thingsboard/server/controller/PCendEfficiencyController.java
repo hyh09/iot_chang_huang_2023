@@ -189,6 +189,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setEndTime(endTime);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             Long lo1 = System.currentTimeMillis();
+            queryTsKvVo.setTenantId(getTenantId().getId());
             PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
             Long lo2 = System.currentTimeMillis();
             Long t3 = lo2-lo1;
