@@ -78,7 +78,7 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
           type: 'pie',
           radius: '60%',
           center: ['50%', '55%'],
-          minAngle: 5,
+          minAngle: 3,
           data: chartData,
           tooltip: {
             formatter: `{b}${this.translate.instant('common.colon')}{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
