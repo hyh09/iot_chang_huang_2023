@@ -18,7 +18,6 @@ import org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
-import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
 import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
@@ -55,7 +54,6 @@ import java.util.stream.Collectors;
 public class BulletinBoardImpl implements BulletinBoardSvc {
 
 
-    @Autowired private EffectMaxValueKvRepository effectMaxValueKvRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EffectTsKvRepository effectTsKvRepository;
     @Autowired private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
@@ -79,14 +77,11 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @return
      */
     @Override
-    public TrendVo energyConsumptionTrend(TrendParameterVo vo) throws ThingsboardException {
+    public TrendVo energyConsumptionTrend(TrendParameterVo vo)  {
         TrendVo resultResults = new TrendVo();
 
         try {
-
             log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
-//            vo.setKey(key);
-//            Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
             List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
             List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
             print("打印查询longs的数据", longs);
@@ -112,10 +107,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             vo.setStartTime(CommonUtils.getYesterdayZero());
             vo.setEndTime(CommonUtils.getYesterdayLastTime());
         }
-        log.info("==totalEnergyConsumption====>{}",vo);
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
         Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
-
         result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_cable,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_gas,titleMapToVo));
@@ -125,7 +118,6 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Override
     public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId) {
         List<String>  keys1 = new ArrayList<>();
-//        vo.setDeviceId(UUID.fromString("ac0297b3-5656-11ec-a240-955d7c1497e4"));
 
 
         keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
@@ -144,36 +136,36 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return   getEntityKeyValue(map,tenantId,mapNameToVo);
     }
 
-    /**
-     * 历史的产能的总和
-     * @param factoryId
-     * @return
-     * @throws ThingsboardException
-     */
-    public   String getHistoryCapValue(String factoryId,UUID tenantId)   {
-        MaxTsVo  vo = new MaxTsVo();
-        List<String> nameKey=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
-        String keyName=  nameKey.get(0);
-        vo.setKey(keyName);
-        if(StringUtils.isNotBlank(factoryId))
-        {
-            vo.setFactoryId(UUID.fromString(factoryId));//工厂维度
-        }
-        vo.setTenantId(tenantId);
-        vo.setCapSign(true);
-        return this.historySumByKey(vo);
-    }
+//    /**
+//     * 历史的产能的总和
+//     * @param factoryId
+//     * @return
+//     * @throws ThingsboardException
+//     */
+//    public   String getHistoryCapValue(String factoryId,UUID tenantId)   {
+//        MaxTsVo  vo = new MaxTsVo();
+//        List<String> nameKey=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+//        String keyName=  nameKey.get(0);
+//        vo.setKey(keyName);
+//        if(StringUtils.isNotBlank(factoryId))
+//        {
+//            vo.setFactoryId(UUID.fromString(factoryId));//工厂维度
+//        }
+//        vo.setTenantId(tenantId);
+//        vo.setCapSign(true);
+//        return this.historySumByKey(vo);
+//    }
 
-    /**
-     * 查询历史key维度的 设备总和
-     *
-     * @return
-     */
-    @Override
-    public String historySumByKey(MaxTsVo maxTsVo) {
-        return  effectMaxValueKvRepository.querySum(maxTsVo);
-
-    }
+//    /**
+//     * 查询历史key维度的 设备总和
+//     *
+//     * @return
+//     */
+//    @Override
+//    public String historySumByKey(MaxTsVo maxTsVo) {
+//        return  effectMaxValueKvRepository.querySum(maxTsVo);
+//
+//    }
 
 
 
