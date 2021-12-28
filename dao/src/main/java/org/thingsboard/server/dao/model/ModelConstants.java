@@ -178,6 +178,10 @@ public class ModelConstants {
      */
     public static final String PRODUCTION_LINE_COLUMN_FAMILY_NAME = "hs_production_line";
     /**
+     * 系统版本表.
+     */
+    public static final String SYSTEM_VERSION_COLUMN_FAMILY_NAME = "hs_system_version";
+    /**
      * Cassandra device constants.
      */
     public static final String DEVICE_COLUMN_FAMILY_NAME = "device";
