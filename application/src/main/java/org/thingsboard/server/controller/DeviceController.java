@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.thingsboard.mqtt.MqttClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -1123,26 +1124,39 @@ public class DeviceController extends BaseController {
             //下发网关
             if(!CollectionUtils.isEmpty(credentials)){
                 for (String credential : credentials) {
-                    TransportMqttClient transportMqttClient = new TransportMqttClient("tcp://47.96.109.1:1883");
-                    transportMqttClient.initialize();
-                    transportMqttClient.publish(JSONObjectUtils.toJSONString(mapIssue),"device/issue/" + credential);
                     log.info("下发网关为：" + "device/issue/" + credential);
                     log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
-                    /*MqttClient mqttClient = getMqttClient(credential);
-                    mqttClient.publish("device/issue/" + credential, Unpooled.wrappedBuffer(mapIssue.toString().getBytes()));
+                    /**  方法一： 使用mqttv3的mqtt **/
+                    /*TransportMqttClient transportMqttClient = new TransportMqttClient("tcp://47.96.109.1:1883");
+                    transportMqttClient.initialize();
+                    transportMqttClient.publish(JSONObjectUtils.toJSONString(mapIssue),"device/issue/" + credential);
+                    */
+
+
+                    /**  方法二： 使用平台的mqtt **/
+                    //MqttMessageListener listener = new MqttMessageListener();
+                    MqttClient mqttClient = getMqttClient(credential, null);
+                    Void unused = mqttClient.publish("device/issue/" + credential, Unpooled.wrappedBuffer(JSONObjectUtils.toJSONString(mapIssue).getBytes())).get();
+                    System.out.println(unused);
+                    /*Void unused1 = mqttClient.on("v1/devices/me/attributes/response/+", listener, MqttQoS.AT_LEAST_ONCE).get();
+                    System.out.println(unused1);
                     */
                 }
             }
         }
         return mapIssue;
     }
-    private MqttClient getMqttClient(String credential) throws ExecutionException, InterruptedException {
+    private MqttClient getMqttClient(String credential,MqttMessageListener listener) throws ExecutionException, InterruptedException {
+        String clientAttributeValue = RandomStringUtils.randomAlphanumeric(8);
         MqttClientConfig clientConfig = new MqttClientConfig();
-        clientConfig.setClientId("MQTT client from test");
+        clientConfig.setClientId("客户端id:测试平台mqtt消息发布" + clientAttributeValue);
         clientConfig.setUsername(credential);
         MqttClient mqttClient = MqttClient.create(clientConfig, null);
-        //mqttClient.connect("localhost", 1883).get();
-        mqttClient.connect("47.96.109.1", 1883);
+        mqttClient.connect("localhost", 1883).get();
+        //mqttClient.connect("localhost", 1883);
         return mqttClient;
+
     }
+
+
 }

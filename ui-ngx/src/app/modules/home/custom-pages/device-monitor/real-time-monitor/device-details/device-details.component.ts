@@ -147,6 +147,10 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   subscribe() {
     this.realTimeMonitorService.subscribe([this.deviceId], (data: { name: string; createdTime: number; content: string; }[]) => {
       (data || []).forEach(prop => {
+        if (prop.content && /^(-)?\d+(\.\d+)?$/.test(prop.content)) {
+          const num = parseFloat(prop.content);
+          prop.content = Math.round((num + Number.EPSILON) * 100) / 100 + '';
+        }
         const target = this.propMap[prop.name];
         if (target) {
           Object.assign(target, prop);

@@ -14,6 +14,7 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
@@ -24,17 +25,17 @@ import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TrendLineVo;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
+import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyRepository;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
-import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepository;
-import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
-import org.thingsboard.server.dao.sql.role.dao.EffectMaxValueKvRepository;
-import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
+import org.thingsboard.server.dao.sql.device.DeviceRepository;
+import org.thingsboard.server.dao.sql.role.dao.*;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
-import org.thingsboard.server.dao.sql.role.entity.SolidTrendLineEntity;
+import org.thingsboard.server.dao.sql.role.entity.EnergyChartOfBoardEntity;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
@@ -63,8 +64,14 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private BoardTrendChartRepository boardTrendChartRepository;  //趋势图的实线
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
 
-    private final  static   String ONE_HOURS="3600000";
+    @Autowired  private BoardTrendChartRepositoryNewMethon boardTrendChartRepositoryNewMethon;
+    @Autowired  private  DictDeviceRepository dictDeviceRepository;
+    // 设备字典标准属性Repository
+    @Autowired  private DictDeviceStandardPropertyRepository standardPropertyRepository;
+    @Autowired  private DeviceRepository deviceRepository;
 
+
+    private final  static   String ONE_HOURS="1800000";//
 
     /**
      *看板的能耗趋势图(实线 和虚线)
@@ -76,70 +83,23 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TrendVo resultResults = new TrendVo();
 
         try {
-            String key = getKeyNameBy(vo.getKey());
-            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
-            vo.setKey(key);
-            Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-            DictDeviceGroupPropertyVO dictDeviceGroupPropertyVO=  mapNameToVo.get(key);
-            List<SolidTrendLineEntity> solidTrendLineEntities = boardTrendChartRepository.getSolidTrendLine(vo);
-            printSolidLineLog(solidTrendLineEntities);
-            resultResults.setSolidLine(convertSolidLineData(solidTrendLineEntities));
-            List<SolidTrendLineEntity> dottedTrendLineList = boardTrendChartRepository.getDottedTrendLine(vo);
-            Map<String, Long> map = dottedTrendLineList.stream().collect(Collectors.toMap(SolidTrendLineEntity::getDays, SolidTrendLineEntity::getTime01));
-            printSolidLineLog01(dottedTrendLineList);
-            resultResults.setDottedLine(convertSolidLineDataTest(solidTrendLineEntities,map,dictDeviceGroupPropertyVO));
+
+            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
+//            vo.setKey(key);
+//            Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+            List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
+            List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
+            print("打印查询longs的数据", longs);
+            resultResults.setSolidLine(getSolidLineData(vo,solidLineData,longs));
+            resultResults.setDottedLine(getDottedLineData(vo,solidLineData,longs));
             return resultResults;
         }catch (Exception e)
         {
-             e.printStackTrace();
+            e.printStackTrace();
             resultResults.setCode("0");
             log.error("看板的能耗趋势图(实线 和虚线)异常{}",e);
             return  resultResults;
         }
-    }
-
-    /**
-     * 查询总能耗的
-     * @return
-     */
-//    @Override
-    public List<ConsumptionVo> totalEnergyConsumptionOld(QueryTsKvVo vo, TenantId tenantId) {
-        log.info("查询能耗的入参{}租户的id{}",vo,tenantId);
-        List<ConsumptionVo> consumptionVos  =  new ArrayList<>();
-
-        List<String>  keys1 = new ArrayList<>();
-        keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        vo.setKeys(keys1);
-        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-        List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
-        log.info("查询到的数据{}",effectTsKvEntities);
-        if(CollectionUtils.isEmpty(effectTsKvEntities))
-        {
-            keys1.stream().forEach(s -> {
-                consumptionVos.add(translateAppTitle(mapNameToVo,s));
-
-            });
-           return  consumptionVos;
-        }
-        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
-        log.info("查询到的数据转换为设备维度:{}",map);
-        Set<UUID> keySet = map.keySet();
-        log.info("打印当前的设备id:{}",keySet);
-        List<UUID> entityIdsAll  = keySet.stream().collect(Collectors.toList());
-        List<UUID>  pageList =  entityIdsAll.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
-                collect(Collectors.toList());
-        Map<UUID,List<EffectTsKvEntity>>  listMap =  new HashMap<>();
-
-
-        for(int i=0;i<pageList.size();i++)
-        {
-            UUID uuid= pageList.get(i);
-            listMap.put(uuid,map.get(uuid));
-        }
-        keys1.stream().forEach(str->{
-            consumptionVos.add(getTotalValue(effectTsKvEntities,str,mapNameToVo));
-        });
-        return consumptionVos;
     }
 
 
@@ -292,37 +252,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
 
 
-    private ConsumptionVo translateAppTitle(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,String key)
-    {
-        ConsumptionVo  consumptionVo = new ConsumptionVo();
-        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
-        if(dictVO != null) {
-            consumptionVo.setUnit( dictVO.getUnit());
-            consumptionVo.setTitle(dictVO.getTitle());
-        }
-        return  consumptionVo;
-
-    }
 
 
 
-    private  ConsumptionVo getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,String key, Map<String,DictDeviceGroupPropertyVO>  mapNameToVo)
-    {
-        ConsumptionVo  consumptionVo = new ConsumptionVo();
-
-        DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(key);
-        if(dictVO != null) {
-            consumptionVo.setUnit( dictVO.getUnit());
-            consumptionVo.setTitle(dictVO.getTitle());
-        }
-        BigDecimal invoiceAmount = effectTsKvEntities.stream()
-                .filter(entity -> StringUtils.isNotBlank(entity.getKeyName()) && entity.getKeyName().equals(key))
-                .map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
-                BigDecimal::add);
-        String value =  invoiceAmount.stripTrailingZeros().toPlainString();
-        consumptionVo.setValue(value);
-        return  consumptionVo;
-    }
 
 
 
@@ -352,84 +284,13 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return "";
     }
 
-    private  void  printSolidLineLog(List<SolidTrendLineEntity>  solidTrendLineEntities )
-    {
-        if(log.isInfoEnabled())
-        {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                String solidTrendLineEntitiesJson = mapper.writeValueAsString(solidTrendLineEntities);
-                log.info("看板的能耗趋势图-实线的数据返回{}",solidTrendLineEntitiesJson);
-            } catch (JsonProcessingException e) {
-                log.error("打印的异常：{}",e);
-            }
-
-        }
-    }
-
-    private  void  printSolidLineLog01(List<SolidTrendLineEntity>  solidTrendLineEntities )
-    {
-        if(log.isInfoEnabled())
-        {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                String solidTrendLineEntitiesJson = mapper.writeValueAsString(solidTrendLineEntities);
-                log.info("看板的能耗趋势图-实线的数据 虚线返回{}",solidTrendLineEntitiesJson);
-            } catch (JsonProcessingException e) {
-                log.error("打印的异常：{}",e);
-            }
-
-        }
-    }
 
 
 
-    private  List<TrendLineVo> convertSolidLineData(List<SolidTrendLineEntity>  solidTrendLineEntities)
-    {
-        List<TrendLineVo>  trendLineVos = new ArrayList<>();
-        //
-        if(CollectionUtils.isEmpty(solidTrendLineEntities))
-        {
-            log.info("当前查询到的实线数据为空,返回空集合");
-            return   trendLineVos;
-        }
-        trendLineVos =   solidTrendLineEntities.stream().map(m ->{
-            TrendLineVo  trendLineVo = new TrendLineVo();
-            trendLineVo.setTime(m.getTime01());
-            trendLineVo.setValue(m.getSumValue());
-            return trendLineVo;
-        }).collect(Collectors.toList());
-        return  trendLineVos;
-    }
 
 
-    private  List<TrendLineVo> convertSolidLineDataTest(List<SolidTrendLineEntity>  solidTrendLineEntities,Map<String, Long> map ,
-                                                        DictDeviceGroupPropertyVO dictDeviceGroupPropertyVO)
-    {
-        List<TrendLineVo>  trendLineVos = new ArrayList<>();
-        if(CollectionUtils.isEmpty(solidTrendLineEntities))
-        {
-            return   trendLineVos;
-        }
-        String content =   dictDeviceGroupPropertyVO.getContent();
-        trendLineVos =   solidTrendLineEntities.stream().map(m ->{
-            TrendLineVo  trendLineVo = new TrendLineVo();
-            trendLineVo.setTime(m.getTime01());
-            Long value01 = map.get(m.getDays());
-            if(value01 == null)
-            {
-                value01 = 0L;
-            }
-            Long  count =(( m.getTime01()-m.getMints()) -value01);
-            //以小时为设定值 保留2位小数运算
-          String  hours =   StringUtilToll.div(count.toString(),ONE_HOURS);
-            String  va=   StringUtilToll.mul(hours,content);
-            log.info("运算得规则：{}减去{}再减去总得耗时得{}再乘以{}=count{}===>va{}===小时=>{}",m.getTime01(),m.getMints(),value01,content,count,va,hours);
-            trendLineVo.setValue(va);
-            return trendLineVo;
-        }).collect(Collectors.toList());
-        return  trendLineVos;
-    }
+
+
 
 
 
@@ -464,4 +325,180 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         consumptionVo.setUnit(dict.getUnit());
         return  consumptionVo;
     }
+
+
+    /**************************  */
+
+    /**
+     * 优化后的实线的逻辑
+     * @param vo
+     * @return
+     */
+    private List<TrendLineVo> getSolidLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData,   List<Long> longs  )
+    {
+        print("打印查询的数据", solidLineData);
+        Map<Long, List<EnergyChartOfBoardEntity>> map = solidLineData.stream().collect(Collectors.groupingBy(EnergyChartOfBoardEntity::getTs));
+        print("打印查询的数据map", map);
+        Map<Long, String> longStringMap = solid(map, vo.getKey());
+        print("打印求和的数据", longStringMap);
+        return   fillReturnData(longs,longStringMap);
+    }
+
+
+    /**
+     *
+     * @param vo
+     * @param solidLineData
+     * @param longs 时间
+     * @return
+     */
+    private  List<TrendLineVo> getDottedLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData,List<Long> longs) throws ThingsboardException {
+        String keyName = getKeyNameBy(vo.getKey());
+        //需要查询出设备字典的数据
+        List<UUID> entityIds = solidLineData.stream().map(EnergyChartOfBoardEntity::getEntityId).distinct().collect(Collectors.toList());
+        print("打印设备id：",entityIds);
+        List<DeviceRatingValueVo>  deviceRatingValueVos  =  deviceRepository.queryDeviceIdAndValue(entityIds,keyName);
+        print("打印设备对应的额定值：",deviceRatingValueVos);
+        Map<UUID, String> IdMappingContentMap = deviceRatingValueVos.stream().collect(Collectors.toMap(DeviceRatingValueVo::getId, DeviceRatingValueVo::getContent));
+        print("打印设备对应的额定值IdMappingContentMap：",IdMappingContentMap);
+        Map<Long, List<EnergyChartOfBoardEntity>> map = solidLineData.stream().collect(Collectors.groupingBy(EnergyChartOfBoardEntity::getTs));
+        //时间点 对应的额定值
+        Map<Long,String>  TimeToValueMap = dashedData(vo.getKey(),map,IdMappingContentMap);
+        return   fillReturnData(longs,TimeToValueMap);
+    }
+
+
+    private  void print(String str,Object   obj)  {
+        try {
+            ObjectMapper mapper=new ObjectMapper();
+            String jsonStr=mapper.writeValueAsString(obj);
+            log.info("[json]"+str+jsonStr);
+        }catch (Exception e)
+        {
+            log.info(str+obj);
+        }
+    }
+
+    /**
+     * 处理实线的数据
+     * @param map
+     * @param key
+     * @return
+     */
+    private  Map<Long,String> solid(Map<Long,List<EnergyChartOfBoardEntity>> map, String  key)
+    {
+        KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(key);
+        Map<Long,String> mapValue = new HashMap<>();
+        map.forEach((k1,v2)->{
+            mapValue.put(k1,getTotalValue(v2,enums));
+
+        });
+        return  mapValue;
+
+    }
+
+
+    /**
+     * 计算值 实线的数据
+     * @param pageList
+     * @param enums
+     * @return
+     */
+    public String getTotalValue(List<EnergyChartOfBoardEntity> pageList, KeyTitleEnums enums) {
+
+        if(enums ==KeyTitleEnums.key_water ) {
+            BigDecimal invoiceAmount = pageList.stream()
+                    .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                    .map(EnergyChartOfBoardEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                            BigDecimal::add);
+            String waterTotalValue = StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
+            return waterTotalValue;
+        }
+
+        if(enums == KeyTitleEnums.key_cable) {
+
+            BigDecimal invoiceAmount02 = pageList.stream()
+                    .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                    .map(EnergyChartOfBoardEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                            BigDecimal::add);
+            String electricTotalValue = StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
+            return electricTotalValue;
+        }
+
+        BigDecimal invoiceAmount03 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
+                .map(EnergyChartOfBoardEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
+        return  value03;
+    }
+
+
+
+
+    private  Map dashedData(String key,Map<Long, List<EnergyChartOfBoardEntity>> map,Map<UUID, String> IdMappingContentMap)
+    {
+        Map<Long,String> resultMap = new HashMap<>();
+        KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(key);
+        map.forEach((k1,v1)->{
+            resultMap.put(k1,getDashedPointData(v1,IdMappingContentMap,enums));
+        });
+        return  resultMap;
+    }
+
+
+    private  String getDashedPointData(List<EnergyChartOfBoardEntity> entities,Map<UUID, String> IdMappingContentMap,KeyTitleEnums enums)
+    {
+
+        List<String> finalValueList = new ArrayList<>();
+        entities.stream().forEach(m1->{
+            Long t2 =0L;
+            Long t1 =0L;
+            if(enums == KeyTitleEnums.key_water)
+            {
+                 t2 =   m1.getWaterLastTime();
+                 t1 =   m1.getWaterFirstTime();
+
+            }
+            if(enums == KeyTitleEnums.key_cable)
+            {
+                 t2 =   m1.getElectricLastTime();
+                 t1 =   m1.getElectricFirstTime();
+
+            }
+            if(enums == KeyTitleEnums.key_gas)
+            {
+                 t2 =   m1.getGasLastTime();
+                 t1 =   m1.getGasFirstTime();
+
+            }
+            String  t3 = StringUtilToll.sub(t2.toString(),t1.toString());
+            String  hours =   StringUtilToll.div(t3.toString(),ONE_HOURS);
+            String setValue =  IdMappingContentMap.get(m1.getEntityId());//设定的值
+            String  va =   StringUtilToll.div(setValue,"2");
+            String  finalValue=   StringUtilToll.mul(hours,va);
+//            log.info("====>打印运算的步骤:结束时间{}减去开始时间{}d等于的时间{};再除以分钟换算30分钟的{}再乘以配置的值{}最后的结果{}"
+//                                                 ,t2,t1,t3,hours,va,finalValue       );
+
+            finalValueList.add(finalValue);
+
+        });
+        return  StringUtilToll.accumulator(finalValueList);
+
+    }
+
+
+    private   List<TrendLineVo> fillReturnData(List<Long> longs,Map<Long, String> longStringMap ){
+        List<TrendLineVo> trendLineVos = longs.stream().map(ts -> {
+            TrendLineVo trendLineVo = new TrendLineVo();
+            trendLineVo.setTime(ts);
+            String value = longStringMap.get(ts);
+            trendLineVo.setValue(StringUtils.isEmpty(value) ? "0" : value);
+            return trendLineVo;
+        }).collect(Collectors.toList());
+        return  trendLineVos;
+    }
+
+
+
 }

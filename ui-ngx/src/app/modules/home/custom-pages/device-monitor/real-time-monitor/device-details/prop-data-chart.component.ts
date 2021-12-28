@@ -39,7 +39,7 @@ export class PropDataChartComponent implements AfterViewInit, OnChanges {
       return [new Date(item.createdTime), item.content];
     });
     const unit = this.data[0] && this.data[0].unit ? this.data[0].unit : '';
-    const minInterval = this.data[0].createdTime - this.data[this.data.length - 1].createdTime < 600000 ? 1000 : 600000;
+    const minInterval = this.data[0].createdTime - this.data[this.data.length - 1].createdTime < 600000 ? 10000 : 600000;
     const option = {
       title: {
         text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.propName ? ` - ${this.propName}` : ''}`,

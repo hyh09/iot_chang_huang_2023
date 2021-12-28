@@ -8,7 +8,7 @@ import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -295,6 +295,105 @@ public class CommonUtils {
         return  false;
 
     }
+
+
+    /**
+     *  获取所在时间所在时间片段
+     *   每隔30分钟统计一次
+     * @param ts
+     * @return
+     */
+    public  static  Long  getTimeClip(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        if(minute >30)
+        {
+             localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
+        }else {
+             localDateTime1  =  LocalDateTime.of(year,month,day,hour,30,0,0);
+
+        }
+       return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+    /**
+     * localDateTime转long
+     * @param localDateTime
+     * @return
+     */
+    public static long getTimestampOfDateTime(LocalDateTime localDateTime) {
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = localDateTime.atZone(zone).toInstant();
+        return instant.toEpochMilli();
+    }
+
+
+    /**
+     * long 转 LocalDateTime
+     * @param l
+     * @return
+     */
+    public static LocalDateTime longToDateTime(long l){
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault());
+    }
+
+    /**
+     * long 转 LocalTime
+     * @param l
+     * @return
+     */
+    public static LocalTime longToLocalTime(long l){
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault()).toLocalTime();
+    }
+
+
+    /**
+     * 获取两个时间段的整点时间
+     * 目前入参： 0:00:00 -> 23:59:59
+     */
+    public  static  List<Long> getTwoTimePeriods(long startTs ,long  endTs)
+    {
+        List<Long> resultTimeList = new ArrayList<>();
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+            Date startTime1 = new Date(startTs);
+            Date endTime1 = new Date(endTs);
+            Calendar tempStart = Calendar.getInstance();
+            tempStart.setTime(startTime1);
+            while (startTime1.getTime() <= endTime1.getTime()) {
+                System.out.println(format2.format(startTime1));
+//                    tempStart.add(Calendar.DAY_OF_YEAR, -1);
+
+                startTime1 = tempStart.getTime();
+                tempStart.add(Calendar.MINUTE, 30);//30分钟前的时间
+                resultTimeList.add(startTime1.getTime());
+            }
+            return resultTimeList;
+
+
+    }
+
+
+
+    /*
+     * 将时间戳转换为时间
+     */
+    public static String stampToDate(String s){
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long lt = new Long(s);
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+
 
 
 
