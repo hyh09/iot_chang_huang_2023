@@ -1,4 +1,5 @@
-import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
+import { viewPortResize } from '@app/core/utils';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
@@ -10,7 +11,7 @@ import * as echarts from 'echarts';
             </div>`,
   styleUrls: ['../chart.component.scss']
 })
-export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class PropDataChartComponent implements AfterViewInit, OnChanges {
   
   @Input() propName: string;
   @Input() data: DeviceProp[];
@@ -23,11 +24,9 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
 
   ngAfterViewInit() {
     this.chart = echarts.init(this.propDataChart.nativeElement);
-    window.addEventListener('resize', this.chart.resize);
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('resize', this.chart.resize);
+    viewPortResize.subscribe(() => {
+      this.chart.resize();
+    });
   }
 
   ngOnChanges() {
@@ -40,6 +39,7 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
       return [new Date(item.createdTime), item.content];
     });
     const unit = this.data[0] && this.data[0].unit ? this.data[0].unit : '';
+    const minInterval = this.data[0].createdTime - this.data[this.data.length - 1].createdTime < 600000 ? 10000 : 600000;
     const option = {
       title: {
         text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.propName ? ` - ${this.propName}` : ''}`,
@@ -66,18 +66,11 @@ export class PropDataChartComponent implements AfterViewInit, OnDestroy, OnChang
         axisLabel: {
           margin: 16
         },
-        minInterval: 600000
+        minInterval
       },
       yAxis: {
         type: 'value'
       },
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 0,
-          end: 100
-        }
-      ],
       series: [
         {
           name: this.propName,

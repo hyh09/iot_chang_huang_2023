@@ -102,7 +102,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         this.bgImages = abstractWorkshopEntity.getBgImages();
         this.remark = abstractWorkshopEntity.getRemark();
         this.tenantId = abstractWorkshopEntity.getTenantId();
-        this.createdTime = abstractWorkshopEntity.getUpdatedTime();
+        this.createdTime = abstractWorkshopEntity.getCreatedTime();
         this.createdUser = abstractWorkshopEntity.getCreatedUser();
         this.updatedTime = abstractWorkshopEntity.getUpdatedTime();
         this.updatedUser = abstractWorkshopEntity.getUpdatedUser();
@@ -121,7 +121,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         this.bgImages = workshop.getBgImages();
         this.remark = workshop.getRemark();
         this.tenantId = workshop.getTenantId();
-        this.createdTime = workshop.getUpdatedTime();
+        this.createdTime = workshop.getCreatedTime();
         this.createdUser = workshop.getCreatedUser();
         this.updatedTime = workshop.getUpdatedTime();
         this.updatedUser = workshop.getUpdatedUser();

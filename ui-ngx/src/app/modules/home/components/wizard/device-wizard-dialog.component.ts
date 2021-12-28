@@ -49,7 +49,7 @@ import { MediaBreakpoints } from '@shared/models/constants';
 import { RuleChainId } from '@shared/models/id/rule-chain-id';
 import { ServiceType } from '@shared/models/queue.models';
 import { deepTrim } from '@core/utils';
-import { DeviceDictionaryService } from '@app/core/http/custom/public-api';
+import { DeviceDictionaryService } from '@app/core/http/public-api';
 import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
 
 @Component({
@@ -332,9 +332,10 @@ export class DeviceWizardDialogComponent extends
   }
 
   private createDevice(profileId): Observable<BaseData<HasId>> {
+    const gateway = this.deviceWizardFormGroup.get('gateway').value;
     const device = {
       name: this.deviceWizardFormGroup.get('name').value,
-      dictDeviceId: this.deviceWizardFormGroup.get('dictDeviceId').value,
+      dictDeviceId: gateway ? '' : this.deviceWizardFormGroup.get('dictDeviceId').value,
       label: this.deviceWizardFormGroup.get('label').value,
       deviceProfileId: profileId,
       additionalInfo: {

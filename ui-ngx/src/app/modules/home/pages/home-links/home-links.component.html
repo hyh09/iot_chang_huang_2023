@@ -44,7 +44,7 @@
       </mat-card-title>
       <mat-card-content>
         <mat-grid-list rowHeight="170px" [cols]="5">
-          <mat-grid-tile *ngFor="let place of section.places" [title]="place.name">
+          <mat-grid-tile *ngFor="let place of section.places" title="{{place.name | translate}}">
             <a mat-raised-button color="primary" class="tb-card-button" routerLink="{{place.path}}">
               <mat-icon *ngIf="!place.isMdiIcon" class="material-icons tb-mat-96">{{place.icon}}</mat-icon>
               <mat-icon *ngIf="place.isMdiIcon" class="tb-mat-70" [svgIcon]="place.icon"></mat-icon>

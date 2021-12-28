@@ -774,3 +774,26 @@ COMMENT ON TABLE "public"."hs_dict_device_standard_property" IS '设备字典-�
 -- December 6, 2021 11:03:14 GMT+8
 ALTER TABLE "public"."hs_dict_device" ADD COLUMN "is_default" bool NOT NULL DEFAULT 'FALSE';
 COMMENT ON COLUMN "public"."hs_dict_device"."is_default" IS '是否默认';
+
+--创建系统版本表
+CREATE TABLE IF NOT EXISTS public.hs_system_version
+(
+    id uuid NOT NULL,
+    version character varying(225) COLLATE pg_catalog."default" NOT NULL DEFAULT '0.0.1'::character varying,
+    publish_time bigint NOT NULL,
+    comment character varying(255) COLLATE pg_catalog."default",
+    tenant_id uuid NOT NULL,
+    created_user uuid,
+    created_time bigint NOT NULL,
+    updated_user uuid,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_system_version_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_system_version
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_system_version
+    IS '系统版本表';

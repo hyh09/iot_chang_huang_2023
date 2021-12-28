@@ -28,7 +28,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.alarm.Alarm;
@@ -119,13 +118,14 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
-//import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
+
+//import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 @Slf4j
 @TbCoreComponent
@@ -363,8 +363,17 @@ public abstract class BaseController {
 
         }
     }
+    void checkParameterChinees(String name, String param) throws ThingsboardException {
+        if (StringUtils.isEmpty(param)) {
+            throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+        }
+    }
+    void checkParameterChinees(String name, Object param) throws ThingsboardException {
+        if(param == null || StringUtils.isBlank(param.toString())){
+            throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
 
-
+        }
+    }
 
     void checkArrayParameter(String name, String[] params) throws ThingsboardException {
         if (params == null || params.length == 0) {
