@@ -6,7 +6,6 @@ import lombok.ToString;
 import org.thingsboard.server.dao.util.sql.entity.AbstractStatisticalDataEntity;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -22,23 +21,30 @@ import java.util.UUID;
 //@IdClass(TimescaleTsKvCompositeKey.class)
 @SqlResultSetMappings({
         @SqlResultSetMapping(
-                name = "EnergyChartOfBoardEntityMap",
+                name = "energyChartOfBoardEntityMap",
                 classes = {
                         @ConstructorResult(
                                 targetClass = EnergyChartOfBoardEntity.class,
                                 columns = {
-                                        @ColumnResult(name = "date", type = LocalDate.class),
-                                        @ColumnResult(name = "increment_capacity",type = String.class),
-                                        @ColumnResult(name = "history_capacity",type = String.class),
+                                        @ColumnResult(name = "entity_id", type = UUID.class),
+                                        @ColumnResult(name = "ts", type = Long.class),
 
-                                        @ColumnResult(name = "increment_electric",type = String.class),
-                                        @ColumnResult(name = "history_electric",type = String.class),
 
-                                        @ColumnResult(name = "increment_gas",type = String.class),
-                                        @ColumnResult(name = "history_gas",type = String.class),
+                                        //水
+                                        @ColumnResult(name = "water_added_value",type = String.class),
+                                        @ColumnResult(name = "water_first_time",type = Long.class),
+                                        @ColumnResult(name = "water_last_time",type = Long.class),
 
-                                        @ColumnResult(name = "increment_water",type = String.class),
-                                        @ColumnResult(name = "history_water",type = String.class),
+
+                                        //电
+                                        @ColumnResult(name = "electric_added_value",type = String.class),
+                                        @ColumnResult(name = "electric_first_time",type = Long.class),
+                                        @ColumnResult(name = "electric_last_time",type = Long.class),
+
+                                        //气
+                                        @ColumnResult(name = "gas_added_value",type = String.class),
+                                        @ColumnResult(name = "gas_first_time",type = Long.class),
+                                        @ColumnResult(name = "gas_last_time",type = Long.class),
 
 
 
