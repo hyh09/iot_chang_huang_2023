@@ -1275,7 +1275,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 .map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
                         BigDecimal::add);
         String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
-        resultMap.put(KeyTitleEnums.key_gas.getgName(),electricTotalValue);
+        resultMap.put(KeyTitleEnums.key_gas.getgName(),value03);
         return  resultMap;
 
     }
