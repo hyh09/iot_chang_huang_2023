@@ -34,7 +34,6 @@ import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.*;
-import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
@@ -55,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Service
 @Slf4j
-public class BaseTimeseriesService implements TimeseriesService , DefalutSvc {
+public class BaseTimeseriesService implements TimeseriesService  {
 
     private  Map<String, String> dataInitMap = new ConcurrentHashMap<>();
 

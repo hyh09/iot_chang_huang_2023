@@ -354,6 +354,46 @@ public class CommonUtils {
     }
 
 
+    /**
+     * 获取两个时间段的整点时间
+     * 目前入参： 0:00:00 -> 23:59:59
+     */
+    public  static  List<Long> getTwoTimePeriods(long startTs ,long  endTs)
+    {
+        List<Long> resultTimeList = new ArrayList<>();
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+            Date startTime1 = new Date(startTs);
+            Date endTime1 = new Date(endTs);
+            Calendar tempStart = Calendar.getInstance();
+            tempStart.setTime(startTime1);
+            while (startTime1.getTime() <= endTime1.getTime()) {
+                System.out.println(format2.format(startTime1));
+//                    tempStart.add(Calendar.DAY_OF_YEAR, -1);
+                tempStart.add(Calendar.MINUTE, 30);//30分钟前的时间
+                startTime1 = tempStart.getTime();
+                resultTimeList.add(startTime1.getTime());
+            }
+            return resultTimeList;
+
+
+    }
+
+
+
+    /*
+     * 将时间戳转换为时间
+     */
+    public static String stampToDate(String s){
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long lt = new Long(s);
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+
+
 
 
 

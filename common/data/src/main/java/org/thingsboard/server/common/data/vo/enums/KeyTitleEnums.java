@@ -45,6 +45,22 @@ public enum KeyTitleEnums {
 
 
 
+    public static  KeyTitleEnums getEnumsByCode(String  code)
+    {
+
+
+        for(KeyTitleEnums enums:KeyTitleEnums.values())
+        {
+            if(code.equals(enums.getCode()))
+            {
+                return enums;
+            }
+        }
+        return  null;
+    }
+
+
+
 
     public String getgName() {
         return gName;

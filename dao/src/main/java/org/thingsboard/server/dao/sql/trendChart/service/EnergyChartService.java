@@ -103,6 +103,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
         EnergyChartEntity  entityNew = new  EnergyChartEntity();
         entityNew.setEntityId(entityDatabase.getEntityId());
         entityNew.setId(entityDatabase.getId());
+        entityNew.setCreatedTime(entityDatabase.getCreatedTime());
         long ts =   tsKvEntry.getTs();
 //        entityNew.setTs(ts);
         if(title.equals(KeyTitleEnums.key_capacity.getgName()))

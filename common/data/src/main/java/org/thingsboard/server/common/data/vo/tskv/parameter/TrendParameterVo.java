@@ -2,7 +2,7 @@ package org.thingsboard.server.common.data.vo.tskv.parameter;
 
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.common.data.user.DefalutSvc;
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 
 import java.util.UUID;
 
@@ -30,6 +30,20 @@ public class TrendParameterVo {
     private  Long  endTime;
 
     private  String key;
+
+
+
+    public QueryTsKvVo toQueryTsKvVo()
+    {
+        QueryTsKvVo  vo = new QueryTsKvVo();
+        vo.setTenantId(this.tenantId);
+        vo.setFactoryId(this.factoryId);
+        vo.setWorkshopId(this.workshopId);
+//        vo.setProductionLineId(null);
+//        vo.setDeviceId(this.deviceId);
+        return  vo;
+
+    }
 
 
 
