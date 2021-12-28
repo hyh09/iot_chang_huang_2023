@@ -37,19 +37,5 @@ public interface BulletinBoardSvc {
 
 
 
-//    /**
-//     * 历史产能的接口
-//     * @param factoryId
-//     * @param tenantId
-//     * @return
-//     */
-//   String getHistoryCapValue(String factoryId, UUID tenantId);
 
-
-//
-//    /**
-//     * 历史产能接口
-//     *   就是查询当前最大
-//     */
-//   String  historySumByKey (MaxTsVo MaxTsVo);
 }
