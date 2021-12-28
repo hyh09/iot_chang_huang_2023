@@ -230,12 +230,11 @@ public class BaseTimeseriesService implements TimeseriesService  {
         {
 //            log.info("打印当前的数据打印标题{}",title);
             statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
-            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
-
         }
-//        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
-//        if(count>0) {
-//        }
+        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
+        if(count>0) {
+            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
+        }
 
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
