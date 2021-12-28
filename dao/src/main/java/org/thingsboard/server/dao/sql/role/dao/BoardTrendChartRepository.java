@@ -4,9 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
-import org.thingsboard.server.common.data.user.DefalutSvc;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
-import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.SolidTrendLineEntity;
 
 import javax.persistence.EntityManager;
@@ -24,7 +23,7 @@ import java.util.Map;
  **/
 @Slf4j
 @Repository
-public class BoardTrendChartRepository implements DefalutSvc {
+public class BoardTrendChartRepository  {
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -94,7 +93,7 @@ public class BoardTrendChartRepository implements DefalutSvc {
         param.put("startTime",vo.getStartTime());
         param.put("endTime",vo.getEndTime());
         param.put("keyName",vo.getKey());
-        param.put("timeGap",ENERGY_TIME_GAP);
+        param.put("timeGap", DataConstants.ENERGY_TIME_GAP);
         query= entityManager.createNativeQuery(sql.toString(),"dottedLineTrendLineEntityMap");
         return getSolidTrendLineEntities(query, param);
 

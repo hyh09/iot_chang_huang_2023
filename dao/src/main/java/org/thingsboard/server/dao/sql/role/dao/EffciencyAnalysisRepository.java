@@ -155,41 +155,41 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     }
 
 
-    /**
-     * sql片段
-     * @param queryTsKvVo
-     * @param sonSql01
-     * @param param
-     */
-    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
-    {
-        if(queryTsKvVo.getTenantId() != null)
-        {
-            sonSql01.append(" and  d1.tenant_id = :tenantId");
-            param.put("tenantId", queryTsKvVo.getTenantId());
-            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
-
-        }
-        if(queryTsKvVo.getFactoryId() != null)
-        {
-            sonSql01.append(" and  d1.factory_id = :factoryId");
-            param.put("factoryId", queryTsKvVo.getFactoryId());
-        }
-        if(queryTsKvVo.getWorkshopId() != null)
-        {
-            sonSql01.append(" and  d1.workshop_id = :workshopId");
-            param.put("workshopId", queryTsKvVo.getWorkshopId());
-        }
-        if(queryTsKvVo.getProductionLineId() != null)
-        {
-            sonSql01.append(" and  d1.production_line_id = :productionLineId");
-            param.put("productionLineId", queryTsKvVo.getProductionLineId());
-        }
-        if(queryTsKvVo.getDeviceId()  != null) {
-            sonSql01.append(" and  d1.id = :did");
-            param.put("did", queryTsKvVo.getDeviceId());
-        }
-     }
+//    /**
+//     * sql片段
+//     * @param queryTsKvVo
+//     * @param sonSql01
+//     * @param param
+//     */
+//    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
+//    {
+//        if(queryTsKvVo.getTenantId() != null)
+//        {
+//            sonSql01.append(" and  d1.tenant_id = :tenantId");
+//            param.put("tenantId", queryTsKvVo.getTenantId());
+//            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+//
+//        }
+//        if(queryTsKvVo.getFactoryId() != null)
+//        {
+//            sonSql01.append(" and  d1.factory_id = :factoryId");
+//            param.put("factoryId", queryTsKvVo.getFactoryId());
+//        }
+//        if(queryTsKvVo.getWorkshopId() != null)
+//        {
+//            sonSql01.append(" and  d1.workshop_id = :workshopId");
+//            param.put("workshopId", queryTsKvVo.getWorkshopId());
+//        }
+//        if(queryTsKvVo.getProductionLineId() != null)
+//        {
+//            sonSql01.append(" and  d1.production_line_id = :productionLineId");
+//            param.put("productionLineId", queryTsKvVo.getProductionLineId());
+//        }
+//        if(queryTsKvVo.getDeviceId()  != null) {
+//            sonSql01.append(" and  d1.id = :did");
+//            param.put("did", queryTsKvVo.getDeviceId());
+//        }
+//     }
 
 
 
