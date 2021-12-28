@@ -45,7 +45,7 @@
                 {{ 'device.name-required' | translate }}
               </mat-error>
             </mat-form-field>
-            <mat-form-field class="mat-block">
+            <mat-form-field *ngIf="!deviceWizardFormGroup.get('gateway').value" class="mat-block">
               <mat-label translate>device-mng.device-dic</mat-label>
               <mat-select formControlName="dictDeviceId">
                 <mat-option *ngFor="let option of deviceDictionaries" [value]="option.id">
@@ -169,7 +169,7 @@
           </tb-device-credentials>
         </form>
       </mat-step>
-      <mat-step [stepControl]="customerFormGroup" [optional]="true">
+      <!-- <mat-step [stepControl]="customerFormGroup" [optional]="true">
         <ng-template matStepLabel>{{ 'customer.customer' | translate }}</ng-template>
         <form [formGroup]="customerFormGroup" style="padding-bottom: 16px;">
           <tb-entity-autocomplete
@@ -178,7 +178,7 @@
             [entityType]="entityType.CUSTOMER">
           </tb-entity-autocomplete>
         </form>
-      </mat-step>
+      </mat-step> -->
     </mat-horizontal-stepper>
   </div>
   <div mat-dialog-actions fxLayout="row">
