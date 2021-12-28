@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -176,6 +177,21 @@ public class StringUtilToll {
         return  localDate;
     }
 
+
+    /**
+     * 累加器
+     * @param finalValueList  number类型
+     * @return
+     */
+    public  static  String  accumulator(List<String> finalValueList)
+    {
+        BigDecimal value =   finalValueList.stream()
+                .filter(m1-> StringUtils.isNotEmpty(m1))
+                .map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String value03= roundUp(value.stripTrailingZeros().toPlainString());
+        return  value03;
+    }
 
 
 
