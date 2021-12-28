@@ -332,9 +332,10 @@ export class DeviceWizardDialogComponent extends
   }
 
   private createDevice(profileId): Observable<BaseData<HasId>> {
+    const gateway = this.deviceWizardFormGroup.get('gateway').value;
     const device = {
       name: this.deviceWizardFormGroup.get('name').value,
-      dictDeviceId: this.deviceWizardFormGroup.get('dictDeviceId').value,
+      dictDeviceId: gateway ? '' : this.deviceWizardFormGroup.get('dictDeviceId').value,
       label: this.deviceWizardFormGroup.get('label').value,
       deviceProfileId: profileId,
       additionalInfo: {
