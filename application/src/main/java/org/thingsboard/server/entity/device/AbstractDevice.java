@@ -213,7 +213,6 @@ public abstract class AbstractDevice{
         device.setFactoryId(factoryId);
         device.setWorkshopId(workshopId);
         device.setProductionLineId(productionLineId);
-        device.setProductionLineId(productionLineId);
         device.setPicture(picture);
         device.setIcon(icon);
         device.setCode(code);
