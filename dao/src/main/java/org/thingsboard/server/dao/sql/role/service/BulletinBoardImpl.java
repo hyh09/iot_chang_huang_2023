@@ -83,11 +83,13 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TrendVo resultResults = new TrendVo();
 
         try {
-            String key = getKeyNameBy(vo.getKey());
-            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
-            vo.setKey(key);
+
+            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
+//            vo.setKey(key);
+//            Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
             List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
             List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
+            print("打印查询longs的数据", longs);
             resultResults.setSolidLine(getSolidLineData(vo,solidLineData,longs));
             resultResults.setDottedLine(getDottedLineData(vo,solidLineData,longs));
             return resultResults;
@@ -350,12 +352,12 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @param longs 时间
      * @return
      */
-    private  List<TrendLineVo> getDottedLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData,List<Long> longs )
-    {
+    private  List<TrendLineVo> getDottedLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData,List<Long> longs) throws ThingsboardException {
+        String keyName = getKeyNameBy(vo.getKey());
         //需要查询出设备字典的数据
         List<UUID> entityIds = solidLineData.stream().map(EnergyChartOfBoardEntity::getEntityId).distinct().collect(Collectors.toList());
         print("打印设备id：",entityIds);
-        List<DeviceRatingValueVo>  deviceRatingValueVos  =  deviceRepository.queryDeviceIdAndValue(entityIds,vo.getKey());
+        List<DeviceRatingValueVo>  deviceRatingValueVos  =  deviceRepository.queryDeviceIdAndValue(entityIds,keyName);
         print("打印设备对应的额定值：",deviceRatingValueVos);
         Map<UUID, String> IdMappingContentMap = deviceRatingValueVos.stream().collect(Collectors.toMap(DeviceRatingValueVo::getId, DeviceRatingValueVo::getContent));
         print("打印设备对应的额定值IdMappingContentMap：",IdMappingContentMap);
@@ -464,16 +466,20 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                  t1 =   m1.getElectricFirstTime();
 
             }
-            if(enums == KeyTitleEnums.key_water)
+            if(enums == KeyTitleEnums.key_gas)
             {
-                 t2 =   m1.getWaterLastTime();
-                 t1 =   m1.getWaterFirstTime();
+                 t2 =   m1.getGasLastTime();
+                 t1 =   m1.getGasFirstTime();
 
             }
             String  t3 = StringUtilToll.sub(t2.toString(),t1.toString());
             String  hours =   StringUtilToll.div(t3.toString(),ONE_HOURS);
             String setValue =  IdMappingContentMap.get(m1.getEntityId());//设定的值
-            String  finalValue=   StringUtilToll.mul(hours,setValue);
+            String  va =   StringUtilToll.div(setValue,"2");
+            String  finalValue=   StringUtilToll.mul(hours,va);
+//            log.info("====>打印运算的步骤:结束时间{}减去开始时间{}d等于的时间{};再除以分钟换算30分钟的{}再乘以配置的值{}最后的结果{}"
+//                                                 ,t2,t1,t3,hours,va,finalValue       );
+
             finalValueList.add(finalValue);
 
         });

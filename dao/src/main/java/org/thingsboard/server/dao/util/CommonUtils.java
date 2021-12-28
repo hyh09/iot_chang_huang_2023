@@ -370,8 +370,9 @@ public class CommonUtils {
             while (startTime1.getTime() <= endTime1.getTime()) {
                 System.out.println(format2.format(startTime1));
 //                    tempStart.add(Calendar.DAY_OF_YEAR, -1);
-                tempStart.add(Calendar.MINUTE, 30);//30分钟前的时间
+
                 startTime1 = tempStart.getTime();
+                tempStart.add(Calendar.MINUTE, 30);//30分钟前的时间
                 resultTimeList.add(startTime1.getTime());
             }
             return resultTimeList;
