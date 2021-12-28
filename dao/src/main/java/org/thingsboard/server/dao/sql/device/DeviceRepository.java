@@ -25,6 +25,7 @@ import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.vo.device.DeviceDataSvc;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
+import org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 
@@ -272,6 +273,14 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             " LEFT JOIN  hs_workshop  w1  ON  w1.id = t.workshop_id     LEFT JOIN hs_production_line  p1  ON  p1.id = t.production_line_id  "+
             "  where  t.factory_id=?1 and t.name like  %?2%  and  position('\"gateway\":true' in t.additional_info)=0")
     Page<DeviceDataSvc> queryAllByNameLikeNativeQuery(UUID factoryId, String Name, Pageable pageable);
+
+
+    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo(d.id,d2.content)  from DeviceEntity d Left JOIN  DictDeviceEntity d1 ON  d.dictDeviceId = d1.id " +
+            "left  join  DictDeviceStandardPropertyEntity d2 ON d1.id = d2.dictDeviceId" +
+            " where  d.id in (:ids) and d2.name = :name ")
+    List<DeviceRatingValueVo> queryDeviceIdAndValue(@Param("ids") List<UUID> ids, @Param("name") String name);
+
+
 
     @Transactional
     @Modifying(clearAutomatically = true)

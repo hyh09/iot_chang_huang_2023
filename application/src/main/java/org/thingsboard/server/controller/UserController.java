@@ -34,10 +34,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
-import org.thingsboard.server.common.data.EntityType;
-import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.Tenant;
-import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -53,7 +50,6 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
-import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -92,7 +88,7 @@ import java.util.stream.Collectors;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class UserController extends BaseController implements DefalutSvc {
+public class UserController extends BaseController  {
 
 
     public static final String USER_ID = "userId";
@@ -512,7 +508,7 @@ public class UserController extends BaseController implements DefalutSvc {
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
-            String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
+            String  encodePassword =   passwordEncoder.encode(DataConstants.DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
             savedUser.setRoleIds(user.getRoleIds());

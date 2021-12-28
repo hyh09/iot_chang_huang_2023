@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,9 +24,14 @@ import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TrendLineVo;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
+import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyRepository;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceStandardPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.sql.role.dao.*;
@@ -37,6 +43,7 @@ import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -61,6 +68,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
 
     @Autowired  private BoardTrendChartRepositoryNewMethon boardTrendChartRepositoryNewMethon;
+    @Autowired  private  DictDeviceRepository dictDeviceRepository;
+    // 设备字典标准属性Repository
+    @Autowired  private DictDeviceStandardPropertyRepository standardPropertyRepository;
 
     private final  static   String ONE_HOURS="3600000";
 
@@ -351,6 +361,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     {
         List<TrendLineVo>   dottedLine = new ArrayList<>();
         //需要查询出设备字典的数据
+        List<UUID> entityIds = solidLineData.stream().map(EnergyChartOfBoardEntity::getEntityId).distinct().collect(Collectors.toList());
+        print("打印设备id：",entityIds);
 
         return  dottedLine;
 
