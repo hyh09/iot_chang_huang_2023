@@ -94,9 +94,9 @@
                     >
                       <tbody>
                         <tr *ngFor="let data of compPropTable.data" (click)="fetchPropHistoryData(data.name, data.title)" [class.active]="data.name === currPropName">
-                          <td width="33%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
-                          <td width="33%">{{data.content}}{{data.unit}}</td>
-                          <td width="34%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                          <td width="40%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
+                          <td width="30%">{{data.content}}{{data.unit}}</td>
+                          <td width="26%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                         </tr>
                       </tbody>  
                     </nz-table>
