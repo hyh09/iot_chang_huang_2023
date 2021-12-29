@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "TB_STATISTICAL_DATA")
+@Table(name = "hs_statistical_data")
 //@IdClass(TimescaleTsKvCompositeKey.class)
 @SqlResultSetMappings({
         @SqlResultSetMapping(

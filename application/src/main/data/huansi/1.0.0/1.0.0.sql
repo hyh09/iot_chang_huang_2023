@@ -850,10 +850,10 @@ CREATE TABLE IF NOT EXISTS public.hs_enery_time_gap
     CONSTRAINT hs_enery_time_gap_pkey PRIMARY KEY (id)
 )
 
-create table tb_statistical_data
+create table hs_statistical_data
 (
     id                   uuid not null
-        constraint tb_statistical_data_pkey
+        constraint hs_statistical_data_pkey
             primary key,
     created_time         bigint,
     created_user         uuid,

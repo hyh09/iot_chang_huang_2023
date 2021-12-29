@@ -1,7 +1,7 @@
-create table tb_statistical_data
+create table hs_statistical_data
 (
     id                   uuid not null
-        constraint tb_statistical_data_pkey
+        constraint hs_statistical_data_pkey
             primary key,
     created_time         bigint,
     created_user         uuid,
