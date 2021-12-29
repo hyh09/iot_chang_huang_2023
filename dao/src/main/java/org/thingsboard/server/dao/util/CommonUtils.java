@@ -313,13 +313,14 @@ public class CommonUtils {
         int hour =  localDateTime.getHour();
         int minute = localDateTime.getMinute();
         int second =localDateTime.getSecond();
-        if(minute >=30 && second>0)
+        if(minute >30)
         {
-
+            localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
+        }else  if(minute == 30 && second>0){
             localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
         }
         else  if(minute == 0 && second== 0){
-            localDateTime1  = localDateTime;
+            localDateTime1  =LocalDateTime.of(year,month,day,hour,0,0,0);
         }else {
             localDateTime1  =  LocalDateTime.of(year,month,day,hour,30,0,0);
 
