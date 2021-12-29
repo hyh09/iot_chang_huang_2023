@@ -15,23 +15,21 @@
  */
 package org.thingsboard.server.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.util.concurrent.Future;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.thingsboard.mqtt.MqttClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +37,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.mqtt.MqttClientConfig;
 import org.thingsboard.rule.engine.api.msg.DeviceCredentialsUpdateNotificationMsg;
 import org.thingsboard.rule.engine.api.msg.DeviceEdgeUpdateMsg;
@@ -61,7 +60,6 @@ import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
 import org.thingsboard.server.config.MqttMessageListener;
-import org.thingsboard.server.config.TransportMqttClient;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -69,7 +67,6 @@ import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
-import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 import org.thingsboard.server.entity.device.dto.*;
 import org.thingsboard.server.entity.device.enums.ReadWriteEnum;
@@ -96,12 +93,18 @@ import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 @RequestMapping("/api")
 public class DeviceController extends BaseController {
 
+    private static final String DEVICE = "DEVICE";
+    private static final String SHARED_SCOPE = "SHARED_SCOPE";
     private static final String DEVICE_ID = "deviceId";
     private static final String DEVICE_NAME = "deviceName";
     private static final String TENANT_ID = "tenantId";
     public static final String SAVE_TYPE_ADD = "add ";
     public static final String SAVE_TYPE_ADD_UPDATE = "update ";
     public static final String GATEWAY = "gateway";
+
+    @Autowired
+    private TelemetryController telemetryController;
+
 
     @ApiOperation("云对接查设备详情")
     @ApiImplicitParam(name = "deviceId",value = "当前id",dataType = "String",paramType="path",required = true)
@@ -182,7 +185,8 @@ public class DeviceController extends BaseController {
             logEntityAction(savedDevice.getId(), savedDevice,
                     savedDevice.getCustomerId(),
                     created ? ActionType.ADDED : ActionType.UPDATED, null);
-
+            //初始化网关版本
+            this.saveAttributesInit(savedDevice);
             return savedDevice;
         } catch (Exception e) {
             logEntityAction(emptyId(EntityType.DEVICE), device,
@@ -191,6 +195,19 @@ public class DeviceController extends BaseController {
         }
 
     }
+    /**
+     * 初始化属性
+     * @param device
+     */
+    private void saveAttributesInit(Device device) throws ThingsboardException, JsonProcessingException {
+        //网关共享属性version
+        if(device.getAdditionalInfo() != null && device.getAdditionalInfo().get(GATEWAY).asBoolean()){
+            String json = "{\"version\":\"0.0.1\"}";
+            JsonNode request = new ObjectMapper().readTree(json);
+            telemetryController.saveEntityAttributesV1(DEVICE,device.getId().getId().toString(),SHARED_SCOPE,request);
+        }
+    }
+
 
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.DELETE)

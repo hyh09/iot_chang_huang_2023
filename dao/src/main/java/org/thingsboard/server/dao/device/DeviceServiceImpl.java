@@ -17,12 +17,10 @@ package org.thingsboard.server.dao.device;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.BeanUtils;
@@ -48,9 +46,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.*;
-import org.thingsboard.server.common.data.id.factory.FactoryId;
 import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
-import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -75,10 +71,12 @@ import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.factory.FactoryDao;
-import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceComponentRepository;
+import org.thingsboard.server.dao.hs.dao.DictDeviceEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
-import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.ota.OtaPackageService;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
@@ -949,6 +947,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         }
     }
 
+    @Override
     public void createRelationDeviceFromProductionLine(Device device){
         if(device != null){
             if(device.getProductionLineId() != null){
