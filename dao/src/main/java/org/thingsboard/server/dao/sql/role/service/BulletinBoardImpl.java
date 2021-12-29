@@ -31,11 +31,15 @@ import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
-import org.thingsboard.server.dao.sql.role.dao.*;
+import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepositoryNewMethon;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
+import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyChartOfBoardEntity;
+import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
@@ -67,6 +71,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     // 设备字典标准属性Repository
     @Autowired  private DictDeviceStandardPropertyRepository standardPropertyRepository;
     @Autowired  private DeviceRepository deviceRepository;
+    @Autowired  private TsKvDictionaryRepository tsKvDictionaryRepository;
 
 
     private final  static   String ONE_HOURS="1800000";//
@@ -139,9 +144,21 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
     @Override
     public Map queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
+        Map<UUID,String> resultMap = new HashMap<>();
         print("查询设备所在时间范围内的产能数据，入参:",deviceCapacityVoList);
-
-        return null;
+        if(CollectionUtils.isEmpty(deviceCapacityVoList)){
+            return  resultMap;
+        }
+        List<String> keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+        print("查询到的产能keyName:",keys1);
+        String key =CollectionUtils.isEmpty(keys1)? "capacities":keys1.get(0);
+        Optional<TsKvDictionary> tsKvDictionary =  tsKvDictionaryRepository.findByKey(key);
+        int keyId = tsKvDictionary.isPresent()?tsKvDictionary.get().getKeyId():76;
+        deviceCapacityVoList.forEach(vo->{
+          String valueToMap =   boardTrendChartRepositoryNewMethon.getCapacityValueByDeviceIdAndInTime(vo,keyId);
+          resultMap.put(vo.getId(),valueToMap);
+        });
+        return resultMap;
     }
 
     /**
