@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -13,27 +12,26 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
-import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
 import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TrendLineVo;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
-import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyRepository;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceStandardPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.role.dao.*;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
@@ -43,7 +41,6 @@ import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -58,22 +55,21 @@ import java.util.stream.Collectors;
 public class BulletinBoardImpl implements BulletinBoardSvc {
 
 
-    @Autowired private EffectMaxValueKvRepository effectMaxValueKvRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EffectTsKvRepository effectTsKvRepository;
     @Autowired private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     @Autowired private DictDeviceService dictDeviceService;
     @Autowired private FactoryDao factoryDao;
-    @Autowired private BoardTrendChartRepository boardTrendChartRepository;  //趋势图的实线
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
 
     @Autowired  private BoardTrendChartRepositoryNewMethon boardTrendChartRepositoryNewMethon;
     @Autowired  private  DictDeviceRepository dictDeviceRepository;
     // 设备字典标准属性Repository
     @Autowired  private DictDeviceStandardPropertyRepository standardPropertyRepository;
+    @Autowired  private DeviceRepository deviceRepository;
 
-    private final  static   String ONE_HOURS="3600000";
 
+    private final  static   String ONE_HOURS="1800000";//
 
     /**
      *看板的能耗趋势图(实线 和虚线)
@@ -81,22 +77,20 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @return
      */
     @Override
-    public TrendVo energyConsumptionTrend(TrendParameterVo vo) throws ThingsboardException {
+    public TrendVo energyConsumptionTrend(TrendParameterVo vo)  {
         TrendVo resultResults = new TrendVo();
 
         try {
-            String key = getKeyNameBy(vo.getKey());
-            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}对应的key:{}", vo, key);
-            vo.setKey(key);
-
+            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
             List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
-            resultResults.setSolidLine(getSolidLineData(vo,solidLineData));
-            resultResults.setDottedLine(getDottedLineData(vo,solidLineData));
-
+            List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
+            print("打印查询longs的数据", longs);
+            resultResults.setSolidLine(getSolidLineData(vo,solidLineData,longs));
+            resultResults.setDottedLine(getDottedLineData(vo,solidLineData,longs));
             return resultResults;
         }catch (Exception e)
         {
-             e.printStackTrace();
+            e.printStackTrace();
             resultResults.setCode("0");
             log.error("看板的能耗趋势图(实线 和虚线)异常{}",e);
             return  resultResults;
@@ -113,10 +107,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
             vo.setStartTime(CommonUtils.getYesterdayZero());
             vo.setEndTime(CommonUtils.getYesterdayLastTime());
         }
-        log.info("==totalEnergyConsumption====>{}",vo);
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
         Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
-
         result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_cable,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_gas,titleMapToVo));
@@ -126,7 +118,6 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Override
     public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId) {
         List<String>  keys1 = new ArrayList<>();
-//        vo.setDeviceId(UUID.fromString("ac0297b3-5656-11ec-a240-955d7c1497e4"));
 
 
         keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
@@ -145,38 +136,13 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return   getEntityKeyValue(map,tenantId,mapNameToVo);
     }
 
-    /**
-     * 历史的产能的总和
-     * @param factoryId
-     * @return
-     * @throws ThingsboardException
-     */
-    public   String getHistoryCapValue(String factoryId,UUID tenantId)   {
-        MaxTsVo  vo = new MaxTsVo();
-        List<String> nameKey=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
-        String keyName=  nameKey.get(0);
-        vo.setKey(keyName);
-        if(StringUtils.isNotBlank(factoryId))
-        {
-            vo.setFactoryId(UUID.fromString(factoryId));//工厂维度
-        }
-        vo.setTenantId(tenantId);
-        vo.setCapSign(true);
-        return this.historySumByKey(vo);
-    }
 
-    /**
-     * 查询历史key维度的 设备总和
-     *
-     * @return
-     */
     @Override
-    public String historySumByKey(MaxTsVo maxTsVo) {
-        return  effectMaxValueKvRepository.querySum(maxTsVo);
+    public Map queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
+        print("查询设备所在时间范围内的产能数据，入参:",deviceCapacityVoList);
 
+        return null;
     }
-
-
 
     /**
      * @param listMap
@@ -335,37 +301,37 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
      * @param vo
      * @return
      */
-    private List<TrendLineVo> getSolidLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData )
+    private List<TrendLineVo> getSolidLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData,   List<Long> longs  )
     {
         print("打印查询的数据", solidLineData);
         Map<Long, List<EnergyChartOfBoardEntity>> map = solidLineData.stream().collect(Collectors.groupingBy(EnergyChartOfBoardEntity::getTs));
         print("打印查询的数据map", map);
         Map<Long, String> longStringMap = solid(map, vo.getKey());
         print("打印求和的数据", longStringMap);
-        List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
-
-        List<TrendLineVo> trendLineVos = longs.stream().map(ts -> {
-            TrendLineVo trendLineVo = new TrendLineVo();
-            trendLineVo.setTime(ts);
-            String value = longStringMap.get(ts);
-            trendLineVo.setValue(StringUtils.isEmpty(value) ? "0" : value);
-            return trendLineVo;
-        }).collect(Collectors.toList());
-
-        return  trendLineVos;
-
+        return   fillReturnData(longs,longStringMap);
     }
 
 
-    private  List<TrendLineVo> getDottedLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData)
-    {
-        List<TrendLineVo>   dottedLine = new ArrayList<>();
+    /**
+     *
+     * @param vo
+     * @param solidLineData
+     * @param longs 时间
+     * @return
+     */
+    private  List<TrendLineVo> getDottedLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData,List<Long> longs) throws ThingsboardException {
+        String keyName = getKeyNameBy(vo.getKey());
         //需要查询出设备字典的数据
         List<UUID> entityIds = solidLineData.stream().map(EnergyChartOfBoardEntity::getEntityId).distinct().collect(Collectors.toList());
         print("打印设备id：",entityIds);
-
-        return  dottedLine;
-
+        List<DeviceRatingValueVo>  deviceRatingValueVos  =  deviceRepository.queryDeviceIdAndValue(entityIds,keyName);
+        print("打印设备对应的额定值：",deviceRatingValueVos);
+        Map<UUID, String> IdMappingContentMap = deviceRatingValueVos.stream().collect(Collectors.toMap(DeviceRatingValueVo::getId, DeviceRatingValueVo::getContent));
+        print("打印设备对应的额定值IdMappingContentMap：",IdMappingContentMap);
+        Map<Long, List<EnergyChartOfBoardEntity>> map = solidLineData.stream().collect(Collectors.groupingBy(EnergyChartOfBoardEntity::getTs));
+        //时间点 对应的额定值
+        Map<Long,String>  TimeToValueMap = dashedData(vo.getKey(),map,IdMappingContentMap);
+        return   fillReturnData(longs,TimeToValueMap);
     }
 
 
@@ -433,5 +399,73 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
         return  value03;
     }
+
+
+
+
+    private  Map dashedData(String key,Map<Long, List<EnergyChartOfBoardEntity>> map,Map<UUID, String> IdMappingContentMap)
+    {
+        Map<Long,String> resultMap = new HashMap<>();
+        KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(key);
+        map.forEach((k1,v1)->{
+            resultMap.put(k1,getDashedPointData(v1,IdMappingContentMap,enums));
+        });
+        return  resultMap;
+    }
+
+
+    private  String getDashedPointData(List<EnergyChartOfBoardEntity> entities,Map<UUID, String> IdMappingContentMap,KeyTitleEnums enums)
+    {
+
+        List<String> finalValueList = new ArrayList<>();
+        entities.stream().forEach(m1->{
+            Long t2 =0L;
+            Long t1 =0L;
+            if(enums == KeyTitleEnums.key_water)
+            {
+                 t2 =   m1.getWaterLastTime();
+                 t1 =   m1.getWaterFirstTime();
+
+            }
+            if(enums == KeyTitleEnums.key_cable)
+            {
+                 t2 =   m1.getElectricLastTime();
+                 t1 =   m1.getElectricFirstTime();
+
+            }
+            if(enums == KeyTitleEnums.key_gas)
+            {
+                 t2 =   m1.getGasLastTime();
+                 t1 =   m1.getGasFirstTime();
+
+            }
+            String  t3 = StringUtilToll.sub(t2.toString(),t1.toString());
+            String  hours =   StringUtilToll.div(t3.toString(),ONE_HOURS);
+            String setValue =  IdMappingContentMap.get(m1.getEntityId());//设定的值
+            String  va =   StringUtilToll.div(setValue,"2");
+            String  finalValue=   StringUtilToll.mul(hours,va);
+//            log.info("====>打印运算的步骤:结束时间{}减去开始时间{}d等于的时间{};再除以分钟换算30分钟的{}再乘以配置的值{}最后的结果{}"
+//                                                 ,t2,t1,t3,hours,va,finalValue       );
+
+            finalValueList.add(finalValue);
+
+        });
+        return  StringUtilToll.accumulator(finalValueList);
+
+    }
+
+
+    private   List<TrendLineVo> fillReturnData(List<Long> longs,Map<Long, String> longStringMap ){
+        List<TrendLineVo> trendLineVos = longs.stream().map(ts -> {
+            TrendLineVo trendLineVo = new TrendLineVo();
+            trendLineVo.setTime(ts);
+            String value = longStringMap.get(ts);
+            trendLineVo.setValue(StringUtils.isEmpty(value) ? "0" : value);
+            return trendLineVo;
+        }).collect(Collectors.toList());
+        return  trendLineVos;
+    }
+
+
 
 }
