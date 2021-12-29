@@ -1,6 +1,5 @@
 
 -- DROP TABLE IF EXISTS public.hs_device_component;
-
 CREATE TABLE IF NOT EXISTS public.hs_device_component
 (
     id uuid NOT NULL,
@@ -27,8 +26,6 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.hs_device_component
     OWNER to postgres;
-)
-;
 
 
 
