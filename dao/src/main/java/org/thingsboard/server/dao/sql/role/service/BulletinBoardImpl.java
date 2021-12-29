@@ -107,11 +107,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     public List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo v1, TenantId tenantId) {
         List<ConsumptionVo>  result = new ArrayList<>();
         TsSqlDayVo vo = TsSqlDayVo.constructionByQueryTsKvVo(v1,tenantId);
-        if(vo.getStartTime() ==  null )  //如果有值，则是看板的调用
-        {
-            vo.setStartTime(CommonUtils.getYesterdayZero());
-            vo.setEndTime(CommonUtils.getYesterdayLastTime());
-        }
+         vo.setStartTime(v1.getStartTime());
+         vo.setEndTime(v1.getEndTime());
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
         Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
         result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
