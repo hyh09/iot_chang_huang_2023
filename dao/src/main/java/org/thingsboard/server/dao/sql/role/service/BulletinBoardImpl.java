@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo;
@@ -59,7 +60,6 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     @Autowired private DictDeviceService dictDeviceService;
     @Autowired private FactoryDao factoryDao;
-    @Autowired private BoardTrendChartRepository boardTrendChartRepository;  //趋势图的实线
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
 
     @Autowired  private BoardTrendChartRepositoryNewMethon boardTrendChartRepositoryNewMethon;
@@ -136,6 +136,13 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return   getEntityKeyValue(map,tenantId,mapNameToVo);
     }
 
+
+    @Override
+    public Map queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
+        print("查询设备所在时间范围内的产能数据，入参:",deviceCapacityVoList);
+
+        return null;
+    }
 
     /**
      * @param listMap
