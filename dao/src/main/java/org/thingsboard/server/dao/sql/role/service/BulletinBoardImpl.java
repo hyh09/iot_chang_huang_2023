@@ -143,7 +143,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
 
     @Override
-    public Map queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
+    public  Map<UUID,String> queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
         Map<UUID,String> resultMap = new HashMap<>();
         print("查询设备所在时间范围内的产能数据，入参:",deviceCapacityVoList);
         if(CollectionUtils.isEmpty(deviceCapacityVoList)){
