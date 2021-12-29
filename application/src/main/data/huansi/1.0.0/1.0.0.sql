@@ -834,7 +834,7 @@ create table hs_energy_chart
 );
 
 ----新增表用于趋势图的统计时间差
-CREATE TABLE IF NOT EXISTS public.tb_enery_time_gap
+CREATE TABLE IF NOT EXISTS public.hs_enery_time_gap
 (
     id uuid NOT NULL,
     created_time bigint,
@@ -847,7 +847,7 @@ CREATE TABLE IF NOT EXISTS public.tb_enery_time_gap
     time_gap bigint,
     ts bigint,
     value character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT tb_enery_time_gap_pkey PRIMARY KEY (id)
+    CONSTRAINT hs_enery_time_gap_pkey PRIMARY KEY (id)
 )
 
 create table tb_statistical_data
