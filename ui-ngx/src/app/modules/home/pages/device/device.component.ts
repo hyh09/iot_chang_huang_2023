@@ -88,10 +88,11 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   }
 
   buildForm(entity: DeviceInfo): FormGroup {
+    const gateway = entity && entity.additionalInfo ? entity.additionalInfo.gateway : false;
     const form = this.fb.group(
       {
         name: [entity ? entity.name : '', [Validators.required]],
-        dictDeviceId: [entity && entity.dictDeviceId ? entity.dictDeviceId : ''],
+        dictDeviceId: [!gateway && entity && entity.dictDeviceId ? entity.dictDeviceId : ''],
         deviceProfileId: [entity ? entity.deviceProfileId : null, [Validators.required]],
         firmwareId: [entity ? entity.firmwareId : null],
         softwareId: [entity ? entity.softwareId : null],
@@ -99,7 +100,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
         deviceData: [entity ? entity.deviceData : null, [Validators.required]],
         additionalInfo: this.fb.group(
           {
-            gateway: [entity && entity.additionalInfo ? entity.additionalInfo.gateway : false],
+            gateway: [gateway],
             overwriteActivityTime: [entity && entity.additionalInfo ? entity.additionalInfo.overwriteActivityTime : false],
             description: [entity && entity.additionalInfo ? entity.additionalInfo.description : ''],
           }
@@ -120,16 +121,17 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   }
 
   updateForm(entity: DeviceInfo) {
+    const gateway = entity.additionalInfo ? entity.additionalInfo.gateway : false;
     this.entityForm.patchValue({
       name: entity.name,
-      dictDeviceId: entity.dictDeviceId,
+      dictDeviceId: gateway ? '' : entity.dictDeviceId,
       deviceProfileId: entity.deviceProfileId,
       firmwareId: entity.firmwareId,
       softwareId: entity.softwareId,
       label: entity.label,
       deviceData: entity.deviceData,
       additionalInfo: {
-        gateway: entity.additionalInfo ? entity.additionalInfo.gateway : false,
+        gateway,
         overwriteActivityTime: entity.additionalInfo ? entity.additionalInfo.overwriteActivityTime : false,
         description: entity.additionalInfo ? entity.additionalInfo.description : ''
       }

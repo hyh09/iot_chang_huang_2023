@@ -2,14 +2,15 @@ package org.thingsboard.server.dao.sql.role.service;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
-import org.thingsboard.server.common.data.vo.tskv.MaxTsVo;
 import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
 import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -31,26 +32,22 @@ public interface BulletinBoardSvc {
     List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
     /**
-     * 今日能耗量列表
+     * 今日能耗量列表  待优化的部分
      *
      */
     ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId );
 
 
-
     /**
-     * 历史产能的接口
-     * @param factoryId
-     * @param tenantId
-     * @return
+     *
+     * @param deviceCapacityVoList  设备的入参
+     * @return  设备id 对应的 产能值
      */
-   String getHistoryCapValue(String factoryId, UUID tenantId);
+    Map<UUID,String> queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList);
 
 
 
-    /**
-     * 历史产能接口
-     *   就是查询当前最大
-     */
-   String  historySumByKey (MaxTsVo MaxTsVo);
+
+
+
 }

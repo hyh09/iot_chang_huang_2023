@@ -52,6 +52,20 @@ import java.util.UUID;
                         ),
                 }
 
+        ),
+        @SqlResultSetMapping(
+                name = "getCapacityValueByDeviceIdAndInTime",
+                classes = {
+                        @ConstructorResult(
+                                targetClass = EnergyChartOfBoardEntity.class,
+                                columns = {
+                                        @ColumnResult(name = "entity_id", type = UUID.class),
+                                        @ColumnResult(name = "maxValue01",type = String.class),
+                                        @ColumnResult(name = "minValue02",type = String.class)
+                               }
+                        ),
+                }
+
         )
 
 
@@ -60,8 +74,10 @@ import java.util.UUID;
 public class EnergyChartOfBoardEntity extends AbstractStatisticalDataEntity {
 
 
-
-
+    @Transient
+    private  String  maxValue01;
+    @Transient
+    private  String  minValue02;
 
 
     public EnergyChartOfBoardEntity(UUID entityId, Long ts,
@@ -91,4 +107,9 @@ public class EnergyChartOfBoardEntity extends AbstractStatisticalDataEntity {
     }
 
 
+    public EnergyChartOfBoardEntity(UUID entityId,String maxValue01, String minValue02) {
+        this.entityId = entityId;
+        this.maxValue01 = maxValue01;
+        this.minValue02 = minValue02;
+    }
 }
