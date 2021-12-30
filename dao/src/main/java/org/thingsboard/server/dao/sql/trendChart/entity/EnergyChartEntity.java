@@ -17,7 +17,7 @@ import javax.persistence.Table;
 */	
 @Data	
 @Entity	
-@Table(name="TB_ENERGY_CHART")
+@Table(name="hs_energy_chart")
 @DynamicInsert	
 @DynamicUpdate	
 //@Proxy(lazy = false)	

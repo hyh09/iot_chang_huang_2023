@@ -25,7 +25,7 @@ public class BoardTrendChartRepositoryNewMethon extends JpaSqlTool {
 
     private  String  SQL_FRAGMENT_MAIN_TABLE="select t1.entity_id,t1.ts,t1.water_added_value ,t1.water_first_time,t1.water_last_time," +
             "  t1.electric_added_value,t1.electric_first_time,t1.electric_last_time,t1.gas_added_value,t1.gas_first_time,t1.gas_last_time " +
-            "  from  TB_ENERGY_CHART t1 WHERE t1.ts>= :startTime and t1.ts<= :endTime ";
+            "  from  hs_energy_chart t1 WHERE t1.ts>= :startTime and t1.ts<= :endTime ";
 
 
 

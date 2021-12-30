@@ -1,8 +1,8 @@
 -- auto-generated definition
-create table tb_energy_chart
+create table hs_energy_chart
 (
     id                   uuid not null
-        constraint tb_energy_chart_pkey
+        constraint hs_energy_chart_pkey
             primary key,
     created_time         bigint,
     created_user         uuid,

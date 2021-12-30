@@ -28,7 +28,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
     /**pc端产能接口 */
     private  String FIND_SON_QUERY="select t1.entity_id,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) as capacity_added_value" +
-            " from tb_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
+            " from hs_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
     public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
     public  static  String  SELECT_TS_CAP =" ,tb.capacity_added_value  ";
     public  static  String  FROM_QUERY_CAP="    from   device  d1 left join table1 tb on  d1.id = tb.entity_id  where 1=1 " ;
@@ -40,7 +40,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
             " min(water_first_time) as water_first_time,max(water_last_time) as water_last_time,"+
             " min(electric_first_time) as electric_first_time,max(electric_last_time) as electric_last_time,"+
             " min(gas_first_time) as gas_first_time,max(gas_last_time) as gas_last_time"+
-            " from tb_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
+            " from hs_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
     public  static  String  SELECT_START_DEVICE_02 =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
 
     public  static  String  SELECT_TS_CAP_02 =" ,tb.capacity_added_value,tb.water_added_value,tb.electric_added_value,tb.gas_added_value, " +
@@ -50,12 +50,17 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
 
 
-     /***  */
+     /***  今天 昨天 历史的 总和统计*/
      public  static  String SELECT_EVERY_DAY_SUM="select date,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) increment_capacity," +
              " sum(to_number(t.capacity_value,'99999999999999999999999999.9999')) history_capacity, sum(to_number(t.electric_added_value,'99999999999999999999999999.9999')) increment_electric,\n" +
              "       sum(to_number(t.electric_value,'99999999999999999999999999.9999')) history_electric,  sum(to_number(t.gas_added_value,'99999999999999999999999999.9999')) increment_gas,\n" +
              "       sum(to_number(t.gas_value,'99999999999999999999999999.9999')) history_gas,sum(to_number(t.water_added_value,'99999999999999999999999999.9999')) increment_water,\n" +
-             "       sum(to_number(t.water_value,'99999999999999999999999999.9999')) history_water  from  tb_statistical_data t  where t.ts>= :startTime and t.entity_id in ( select id from device d1 where 1=1   \n" ;
+             "       sum(to_number(t.water_value,'99999999999999999999999999.9999')) history_water  from  hs_statistical_data t  where t.ts>= :startTime and t.entity_id in ( select id from device d1 where 1=1   \n" ;
+
+
+     /***今日排行*/
+     public static  String  TODAY_SQL_02=" tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value ,tb.ts ";
+    public  static  String  FROM_SQL_02="    from   device  d1 left join hs_statistical_data tb on  d1.id = tb.entity_id  and  tb.ts>=:startTime and tb.ts<:endTime  where 1=1 " ;
 
 
 
@@ -86,8 +91,6 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
         Page<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param, DaoUtil.toPageable(pageLink),"energyEffciencyNewEntity_01");
     return page;
-
-
 
     }
 
@@ -122,6 +125,33 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(sonSql01);
         Page<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param, DaoUtil.toPageable(pageLink),"energyEffciencyNewEntity_02");
         return  page;
+    }
+
+
+    /**
+     * 设备的排行
+     *    单纯的设备维度； 不需要统计的
+     * @param queryTsKvVo
+     * @return
+     */
+    public List<EnergyEffciencyNewEntity> queryEnergy(QueryTsKvVo queryTsKvVo)
+    {
+        Query query = null;
+        Map<String, Object> param = new HashMap<>();
+        param.put("startTime",queryTsKvVo.getStartTime());
+        param.put("endTime",queryTsKvVo.getEndTime());
+        StringBuffer  sonSql = new StringBuffer();
+
+        StringBuffer  sonSql01 = new StringBuffer();
+        sqlPartOnDevice(queryTsKvVo,sonSql01,param);
+
+        StringBuffer  sql = new StringBuffer();
+//        sql.append(SELECT_START_DEVICE_02).append(",").append(TODAY_SQL_02).append(FROM_SQL_02);
+        sql.append(SELECT_START_DEVICE_02).append(",tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value,tb.ts ").append(FROM_SQL_02);
+
+        sql.append(sonSql01);
+        List<EnergyEffciencyNewEntity>   entityList = querySql(sql.toString(),param,"energyEffciencyNewEntity_03");
+        return  entityList;
     }
 
 

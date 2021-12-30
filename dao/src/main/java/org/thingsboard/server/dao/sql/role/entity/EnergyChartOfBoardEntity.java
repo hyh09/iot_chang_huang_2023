@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "TB_ENERGY_CHART")
+@Table(name = "hs_energy_chart")
 //@IdClass(TimescaleTsKvCompositeKey.class)
 @SqlResultSetMappings({
         @SqlResultSetMapping(

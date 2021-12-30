@@ -88,8 +88,6 @@ public class BulletinBoardController extends BaseController{
     @ResponseBody
     public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "factoryId")  String factoryId) throws ThingsboardException {
         try {
-
-
         QueryTsKvVo  vo =  new  QueryTsKvVo();
         vo.setStartTime(CommonUtils.getZero());
         vo.setEndTime(CommonUtils.getNowTime());
@@ -98,7 +96,7 @@ public class BulletinBoardController extends BaseController{
             vo.setFactoryId(UUID.fromString(factoryId));
         }
         vo.setTenantId(getTenantId().getId());
-       return bulletinBoardSvc.energyConsumptionToday(vo,getTenantId().getId());
+       return bulletinBoardSvc.energyConsumptionToday(vo,getTenantId());
         }catch (Exception  e)
         {
             log.error("打印看板设备今日耗能量:{}",e);

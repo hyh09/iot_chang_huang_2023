@@ -5,11 +5,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
+import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
+import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataToConversionImpl implements DataToConversionSvc {
 
+    @Autowired private FactoryDao factoryDao;
     @Autowired private WorkshopRepository workshopRepository;
     @Autowired private ProductionLineRepository productionLineRepository;
     @Autowired private   DictDeviceRepository dictDeviceRepository;
@@ -62,6 +67,34 @@ public class DataToConversionImpl implements DataToConversionSvc {
         });
 
         return  appDeviceCapVoList;
+    }
+
+    /**
+     * 结果的数据返回处理 看板的今日排行数据
+     * @param entityList
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public ConsumptionTodayVo resultProcessByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId) {
+        ConsumptionTodayVo  resultVo = new ConsumptionTodayVo();
+        List<TkTodayVo> waterList = new ArrayList<>();
+        List<TkTodayVo> electricList = new ArrayList<>();
+        List<TkTodayVo> gasList = new ArrayList<>();
+
+        Map<UUID,String> mapFactoryCache = new HashMap<>();
+        entityList.stream().forEach(m1->{
+
+            waterList.add(returnTheData(m1,mapFactoryCache,m1.getWaterAddedValue(),m1.getWaterValue()));
+            electricList.add(returnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue()));
+            gasList.add(returnTheData(m1,mapFactoryCache,m1.getGasAddedValue(),m1.getGasValue()));
+
+        });
+
+        resultVo.setWaterList(compareToMaxToMin(waterList));
+        resultVo.setElectricList(compareToMaxToMin(electricList));
+        resultVo.setGasList(compareToMaxToMin(gasList));
+        return resultVo;
     }
 
     /**
@@ -123,6 +156,29 @@ public class DataToConversionImpl implements DataToConversionSvc {
 
 
         return appDeviceEnergyVos;
+    }
+
+
+    /**
+     * 翻译工厂的名称
+     * @param factoryId
+     * @param mapFactoryCache 局部map
+     * @return
+     */
+    private  String  getFactoryNameById(UUID factoryId,Map<UUID,String> mapFactoryCache)
+    {
+         if(factoryId == null){
+             return  "";
+         }
+        String mapName = mapFactoryCache.get(factoryId);
+        if(StringUtils.isNotEmpty(mapName))
+        {
+            return mapName;
+        }
+        Factory factory = factoryDao.findById(factoryId);
+        String  factoryName=StringUtils.isNotEmpty(factory.getName())?factory.getName():"";
+        mapFactoryCache.put(factoryId,factoryName);
+        return factoryName;
     }
 
 
@@ -189,6 +245,37 @@ public class DataToConversionImpl implements DataToConversionSvc {
         return  map;
 
     }
+
+
+    /**
+     * 过滤空的value 默认为0
+     * @param str
+     * @return
+     */
+    private String filterEmpty(String str)
+    {
+      return   StringUtils.isNotEmpty(str)?str:"0";
+    }
+
+
+    /**大到小*/
+    public static List<TkTodayVo> compareToMaxToMin(List<TkTodayVo> list){
+        return list.stream().sorted((s1, s2) -> new BigDecimal(s2.getValue()).compareTo(new BigDecimal(s1.getValue()))).collect(Collectors.toList());
+    }
+
+
+    private  TkTodayVo  returnTheData(EnergyEffciencyNewEntity m1, Map<UUID,String> mapFactoryCache,String  value,String historyValue )
+    {
+        TkTodayVo  todayVo = new TkTodayVo();
+        todayVo.setDeviceId(m1.getEntityId().toString());
+        todayVo.setDeviceName(m1.getDeviceName());
+        todayVo.setTs(m1.getTs());
+        todayVo.setFactoryName(getFactoryNameById(m1.getFactoryId(),mapFactoryCache));
+        todayVo.setValue(filterEmpty(value));
+        todayVo.setTotalValue(filterEmpty(historyValue));
+        return  todayVo;
+    }
+
 
 
 
