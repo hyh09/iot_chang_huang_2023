@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.sql.role.dao.tool;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
+import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 
@@ -24,6 +25,11 @@ public interface DataToConversionSvc {
      * @return
      */
     public  List<AppDeviceCapVo>  resultProcessingByCapacityPc (List<EnergyEffciencyNewEntity> entityList, TenantId tenantId);
+
+    /**
+     * 数据的处理： 看板的数据返回处理 今日排行
+     */
+    ConsumptionTodayVo   resultProcessByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId);
 
     /**
      * 计算总产能的接口

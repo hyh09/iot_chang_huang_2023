@@ -1,6 +1,5 @@
 package org.thingsboard.server.dao.sql.role.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +35,11 @@ import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepositoryNewMethon;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
+import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyChartOfBoardEntity;
+import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
@@ -72,6 +73,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Autowired  private DictDeviceStandardPropertyRepository standardPropertyRepository;
     @Autowired  private DeviceRepository deviceRepository;
     @Autowired  private TsKvDictionaryRepository tsKvDictionaryRepository;
+    @Autowired private DataToConversionSvc dataToConversionSvc;
 
 
     private final  static   String ONE_HOURS="1800000";//
@@ -117,25 +119,17 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return result;
     }
 
+    /**
+     * 只查询今日的排行数据
+     * @param vo
+     * @param tenantId
+     * @return
+     */
     @Override
-    public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId) {
-        List<String>  keys1 = new ArrayList<>();
-
-
-        keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        vo.setKeys(keys1);
-        Map<String, DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-          List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
-        log.info("查询到的数据{}",effectTsKvEntities);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String solidTrendLineEntitiesJson = mapper.writeValueAsString(effectTsKvEntities);
-            log.info("查询到的数据的数据返回{}",solidTrendLineEntitiesJson);
-        } catch (JsonProcessingException e) {
-            log.error("打印的异常：{}",e);
-        }
-        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
-        return   getEntityKeyValue(map,tenantId,mapNameToVo);
+    public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, TenantId tenantId) {
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(vo);
+        print("看板的今日能耗数据",entityList);
+        return  dataToConversionSvc.resultProcessByEntityList(entityList,tenantId);
     }
 
 
