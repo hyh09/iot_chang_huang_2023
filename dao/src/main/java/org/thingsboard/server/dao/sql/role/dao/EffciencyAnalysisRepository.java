@@ -161,7 +161,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
      * @param vo
      * @return
      */
-    public List<CensusSqlByDayEntity> queryCensusSqlByDay(TsSqlDayVo vo)
+    public List<CensusSqlByDayEntity> queryCensusSqlByDay(TsSqlDayVo vo,boolean isCap)
     {
         Query query = null;
         Map<String, Object> param = new HashMap<>();
@@ -170,6 +170,10 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
         StringBuffer  sonSql01 = new StringBuffer();
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        if(isCap) {
+            sonSql01.append(" and  d1.flg = true");
+        }
+
         sonSql.append(sonSql01).append("  ) ");
 
         if(vo.getEndTime() != null )

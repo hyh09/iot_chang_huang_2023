@@ -111,7 +111,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TsSqlDayVo vo = TsSqlDayVo.constructionByQueryTsKvVo(v1,tenantId);
          vo.setStartTime(v1.getStartTime());
          vo.setEndTime(v1.getEndTime());
-        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo,false);
         Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
         result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_cable,titleMapToVo));
