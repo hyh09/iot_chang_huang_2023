@@ -447,6 +447,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                  t1 =   m1.getGasFirstTime();
 
             }
+            t2 =(t2==null)?0L:t2;
+            t1 =(t1==null)?0L:t1;
             String  t3 = StringUtilToll.sub(t2.toString(),t1.toString());
             String  hours =   StringUtilToll.div(t3.toString(),ONE_HOURS);
             String setValue =  IdMappingContentMap.get(m1.getEntityId());//设定的值
