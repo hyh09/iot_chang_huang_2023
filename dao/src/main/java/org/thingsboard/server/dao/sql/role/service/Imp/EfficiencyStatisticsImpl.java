@@ -686,7 +686,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setStartTime(CommonUtils.getYesterdayZero());
         }
-        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo,true);
         Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
         LocalDate   localDate=  LocalDate.now();
         LocalDate yesterday = localDate.plusDays(-1);
@@ -722,7 +722,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setStartTime(CommonUtils.getYesterdayZero());
         }
-        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo,false);
         Map<LocalDate, CensusSqlByDayEntity> appleMap = entities.stream().collect(Collectors.toMap(CensusSqlByDayEntity::getDate, a -> a,(k1, k2)->k1));
         log.info("queryAppThreePeriodsEnergy.appleMap:{}",appleMap);
 

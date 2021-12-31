@@ -111,7 +111,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TsSqlDayVo vo = TsSqlDayVo.constructionByQueryTsKvVo(v1,tenantId);
          vo.setStartTime(v1.getStartTime());
          vo.setEndTime(v1.getEndTime());
-        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo,false);
         Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
         result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_cable,titleMapToVo));
@@ -447,6 +447,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                  t1 =   m1.getGasFirstTime();
 
             }
+            t2 =(t2==null)?0L:t2;
+            t1 =(t1==null)?0L:t1;
             String  t3 = StringUtilToll.sub(t2.toString(),t1.toString());
             String  hours =   StringUtilToll.div(t3.toString(),ONE_HOURS);
             String setValue =  IdMappingContentMap.get(m1.getEntityId());//设定的值

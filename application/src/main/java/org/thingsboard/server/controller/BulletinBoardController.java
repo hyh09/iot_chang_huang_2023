@@ -65,10 +65,6 @@ public class BulletinBoardController extends BaseController{
             TsSqlDayVo tsSqlDayVo =    TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
             tsSqlDayVo.setTenantId(getTenantId().getId());
             return efficiencyStatisticsSvc.queryThreePeriodsCapacity(tsSqlDayVo);
-//            result.setTodayValue(getValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-//            result.setYesterdayValue(getValueByTime(factoryId,workshopId, productionLineId,deviceId,CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-//            result.setHistory(bulletinBoardSvc.getHistoryCapValue(factoryId,getTenantId().getId()));
-//            return result;
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -111,7 +107,7 @@ public class BulletinBoardController extends BaseController{
     public List<ConsumptionVo> totalEnergyConsumption(
           @RequestBody  QueryTsKvVo  vo
     ) throws ThingsboardException {
-        log.info("=====QueryTsKvVo.totalEnergyConsumption==>:"+vo);
+//        log.info("=====QueryTsKvVo.totalEnergyConsumption==>:"+vo);
         try {
             if(vo.getEndTime() == null )
             {

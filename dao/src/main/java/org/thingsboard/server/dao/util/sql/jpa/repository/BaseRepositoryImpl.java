@@ -87,7 +87,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
 			return null;
 		}
 		CommonUtils.copyNonNullProperties(entity, e);
-		logger.info("打印当前的=====："+e);
+//		logger.info("打印当前的=====："+e);
 		entityManager.flush();
      	entityManager.setFlushMode(FlushModeType.COMMIT);
 		return e;
