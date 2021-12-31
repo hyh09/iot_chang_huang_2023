@@ -303,7 +303,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @ResponseBody
     public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-        log.info("打印当前的入参:{}",deviceId);
+//        log.info("打印当前的入参:{}",deviceId);
         try {
             return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
         }catch (Exception e)
