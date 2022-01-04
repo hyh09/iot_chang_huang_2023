@@ -47,7 +47,6 @@ import org.thingsboard.server.service.apiusage.TbApiUsageStateService;
 import javax.annotation.PostConstruct;
 import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -181,6 +180,7 @@ public class DefaultMailService implements MailService {
         sendMail(testMailSender, mailFrom, email, subject, message);
     }
 
+
     @Override
     public void sendActivationEmail(String activationLink, String email, JsonNode additionalInfo) throws ThingsboardException {
         try {
@@ -199,15 +199,16 @@ public class DefaultMailService implements MailService {
     }
 
     @Override
-    public void sendAccountActivatedEmail(String loginLink, String email) throws ThingsboardException {
+    public void sendAccountActivatedEmail(String loginLink, String email,JsonNode additionalInfo) throws ThingsboardException {
 
-        String subject = messages.getMessage("account.activated.subject", null, Locale.US);
+        LanguageTypeEnums enums = LanguageTypeEnums.getLocaleByType(additionalInfo);
+        String subject = messages.getMessage("account.activated.subject", null, enums.getLocale());
 
         Map<String, Object> model = new HashMap<>();
         model.put("loginLink", loginLink);
         model.put(TARGET_EMAIL, email);
-
-        String message = mergeTemplateIntoString("account.activated.ftl", model);
+        String templateLocation = "account.activated"+enums.getFileSuffix()+".ftl";
+        String message = mergeTemplateIntoString(templateLocation, model);
 
         sendMail(mailSender, mailFrom, email, subject, message);
     }

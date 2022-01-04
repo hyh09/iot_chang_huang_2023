@@ -223,7 +223,7 @@ public class AuthController extends BaseController {
 
             if (sendActivationMail) {
                 try {
-                    mailService.sendAccountActivatedEmail(loginUrl, email);
+                    mailService.sendAccountActivatedEmail(loginUrl, email,user.getAdditionalInfo());
                 } catch (Exception e) {
                     log.info("Unable to send account activation email [{}]", e.getMessage());
                 }
