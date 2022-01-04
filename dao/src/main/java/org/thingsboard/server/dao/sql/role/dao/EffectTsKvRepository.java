@@ -141,7 +141,6 @@ public class EffectTsKvRepository {
 
 
         query= entityManager.createNativeQuery(sql.toString(),"result001");
-        System.out.println("==param==>"+param);
         if(!CollectionUtils.isEmpty(param)) {
             for (Map.Entry<String, Object> entry : param.entrySet()) {
                 query.setParameter(entry.getKey(), entry.getValue());

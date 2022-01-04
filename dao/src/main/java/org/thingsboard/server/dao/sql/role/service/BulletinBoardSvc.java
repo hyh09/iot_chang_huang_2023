@@ -35,7 +35,7 @@ public interface BulletinBoardSvc {
      * 今日能耗量列表  待优化的部分
      *
      */
-    ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId );
+    ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, TenantId tenantId );
 
 
     /**
@@ -43,7 +43,7 @@ public interface BulletinBoardSvc {
      * @param deviceCapacityVoList  设备的入参
      * @return  设备id 对应的 产能值
      */
-    Map queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList);
+    Map<UUID,String> queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList);
 
 
 

@@ -22,7 +22,7 @@ import static org.thingsboard.server.dao.model.ModelConstants.*;
 */	
 @Data	
 @Entity	
-@Table(name="TB_ENERY_TIME_GAP")
+@Table(name="hs_enery_time_gap")
 @DynamicInsert	
 @DynamicUpdate	
 @JsonIgnoreProperties(value={"hibernateLazyInitializer","handler","fieldHandler"})

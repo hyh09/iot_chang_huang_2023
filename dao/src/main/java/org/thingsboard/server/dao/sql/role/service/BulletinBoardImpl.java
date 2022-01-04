@@ -1,6 +1,5 @@
 package org.thingsboard.server.dao.sql.role.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +30,17 @@ import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
-import org.thingsboard.server.dao.sql.role.dao.*;
+import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepositoryNewMethon;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
+import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
+import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyChartOfBoardEntity;
+import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
@@ -67,6 +72,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     // 设备字典标准属性Repository
     @Autowired  private DictDeviceStandardPropertyRepository standardPropertyRepository;
     @Autowired  private DeviceRepository deviceRepository;
+    @Autowired  private TsKvDictionaryRepository tsKvDictionaryRepository;
+    @Autowired private DataToConversionSvc dataToConversionSvc;
 
 
     private final  static   String ONE_HOURS="1800000";//
@@ -102,12 +109,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     public List<ConsumptionVo> totalEnergyConsumption(QueryTsKvVo v1, TenantId tenantId) {
         List<ConsumptionVo>  result = new ArrayList<>();
         TsSqlDayVo vo = TsSqlDayVo.constructionByQueryTsKvVo(v1,tenantId);
-        if(vo.getStartTime() ==  null )  //如果有值，则是看板的调用
-        {
-            vo.setStartTime(CommonUtils.getYesterdayZero());
-            vo.setEndTime(CommonUtils.getYesterdayLastTime());
-        }
-        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo);
+         vo.setStartTime(v1.getStartTime());
+         vo.setEndTime(v1.getEndTime());
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo,false);
         Map<String,DictDeviceGroupPropertyVO>  titleMapToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
         result.add(calculationTotal(entities,KeyTitleEnums.key_water,titleMapToVo));
         result.add(calculationTotal(entities,KeyTitleEnums.key_cable,titleMapToVo));
@@ -115,33 +119,37 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return result;
     }
 
+    /**
+     * 只查询今日的排行数据
+     * @param vo
+     * @param tenantId
+     * @return
+     */
     @Override
-    public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, UUID tenantId) {
-        List<String>  keys1 = new ArrayList<>();
-
-
-        keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        vo.setKeys(keys1);
-        Map<String, DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-          List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
-        log.info("查询到的数据{}",effectTsKvEntities);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String solidTrendLineEntitiesJson = mapper.writeValueAsString(effectTsKvEntities);
-            log.info("查询到的数据的数据返回{}",solidTrendLineEntitiesJson);
-        } catch (JsonProcessingException e) {
-            log.error("打印的异常：{}",e);
-        }
-        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
-        return   getEntityKeyValue(map,tenantId,mapNameToVo);
+    public ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, TenantId tenantId) {
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(vo);
+        print("看板的今日能耗数据",entityList);
+        return  dataToConversionSvc.resultProcessByEntityList(entityList,tenantId);
     }
 
 
     @Override
-    public Map queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
+    public  Map<UUID,String> queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
+        Map<UUID,String> resultMap = new HashMap<>();
         print("查询设备所在时间范围内的产能数据，入参:",deviceCapacityVoList);
-
-        return null;
+        if(CollectionUtils.isEmpty(deviceCapacityVoList)){
+            return  resultMap;
+        }
+        List<String> keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.CAPACITY_001.getgName());
+        print("查询到的产能keyName:",keys1);
+        String key =CollectionUtils.isEmpty(keys1)? "capacities":keys1.get(0);
+        Optional<TsKvDictionary> tsKvDictionary =  tsKvDictionaryRepository.findByKey(key);
+        int keyId = tsKvDictionary.isPresent()?tsKvDictionary.get().getKeyId():76;
+        deviceCapacityVoList.forEach(vo->{
+          String valueToMap =   boardTrendChartRepositoryNewMethon.getCapacityValueByDeviceIdAndInTime(vo,keyId);
+          resultMap.put(vo.getId(),valueToMap);
+        });
+        return resultMap;
     }
 
     /**
@@ -439,6 +447,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
                  t1 =   m1.getGasFirstTime();
 
             }
+            t2 =(t2==null)?0L:t2;
+            t1 =(t1==null)?0L:t1;
             String  t3 = StringUtilToll.sub(t2.toString(),t1.toString());
             String  hours =   StringUtilToll.div(t3.toString(),ONE_HOURS);
             String setValue =  IdMappingContentMap.get(m1.getEntityId());//设定的值

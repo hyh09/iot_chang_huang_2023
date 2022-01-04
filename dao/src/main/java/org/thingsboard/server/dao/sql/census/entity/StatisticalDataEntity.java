@@ -17,7 +17,7 @@ import javax.persistence.Table;
 */	
 @Data	
 @Entity	
-@Table(name="TB_STATISTICAL_DATA")
+@Table(name="hs_statistical_data")
 @DynamicInsert	
 @DynamicUpdate	
 //@Proxy(lazy = false)	
