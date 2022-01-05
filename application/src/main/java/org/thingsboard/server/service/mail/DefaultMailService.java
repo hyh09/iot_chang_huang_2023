@@ -295,14 +295,14 @@ public class DefaultMailService implements MailService {
 
     @Override
     public void sendAccountLockoutEmail(String lockoutEmail, String email, Integer maxFailedLoginAttempts) throws ThingsboardException {
-        String subject = messages.getMessage("account.lockout.subject", null, Locale.US);
-
+        LanguageTypeEnums enums = LanguageTypeEnums.getLocaleByType(null);
+        String subject = messages.getMessage("account.lockout.subject", null,  enums.getLocale());
         Map<String, Object> model = new HashMap<>();
         model.put("lockoutAccount", lockoutEmail);
         model.put("maxFailedLoginAttempts", maxFailedLoginAttempts);
         model.put(TARGET_EMAIL, email);
-
-        String message = mergeTemplateIntoString("account.lockout.ftl", model);
+        String templateLocation = "account.lockout"+enums.getFileSuffix()+".ftl";
+        String message = mergeTemplateIntoString(templateLocation, model);
 
         sendMail(mailSender, mailFrom, email, subject, message);
     }
