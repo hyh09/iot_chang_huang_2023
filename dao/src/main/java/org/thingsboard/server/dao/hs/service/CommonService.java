@@ -7,6 +7,8 @@ import org.thingsboard.server.common.data.kv.KvEntry;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -134,6 +136,47 @@ public interface CommonService {
      */
     default <T extends Device> Boolean isDeviceUnAllocation(T t) {
         return t.getProductionLineId() == null;
+    }
+
+    /**
+     * urlEncode data
+     */
+    default String urlEncode(String str) {
+        return Optional.ofNullable(str).map(v -> URLEncoder.encode(str.trim(), StandardCharsets.UTF_8)).orElse("");
+    }
+
+    /**
+     * 转换成政治正确的国家
+     */
+    default String toTrueCountry(String country) {
+        return Optional.ofNullable(country).map(v -> {
+            var temp = v.toLowerCase().trim();
+            if (temp.contains("tai") && temp.contains("wan")) {
+                return "China";
+            } else if (v.contains("台") && v.contains("湾")) {
+                return "中国";
+            } else if (v.contains("臺") && v.contains("灣")) {
+                return "中国";
+            }
+            return v;
+        }).orElse(null);
+    }
+
+    /**
+     * 转换成政治正确的地区显示名称
+     */
+    default String toTrueDisplayName(String displayName) {
+        return Optional.ofNullable(displayName).map(v -> {
+            var temp = v.toLowerCase().trim();
+            if (temp.contains("tai") && temp.contains("wan")) {
+                return v + ", China";
+            } else if (v.contains("台") && v.contains("湾")) {
+                return v + ", 中国";
+            } else if (v.contains("臺") && v.contains("灣")) {
+                return v + ", 中国";
+            }
+            return v;
+        }).orElse(null);
     }
 
     /**
