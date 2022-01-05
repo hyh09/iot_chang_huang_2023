@@ -22,7 +22,9 @@
 
 hs:
   file:
-    location: "${HS_FILE_LOCATION:/Users/wwj/Downloads}"
+    location: "${HS_FILE_LOCATION:/Users/wwj/Downloads/hsfile}"
+  geo:
+    address: "https://nominatim.openstreetmap.org"
 
 server:
   # Server bind address

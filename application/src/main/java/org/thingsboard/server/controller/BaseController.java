@@ -16,6 +16,7 @@
 package org.thingsboard.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
@@ -1039,6 +1040,17 @@ public abstract class BaseController {
         } catch (Exception e) {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
+    }
+
+    /**
+     * 获得当前登录用户的语言环境，默认zh_cn
+     */
+    public String getUserLanguage() {
+        try {
+            return Optional.ofNullable(getCurrentUser().getAdditionalInfo()).map(v -> v.get("lang")).map(JsonNode::asText).orElse("zh_cn");
+        } catch (Exception ignore) {
+        }
+        return "zh_cn";
     }
 
     /**
