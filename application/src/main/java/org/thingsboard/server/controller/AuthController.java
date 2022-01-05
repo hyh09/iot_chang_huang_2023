@@ -269,7 +269,7 @@ public class AuthController extends BaseController {
                 String baseUrl = systemSecurityService.getBaseUrl(user.getTenantId(), user.getCustomerId(), request);
                 String loginUrl = String.format("%s/login", baseUrl);
                 String email = user.getEmail();
-                mailService.sendPasswordWasResetEmail(loginUrl, email);
+                mailService.sendPasswordWasResetEmail(loginUrl, email,user.getAdditionalInfo());
 
                 eventPublisher.publishEvent(new UserAuthDataChangedEvent(securityUser.getId()));
                 JwtToken accessToken = tokenFactory.createAccessJwtToken(securityUser);

@@ -47,7 +47,7 @@ public interface MailService {
 
     void sendResetPasswordEmailAsync(String passwordResetLink, String email);
 
-    void sendPasswordWasResetEmail(String loginLink, String email) throws ThingsboardException;
+    void sendPasswordWasResetEmail(String loginLink, String email,JsonNode additionalInfo) throws ThingsboardException;
 
     void sendAccountLockoutEmail(String lockoutEmail, String email, Integer maxFailedLoginAttempts) throws ThingsboardException;
 

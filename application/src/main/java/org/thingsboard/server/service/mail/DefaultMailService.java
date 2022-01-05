@@ -235,16 +235,14 @@ public class DefaultMailService implements MailService {
     }
 
     @Override
-    public void sendPasswordWasResetEmail(String loginLink, String email) throws ThingsboardException {
-
-        String subject = messages.getMessage("password.was.reset.subject", null, Locale.US);
-
+    public void sendPasswordWasResetEmail(String loginLink, String email,JsonNode additionalInfo) throws ThingsboardException {
+        LanguageTypeEnums enums = LanguageTypeEnums.getLocaleByType(additionalInfo);
+        String subject = messages.getMessage("password.was.reset.subject", null, enums.getLocale());
         Map<String, Object> model = new HashMap<>();
         model.put("loginLink", loginLink);
         model.put(TARGET_EMAIL, email);
-
-        String message = mergeTemplateIntoString("password.was.reset.ftl", model);
-
+        String templateLocation = "password.was.reset"+enums.getFileSuffix()+".ftl";
+        String message = mergeTemplateIntoString(templateLocation, model);
         sendMail(mailSender, mailFrom, email, subject, message);
     }
 
