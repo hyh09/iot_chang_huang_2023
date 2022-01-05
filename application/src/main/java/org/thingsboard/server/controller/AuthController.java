@@ -257,7 +257,7 @@ public class AuthController extends BaseController {
             if (userCredentials != null) {
                 systemSecurityService.validatePassword(TenantId.SYS_TENANT_ID, password, userCredentials);
                 if (passwordEncoder.matches(password, userCredentials.getPassword())) {
-                    throw new ThingsboardException("New password should be different from existing!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+                    throw new ThingsboardException(" 新密码应与原有密码不同！ ", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
                 }
                 String encodedPassword = passwordEncoder.encode(password);
                 userCredentials.setPassword(encodedPassword);
