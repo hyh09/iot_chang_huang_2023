@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.entity.vo.GeoVO;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.GeoService;
 
@@ -36,14 +40,18 @@ public class GeoServiceImpl extends AbstractEntityService implements GeoService,
 
     private final RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
 
+    private ClientService clientService;
+
     /**
      * 查询城市列表 TODO 结果必须缓存在您这边。重复发送相同查询的客户端可能被归类为错误和阻塞。
      *
-     * @param geoVO 参数
+     * @param geoVO  参数
+     * @param userId 用户Id
      * @return 城市列表
      */
     @Override
-    public List<GeoVO> listCitiesByQuery(GeoVO geoVO) throws IOException, InterruptedException {
+    public List<GeoVO> listCitiesByQuery(GeoVO geoVO, UserId userId) throws IOException, InterruptedException {
+        Optional.ofNullable(this.clientService.getUserByUserId(userId)).map(User::getAdditionalInfo).map(v -> v.get("lang")).map(JsonNode::asText).ifPresent(geoVO::setLanguage);
         return CompletableFuture.supplyAsync(() -> restTemplateBuilder.build().getForEntity(geoAddress + "/search?city={cityName}&country={countryName}&accept-language={acceptLanguage}&format=json&addressdetails=1&limit=10", ArrayNode.class, geoVO.getCityName(), geoVO.getCountryName(), geoVO.getLanguage()))
                 .thenApplyAsync(responseEntity -> Optional.ofNullable(responseEntity.getBody())
                         .map(v -> IntStream.range(0, v.size()).mapToObj(v::get))
@@ -68,5 +76,10 @@ public class GeoServiceImpl extends AbstractEntityService implements GeoService,
                                             .displayName(Optional.ofNullable(e.get("display_name")).map(JsonNode::asText).map(this::toTrueDisplayName).orElse(null))
                                             .build();
                                 })).map(v -> v.collect(Collectors.toList())).orElse(Lists.newArrayList())).join();
+    }
+
+    @Autowired
+    public void setClientService(ClientService clientService) {
+        this.clientService = clientService;
     }
 }

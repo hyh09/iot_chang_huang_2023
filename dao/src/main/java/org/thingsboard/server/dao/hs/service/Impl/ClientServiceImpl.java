@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
@@ -38,9 +40,11 @@ import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.entity.vo.OrderPlanDeviceVO;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -52,6 +56,7 @@ import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
+import org.thingsboard.server.dao.sql.user.UserRepository;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
@@ -61,6 +66,7 @@ import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -126,6 +132,19 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     // 设备字典Service
     DictDeviceService dictDeviceService;
 
+    // 用户Repository
+    UserRepository userRepository;
+
+
+    /**
+     * 查询用户
+     *
+     * @param userId 用户Id
+     */
+    @Override
+    public User getUserByUserId(UserId userId) {
+        return this.userRepository.findById(userId.getId()).map(UserEntity::toData).orElse(null);
+    }
 
     /**
      * 查询设备基本信息、工厂、车间、产线、设备等
@@ -263,6 +282,32 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId) {
         return this.factoryService.findFactoryListByLoginRole(userId.getId(), tenantId.getId());
+    }
+
+    /**
+     * 根据工厂名称查询工厂列表
+     *
+     * @param tenantId    租户Id
+     * @param factoryName 工厂名称
+     * @return 工厂列表
+     */
+    @Override
+    public List<Factory> listFactoriesByFactoryName(TenantId tenantId, String factoryName) {
+        return DaoUtil.convertDataList(this.factoryRepository.findAllByTenantIdAndNameLike(tenantId.getId(), factoryName).join());
+    }
+
+    /**
+     * 根据当前登录人及工厂名称查询工厂列表
+     *
+     * @param tenantId    租户Id
+     * @param userId      用户Id
+     * @param factoryName 工厂名称
+     * @return 工厂列表
+     */
+    @Override
+    public List<Factory> listFactoriesByUserIdAndFactoryName(TenantId tenantId, UserId userId, String factoryName) {
+        var ids = this.listFactoriesByFactoryName(tenantId, factoryName).stream().map(Factory::getId).collect(Collectors.toSet());
+        return this.listFactoriesByUserId(tenantId, userId).stream().filter(v -> ids.contains(v.getId())).collect(Collectors.toList());
     }
 
     /**
@@ -417,6 +462,98 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 列举全部工厂
+     *
+     * @param factoryIds 工厂Id列表
+     */
+    @Override
+    public Map<UUID, Factory> mapIdToFactory(List<UUID> factoryIds) {
+        if (factoryIds.isEmpty())
+            return Maps.newHashMap();
+        return DaoUtil.convertDataList(Lists.newArrayList(this.factoryRepository.findAllById(factoryIds))).stream()
+                .collect(Collectors.toMap(Factory::getId, Function.identity()));
+    }
+
+    /**
+     * 列举全部车间
+     *
+     * @param workshopIds 车间Id列表
+     */
+    @Override
+    public Map<UUID, Workshop> mapIdToWorkshop(List<UUID> workshopIds) {
+        if (workshopIds.isEmpty())
+            return Maps.newHashMap();
+        return DaoUtil.convertDataList(Lists.newArrayList(this.workshopRepository.findAllById(workshopIds))).stream()
+                .collect(Collectors.toMap(Workshop::getId, Function.identity()));
+    }
+
+    /**
+     * 列举全部产线
+     *
+     * @param productionLineIds 产线Id列表
+     */
+    @Override
+    public Map<UUID, ProductionLine> mapIdToProductionLine(List<UUID> productionLineIds) {
+        if (productionLineIds.isEmpty())
+            return Maps.newHashMap();
+        return DaoUtil.convertDataList(Lists.newArrayList(this.productionLineRepository.findAllById(productionLineIds))).stream()
+                .collect(Collectors.toMap(ProductionLine::getId, Function.identity()));
+    }
+
+    /**
+     * 列举全部产线
+     *
+     * @param deviceIds 设备Id列表
+     */
+    @Override
+    public Map<UUID, Device> mapIdToDevice(List<UUID> deviceIds) {
+        if (deviceIds.isEmpty())
+            return Maps.newHashMap();
+        return DaoUtil.convertDataList(Lists.newArrayList(this.deviceRepository.findAllById(deviceIds))).stream()
+                .collect(Collectors.toMap(v -> v.getId().getId(), Function.identity()));
+    }
+
+    /**
+     * 列举全部用户
+     *
+     * @param userIds 用户Id列表
+     */
+    @Override
+    public Map<UUID, User> mapIdToUser(List<UUID> userIds) {
+        if (userIds.isEmpty())
+            return Maps.newHashMap();
+        return DaoUtil.convertDataList(Lists.newArrayList(this.userRepository.findAllById(userIds))).stream()
+                .collect(Collectors.toMap(e -> e.getId().getId(), Function.identity()));
+    }
+
+    /**
+     * 查询设备指定时间段产能
+     *
+     * @param plans 生产计划列表
+     */
+    public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
+        if (plans.isEmpty())
+            log.info("查询设备指定时间段产能：" + "empty");
+        else
+            log.info("查询设备指定时间段产能：");
+        return Maps.newHashMap();
+    }
+
+    /**
+     * 查询设备指定时间段产能
+     *
+     * @param devicePlans 生产计划列表
+     */
+    @Override
+    public Map<UUID, BigDecimal> mapPlanIdToCapacitiesAnother(List<OrderPlanDeviceVO> devicePlans) {
+        return this.mapPlanIdToCapacities(devicePlans.stream().map(e -> {
+            OrderPlan orderPlan = new OrderPlan();
+            BeanUtils.copyProperties(e, orderPlan);
+            return orderPlan;
+        }).collect(Collectors.toList()));
+    }
+
+    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id
@@ -548,5 +685,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setDictDeviceService(DictDeviceService dictDeviceService) {
         this.dictDeviceService = dictDeviceService;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 }

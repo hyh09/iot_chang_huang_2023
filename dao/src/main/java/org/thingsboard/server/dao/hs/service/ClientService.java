@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.service;
 
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
@@ -13,10 +14,13 @@ import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.entity.vo.OrderPlanDeviceVO;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +33,12 @@ import java.util.concurrent.ExecutionException;
  * @since 2021.11.1
  */
 public interface ClientService {
+    /**
+     * 查询用户
+     *
+     * @param userId 用户Id
+     */
+    User getUserByUserId(UserId userId);
 
     /**
      * 查询设备基本信息、工厂、车间、产线、设备等
@@ -107,6 +117,25 @@ public interface ClientService {
     List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId);
 
     /**
+     * 根据工厂名称查询工厂列表
+     *
+     * @param tenantId    租户Id
+     * @param factoryName 工厂名称
+     * @return 工厂列表
+     */
+    List<Factory> listFactoriesByFactoryName(TenantId tenantId, String factoryName);
+
+    /**
+     * 根据当前登录人及工厂名称查询工厂列表
+     *
+     * @param tenantId    租户Id
+     * @param userId      用户Id
+     * @param factoryName 工厂名称
+     * @return 工厂列表
+     */
+    List<Factory> listFactoriesByUserIdAndFactoryName(TenantId tenantId, UserId userId, String factoryName);
+
+    /**
      * 分页查询历史遥测数据
      *
      * @param tenantId     租户Id
@@ -126,4 +155,53 @@ public interface ClientService {
      * @return 历史遥测数据
      */
     PageData<DictDeviceGroupPropertyVO> listPageTsHistories(TenantId tenantId, DeviceId deviceId, String groupPropertyName, TimePageLink timePageLink) throws ExecutionException, InterruptedException, ThingsboardException;
+
+    /**
+     * 列举全部工厂
+     *
+     * @param factoryIds 工厂Id列表
+     */
+    Map<UUID, Factory> mapIdToFactory(List<UUID> factoryIds);
+
+    /**
+     * 列举全部车间
+     *
+     * @param workshopIds 车间Id列表
+     */
+    Map<UUID, Workshop> mapIdToWorkshop(List<UUID> workshopIds);
+
+    /**
+     * 列举全部产线
+     *
+     * @param productionLineIds 产线Id列表
+     */
+    Map<UUID, ProductionLine> mapIdToProductionLine(List<UUID> productionLineIds);
+
+    /**
+     * 列举全部设备
+     *
+     * @param deviceIds 设备Id列表
+     */
+    Map<UUID, Device> mapIdToDevice(List<UUID> deviceIds);
+
+    /**
+     * 列举全部用户
+     *
+     * @param userIds 用户Id列表
+     */
+    Map<UUID, User> mapIdToUser(List<UUID> userIds);
+
+    /**
+     * 查询设备指定时间段产能
+     *
+     * @param plans 生产计划列表
+     */
+    Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans);
+
+    /**
+     * 查询设备指定时间段产能
+     *
+     * @param devicePlans 生产计划列表
+     */
+    Map<UUID, BigDecimal> mapPlanIdToCapacitiesAnother(List<OrderPlanDeviceVO> devicePlans);
 }

@@ -19,12 +19,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.scheduling.annotation.Async;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by Valerii Sosliuk on 4/30/2017.
@@ -34,6 +36,12 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
     Optional<FactoryEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     List<FactoryEntity> findAllByTenantIdOrderByCreatedTimeDesc(UUID tenantId);
+
+    @Async
+    @Query("select t from FactoryEntity t where " +
+            "t.tenantId = :tenantId " +
+            "AND t.name like CONCAT('%', :name, '%')")
+    CompletableFuture<List<FactoryEntity>> findAllByTenantIdAndNameLike(@Param("tenantId") UUID tenantId, @Param("name") String name);
 
 //    @Query("SELECT org.thingsboard.server.dao.model.sql.FactoryInfoEntity(f,w,p) " +
 //            "FROM FactoryEntity f " +
