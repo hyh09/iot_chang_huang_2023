@@ -60,7 +60,7 @@ public class BoardTrendChartRepositoryNewMethon extends JpaSqlTool {
          Map<String, Object> param = new HashMap<>();
          param.put("startTime",vo.getStartTime());
          param.put("endTime",vo.getEndTime());
-         param.put("entity_id",vo.getId());
+         param.put("entity_id",vo.getEntityId());
          param.put("keyId",keyId);
 
          StringBuffer  sql = new StringBuffer();
