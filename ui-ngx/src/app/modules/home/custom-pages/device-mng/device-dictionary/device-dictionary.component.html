@@ -1,4 +1,4 @@
-<div class="tb-details-buttons" fxLayout.xs="column">
+<div *ngIf="utils.hasPermission('action.edit')" class="tb-details-buttons" fxLayout.xs="column">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'setDefault')"
