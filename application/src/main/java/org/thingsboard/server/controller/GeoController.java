@@ -35,11 +35,15 @@ public class GeoController extends BaseController {
     @ApiOperation(value = "国外城市查询接口", notes = "根据用户角色语言环境返回结果，默认zh_cn")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "cityName", value = "城市名称", paramType = "query", required = true),
-            @ApiImplicitParam(name = "countryName", value = "国家名称", paramType = "query", required = false),
+            @ApiImplicitParam(name = "countryName", value = "国家名称", paramType = "query"),
+            @ApiImplicitParam(name = "language", value = "语言环境", paramType = "query", defaultValue = "zh_cn"),
     })
     @GetMapping(value = "/cities")
-    public List<GeoVO> uploadFile(@RequestParam String cityName, @RequestParam(required = false) String countryName) throws ThingsboardException, IOException, InterruptedException {
+    public List<GeoVO> uploadFile(@RequestParam String cityName,
+                                  @RequestParam(required = false) String countryName,
+                                  @RequestParam(required = false, defaultValue = "zh_cn") String language
+    ) throws ThingsboardException, IOException, InterruptedException {
         checkParameter("cityName", cityName);
-        return this.geoService.listCitiesByQuery(GeoVO.builder().cityName(cityName).countryName(countryName).language(getUserLanguage()).build());
+        return this.geoService.listCitiesByQuery(GeoVO.builder().cityName(cityName).countryName(countryName).language(language).build(), getCurrentUser().getId());
     }
 }

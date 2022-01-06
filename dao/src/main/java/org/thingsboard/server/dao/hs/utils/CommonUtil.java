@@ -1,9 +1,10 @@
 package org.thingsboard.server.dao.hs.utils;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +30,52 @@ import java.util.stream.Collectors;
  * @since 2021.10.21
  */
 public class CommonUtil {
+
+    public static String getCellStringVal(Cell cell) {
+        switch (cell.getCellType()) {
+            case NUMERIC:
+                return String.valueOf(cell.getNumericCellValue()).trim();
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue()).trim();
+            case FORMULA:
+                return cell.getCellFormula().trim();
+            case ERROR:
+                return String.valueOf(cell.getErrorCellValue()).trim();
+            default:
+                return StringUtils.EMPTY;
+        }
+    }
+
+    /**
+     * 转换成UUID
+     *
+     * @param str uuid str
+     */
+    public static UUID toUUIDNullable(String str) {
+        return Optional.ofNullable(str).map(String::trim).filter(e -> !"".equals(e)).map(UUID::fromString).orElse(null);
+    }
+
+    /**
+     * 转换成UUID str
+     *
+     * @param uuid uuid
+     */
+    public static String toStrUUIDNullable(UUID uuid) {
+        return Optional.ofNullable(uuid).map(UUID::toString).orElse(null);
+    }
+
+    /**
+     * 转换成Null 如果是空字符串
+     *
+     * @param str str
+     */
+    public static String toNullStrIfIsBlank(String str) {
+        if (StringUtils.isBlank(str))
+            return null;
+        return str;
+    }
 
     /**
      * 生成校验和
@@ -125,6 +173,13 @@ public class CommonUtil {
      */
     public static Long getTodayCurrentTime() {
         return System.currentTimeMillis();
+    }
+
+    /**
+     * 获得当天的日期
+     */
+    public static String getTodayDate() {
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     }
 
     /**
