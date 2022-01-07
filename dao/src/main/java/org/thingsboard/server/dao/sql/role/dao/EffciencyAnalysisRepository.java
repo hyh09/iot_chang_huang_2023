@@ -1,12 +1,10 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
-import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 
@@ -106,7 +104,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
      * @param pageLink
      * @return
      */
-    public Page<EnergyEffciencyNewEntity> queryEnergy(QueryTsKvVo queryTsKvVo, PageLink pageLink)
+    public List<EnergyEffciencyNewEntity> queryEnergyListAll(QueryTsKvVo queryTsKvVo, PageLink pageLink)
     {
         Query query = null;
         Map<String, Object> param = new HashMap<>();
@@ -123,7 +121,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(sqlpre);
         sql.append(SELECT_START_DEVICE_02).append(SELECT_TS_CAP_02).append(FROM_QUERY_CAP_02);
         sql.append(sonSql01);
-        Page<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param, DaoUtil.toPageable(pageLink),"energyEffciencyNewEntity_02");
+        List<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param,"energyEffciencyNewEntity_02");
         return  page;
     }
 
