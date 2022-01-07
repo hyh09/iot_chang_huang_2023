@@ -235,11 +235,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
-        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryCapacity(vo,pageLink);
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryCapacityALL(vo,pageLink);
+        Page<EnergyEffciencyNewEntity> page= PageUtil.createPageFromList(entityList,pageLink);
         List<EnergyEffciencyNewEntity> pageList=  page.getContent();
         //将查询的结果返回原接口返回的对象
         List<AppDeviceCapVo>  appDeviceCapVos =  dataToConversionSvc.resultProcessingByCapacityPc(pageList,tenantId);
-     return new PageDataAndTotalValue<AppDeviceCapVo>(dataToConversionSvc.getTotalValue(pageList),appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+     return new PageDataAndTotalValue<AppDeviceCapVo>(dataToConversionSvc.getTotalValue(entityList),appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
 
     }
 
@@ -334,11 +335,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
         Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
-        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryEnergy(vo,pageLink);
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergyListAll(vo,pageLink);
+        Page<EnergyEffciencyNewEntity> page= PageUtil.createPageFromList(entityList,pageLink);
         List<EnergyEffciencyNewEntity> pageList=  page.getContent();
         //将查询的结果返回原接口返回的对象 包含单位能耗
         List<Map>  appDeviceCapVos =  this.resultProcessingByEnergyPc(pageList,mapNameToVo);
-        List<String>  totalValueList = getTotalValueNewMethod(pageList,mapNameToVo);
+        List<String>  totalValueList = getTotalValueNewMethod(entityList,mapNameToVo);
         return new PageDataAndTotalValue<Map>(totalValueList,appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
@@ -438,12 +440,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
         Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
-        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryEnergy(vo,pageLink);
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergyListAll(vo,pageLink);
+        Page<EnergyEffciencyNewEntity> page= PageUtil.createPageFromList(entityList,pageLink);
         List<EnergyEffciencyNewEntity> pageList=  page.getContent();
         //将查询的结果返回原接口返回的对象 包含单位能耗
         List<AppDeviceEnergyVo>  appDeviceCapVos =  dataToConversionSvc.resultProcessingByEnergyApp(pageList,mapNameToVo,tenantId);
         result.setAppDeviceCapVoList(appDeviceCapVos);
-        result.setTotalValue(getTotalValueApp(pageList,mapNameToVo));
+        result.setTotalValue(getTotalValueApp(entityList,mapNameToVo));
         return result;
     }
 
