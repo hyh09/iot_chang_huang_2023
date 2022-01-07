@@ -24,6 +24,8 @@ export interface Factory extends BaseData<FactoryId>, CommonData {
   postalCode?: string;
   logoImages?: string;
   rowType?: FactoryRowType;
+  latitude?: string | number;
+  longitude?: string | number;
 }
 
 export interface WorkShop extends BaseData<WorkShopId>, CommonData {
@@ -89,6 +91,8 @@ export interface FactoryTableOriginRow {
   name?: string;
   logoImages?: string;
   images?: string;
+  country?: string;
+  city?: string;
   address?: string;
   createdTime?: number;
   rowType?: FactoryRowType;
@@ -108,6 +112,8 @@ export interface FactoryTableTreeNode extends TableTreeNodeOptions {
   code?: string;
   name?: string;
   logoImages?: string;
+  country?: string;
+  city?: string;
   address?: string;
   createdTime?: number;
   rowType?: FactoryRowType;

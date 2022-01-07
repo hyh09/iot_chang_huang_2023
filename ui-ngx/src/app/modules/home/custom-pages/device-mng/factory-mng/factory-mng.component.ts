@@ -122,6 +122,8 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
           code: item.code,
           name: item.name,
           logoImages: item.logoImages,
+          country: item.country,
+          city: item.city,
           address: item.address,
           createdTime: item.createdTime,
           rowType: item.rowType,
