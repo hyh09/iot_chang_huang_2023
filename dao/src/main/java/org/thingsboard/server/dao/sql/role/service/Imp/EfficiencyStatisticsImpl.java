@@ -235,11 +235,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
-        Page<EnergyEffciencyNewEntity> page = effciencyAnalysisRepository.queryCapacity(vo,pageLink);
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryCapacityALL(vo,pageLink);
+        Page<EnergyEffciencyNewEntity> page= PageUtil.createPageFromList(entityList,pageLink);
         List<EnergyEffciencyNewEntity> pageList=  page.getContent();
         //将查询的结果返回原接口返回的对象
         List<AppDeviceCapVo>  appDeviceCapVos =  dataToConversionSvc.resultProcessingByCapacityPc(pageList,tenantId);
-     return new PageDataAndTotalValue<AppDeviceCapVo>(dataToConversionSvc.getTotalValue(pageList),appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+     return new PageDataAndTotalValue<AppDeviceCapVo>(dataToConversionSvc.getTotalValue(entityList),appDeviceCapVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
 
     }
 

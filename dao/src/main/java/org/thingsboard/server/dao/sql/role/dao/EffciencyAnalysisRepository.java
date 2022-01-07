@@ -68,7 +68,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
      * 如果设备id为空，就排除产能配置的false
      * @return
      */
-    public Page<EnergyEffciencyNewEntity> queryCapacity(QueryTsKvVo queryTsKvVo, PageLink pageLink)
+    public List<EnergyEffciencyNewEntity> queryCapacityALL(QueryTsKvVo queryTsKvVo, PageLink pageLink)
     {
 
         Query query = null;
@@ -89,7 +89,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(SELECT_START_DEVICE).append(SELECT_TS_CAP).append(FROM_QUERY_CAP);
         sql.append(sonSql01);
 
-        Page<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param, DaoUtil.toPageable(pageLink),"energyEffciencyNewEntity_01");
+        List<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param,"energyEffciencyNewEntity_01");
     return page;
 
     }
