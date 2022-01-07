@@ -75,7 +75,8 @@ export class MenuService {
         name: 'menu-mng.menu-mng',
         type: 'link',
         path: '/menuManagement',
-        icon: 'menu'
+        icon: 'mdi:menu2',
+        isMdiIcon: true
       },
       {
         id: guid(),
@@ -164,7 +165,8 @@ export class MenuService {
           {
             name: 'menu-mng.menu-mng',
             path: '/menuManagement',
-            icon: 'menu'
+            icon: 'mdi:menu2',
+            isMdiIcon: true
           },
           {
             name: 'tenant.tenants',
