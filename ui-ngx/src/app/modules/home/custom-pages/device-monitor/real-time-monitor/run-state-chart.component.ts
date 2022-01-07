@@ -61,17 +61,7 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
       },
       legend: {
         align: 'left',
-        right: 0,
-        formatter: (name: string) => {
-          switch(name) {
-            case online:
-              return this.translate.instant('device-monitor.on-line-device-with-value', { count: chartData[0].value });
-            case offline:
-              return this.translate.instant('device-monitor.off-line-device-with-value', { count: chartData[1].value });
-            default:
-              return '';
-          }
-        }
+        right: 0
       },
       series: [
         {
@@ -81,6 +71,9 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
           minAngle: 3,
           data: chartData,
           tooltip: {
+            formatter: `{b}${this.translate.instant('common.colon')}{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
+          },
+          label: {
             formatter: `{b}${this.translate.instant('common.colon')}{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
           },
           emphasis: {
