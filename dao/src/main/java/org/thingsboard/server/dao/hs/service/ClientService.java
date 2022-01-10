@@ -12,13 +12,14 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.hs.entity.vo.OrderPlanDeviceVO;
+import org.thingsboard.server.dao.hs.entity.vo.OrderVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -192,16 +193,24 @@ public interface ClientService {
     Map<UUID, User> mapIdToUser(List<UUID> userIds);
 
     /**
-     * 查询设备指定时间段产能
+     * 查询订单产能
+     *
+     * @param plans 生产计划列表
+     */
+    BigDecimal getOrderCapacities(List<OrderPlan> plans);
+
+    /**
+     * 查询订单产能
+     *
+     * @param plans 生产计划列表
+     * @param orderId 订单Id
+     */
+    OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId);
+
+    /**
+     * 查询订单设备产能
      *
      * @param plans 生产计划列表
      */
     Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans);
-
-    /**
-     * 查询设备指定时间段产能
-     *
-     * @param devicePlans 生产计划列表
-     */
-    Map<UUID, BigDecimal> mapPlanIdToCapacitiesAnother(List<OrderPlanDeviceVO> devicePlans);
 }

@@ -5,9 +5,16 @@ import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.SchemaType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +32,8 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
+import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.po.Order;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
@@ -34,11 +43,14 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -70,14 +82,21 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Transactional
     public void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException {
         var workbook = new XSSFWorkbook(file.getInputStream());
-        var sheetIterator = workbook.sheetIterator();
-        while (sheetIterator.hasNext()) {
-            var sheet = sheetIterator.next();
-            for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
-                Row row = sheet.getRow(rowNum);
-                Cell cell = row.getCell(0);
+        var sheet = workbook.getSheet("orders");
+        for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                var row = sheet.getRow(rowNum);
+                var cell = row.getCell(0);
+//                cell.getCellType()
+//                CommonUtil.getCellStringVal(cell)
             }
-        }
+    }
+
+    /**
+     * 订单-模板
+     */
+    @Override
+    public XSSFWorkbook createTemplate() throws IOException {
+        return null;
     }
 
     /**
@@ -91,7 +110,47 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public PageData<OrderListResult> listPageOrdersByQuery(TenantId tenantId, UserId userId, OrderListQuery orderQuery, PageLink pageLink) {
-        return null;
+        List<Factory> factories;
+        if (orderQuery.getFactoryId() != null)
+            factories = List.of(new Factory(orderQuery.getFactoryId()));
+        else
+            factories = Optional.ofNullable(orderQuery.getFactoryName()).filter(StringUtils::isNotBlank)
+                    .map(v -> this.clientService.listFactoriesByUserIdAndFactoryName(tenantId, userId, orderQuery.getFactoryName()))
+                    .orElseGet(() -> this.clientService.listFactoriesByUserId(tenantId, userId));
+
+        if (factories.isEmpty())
+            return new PageData<>(Lists.newArrayList(), 0, 0L, false);
+
+        var temp = DaoUtil.toPageData(this.orderRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            if (StringUtils.isNotBlank(orderQuery.getOrderNo()))
+                predicates.add(cb.like(root.get("orderNo"), "%" + orderQuery.getOrderNo().trim() + "%"));
+            if (StringUtils.isNotBlank(orderQuery.getType()))
+                predicates.add(cb.like(root.get("type"), "%" + orderQuery.getType().trim() + "%"));
+
+            var in = cb.in(root.<UUID>get("factoryId"));
+            factories.forEach(v -> in.value(v.getId()));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        }, DaoUtil.toPageable(pageLink)));
+
+        return CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(temp.getData().stream().map(Order::getFactoryId)
+                .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
+                .thenCombine(CompletableFuture.supplyAsync(() -> this.clientService.mapIdToUser(temp.getData().stream().map(Order::getCreatedUser)
+                        .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList()))), (factoryMap, userMap) -> new PageData<>(temp.getData().stream().map(e -> OrderListResult.builder()
+                        .orderNo(e.getOrderNo())
+                        .id(e.getId())
+                        .createdTime(e.getCreatedTime())
+                        .creator(Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
+                        .emergencyDegree(e.getEmergencyDegree())
+                        .factoryName(Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
+                        .intendedTime(e.getIntendedTime())
+                        .merchandiser(e.getMerchandiser())
+                        .salesman(e.getSalesman())
+                        .totalAmount(e.getTotalAmount())
+                        .total(e.getTotal())
+                        .build()).collect(Collectors.toList()),
+                        temp.getTotalPages(), temp.getTotalElements(), temp.hasNext())).join();
     }
 
     /**
@@ -103,7 +162,33 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public OrderVO getOrderDetail(TenantId tenantId, UUID orderId) throws ThingsboardException {
-        return null;
+        OrderVO orderVO = new OrderVO();
+        var order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).map(OrderEntity::toData).orElseThrow(() -> new ThingsboardException("订单不存在！", ThingsboardErrorCode.GENERAL));
+        BeanUtils.copyProperties(order, orderVO);
+
+        CompletableFuture.allOf(CompletableFuture.runAsync(() -> {
+                    if (StringUtils.isNotBlank(order.getFactoryId()))
+                        Optional.ofNullable(this.clientService.mapIdToFactory(List.of(toUUID(order.getFactoryId()))).get(toUUID(order.getFactoryId()))).ifPresent(v -> orderVO.setFactoryName(v.getName()));
+                }),
+                CompletableFuture.runAsync(() -> {
+                    if (StringUtils.isNotBlank(order.getProductionLineId()))
+                        Optional.ofNullable(this.clientService.mapIdToProductionLine(List.of(toUUID(order.getProductionLineId()))).get(toUUID(order.getProductionLineId()))).ifPresent(v -> orderVO.setProductionLineName(v.getName()));
+                }), CompletableFuture.runAsync(() -> {
+                    if (StringUtils.isNotBlank(order.getWorkshopId()))
+                        Optional.ofNullable(this.clientService.mapIdToWorkshop(List.of(toUUID(order.getWorkshopId()))).get(toUUID(order.getWorkshopId()))).ifPresent(v -> orderVO.setWorkshopName(v.getName()));
+                }),
+                this.orderPlanRepository.findAllByTenantIdAndOrderIdOrderBySortAsc(tenantId.getId(), orderId).thenAcceptAsync(v -> {
+                    var map = this.clientService.mapIdToDevice(v.stream().map(OrderPlanEntity::getDeviceId).collect(Collectors.toList()));
+                    orderVO.setPlanDevices(v.stream().map(OrderPlanEntity::toData).map(e -> {
+                        OrderPlanDeviceVO orderPlanDeviceVO = new OrderPlanDeviceVO();
+                        BeanUtils.copyProperties(e, orderPlanDeviceVO);
+                        Optional.ofNullable(map.get(toUUID(e.getDeviceId()))).ifPresent(device -> orderPlanDeviceVO.setDeviceName(device.getName()));
+                        return orderPlanDeviceVO;
+                    }).collect(Collectors.toList()));
+                })
+        ).join();
+
+        return orderVO;
     }
 
     /**
@@ -115,7 +200,32 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     @Transactional
     public OrderVO updateOrSaveOrder(TenantId tenantId, OrderVO orderVO) throws ThingsboardException {
-        return null;
+        Order order = new Order();
+        if (StringUtils.isNotBlank(orderVO.getId())) {
+            order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), toUUID(orderVO.getId())).map(OrderEntity::toData)
+                    .orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
+            BeanUtils.copyProperties(orderVO, order, "id", "code");
+            deleteOrderPlan(toUUID(orderVO.getId()));
+        } else {
+            BeanUtils.copyProperties(orderVO, order);
+            order.setTenantId(tenantId.toString());
+        }
+
+        OrderEntity orderEntity = new OrderEntity(order);
+        this.orderRepository.save(orderEntity);
+
+        AtomicInteger sort = new AtomicInteger(1);
+        this.orderPlanRepository.saveAll(orderVO.getPlanDevices().stream().map(v -> {
+            OrderPlanEntity orderPlanEntity = new OrderPlanEntity();
+            BeanUtils.copyProperties(v, orderPlanEntity);
+            orderPlanEntity.setTenantId(tenantId.getId());
+            orderPlanEntity.setOrderId(orderEntity.getId());
+            orderPlanEntity.setSort(sort.get());
+            sort.addAndGet(1);
+            return orderPlanEntity;
+        }).collect(Collectors.toList()));
+
+        return this.getOrderDetail(tenantId, orderEntity.getId());
     }
 
     /**
@@ -127,6 +237,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     @Transactional
     public void deleteOrder(TenantId tenantId, UUID orderId) throws ThingsboardException {
+        this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
+        this.orderRepository.deleteById(orderId);
+        this.deleteOrderPlan(orderId);
     }
 
     /**
@@ -137,7 +250,23 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public String getAvailableCode(TenantId tenantId) {
-        return null;
+        var prefix = HSConstants.CODE_PREFIX_ORDER + CommonUtil.getTodayDate();
+        return this.orderRepository.findAllOrderNoByTenantIdAndOrderNoLike(tenantId.getId(), prefix)
+                .thenApplyAsync(r -> r.stream().map(OrderEntity::getOrderNo)
+                        .filter(v -> {
+                            try {
+                                var numStr = v.split(prefix)[1];
+                                if (numStr.length() != 5)
+                                    return false;
+                                Integer.valueOf(numStr);
+                                return true;
+                            } catch (Exception ignore) {
+                                return false;
+                            }
+                        }).map(v -> Integer.valueOf(v.split(prefix)[1])).collect(Collectors.toSet()))
+                .thenApplyAsync(r -> IntStream.iterate(1, k -> k + 1).boxed().filter(e -> !r.contains(e)).findFirst()
+                        .map(e -> prefix + String.format("%05d", e)).orElse(null))
+                .join();
     }
 
     /**
@@ -167,38 +296,37 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     /**
      * 订单产能监控-看板
      *
-     * @param tenantId  租户id
-     * @param factoryId 工厂Id
-     * @param startTime 开始时间
-     * @param endTime   结束时间
+     * @param tenantId   租户id
+     * @param factoryIds 工厂Id
+     * @param timeQuery  时间请求参数
      */
     @Override
-    public List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, Long startTime, Long endTime) {
-
-
+    public List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
         return null;
     }
 
     /**
      * 订单产能监控-App-首页
      *
-     * @param tenantId  租户id
-     * @param factoryId 工厂Id
+     * @param tenantId   租户id
+     * @param factoryIds 工厂Id
+     * @param timeQuery  时间请求参数
      */
     @Override
-    public OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(TenantId tenantId, UUID factoryId) {
+    public OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
         return null;
     }
 
     /**
      * App-订单-订单监控
      *
-     * @param tenantId  租户id
-     * @param factoryId 工厂Id
-     * @param orderNo   订单编号
+     * @param tenantId       租户id
+     * @param orderListQuery 请求参数
+     * @param userId         用户Id
+     * @param pageLink       分页参数
      */
     @Override
-    public PageData<OrderListResult> listPageAppOrderCapacityMonitorByQuery(TenantId tenantId, UUID factoryId, String orderNo) {
+    public PageData<OrderListResult> listPageAppOrderCapacityMonitorByQuery(TenantId tenantId, UserId userId, OrderListQuery orderListQuery, PageLink pageLink) {
         return null;
     }
 
@@ -206,12 +334,11 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      * App-订单-订单监控-生产计划-更新实际时间
      *
      * @param tenantId 租户id
-     * @param orderId  订单Id
-     * @param deviceId 设备Id
+     * @param planId   设备计划Id
      * @param timeVO   时间参数
      */
     @Override
-    public void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID orderId, UUID deviceId, OrderPlanDeviceActualTimeVO timeVO) {
+    public void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID planId, OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException {
     }
 
     /**
@@ -220,5 +347,12 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Transactional
     public void deleteOrderPlan(UUID orderId) {
         this.orderPlanRepository.deleteAllByOrderId(orderId).join();
+    }
+
+    /**
+     * 订单-产能计算
+     */
+    public Map<UUID, OrderCapacityBO> mapOrderIdToCapacity(List<UUID> orderIds) {
+        return Maps.newHashMap();
     }
 }

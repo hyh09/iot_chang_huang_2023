@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.hs.entity.vo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.springframework.beans.BeanUtils;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -20,7 +22,7 @@ import java.math.BigDecimal;
 @ApiModel(value = "订单计划-设备")
 public class OrderPlanDeviceVO {
 
-    @ApiModelProperty(value = "id", notes = "仅用于展示")
+    @ApiModelProperty(value = "设备计划id", notes = "仅用于展示")
     private String id;
 
     @NotNull
@@ -52,4 +54,10 @@ public class OrderPlanDeviceVO {
 
     @ApiModelProperty(value = "产量", notes = "仅用于显示")
     private BigDecimal capacities;
+
+    public OrderPlan toOrderPlan() {
+        OrderPlan orderPlan = new OrderPlan();
+        BeanUtils.copyProperties(this, orderPlan);
+        return orderPlan;
+    }
 }

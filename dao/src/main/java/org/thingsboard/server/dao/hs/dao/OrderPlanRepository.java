@@ -28,4 +28,7 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
 
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByOrderIdIn(List<UUID> orderIds);
+
+    @Async
+    CompletableFuture<List<OrderPlanEntity>> findAllByOrderId(UUID orderId);
 }

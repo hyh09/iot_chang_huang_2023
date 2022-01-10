@@ -1,27 +1,41 @@
 package org.thingsboard.server.controller;
 
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.OrderService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -40,6 +54,9 @@ public class OrderController extends BaseController {
 
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    ClientService clientService;
 
     /**
      * Pc-订单-导入
@@ -66,18 +83,10 @@ public class OrderController extends BaseController {
      */
     @ApiOperation(value = "Pc-订单-模板下载")
     @GetMapping("/order/template")
-    public ResponseEntity<Resource> downloadTemplate() throws ThingsboardException, IOException {
-//        var fileInfo = this.fileService.getFileInfo(getTenantId(), id);
-//        var filePath = Paths.get(fileInfo.getLocation());
-//
-//        ByteArrayResource resource = new ByteArrayResource(ByteBuffer.wrap(Files.readAllBytes(filePath)).array());
-
-        return ResponseEntity.ok().build();
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + URLEncoder.encode("xxx", StandardCharsets.UTF_8))
-////                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + new String(fileInfo.getFileName().getBytes("utf-8"), "ISO8859-1"))
-//                .contentLength(resource.contentLength())
-//                .body(resource);
+    public void downloadTemplate(HttpServletResponse response) throws ThingsboardException, IOException {
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("订单批量导入模板.xlsx", StandardCharsets.UTF_8));
+        this.orderService.createTemplate().write(response.getOutputStream());
+        response.flushBuffer();
     }
 
     /**
@@ -215,20 +224,34 @@ public class OrderController extends BaseController {
             @RequestParam(value = "factoryId", required = false) String factoryId) throws ThingsboardException {
         checkParameter("startTime", startTime);
         checkParameter("endTime", endTime);
-        return this.orderService.listBoardCapacityMonitorOrders(getTenantId(), CommonUtil.toUUIDNullable(factoryId), startTime, endTime);
+        var factoryIds = Optional.ofNullable(factoryId).filter(StringUtils::isNotBlank).map(this::toUUID).map(List::of).orElse(List.of());
+        return this.orderService.listBoardCapacityMonitorOrders(getTenantId(), factoryIds, TimeQuery.builder().startTime(startTime).endTime(endTime).build());
     }
 
     /**
      * App-首页-订单统计
      */
-    @ApiOperation(value = "App-首页-订单管理", notes = "不传工厂Id，则当前登录用户所属工厂下全部订单")
+    @ApiOperation(value = "App-首页-订单管理", notes = "不传工厂Id，则当前登录用户所属工厂下全部订单；默认当月")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", defaultValue = "当月第一天零点"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", defaultValue = "当前时间")
     })
     @GetMapping("/order/app/index/capacityMonitor")
     public OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(
-            @RequestParam(value = "factoryId", required = false) String factoryId) throws ThingsboardException {
-        return this.orderService.getAppIndexOrderCapacityResult(getTenantId(), CommonUtil.toUUIDNullable(factoryId));
+            @RequestParam(value = "factoryId", required = false) String factoryId,
+            @RequestParam(value = "startTime", required = false) Long startTime,
+            @RequestParam(value = "endTime", required = false) Long endTime
+    ) throws ThingsboardException {
+        if (startTime == null || startTime <= 0)
+            startTime = CommonUtil.getThisMonthStartTime();
+        if (endTime == null || endTime <= 0)
+            endTime = CommonUtil.getTodayCurrentTime();
+        var tenantId = getTenantId();
+        var userId = getCurrentUser().getId();
+        var factoryIds = Optional.ofNullable(factoryId).filter(StringUtils::isNotBlank).map(this::toUUID).map(List::of)
+                .orElseGet(() -> this.clientService.listFactoriesByUserId(tenantId, userId).stream().map(Factory::getId).collect(Collectors.toList()));
+        return this.orderService.getAppIndexOrderCapacityResult(tenantId, factoryIds, TimeQuery.builder().startTime(startTime).endTime(endTime).build());
     }
 
     /**
@@ -236,21 +259,31 @@ public class OrderController extends BaseController {
      */
     @ApiOperation(value = "App-订单-订单监控", notes = "不传工厂Id，则当前登录用户所属工厂下全部订单")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
             @ApiImplicitParam(name = "orderNo", value = "订单编号", paramType = "query")
     })
     @GetMapping("/order/app/capacityMonitor")
     public PageData<OrderListResult> getAppIndexOrderCapacityResult(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam(value = "factoryId", required = false) String factoryId,
             @RequestParam(value = "orderNo", required = false) String orderNo
     ) throws ThingsboardException {
-        return this.orderService.listPageAppOrderCapacityMonitorByQuery(getTenantId(), CommonUtil.toUUIDNullable(factoryId), orderNo);
+        PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
+        validatePageLink(pageLink);
+        return this.orderService.listPageAppOrderCapacityMonitorByQuery(getTenantId(), getCurrentUser().getId(), OrderListQuery.builder().orderNo(orderNo).factoryId(CommonUtil.toUUIDNullable(factoryId)).build(), pageLink);
     }
 
     /**
      * App-订单-订单监控-生产计划
      */
-    @ApiOperation(value = "App-订单-订单监控-生产计划", notes = "不传工厂Id，则当前登录用户所属工厂下全部订单")
+    @ApiOperation(value = "App-订单-订单监控-生产计划")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderId", value = "订单Id", paramType = "path", required = true),
     })
@@ -267,12 +300,11 @@ public class OrderController extends BaseController {
      */
     @ApiOperation(value = "App-订单-订单监控-生产计划-更新实际时间")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "orderId", value = "订单Id", paramType = "path", required = true),
+            @ApiImplicitParam(name = "planId", value = "设备计划Id", paramType = "path", required = true),
     })
-    @PutMapping("/order/app/capacityMonitor/{orderId}/plan/device/{deviceId}/actualTime")
-    public void updateOrderPlanDeviceActualTime(@PathVariable("orderId") String orderId, @PathVariable("deviceId") String deviceId, @RequestBody @Valid OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException {
-        checkParameter("orderId", orderId);
-        checkParameter("deviceId", deviceId);
-        this.orderService.updateOrderPlanDeviceActualTime(getTenantId(), toUUID(orderId), toUUID(deviceId), timeVO);
+    @PutMapping("/order/app/capacityMonitor/plan/device/{planId}/actualTime")
+    public void updateOrderPlanDeviceActualTime(@PathVariable("planId") String planId, @RequestBody @Valid OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException {
+        checkParameter("planId", planId);
+        this.orderService.updateOrderPlanDeviceActualTime(getTenantId(), toUUID(planId), timeVO);
     }
 }

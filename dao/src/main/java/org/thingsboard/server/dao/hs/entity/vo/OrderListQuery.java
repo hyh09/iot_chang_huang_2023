@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 import java.util.UUID;
 
 /**
- * 订单/订单产能列表请求参数
+ * 订单/订单产能/App产能监控列表请求参数
  *
  * @author wwj
  * @since 2021.10.26
@@ -18,7 +18,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "订单/订单产能列表请求参数")
+@ApiModel(value = "订单/订单产能/App产能监控列表请求参数")
 public class OrderListQuery {
     /**
      * 订单号
@@ -31,6 +31,12 @@ public class OrderListQuery {
      */
     @ApiModelProperty("工厂名")
     private String factoryName;
+
+    /**
+     * 工厂Id
+     */
+    @ApiModelProperty("工厂Id")
+    private UUID factoryId;
 
     /**
      * 订单类型

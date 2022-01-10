@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.hs.entity.po;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 /**
  * 订单设备
@@ -49,4 +51,13 @@ public class OrderPlan extends BasePO {
 
     @ApiModelProperty(value = "排序值")
     private Integer sort;
+
+    public DeviceCapacityVo toDeviceCapacityVO() {
+        DeviceCapacityVo capacityVO = new DeviceCapacityVo();
+        capacityVO.setId(CommonUtil.toUUIDNullable(id));
+        capacityVO.setEntityId(CommonUtil.toUUIDNullable(deviceId));
+        capacityVO.setStartTime(actualStartTime);
+        capacityVO.setEndTime(actualStartTime);
+        return capacityVO;
+    }
 }

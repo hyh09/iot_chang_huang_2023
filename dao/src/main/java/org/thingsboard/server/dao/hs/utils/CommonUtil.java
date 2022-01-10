@@ -148,6 +148,13 @@ public class CommonUtil {
     }
 
     /**
+     * 获得当月零点的时间
+     */
+    public static Long getThisMonthStartTime() {
+        return LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()), LocalTime.MIN).toInstant(ZoneOffset.of("+8")).toEpochMilli();
+    }
+
+    /**
      * 获得当年零点的时间
      */
     public static Long getThisYearStartTime() {

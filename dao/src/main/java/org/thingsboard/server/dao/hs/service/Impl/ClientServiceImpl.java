@@ -36,6 +36,8 @@ import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.InitEntity;
 import org.thingsboard.server.dao.hs.dao.InitRepository;
+import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
+import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
@@ -44,11 +46,11 @@ import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.hs.entity.vo.OrderPlanDeviceVO;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.model.sql.*;
 import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
@@ -56,6 +58,7 @@ import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
+import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.sql.user.UserRepository;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
@@ -135,6 +138,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     // 用户Repository
     UserRepository userRepository;
 
+    // BulletinBoardSvc
+    BulletinBoardSvc bulletinBoardSvc;
 
     /**
      * 查询用户
@@ -527,30 +532,57 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
-     * 查询设备指定时间段产能
+     * 查询订单产能
      *
      * @param plans 生产计划列表
      */
-    public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
-        if (plans.isEmpty())
-            log.info("查询设备指定时间段产能：" + "empty");
-        else
-            log.info("查询设备指定时间段产能：");
-        return Maps.newHashMap();
+    @Override
+    public BigDecimal getOrderCapacities(List<OrderPlan> plans) {
+        return this.getOrderCapacities(plans, null).getCapacities();
     }
 
     /**
-     * 查询设备指定时间段产能
+     * 查询订单产能
      *
-     * @param devicePlans 生产计划列表
+     * @param plans   生产计划列表
+     * @param orderId 订单Id
      */
     @Override
-    public Map<UUID, BigDecimal> mapPlanIdToCapacitiesAnother(List<OrderPlanDeviceVO> devicePlans) {
-        return this.mapPlanIdToCapacities(devicePlans.stream().map(e -> {
-            OrderPlan orderPlan = new OrderPlan();
-            BeanUtils.copyProperties(e, orderPlan);
-            return orderPlan;
-        }).collect(Collectors.toList()));
+    public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
+        if (plans.isEmpty()) {
+            log.info("查询设备指定时间段产能：" + "empty");
+            return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).build();
+        } else {
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList()));
+            log.info("查询设备指定时间段产能：" + dataMap);
+            var deviceCapacities = plans.stream().map(v -> OrderDeviceCapacityBO.builder()
+                    .planId(null) // TODO add
+                    .capacities(Optional.ofNullable(dataMap.get(CommonUtil.toUUIDNullable(v.getId()))).map(e -> BigDecimal.valueOf(Double.parseDouble(e))).orElse(BigDecimal.ZERO))
+                    .build()).collect(Collectors.toList());
+            return OrderCapacityBO.builder()
+                    .orderId(orderId)
+                    .deviceCapacities(deviceCapacities)
+                    .capacities(deviceCapacities.stream().reduce(BigDecimal.ZERO, (r, e) -> r.add(e.getCapacities()), (a, b) -> null))
+                    .build();
+        }
+    }
+
+    /**
+     * 查询订单产能
+     *
+     * @param plans 生产计划列表
+     */
+    @Override
+    public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
+        if (plans.isEmpty()) {
+            log.info("查询设备指定时间段产能：" + "empty");
+            return Maps.newHashMap();
+        } else {
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList())).entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> BigDecimal.valueOf(Double.parseDouble(v.getValue()))));
+            log.info("查询设备指定时间段产能：" + dataMap);
+            return dataMap;
+        }
     }
 
     /**
@@ -690,5 +722,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setBulletinBoardSvc(BulletinBoardSvc bulletinBoardSvc) {
+        this.bulletinBoardSvc = bulletinBoardSvc;
     }
 }

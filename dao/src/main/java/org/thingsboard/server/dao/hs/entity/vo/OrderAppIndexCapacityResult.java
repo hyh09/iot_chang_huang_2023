@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 public class OrderAppIndexCapacityResult {
 
     @ApiModelProperty(value = "订单数量")
-    private Long num;
+    private Integer num;
 
     @ApiModelProperty(value = "完成度")
     private BigDecimal completeness;
