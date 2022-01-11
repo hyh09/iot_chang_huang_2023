@@ -211,7 +211,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Override
     public Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException {
         //同租户下，设备名称不能重复
-        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(device.getTenantId(), device.getName()));
+//        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(device.getTenantId(), device.getName()));
+        List<Device> deviceListByCdn =deviceDao.queryAllByTenantIdAndName(device.getTenantId(),device.getName());
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             if(device.getId() == null){
                 throw new ThingsboardException("设备名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);

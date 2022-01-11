@@ -341,4 +341,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
     void   updateFlgById(Boolean deviceFlg, UUID id);
 
 
+    List<Device> queryAllByTenantIdAndName(TenantId tenantId,String name);
+
+
 }

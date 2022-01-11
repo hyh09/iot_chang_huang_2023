@@ -211,7 +211,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .levelStr(level.getName())
                     .isCanBeConfirm(status.canBeConfirm())
                     .isCanBeClear(status.canBeClear())
-                    .info(Optional.ofNullable(e.getDetails()).map(v -> v.get("data")).map(JsonNode::toString).orElse(null))
+                    .info(Optional.ofNullable(e.getDetails()).map(v -> v.get("data")).map(JsonNode::asText).orElse(null))
                     .factoryStr(Optional.ofNullable(affiliationDTO.getFactoryMap().get(device.getFactoryId())).map(Factory::getName).orElse(null))
                     .workShopStr(Optional.ofNullable(affiliationDTO.getWorkshopMap().get(device.getWorkshopId())).map(Workshop::getName).orElse(null))
                     .productionLineStr(Optional.ofNullable(affiliationDTO.getProductionLineMap().get(device.getProductionLineId())).map(ProductionLine::getName).orElse(null))

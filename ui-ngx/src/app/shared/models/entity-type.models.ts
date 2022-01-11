@@ -50,7 +50,8 @@ export enum EntityType {
   DEVICE_HISTORY = 'DEVICE_HISTORY',
   POTENCY = 'POTENCY',
   FACTORY_VERSION = 'FACTORY_VERSION',
-  PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS'
+  PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS',
+  ORDER_FORM = 'ORDER_FORM'
 }
 
 export enum AliasEntityType {
@@ -450,7 +451,20 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       {
         noEntities: 'device.no-devices-text'
       }
-    ]
+    ],
+    [
+      EntityType.ORDER_FORM,
+      {
+        type: 'entity.type-order',
+        typePlural: 'entity.type-orders',
+        list: 'entity.list-of-orders',
+        nameStartsWith: 'entity.order-name-starts-with',
+        details: 'order.order-details',
+        add: 'order.add-order',
+        noEntities: 'order.no-orders-text',
+        selectedEntities: 'order.selected-orders'
+      }
+    ],
   ]
 );
 
@@ -620,6 +634,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.PROD_CAPACITY_SETTINGS,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.ORDER_FORM,
       {
         helpLinkId: ''
       }

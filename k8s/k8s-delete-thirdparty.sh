@@ -19,5 +19,5 @@ set -e
 
 source .env
 
-kubectl config set-context $(kubectl config current-context) --namespace=thingsboard
+kubectl config set-context $(kubectl config current-context) --namespace=hsyl-iot
 kubectl delete -f $DEPLOYMENT_TYPE/thirdparty.yml

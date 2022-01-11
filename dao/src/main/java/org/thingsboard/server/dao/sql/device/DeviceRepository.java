@@ -288,4 +288,8 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
    void  updateFlgById(@Param("deviceFlg") Boolean deviceFlg,@Param("id") UUID id);
 
 
+    @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.name =:name ")
+    List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId,@Param("name") String name );
+
+
 }

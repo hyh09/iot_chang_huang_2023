@@ -28,6 +28,8 @@ RUN apt-get install -y cassandra cassandra-tools postgresql-12
 RUN update-rc.d cassandra disable
 RUN update-rc.d postgresql disable
 RUN sed -i.old '/ulimit/d' /etc/init.d/cassandra
+#设置时区
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
 COPY logback.xml ${pkg.name}.conf start-db.sh stop-db.sh start-tb.sh upgrade-tb.sh install-tb.sh ${pkg.name}.deb /tmp/
 
