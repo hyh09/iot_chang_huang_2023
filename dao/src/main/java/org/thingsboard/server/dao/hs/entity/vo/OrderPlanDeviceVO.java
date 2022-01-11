@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.beans.BeanUtils;
 import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
@@ -25,7 +26,7 @@ public class OrderPlanDeviceVO {
     @ApiModelProperty(value = "设备计划id", notes = "仅用于展示")
     private String id;
 
-    @NotNull
+    @NotBlank
     @ApiModelProperty(value = "设备Id", required = true)
     private String deviceId;
 

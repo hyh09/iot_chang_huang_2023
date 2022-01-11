@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -583,6 +582,53 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             log.info("查询设备指定时间段产能：" + dataMap);
             return dataMap;
         }
+    }
+
+    /**
+     * 根据工厂名称查询第一个工厂
+     *
+     * @param tenantId    租户Id
+     * @param factoryName 工厂名称
+     * @return 工厂
+     */
+    @Override
+    public Factory getFirstFactoryByFactoryName(TenantId tenantId, String factoryName) {
+        if (StringUtils.isBlank(factoryName))
+            return null;
+        var pageData = DaoUtil.toPageData(this.factoryRepository.findAllByTenantIdAndNameLike(tenantId.getId(), factoryName, CommonUtil.singleDataPage()).join());
+        return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
+    }
+
+    /**
+     * 根据车间名称和工厂Id查询第一个车间
+     *
+     * @param tenantId     租户Id
+     * @param factoryId    工厂Id
+     * @param workshopName 车间名称
+     * @return 车间
+     */
+    @Override
+    public Workshop getFirstWorkshopByFactoryIdAndWorkshopName(TenantId tenantId, UUID factoryId, String workshopName) {
+        if (StringUtils.isBlank(workshopName))
+            return null;
+        var pageData = DaoUtil.toPageData(this.workshopRepository.findAllByTenantIdAndFactoryIdAndNameLike(tenantId.getId(), factoryId, workshopName, CommonUtil.singleDataPage()).join());
+        return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
+    }
+
+    /**
+     * 根据产线名称和车间Id查询第一个产线
+     *
+     * @param tenantId           租户Id
+     * @param workshopId         车间Id
+     * @param productionLineName 产线名称
+     * @return 产线
+     */
+    @Override
+    public ProductionLine getFirstProductionLineByWorkshopIdAndProductionLineName(TenantId tenantId, UUID workshopId, String productionLineName) {
+        if (StringUtils.isBlank(productionLineName))
+            return null;
+        var pageData = DaoUtil.toPageData(this.productionLineRepository.findAllByTenantIdAndWorkshopIdAndNameLike(tenantId.getId(), workshopId, productionLineName, CommonUtil.singleDataPage()).join());
+        return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
     }
 
     /**

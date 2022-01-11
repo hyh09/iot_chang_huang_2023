@@ -1,20 +1,13 @@
 package org.thingsboard.server.dao.hs.service.Impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.xmlbeans.SchemaType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +21,15 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
+import org.thingsboard.server.dao.hs.entity.bo.OrderExcelBO;
 import org.thingsboard.server.dao.hs.entity.po.Order;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
@@ -43,7 +39,6 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -80,15 +75,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     @Transactional
-    public void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException {
-        var workbook = new XSSFWorkbook(file.getInputStream());
-        var sheet = workbook.getSheet("orders");
-        for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
-                var row = sheet.getRow(rowNum);
-                var cell = row.getCell(0);
-//                cell.getCellType()
-//                CommonUtil.getCellStringVal(cell)
-            }
+    public void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
     }
 
     /**
@@ -218,6 +205,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         this.orderPlanRepository.saveAll(orderVO.getPlanDevices().stream().map(v -> {
             OrderPlanEntity orderPlanEntity = new OrderPlanEntity();
             BeanUtils.copyProperties(v, orderPlanEntity);
+            orderPlanEntity.setDeviceId(toUUID(v.getDeviceId()));
             orderPlanEntity.setTenantId(tenantId.getId());
             orderPlanEntity.setOrderId(orderEntity.getId());
             orderPlanEntity.setSort(sort.get());
@@ -225,7 +213,8 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             return orderPlanEntity;
         }).collect(Collectors.toList()));
 
-        return this.getOrderDetail(tenantId, orderEntity.getId());
+        orderVO.setId(orderEntity.getId().toString());
+        return orderVO;
     }
 
     /**
@@ -279,7 +268,14 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public PageData<OrderListResult> listPageOrderCapacityMonitorByQuery(TenantId tenantId, UserId userId, OrderListQuery query, PageLink pageLink) {
-        return null;
+        var pageData = this.listPageOrdersByQuery(tenantId, userId, query, pageLink);
+        var dataMap = this.mapOrderIdToCapacity(pageData.getData().stream().map(OrderListResult::getId).map(this::toUUID).collect(Collectors.toList()));
+        pageData.getData().forEach(v -> {
+            var r = Optional.ofNullable(dataMap.get(toUUID(v.getId()))).map(OrderCapacityBO::getCapacities).orElse(BigDecimal.ZERO);
+            v.setCapacities(r);
+            v.setCompleteness(r.divide(v.getTotal(), 2, RoundingMode.HALF_UP));
+        });
+        return pageData;
     }
 
     /**
@@ -290,7 +286,20 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public OrderVO getOrderCapacityMonitorDetail(TenantId tenantId, UUID orderId) throws ThingsboardException {
-        return null;
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.getOrderDetail(tenantId, orderId);
+            } catch (ThingsboardException e) {
+                throw new CompletionException(e);
+            }
+        }).thenApplyAsync(orderVO -> CompletableFuture.supplyAsync(() -> this.clientService.getOrderCapacities(orderVO.getPlanDevices().stream().map(OrderPlanDeviceVO::toOrderPlan).collect(Collectors.toList()), orderId))
+                .thenApplyAsync(orderCapacityBO -> {
+                    orderVO.setCapacities(orderCapacityBO.getCapacities());
+                    orderVO.setCompleteness(orderCapacityBO.getCapacities().divide(orderVO.getTotal(), 2, RoundingMode.HALF_UP));
+                    var deviceCapacitiesMap = orderCapacityBO.getDeviceCapacities().stream().collect(Collectors.toMap(OrderDeviceCapacityBO::getPlanId, OrderDeviceCapacityBO::getCapacities));
+                    orderVO.getPlanDevices().forEach(v -> v.setCapacities(deviceCapacitiesMap.getOrDefault(toUUID(v.getId()), BigDecimal.ZERO)));
+                    return orderVO;
+                }).join()).join();
     }
 
     /**
@@ -346,13 +355,17 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Transactional
     public void deleteOrderPlan(UUID orderId) {
-        this.orderPlanRepository.deleteAllByOrderId(orderId).join();
+        this.orderPlanRepository.deleteAllByOrderId(orderId);
     }
 
     /**
      * 订单-产能计算
      */
     public Map<UUID, OrderCapacityBO> mapOrderIdToCapacity(List<UUID> orderIds) {
-        return Maps.newHashMap();
+        return orderIds.stream()
+                .map(v -> this.orderPlanRepository.findAllByOrderId(v).thenApplyAsync(e -> ImmutablePair.of(v, DaoUtil.convertDataList(e))))
+                .map(v -> v.thenApplyAsync(e -> this.clientService.getOrderCapacities(e.getRight(), e.getLeft())))
+                .map(CompletableFuture::join)
+                .collect(Collectors.toMap(OrderCapacityBO::getOrderId, Function.identity()));
     }
 }

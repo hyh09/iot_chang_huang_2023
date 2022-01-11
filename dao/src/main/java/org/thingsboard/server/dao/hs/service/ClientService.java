@@ -19,7 +19,6 @@ import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.hs.entity.vo.OrderVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -202,7 +201,7 @@ public interface ClientService {
     /**
      * 查询订单产能
      *
-     * @param plans 生产计划列表
+     * @param plans   生产计划列表
      * @param orderId 订单Id
      */
     OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId);
@@ -213,4 +212,33 @@ public interface ClientService {
      * @param plans 生产计划列表
      */
     Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans);
+
+    /**
+     * 根据工厂名称查询第一个工厂
+     *
+     * @param tenantId    租户Id
+     * @param factoryName 工厂名称
+     * @return 工厂
+     */
+    Factory getFirstFactoryByFactoryName(TenantId tenantId, String factoryName);
+
+    /**
+     * 根据车间名称和工厂Id查询第一个车间
+     *
+     * @param tenantId     租户Id
+     * @param factoryId    工厂Id
+     * @param workshopName 车间名称
+     * @return 车间
+     */
+    Workshop getFirstWorkshopByFactoryIdAndWorkshopName(TenantId tenantId, UUID factoryId, String workshopName);
+
+    /**
+     * 根据产线名称和车间Id查询第一个产线
+     *
+     * @param tenantId           租户Id
+     * @param workshopId         车间Id
+     * @param productionLineName 产线名称
+     * @return 产线
+     */
+    ProductionLine getFirstProductionLineByWorkshopIdAndProductionLineName(TenantId tenantId, UUID workshopId, String productionLineName);
 }

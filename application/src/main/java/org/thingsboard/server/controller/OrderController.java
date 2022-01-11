@@ -149,7 +149,8 @@ public class OrderController extends BaseController {
     @ApiOperation(value = "Pc-订单-更新或新增")
     @PostMapping("/order")
     public OrderVO updateOrSaveOrder(@RequestBody @Valid OrderVO orderVO) throws ThingsboardException {
-        return this.orderService.updateOrSaveOrder(getTenantId(), orderVO);
+        var oldOrderVO = this.orderService.updateOrSaveOrder(getTenantId(), orderVO);
+        return this.orderService.getOrderDetail(getTenantId(), toUUID(oldOrderVO.getId()));
     }
 
     /**

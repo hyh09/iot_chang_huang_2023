@@ -31,7 +31,7 @@ public interface OrderService {
      * @param checksumAlgorithm 校验和算法
      * @param file              文件
      */
-    void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException;
+    void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException;
 
     /**
      * 订单-模板
