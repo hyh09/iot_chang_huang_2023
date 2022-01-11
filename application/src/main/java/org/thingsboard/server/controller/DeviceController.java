@@ -1043,7 +1043,7 @@ public class DeviceController extends BaseController {
 
     @ApiOperation("自定义条件查询设备列表")
     @ApiImplicitParam(name = "deviceQry",value = "入参实体",dataType = "DeviceQry",paramType="body")
-    @RequestMapping(value = "/findDeviceListByCdn", method = RequestMethod.POST)
+    @RequestMapping(value = "/findDeviceListByCdn", method = RequestMethod.GET)
     @ResponseBody
     public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
         List<DeviceVo> result = new ArrayList<>();
