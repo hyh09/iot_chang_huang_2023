@@ -1,0 +1,64 @@
+<div class="device-comp-wrapper" style="min-width: 360px;">
+  <mat-toolbar color="primary">
+    <h2 translate>{{ isEdit ? 'order.edit-prod-plan' : 'order.add-prod-plan' }}</h2>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="cancel()" type="button">
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <div mat-dialog-content>
+    <form [formGroup]="orderDeviceForm">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device.device</mat-label>
+        <mat-select formControlName="deviceId" required>
+          <mat-option
+            *ngFor="let device of devices"
+            [value]="device.id"
+            [disabled]="device.id !== orderDeviceForm.get('deviceId').value && existDeviceIds.indexOf(device.id) > -1"
+          >{{ device.name }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="orderDeviceForm.get('deviceId').hasError('required')">
+          {{ 'device.device-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>order.intended-time</mat-label>
+        <mat-date-range-input [rangePicker]="intendedPicker">
+          <input matStartDate autocomplete="off" formControlName="intendedStartTime" (click)="intendedPicker.open()">
+          <input matEndDate autocomplete="off" formControlName="intendedEndTime" (click)="intendedPicker.open()">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="intendedPicker"></mat-datepicker-toggle>
+        <mat-date-range-picker #intendedPicker></mat-date-range-picker>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>order.actual-time</mat-label>
+        <mat-date-range-input [rangePicker]="actualPicker">
+          <input matStartDate autocomplete="off" formControlName="actualStartTime" (click)="actualPicker.open()">
+          <input matEndDate autocomplete="off" formControlName="actualEndTime" (click)="actualPicker.open()">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="actualPicker"></mat-datepicker-toggle>
+        <mat-date-range-picker #actualPicker></mat-date-range-picker>
+      </mat-form-field>
+      <mat-slide-toggle formControlName="enabled">
+        {{ 'device-mng.in-calculation' | translate }}
+      </mat-slide-toggle>
+    </form>
+  </div>
+  <div mat-dialog-actions fxLayoutAlign="end center">
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      cdkFocusInitial
+      [disabled]="(isLoading$ | async)"
+      (click)="cancel()"
+    >{{ 'action.cancel' | translate }}</button>
+    <button
+      mat-raised-button
+      type="button"
+      color="primary"
+      [disabled]="(isLoading$ | async) || orderDeviceForm?.invalid || !orderDeviceForm?.dirty"
+      (click)="save()"
+    >{{ 'action.confirm' | translate }}</button>
+  </div>
+</div>

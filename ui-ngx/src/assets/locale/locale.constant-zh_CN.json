@@ -3529,6 +3529,8 @@
     "total-count-required": "总数量必填",
     "production-plan": "生产计划",
     "no-device": "暂无设备",
-    "select-a-device": "选择一个设备"
+    "select-a-device": "选择一个设备",
+    "add-prod-plan": "添加生产计划",
+    "edit-prod-plan": "编辑生产计划"
   }
 }

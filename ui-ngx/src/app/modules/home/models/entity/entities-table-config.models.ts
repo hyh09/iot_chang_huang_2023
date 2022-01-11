@@ -128,7 +128,7 @@ export class DateEntityTableColumn<T extends BaseData<HasId>> extends EntityTabl
     super(key,
           title,
           width,
-          (entity, property) => datePipe.transform(entity[property], dateFormat),
+          (entity, property) => entity[property] ? datePipe.transform(entity[property], dateFormat) : '',
           cellStyleFunction);
   }
 }
