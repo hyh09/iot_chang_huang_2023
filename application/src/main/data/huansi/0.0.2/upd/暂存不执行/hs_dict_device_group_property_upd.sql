@@ -1,0 +1,1 @@
+UPDATE hs_dict_device_group_property SET title = '总产量' where "name" = 'capacities';

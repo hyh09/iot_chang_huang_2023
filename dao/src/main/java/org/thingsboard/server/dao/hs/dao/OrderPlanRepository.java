@@ -23,9 +23,11 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByTenantIdAndOrderIdOrderBySortAsc(UUID tenantId, UUID orderId);
 
-    @Async
-    CompletableFuture<Void> deleteAllByOrderId(UUID orderId);
+    void deleteAllByOrderId(UUID orderId);
 
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByOrderIdIn(List<UUID> orderIds);
+
+    @Async
+    CompletableFuture<List<OrderPlanEntity>> findAllByOrderId(UUID orderId);
 }

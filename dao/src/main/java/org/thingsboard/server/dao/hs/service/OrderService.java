@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.service;
 
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -11,6 +12,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +31,12 @@ public interface OrderService {
      * @param checksumAlgorithm 校验和算法
      * @param file              文件
      */
-    void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException;
+    void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException;
+
+    /**
+     * 订单-模板
+     */
+    XSSFWorkbook createTemplate() throws IOException;
 
     /**
      * 订单列表- 分页
@@ -96,37 +103,37 @@ public interface OrderService {
     /**
      * 订单产能监控-看板
      *
-     * @param tenantId  租户id
-     * @param factoryId 工厂Id
-     * @param startTime 开始时间
-     * @param endTime   结束时间
+     * @param tenantId   租户id
+     * @param factoryIds 工厂Id
+     * @param timeQuery  时间请求参数
      */
-    List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, Long startTime, Long endTime);
+    List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery);
 
     /**
      * 订单产能监控-App-首页
      *
-     * @param tenantId  租户id
-     * @param factoryId 工厂Id
+     * @param tenantId   租户id
+     * @param factoryIds 工厂Id
+     * @param timeQuery  时间请求参数
      */
-    OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(TenantId tenantId, UUID factoryId);
+    OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery);
 
     /**
      * App-订单-订单监控
      *
-     * @param tenantId  租户id
-     * @param factoryId 工厂Id
-     * @param orderNo   订单编号
+     * @param tenantId       租户id
+     * @param orderListQuery 请求参数
+     * @param userId         用户Id
+     * @param pageLink       分页参数
      */
-    PageData<OrderListResult> listPageAppOrderCapacityMonitorByQuery(TenantId tenantId, UUID factoryId, String orderNo);
+    PageData<OrderListResult> listPageAppOrderCapacityMonitorByQuery(TenantId tenantId, UserId userId, OrderListQuery orderListQuery, PageLink pageLink);
 
     /**
      * App-订单-订单监控-生产计划-更新实际时间
      *
      * @param tenantId 租户id
-     * @param orderId  订单Id
-     * @param deviceId 设备Id
+     * @param planId   设备计划Id
      * @param timeVO   时间参数
      */
-    void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID orderId, UUID deviceId, OrderPlanDeviceActualTimeVO timeVO);
+    void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID planId, OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException;
 }

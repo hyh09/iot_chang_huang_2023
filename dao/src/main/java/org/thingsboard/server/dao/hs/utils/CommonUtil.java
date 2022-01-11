@@ -5,6 +5,9 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
@@ -12,6 +15,8 @@ import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,10 +36,51 @@ import java.util.stream.Collectors;
  */
 public class CommonUtil {
 
+    /**
+     * 单个数据
+     */
+    public static PageRequest singleDataPage() {
+        return PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdTime"));
+    }
+
+    /**
+     * 获得excel 单元格时间数据
+     *
+     * @param cell 单元格
+     */
+    public static Long getCellDateVal(Cell cell) {
+        try {
+            return cell.getLocalDateTimeCellValue().toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        } catch (Exception ignore) {
+        }
+        return null;
+    }
+
+    /**
+     * 获得excel 单元格decimal数据
+     *
+     * @param cell 单元格
+     */
+    public static BigDecimal getCellDecimalVal(Cell cell) {
+        try {
+            return BigDecimal.valueOf(cell.getNumericCellValue()).setScale(2, RoundingMode.HALF_UP);
+        } catch (Exception ignore) {
+        }
+        return null;
+    }
+
+    /**
+     * 获得excel 单元格字符串格式数据
+     *
+     * @param cell 单元格
+     */
     public static String getCellStringVal(Cell cell) {
         switch (cell.getCellType()) {
             case NUMERIC:
-                return String.valueOf(cell.getNumericCellValue()).trim();
+                if (DateUtil.isCellDateFormatted(cell))
+                    return cell.getLocalDateTimeCellValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                else
+                    return BigDecimal.valueOf(cell.getNumericCellValue()).setScale(2, RoundingMode.HALF_UP).toPlainString();
             case STRING:
                 return cell.getStringCellValue().trim();
             case BOOLEAN:
@@ -145,6 +191,13 @@ public class CommonUtil {
      */
     public static <T> List<T> handleAsync(List<CompletableFuture<T>> t) {
         return t.stream().map(CompletableFuture::join).collect(Collectors.toList());
+    }
+
+    /**
+     * 获得当月零点的时间
+     */
+    public static Long getThisMonthStartTime() {
+        return LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()), LocalTime.MIN).toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 
     /**

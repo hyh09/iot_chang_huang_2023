@@ -15,6 +15,8 @@
  */
 package org.thingsboard.server.dao.sql.factory;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -42,6 +44,12 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
             "t.tenantId = :tenantId " +
             "AND t.name like CONCAT('%', :name, '%')")
     CompletableFuture<List<FactoryEntity>> findAllByTenantIdAndNameLike(@Param("tenantId") UUID tenantId, @Param("name") String name);
+
+    @Async
+    @Query("select t from FactoryEntity t where " +
+            "t.tenantId = :tenantId " +
+            "AND t.name like CONCAT('%', :name, '%') ")
+    CompletableFuture<Page<FactoryEntity>> findAllByTenantIdAndNameLike(@Param("tenantId") UUID tenantId, @Param("name") String name, Pageable pageable);
 
 //    @Query("SELECT org.thingsboard.server.dao.model.sql.FactoryInfoEntity(f,w,p) " +
 //            "FROM FactoryEntity f " +

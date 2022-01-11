@@ -1,0 +1,1 @@
+UPDATE hs_dict_device_group set "name" = '产量' where "name" = '产能';
