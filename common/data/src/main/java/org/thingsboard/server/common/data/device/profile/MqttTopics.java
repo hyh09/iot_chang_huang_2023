@@ -89,6 +89,9 @@ public class MqttTopics {
     public static final String DEVICE_SOFTWARE_RESPONSES_TOPIC = BASE_DEVICE_API_TOPIC_V2 + SOFTWARE + RESPONSE + "/" + SUB_TOPIC + CHUNK + SUB_TOPIC;
     public static final String DEVICE_SOFTWARE_ERROR_TOPIC = BASE_DEVICE_API_TOPIC_V2 + SOFTWARE + ERROR;
 
+    //设备字典下发
+    public static final String DICT_ISSUE ="device/issue/";
+
     private MqttTopics() {
     }
 }
