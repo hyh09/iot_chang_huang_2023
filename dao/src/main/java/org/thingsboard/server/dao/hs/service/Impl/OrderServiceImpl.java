@@ -272,8 +272,8 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         var dataMap = this.mapOrderIdToCapacity(pageData.getData().stream().map(OrderListResult::getId).map(this::toUUID).collect(Collectors.toList()));
         pageData.getData().forEach(v -> {
             var r = Optional.ofNullable(dataMap.get(toUUID(v.getId()))).map(OrderCapacityBO::getCapacities).orElse(BigDecimal.ZERO);
-            v.setCapacities(r);
-            v.setCompleteness(r.divide(v.getTotal(), 2, RoundingMode.HALF_UP));
+            v.setCapacities(this.formatCapacity(r));
+            v.setCompleteness(this.calculateCompleteness(r, v.getTotal()));
         });
         return pageData;
     }
@@ -294,10 +294,10 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             }
         }).thenApplyAsync(orderVO -> CompletableFuture.supplyAsync(() -> this.clientService.getOrderCapacities(orderVO.getPlanDevices().stream().map(OrderPlanDeviceVO::toOrderPlan).collect(Collectors.toList()), orderId))
                 .thenApplyAsync(orderCapacityBO -> {
-                    orderVO.setCapacities(orderCapacityBO.getCapacities());
-                    orderVO.setCompleteness(orderCapacityBO.getCapacities().divide(orderVO.getTotal(), 2, RoundingMode.HALF_UP));
+                    orderVO.setCapacities(this.formatCapacity(orderCapacityBO.getCapacities()));
+                    orderVO.setCompleteness(this.calculateCompleteness(orderCapacityBO.getCapacities(), orderVO.getTotal()));
                     var deviceCapacitiesMap = orderCapacityBO.getDeviceCapacities().stream().collect(Collectors.toMap(OrderDeviceCapacityBO::getPlanId, OrderDeviceCapacityBO::getCapacities));
-                    orderVO.getPlanDevices().forEach(v -> v.setCapacities(deviceCapacitiesMap.getOrDefault(toUUID(v.getId()), BigDecimal.ZERO)));
+                    orderVO.getPlanDevices().forEach(v -> v.setCapacities(this.formatCapacity(deviceCapacitiesMap.getOrDefault(toUUID(v.getId()), BigDecimal.ZERO))));
                     return orderVO;
                 }).join()).join();
     }
@@ -311,7 +311,27 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
-        return null;
+        return CompletableFuture.supplyAsync(() -> DaoUtil.convertDataList(this.orderRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            predicates.add(cb.between(root.get("createdTime"), timeQuery.getStartTime(), timeQuery.getEndTime()));
+            if (!factoryIds.isEmpty()) {
+                var in = cb.in(root.<UUID>get("factoryId"));
+                factoryIds.forEach(in::value);
+            }
+            query.orderBy(cb.desc(root.get("createdTime")));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        }))).thenApplyAsync(orders -> CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(orders.stream().map(Order::getFactoryId)
+                .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
+                .thenCombineAsync(CompletableFuture.supplyAsync(() -> this.mapOrderIdToCapacity(orders.stream().map(Order::getId).map(this::toUUID).collect(Collectors.toList()))), (factoryMap, dataMap) -> orders.stream().map(v ->
+                        OrderBoardCapacityResult.builder()
+                                .factoryId(v.getFactoryId())
+                                .factoryName(Optional.ofNullable(v.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
+                                .orderNo(v.getOrderNo())
+                                .total(v.getTotal())
+                                .completeness(this.calculateCompleteness(Optional.ofNullable(dataMap.get(toUUID(v.getId()))).map(OrderCapacityBO::getCapacities).orElse(BigDecimal.ZERO), v.getTotal()))
+                                .build()
+                ).collect(Collectors.toList())).join()).join();
     }
 
     /**
@@ -323,7 +343,13 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
-        return null;
+        var result = this.listBoardCapacityMonitorOrders(tenantId, factoryIds, timeQuery);
+        return OrderAppIndexCapacityResult.builder()
+                .num(result.size())
+                .completeness(result.isEmpty() ? BigDecimal.ZERO : this.calculatePercentage(BigDecimal.valueOf(result.stream()
+                        .filter(v -> v.getCompleteness().compareTo(BigDecimal.valueOf(100L)) >= 0)
+                        .count()), BigDecimal.valueOf(result.size())))
+                .build();
     }
 
     /**
@@ -336,7 +362,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public PageData<OrderListResult> listPageAppOrderCapacityMonitorByQuery(TenantId tenantId, UserId userId, OrderListQuery orderListQuery, PageLink pageLink) {
-        return null;
+        return this.listPageOrderCapacityMonitorByQuery(tenantId, userId, orderListQuery, pageLink);
     }
 
     /**
@@ -347,7 +373,13 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      * @param timeVO   时间参数
      */
     @Override
+    @Transactional
     public void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID planId, OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException {
+        var plan = this.orderPlanRepository.findByTenantIdAndId(tenantId.getId(), planId).map(OrderPlanEntity::toData).
+                orElseThrow(() -> new ThingsboardException("设备计划不存在！", ThingsboardErrorCode.GENERAL));
+        plan.setActualStartTime(timeVO.getActualStartTime());
+        plan.setActualEndTime(timeVO.getActualEndTime());
+        this.orderPlanRepository.save(new OrderPlanEntity(plan));
     }
 
     /**

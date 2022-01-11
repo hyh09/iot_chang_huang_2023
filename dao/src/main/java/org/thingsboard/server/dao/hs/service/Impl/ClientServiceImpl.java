@@ -555,7 +555,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList()));
             log.info("查询设备指定时间段产能：" + dataMap);
             var deviceCapacities = plans.stream().map(v -> OrderDeviceCapacityBO.builder()
-                    .planId(null) // TODO add
+                    .planId(toUUID(v.getId()))
                     .capacities(Optional.ofNullable(dataMap.get(CommonUtil.toUUIDNullable(v.getId()))).map(e -> BigDecimal.valueOf(Double.parseDouble(e))).orElse(BigDecimal.ZERO))
                     .build()).collect(Collectors.toList());
             return OrderCapacityBO.builder()

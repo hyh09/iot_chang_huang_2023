@@ -33,7 +33,7 @@ public class OrderVO {
     @ApiModelProperty(value = "订单编号")
     private String orderNo;
 
-    @DecimalMin("0.01")
+    @DecimalMin("0.00")
     @ApiModelProperty(value = "总数量")
     private BigDecimal total;
 

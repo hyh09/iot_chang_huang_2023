@@ -57,7 +57,7 @@ public class OrderPlan extends BasePO {
         capacityVO.setId(CommonUtil.toUUIDNullable(id));
         capacityVO.setEntityId(CommonUtil.toUUIDNullable(deviceId));
         capacityVO.setStartTime(actualStartTime);
-        capacityVO.setEndTime(actualStartTime);
+        capacityVO.setEndTime(actualEndTime);
         return capacityVO;
     }
 }
