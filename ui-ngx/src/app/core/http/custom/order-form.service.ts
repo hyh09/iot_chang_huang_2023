@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { OrderForm } from "@app/shared/models/custom/order-form-mng.models";
+import { OrderCapacity, OrderForm } from "@app/shared/models/custom/order-form-mng.models";
 import { PageLink, PageData, HasUUID } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
@@ -28,8 +28,22 @@ export class OrderFormService {
     return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 获取订单产能列表
+  public getOrderCapacities(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<OrderCapacity>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<OrderCapacity>>(`/api/order/capacityMonitor${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
   // 获取订单详情
   public getOrderForm(id: HasUUID, config?: RequestConfig): Observable<OrderForm> {
+    return this.http.get<OrderForm>(`/api/order/${id}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取订单产能详情
+  public getOrderCapacity(id: HasUUID, config?: RequestConfig): Observable<OrderForm> {
     return this.http.get<OrderForm>(`/api/order/${id}`, defaultHttpOptionsFromConfig(config));
   }
 

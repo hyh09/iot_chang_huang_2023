@@ -25,6 +25,8 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
 
   prodPlanExpanded = true;
 
+  isCapacity = false;
+
   constructor(
     protected store: Store<AppState>,
     protected translate: TranslateService,
@@ -37,6 +39,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
     this.fetchData();
+    this.isCapacity = window.location.pathname.indexOf('orderCapacity') > -1;
   }
 
   buildForm(entity: OrderForm): FormGroup {
@@ -54,7 +57,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       orderNo: [entity && entity.orderNo ? entity.orderNo : this.entitiesTableConfig.componentsData.availableOrderNo, Validators.required],
       contractNo: [entity ? entity.contractNo : ''],
       refOrderNo: [entity ? entity.refOrderNo : ''],
-      takeTime: [entity ? entity.takeTime : ''],
+      takeTime: [entity && entity.takeTime ? new Date(entity.takeTime) : null],
       customerOrderNo: [entity ? entity.customerOrderNo : ''],
       customer: [entity ? entity.customer : ''],
       type: [entity ? entity.type : ''],
@@ -77,7 +80,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       salesman: [entity ? entity.salesman : ''],
       shortShipment: [entity ? entity.shortShipment : ''],
       overShipment: [entity ? entity.overShipment : ''],
-      intendedTime: [entity ? entity.intendedTime : ''],
+      intendedTime: [entity && entity.intendedTime ? new Date(entity.intendedTime) : null],
       standardTimeCosting: [entity ? entity.standardTimeCosting : ''],
       comment: [entity ? entity.comment : ''],
       planDevices: this.fb.array(orderDeviceControls)
@@ -119,6 +122,13 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
 
   updateForm(entity: OrderForm) {
     this.entityForm.patchValue(entity);
+    const { takeTime, intendedTime } = this.entityForm.value
+    if (takeTime) {
+      this.entityForm.get('takeTime').patchValue(new Date(takeTime));
+    }
+    if (intendedTime) {
+      this.entityForm.get('intendedTime').patchValue(new Date(intendedTime));
+    }
     const orderDeviceControls: Array<AbstractControl> = [];
     if (entity && entity.planDevices && entity.planDevices.length > 0) {
       for (const device of entity.planDevices) {

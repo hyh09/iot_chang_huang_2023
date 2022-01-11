@@ -1163,6 +1163,10 @@ th[required]:after {
   color: #fff !important;
 }
 
+.mat-form-field-label-wrapper {
+  top: -0.84em;
+}
+
 // 覆盖antd样式
 .ant-tabs:not(.antd-tabs-card) {
   .ant-tabs-tab {

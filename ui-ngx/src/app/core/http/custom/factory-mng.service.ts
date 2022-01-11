@@ -139,7 +139,13 @@ export class FactoryMngService {
     name?: string; factoryId?: string; dictDeviceId?: string; workshopId?: string; productionLineId?: string;
     factoryName?: string; workshopName?: string; productionLineName?: string
   }, config?: RequestConfig): Observable<ProdDevice[]> {
-    return this.http.post<ProdDevice[]>(`/api/findDeviceListByCdn`, params, defaultHttpOptionsFromConfig(config));
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get<ProdDevice[]>(`/api/findDeviceListByCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 分配设备

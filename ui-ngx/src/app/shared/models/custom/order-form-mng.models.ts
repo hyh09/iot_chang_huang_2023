@@ -1,7 +1,7 @@
 import { BaseData } from "../base-data";
 import { OrderFormId } from "../id/custom/order-form-id";
 
-export interface OrderForm extends BaseData<OrderFormId> {
+export interface OrderForm extends OrderCapacity {
   orderNo: string;
   factoryName: string;
   emergencyDegree: string;
@@ -51,4 +51,18 @@ export interface OrderDevice {
   actualStartTime?: number;
   actualEndTime?: number;
   capacities?: number;
+}
+
+export interface OrderCapacity extends BaseData<OrderFormId> {
+  capacities: number;
+  completeness: number;
+  creator: string;
+  emergencyDegree: string;
+  factoryName: string;
+  intendedTime: number;
+  merchandiser: string;
+  orderNo: string;
+  salesman: string;
+  total: number;
+  totalAmount: number;
 }

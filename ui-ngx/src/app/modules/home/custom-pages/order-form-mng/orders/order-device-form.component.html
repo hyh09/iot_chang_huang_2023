@@ -1,4 +1,4 @@
-<div class="device-comp-wrapper" style="min-width: 360px;">
+<div class="order-device-wrapper" style="min-width: 360px;">
   <mat-toolbar color="primary">
     <h2 translate>{{ isEdit ? 'order.edit-prod-plan' : 'order.add-prod-plan' }}</h2>
     <span fxFlex></span>
@@ -8,7 +8,7 @@
   </mat-toolbar>
   <div mat-dialog-content>
     <form [formGroup]="orderDeviceForm">
-      <mat-form-field class="mat-block">
+      <!-- <mat-form-field class="mat-block">
         <mat-label translate>device.device</mat-label>
         <mat-select formControlName="deviceId" required>
           <mat-option
@@ -20,28 +20,34 @@
         <mat-error *ngIf="orderDeviceForm.get('deviceId').hasError('required')">
           {{ 'device.device-required' | translate }}
         </mat-error>
-      </mat-form-field>
-      <mat-form-field class="mat-block">
+      </mat-form-field> -->
+      <div class="form-item">
+        <mat-label translate required>device.device</mat-label>
+        <nz-select nzShowSearch nzAllowClear formControlName="deviceId">
+          <nz-option
+            *ngFor="let device of devices"
+            [nzLabel]="device.name"
+            [nzValue]="device.id"
+            [nzDisabled]="device.id !== orderDeviceForm.get('deviceId').value && existDeviceIds.indexOf(device.id) > -1"
+          ></nz-option>
+        </nz-select>
+        <mat-error *ngIf="orderDeviceForm.get('deviceId').hasError('required')">
+          {{ 'device.device-required' | translate }}
+        </mat-error>
+      </div>
+      <div class="form-item">
         <mat-label translate>order.intended-time</mat-label>
-        <mat-date-range-input [rangePicker]="intendedPicker">
-          <input matStartDate autocomplete="off" formControlName="intendedStartTime" (click)="intendedPicker.open()">
-          <input matEndDate autocomplete="off" formControlName="intendedEndTime" (click)="intendedPicker.open()">
-        </mat-date-range-input>
-        <mat-datepicker-toggle matSuffix [for]="intendedPicker"></mat-datepicker-toggle>
-        <mat-date-range-picker #intendedPicker></mat-date-range-picker>
-      </mat-form-field>
-      <mat-form-field class="mat-block">
+        <nz-range-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="intendedTime"></nz-range-picker>
+      </div>
+      <div class="form-item">
         <mat-label translate>order.actual-time</mat-label>
-        <mat-date-range-input [rangePicker]="actualPicker">
-          <input matStartDate autocomplete="off" formControlName="actualStartTime" (click)="actualPicker.open()">
-          <input matEndDate autocomplete="off" formControlName="actualEndTime" (click)="actualPicker.open()">
-        </mat-date-range-input>
-        <mat-datepicker-toggle matSuffix [for]="actualPicker"></mat-datepicker-toggle>
-        <mat-date-range-picker #actualPicker></mat-date-range-picker>
-      </mat-form-field>
-      <mat-slide-toggle formControlName="enabled">
-        {{ 'device-mng.in-calculation' | translate }}
-      </mat-slide-toggle>
+        <nz-range-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="actualTime"></nz-range-picker>
+      </div>
+      <div class="form-item" fxLayout="row" fxLayoutGap="16px" fxLaoutAlign="start center">
+        <mat-slide-toggle formControlName="enabled">
+          {{ 'device-mng.in-calculation' | translate }}
+        </mat-slide-toggle>
+      </div>
     </form>
   </div>
   <div mat-dialog-actions fxLayoutAlign="end center">

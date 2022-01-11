@@ -31,8 +31,8 @@
           </mat-form-field>
         </div>
         <div fxLayout="row" fxLayoutGap="10px">
-          <fieldset [disabled]="!!entityForm.get('id').value">
-            <mat-form-field fxFlex class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
+          <fieldset fxFlex [disabled]="!!entityForm.get('id').value">
+            <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
               <mat-label translate>order.order-no</mat-label>
               <input type="text" matInput formControlName="orderNo" required />
               <mat-error *ngIf="entityForm.get('orderNo').hasError('required')">
@@ -172,15 +172,18 @@
         </div>
         <mat-form-field fxFlex class="mat-block">
           <mat-label translate>order.remarks</mat-label>
-          <input type="text" matInput formControlName="comment" />
+          <textarea matInput formControlName="comment"></textarea>
         </mat-form-field>
       </mat-expansion-panel>
       <mat-expansion-panel [fxShow]="entityForm.get('factoryId').value" [expanded]="prodPlanExpanded">
         <mat-expansion-panel-header>
-          <mat-panel-title>{{ 'order.production-plan' | translate }}</mat-panel-title>
+          <mat-panel-title>{{ (isCapacity ? 'order.order-potency' : 'order.production-plan') | translate }}</mat-panel-title>
           <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <span *ngIf="isCapacity">
+              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.value.completeness || 0} }}
+            </span>
             <mat-icon
-              *ngIf="!(isLoading$ | async) && isEdit && prodPlanExpanded"
+              *ngIf="!isCapacity && !(isLoading$ | async) && isEdit && prodPlanExpanded"
               class="material-icons"
               matTooltip="{{ 'device-mng.add-device' | translate }}"
               matTooltipPosition="above"
@@ -194,31 +197,34 @@
           [nzShowPagination]="false"
           [nzFrontPagination]="false"
           [nzNoResult]="'order.no-device' | translate"
+          [nzScroll]="{ x: '100%', y: '500px' }"
         >
           <thead>
             <tr>
-              <th nzWidth="200px" nzLeft>{{ 'device.device' | translate }}</th>
-              <th nzWidth="150px">{{ 'order.intended-time' | translate }}</th>
-              <th nzWidth="150px">{{ 'order.actual-time' | translate }}</th>
-              <th nzWidth="100px" nzAlign="center">{{ 'device-mng.in-calculation' | translate }}</th>
-              <th *ngIf="isEdit" nzWidth="100px"></th>
+              <th nzWidth="210px" nzLeft>{{ 'device.device' | translate }}</th>
+              <th nzWidth="250px">{{ 'order.intended-time' | translate }}</th>
+              <th nzWidth="250px">{{ 'order.actual-time' | translate }}</th>
+              <th *ngIf="isCapacity" nzWidth="110px">{{ 'potency.capacity' | translate }}</th>
+              <th *ngIf="!isCapacity" nzWidth="100px" nzAlign="center">{{ 'device-mng.in-calculation' | translate }}</th>
+              <th *ngIf="isEdit" nzWidth="104px" nzRight></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let data of deviceTable.data; let $index = index">
-              <td>{{ data.deviceName }}</td>
+              <td>{{ data.deviceName || '' }}</td>
               <td>
                 <ng-container *ngIf="data.intendedStartTime && data.intendedEndTime">
-                  {{ data.intendedStartTime | date:'yyyy-MM-dd' }} ~ {{ data.intendedEndTime | date:'yyyy-MM-dd' }}
+                  {{ data.intendedStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.intendedEndTime | date:'yyyy-MM-dd HH:mm' }}
                 </ng-container>
               </td>
               <td>
                 <ng-container *ngIf="data.actualStartTime && data.actualEndTime">
-                  {{ data.actualStartTime | date:'yyyy-MM-dd' }} ~ {{ data.actualEndTime | date:'yyyy-MM-dd' }}
+                  {{ data.actualStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.actualEndTime | date:'yyyy-MM-dd HH:mm' }}
                 </ng-container>
               </td>
-              <td nzAlign="center">{{ (data.enabled ? 'action.yes' : 'action.no') | translate }}</td>
-              <td *ngIf="isEdit" nzAlign="right">
+              <td *ngIf="isCapacity">{{ data.capacities || '' }}</td>
+              <td *ngIf="!isCapacity" nzAlign="center">{{ (data.enabled ? 'action.yes' : 'action.no') | translate }}</td>
+              <td *ngIf="isEdit" nzAlign="right" nzRight>
                 <button
                   mat-icon-button
                   type="button"

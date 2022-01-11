@@ -4,7 +4,7 @@ import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@ap
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { UtilsService } from '@app/core/public-api';
+import { deepClone, UtilsService } from '@app/core/public-api';
 import { OrderForm } from '@app/shared/models/custom/order-form-mng.models';
 import { OrderFormComponent } from './order-form.component';
 import { OrdersFiltersComponent } from './orders-filters.component';
@@ -31,7 +31,8 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.componentsData = {
       orderNo: '',
       factoryName: '',
-      type: ''
+      type: '',
+      availableOrderNo: ''
     }
 
     this.config.deleteEntityTitle = order => this.translate.instant('order.delete-order-title', {orderNo: order.orderNo});
@@ -42,7 +43,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.columns.push(
       new EntityTableColumn<OrderForm>('orderNo', 'order.order-no', '50%'),
       new EntityTableColumn<OrderForm>('factoryName', 'order.factory-name', '50%'),
-      new EntityTableColumn<OrderForm>('emergencyDegree', 'order.emergency-degree', '150px'),
+      new EntityTableColumn<OrderForm>('emergencyDegree', 'order.emergency-degree', '100px'),
       new EntityTableColumn<OrderForm>('merchandiser', 'order.merchandiser', '100px'),
       new DateEntityTableColumn<OrderForm>('intendedTime', 'order.intended-complete-date', this.datePipe, '150px', 'yyyy-MM-dd'),
       new EntityTableColumn<OrderForm>('creator', 'common.creator', '100px'),
@@ -71,7 +72,12 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
 
     this.config.entitiesFetchFunction = pageLink => this.orderFormService.getOrders(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.orderFormService.getOrderForm(id);
-    this.config.saveEntity = orderForm => this.orderFormService.saveOrderForm(orderForm);
+    this.config.saveEntity = orderForm => {
+      const form = deepClone(orderForm);
+      if (form.takeTime) form.takeTime = new Date(form.takeTime).getTime();
+      if (form.intendedTime) form.intendedTime = new Date(form.intendedTime).getTime();
+      return this.orderFormService.saveOrderForm(form);
+    };
     this.config.entityAdded = () => {
       this.setAvailableOrderNo();
     }

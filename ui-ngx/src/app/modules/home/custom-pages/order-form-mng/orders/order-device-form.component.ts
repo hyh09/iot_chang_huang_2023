@@ -16,7 +16,8 @@ export interface OrderDeviceDialogData {
 
 @Component({
   selector: 'tb-order-device-form',
-  templateUrl: './order-device-form.component.html'
+  templateUrl: './order-device-form.component.html',
+  styleUrls: ['./order-device-form.component.scss']
 })
 export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormComponent, OrderDevice> implements OnInit {
 
@@ -48,13 +49,30 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
 
   buildForm() {
     const planDevices = this.data.planDevices;
+    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime } = (planDevices || {});
     this.orderDeviceForm = this.fb.group({
       deviceId: [planDevices ? planDevices.deviceId : '', Validators.required],
-      intendedStartTime: [planDevices ? planDevices.intendedStartTime : ''],
-      intendedEndTime: [planDevices ? planDevices.intendedEndTime : ''],
-      actualStartTime: [planDevices ? planDevices.actualStartTime : ''],
-      actualEndTime: [planDevices ? planDevices.actualEndTime : ''],
+      intendedTime: [intendedStartTime && intendedEndTime ? [intendedStartTime, intendedEndTime] : null],
+      intendedStartTime: [planDevices ? planDevices.intendedStartTime : null],
+      intendedEndTime: [planDevices ? planDevices.intendedEndTime : null],
+      actualTime: [actualStartTime && actualEndTime ? [actualStartTime, actualEndTime] : null],
+      actualStartTime: [planDevices ? planDevices.actualStartTime : null],
+      actualEndTime: [planDevices ? planDevices.actualEndTime : null],
       enabled: [planDevices ? planDevices.enabled : false]
+    });
+    this.orderDeviceForm.get('intendedTime').valueChanges.subscribe(res => {
+      const hasVal = res && res.length === 2;
+      this.orderDeviceForm.patchValue({
+        intendedStartTime: hasVal ? res[0] : null,
+        intendedEndTime: hasVal ? res[1] : null
+      });
+    });
+    this.orderDeviceForm.get('actualTime').valueChanges.subscribe(res => {
+      const hasVal = res && res.length === 2;
+      this.orderDeviceForm.patchValue({
+        actualStartTime: hasVal ? res[0] : null,
+        actualEndTime: hasVal ? res[1] : null
+      });
     });
     this.orderDeviceForm.markAsDirty();
   }

@@ -3473,8 +3473,8 @@
     "energy-consumption-history": "能耗历史",
     "running-state": "运行状态",
     "device-name": "设备名称",
-    "capacity": "产能 (M)",
-    "total-capacity": "总产能：",
+    "capacity": "产量 (M)",
+    "total-capacity": "总产量：",
     "total-energy-consumption": "总能耗：",
     "go-to-history": "查看历史数据",
     "created-time": "上报时间",
@@ -3531,6 +3531,10 @@
     "no-device": "暂无设备",
     "select-a-device": "选择一个设备",
     "add-prod-plan": "添加生产计划",
-    "edit-prod-plan": "编辑生产计划"
+    "edit-prod-plan": "编辑生产计划",
+    "capacities": "完成产量",
+    "completeness": "完成度 (%)",
+    "completeness-with-value": "完成度：{{completeness}}%",
+    "order-potency": "订单效能"
   }
 }

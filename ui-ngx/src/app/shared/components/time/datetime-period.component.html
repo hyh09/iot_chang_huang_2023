@@ -22,13 +22,13 @@
       <mat-placeholder translate>datetime.date-from</mat-placeholder>
       <mat-datetimepicker-toggle [for]="startDatePicker" matPrefix></mat-datetimepicker-toggle>
       <mat-datetimepicker #startDatePicker type="date"></mat-datetimepicker>
-      <input matInput [disabled]="disabled" [(ngModel)]="startDate" [matDatetimepicker]="startDatePicker" (click)="startDatePicker.open()" (ngModelChange)="onStartDateChange()">
+      <input matInput autocomplete="off" [disabled]="disabled" [(ngModel)]="startDate" [matDatetimepicker]="startDatePicker" (click)="startDatePicker.open()" (ngModelChange)="onStartDateChange()">
     </mat-form-field>
     <mat-form-field>
       <mat-placeholder translate>datetime.time-from</mat-placeholder>
       <mat-datetimepicker-toggle [for]="startTimePicker" matPrefix></mat-datetimepicker-toggle>
       <mat-datetimepicker #startTimePicker type="time"></mat-datetimepicker>
-      <input matInput [disabled]="disabled" [(ngModel)]="startDate" [matDatetimepicker]="startTimePicker" (click)="startTimePicker.open()" (ngModelChange)="onStartDateChange()">
+      <input matInput autocomplete="off" [disabled]="disabled" [(ngModel)]="startDate" [matDatetimepicker]="startTimePicker" (click)="startTimePicker.open()" (ngModelChange)="onStartDateChange()">
     </mat-form-field>
   </section>
   <section fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="16px"
@@ -37,13 +37,13 @@
       <mat-placeholder translate>datetime.date-to</mat-placeholder>
       <mat-datetimepicker-toggle [for]="endDatePicker" matPrefix></mat-datetimepicker-toggle>
       <mat-datetimepicker #endDatePicker type="date"></mat-datetimepicker>
-      <input matInput [disabled]="disabled" [(ngModel)]="endDate" [matDatetimepicker]="endDatePicker" (click)="endDatePicker.open()" (ngModelChange)="onEndDateChange()">
+      <input matInput autocomplete="off" [disabled]="disabled" [(ngModel)]="endDate" [matDatetimepicker]="endDatePicker" (click)="endDatePicker.open()" (ngModelChange)="onEndDateChange()">
     </mat-form-field>
     <mat-form-field>
       <mat-placeholder translate>datetime.time-to</mat-placeholder>
       <mat-datetimepicker-toggle [for]="endTimePicker" matPrefix></mat-datetimepicker-toggle>
       <mat-datetimepicker #endTimePicker type="time"></mat-datetimepicker>
-      <input matInput [disabled]="disabled" [(ngModel)]="endDate" [matDatetimepicker]="endTimePicker" (click)="endTimePicker.open()" (ngModelChange)="onEndDateChange()">
+      <input matInput autocomplete="off" [disabled]="disabled" [(ngModel)]="endDate" [matDatetimepicker]="endTimePicker" (click)="endTimePicker.open()" (ngModelChange)="onEndDateChange()">
     </mat-form-field>
   </section>
 </section>
