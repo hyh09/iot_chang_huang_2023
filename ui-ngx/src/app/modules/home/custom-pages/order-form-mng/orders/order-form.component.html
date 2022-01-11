@@ -1,0 +1,253 @@
+<div class="mat-padding" fxLayout="column" style="min-width: 900px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <mat-expansion-panel expanded style="margin-top: 0;">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'order.basic-info' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>device-mng.factory</mat-label>
+            <mat-select formControlName="factoryId" required>
+              <mat-option *ngFor="let factory of factoryList" [value]="factory.id">{{ factory.name }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="entityForm.get('factoryId').hasError('required')">
+              {{ 'device-mng.factory-required' | translate }}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>device-mng.work-shop</mat-label>
+            <mat-select formControlName="workshopId" [disabled]="!isEdit || !entityForm.get('factoryId').value">
+              <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
+              <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>device-mng.prod-line</mat-label>
+            <mat-select formControlName="productionLineId" [disabled]="!isEdit || !entityForm.get('workshopId').value">
+              <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
+              <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <fieldset fxFlex [disabled]="!!entityForm.get('id').value">
+            <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
+              <mat-label translate>order.order-no</mat-label>
+              <input type="text" matInput formControlName="orderNo" required />
+              <mat-error *ngIf="entityForm.get('orderNo').hasError('required')">
+                {{ 'order.order-no-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </fieldset>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.contract-no</mat-label>
+            <input type="text" matInput formControlName="contractNo" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.referance-order-no</mat-label>
+            <input type="text" matInput formControlName="refOrderNo" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.receive-date</mat-label>
+            <input autocomplete="off" matInput formControlName="takeTime" [matDatepicker]="picker" (click)="picker.open()">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.customer-order-no</mat-label>
+            <input type="text" matInput formControlName="customerOrderNo" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.customer</mat-label>
+            <input type="text" matInput formControlName="customer" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.order-type</mat-label>
+            <input type="text" matInput formControlName="type" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.operation-mode</mat-label>
+            <input type="text" matInput formControlName="bizPractice" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.currency</mat-label>
+            <input type="text" matInput formControlName="currency" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.exchange-rate</mat-label>
+            <input type="text" matInput formControlName="exchangeRate" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.tax-rate</mat-label>
+            <input type="text" matInput formControlName="taxRate" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.tax-category</mat-label>
+            <input type="text" matInput formControlName="taxes" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.total-count</mat-label>
+            <input type="text" matInput formControlName="total" required />
+            <mat-error *ngIf="entityForm.get('total').hasError('required')">
+              {{ 'order.total-count-required' | translate }}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.total-amount</mat-label>
+            <input type="text" matInput formControlName="totalAmount" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.unit</mat-label>
+            <input type="text" matInput formControlName="unit" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.unit-price-type</mat-label>
+            <input type="text" matInput formControlName="unitPriceType" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.additional-amount</mat-label>
+            <input type="text" matInput formControlName="additionalAmount" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.type-of-payment</mat-label>
+            <input type="text" matInput formControlName="paymentMethod" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.emergency-degree</mat-label>
+            <input type="text" matInput formControlName="emergencyDegree" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.tech-requiremnet</mat-label>
+            <input type="text" matInput formControlName="technologicalRequirements" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.season</mat-label>
+            <input type="text" matInput formControlName="season" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.count</mat-label>
+            <input type="text" matInput formControlName="num" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.merchandiser</mat-label>
+            <input type="text" matInput formControlName="merchandiser" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.salesman</mat-label>
+            <input type="text" matInput formControlName="salesman" />
+          </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutGap="10px">
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.short-shipment</mat-label>
+            <input type="text" matInput formControlName="shortShipment" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.over-shipment</mat-label>
+            <input type="text" matInput formControlName="overShipment" />
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.intended-complete-date</mat-label>
+            <input autocomplete="off" matInput formControlName="intendedTime" [matDatepicker]="picker2" (click)="picker2.open()">
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field fxFlex class="mat-block">
+            <mat-label translate>order.standard-time-costing</mat-label>
+            <input type="text" matInput formControlName="standardTimeCosting" />
+          </mat-form-field>
+        </div>
+        <mat-form-field fxFlex class="mat-block">
+          <mat-label translate>order.remarks</mat-label>
+          <textarea matInput formControlName="comment"></textarea>
+        </mat-form-field>
+      </mat-expansion-panel>
+      <mat-expansion-panel [fxShow]="entityForm.get('factoryId').value" [expanded]="prodPlanExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ (isCapacity ? 'order.order-potency' : 'order.production-plan') | translate }}</mat-panel-title>
+          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <span *ngIf="isCapacity">
+              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.value.completeness || 0} }}
+            </span>
+            <mat-icon
+              *ngIf="!isCapacity && !(isLoading$ | async) && isEdit && prodPlanExpanded"
+              class="material-icons"
+              matTooltip="{{ 'device-mng.add-device' | translate }}"
+              matTooltipPosition="above"
+              (click)="addOrderDevice($event)"
+            >add</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <nz-table
+          #deviceTable
+          [nzData]="orderDeviceFormArray().value"
+          [nzShowPagination]="false"
+          [nzFrontPagination]="false"
+          [nzNoResult]="'order.no-device' | translate"
+          [nzScroll]="{ x: '100%', y: '500px' }"
+        >
+          <thead>
+            <tr>
+              <th nzWidth="210px" nzLeft>{{ 'device.device' | translate }}</th>
+              <th nzWidth="250px">{{ 'order.intended-time' | translate }}</th>
+              <th nzWidth="250px">{{ 'order.actual-time' | translate }}</th>
+              <th *ngIf="isCapacity" nzWidth="110px">{{ 'potency.capacity' | translate }}</th>
+              <th *ngIf="!isCapacity" nzWidth="100px" nzAlign="center">{{ 'device-mng.in-calculation' | translate }}</th>
+              <th *ngIf="isEdit" nzWidth="104px" nzRight></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of deviceTable.data; let $index = index">
+              <td>{{ data.deviceName || '' }}</td>
+              <td>
+                <ng-container *ngIf="data.intendedStartTime && data.intendedEndTime">
+                  {{ data.intendedStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.intendedEndTime | date:'yyyy-MM-dd HH:mm' }}
+                </ng-container>
+              </td>
+              <td>
+                <ng-container *ngIf="data.actualStartTime && data.actualEndTime">
+                  {{ data.actualStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.actualEndTime | date:'yyyy-MM-dd HH:mm' }}
+                </ng-container>
+              </td>
+              <td *ngIf="isCapacity">{{ data.capacities || '' }}</td>
+              <td *ngIf="!isCapacity" nzAlign="center">{{ (data.enabled ? 'action.yes' : 'action.no') | translate }}</td>
+              <td *ngIf="isEdit" nzAlign="right" nzRight>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="{{ 'action.edit' | translate }}"
+                  matTooltipPosition="above"
+                  (click)="editOrderDevice($event, $index)"
+                >
+                  <mat-icon class="material-icons" >edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="{{ 'action.delete' | translate }}"
+                  matTooltipPosition="above"
+                  (click)="orderDeviceFormArray().removeAt($index)"
+                >
+                  <mat-icon class="material-icons" >delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </mat-expansion-panel>
+    </fieldset>
+  </form>
+</div>

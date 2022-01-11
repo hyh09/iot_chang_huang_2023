@@ -2,9 +2,10 @@ import { Component } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { AppState } from "@app/core/core.state";
-import { DialogComponent } from "@app/shared/public-api";
+import { City, GeographyService } from "@app/core/http/custom/geography.service";
+import { guid } from "@app/core/utils";
+import { DialogComponent } from "@app/shared/components/dialog.component";
 import { Store } from "@ngrx/store";
-import { City, GeographyService, guid } from '@app/core/public-api';
 
 @Component({
   selector: 'tb-select-city-dialog',
