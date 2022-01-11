@@ -19,11 +19,17 @@ import java.util.UUID;
 public class DeviceCapacityVo {
 
     /**
+     * 中文描述:  数据的唯一id
+     * 是否必传:  是
+     */
+    private  UUID  id;
+
+    /**
      *中文描述: 设备id
      * 是否必传:  是
      */
-    @ApiModelProperty("中文描述: 设备id;【必填】  ")
-    private UUID  id;
+    @ApiModelProperty("中文描述: 设备entityId;【必填】  ")
+    private UUID  entityId;
 
     /**
      *中文描述: 起始时间

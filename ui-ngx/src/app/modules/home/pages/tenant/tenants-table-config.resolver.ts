@@ -68,7 +68,7 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
     this.config.cellActionDescriptors.push(
       {
         name: this.translate.instant('tenant.set-tenant-menus'),
-        icon: 'menu',
+        mdiIcon: 'mdi:menu2',
         isEnabled: () => true,
         onAction: ($event, entity) => this.setTenantMenus($event, entity)
       },

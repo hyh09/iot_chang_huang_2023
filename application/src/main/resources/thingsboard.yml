@@ -23,6 +23,8 @@
 hs:
   file:
     location: "${HS_FILE_LOCATION:/upload}"
+  geo:
+    address: "https://nominatim.openstreetmap.org"
 
 server:
   # Server bind address
