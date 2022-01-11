@@ -159,6 +159,19 @@ public class JsonMqttAdaptor implements MqttTransportAdaptor {
         return Optional.of(createMqttPublishMsg(ctx, String.format(DEVICE_SOFTWARE_FIRMWARE_RESPONSES_TOPIC_FORMAT, firmwareType.getKeyPrefix(), requestId, chunk), firmwareChunk));
     }
 
+    /**
+     * 设备字典参数下发
+     * @param ctx
+     * @param jsonStr
+     * @return
+     */
+    @Override
+    public Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx,String topic, String jsonStr) {
+        JsonElement je = GSON.toJsonTree(jsonStr);
+        return Optional.of(createMqttPublishMsg(ctx, topic, je));
+    }
+
+
     public static JsonElement validateJsonPayload(UUID sessionId, ByteBuf payloadData) throws AdaptorException {
         String payload = validatePayload(sessionId, payloadData, false);
         try {
