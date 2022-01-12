@@ -27,7 +27,7 @@ export interface OrderForm extends OrderCapacity {
   refOrderNo: string;
   season: string;
   shortShipment: string;
-  standardTimeCosting: number;
+  standardAvailableTime: number;
   takeTime: number;
   taxRate: string;
   taxes: string;
