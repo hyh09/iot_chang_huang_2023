@@ -118,6 +118,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
 
             var in = cb.in(root.<UUID>get("factoryId"));
             factories.forEach(v -> in.value(v.getId()));
+            predicates.add(in);
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         }, DaoUtil.toPageable(pageLink)));
 
@@ -318,6 +319,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             if (!factoryIds.isEmpty()) {
                 var in = cb.in(root.<UUID>get("factoryId"));
                 factoryIds.forEach(in::value);
+                predicates.add(in);
             }
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
