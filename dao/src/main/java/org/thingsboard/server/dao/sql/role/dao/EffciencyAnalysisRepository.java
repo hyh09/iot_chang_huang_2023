@@ -1,15 +1,16 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
-import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 
 import javax.persistence.Query;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +26,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
     /**pc端产能接口 */
     private  String FIND_SON_QUERY="select t1.entity_id,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) as capacity_added_value" +
-            " from tb_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
+            " from hs_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
     public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
     public  static  String  SELECT_TS_CAP =" ,tb.capacity_added_value  ";
     public  static  String  FROM_QUERY_CAP="    from   device  d1 left join table1 tb on  d1.id = tb.entity_id  where 1=1 " ;
@@ -37,7 +38,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
             " min(water_first_time) as water_first_time,max(water_last_time) as water_last_time,"+
             " min(electric_first_time) as electric_first_time,max(electric_last_time) as electric_last_time,"+
             " min(gas_first_time) as gas_first_time,max(gas_last_time) as gas_last_time"+
-            " from tb_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
+            " from hs_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
     public  static  String  SELECT_START_DEVICE_02 =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
 
     public  static  String  SELECT_TS_CAP_02 =" ,tb.capacity_added_value,tb.water_added_value,tb.electric_added_value,tb.gas_added_value, " +
@@ -47,13 +48,25 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
 
 
+     /***  今天 昨天 历史的 总和统计*/
+     public  static  String SELECT_EVERY_DAY_SUM="select date,sum(to_number(capacity_added_value,'99999999999999999999999999.9999')) increment_capacity," +
+             " sum(to_number(t.capacity_value,'99999999999999999999999999.9999')) history_capacity, sum(to_number(t.electric_added_value,'99999999999999999999999999.9999')) increment_electric,\n" +
+             "       sum(to_number(t.electric_value,'99999999999999999999999999.9999')) history_electric,  sum(to_number(t.gas_added_value,'99999999999999999999999999.9999')) increment_gas,\n" +
+             "       sum(to_number(t.gas_value,'99999999999999999999999999.9999')) history_gas,sum(to_number(t.water_added_value,'99999999999999999999999999.9999')) increment_water,\n" +
+             "       sum(to_number(t.water_value,'99999999999999999999999999.9999')) history_water  from  hs_statistical_data t  where t.ts>= :startTime and t.entity_id in ( select id from device d1 where 1=1   \n" ;
+
+
+     /***今日排行*/
+     public static  String  TODAY_SQL_02=" tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value ,tb.ts ";
+    public  static  String  FROM_SQL_02="    from   device  d1 left join hs_statistical_data tb on  d1.id = tb.entity_id  and  tb.ts>=:startTime and tb.ts<:endTime  where 1=1 " ;
+
 
 
     /**
      * 如果设备id为空，就排除产能配置的false
      * @return
      */
-    public Page<EnergyEffciencyNewEntity> queryCapacity(QueryTsKvVo queryTsKvVo, PageLink pageLink)
+    public List<EnergyEffciencyNewEntity> queryCapacityALL(QueryTsKvVo queryTsKvVo, PageLink pageLink)
     {
 
         Query query = null;
@@ -74,10 +87,8 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(SELECT_START_DEVICE).append(SELECT_TS_CAP).append(FROM_QUERY_CAP);
         sql.append(sonSql01);
 
-        Page<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param, DaoUtil.toPageable(pageLink),"energyEffciencyNewEntity_01");
+        List<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param,"energyEffciencyNewEntity_01");
     return page;
-
-
 
     }
 
@@ -93,7 +104,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
      * @param pageLink
      * @return
      */
-    public Page<EnergyEffciencyNewEntity> queryEnergy(QueryTsKvVo queryTsKvVo, PageLink pageLink)
+    public List<EnergyEffciencyNewEntity> queryEnergyListAll(QueryTsKvVo queryTsKvVo, PageLink pageLink)
     {
         Query query = null;
         Map<String, Object> param = new HashMap<>();
@@ -110,46 +121,110 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(sqlpre);
         sql.append(SELECT_START_DEVICE_02).append(SELECT_TS_CAP_02).append(FROM_QUERY_CAP_02);
         sql.append(sonSql01);
-        Page<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param, DaoUtil.toPageable(pageLink),"energyEffciencyNewEntity_02");
+        List<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param,"energyEffciencyNewEntity_02");
         return  page;
     }
 
 
     /**
-     * sql片段
+     * 设备的排行
+     *    单纯的设备维度； 不需要统计的
      * @param queryTsKvVo
-     * @param sonSql01
-     * @param param
+     * @return
      */
-    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
+    public List<EnergyEffciencyNewEntity> queryEnergy(QueryTsKvVo queryTsKvVo)
     {
-        if(queryTsKvVo.getTenantId() != null)
-        {
-            sonSql01.append(" and  d1.tenant_id = :tenantId");
-            param.put("tenantId", queryTsKvVo.getTenantId());
-            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+        Query query = null;
+        Map<String, Object> param = new HashMap<>();
+        param.put("startTime",queryTsKvVo.getStartTime());
+        param.put("endTime",queryTsKvVo.getEndTime());
+        StringBuffer  sonSql = new StringBuffer();
 
+        StringBuffer  sonSql01 = new StringBuffer();
+        sqlPartOnDevice(queryTsKvVo,sonSql01,param);
+
+        StringBuffer  sql = new StringBuffer();
+//        sql.append(SELECT_START_DEVICE_02).append(",").append(TODAY_SQL_02).append(FROM_SQL_02);
+        sql.append(SELECT_START_DEVICE_02).append(",tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value,tb.ts ").append(FROM_SQL_02);
+
+        sql.append(sonSql01);
+        List<EnergyEffciencyNewEntity>   entityList = querySql(sql.toString(),param,"energyEffciencyNewEntity_03");
+        return  entityList;
+    }
+
+
+    /**
+     * 统计各个
+     *   ###2021-12-24 用于统计昨天 今天 历史的数据
+     * @param vo
+     * @return
+     */
+    public List<CensusSqlByDayEntity> queryCensusSqlByDay(TsSqlDayVo vo,boolean isCap)
+    {
+        Query query = null;
+        Map<String, Object> param = new HashMap<>();
+        param.put("startTime",vo.getStartTime());
+        StringBuffer  sonSql = new StringBuffer();
+
+        StringBuffer  sonSql01 = new StringBuffer();
+        sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        if(isCap) {
+            sonSql01.append(" and  d1.flg = true");
         }
-        if(queryTsKvVo.getFactoryId() != null)
+
+        sonSql.append(sonSql01).append("  ) ");
+
+        if(vo.getEndTime() != null )
         {
-            sonSql01.append(" and  d1.factory_id = :factoryId");
-            param.put("factoryId", queryTsKvVo.getFactoryId());
+            sonSql.append(" and  t.ts <= :endTime");
+            param.put("endTime", vo.getEndTime());
         }
-        if(queryTsKvVo.getWorkshopId() != null)
-        {
-            sonSql01.append(" and  d1.workshop_id = :workshopId");
-            param.put("workshopId", queryTsKvVo.getWorkshopId());
-        }
-        if(queryTsKvVo.getProductionLineId() != null)
-        {
-            sonSql01.append(" and  d1.production_line_id = :productionLineId");
-            param.put("productionLineId", queryTsKvVo.getProductionLineId());
-        }
-        if(queryTsKvVo.getDeviceId()  != null) {
-            sonSql01.append(" and  d1.id = :did");
-            param.put("did", queryTsKvVo.getDeviceId());
-        }
-     }
+
+        StringBuffer  sql = new StringBuffer();
+        sql.append(SELECT_EVERY_DAY_SUM).append(sonSql).append("   group by  date ");
+        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_01");
+        return  list;
+    }
+
+
+//    /**
+//     * sql片段
+//     * @param queryTsKvVo
+//     * @param sonSql01
+//     * @param param
+//     */
+//    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
+//    {
+//        if(queryTsKvVo.getTenantId() != null)
+//        {
+//            sonSql01.append(" and  d1.tenant_id = :tenantId");
+//            param.put("tenantId", queryTsKvVo.getTenantId());
+//            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+//
+//        }
+//        if(queryTsKvVo.getFactoryId() != null)
+//        {
+//            sonSql01.append(" and  d1.factory_id = :factoryId");
+//            param.put("factoryId", queryTsKvVo.getFactoryId());
+//        }
+//        if(queryTsKvVo.getWorkshopId() != null)
+//        {
+//            sonSql01.append(" and  d1.workshop_id = :workshopId");
+//            param.put("workshopId", queryTsKvVo.getWorkshopId());
+//        }
+//        if(queryTsKvVo.getProductionLineId() != null)
+//        {
+//            sonSql01.append(" and  d1.production_line_id = :productionLineId");
+//            param.put("productionLineId", queryTsKvVo.getProductionLineId());
+//        }
+//        if(queryTsKvVo.getDeviceId()  != null) {
+//            sonSql01.append(" and  d1.id = :did");
+//            param.put("did", queryTsKvVo.getDeviceId());
+//        }
+//     }
+
+
+
 
 
 

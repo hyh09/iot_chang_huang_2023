@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AppState } from '@app/core/core.state';
+import { UtilsService } from '@app/core/public-api';
 import { guid } from '@app/core/utils';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
@@ -35,7 +36,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceDictionary>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    public utils: UtilsService
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }

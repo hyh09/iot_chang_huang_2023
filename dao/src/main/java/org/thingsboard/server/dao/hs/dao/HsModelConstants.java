@@ -19,6 +19,10 @@ public class HsModelConstants {
     public static final String GENERAL_UPDATED_USER = "updated_user";
     public static final String GENERAL_SORT = "sort";
 
+    public static final String GENERAL_PRODUCTION_LINE_ID = "production_line_id";
+    public static final String GENERAL_WORKSHOP_ID = "workshop_id";
+    public static final String GENERAL_FACTORY_ID = "factory_id";
+
     public static final String DICT_DEVICE_ID = "dict_device_id";
     public static final String DEVICE_PROFILE_ID = "device_profile_id";
     public static final String DICT_DATA_ID = "dict_data_id";
@@ -61,7 +65,7 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_IS_DEFAULT = "is_default";
 
     public static final String DICT_DEVICE_COMPONENT_TABLE_NAME = "hs_dict_device_component";
-    public static final String DICT_DEVICE_COMPONENT_PARENT_ID= "parent_id";
+    public static final String DICT_DEVICE_COMPONENT_PARENT_ID = "parent_id";
     public static final String DICT_DEVICE_COMPONENT_CODE = "code";
     public static final String DICT_DEVICE_COMPONENT_NAME = "name";
     public static final String DICT_DEVICE_COMPONENT_TYPE = "type";
@@ -78,7 +82,7 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_PROPERTY_CONTENT = "content";
 
     public static final String DICT_DEVICE_GROUP_TABLE_NAME = "hs_dict_device_group";
-    public static final String DICT_DEVICE_GROUP_ID= "dict_device_group_id";
+    public static final String DICT_DEVICE_GROUP_ID = "dict_device_group_id";
     public static final String DICT_DEVICE_GROUP_NAME = "name";
 
     public static final String DICT_DEVICE_GROUP_PROPERTY_TABLE_NAME = "hs_dict_device_group_property";
@@ -113,7 +117,49 @@ public class HsModelConstants {
     public static final String FILE_LOCATION = "location";
 
     /**
-     * 设备配置-设备字典关联表
+     * 订单
      */
-    public static final String DEVICE_PROFILE_DICT_DEVICE_TABLE_NAME = "hs_device_profile_dict_device";
+    public static final String ORDER_TABLE_NAME = "hs_order";
+    public static final String ORDER_NO = "order_no";
+    public static final String ORDER_TOTAL = "total";
+    public static final String ORDER_CONTRACT_NO = "contract_no";
+    public static final String ORDER_REF_ORDER_NO = "ref_order_no";
+    public static final String ORDER_TAKE_TIME = "take_time";
+    public static final String ORDER_CUSTOMER_ORDER_NO = "customer_order_no";
+    public static final String ORDER_CUSTOMER = "customer";
+    public static final String ORDER_TYPE = "type";
+    public static final String ORDER_BIZ_PRACTICE = "biz_practice";
+    public static final String ORDER_CURRENCY = "currency";
+    public static final String ORDER_EXCHANGE_RATE = "exchange_rate";
+    public static final String ORDER_TAX_RATE = "tax_rate";
+    public static final String ORDER_TAXES = "taxes";
+    public static final String ORDER_TOTAL_AMOUNT = "total_amount";
+    public static final String ORDER_UNIT = "unit";
+    public static final String ORDER_UNIT_PRICE_TYPE = "unit_price_type";
+    public static final String ORDER_ADDITIONAL_AMOUNT = "additional_amount";
+    public static final String ORDER_PAYMENT_METHOD = "payment_method";
+    public static final String ORDER_EMERGENCY_DEGREE = "emergency_degree";
+    public static final String ORDER_TECHNOLOGICAL_REQUIREMENTS = "technological_requirements";
+    public static final String ORDER_NUM = "num";
+    public static final String ORDER_SEASON = "season";
+    public static final String ORDER_MERCHANDISER = "merchandiser";
+    public static final String ORDER_SALESMAN = "salesman";
+    public static final String ORDER_SHORT_SHIPMENT = "short_shipment";
+    public static final String ORDER_OVER_SHIPMENT = "over_shipment";
+    public static final String ORDER_COMMENT = "comment";
+    public static final String ORDER_INTENDED_TIME = "intended_time";
+    public static final String ORDER_STANDARD_AVAILABLE_TIME = "standard_available_time";
+
+    /**
+     * 订单设备
+     */
+    public static final String ORDER_PLAN_TABLE_NAME = "hs_order_plan";
+    public static final String ORDER_PLAN_DEVICE_ID = "device_id";
+    public static final String ORDER_PLAN_ORDER_ID = "order_id";
+    public static final String ORDER_PLAN_INTENDED_START_TIME = "intended_start_time";
+    public static final String ORDER_PLAN_INTENDED_END_TIME = "intended_end_time";
+    public static final String ORDER_PLAN_ACTUAL_START_TIME = "actual_start_time";
+    public static final String ORDER_PLAN_ACTUAL_END_TIME = "actual_end_time";
+    public static final String ORDER_PLAN_ENABLED = "enabled";
+    public static final String ORDER_PLAN_SORT = "sort";
 }

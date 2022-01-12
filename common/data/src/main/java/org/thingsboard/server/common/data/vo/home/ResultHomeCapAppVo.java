@@ -4,9 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
-
-import java.util.List;
 
 /**
  * @program: springboot-jpa-20210106
@@ -20,11 +17,11 @@ import java.util.List;
 public class ResultHomeCapAppVo {
 
     @ApiModelProperty("昨天的总产量")
-    private String  yesterdayValue;
+    private String  yesterdayValue="0";
     @ApiModelProperty("今天的总产量")
-    private String  todayValue;
+    private String  todayValue="0";
     @ApiModelProperty("历史的总产量")
-    private  String history;
+    private  String history="0";
 
 
 }

@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -79,8 +81,51 @@ public class JpaSqlTool {
     {
         Query query = null;
         query= entityManager.createNativeQuery(sql.toString(),resultSetMapping);
+        if(!CollectionUtils.isEmpty(param)) {
+            for (Map.Entry<String, Object> entry : param.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+        }
         List<T> list = query.getResultList();
         return  list;
+    }
+
+
+
+    /**
+     * sql片段  设备的
+     * @param queryTsKvVo
+     * @param sonSql01
+     * @param param
+     */
+    protected   void sqlPartOnDevice(QueryTsKvVo queryTsKvVo, StringBuffer  sonSql01, Map<String, Object> param)
+    {
+        if(queryTsKvVo.getTenantId() != null)
+        {
+            sonSql01.append(" and  d1.tenant_id = :tenantId");
+            param.put("tenantId", queryTsKvVo.getTenantId());
+            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+
+        }
+        if(queryTsKvVo.getFactoryId() != null)
+        {
+            sonSql01.append(" and  d1.factory_id = :factoryId");
+            param.put("factoryId", queryTsKvVo.getFactoryId());
+        }
+        if(queryTsKvVo.getWorkshopId() != null)
+        {
+            sonSql01.append(" and  d1.workshop_id = :workshopId");
+            param.put("workshopId", queryTsKvVo.getWorkshopId());
+        }
+        if(queryTsKvVo.getProductionLineId() != null)
+        {
+            sonSql01.append(" and  d1.production_line_id = :productionLineId");
+            param.put("productionLineId", queryTsKvVo.getProductionLineId());
+        }
+        if(queryTsKvVo.getDeviceId()  != null) {
+            sonSql01.append(" and  d1.id = :did");
+            param.put("did", queryTsKvVo.getDeviceId());
+        }
     }
 
 }

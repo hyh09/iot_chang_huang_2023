@@ -11,7 +11,7 @@ const routes: Routes = [
       title: 'menu-mng.menu-mng',
       breadcrumb: {
         label: 'menu-mng.menu-mng',
-        icon: 'menu'
+        icon: 'mdi:menu2'
       }
     },
     resolve: {

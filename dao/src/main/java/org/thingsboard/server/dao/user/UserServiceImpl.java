@@ -521,8 +521,8 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 //                            }
                             break;
                         case CUSTOMER_USER:
-                            log.info("====>打印当前的数据:{}",tenantId.getId());
-                            log.info("====>打印当前的数据ModelConstants.NULL_UUID:{}",ModelConstants.NULL_UUID);
+//                            log.info("====>打印当前的数据:{}",tenantId.getId());
+//                            log.info("====>打印当前的数据ModelConstants.NULL_UUID:{}",ModelConstants.NULL_UUID);
 
 //                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
 //                                throw new DataValidationException("Customer user should be assigned to customer!");

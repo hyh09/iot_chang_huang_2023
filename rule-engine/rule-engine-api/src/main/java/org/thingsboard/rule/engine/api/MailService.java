@@ -20,12 +20,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.thingsboard.server.common.data.ApiFeature;
 import org.thingsboard.server.common.data.ApiUsageStateMailMessage;
 import org.thingsboard.server.common.data.ApiUsageStateValue;
-import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.TenantId;
-
-import java.util.Map;
 
 public interface MailService {
 
@@ -37,13 +34,20 @@ public interface MailService {
 
     void sendActivationEmail(String activationLink, String email, JsonNode additionalInfo) throws ThingsboardException;
 
-    void sendAccountActivatedEmail(String loginLink, String email) throws ThingsboardException;
+    /**
+     * 账号已经激活
+     * @param loginLink
+     * @param email
+     * @param additionalInfo
+     * @throws ThingsboardException
+     */
+    void sendAccountActivatedEmail(String loginLink, String email,JsonNode additionalInfo) throws ThingsboardException;
 
     void sendResetPasswordEmail(String passwordResetLink, String email) throws ThingsboardException;
 
     void sendResetPasswordEmailAsync(String passwordResetLink, String email);
 
-    void sendPasswordWasResetEmail(String loginLink, String email) throws ThingsboardException;
+    void sendPasswordWasResetEmail(String loginLink, String email,JsonNode additionalInfo) throws ThingsboardException;
 
     void sendAccountLockoutEmail(String lockoutEmail, String email, Integer maxFailedLoginAttempts) throws ThingsboardException;
 

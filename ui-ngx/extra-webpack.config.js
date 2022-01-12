@@ -73,7 +73,7 @@ module.exports = (config, options) => {
     loader: 'less-loader',
     options: {
       modifyVars: { // 修改antd主题变量
-        'primary-color': '#36476C',
+        'primary-color': '#0663ff',
         'border-color-split': 'rgba(0, 0, 0, 0.12)',
         'table-header-bg': '#fff',
         'table-header-color': 'rgba(0, 0, 0, 0.54)',
@@ -81,7 +81,11 @@ module.exports = (config, options) => {
         'table-selected-row-bg': '#e9e9e9',
         'table-padding-vertical': '0',
         'table-padding-horizontal': '12px',
-        'tree-node-selected-bg': '#2367fa'
+        'tree-node-selected-bg': '#2367fa',
+        'tabs-card-active-color': '#36476c',
+        'tabs-active-color': '#36476c',
+        'tabs-highlight-color': '#36476c',
+        'tabs-ink-bar-color': '#36476c'
       },
       javascriptEnabled: true
     }

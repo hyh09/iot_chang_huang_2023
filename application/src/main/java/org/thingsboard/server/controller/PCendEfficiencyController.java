@@ -189,6 +189,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setEndTime(endTime);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             Long lo1 = System.currentTimeMillis();
+            queryTsKvVo.setTenantId(getTenantId().getId());
             PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
             Long lo2 = System.currentTimeMillis();
             Long t3 = lo2-lo1;
@@ -302,7 +303,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @ResponseBody
     public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-        log.info("打印当前的入参:{}",deviceId);
+//        log.info("打印当前的入参:{}",deviceId);
         try {
             return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
         }catch (Exception e)

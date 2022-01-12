@@ -25,6 +25,7 @@ import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.vo.device.DeviceDataSvc;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
+import org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 
@@ -273,10 +274,22 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             "  where  t.factory_id=?1 and t.name like  %?2%  and  position('\"gateway\":true' in t.additional_info)=0")
     Page<DeviceDataSvc> queryAllByNameLikeNativeQuery(UUID factoryId, String Name, Pageable pageable);
 
+
+    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceRatingValueVo(d.id,d2.content)  from DeviceEntity d Left JOIN  DictDeviceEntity d1 ON  d.dictDeviceId = d1.id " +
+            "left  join  DictDeviceStandardPropertyEntity d2 ON d1.id = d2.dictDeviceId" +
+            " where  d.id in (:ids) and d2.name = :name ")
+    List<DeviceRatingValueVo> queryDeviceIdAndValue(@Param("ids") List<UUID> ids, @Param("name") String name);
+
+
+
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("update DeviceEntity d set  d.deviceFlg= :deviceFlg   where    d.id =:id")
    void  updateFlgById(@Param("deviceFlg") Boolean deviceFlg,@Param("id") UUID id);
+
+
+    @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.name =:name ")
+    List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId,@Param("name") String name );
 
 
 }

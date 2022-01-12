@@ -3,26 +3,19 @@ import { Resolve } from '@angular/router';
 import {
   DateEntityTableColumn,
   EntityTableColumn,
-  EntityTableConfig,
-  HeaderActionDescriptor
+  EntityTableConfig
 } from '@home/models/entity/entities-table-config.models';
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { EntityType, entityTypeResources, entityTypeTranslations } from '@shared/models/entity-type.models';
-import { EntityAction } from '@home/models/entity/entity-component.models';
-import { DialogService } from '@core/services/dialog.service';
 import { AlarmRulesTabsComponent } from './alarm-rules-tabs.component';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  AddDeviceProfileDialogComponent,
-  AddDeviceProfileDialogData
-} from '@home/components/profile/add-device-profile-dialog.component';
-import { ImportExportService } from '@home/components/import-export/import-export.service';
 import { AlarmRulesComponent } from './alarm-rules.component';
 import { AlarmRuleInfo } from '@app/shared/models/custom/device-monitor.models';
 import { AlarmRuleService } from '@app/core/http/custom/alarm-rule.service';
 import { AddAlarmRuleDialogComponent, AddAlarmRuleDialogData } from './add-alarm-rule-dialog.component';
 import { AlarmRulesTableFilterComponent } from './alarm-rules-table-filter.component';
+import { UtilsService } from '@app/core/public-api';
 
 @Injectable()
 export class AlarmRulesTableConfigResolver implements Resolve<EntityTableConfig<AlarmRuleInfo>> {
@@ -33,7 +26,8 @@ export class AlarmRulesTableConfigResolver implements Resolve<EntityTableConfig<
     private alarmRuleService: AlarmRuleService,
     private translate: TranslateService,
     private datePipe: DatePipe,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private utils: UtilsService
   ) {
     this.config.entityType = EntityType.ALARM_RULES;
     this.config.entityComponent = AlarmRulesComponent;
@@ -82,6 +76,11 @@ export class AlarmRulesTableConfigResolver implements Resolve<EntityTableConfig<
 
     this.config.refreshEnabled = false;
     this.config.searchEnabled = false;
+    this.config.afterResolved = () => {
+      this.config.addEnabled = this.utils.hasPermission('device-monitor.add-alarm-rule');
+      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+    }
 
     return this.config;
   }

@@ -134,6 +134,20 @@ export class FactoryMngService {
     }));
   }
 
+  // 自定义查询设备列表
+  public getDevices(params: {
+    name?: string; factoryId?: string; dictDeviceId?: string; workshopId?: string; productionLineId?: string;
+    factoryName?: string; workshopName?: string; productionLineName?: string
+  }, config?: RequestConfig): Observable<ProdDevice[]> {
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get<ProdDevice[]>(`/api/findDeviceListByCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
   // 分配设备
   public distributeDevice(params: { deviceIdList: string[]; factoryId: string; workshopId: string; productionLineId: string; }, config?: RequestConfig) {
     return this.http.post(`/api/distributionDevice`, params, defaultHttpOptionsFromConfig(config));

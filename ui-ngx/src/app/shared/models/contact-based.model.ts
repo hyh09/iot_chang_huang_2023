@@ -20,6 +20,8 @@ export interface ContactBased<T extends HasId> extends BaseData<T> {
   country: string;
   state: string;
   city: string;
+  latitude: number | string;
+  longitude: number | string;
   address: string;
   address2: string;
   zip: string;

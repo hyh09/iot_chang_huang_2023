@@ -78,6 +78,8 @@
               <tr>
                 <th>{{ 'device-mng.factory-col-name' | translate }}</th>
                 <th nzWidth="104px">{{ 'device-mng.logo' | translate }}</th>
+                <th>{{ 'contact.country' | translate }}</th>
+                <th>{{ 'contact.city' | translate }}</th>
                 <th>{{ 'device-mng.address' | translate }}</th>
                 <th nzWidth="150px">{{ 'common.created-time' | translate }}</th>
                 <th
@@ -112,6 +114,8 @@
                         <img nz-image [nzSrc]="item.logoImages" (click)="$event.stopPropagation()" />
                       </div>
                     </td>
+                    <td>{{ item.country }}</td>
+                    <td>{{ item.city }}</td>
                     <td>{{ item.address }}</td>
                     <td>{{ item.createdTime | date: "yyyy-MM-dd HH:mm:ss" }}</td>
                     <td *ngIf="utils.hasPermission('device-mng.add-work-shop') || utils.hasPermission('device-mng.add-prod-line')

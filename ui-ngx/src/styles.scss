@@ -1126,7 +1126,8 @@ input:-internal-autofill-previewed,
   color: rgba(0, 0, 0, 0.26) !important;
 }
 
-form button .mat-icon {
+form button:not(.mat-primary):not(.mat-accent):not(.mat-warn):not([disabled]) .mat-icon:not(.mat-icon-no-color),
+table button .mat-icon {
   color: rgba(0, 0, 0, 0.54);
 }
 
@@ -1160,6 +1161,10 @@ th[required]:after {
 *::selection {
   background: rgb(42, 134, 253) !important;
   color: #fff !important;
+}
+
+.mat-form-field-label-wrapper {
+  top: -0.84em;
 }
 
 // 覆盖antd样式
@@ -1206,4 +1211,16 @@ nz-range-picker,
 nz-time-picker {
   outline: none !important;
   box-shadow: none !important;
+}
+
+.editable-cell {
+  position: relative;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.editable-row:hover .editable-cell {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  padding: 4px 11px;
 }

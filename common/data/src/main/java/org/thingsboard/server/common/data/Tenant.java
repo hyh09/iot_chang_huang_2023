@@ -54,6 +54,8 @@ public class Tenant extends ContactBased<TenantId> implements HasTenantId {
         this.title = tenant.getTitle();
         this.region = tenant.getRegion();
         this.tenantProfileId = tenant.getTenantProfileId();
+        this.latitude = tenant.getLatitude();
+        this.longitude = tenant.getLongitude();
     }
 
     public String getTitle() {
