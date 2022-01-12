@@ -23,8 +23,8 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
   allProdLineList: ProdLine[];
   prodLineList: ProdLine[];
 
+  updated = false;
   prodPlanExpanded = true;
-
   isCapacity = false;
 
   constructor(
@@ -51,9 +51,9 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     }
     const form = this.fb.group({
       id: [entity ? entity.id : ''],
-      factoryId: [entity ? entity.factoryId : '', Validators.required],
-      workshopId: [entity ? entity.workshopId : ''],
-      productionLineId: [entity ? entity.productionLineId : ''],
+      factoryId: [entity && entity.factoryId ? entity.factoryId : '', Validators.required],
+      workshopId: [entity && entity.workshopId ? entity.workshopId : ''],
+      productionLineId: [entity && entity.productionLineId ? entity.productionLineId : ''],
       orderNo: [entity && entity.orderNo ? entity.orderNo : this.entitiesTableConfig.componentsData.availableOrderNo, Validators.required],
       contractNo: [entity ? entity.contractNo : ''],
       refOrderNo: [entity ? entity.refOrderNo : ''],
@@ -86,20 +86,26 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       planDevices: this.fb.array(orderDeviceControls)
     }); 
     form.get('factoryId').valueChanges.subscribe(newFactoryId => {
-      form.get('workshopId').setValue('');
-      this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === newFactoryId));
-      this.orderDeviceFormArray().clear();
-      form.updateValueAndValidity();
+      if (this.updated) {
+        form.get('workshopId').setValue('');
+        this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === newFactoryId));
+        this.orderDeviceFormArray().clear();
+        form.updateValueAndValidity();
+      }
     });
     form.get('workshopId').valueChanges.subscribe(newWorkshopId => {
-      form.get('productionLineId').setValue('');
-      this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === newWorkshopId));
-      this.orderDeviceFormArray().clear();
-      form.updateValueAndValidity();
+      if (this.updated) {
+        form.get('productionLineId').setValue('');
+        this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === newWorkshopId));
+        this.orderDeviceFormArray().clear();
+        form.updateValueAndValidity();
+      }
     });
     form.get('productionLineId').valueChanges.subscribe(() => {
-      this.orderDeviceFormArray().clear();
-      form.updateValueAndValidity();
+      if (this.updated) {
+        this.orderDeviceFormArray().clear();
+        form.updateValueAndValidity();
+      }
     });
     return form;
   }
@@ -121,13 +127,20 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
   }
 
   updateForm(entity: OrderForm) {
+    this.updated = false;
     this.entityForm.patchValue(entity);
-    const { takeTime, intendedTime } = this.entityForm.value
+    const { takeTime, intendedTime, factoryId, workshopId } = entity || {};
     if (takeTime) {
       this.entityForm.get('takeTime').patchValue(new Date(takeTime));
     }
     if (intendedTime) {
       this.entityForm.get('intendedTime').patchValue(new Date(intendedTime));
+    }
+    if (factoryId) {
+      this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === factoryId));
+    }
+    if (workshopId) {
+      this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === workshopId));
     }
     const orderDeviceControls: Array<AbstractControl> = [];
     if (entity && entity.planDevices && entity.planDevices.length > 0) {
@@ -137,6 +150,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     }
     this.entityForm.controls.planDevices = this.fb.array(orderDeviceControls);
     this.entityForm.updateValueAndValidity();
+    this.updated = true;
   }
 
   fetchData() {
@@ -168,7 +182,6 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
           existDeviceIds: this.existDeviceIds()
         }
       }).afterClosed().subscribe(res => {
-        console.log(res)
         if (res) {
           this.orderDeviceFormArray().push(this.createOrderDeviceControl(res));
           this.cd.markForCheck();
