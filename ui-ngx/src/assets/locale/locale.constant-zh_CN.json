@@ -3535,6 +3535,12 @@
     "capacities": "完成产量",
     "completeness": "完成度 (%)",
     "completeness-with-value": "完成度：{{completeness}}%",
-    "order-potency": "订单效能"
+    "order-potency": "订单效能",
+    "create-order": "创建订单",
+    "import-order": "导入订单",
+    "order-excel": "订单excel",
+    "download-template": "下载模板",
+    "drop-order": "拖拽excel文件或单击以选择要导入的excel文件。",
+    "import-template-name": "订单导入模板.xlsx"
   }
 }
