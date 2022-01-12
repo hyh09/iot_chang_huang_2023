@@ -217,8 +217,12 @@ public class UserController extends BaseController  {
             checkEntity(user.getId(), user, Resource.USER);
 
             boolean sendEmail = user.getId() == null && sendActivationMail;
-//             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-//             user.setFactoryId(null);
+
+            if(StringUtils.isEmpty(user.getUserName()))
+            {
+                String  userName =user.getFirstName()+user.getLastName();
+                user.setUserName(userName);
+            }
             User savedUser = checkNotNull(userService.saveUser(user));
             if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
                 saveRole(savedUser);
