@@ -29,6 +29,8 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
 
     private final MqttTransportContext context;
     private final boolean sslEnabled;
+    private MqttTransportHandler handler;
+
 
     public MqttTransportServerInitializer(MqttTransportContext context, boolean sslEnabled) {
         this.context = context;
@@ -46,10 +48,14 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast("decoder", new MqttDecoder(context.getMaxPayloadSize()));
         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
 
-        MqttTransportHandler handler = new MqttTransportHandler(context, sslHandler);
+        handler = new MqttTransportHandler(context, sslHandler);
 
         pipeline.addLast(handler);
         ch.closeFuture().addListener(handler);
     }
 
+
+    public MqttTransportHandler getHandler() {
+        return handler;
+    }
 }
