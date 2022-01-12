@@ -84,7 +84,9 @@ public class OrderController extends BaseController {
     @ApiOperation(value = "Pc-订单-模板下载")
     @GetMapping("/order/template")
     public void downloadTemplate(HttpServletResponse response) throws ThingsboardException, IOException {
-        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("订单批量导入模板.xlsx", StandardCharsets.UTF_8));
+        var fileName = URLEncoder.encode("订单批量导入模板.xlsx", StandardCharsets.UTF_8.name());
+        response.addHeader("Content-disposition", "attachment;filename=" + fileName + ";filename*=UTF-8" + fileName);
+        response.addHeader("Access-Control-Expose-Headers", "*");
         this.orderService.createTemplate().write(response.getOutputStream());
         response.flushBuffer();
     }

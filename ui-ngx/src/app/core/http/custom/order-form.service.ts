@@ -1,8 +1,11 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { OrderCapacity, OrderForm } from "@app/shared/models/custom/order-form-mng.models";
+import { ChecksumAlgorithm } from "@app/shared/models/ota-package.models";
 import { PageLink, PageData, HasUUID } from "@app/shared/public-api";
+import { TranslateService } from "@ngx-translate/core";
 import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 
 interface FetchListFilter {
@@ -16,7 +19,8 @@ interface FetchListFilter {
 export class OrderFormService {
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private translate: TranslateService
   ) { }
 
   // 获取订单列表
@@ -60,6 +64,30 @@ export class OrderFormService {
   // 删除订单
   public deleteOrder(id: HasUUID, config?: RequestConfig) {
     return this.http.delete(`/api/order/${id}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 下载订单导入模板
+  public downloadOrderTemplate() {
+    return this.http.get(`/api/order/template`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+      var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+      var link = document.createElement('a');
+      var href = window.URL.createObjectURL(blob);
+      link.href = href;
+      link.download = this.translate.instant('order.import-template-name');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(href);
+    }));
+  }
+
+  // 导入订单
+  public importOrder(file: File, checksum?: string, checksumAlgorithmStr?: ChecksumAlgorithm): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    checksum && formData.append('checksum', checksum);
+    checksumAlgorithmStr && formData.append('checksumAlgorithm', checksumAlgorithmStr);
+    return this.http.post(`/api/order/import`, formData, { responseType: 'text' });
   }
 
 }

@@ -4,7 +4,6 @@ import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@ap
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { UtilsService } from '@app/core/public-api';
 import { OrderCapacity } from '@app/shared/models/custom/order-form-mng.models';
 import { OrderFormComponent } from '../orders/order-form.component';
 import { OrdersFiltersComponent } from '../orders/orders-filters.component';
