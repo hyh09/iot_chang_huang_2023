@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
@@ -83,7 +84,10 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public XSSFWorkbook createTemplate() throws IOException {
-        return null;
+        // todo delete
+        var xssfWorkbook = new XSSFWorkbook();
+        xssfWorkbook.createSheet("xxx");
+        return xssfWorkbook;
     }
 
     /**
@@ -108,6 +112,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         if (factories.isEmpty())
             return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
+        List<SortOrder> sortOrders = Lists.newArrayList(pageLink.getSortOrder());
+        if (!pageLink.getSortOrder().getProperty().equals("orderNo"))
+            sortOrders.add(new SortOrder("orderNo", SortOrder.Direction.DESC));
         var temp = DaoUtil.toPageData(this.orderRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
@@ -120,7 +127,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             factories.forEach(v -> in.value(v.getId()));
             predicates.add(in);
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
-        }, DaoUtil.toPageable(pageLink)));
+        }, DaoUtil.toPageable(pageLink, sortOrders)));
 
         return CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(temp.getData().stream().map(Order::getFactoryId)
                 .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
@@ -129,9 +136,11 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                         .orderNo(e.getOrderNo())
                         .id(e.getId())
                         .createdTime(e.getCreatedTime())
-                        .creator(Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
+                        .creator(
+                                Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
                         .emergencyDegree(e.getEmergencyDegree())
-                        .factoryName(Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
+                        .factoryName(
+                                Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
                         .intendedTime(e.getIntendedTime())
                         .merchandiser(e.getMerchandiser())
                         .salesman(e.getSalesman())
@@ -321,7 +330,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                 factoryIds.forEach(in::value);
                 predicates.add(in);
             }
-            query.orderBy(cb.desc(root.get("createdTime")));
+            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("orderNo")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         }))).thenApplyAsync(orders -> CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(orders.stream().map(Order::getFactoryId)
                 .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
