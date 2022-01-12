@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
-import org.thingsboard.common.util.baidumap.BaiduMaps;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -40,7 +39,10 @@ import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -83,7 +85,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             factoryEntity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
         //获取经纬度
-        String address = factoryEntity.getCountry() + factoryEntity.getProvince() + factoryEntity.getCity() + factoryEntity.getArea() + factoryEntity.getAddress();
+        /*String address = factoryEntity.getCountry() + factoryEntity.getProvince() + factoryEntity.getCity() + factoryEntity.getArea() + factoryEntity.getAddress();
         if(StringUtils.isNotBlank(address)){
             Map<String, String> coordinate = BaiduMaps.getCoordinate(address);
             if(coordinate != null){
@@ -94,7 +96,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     factoryEntity.setLatitude(coordinate.get("latitude"));
                 }
             }
-        }
+        }*/
 
         FactoryEntity entity = factoryRepository.save(factoryEntity);
         if(entity != null){
