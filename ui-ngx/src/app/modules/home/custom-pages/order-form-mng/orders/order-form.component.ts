@@ -128,8 +128,13 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
   }
 
   updateForm(entity: OrderForm) {
-    this.entityForm.patchValue(entity);
-    const { takeTime, intendedTime, factoryId, workshopId } = entity || {};
+    const { takeTime, intendedTime, factoryId, workshopId, productionLineId } = entity || {};
+    this.entityForm.patchValue({
+      ...(entity || {}),
+      factoryId: factoryId || '',
+      workshopId: workshopId || '',
+      productionLineId: productionLineId || ''
+    });
     if (takeTime) {
       this.entityForm.get('takeTime').patchValue(new Date(takeTime));
     }
