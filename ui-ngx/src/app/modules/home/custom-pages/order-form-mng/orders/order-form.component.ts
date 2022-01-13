@@ -172,7 +172,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     event.preventDefault();
     event.stopPropagation();
     const { factoryId, workshopId, productionLineId } = this.entityForm.value;
-    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId }).subscribe(res => {
+    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,
         panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
@@ -196,7 +196,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     if (index < 0) return;
     const target = this.orderDeviceFormArray().controls[index];
     const { factoryId, workshopId, productionLineId } = this.entityForm.value;
-    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId }).subscribe(res => {
+    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,
         panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
