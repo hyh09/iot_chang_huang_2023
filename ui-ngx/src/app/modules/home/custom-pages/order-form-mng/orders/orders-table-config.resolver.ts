@@ -33,6 +33,8 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER_FORM);
     this.config.entityResources = entityTypeResources.get(EntityType.ORDER_FORM);
 
+    this.config.addDialogStyle = { width: '960px' };
+
     this.config.componentsData = {
       orderNo: '',
       factoryName: '',

@@ -48,7 +48,7 @@ export class OrderFormService {
 
   // 获取订单产能详情
   public getOrderCapacity(id: HasUUID, config?: RequestConfig): Observable<OrderForm> {
-    return this.http.get<OrderForm>(`/api/order/${id}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<OrderForm>(`/api/order/${id}/capacityMonitor`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取可用的订单号
