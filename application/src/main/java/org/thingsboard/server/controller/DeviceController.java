@@ -1138,7 +1138,11 @@ public class DeviceController extends BaseController {
                         log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
                         String json = JSONObjectUtils.toJSONString(mapIssue);
                         //发布mqtt消息
-                        handler.dictIssue(topic,json);
+                        if(handler != null){
+                            handler.dictIssue(topic,json);
+                        }else {
+                            throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！当前下发数据为："+json,ThingsboardErrorCode.FAIL_VIOLATION);
+                        }
                     }
                 }
             }
