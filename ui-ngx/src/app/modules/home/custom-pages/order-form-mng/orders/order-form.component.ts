@@ -60,6 +60,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       takeTime: [entity && entity.takeTime ? new Date(entity.takeTime) : null],
       customerOrderNo: [entity ? entity.customerOrderNo : ''],
       customer: [entity ? entity.customer : ''],
+      completeness: [entity ? entity.completeness : 0],
       type: [entity ? entity.type : ''],
       bizPractice: [entity ? entity.bizPractice : ''],
       currency: [entity ? entity.currency : ''],
@@ -122,7 +123,8 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       intendedStartTime: [planDevices ? planDevices.intendedStartTime : ''],
       intendedEndTime: [planDevices ? planDevices.intendedEndTime : ''],
       actualStartTime: [planDevices ? planDevices.actualStartTime : ''],
-      actualEndTime: [planDevices ? planDevices.actualEndTime : '']
+      actualEndTime: [planDevices ? planDevices.actualEndTime : ''],
+      capacities: [planDevices ? planDevices.capacities : 0]
     });
   }
 

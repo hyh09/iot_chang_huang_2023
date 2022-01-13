@@ -181,7 +181,7 @@
           <mat-panel-title>{{ (isCapacity ? 'order.order-potency' : 'order.production-plan') | translate }}</mat-panel-title>
           <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
             <span *ngIf="isCapacity">
-              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.value.completeness || 0} }}
+              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.get('completeness').value || 0} }}
             </span>
             <mat-icon
               *ngIf="!isCapacity && !(isLoading$ | async) && isEdit && prodPlanExpanded"
