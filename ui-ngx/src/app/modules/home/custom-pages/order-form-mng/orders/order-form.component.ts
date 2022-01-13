@@ -23,8 +23,8 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
   allProdLineList: ProdLine[];
   prodLineList: ProdLine[];
 
+  updated = false;
   prodPlanExpanded = true;
-
   isCapacity = false;
 
   constructor(
@@ -51,15 +51,16 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     }
     const form = this.fb.group({
       id: [entity ? entity.id : ''],
-      factoryId: [entity ? entity.factoryId : '', Validators.required],
-      workshopId: [entity ? entity.workshopId : ''],
-      productionLineId: [entity ? entity.productionLineId : ''],
+      factoryId: [entity && entity.factoryId ? entity.factoryId : '', Validators.required],
+      workshopId: [entity && entity.workshopId ? entity.workshopId : ''],
+      productionLineId: [entity && entity.productionLineId ? entity.productionLineId : ''],
       orderNo: [entity && entity.orderNo ? entity.orderNo : this.entitiesTableConfig.componentsData.availableOrderNo, Validators.required],
       contractNo: [entity ? entity.contractNo : ''],
       refOrderNo: [entity ? entity.refOrderNo : ''],
       takeTime: [entity && entity.takeTime ? new Date(entity.takeTime) : null],
       customerOrderNo: [entity ? entity.customerOrderNo : ''],
       customer: [entity ? entity.customer : ''],
+      completeness: [entity ? entity.completeness : 0],
       type: [entity ? entity.type : ''],
       bizPractice: [entity ? entity.bizPractice : ''],
       currency: [entity ? entity.currency : ''],
@@ -81,27 +82,32 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       shortShipment: [entity ? entity.shortShipment : ''],
       overShipment: [entity ? entity.overShipment : ''],
       intendedTime: [entity && entity.intendedTime ? new Date(entity.intendedTime) : null],
-      standardTimeCosting: [entity ? entity.standardTimeCosting : ''],
+      standardAvailableTime: [entity ? entity.standardAvailableTime : ''],
       comment: [entity ? entity.comment : ''],
       planDevices: this.fb.array(orderDeviceControls)
-    }); 
-    form.get('factoryId').valueChanges.subscribe(newFactoryId => {
-      form.get('workshopId').setValue('');
-      this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === newFactoryId));
-      this.orderDeviceFormArray().clear();
-      form.updateValueAndValidity();
-    });
-    form.get('workshopId').valueChanges.subscribe(newWorkshopId => {
-      form.get('productionLineId').setValue('');
-      this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === newWorkshopId));
-      this.orderDeviceFormArray().clear();
-      form.updateValueAndValidity();
-    });
-    form.get('productionLineId').valueChanges.subscribe(() => {
-      this.orderDeviceFormArray().clear();
-      form.updateValueAndValidity();
     });
     return form;
+  }
+
+  onFactoryChange() {
+    this.entityForm.get('workshopId').setValue('');
+    this.entityForm.get('productionLineId').setValue('');
+    this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === this.entityForm.get('factoryId').value));
+    this.prodLineList = [];
+    this.orderDeviceFormArray().clear();
+    this.entityForm.updateValueAndValidity();
+  }
+
+  onWorkshopChange() {
+    this.entityForm.get('productionLineId').setValue('');
+    this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === this.entityForm.get('workshopId').value));
+    this.orderDeviceFormArray().clear();
+    this.entityForm.updateValueAndValidity();
+  }
+
+  onProductionLineChange() {
+    this.orderDeviceFormArray().clear();
+    this.entityForm.updateValueAndValidity();
   }
 
   orderDeviceFormArray(): FormArray {
@@ -116,18 +122,30 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       intendedStartTime: [planDevices ? planDevices.intendedStartTime : ''],
       intendedEndTime: [planDevices ? planDevices.intendedEndTime : ''],
       actualStartTime: [planDevices ? planDevices.actualStartTime : ''],
-      actualEndTime: [planDevices ? planDevices.actualEndTime : '']
+      actualEndTime: [planDevices ? planDevices.actualEndTime : ''],
+      capacities: [planDevices ? planDevices.capacities : 0]
     });
   }
 
   updateForm(entity: OrderForm) {
-    this.entityForm.patchValue(entity);
-    const { takeTime, intendedTime } = this.entityForm.value
+    const { takeTime, intendedTime, factoryId, workshopId, productionLineId } = entity || {};
+    this.entityForm.patchValue({
+      ...(entity || {}),
+      factoryId: factoryId || '',
+      workshopId: workshopId || '',
+      productionLineId: productionLineId || ''
+    });
     if (takeTime) {
       this.entityForm.get('takeTime').patchValue(new Date(takeTime));
     }
     if (intendedTime) {
       this.entityForm.get('intendedTime').patchValue(new Date(intendedTime));
+    }
+    if (factoryId) {
+      this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === factoryId));
+    }
+    if (workshopId) {
+      this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === workshopId));
     }
     const orderDeviceControls: Array<AbstractControl> = [];
     if (entity && entity.planDevices && entity.planDevices.length > 0) {
@@ -159,7 +177,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     event.preventDefault();
     event.stopPropagation();
     const { factoryId, workshopId, productionLineId } = this.entityForm.value;
-    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId }).subscribe(res => {
+    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,
         panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
@@ -168,7 +186,6 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
           existDeviceIds: this.existDeviceIds()
         }
       }).afterClosed().subscribe(res => {
-        console.log(res)
         if (res) {
           this.orderDeviceFormArray().push(this.createOrderDeviceControl(res));
           this.cd.markForCheck();
@@ -184,7 +201,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     if (index < 0) return;
     const target = this.orderDeviceFormArray().controls[index];
     const { factoryId, workshopId, productionLineId } = this.entityForm.value;
-    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId }).subscribe(res => {
+    this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,
         panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],

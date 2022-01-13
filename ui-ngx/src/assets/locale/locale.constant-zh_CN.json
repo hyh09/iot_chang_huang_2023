@@ -973,6 +973,7 @@
     "home-dashboard-hide-toolbar": "隐藏首页仪表板工具栏",
     "horizontal-margin": "水平边距",
     "horizontal-margin-required": "需要水平边距值。",
+    "image": "仪表板图片",
     "import": "导入仪表板",
     "import-widget": "导入部件",
     "invalid-aliases-config": "无法找到与某些别名筛选器匹配的任何设备。<br/>请联系您的管理员以解决此问题。",
@@ -999,7 +1000,10 @@
     "min-margin-message": "最小边距值只允许为0。",
     "min-mobile-row-height-message": "移动端行高距至少5px。",
     "min-vertical-margin-message": "只允许0作为最小垂直边距值。",
+    "mobile-app-settings": "移动端设置",
+    "mobile-hide": "在移动端隐藏仪表板",
     "mobile-layout": "移动端布局设置",
+    "mobile-order": "仪表板在移动端的顺序",
     "mobile-row-height": "移动端行高距（px）",
     "mobile-row-height-required": "移动端行高距必填",
     "new-dashboard-title": "新仪表板标题",
@@ -3535,6 +3539,12 @@
     "capacities": "完成产量",
     "completeness": "完成度 (%)",
     "completeness-with-value": "完成度：{{completeness}}%",
-    "order-potency": "订单效能"
+    "order-potency": "订单效能",
+    "create-order": "创建订单",
+    "import-order": "导入订单",
+    "order-excel": "订单excel",
+    "download-template": "下载模板",
+    "drop-order": "拖拽excel文件或单击以选择要导入的excel文件。",
+    "import-template-name": "订单导入模板.xlsx"
   }
 }

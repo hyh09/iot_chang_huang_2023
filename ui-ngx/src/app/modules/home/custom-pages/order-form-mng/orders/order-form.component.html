@@ -8,7 +8,8 @@
         <div fxLayout="row" fxLayoutGap="10px">
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>device-mng.factory</mat-label>
-            <mat-select formControlName="factoryId" required>
+            <mat-select formControlName="factoryId" required (selectionChange)="onFactoryChange()">
+              <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
               <mat-option *ngFor="let factory of factoryList" [value]="factory.id">{{ factory.name }}</mat-option>
             </mat-select>
             <mat-error *ngIf="entityForm.get('factoryId').hasError('required')">
@@ -17,14 +18,14 @@
           </mat-form-field>
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>device-mng.work-shop</mat-label>
-            <mat-select formControlName="workshopId" [disabled]="!isEdit || !entityForm.get('factoryId').value">
+            <mat-select formControlName="workshopId" (selectionChange)="onWorkshopChange()">
               <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
               <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>device-mng.prod-line</mat-label>
-            <mat-select formControlName="productionLineId" [disabled]="!isEdit || !entityForm.get('workshopId').value">
+            <mat-select formControlName="productionLineId" (selectionChange)="onProductionLineChange()">
               <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
               <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
             </mat-select>
@@ -167,7 +168,7 @@
           </mat-form-field>
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>order.standard-time-costing</mat-label>
-            <input type="text" matInput formControlName="standardTimeCosting" />
+            <input type="text" matInput formControlName="standardAvailableTime" />
           </mat-form-field>
         </div>
         <mat-form-field fxFlex class="mat-block">
@@ -175,12 +176,12 @@
           <textarea matInput formControlName="comment"></textarea>
         </mat-form-field>
       </mat-expansion-panel>
-      <mat-expansion-panel [fxShow]="entityForm.get('factoryId').value" [expanded]="prodPlanExpanded">
+      <mat-expansion-panel [fxShow]="!!entityForm.get('factoryId').value" [expanded]="prodPlanExpanded">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ (isCapacity ? 'order.order-potency' : 'order.production-plan') | translate }}</mat-panel-title>
           <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
             <span *ngIf="isCapacity">
-              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.value.completeness || 0} }}
+              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.get('completeness').value || 0} }}
             </span>
             <mat-icon
               *ngIf="!isCapacity && !(isLoading$ | async) && isEdit && prodPlanExpanded"

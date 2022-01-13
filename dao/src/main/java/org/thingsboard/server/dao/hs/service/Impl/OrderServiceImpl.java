@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
@@ -40,7 +41,6 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -76,6 +76,82 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     @Transactional
     public void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
+        var workbook = new XSSFWorkbook(file.getInputStream());
+        var sheet = workbook.getSheet("orders");
+        if (sheet == null)
+            sheet = workbook.getSheetAt(0);
+
+        final var finalSheet = sheet;
+        var orders = IntStream.iterate(1, k -> k + 1).limit(finalSheet.getLastRowNum() - 1).mapToObj(rowNum -> {
+            var row = finalSheet.getRow(rowNum);
+            var orderExcelBO = new OrderExcelBO();
+            orderExcelBO.setRowNum(rowNum);
+            var factoryName = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(0)))
+                    .orElseThrow(() -> new RuntimeException("工厂名称不能为空！ row:" + rowNum));
+            orderExcelBO.setFactoryName(factoryName);
+            orderExcelBO.setWorkshopName(CommonUtil.getCellStringVal(row.getCell(1)));
+            orderExcelBO.setProductionLineName(CommonUtil.getCellStringVal(row.getCell(2)));
+            var orderNo = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(3)))
+                    .orElseThrow(() -> new RuntimeException("订单号不能为空！ row:" + rowNum));
+            orderExcelBO.setOrderNo(orderNo);
+            orderExcelBO.setContractNo(CommonUtil.getCellStringVal(row.getCell(4)));
+            orderExcelBO.setRefOrderNo(CommonUtil.getCellStringVal(row.getCell(5)));
+            orderExcelBO.setTakeTime(CommonUtil.getCellDateVal(row.getCell(6)));
+            orderExcelBO.setCustomerOrderNo(CommonUtil.getCellStringVal(row.getCell(7)));
+            orderExcelBO.setCustomer(CommonUtil.getCellStringVal(row.getCell(8)));
+            orderExcelBO.setType(CommonUtil.getCellStringVal(row.getCell(9)));
+            orderExcelBO.setBizPractice(CommonUtil.getCellStringVal(row.getCell(10)));
+            orderExcelBO.setCurrency(CommonUtil.getCellStringVal(row.getCell(11)));
+            orderExcelBO.setExchangeRate(CommonUtil.getCellStringVal(row.getCell(12)));
+            orderExcelBO.setTaxRate(CommonUtil.getCellStringVal(row.getCell(13)));
+            orderExcelBO.setTaxes(CommonUtil.getCellStringVal(row.getCell(14)));
+            var total = Optional.ofNullable(CommonUtil.getCellDecimalVal(row.getCell(15)))
+                    .orElseThrow(() -> new RuntimeException("总数量不能为空！ row:" + rowNum));
+            if (total.compareTo(BigDecimal.ZERO) < 0)
+                throw new RuntimeException("总数量最小为0.00！ row:" + rowNum);
+            orderExcelBO.setTotal(total);
+            orderExcelBO.setTotalAmount(CommonUtil.getCellDecimalVal(row.getCell(16)));
+            orderExcelBO.setUnit(CommonUtil.getCellStringVal(row.getCell(17)));
+            orderExcelBO.setUnitPriceType(CommonUtil.getCellStringVal(row.getCell(18)));
+            orderExcelBO.setAdditionalAmount(CommonUtil.getCellDecimalVal(row.getCell(19)));
+            orderExcelBO.setPaymentMethod(CommonUtil.getCellStringVal(row.getCell(20)));
+            orderExcelBO.setEmergencyDegree(CommonUtil.getCellStringVal(row.getCell(21)));
+            orderExcelBO.setTechnologicalRequirements(CommonUtil.getCellStringVal(row.getCell(22)));
+            orderExcelBO.setSeason(CommonUtil.getCellStringVal(row.getCell(23)));
+            orderExcelBO.setNum(CommonUtil.getCellDecimalVal(row.getCell(24)));
+            orderExcelBO.setMerchandiser(CommonUtil.getCellStringVal(row.getCell(25)));
+            orderExcelBO.setSalesman(CommonUtil.getCellStringVal(row.getCell(26)));
+            orderExcelBO.setShortShipment(CommonUtil.getCellStringVal(row.getCell(27)));
+            orderExcelBO.setOverShipment(CommonUtil.getCellStringVal(row.getCell(28)));
+            orderExcelBO.setIntendedTime(CommonUtil.getCellDateVal(row.getCell(29)));
+            orderExcelBO.setStandardAvailableTime(CommonUtil.getCellDecimalVal(row.getCell(30)));
+            orderExcelBO.setComment(CommonUtil.getCellStringVal(row.getCell(31)));
+            return orderExcelBO;
+        }).map(orderExcelBO -> CompletableFuture.supplyAsync(() -> {
+            var result = (OrderExcelBO) SerializationUtils.clone(orderExcelBO);
+            var factory = this.clientService.getFirstFactoryByFactoryName(tenantId, orderExcelBO.getFactoryName());
+            Workshop workshop = null;
+            ProductionLine productionLine = null;
+            if (factory != null) {
+                workshop = this.clientService.getFirstWorkshopByFactoryIdAndWorkshopName(tenantId, factory.getId(), orderExcelBO.getWorkshopName());
+                orderExcelBO.setFactoryId(factory.getId().toString());
+            }
+            if (workshop != null) {
+                orderExcelBO.setWorkshopId(workshop.getId().toString());
+                productionLine = this.clientService.getFirstProductionLineByWorkshopIdAndProductionLineName(tenantId, workshop.getId(), orderExcelBO.getProductionLineName());
+            }
+            if (productionLine != null)
+                orderExcelBO.setProductionLineId(productionLine.getId().toString());
+            return result;
+        })).map(CompletableFuture::join).map(orderExcelBO -> {
+            if (StringUtils.isBlank(orderExcelBO.getFactoryId()))
+                throw new RuntimeException("无法匹配工厂！ row:" + orderExcelBO.getRowNum());
+            Order order = new Order();
+            BeanUtils.copyProperties(orderExcelBO, order);
+            order.setTenantId(tenantId.toString());
+            return order;
+        }).map(OrderEntity::new).collect(Collectors.toList());
+        this.orderRepository.saveAll(orders);
     }
 
     /**
@@ -83,7 +159,39 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public XSSFWorkbook createTemplate() throws IOException {
-        return null;
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("orders");
+        sheet.setDefaultColumnWidth(15);
+
+        var stringCellStyle = workbook.createCellStyle();
+        stringCellStyle.setAlignment(HorizontalAlignment.CENTER);
+
+        var dateTimeCellStyle = workbook.createCellStyle();
+        dateTimeCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("yyyy-MM-dd HH:mm:ss"));
+
+        var numberCellStyle = workbook.createCellStyle();
+        numberCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("#,##0.00"));
+
+        var currencyCellStyle = workbook.createCellStyle();
+        currencyCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("￥#,##0.00"));
+
+        sheet.setDefaultColumnStyle(6, dateTimeCellStyle); // 接单日期
+        sheet.setDefaultColumnStyle(15, numberCellStyle);  // 总数量
+        sheet.setDefaultColumnStyle(16, currencyCellStyle); // 总金额
+        sheet.setDefaultColumnStyle(19, currencyCellStyle); //  附加金额
+        sheet.setDefaultColumnStyle(24, numberCellStyle);  // 数量
+        sheet.setDefaultColumnStyle(29, dateTimeCellStyle); // 计划完工日期
+        sheet.setDefaultColumnStyle(30, numberCellStyle); // 订单标准用时
+
+        var row = sheet.createRow(0);
+        row.setRowStyle(stringCellStyle);
+
+        var names = List.of("*工厂", "车间", "产线", "*订单号", "合同号", "参考订单号", "接单日期", "客户订单号", "客户", "订单类型", "经营方式",
+                "币种", "汇率", "税率", "税种", "*总数量", "总金额", "单位", "单价类型", "附加金额", "付款方式", "紧急程度",
+                "工艺要求", "季节", "数量", "跟单员", "销售员", "短装(%)", "溢装%", "计划完工日期", "订单标准用时(小时)", "备注");
+        IntStream.iterate(0, k -> k + 1).limit(names.size()).boxed()
+                .forEach(v -> row.createCell(v).setCellValue(names.get(v)));
+        return workbook;
     }
 
     /**
@@ -108,6 +216,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         if (factories.isEmpty())
             return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
+        List<SortOrder> sortOrders = Lists.newArrayList(pageLink.getSortOrder());
+        if (!pageLink.getSortOrder().getProperty().equals("orderNo"))
+            sortOrders.add(new SortOrder("orderNo", SortOrder.Direction.DESC));
         var temp = DaoUtil.toPageData(this.orderRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
@@ -118,8 +229,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
 
             var in = cb.in(root.<UUID>get("factoryId"));
             factories.forEach(v -> in.value(v.getId()));
+            predicates.add(in);
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
-        }, DaoUtil.toPageable(pageLink)));
+        }, DaoUtil.toPageable(pageLink, sortOrders)));
 
         return CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(temp.getData().stream().map(Order::getFactoryId)
                 .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
@@ -128,9 +240,11 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                         .orderNo(e.getOrderNo())
                         .id(e.getId())
                         .createdTime(e.getCreatedTime())
-                        .creator(Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
+                        .creator(
+                                Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
                         .emergencyDegree(e.getEmergencyDegree())
-                        .factoryName(Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
+                        .factoryName(
+                                Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
                         .intendedTime(e.getIntendedTime())
                         .merchandiser(e.getMerchandiser())
                         .salesman(e.getSalesman())
@@ -150,6 +264,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     public OrderVO getOrderDetail(TenantId tenantId, UUID orderId) throws ThingsboardException {
         OrderVO orderVO = new OrderVO();
+        orderVO.setPlanDevices(Lists.newArrayList());
         var order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).map(OrderEntity::toData).orElseThrow(() -> new ThingsboardException("订单不存在！", ThingsboardErrorCode.GENERAL));
         BeanUtils.copyProperties(order, orderVO);
 
@@ -318,8 +433,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             if (!factoryIds.isEmpty()) {
                 var in = cb.in(root.<UUID>get("factoryId"));
                 factoryIds.forEach(in::value);
+                predicates.add(in);
             }
-            query.orderBy(cb.desc(root.get("createdTime")));
+            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("orderNo")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         }))).thenApplyAsync(orders -> CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(orders.stream().map(Order::getFactoryId)
                 .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
