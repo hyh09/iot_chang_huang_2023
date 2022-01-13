@@ -28,37 +28,37 @@
           [fxShow]="!isEdit && dashboardScope === 'tenant'">
     {{'dashboard.export' | translate }}
   </button>
-  <button mat-raised-button color="primary"
+  <!-- <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'makePublic')"
           [fxShow]="!isEdit && dashboardScope === 'tenant' && !isPublic(entity)">
     {{'dashboard.make-public' | translate }}
-  </button>
-  <button mat-raised-button color="primary"
+  </button> -->
+  <!-- <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'makePrivate')"
           [fxShow]="!isEdit && (dashboardScope === 'tenant' && isPublic(entity)
                                 || dashboardScope === 'customer' && isCurrentPublicCustomer(entity))">
     {{'dashboard.make-private' | translate }}
-  </button>
-  <button mat-raised-button color="primary"
+  </button> -->
+  <!-- <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'manageAssignedCustomers')"
           [fxShow]="!isEdit && dashboardScope === 'tenant'">
     {{'dashboard.manage-assigned-customers' | translate }}
-  </button>
-  <button mat-raised-button color="primary"
+  </button> -->
+  <!-- <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'unassignFromCustomer')"
           [fxShow]="!isEdit && dashboardScope === 'customer' && !isCurrentPublicCustomer(entity)">
     {{ 'dashboard.unassign-from-customer' | translate }}
-  </button>
-  <button mat-raised-button color="primary"
+  </button> -->
+  <!-- <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'unassignFromEdge')"
           [fxShow]="!isEdit && dashboardScope === 'edge'">
     {{ 'edge.unassign-from-edge' | translate }}
-  </button>
+  </button> -->
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'delete')"
@@ -111,7 +111,7 @@
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
       </div>
-      <div style="padding-bottom: 16px;" translate>dashboard.mobile-app-settings</div>
+      <!-- <div style="padding-bottom: 16px;" translate>dashboard.mobile-app-settings</div>
       <tb-image-input fxFlex
                       label="{{'dashboard.image' | translate}}"
                       maxSizeByte="524288"
@@ -123,7 +123,7 @@
       <mat-form-field class="mat-block">
         <mat-label translate>dashboard.mobile-order</mat-label>
         <input matInput formControlName="mobileOrder" type="number" step="1">
-      </mat-form-field>
+      </mat-form-field> -->
     </fieldset>
   </form>
 </div>
