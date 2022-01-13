@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig, HeaderActionDescriptor } from "@app/modules/home/models/entity/entities-table-config.models";
+import { BaseData, EntityType, entityTypeResources, entityTypeTranslations, HasId } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { deepClone, UtilsService } from '@app/core/public-api';
@@ -10,6 +10,10 @@ import { OrderFormComponent } from './order-form.component';
 import { OrdersFiltersComponent } from './orders-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
 import { map } from "rxjs/operators";
+import { MatDialog } from "@angular/material/dialog";
+import { AddEntityDialogComponent } from "@app/modules/home/components/entity/add-entity-dialog.component";
+import { AddEntityDialogData } from "@app/modules/home/models/entity/entity-component.models";
+import { ImportOrderDialogComponent } from "./import-order-dialog.component";
 
 @Injectable()
 export class OrderTableConfigResolver implements Resolve<EntityTableConfig<OrderForm>> {
@@ -20,13 +24,16 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     private translate: TranslateService,
     private datePipe: DatePipe,
     private utils: UtilsService,
-    private orderFormService: OrderFormService
+    private orderFormService: OrderFormService,
+    private dialog: MatDialog
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
     this.config.entityComponent = OrderFormComponent;
     this.config.filterComponent = OrdersFiltersComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER_FORM);
     this.config.entityResources = entityTypeResources.get(EntityType.ORDER_FORM);
+
+    this.config.addDialogStyle = { width: '960px' };
 
     this.config.componentsData = {
       orderNo: '',
@@ -64,6 +71,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.tableTitle = this.translate.instant('order.orders');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.addActionDescriptors = this.configureAddActions();
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('order.add-order');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
@@ -89,6 +97,50 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     }
 
     return this.config;
+  }
+
+  configureAddActions(): Array<HeaderActionDescriptor> {
+    const actions: Array<HeaderActionDescriptor> = [];
+    actions.push(
+      {
+        name: this.translate.instant('order.create-order'),
+        icon: 'insert_drive_file',
+        isEnabled: () => true,
+        onAction: () => this.createOrder()
+      },
+      {
+        name: this.translate.instant('order.import-order'),
+        icon: 'file_upload',
+        isEnabled: () => true,
+        onAction: () => this.importOrders()
+      }
+    );
+    return actions;
+  }
+
+  createOrder() {
+    this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>, BaseData<HasId>>(AddEntityDialogComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: {
+        entitiesTableConfig: this.config
+      }
+    }).afterClosed().subscribe(res => {
+      if (res) {
+        this.config.table.updateData();
+      }
+    });
+  }
+
+  importOrders() {
+    this.dialog.open<ImportOrderDialogComponent, void, string>(ImportOrderDialogComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+    }).afterClosed().subscribe(res => {
+      if (res) {
+        this.config.table.updateData();
+      }
+    });
   }
 
   setAvailableOrderNo(): void {

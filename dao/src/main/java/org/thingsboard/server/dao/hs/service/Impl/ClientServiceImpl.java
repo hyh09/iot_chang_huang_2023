@@ -556,12 +556,13 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             log.info("查询设备指定时间段产能：" + dataMap);
             var deviceCapacities = plans.stream().map(v -> OrderDeviceCapacityBO.builder()
                     .planId(toUUID(v.getId()))
-                    .capacities(Optional.ofNullable(dataMap.get(CommonUtil.toUUIDNullable(v.getId()))).map(e -> BigDecimal.valueOf(Double.parseDouble(e))).orElse(BigDecimal.ZERO))
+                    .enabled(v.getEnabled())
+                    .capacities(Optional.ofNullable(dataMap.get(CommonUtil.toUUIDNullable(v.getId()))).map(BigDecimal::new).orElse(BigDecimal.ZERO))
                     .build()).collect(Collectors.toList());
             return OrderCapacityBO.builder()
                     .orderId(orderId)
                     .deviceCapacities(deviceCapacities)
-                    .capacities(deviceCapacities.stream().reduce(BigDecimal.ZERO, (r, e) -> r.add(e.getCapacities()), (a, b) -> null))
+                    .capacities(deviceCapacities.stream().filter(OrderDeviceCapacityBO::getEnabled).map(OrderDeviceCapacityBO::getCapacities).reduce(BigDecimal.ZERO, BigDecimal::add))
                     .build();
         }
     }
@@ -578,7 +579,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             return Maps.newHashMap();
         } else {
             var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList())).entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> BigDecimal.valueOf(Double.parseDouble(v.getValue()))));
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new BigDecimal(v.getValue())));
             log.info("查询设备指定时间段产能：" + dataMap);
             return dataMap;
         }
