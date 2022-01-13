@@ -764,10 +764,13 @@ export class EntityService {
         break;
       case EntityType.FACTORY:
         entityFieldKeys.push(...this.factoryEntityProps);
+        break;
       case EntityType.WORKSHOP:
         entityFieldKeys.push(...this.workshopEntityProps);
+        break;
       case EntityType.PRODUCTION_LINE:
         entityFieldKeys.push(...this.prodLineEntityProps);
+        break;
       case EntityType.EDGE:
       case EntityType.ASSET:
         entityFieldKeys.push(entityFields.name.keyName);
