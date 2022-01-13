@@ -31,4 +31,9 @@ public class OrderDeviceCapacityBO {
      * 设备计划Id
      */
     private UUID planId;
+
+    /**
+     * 是否参与产能计算
+     */
+    private Boolean enabled;
 }

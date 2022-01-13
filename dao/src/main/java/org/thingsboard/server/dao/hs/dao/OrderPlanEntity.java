@@ -60,6 +60,7 @@ public class OrderPlanEntity extends BasePgEntity<OrderPlanEntity> implements To
     }
 
     public OrderPlanEntity(OrderPlan common) {
+        this.id = CommonUtil.toUUIDNullable(common.getId());
         this.tenantId = CommonUtil.toUUIDNullable(common.getTenantId());
         this.deviceId = CommonUtil.toUUIDNullable(common.getDeviceId());
         this.orderId = CommonUtil.toUUIDNullable(common.getOrderId());

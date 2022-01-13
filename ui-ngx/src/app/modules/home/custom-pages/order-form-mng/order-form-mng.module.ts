@@ -6,6 +6,7 @@ import { OrderFormRoutingModule } from './order-form-mng-routing.module';
 import { OrderFormComponent } from './orders/order-form.component';
 import { OrdersFiltersComponent } from './orders/orders-filters.component';
 import { OrderDeviceFormComponent } from './orders/order-device-form.component';
+import { ImportOrderDialogComponent } from './orders/import-order-dialog.component';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import { OrderDeviceFormComponent } from './orders/order-device-form.component';
   declarations: [
     OrderFormComponent,
     OrdersFiltersComponent,
-    OrderDeviceFormComponent
+    OrderDeviceFormComponent,
+    ImportOrderDialogComponent
   ]
 })
 export class OrderFormModule { }
