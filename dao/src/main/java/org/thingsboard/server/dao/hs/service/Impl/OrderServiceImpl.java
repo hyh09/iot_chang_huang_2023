@@ -265,6 +265,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     public OrderVO getOrderDetail(TenantId tenantId, UUID orderId) throws ThingsboardException {
         OrderVO orderVO = new OrderVO();
+        orderVO.setPlanDevices(Lists.newArrayList());
         var order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).map(OrderEntity::toData).orElseThrow(() -> new ThingsboardException("订单不存在！", ThingsboardErrorCode.GENERAL));
         BeanUtils.copyProperties(order, orderVO);
 
