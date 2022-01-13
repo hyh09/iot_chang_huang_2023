@@ -41,7 +41,6 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
