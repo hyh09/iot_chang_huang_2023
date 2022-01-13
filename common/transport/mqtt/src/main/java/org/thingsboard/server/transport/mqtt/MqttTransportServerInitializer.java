@@ -21,10 +21,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.ssl.SslHandler;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Andrew Shvayka
  */
+@Slf4j
 public class MqttTransportServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private final MqttTransportContext context;
@@ -49,7 +51,7 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
 
         handler = new MqttTransportHandler(context, sslHandler);
-
+        log.info("MqttTransportHandler被初始化："+handler.toString());
         pipeline.addLast(handler);
         ch.closeFuture().addListener(handler);
     }
