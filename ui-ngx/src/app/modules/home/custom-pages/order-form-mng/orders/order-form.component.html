@@ -8,7 +8,7 @@
         <div fxLayout="row" fxLayoutGap="10px">
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>device-mng.factory</mat-label>
-            <mat-select formControlName="factoryId" required>
+            <mat-select formControlName="factoryId" required (selectionChange)="onFactoryChange()">
               <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
               <mat-option *ngFor="let factory of factoryList" [value]="factory.id">{{ factory.name }}</mat-option>
             </mat-select>
@@ -18,14 +18,14 @@
           </mat-form-field>
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>device-mng.work-shop</mat-label>
-            <mat-select formControlName="workshopId">
+            <mat-select formControlName="workshopId" (selectionChange)="onWorkshopChange()">
               <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
               <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>device-mng.prod-line</mat-label>
-            <mat-select formControlName="productionLineId">
+            <mat-select formControlName="productionLineId" (selectionChange)="onProductionLineChange()">
               <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
               <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
             </mat-select>
