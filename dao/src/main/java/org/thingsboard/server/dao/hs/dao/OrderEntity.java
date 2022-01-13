@@ -172,6 +172,7 @@ public class OrderEntity extends BasePgEntity<OrderEntity> implements ToData<Ord
         this.comment = common.getComment();
         this.intendedTime = common.getIntendedTime();
         this.standardAvailableTime = common.getStandardAvailableTime();
+        this.additionalAmount = common.getAdditionalAmount();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
