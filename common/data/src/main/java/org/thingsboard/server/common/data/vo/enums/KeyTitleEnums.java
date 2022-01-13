@@ -12,7 +12,7 @@ public enum KeyTitleEnums {
     key_cable("耗电量","3"),//电
 
 
-    key_capacity("总产能","0"),//总产能
+    key_capacity("总产量","0"),//总产能
 
     ;
 
