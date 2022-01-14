@@ -33,14 +33,14 @@ export class OrderCapacityTableConfigResolver implements Resolve<EntityTableConf
 
     this.config.columns.push(
       new EntityTableColumn<OrderCapacity>('orderNo', 'order.order-no', '50%'),
-      new EntityTableColumn<OrderCapacity>('factoryName', 'order.factory-name', '50%'),
+      new EntityTableColumn<OrderCapacity>('factoryName', 'order.factory-name', '50%', (entity) => (entity.factoryName || ''), () => ({}), false),
       new EntityTableColumn<OrderCapacity>('emergencyDegree', 'order.emergency-degree', '100px'),
       new EntityTableColumn<OrderCapacity>('totalAmount', 'order.total-amount', '80px'),
       new DateEntityTableColumn<OrderCapacity>('intendedTime', 'order.intended-complete-date', this.datePipe, '120px', 'yyyy-MM-dd'),
       new EntityTableColumn<OrderCapacity>('total', 'order.total-count', '80px'),
-      new EntityTableColumn<OrderCapacity>('capacities', 'order.capacities', '80px'),
-      new EntityTableColumn<OrderCapacity>('completeness', 'order.completeness', '80px'),
-      new EntityTableColumn<OrderCapacity>('creator', 'common.creator', '80px'),
+      new EntityTableColumn<OrderCapacity>('capacities', 'order.capacities', '80px', (entity) => ((entity.capacities || '') + ''), () => ({}), false),
+      new EntityTableColumn<OrderCapacity>('completeness', 'order.completeness', '80px', (entity) => ((entity.completeness || '') + ''), () => ({}), false),
+      new EntityTableColumn<OrderCapacity>('creator', 'common.creator', '80px', (entity) => (entity.creator || ''), () => ({}), false),
       new DateEntityTableColumn<OrderCapacity>('createdTime', 'common.created-time', this.datePipe, '120px')
     );
   }
