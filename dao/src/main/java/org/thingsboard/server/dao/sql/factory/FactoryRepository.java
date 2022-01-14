@@ -39,6 +39,7 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
 
     List<FactoryEntity> findAllByTenantIdOrderByCreatedTimeDesc(UUID tenantId);
 
+
     @Async
     @Query("select t from FactoryEntity t where " +
             "t.tenantId = :tenantId " +
@@ -48,8 +49,14 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
     @Async
     @Query("select t from FactoryEntity t where " +
             "t.tenantId = :tenantId " +
-            "AND t.name like CONCAT('%', :name, '%') ")
+            "AND t.name like CONCAT('%', :name, '%')")
     CompletableFuture<Page<FactoryEntity>> findAllByTenantIdAndNameLike(@Param("tenantId") UUID tenantId, @Param("name") String name, Pageable pageable);
+
+    @Async
+    @Query("select t from FactoryEntity t where " +
+            "t.tenantId = :tenantId " +
+            "AND t.name = :name ")
+    CompletableFuture<Page<FactoryEntity>> findAllByTenantIdAndName(@Param("tenantId") UUID tenantId, @Param("name") String name, Pageable pageable);
 
 //    @Query("SELECT org.thingsboard.server.dao.model.sql.FactoryInfoEntity(f,w,p) " +
 //            "FROM FactoryEntity f " +
