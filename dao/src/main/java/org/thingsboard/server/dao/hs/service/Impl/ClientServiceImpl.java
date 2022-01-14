@@ -550,7 +550,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
             log.info("查询设备指定时间段产能：" + "empty");
-            return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).build();
+            return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
         } else {
             var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList()));
             log.info("查询设备指定时间段产能：" + dataMap);
