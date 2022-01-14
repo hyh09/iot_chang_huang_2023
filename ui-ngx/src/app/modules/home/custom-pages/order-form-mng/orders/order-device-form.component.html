@@ -8,22 +8,9 @@
   </mat-toolbar>
   <div mat-dialog-content>
     <form [formGroup]="orderDeviceForm">
-      <!-- <mat-form-field class="mat-block">
-        <mat-label translate>device.device</mat-label>
-        <mat-select formControlName="deviceId" required>
-          <mat-option
-            *ngFor="let device of devices"
-            [value]="device.id"
-            [disabled]="device.id !== orderDeviceForm.get('deviceId').value && existDeviceIds.indexOf(device.id) > -1"
-          >{{ device.name }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="orderDeviceForm.get('deviceId').hasError('required')">
-          {{ 'device.device-required' | translate }}
-        </mat-error>
-      </mat-form-field> -->
       <div class="form-item">
         <mat-label translate required>device.device</mat-label>
-        <nz-select nzShowSearch nzAllowClear formControlName="deviceId">
+        <nz-select nzShowSearch formControlName="deviceId">
           <nz-option
             *ngFor="let device of devices"
             [nzLabel]="device.name"

@@ -137,7 +137,7 @@ export class FactoryMngService {
   // 自定义查询设备列表
   public getDevices(params: {
     name?: string; factoryId?: string; dictDeviceId?: string; workshopId?: string; productionLineId?: string;
-    factoryName?: string; workshopName?: string; productionLineName?: string
+    factoryName?: string; workshopName?: string; productionLineName?: string; filterGatewayFlag?: boolean
   }, config?: RequestConfig): Observable<ProdDevice[]> {
     let queryStr: string[] = [];
     if (params) {

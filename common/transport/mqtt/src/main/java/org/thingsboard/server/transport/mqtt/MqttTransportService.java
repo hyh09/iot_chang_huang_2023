@@ -22,6 +22,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +71,8 @@ public class MqttTransportService implements TbTransportService {
     private Channel sslServerChannel;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
-    private MqttTransportServerInitializer mqttTransportServerInitializer;
+    @Getter
+    private static MqttTransportServerInitializer mqttTransportServerInitializer;
     @PostConstruct
     public void init() throws Exception {
         log.info("Setting resource leak detector level to {}", leakDetectorLevel);
@@ -120,7 +122,4 @@ public class MqttTransportService implements TbTransportService {
         return DataConstants.MQTT_TRANSPORT_NAME;
     }
 
-    public MqttTransportServerInitializer getMqttTransportServerInitializer() {
-        return mqttTransportServerInitializer;
-    }
 }

@@ -169,15 +169,15 @@ export class AssetsTableConfigResolver implements Resolve<EntityTableConfig<Asse
       new EntityTableColumn<AssetInfo>('type', 'asset.asset-type', '25%'),
       new EntityTableColumn<DeviceInfo>('label', 'asset.label', '25%'),
     ];
-    if (assetScope === 'tenant') {
-      columns.push(
-        new EntityTableColumn<AssetInfo>('customerTitle', 'customer.customer', '25%'),
-        new EntityTableColumn<AssetInfo>('customerIsPublic', 'asset.public', '60px',
-          entity => {
-            return checkBoxCell(entity.customerIsPublic);
-          }, () => ({}), false),
-      );
-    }
+    // if (assetScope === 'tenant') {
+    //   columns.push(
+    //     new EntityTableColumn<AssetInfo>('customerTitle', 'customer.customer', '25%'),
+    //     new EntityTableColumn<AssetInfo>('customerIsPublic', 'asset.public', '60px',
+    //       entity => {
+    //         return checkBoxCell(entity.customerIsPublic);
+    //       }, () => ({}), false),
+    //   );
+    // }
     return columns;
   }
 
@@ -198,60 +198,60 @@ export class AssetsTableConfigResolver implements Resolve<EntityTableConfig<Asse
 
   configureCellActions(assetScope: string): Array<CellActionDescriptor<AssetInfo>> {
     const actions: Array<CellActionDescriptor<AssetInfo>> = [];
-    if (assetScope === 'tenant') {
-      actions.push(
-        {
-          name: this.translate.instant('asset.make-public'),
-          icon: 'share',
-          isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
-          onAction: ($event, entity) => this.makePublic($event, entity)
-        },
-        {
-          name: this.translate.instant('asset.assign-to-customer'),
-          icon: 'assignment_ind',
-          isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
-          onAction: ($event, entity) => this.assignToCustomer($event, [entity.id])
-        },
-        {
-          name: this.translate.instant('asset.unassign-from-customer'),
-          icon: 'assignment_return',
-          isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
-          onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
-        },
-        {
-          name: this.translate.instant('asset.make-private'),
-          icon: 'reply',
-          isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && entity.customerIsPublic),
-          onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
-        }
-      );
-    }
-    if (assetScope === 'customer') {
-      actions.push(
-        {
-          name: this.translate.instant('asset.unassign-from-customer'),
-          icon: 'assignment_return',
-          isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
-          onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
-        },
-        {
-          name: this.translate.instant('asset.make-private'),
-          icon: 'reply',
-          isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && entity.customerIsPublic),
-          onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
-        }
-      );
-    }
-    if (assetScope === 'edge') {
-      actions.push(
-        {
-          name: this.translate.instant('edge.unassign-from-edge'),
-          icon: 'assignment_return',
-          isEnabled: (entity) => true,
-          onAction: ($event, entity) => this.unassignFromEdge($event, entity)
-        }
-      );
-    }
+    // if (assetScope === 'tenant') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('asset.make-public'),
+    //       icon: 'share',
+    //       isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
+    //       onAction: ($event, entity) => this.makePublic($event, entity)
+    //     },
+    //     {
+    //       name: this.translate.instant('asset.assign-to-customer'),
+    //       icon: 'assignment_ind',
+    //       isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
+    //       onAction: ($event, entity) => this.assignToCustomer($event, [entity.id])
+    //     },
+    //     {
+    //       name: this.translate.instant('asset.unassign-from-customer'),
+    //       icon: 'assignment_return',
+    //       isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
+    //       onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
+    //     },
+    //     {
+    //       name: this.translate.instant('asset.make-private'),
+    //       icon: 'reply',
+    //       isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && entity.customerIsPublic),
+    //       onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
+    //     }
+    //   );
+    // }
+    // if (assetScope === 'customer') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('asset.unassign-from-customer'),
+    //       icon: 'assignment_return',
+    //       isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
+    //       onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
+    //     },
+    //     {
+    //       name: this.translate.instant('asset.make-private'),
+    //       icon: 'reply',
+    //       isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && entity.customerIsPublic),
+    //       onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
+    //     }
+    //   );
+    // }
+    // if (assetScope === 'edge') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('edge.unassign-from-edge'),
+    //       icon: 'assignment_return',
+    //       isEnabled: (entity) => true,
+    //       onAction: ($event, entity) => this.unassignFromEdge($event, entity)
+    //     }
+    //   );
+    // }
     return actions;
   }
 

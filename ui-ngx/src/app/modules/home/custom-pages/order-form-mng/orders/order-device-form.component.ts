@@ -74,7 +74,7 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
         actualEndTime: hasVal ? res[1] : null
       });
     });
-    this.orderDeviceForm.markAsDirty();
+    this.orderDeviceForm.get('deviceId').clearValidators();
   }
 
   cancel() {
