@@ -3,8 +3,8 @@ package org.thingsboard.server.dao.hs.entity.bo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.commons.compress.utils.Lists;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.UUID;
 @Data
 @Builder
 @Accessors(chain = true)
-@NoArgsConstructor
 @AllArgsConstructor
 public class OrderCapacityBO {
 
@@ -37,4 +36,9 @@ public class OrderCapacityBO {
      * 设备产量列表
      */
     private List<OrderDeviceCapacityBO> deviceCapacities;
+
+    public OrderCapacityBO() {
+        super();
+        deviceCapacities = Lists.newArrayList();
+    }
 }
