@@ -130,4 +130,7 @@ public class OrderExcelBO implements Serializable {
 
     @ApiModelProperty(value = "行数")
     private Integer rowNum;
+
+    @ApiModelProperty(value = "是否唯一")
+    private Boolean isUk;
 }
