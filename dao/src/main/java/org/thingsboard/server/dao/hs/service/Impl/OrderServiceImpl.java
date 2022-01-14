@@ -27,7 +27,10 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
-import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.dao.OrderEntity;
+import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
+import org.thingsboard.server.dao.hs.dao.OrderPlanRepository;
+import org.thingsboard.server.dao.hs.dao.OrderRepository;
 import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderExcelBO;
@@ -82,17 +85,17 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             sheet = workbook.getSheetAt(0);
 
         final var finalSheet = sheet;
-        var orders = IntStream.iterate(1, k -> k + 1).limit(finalSheet.getLastRowNum() - 1).mapToObj(rowNum -> {
+        var orders = IntStream.iterate(1, k -> k + 1).limit(finalSheet.getLastRowNum()).mapToObj(rowNum -> {
             var row = finalSheet.getRow(rowNum);
             var orderExcelBO = new OrderExcelBO();
             orderExcelBO.setRowNum(rowNum);
             var factoryName = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(0)))
-                    .orElseThrow(() -> new RuntimeException("工厂名称不能为空！ row:" + rowNum));
+                    .filter(StringUtils::isNotBlank).orElseThrow(() -> new RuntimeException("工厂名称不能为空！ row:" + rowNum));
             orderExcelBO.setFactoryName(factoryName);
             orderExcelBO.setWorkshopName(CommonUtil.getCellStringVal(row.getCell(1)));
             orderExcelBO.setProductionLineName(CommonUtil.getCellStringVal(row.getCell(2)));
             var orderNo = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(3)))
-                    .orElseThrow(() -> new RuntimeException("订单号不能为空！ row:" + rowNum));
+                    .filter(StringUtils::isNotBlank).orElseThrow(() -> new RuntimeException("订单号不能为空！ row:" + rowNum));
             orderExcelBO.setOrderNo(orderNo);
             orderExcelBO.setContractNo(CommonUtil.getCellStringVal(row.getCell(4)));
             orderExcelBO.setRefOrderNo(CommonUtil.getCellStringVal(row.getCell(5)));
@@ -134,14 +137,14 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             ProductionLine productionLine = null;
             if (factory != null) {
                 workshop = this.clientService.getFirstWorkshopByFactoryIdAndWorkshopName(tenantId, factory.getId(), orderExcelBO.getWorkshopName());
-                orderExcelBO.setFactoryId(factory.getId().toString());
+                result.setFactoryId(factory.getId().toString());
             }
             if (workshop != null) {
-                orderExcelBO.setWorkshopId(workshop.getId().toString());
+                result.setWorkshopId(workshop.getId().toString());
                 productionLine = this.clientService.getFirstProductionLineByWorkshopIdAndProductionLineName(tenantId, workshop.getId(), orderExcelBO.getProductionLineName());
             }
             if (productionLine != null)
-                orderExcelBO.setProductionLineId(productionLine.getId().toString());
+                result.setProductionLineId(productionLine.getId().toString());
             return result;
         })).map(CompletableFuture::join).map(orderExcelBO -> {
             if (StringUtils.isBlank(orderExcelBO.getFactoryId()))
@@ -264,7 +267,6 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     public OrderVO getOrderDetail(TenantId tenantId, UUID orderId) throws ThingsboardException {
         OrderVO orderVO = new OrderVO();
-        orderVO.setPlanDevices(Lists.newArrayList());
         var order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).map(OrderEntity::toData).orElseThrow(() -> new ThingsboardException("订单不存在！", ThingsboardErrorCode.GENERAL));
         BeanUtils.copyProperties(order, orderVO);
 
