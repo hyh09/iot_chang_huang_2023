@@ -165,7 +165,8 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             order.setTenantId(tenantId.toString());
             return order;
         }).map(OrderEntity::new).collect(Collectors.toList());
-        this.orderRepository.saveAll(orders);
+        orders.forEach(this.orderRepository::save);
+//        this.orderRepository.saveAll(orders);
     }
 
     /**
