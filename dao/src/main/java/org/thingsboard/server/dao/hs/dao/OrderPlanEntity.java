@@ -65,7 +65,7 @@ public class OrderPlanEntity extends BasePgEntity<OrderPlanEntity> implements To
         this.deviceId = CommonUtil.toUUIDNullable(common.getDeviceId());
         this.orderId = CommonUtil.toUUIDNullable(common.getOrderId());
         this.intendedEndTime = common.getIntendedEndTime();
-        this.intendedStartTime = common.getActualStartTime();
+        this.intendedStartTime = common.getIntendedStartTime();
         this.actualEndTime = common.getActualEndTime();
         this.actualStartTime = common.getActualStartTime();
         this.enabled = common.getEnabled();
