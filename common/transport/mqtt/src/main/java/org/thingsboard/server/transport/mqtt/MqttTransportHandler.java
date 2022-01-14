@@ -48,6 +48,7 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.TransportPayloadType;
 import org.thingsboard.server.common.data.device.profile.MqttTopics;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.OtaPackageId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.msg.EncryptionUtil;
@@ -334,7 +335,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         }
     }
 
-    public void dictIssue(String topic,String json){
+    public void dictIssue(String topic,String json) throws ThingsboardException {
         //设备字典下发
         deviceSessionCtx.getContext().getJsonMqttAdaptor().convertToPublish(deviceSessionCtx,topic,json).ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
     }
