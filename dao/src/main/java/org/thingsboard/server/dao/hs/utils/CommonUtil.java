@@ -63,7 +63,7 @@ public class CommonUtil {
      */
     public static BigDecimal getCellDecimalVal(Cell cell) {
         try {
-            return BigDecimal.valueOf(cell.getNumericCellValue()).setScale(2, RoundingMode.HALF_UP);
+            return BigDecimal.valueOf(cell.getNumericCellValue()).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
         } catch (Exception ignore) {
         }
         return null;
@@ -75,12 +75,14 @@ public class CommonUtil {
      * @param cell 单元格
      */
     public static String getCellStringVal(Cell cell) {
+        if (cell == null)
+            return StringUtils.EMPTY;
         switch (cell.getCellType()) {
             case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell))
                     return cell.getLocalDateTimeCellValue().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 else
-                    return BigDecimal.valueOf(cell.getNumericCellValue()).setScale(2, RoundingMode.HALF_UP).toPlainString();
+                    return BigDecimal.valueOf(cell.getNumericCellValue()).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
             case STRING:
                 return cell.getStringCellValue().trim();
             case BOOLEAN:
