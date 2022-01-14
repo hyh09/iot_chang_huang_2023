@@ -12,7 +12,6 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
 
