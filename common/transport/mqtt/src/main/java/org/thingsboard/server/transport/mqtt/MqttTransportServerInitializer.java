@@ -21,7 +21,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 import io.netty.handler.ssl.SslHandler;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.openjdk.jol.vm.VM;
 
 /**
  * @author Andrew Shvayka
@@ -31,7 +33,8 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
 
     private final MqttTransportContext context;
     private final boolean sslEnabled;
-    private MqttTransportHandler handler;
+    @Getter
+    private static MqttTransportHandler handler;
 
 
     public MqttTransportServerInitializer(MqttTransportContext context, boolean sslEnabled) {
@@ -51,13 +54,14 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
 
         handler = new MqttTransportHandler(context, sslHandler);
+        long l = VM.current().addressOf(handler);
+        log.info("handler初始化内存地址：" +VM.current().addressOf(handler));
         log.info("MqttTransportHandler被初始化："+handler.toString());
+        log.info("context"+handler.toString());
+        log.info("sslHandler"+handler.toString());
+
         pipeline.addLast(handler);
         ch.closeFuture().addListener(handler);
     }
 
-
-    public MqttTransportHandler getHandler() {
-        return handler;
-    }
 }

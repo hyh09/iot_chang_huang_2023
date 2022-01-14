@@ -28,6 +28,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.openjdk.jol.vm.VM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1083,6 +1084,8 @@ public class DeviceController extends BaseController {
     public String deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
         //获取Mqtt实例
         MqttTransportHandler handler = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+        log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
+        log.info("handler值：" + handler.toString());
 
         //下发入参
         Map mapIssue = new HashMap();
@@ -1139,9 +1142,13 @@ public class DeviceController extends BaseController {
                         String json = JSONObjectUtils.toJSONString(mapIssue);
                         //发布mqtt消息
                         if(handler != null){
+                            log.info("调用前：handler：" + handler.toString());
+                            log.info("调用前handler内存地址：" +VM.current().addressOf(handler));
                             handler.dictIssue(topic,json);
+                            log.info("调用后：handler：" + handler.toString());
+                            log.info("调用后handler内存地址：" +VM.current().addressOf(handler));
                         }else {
-                            throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！当前下发数据为："+json,ThingsboardErrorCode.FAIL_VIOLATION);
+                            throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！",ThingsboardErrorCode.FAIL_VIOLATION);
                         }
                     }
                 }
