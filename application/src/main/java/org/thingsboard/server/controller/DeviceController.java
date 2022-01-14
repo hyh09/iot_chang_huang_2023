@@ -73,6 +73,7 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
+import org.thingsboard.server.transport.mqtt.MqttTransportServerInitializer;
 import org.thingsboard.server.transport.mqtt.MqttTransportService;
 
 import javax.annotation.Nullable;
@@ -1083,7 +1084,9 @@ public class DeviceController extends BaseController {
     @ResponseBody
     public String deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
         //获取Mqtt实例
-        MqttTransportHandler handler = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+       // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+        MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
+
         log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
         log.info("handler值：" + handler.toString());
 
