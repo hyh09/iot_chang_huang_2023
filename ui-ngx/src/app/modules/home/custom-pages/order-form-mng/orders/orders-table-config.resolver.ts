@@ -49,11 +49,11 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
 
     this.config.columns.push(
       new EntityTableColumn<OrderForm>('orderNo', 'order.order-no', '50%'),
-      new EntityTableColumn<OrderForm>('factoryName', 'order.factory-name', '50%'),
+      new EntityTableColumn<OrderForm>('factoryName', 'order.factory-name', '50%', (entity) => (entity.factoryName), () => ({}), false),
       new EntityTableColumn<OrderForm>('emergencyDegree', 'order.emergency-degree', '100px'),
       new EntityTableColumn<OrderForm>('merchandiser', 'order.merchandiser', '100px'),
       new DateEntityTableColumn<OrderForm>('intendedTime', 'order.intended-complete-date', this.datePipe, '150px', 'yyyy-MM-dd'),
-      new EntityTableColumn<OrderForm>('creator', 'common.creator', '100px'),
+      new EntityTableColumn<OrderForm>('creator', 'common.creator', '100px', (entity) => (entity.creator), () => ({}), false),
       new DateEntityTableColumn<OrderForm>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }
