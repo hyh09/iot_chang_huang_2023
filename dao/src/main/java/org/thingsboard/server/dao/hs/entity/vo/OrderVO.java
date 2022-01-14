@@ -1,15 +1,15 @@
 package org.thingsboard.server.dao.hs.entity.vo;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
-import org.thingsboard.server.dao.hs.utils.DecimalSerializer;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import org.apache.commons.compress.utils.Lists;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -21,7 +21,6 @@ import java.util.List;
  */
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "订单")
 public class OrderVO {
@@ -146,4 +145,9 @@ public class OrderVO {
     @Valid
     @ApiModelProperty(value = "生产计划设备列表", required = true)
     private List<OrderPlanDeviceVO> planDevices;
+
+    public OrderVO () {
+        super();
+        planDevices = Lists.newArrayList();
+    }
 }
