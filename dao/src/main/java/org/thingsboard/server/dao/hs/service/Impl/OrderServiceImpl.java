@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.service.Impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationUtils;
@@ -75,27 +76,33 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      * @param checksum          校验和
      * @param checksumAlgorithm 校验和算法
      * @param file              文件
+     * @param userId            用户Id
      */
     @Override
     @Transactional
-    public void saveOrdersFromFile(TenantId tenantId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
+    public void saveOrdersFromFile(TenantId tenantId, UserId userId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
         var workbook = new XSSFWorkbook(file.getInputStream());
         var sheet = workbook.getSheet("orders");
         if (sheet == null)
             sheet = workbook.getSheetAt(0);
 
+        var factoryIds = this.clientService.listFactoriesByUserId(tenantId, userId).stream().map(Factory::getId).collect(Collectors.toSet());
+        Set<String> orderNos = Sets.newHashSet();
         final var finalSheet = sheet;
         var orders = IntStream.iterate(1, k -> k + 1).limit(finalSheet.getLastRowNum()).mapToObj(rowNum -> {
             var row = finalSheet.getRow(rowNum);
             var orderExcelBO = new OrderExcelBO();
             orderExcelBO.setRowNum(rowNum);
             var factoryName = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(0)))
-                    .filter(StringUtils::isNotBlank).orElseThrow(() -> new RuntimeException("工厂名称不能为空！ row:" + rowNum));
+                    .filter(StringUtils::isNotBlank).orElseThrow(() -> new RuntimeException(this.formatExcelErrorInfo(rowNum, "工厂名称为空！")));
             orderExcelBO.setFactoryName(factoryName);
             orderExcelBO.setWorkshopName(CommonUtil.getCellStringVal(row.getCell(1)));
             orderExcelBO.setProductionLineName(CommonUtil.getCellStringVal(row.getCell(2)));
             var orderNo = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(3)))
-                    .filter(StringUtils::isNotBlank).orElseThrow(() -> new RuntimeException("订单号不能为空！ row:" + rowNum));
+                    .filter(StringUtils::isNotBlank).orElseThrow(() -> new RuntimeException(this.formatExcelErrorInfo(rowNum, "订单号为空！")));
+            if (orderNos.contains(orderNo))
+                throw new RuntimeException(this.formatExcelErrorInfo(rowNum, "订单号重复！", orderNo));
+            orderNos.add(orderNo);
             orderExcelBO.setOrderNo(orderNo);
             orderExcelBO.setContractNo(CommonUtil.getCellStringVal(row.getCell(4)));
             orderExcelBO.setRefOrderNo(CommonUtil.getCellStringVal(row.getCell(5)));
@@ -109,9 +116,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             orderExcelBO.setTaxRate(CommonUtil.getCellStringVal(row.getCell(13)));
             orderExcelBO.setTaxes(CommonUtil.getCellStringVal(row.getCell(14)));
             var total = Optional.ofNullable(CommonUtil.getCellDecimalVal(row.getCell(15)))
-                    .orElseThrow(() -> new RuntimeException("总数量不能为空！ row:" + rowNum));
+                    .orElseThrow(() -> new RuntimeException(this.formatExcelErrorInfo(rowNum, "总数量为空!")));
             if (total.compareTo(BigDecimal.ZERO) < 0)
-                throw new RuntimeException("总数量最小为0.00！ row:" + rowNum);
+                throw new RuntimeException(this.formatExcelErrorInfo(rowNum, "总数量为负数!", total));
             orderExcelBO.setTotal(total);
             orderExcelBO.setTotalAmount(CommonUtil.getCellDecimalVal(row.getCell(16)));
             orderExcelBO.setUnit(CommonUtil.getCellStringVal(row.getCell(17)));
@@ -132,10 +139,12 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             return orderExcelBO;
         }).map(orderExcelBO -> CompletableFuture.supplyAsync(() -> {
             var result = (OrderExcelBO) SerializationUtils.clone(orderExcelBO);
-            var factory = this.clientService.getFirstFactoryByFactoryName(tenantId, orderExcelBO.getFactoryName());
+            result.setIsUk(true);
+            this.orderRepository.findByTenantIdAndOrderNo(tenantId.getId(), orderExcelBO.getOrderNo()).ifPresent(l->result.setIsUk(false));
+            var factory = this.clientService.getFactoryByFactoryNameExactly(tenantId, orderExcelBO.getFactoryName());
             Workshop workshop = null;
             ProductionLine productionLine = null;
-            if (factory != null) {
+            if (factory != null && factoryIds.contains(factory.getId())) {
                 workshop = this.clientService.getFirstWorkshopByFactoryIdAndWorkshopName(tenantId, factory.getId(), orderExcelBO.getWorkshopName());
                 result.setFactoryId(factory.getId().toString());
             }
@@ -148,7 +157,9 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             return result;
         })).map(CompletableFuture::join).map(orderExcelBO -> {
             if (StringUtils.isBlank(orderExcelBO.getFactoryId()))
-                throw new RuntimeException("无法匹配工厂！ row:" + orderExcelBO.getRowNum());
+                throw new RuntimeException(this.formatExcelErrorInfo(orderExcelBO.getRowNum(), "工厂名错误，无法匹配!", orderExcelBO.getFactoryName()));
+            if (!orderExcelBO.getIsUk())
+                throw new RuntimeException(this.formatExcelErrorInfo(orderExcelBO.getRowNum(), "订单号重复!", orderExcelBO.getOrderNo()));
             Order order = new Order();
             BeanUtils.copyProperties(orderExcelBO, order);
             order.setTenantId(tenantId.toString());
