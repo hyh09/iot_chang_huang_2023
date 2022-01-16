@@ -43,6 +43,13 @@ public interface ProductionLineRepository extends PagingAndSortingRepository<Pro
             "AND t.name like CONCAT('%', :name, '%') ")
     CompletableFuture<Page<ProductionLineEntity>> findAllByTenantIdAndWorkshopIdAndNameLike(@Param("tenantId") UUID tenantId, @Param("workshopId") UUID workshopId, @Param("name") String workshopName, Pageable pageable);
 
+    @Async
+    @Query("select t from ProductionLineEntity t where " +
+            "t.tenantId = :tenantId " +
+            "AND t.workshopId = :workshopId " +
+            "AND t.name = :name ")
+    CompletableFuture<Page<ProductionLineEntity>> findAllByTenantIdAndWorkshopIdAndName(@Param("tenantId") UUID tenantId, @Param("workshopId") UUID workshopId, @Param("name") String workshopName, Pageable pageable);
+
     Optional<ProductionLineEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     /**

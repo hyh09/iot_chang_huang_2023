@@ -67,7 +67,7 @@ public class OrderController extends BaseController {
             throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
 
         ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm.valueOf(checksumAlgorithmStr.toUpperCase());
-        this.orderService.saveOrdersFromFile(getTenantId(), checksum, checksumAlgorithm, file);
+        this.orderService.saveOrdersFromFile(getTenantId(), getCurrentUser().getId(), checksum, checksumAlgorithm, file);
     }
 
     /**
