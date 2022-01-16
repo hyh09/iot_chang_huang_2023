@@ -59,7 +59,6 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
 
         handler = new MqttTransportHandler(context, sslHandler);
-        long l = VM.current().addressOf(handler);
         log.info("handler初始化内存地址：" +VM.current().addressOf(handler));
         log.info("MqttTransportHandler被初始化："+handler.toString());
         log.info("context"+handler.toString());
@@ -67,6 +66,7 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         if(handler != null){
             log.info("handler存进缓存");
             handlerMap.put("handler",handler);
+            log.info("已缓存handler:"+handler.toString());
         }
 
         pipeline.addLast(handler);
