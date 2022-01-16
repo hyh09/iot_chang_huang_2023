@@ -22,6 +22,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.gson.Gson;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -1083,6 +1084,7 @@ public class DeviceController extends BaseController {
     @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
     @ResponseBody
     public String deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
+        log.info("/deviceIssue设备字典下发"+ new Gson().toJson(deviceIssueDto));
         //获取Mqtt实例
        // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
         MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
