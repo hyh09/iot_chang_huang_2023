@@ -65,7 +65,7 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         log.info("sslHandler"+handler.toString());
         if(handler != null){
             handlerMap.put("handler",handler);
-            log.info("已缓存handler:"+handler.toString());
+            log.info("已缓存handler:"+handlerMap.get("handler").toString());
         }
 
         pipeline.addLast(handler);
