@@ -285,7 +285,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public List<Factory> listFactoriesByUserId(TenantId tenantId, UserId userId) {
-        return this.factoryService.findFactoryListByLoginRole(userId.getId(), tenantId.getId());
+        return Optional.ofNullable(this.factoryService.findFactoryListByLoginRole(userId.getId(), tenantId.getId())).orElse(Lists.newArrayList());
     }
 
     /**
@@ -586,6 +586,21 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 根据工厂名称精确查询
+     *
+     * @param tenantId    租户Id
+     * @param factoryName 工厂名称
+     * @return 工厂
+     */
+    @Override
+    public Factory getFactoryByFactoryNameExactly(TenantId tenantId, String factoryName) {
+        if (StringUtils.isBlank(factoryName))
+            return null;
+        var pageData = DaoUtil.toPageData(this.factoryRepository.findAllByTenantIdAndName(tenantId.getId(), factoryName, CommonUtil.singleDataPage()).join());
+        return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
+    }
+
+    /**
      * 根据工厂名称查询第一个工厂
      *
      * @param tenantId    租户Id
@@ -613,6 +628,38 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         if (StringUtils.isBlank(workshopName))
             return null;
         var pageData = DaoUtil.toPageData(this.workshopRepository.findAllByTenantIdAndFactoryIdAndNameLike(tenantId.getId(), factoryId, workshopName, CommonUtil.singleDataPage()).join());
+        return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
+    }
+
+    /**
+     * 根据车间名称和工厂Id精确查询第一个车间
+     *
+     * @param tenantId     租户Id
+     * @param factoryId    工厂Id
+     * @param workshopName 车间名称
+     * @return 车间
+     */
+    @Override
+    public Workshop getWorkshopByFactoryIdAndWorkshopNameExactly(TenantId tenantId, UUID factoryId, String workshopName) {
+        if (StringUtils.isBlank(workshopName))
+            return null;
+        var pageData = DaoUtil.toPageData(this.workshopRepository.findAllByTenantIdAndFactoryIdAndName(tenantId.getId(), factoryId, workshopName, CommonUtil.singleDataPage()).join());
+        return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
+    }
+
+    /**
+     * 根据产线名称和车间Id精确查询第一个产线
+     *
+     * @param tenantId           租户Id
+     * @param workshopId         车间Id
+     * @param productionLineName 产线名称
+     * @return 产线
+     */
+    @Override
+    public ProductionLine getProductionLineByWorkshopIdAndProductionLineNameExactly(TenantId tenantId, UUID workshopId, String productionLineName) {
+        if (StringUtils.isBlank(productionLineName))
+            return null;
+        var pageData = DaoUtil.toPageData(this.productionLineRepository.findAllByTenantIdAndWorkshopIdAndName(tenantId.getId(), workshopId, productionLineName, CommonUtil.singleDataPage()).join());
         return pageData.getData().isEmpty() ? null : pageData.getData().get(0);
     }
 

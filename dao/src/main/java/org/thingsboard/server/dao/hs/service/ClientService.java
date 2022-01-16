@@ -214,6 +214,15 @@ public interface ClientService {
     Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans);
 
     /**
+     * 根据工厂名称精确查询
+     *
+     * @param tenantId    租户Id
+     * @param factoryName 工厂名称
+     * @return 工厂
+     */
+    Factory getFactoryByFactoryNameExactly(TenantId tenantId, String factoryName);
+
+    /**
      * 根据工厂名称查询第一个工厂
      *
      * @param tenantId    租户Id
@@ -231,6 +240,26 @@ public interface ClientService {
      * @return 车间
      */
     Workshop getFirstWorkshopByFactoryIdAndWorkshopName(TenantId tenantId, UUID factoryId, String workshopName);
+
+    /**
+     * 根据车间名称和工厂Id精确查询第一个车间
+     *
+     * @param tenantId     租户Id
+     * @param factoryId    工厂Id
+     * @param workshopName 车间名称
+     * @return 车间
+     */
+    Workshop getWorkshopByFactoryIdAndWorkshopNameExactly(TenantId tenantId, UUID factoryId, String workshopName);
+
+    /**
+     * 根据产线名称和车间Id精确查询第一个产线
+     *
+     * @param tenantId           租户Id
+     * @param workshopId         车间Id
+     * @param productionLineName 产线名称
+     * @return 产线
+     */
+    ProductionLine getProductionLineByWorkshopIdAndProductionLineNameExactly(TenantId tenantId, UUID workshopId, String productionLineName);
 
     /**
      * 根据产线名称和车间Id查询第一个产线

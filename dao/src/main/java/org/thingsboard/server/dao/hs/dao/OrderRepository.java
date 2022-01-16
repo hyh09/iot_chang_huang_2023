@@ -24,6 +24,8 @@ public interface OrderRepository extends PagingAndSortingRepository<OrderEntity,
 
     Optional<OrderEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
+    Optional<OrderEntity> findByTenantIdAndOrderNo(UUID tenantId, String orderNo);
+
     @Async
     @Query("SELECT new OrderEntity(e.orderNo) FROM OrderEntity e WHERE " +
             "e.tenantId = :tenantId " +

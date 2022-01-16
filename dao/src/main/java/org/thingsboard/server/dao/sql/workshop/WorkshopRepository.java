@@ -43,6 +43,14 @@ public interface WorkshopRepository extends PagingAndSortingRepository<WorkshopE
             "AND t.name like CONCAT('%', :name, '%') ")
     CompletableFuture<Page<WorkshopEntity>> findAllByTenantIdAndFactoryIdAndNameLike(@Param("tenantId") UUID tenantId, @Param("factoryId") UUID factoryId, @Param("name") String workshopName, Pageable pageable);
 
+    @Async
+    @Query("select t from WorkshopEntity t where " +
+            "t.tenantId = :tenantId " +
+            "AND t.factoryId = :factoryId " +
+            "AND t.name = :name ")
+    CompletableFuture<Page<WorkshopEntity>> findAllByTenantIdAndFactoryIdAndName(@Param("tenantId") UUID tenantId, @Param("factoryId") UUID factoryId, @Param("name") String workshopName, Pageable pageable);
+
+
     Optional<WorkshopEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     /**

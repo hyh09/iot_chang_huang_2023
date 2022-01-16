@@ -24,6 +24,22 @@ import java.util.stream.IntStream;
 public interface CommonService {
 
     /**
+     * 格式化Excel错误信息
+     */
+    default String formatExcelErrorInfo(Integer rowNum, String info, Object oldValue) {
+//        return info + " 第「" + rowNum + "」行 值：「" + oldValue + "」";
+        return info + " 行：" + rowNum;
+    }
+
+    /**
+     * 格式化Excel错误信息
+     */
+    default String formatExcelErrorInfo(Integer rowNum, String info) {
+//        return info + " 第「" + rowNum + "」行";
+        return info + " 行：" + rowNum;
+    }
+
+    /**
      * 格式化产量
      */
     default BigDecimal formatCapacity(BigDecimal val1) {
