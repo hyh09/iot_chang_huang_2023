@@ -1086,7 +1086,7 @@ public class DeviceController extends BaseController {
         //获取Mqtt实例
        // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
         MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
-
+        log.info("从缓存取值");
         log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
         log.info("handler值：" + handler.toString());
 
