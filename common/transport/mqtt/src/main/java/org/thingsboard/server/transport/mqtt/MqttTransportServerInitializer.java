@@ -67,6 +67,7 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         log.info("sslHandler"+handler.toString());
         log.info("MqttTransportServerInitializer中MqttTransportService地址"+ SpringUtil.getBean(MqttTransportService.class));
         if(handler != null){
+            log.info("handler存进缓存");
             handlerMap.put("handler",handler);
             log.info("已缓存handler:"+handlerMap.get("handler").toString());
         }
