@@ -24,6 +24,8 @@ import io.netty.handler.ssl.SslHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openjdk.jol.vm.VM;
+import org.springframework.beans.BeanUtils;
+import org.thingsboard.server.transport.mqtt.util.SpringUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -63,6 +65,7 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         log.info("MqttTransportHandler被初始化："+handler.toString());
         log.info("context"+handler.toString());
         log.info("sslHandler"+handler.toString());
+        log.info("MqttTransportServerInitializer中MqttTransportService地址"+ SpringUtil.getBean(MqttTransportService.class));
         if(handler != null){
             log.info("handler存进缓存");
             handlerMap.put("handler",handler);

@@ -76,6 +76,7 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
 import org.thingsboard.server.transport.mqtt.MqttTransportServerInitializer;
 import org.thingsboard.server.transport.mqtt.MqttTransportService;
+import org.thingsboard.server.transport.mqtt.util.SpringUtil;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -1087,6 +1088,7 @@ public class DeviceController extends BaseController {
         log.info("/deviceIssue设备字典下发"+ new Gson().toJson(deviceIssueDto));
         //获取Mqtt实例
        // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+        log.info("DeviceController中MqttTransportService地址"+ SpringUtil.getBean(MqttTransportService.class));
         MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
         log.info("缓存取值："+handler.toString());
         log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
