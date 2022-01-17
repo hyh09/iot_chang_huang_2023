@@ -74,7 +74,9 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
             formatter: `{b}${this.translate.instant('common.colon')}{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
           },
           label: {
-            formatter: `{b}${this.translate.instant('common.colon')}{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
+            formatter: [
+              '{b}', `{c}${this.translate.instant('device-monitor.device-count-unit')} ({d}%)`
+            ].join('\n')
           },
           emphasis: {
             itemStyle: {
