@@ -23,7 +23,7 @@ export class PotencyService {
     private http: HttpClient
   ) { }
 
-  // 查询设备产能列表
+  // 查询设备产量列表
   public getDeviceCapacityList(pageLink: TimePageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceCapacityList> {
     let queryStr: string[] = [];
     if (params) {
