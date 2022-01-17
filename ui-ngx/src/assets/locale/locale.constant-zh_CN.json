@@ -3205,8 +3205,8 @@
     "little-endian-required": "小端在前必填",
     "send-driver-config-success": "配置下发成功",
     "factory-mng": "工厂管理",
-    "prod-capactity-settings": "产能运算配置",
-    "in-calculation": "参与产能运算",
+    "prod-capactity-settings": "产量运算配置",
+    "in-calculation": "参与产量运算",
     "delete-factory": "删除工厂",
     "delete-work-shop": "删除车间",
     "delete-prod-line": "删除产线",
@@ -3472,7 +3472,7 @@
   },
   "potency": {
     "potency": "效能分析",
-    "device-capacity": "产能分析",
+    "device-capacity": "产量分析",
     "energy-consumption": "能耗分析",
     "energy-consumption-history": "能耗历史",
     "running-state": "运行状态",
@@ -3487,7 +3487,7 @@
   "order": {
     "order-form-mng": "订单管理",
     "orders": "订单列表",
-    "order-capacity": "订单产能监控",
+    "order-capacity": "订单产量监控",
     "order-details": "订单详情",
     "add-order": "添加订单",
     "no-orders-text": "未找到订单",
