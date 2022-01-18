@@ -371,16 +371,21 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var time1 = pageData.getContent().get(0);
             var time2 = pageData.getContent().get(pageData.getContent().size() - 1);
 
-            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTs(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
-            kvEntityResult.forEach(e -> e.setStrKey(keyIdToKeyMap.getOrDefault(e.getKey(), HSConstants.NULL_STR)));
-            var KvResult = DaoUtil.convertDataList(kvEntityResult);
+            List<TsKvEntity> kvEntityResult = Lists.newArrayList();
+            if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection())) {
+                kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsAsc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+            } else {
+                kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+            }
 
             List<Map<String, Object>> result = new ArrayList<>();
             Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
-            if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection()))
-                KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs)).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
-            else
-                KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+            kvEntityResult.stream().map(e -> {
+                e.setStrKey(keyIdToKeyMap.getOrDefault(e.getKey(), HSConstants.NULL_STR));
+                return e;
+            }).map(TsKvEntity::toData).forEach(v -> {
+                resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v));
+            });
             resultMap.forEach((k, v) -> {
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
