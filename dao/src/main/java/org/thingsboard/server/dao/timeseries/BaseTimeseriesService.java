@@ -42,6 +42,7 @@ import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
+import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,6 +93,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
     @Autowired private EneryTimeGapService eneryTimeGapService;
     @Autowired private StatisticalDataService statisticalDataService;
     @Autowired private EnergyChartService energyChartService;
+    @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -230,6 +232,8 @@ public class BaseTimeseriesService implements TimeseriesService  {
         {
 //            log.info("打印当前的数据打印标题{}",title);
             statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
+            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
+
         }
         Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
         if(count>0) {

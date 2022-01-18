@@ -11,7 +11,6 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
-import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
@@ -53,6 +52,7 @@ import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
@@ -94,6 +94,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
     @Autowired private DataToConversionSvc  dataToConversionSvc;
+    @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
 
 
 
@@ -153,25 +154,27 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public Object queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink) {
-        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
+//        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
         }
         String deviceName = deviceInfo.getName();
-        //先查询能耗的属性
-        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        queryTsKvVo.setKeys(keys1);
-        Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo,DaoUtil.toPageable(pageLink));
-        List<Map> list = page.getContent();
-        log.debug("查询当前角色下的用户绑定数据list{}",list);
-         if(CollectionUtils.isEmpty(list))
-         {
-             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
-         }
-        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
-        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+      return   energyHistoryMinuteSvc.queryTranslateTitle(queryTsKvVo,deviceName,pageLink);
+
+//        //先查询能耗的属性
+//        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+//        queryTsKvVo.setKeys(keys1);
+//        Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo,DaoUtil.toPageable(pageLink));
+//        List<Map> list = page.getContent();
+//        log.debug("查询当前角色下的用户绑定数据list{}",list);
+//         if(CollectionUtils.isEmpty(list))
+//         {
+//             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+//         }
+//        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
+//        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     @Override
