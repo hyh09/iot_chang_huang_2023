@@ -230,6 +230,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList) {
+        if (allDeviceIdList.isEmpty())
+            return Maps.newHashMap();
         if (persistToTelemetry) {
             Map<String, Boolean> map = new HashMap<>();
             for (UUID uuid : allDeviceIdList) {
@@ -399,7 +401,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
             var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
 
-            var pageData = this.tsRepository.findTss(deviceId.getId(), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
+            var pageData = this.tsRepository.findTss(deviceId.getId(), Sets.newHashSet(keyIds), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
             if (pageData.getContent().isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
