@@ -9,6 +9,7 @@ import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,6 +20,12 @@ public class FactoryEntity extends AbstractFactoryEntity<Factory>  {
 
     public FactoryEntity() {
         super();
+    }
+
+    public FactoryEntity(UUID id, String name) {
+        super();
+        this.id = id;
+        this.setName(name);
     }
 
     @Override

@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
-import { Factory, FactoryMngList, ProdDevice, ProdLine, WorkShop } from "@app/shared/models/custom/factory-mng.models";
+import { Factory, FactoryMngList, FactoryTreeList, ProdDevice, ProdLine, WorkShop } from "@app/shared/models/custom/factory-mng.models";
 import { BaseData, HasId } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -38,6 +38,11 @@ export class FactoryMngService {
       });
     }
     return this.http.get<FactoryMngList>(`/api/factory/findFactoryListByCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 根据当前登录人获取工厂层级数据
+  public getFactoryTreeList(config?: RequestConfig): Observable<FactoryTreeList> {
+    return this.http.get<FactoryTreeList>('/api/deviceMonitor/rtMonitor/factory/hierarchy', defaultHttpOptionsFromConfig(config));
   }
 
   // 新增/更新工厂信息
