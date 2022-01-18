@@ -58,57 +58,37 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
   }
 
   fetchData() {
-    this.factoryMngService.getFactoryList().subscribe(res => {
+    this.factoryMngService.getFactoryTreeList().subscribe(res => {
       const arr: FactoryTableOriginRow[] = [];
       const treeArr: FactoryTreeNodeOptions[] = [];
-      res.factoryList.forEach(factory => {
-        factory.rowType = 'factory';
-        factory.key = factory.id + '';
-        factory.title = factory.name;
-      });
-      res.workshopList.forEach(workShop => {
+      res.workshops.forEach(workShop => {
         workShop.parentId = workShop.factoryId;
-        workShop.rowType = 'workShop';
-        workShop.key = workShop.id + '';
-        workShop.title = workShop.name;
       });
-      res.productionLineList.forEach(prodLine => {
+      res.productionLines.forEach(prodLine => {
         prodLine.parentId = prodLine.workshopId;
-        prodLine.rowType = 'prodLine';
-        prodLine.key = prodLine.id + '';
-        prodLine.title = prodLine.name;
       });
-      res.deviceVoList.forEach(device => {
+      res.devices.forEach(device => {
         device.parentId = device.productionLineId;
-        device.rowType = 'device';
-        device.key = device.id + '';
-        device.title = device.name;
       });
-      res.notDistributionList.forEach(device => {
+      res.undistributedDevices.forEach(device => {
         device.parentId = '-1';
-        device.rowType = 'device';
-        device.key = device.id;
-        device.title = device.name;
       });
       arr.push(
-        ...res.factoryList, ...res.workshopList, ...res.productionLineList, ...res.deviceVoList, ...res.notDistributionList
+        ...res.factories, ...res.workshops, ...res.productionLines, ...res.devices, ...res.undistributedDevices
       );
-      if (res.notDistributionList.length > 0) {
-        arr.push({key: '-1', name: this.translate.instant('device-mng.undistributed-device')});
+      if (res.undistributedDevices.length > 0) {
+        arr.push({key: '-1', title: this.translate.instant('device-mng.undistributed-device')});
       }
       arr.forEach(item => {
         treeArr.push({
-          title: item.name,
+          title: item.title,
           key: item.key,
           id: item.key,
           parentId: item.parentId,
           rowType: item.rowType,
           factoryId: item.factoryId,
-          factoryName: item.factoryName,
           workshopId: item.workshopId,
-          workshopName: item.workshopName,
           productionLineId: item.productionLineId,
-          productionLineName: item.productionLineName,
           selectable: this.deviceOnly ? item.rowType === 'device' : true
         });
       });
@@ -130,7 +110,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           }
         }
       } else {
-        this.selectedKeys = res.factoryList[0] ? [res.factoryList[0].key] : [];
+        this.selectedKeys = res.factories[0] ? [res.factories[0].key] : [];
         params.factoryId = this.selectedKeys[0] || '';
         params.factoryId = params.factoryId === '-1' ? '' : params.factoryId;
       }

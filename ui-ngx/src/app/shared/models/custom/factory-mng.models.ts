@@ -18,6 +18,8 @@ interface CommonData {
 export declare type FactoryRowType = 'factory' | 'workShop' | 'prodLine' | 'device';
 
 export interface Factory extends BaseData<FactoryId>, CommonData {
+  key?: string;
+  title?: string;
   country?: string;
   city?: string;
   address?: string;
@@ -29,6 +31,8 @@ export interface Factory extends BaseData<FactoryId>, CommonData {
 }
 
 export interface WorkShop extends BaseData<WorkShopId>, CommonData {
+  key?: string;
+  title?: string;
   factoryId?: string;
   factoryName?: string;
   bgImages?: string;
@@ -36,6 +40,8 @@ export interface WorkShop extends BaseData<WorkShopId>, CommonData {
 }
 
 export interface ProdLine extends BaseData<ProdLineId>, CommonData {
+  key?: string;
+  title?: string;
   factoryId?: string;
   factoryName?: string;
   workshopId?: string;
@@ -44,6 +50,8 @@ export interface ProdLine extends BaseData<ProdLineId>, CommonData {
 }
 
 export interface ProdDevice extends BaseData<DeviceId>, CommonData {
+  key?: string;
+  title?: string;
   factoryId?: string;
   factoryName?: string;
   workshopId?: string;
@@ -140,4 +148,12 @@ export interface FactoryTreeNodeIds {
   workshopId?: string;
   productionLineId?: string;
   deviceId?: string;
+}
+
+export interface FactoryTreeList {
+  factories: Factory[];
+  workshops: WorkShop[];
+  productionLines: ProdLine[];
+  devices: ProdDevice[];
+  undistributedDevices: ProdDevice[];
 }
