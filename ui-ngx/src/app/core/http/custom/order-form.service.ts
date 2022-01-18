@@ -32,7 +32,7 @@ export class OrderFormService {
     return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
-  // 获取订单产能列表
+  // 获取订单产量列表
   public getOrderCapacities(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<OrderCapacity>> {
     let queryStr: string[] = [];
     Object.keys(filterParams).forEach(key => {
@@ -46,7 +46,7 @@ export class OrderFormService {
     return this.http.get<OrderForm>(`/api/order/${id}`, defaultHttpOptionsFromConfig(config));
   }
 
-  // 获取订单产能详情
+  // 获取订单产量详情
   public getOrderCapacity(id: HasUUID, config?: RequestConfig): Observable<OrderForm> {
     return this.http.get<OrderForm>(`/api/order/${id}/capacityMonitor`, defaultHttpOptionsFromConfig(config));
   }

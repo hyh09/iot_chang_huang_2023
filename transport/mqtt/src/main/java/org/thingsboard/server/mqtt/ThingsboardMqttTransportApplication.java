@@ -34,6 +34,7 @@ public class ThingsboardMqttTransportApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ThingsboardMqttTransportApplication.class, updateArguments(args));
+        System.out.println("ThingsboardMqttTransportApplication启动了！！！！！！！！！！！");
     }
 
     private static String[] updateArguments(String[] args) {

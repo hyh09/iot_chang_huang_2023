@@ -173,6 +173,20 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
                                               @Param("endTs") long endTs);
 
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts asc")
+    List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsAsc(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts desc")
+    List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsDesc(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key = :entityKey AND tskv.ts >= :startTs AND tskv.ts < :endTs")
     Page<TsKvEntity> findAll(@Param("entityId") UUID entityId,
                              @Param("entityKey") int key,
