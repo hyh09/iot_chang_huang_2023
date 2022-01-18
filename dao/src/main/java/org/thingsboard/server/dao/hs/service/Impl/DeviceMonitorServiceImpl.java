@@ -50,6 +50,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import javax.persistence.criteria.Predicate;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -232,40 +233,37 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public RTMonitorResult getRTMonitorData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
-        var allDeviceList = this.clientService.listDevicesByQuery(tenantId, query);
-        var allDeviceIdList = allDeviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
-        var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
-
-        var activeStatusMap = this.clientService.listDevicesOnlineStatus(allDeviceIdList);
-
-        var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
-        var map = new HashMap<String, DictDevice>();
-        if (!dictDeviceIds.isEmpty()) {
-            map = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
-                    .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
-        }
-
-        HashMap<String, DictDevice> finalMap = map;
-        var resultList = devicePageData.getData().stream().map(e -> {
-            var idStr = e.getId().toString();
-            return RTMonitorDeviceResult.builder()
-                    .id(idStr)
-                    .name(e.getName())
-                    .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(finalMap::get).map(DictDevice::getPicture).orElse(null)))
-                    .isOnLine(calculateValueInMap(activeStatusMap, idStr))
-                    .build();
-        }).collect(Collectors.toList());
-
-        int onLineCount = calculateValueInMap(activeStatusMap);
-
-        return RTMonitorResult.builder()
-                .devicePageData(new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext()))
-                .allDeviceCount(allDeviceList.size())
-                .offLineDeviceCount(allDeviceList.size() - onLineCount)
-                .onLineDeviceCount(onLineCount)
-                .alarmTimesList(this.listAlarmTimesResult(tenantId, allDeviceIdList))
-                .deviceIdList(allDeviceIdList.stream().map(UUID::toString).collect(Collectors.toList()))
-                .build();
+        var result = new RTMonitorResult();
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        result.setAllDeviceCount(uuids.size());
+        result.setDeviceIdList(uuids.stream().map(UUID::toString).collect(Collectors.toList()));
+        CompletableFuture.allOf(
+                CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
+                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
+                        .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
+                            var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+                            if (uuidList.isEmpty())
+                                return new HashMap<String, DictDevice>();
+                            else
+                                return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), uuidList)).stream()
+                                        .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
+                        }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(uuids)),
+                                (dictDeviceMap, activeStatusMap) -> {
+                                    int onLineCount = this.calculateValueInMap(activeStatusMap);
+                                    result.setOnLineDeviceCount(onLineCount);
+                                    result.setOffLineDeviceCount(result.getAllDeviceCount() - onLineCount);
+                                    return devicePageData.getData().stream().map(e -> {
+                                        var idStr = e.getId().toString();
+                                        return RTMonitorDeviceResult.builder()
+                                                .id(idStr)
+                                                .name(e.getName())
+                                                .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                                                .isOnLine(calculateValueInMap(activeStatusMap, idStr))
+                                                .build();
+                                    }).collect(Collectors.toList());
+                                }).thenAcceptAsync(resultList -> result.setDevicePageData(new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext()))).join()
+                        )).join();
+        return result;
     }
 
     /**

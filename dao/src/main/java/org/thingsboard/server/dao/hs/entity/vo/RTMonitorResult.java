@@ -60,4 +60,5 @@ public class RTMonitorResult {
      */
     @ApiModelProperty("预警次数列表，从远及近")
     private List<AlarmTimesResult> alarmTimesList;
+
 }
