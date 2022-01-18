@@ -15,6 +15,9 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
@@ -52,6 +55,24 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
     public DeviceEntity (Factory factory){
         this.setName(factory.getWorkshopName());
         this.setTenantId(factory.getTenantId());
+    }
+
+    public DeviceEntity (UUID id, String name){
+        super();
+        this.id = id;
+        this.setName(name);
+    }
+
+    public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setFactoryId(factoryId);
+        this.setWorkshopId(workshopId);
+        this.setProductionLineId(productionLineId);
+        try {
+            this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
+        } catch (Exception ignore){}
     }
 
     public DeviceEntity (UUID tenantId){
