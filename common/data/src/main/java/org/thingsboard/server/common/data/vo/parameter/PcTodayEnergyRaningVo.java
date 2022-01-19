@@ -1,5 +1,7 @@
 package org.thingsboard.server.common.data.vo.parameter;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.thingsboard.server.common.data.vo.AbstractDeviceVo;
@@ -15,11 +17,12 @@ import java.time.LocalDate;
  **/
 @Data
 @ToString
+@ApiModel(value = "设备入参实体")
 public class PcTodayEnergyRaningVo extends AbstractDeviceVo{
 
     private LocalDate date;
 
-
+    @ApiModelProperty("1:水 2 气  3电")
     private  String  keyNum;
 
 
