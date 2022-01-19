@@ -3,11 +3,11 @@ package org.thingsboard.server.dao.sql.role.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.dao.util.sql.entity.AbstractStatisticalDataEntity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -46,7 +46,22 @@ import java.time.LocalDate;
                         ),
                 }
 
-        )
+        ),@SqlResultSetMapping(
+                name = "censusSqlByDayEntity_02",
+        classes = {
+                @ConstructorResult(    targetClass = CensusSqlByDayEntity.class,
+                columns = {
+                        @ColumnResult(name = "date", type = LocalDate.class),
+                        @ColumnResult(name = "entity_id",type = UUID.class),
+                        @ColumnResult(name = "water_added_value",type = String.class),
+                        @ColumnResult(name = "electric_added_value",type = String.class),
+                        @ColumnResult(name = "gas_added_value",type = String.class)
+
+                }
+                )
+        }
+
+)
 
 
 })
@@ -109,4 +124,17 @@ public class CensusSqlByDayEntity  extends AbstractStatisticalDataEntity {
 
 
 
+
+    public CensusSqlByDayEntity( LocalDate date,
+                                 UUID entityId,
+                                 String waterAddedValue,
+                                 String electricAddedValue,
+                                 String gasAddedValue) {
+        this.date = date;
+        this.entityId = entityId;
+        this.waterAddedValue = waterAddedValue;
+        this.electricAddedValue = electricAddedValue;
+        this.gasAddedValue = gasAddedValue;
+
+    }
 }
