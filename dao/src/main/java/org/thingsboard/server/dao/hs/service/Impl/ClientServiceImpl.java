@@ -35,6 +35,7 @@ import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.InitEntity;
 import org.thingsboard.server.dao.hs.dao.InitRepository;
+import org.thingsboard.server.dao.hs.entity.bo.FactoryDetailBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
@@ -42,9 +43,7 @@ import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -70,6 +69,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -177,6 +177,41 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 查询设备id列表
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @Override
+    @SuppressWarnings("all")
+    public <T extends FactoryDeviceQuery> List<Device> listSimpleDevicesByQuery(TenantId tenantId, T t) {
+        var cb = entityManager.getCriteriaBuilder();
+        var query = cb.createQuery(DeviceEntity.class);
+        var root = query.from(DeviceEntity.class);
+        query.multiselect(root.<UUID>get("id"), root.get("name"));
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+        predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+        if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+            // do nothing
+        } else if (!StringUtils.isBlank(t.getDeviceId())) {
+            predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+        } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+            predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+        } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+            predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+        } else if (!StringUtils.isBlank(t.getFactoryId())) {
+            predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+        } else {
+            predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+        }
+        query.orderBy(cb.desc(root.get("createdTime")));
+        query.where(predicates.toArray(new Predicate[0]));
+
+        return DaoUtil.convertDataList(entityManager.createQuery(query).getResultList());
+    }
+
+    /**
      * 分页查询设备列表
      *
      * @param tenantId 租户Id
@@ -195,6 +230,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList) {
+        if (allDeviceIdList.isEmpty())
+            return Maps.newHashMap();
         if (persistToTelemetry) {
             Map<String, Boolean> map = new HashMap<>();
             for (UUID uuid : allDeviceIdList) {
@@ -360,9 +397,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
         } else {
             var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
-            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
             if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
 
             var pageData = this.tsRepository.findTss(deviceId.getId(), Sets.newHashSet(keyIds), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
             if (pageData.getContent().isEmpty())
@@ -685,11 +722,29 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 根据当前登录人获得工厂层级列表
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 工厂层级列表
+     */
+    @Override
+    public FactoryDetailBO getFactoryHierarchy(TenantId tenantId, UUID factoryId) {
+        FactoryDetailBO factoryBO = new FactoryDetailBO();
+        CompletableFuture.allOf(this.factoryRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setFactories(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.workshopRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setWorkshops(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.productionLineRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setProductionLines(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setDevices(v.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList())))).join();
+        return factoryBO;
+    }
+
+    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id
      * @param t        extends FactoryDeviceQuery
      */
+    @SuppressWarnings("all")
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
