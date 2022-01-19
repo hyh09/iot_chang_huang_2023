@@ -325,6 +325,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     @SuppressWarnings("all")
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
             var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
             if (keyList.isEmpty())
@@ -359,12 +360,22 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
         } else {
+            long a1 = System.currentTimeMillis();
             var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
+            long a2 = System.currentTimeMillis();
+            log.info("方法findAllKeyIdsByEntityId执行时间："+(a2-a1));
+
             var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
+            long a3 = System.currentTimeMillis();
+            log.info("方法findAllByKeyIdIn执行时间："+(a3-a2));
+
             if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
             var pageData = this.tsRepository.findTss(deviceId.getId(), Sets.newHashSet(keyIds), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
+            long a4 = System.currentTimeMillis();
+            log.info("方法findTss执行时间："+(a4-a3));
+
             if (pageData.getContent().isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
@@ -374,8 +385,13 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             List<TsKvEntity> kvEntityResult = Lists.newArrayList();
             if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection())) {
                 kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsAsc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+                long a5 = System.currentTimeMillis();
+                log.info("排序方法findAllByStartTsAndEndTsOrderByTsAsc执行时间："+(a5-a4));
             } else {
+                long a = System.currentTimeMillis();
                 kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+                long b = System.currentTimeMillis();
+                log.info("方法findAllByStartTsAndEndTsOrderByTsDesc执行时间为："+ (b-a));
             }
 
             List<Map<String, Object>> result = new ArrayList<>();
@@ -390,6 +406,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
             });
+            long en = System.currentTimeMillis();
+            log.info("接口执行时间："+(en - sta));
             return new PageData<>(result, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
         }
     }

@@ -29,7 +29,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.openjdk.jol.vm.VM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -1079,6 +1078,9 @@ public class DeviceController extends BaseController {
 
     }
 
+    @Autowired
+    private Pub1 pub;
+
     @ApiOperation("设备配置下发")
     @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
     @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
@@ -1088,10 +1090,10 @@ public class DeviceController extends BaseController {
         //获取Mqtt实例
        // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
         MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
-        log.info("缓存取值："+handler.toString());
+        /*log.info("缓存取值："+handler.toString());
         log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
         log.info("handler值：" + handler.toString());
-
+*/
         //下发入参
         Map mapIssue = new HashMap();
         //设备信息
@@ -1145,8 +1147,11 @@ public class DeviceController extends BaseController {
                         log.info("下发网关为：" + topic);
                         log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
                         String json = JSONObjectUtils.toJSONString(mapIssue);
+
+                        pub.sendMessage("dictIssue", json);
+
                         //发布mqtt消息
-                        if(handler != null){
+                       /* if(handler != null){
                             log.info("调用前：handler：" + handler.toString());
                             log.info("调用前handler内存地址：" +VM.current().addressOf(handler));
                             handler.dictIssue(topic,json);
@@ -1154,7 +1159,7 @@ public class DeviceController extends BaseController {
                             log.info("调用后handler内存地址：" +VM.current().addressOf(handler));
                         }else {
                             throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！",ThingsboardErrorCode.FAIL_VIOLATION);
-                        }
+                        }*/
                     }
                 }
             }
