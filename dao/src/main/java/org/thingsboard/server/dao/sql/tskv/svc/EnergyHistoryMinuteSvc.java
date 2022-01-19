@@ -29,6 +29,13 @@ public interface EnergyHistoryMinuteSvc {
     PageData<EnergyHistoryMinuteEntity> queryByDeviceIdAndTs(QueryTsKvHisttoryVo vo, PageLink pageLink);
 
 
+    /**
+     * 能耗
+     * @param vo
+     * @param deviceName
+     * @param pageLink
+     * @return
+     */
     PageData<Map> queryTranslateTitle(QueryTsKvHisttoryVo vo, String deviceName,PageLink pageLink);
 
 
