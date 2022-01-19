@@ -15,13 +15,17 @@ import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.controller.example.AnswerExample;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+import org.thingsboard.server.service.security.model.SecurityUser;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -313,6 +317,26 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
+
+
+
+    @ApiOperation(value = "【PC端查询当前设备的运行状态】")
+    @PostMapping("/queryTodayEffceency")
+    public  List<CensusSqlByDayEntity>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
+        try {
+            LocalDate today = LocalDate.now();
+            SecurityUser authUser = getCurrentUser();
+            vo.setTenantId(getTenantId().getId());
+            vo.setDate(today);
+            return effciencyAnalysisRepository.queryTodayEffceency(vo);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+
+        }
+    }
+
 
 
 
