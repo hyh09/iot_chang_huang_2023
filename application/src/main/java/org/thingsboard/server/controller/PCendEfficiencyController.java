@@ -16,6 +16,7 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
@@ -322,13 +323,13 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     @ApiOperation(value = "【PC端查询当前设备的运行状态】")
     @PostMapping("/queryTodayEffceency")
-    public  List<CensusSqlByDayEntity>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
+    public  List<ResultEnergyTopTenVo>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
         try {
             LocalDate today = LocalDate.now();
             SecurityUser authUser = getCurrentUser();
             vo.setTenantId(getTenantId().getId());
             vo.setDate(today);
-            return effciencyAnalysisRepository.queryTodayEffceency(vo);
+            return efficiencyStatisticsSvc.queryPcResultEnergyTopTenVo(vo);
         }catch (Exception e)
         {
             e.printStackTrace();

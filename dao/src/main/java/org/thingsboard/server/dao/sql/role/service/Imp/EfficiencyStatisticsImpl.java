@@ -22,6 +22,8 @@ import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
@@ -787,6 +789,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return resultHomeEnergyAppVo;
     }
 
+
+    @Override
+    public List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo) {
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryTodayEffceency(vo);
+      return    dataVoToResultEnergyTopTenVo(entities,vo);
+
+    }
+
+
+
+
     /**
      * 获取当前租户的第一个工厂id
      * @param tenantId 当前登录人的租户
@@ -1334,6 +1347,38 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         vo.setUnit(properties.getUnit());
         resultList.add(vo);
         return  resultList;
+
+    }
+
+
+
+
+    private  List<ResultEnergyTopTenVo>  dataVoToResultEnergyTopTenVo(List<CensusSqlByDayEntity>  entities ,PcTodayEnergyRaningVo vo)
+    {
+        if(CollectionUtils.isEmpty(entities))
+        {
+            return  new ArrayList<>();
+        }
+        KeyTitleEnums  enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+        return    entities.stream().map(m1 ->{
+            ResultEnergyTopTenVo  vo1= new ResultEnergyTopTenVo();
+            vo1.setDeviceId(m1.getEntityId());
+            vo1.setDeviceName(m1.getDeviceName());
+            if(enums == KeyTitleEnums.key_water)
+            {
+                vo1.setValue(StringUtils.isNotEmpty(m1.getWaterAddedValue())?m1.getWaterAddedValue():"0");
+            }
+            if(enums == KeyTitleEnums.key_cable)
+            {
+                vo1.setValue(StringUtils.isNotEmpty(m1.getElectricAddedValue())?m1.getElectricAddedValue():"0");
+            }
+            if(enums == KeyTitleEnums.key_gas)
+            {
+                vo1.setValue(StringUtils.isNotEmpty(m1.getGasAddedValue())?m1.getGasAddedValue():"0");
+            }
+            return  vo1;
+        }).collect(Collectors.toList());
+
 
     }
 
