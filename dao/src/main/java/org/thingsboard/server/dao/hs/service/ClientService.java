@@ -289,4 +289,33 @@ public interface ClientService {
      * @return 工厂层级列表
      */
     FactoryDetailBO getFactoryHierarchy(TenantId tenantId, UUID factoryId);
+
+    /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    List<String> listDeviceKeys(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 查询历史遥测数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 历史遥测数据
+     */
+    List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
+
 }
