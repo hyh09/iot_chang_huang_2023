@@ -86,6 +86,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
@@ -305,6 +306,7 @@ public abstract class BaseController {
     @Autowired  protected UserLanguageSvc userLanguageSvc;
     @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
+    @Autowired  private EffciencyAnalysisRepository effciencyAnalysisRepository;
 
 
     @ExceptionHandler(ThingsboardException.class)
