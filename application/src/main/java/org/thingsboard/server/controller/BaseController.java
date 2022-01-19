@@ -306,7 +306,7 @@ public abstract class BaseController {
     @Autowired  protected UserLanguageSvc userLanguageSvc;
     @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
-    @Autowired  private EffciencyAnalysisRepository effciencyAnalysisRepository;
+    @Autowired  protected EffciencyAnalysisRepository effciencyAnalysisRepository;
 
 
     @ExceptionHandler(ThingsboardException.class)
