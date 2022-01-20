@@ -240,7 +240,7 @@
           "all-platforms": "All platforms",
           "allowed-platforms": "Allowed platforms"
         }
-      },
+    },
     "alarm": {
         "alarm": "Alarm",
         "alarms": "Alarms",
