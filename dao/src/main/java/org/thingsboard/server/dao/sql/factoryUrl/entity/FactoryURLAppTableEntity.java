@@ -19,7 +19,7 @@ import javax.persistence.Table;
 */	
 @Data	
 @Entity	
-@Table(name="FACTORY_URL_APP_TABLE",indexes ={
+@Table(name="HS_FACTORY_URL_APP_TABLE",indexes ={
         @Index(name = "APP_URL_INDEX",columnList ="APP_URL",unique = true)
 })
 @DynamicInsert	
