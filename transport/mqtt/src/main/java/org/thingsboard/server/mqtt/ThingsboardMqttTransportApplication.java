@@ -26,7 +26,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.thingsboard.server.mqtt.controller.SubRedis;
+import org.thingsboard.server.mqtt.redis.SubRedis;
 
 import java.util.Arrays;
 
