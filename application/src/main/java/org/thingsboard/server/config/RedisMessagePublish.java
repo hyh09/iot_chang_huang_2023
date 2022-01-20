@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 @Service
-public class PubReids {
+public class RedisMessagePublish {
     @Autowired
     @Resource(name="redisTemplate")
     private RedisTemplate<String, String> rt;
@@ -28,4 +28,12 @@ public class PubReids {
     public void sendMessage(String channel, String message) {
         rt.convertAndSend(channel, message);
     }
+
+    public void sendMessage(String channel,Object message) {
+        byte[] msg =jackson2JsonRedisSerializer.serialize(message);
+        rt.convertAndSend(channel,new String(msg));
+    }
+
+
+
 }
