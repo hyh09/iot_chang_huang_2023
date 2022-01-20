@@ -16,9 +16,12 @@
 package org.thingsboard.server.service.security.auth.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,20 +36,17 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
-import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.audit.AuditLogService;
 import org.thingsboard.server.dao.customer.CustomerService;
-import org.thingsboard.server.dao.sql.factoryUrl.entity.FactoryURLAppTableEntity;
-import org.thingsboard.server.dao.sql.factoryUrl.service.FactoryURLAppTableService;
 import org.thingsboard.server.dao.user.UserService;
-import org.thingsboard.server.service.security.auth.ProviderEnums;
-import org.thingsboard.server.service.security.exception.UserDoesNotExistException;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.model.UserPrincipal;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 import ua_parser.Client;
 
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Component
@@ -57,20 +57,16 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
     private final UserService userService;
     private final CustomerService customerService;
     private final AuditLogService auditLogService;
-    private final FactoryURLAppTableService factoryURLAppTableService;
 
     @Autowired
     public RestAuthenticationProvider(final UserService userService,
                                       final CustomerService customerService,
                                       final SystemSecurityService systemSecurityService,
-                                      final AuditLogService auditLogService,
-                                      final  FactoryURLAppTableService factoryURLAppTableService
-                                      ) {
+                                      final AuditLogService auditLogService) {
         this.userService = userService;
         this.customerService = customerService;
         this.systemSecurityService = systemSecurityService;
         this.auditLogService = auditLogService;
-        this.factoryURLAppTableService =factoryURLAppTableService;
     }
 
     @Override
@@ -81,24 +77,22 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         if (!(principal instanceof UserPrincipal)) {
             throw new BadCredentialsException("Authentication Failed. Bad user principal.");
         }
+
         UserPrincipal userPrincipal =  (UserPrincipal) principal;
         if (userPrincipal.getType() == UserPrincipal.Type.USER_NAME) {
             String username = userPrincipal.getValue();
-            LoginRequest loginRequest = (LoginRequest) authentication.getCredentials();
-
-            return authenticateByUsernameAndPassword(authentication, userPrincipal, username, loginRequest);
+            String password = (String) authentication.getCredentials();
+            return authenticateByUsernameAndPassword(authentication, userPrincipal, username, password);
         } else {
             String publicId = userPrincipal.getValue();
             return authenticateByPublicId(userPrincipal, publicId);
         }
     }
 
-    private Authentication authenticateByUsernameAndPassword(Authentication authentication, UserPrincipal userPrincipal, String username, LoginRequest loginRequest) {
-        String  password  =loginRequest.getPassword();
+    private Authentication authenticateByUsernameAndPassword(Authentication authentication, UserPrincipal userPrincipal, String username, String password) {
         User user = new User();
         if(isEmail(username)) {
-             user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
-             checkUserLogin(user,loginRequest);
+              user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
          }else {
             user = userService.findByPhoneNumber(username);
         }
@@ -232,58 +226,5 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 //            return true;
 //        else
 //            return false;
-    }
-
-
-
-    private  void checkUserLogin(User user,LoginRequest loginRequest)
-    {
-        if(user.getAuthority().equals(Authority.SYS_ADMIN))
-        {
-                 return;
-        }
-        if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
-        {
-            FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
-            if(factoryURLAppTableEntity == null)
-            {
-                log.info("查询不到配置表信息【FACTORY_URL_APP_TABLE】入参为{}",loginRequest.getAppUrl());
-               throw  new UserDoesNotExistException(" user does not exist ");
-            }
-            loginRequest.setFactoryId(factoryURLAppTableEntity.getFactoryId());
-        }
-
-          String userType = user.getType();
-          String factoryId =loginRequest.getFactoryId();
-          if(loginRequest.getLoginPlatform().equals(ProviderEnums.Intranet_1.getCode()))
-          {
-               if(!userType.equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
-                {
-                    log.info("(内网)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                     throw new UserDoesNotExistException("User not found: " + user.getEmail());
-                }
-
-                  if(StringUtils.isEmpty(factoryId))
-                  {
-                      log.info("(工厂为空)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                      throw new UserDoesNotExistException("User not found: " + user.getEmail());
-                  }
-
-                  if(!user.getFactoryId().equals(UUID.fromString(factoryId)))
-                  {
-                      log.info("(工厂不等)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                      throw new UserDoesNotExistException("User not found: " + user.getEmail());
-                  }
-
-          }else {
-              //默认是平台的
-              if(!userType.equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
-              {
-                  log.info("(默认是平台的)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                  throw new UserDoesNotExistException("User not found: " + user.getEmail());
-              }
-          }
-
-
     }
 }
