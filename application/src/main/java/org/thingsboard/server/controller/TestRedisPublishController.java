@@ -1,6 +1,5 @@
 package org.thingsboard.server.controller;
 
-import controller.test2.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -28,7 +27,7 @@ public class TestRedisPublishController {
         System.out.println("执行发布");
         redisTemplate.convertAndSend("channel1", "Hello, I'm Tom!");
     }
-
+/*
     @GetMapping("/publish2")
     @ResponseStatus(HttpStatus.OK)
     public void publish2() throws InterruptedException {
@@ -39,7 +38,7 @@ public class TestRedisPublishController {
         pub.sendMessage("dddchannel", "我发消息了");
         //pub.sendMessage("cccchannel", u);
         Thread.sleep(100);//jackson 反向序列化慢
-    }
+    }*/
 
     @GetMapping("/publish3")
     public void publish3(){

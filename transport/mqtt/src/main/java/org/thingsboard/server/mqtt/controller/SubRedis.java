@@ -31,12 +31,12 @@ public class SubRedis implements MessageListener {
      */
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        System.out.println(message.toString());
+        System.out.println("收到消息："+ message.toString());
 
-        byte[] body = message.getBody();//请使用valueSerializer
+        /*byte[] body = message.getBody();//请使用valueSerializer
         byte[] channel = message.getChannel();
         String msg = (String)stringRedisSerializer.deserialize(body);
         String topic = (String)stringRedisSerializer.deserialize(channel);
-        System.out.println("我是sub2,监听"+topic+",我收到消息："+msg);
+        System.out.println("我是sub2,监听"+topic+",我收到消息："+msg);*/
     }
 }
