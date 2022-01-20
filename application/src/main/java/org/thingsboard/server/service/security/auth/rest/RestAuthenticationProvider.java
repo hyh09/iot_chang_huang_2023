@@ -244,15 +244,14 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
                     log.info("(内网)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
                      throw new UsernameNotFoundException("User not found: " + user.getEmail());
                 }
-//               if(StringUtils.isEmpty(loginRequest.getAppUrl()))
-//              {
+
                   if(StringUtils.isEmpty(factoryId))
                   {
-                      log.info("(工厂不等)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
+                      log.info("(工厂为空)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
                       throw new UsernameNotFoundException("User not found: " + user.getEmail());
                   }
 
-                  if(!user.getFactoryId().equals(factoryId))
+                  if(!user.getFactoryId().equals(UUID.fromString(factoryId)))
                   {
                       log.info("(工厂不等)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
                       throw new UsernameNotFoundException("User not found: " + user.getEmail());

@@ -78,10 +78,6 @@ public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingF
        if (StringUtils.isBlank(loginRequest.getUsername()) || StringUtils.isBlank(loginRequest.getPassword())) {
             throw new AuthenticationServiceException("Username or Password not provided");
         }
-       if(StringUtils.isBlank(loginRequest.getLoginPlatform()))
-       {
-           throw new AuthenticationServiceException("登录失败!");
-       }
 
         UserPrincipal principal = new UserPrincipal(UserPrincipal.Type.USER_NAME, loginRequest.getUsername());
 
