@@ -17,12 +17,20 @@ package org.thingsboard.server.mqtt;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.thingsboard.server.mqtt.controller.SubRedis;
 
 import java.util.Arrays;
 
+@SpringBootApplication
 @SpringBootConfiguration
 @EnableAsync
 @EnableScheduling
@@ -45,5 +53,18 @@ public class ThingsboardMqttTransportApplication {
             return modifiedArgs;
         }
         return args;
+    }
+
+    @Bean
+    MessageListenerAdapter messageListener() {
+        return new MessageListenerAdapter(new SubRedis());
+    }
+
+    @Bean
+    RedisMessageListenerContainer redisContainer(RedisConnectionFactory factory) {
+        final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(factory);
+        container.addMessageListener(messageListener(), new ChannelTopic("dictIssue"));
+        return container;
     }
 }
