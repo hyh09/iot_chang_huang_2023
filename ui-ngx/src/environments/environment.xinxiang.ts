@@ -23,6 +23,5 @@ export const environment = {
   supportedLangs: SUPPORTED_LANGS,
   defaultLang: 'zh_CN',
   loginPlatform: 1,
-  factoryId: '',
-  host: 'http://iiot.newtech-textile.com'
+  factoryId: '24d0aa00-589c-11ec-afcd-2bd77acada1c'
 };
