@@ -433,16 +433,6 @@ public class UserController extends BaseController  {
         }
     }
 
-
-
-    @RequestMapping("/user/test")
-    @ResponseBody
-    public  String  get()
-    {
-        return "hello world";
-    }
-
-
     @ApiOperation(value = "用户管理界面下的修改密码")
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
@@ -709,6 +699,9 @@ public class UserController extends BaseController  {
 
 
     }
+
+
+
 
 
     private  void checkEmailAndPhone(User  user)

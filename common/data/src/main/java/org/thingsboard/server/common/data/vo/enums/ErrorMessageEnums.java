@@ -16,6 +16,7 @@ public enum  ErrorMessageEnums {
     SING_ON_USER_INVALID("9"," 无效的用户名或密码  ！","Invalid username or password"),
     SING_ON_AUTHENTICATION("10"," 用户帐户未激活 ！","User account is not active"),
     PARAMETER_NOT_NULL("11","入参错误！"," Input parameter error "),
+    USER_NOT_EXIST("12","用户不存在！"," user does not exist ")
     ;
 
 
