@@ -362,6 +362,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     @SuppressWarnings("all")
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
             var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
             if (keyList.isEmpty())
@@ -396,6 +397,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
         } else {
+            long a1 = System.currentTimeMillis();
             var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
             if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
