@@ -52,6 +52,7 @@ import java.util.UUID;
                 @ConstructorResult(    targetClass = CensusSqlByDayEntity.class,
                 columns = {
                         @ColumnResult(name = "date", type = LocalDate.class),
+                        @ColumnResult(name="name",type = String.class),
                         @ColumnResult(name = "entity_id",type = UUID.class),
                         @ColumnResult(name = "water_added_value",type = String.class),
                         @ColumnResult(name = "electric_added_value",type = String.class),
@@ -105,6 +106,11 @@ public class CensusSqlByDayEntity  extends AbstractStatisticalDataEntity {
     private  String historyWater;
 
 
+    @Transient
+    @Column(name = "name")
+    private  String  deviceName;
+
+
     public CensusSqlByDayEntity(
             LocalDate date,
             String incrementCapacity, String historyCapacity, String incrementElectric,
@@ -126,11 +132,13 @@ public class CensusSqlByDayEntity  extends AbstractStatisticalDataEntity {
 
 
     public CensusSqlByDayEntity( LocalDate date,
+                                 String deviceName,
                                  UUID entityId,
                                  String waterAddedValue,
                                  String electricAddedValue,
                                  String gasAddedValue) {
         this.date = date;
+        this.deviceName = deviceName;
         this.entityId = entityId;
         this.waterAddedValue = waterAddedValue;
         this.electricAddedValue = electricAddedValue;

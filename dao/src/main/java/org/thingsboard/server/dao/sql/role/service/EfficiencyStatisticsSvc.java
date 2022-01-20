@@ -10,6 +10,8 @@ import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
@@ -147,6 +149,13 @@ public interface EfficiencyStatisticsSvc {
      *
      */
     ResultHomeEnergyAppVo queryAppThreePeriodsEnergy(TsSqlDayVo vo);
+
+
+    /**
+     * PC端能耗 top-10
+     * @return
+     */
+   List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo);
 
 
 
