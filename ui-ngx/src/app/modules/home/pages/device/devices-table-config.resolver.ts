@@ -181,9 +181,9 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
       new DateEntityTableColumn<DeviceInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<DeviceInfo>('name', 'device.name', '20%'),
       new EntityTableColumn<DeviceInfo>('type', 'device-profile.device-profile', '20%'),
-      new EntityTableColumn<DeviceInfo>('factoryName', 'device-mng.factory', '20%'),
-      new EntityTableColumn<DeviceInfo>('workshopName', 'device-mng.work-shop', '20%'),
-      new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%')
+      new EntityTableColumn<DeviceInfo>('factoryName', 'device-mng.factory', '20%', (entity) => (entity.factoryName || ''), () => ({}), false),
+      new EntityTableColumn<DeviceInfo>('workshopName', 'device-mng.work-shop', '20%', (entity) => (entity.workshopName || ''), () => ({}), false),
+      new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%', (entity) => (entity.productionLineName || ''), () => ({}), false)
       // new EntityTableColumn<DeviceInfo>('label', 'device.label', '25%')
     ];
     if (deviceScope === 'tenant') {
