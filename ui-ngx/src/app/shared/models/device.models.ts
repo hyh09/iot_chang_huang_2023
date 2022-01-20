@@ -699,6 +699,9 @@ export interface DeviceInfo extends Device {
   customerTitle: string;
   customerIsPublic: boolean;
   deviceProfileName: string;
+  factoryName?: string;
+  workshopName?: string;
+  productionLineName?: string;
 }
 
 export enum DeviceCredentialsType {
