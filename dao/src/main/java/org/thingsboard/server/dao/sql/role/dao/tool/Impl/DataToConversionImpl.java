@@ -17,11 +17,13 @@ import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
+import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
@@ -43,6 +45,8 @@ public class DataToConversionImpl implements DataToConversionSvc {
     @Autowired private WorkshopRepository workshopRepository;
     @Autowired private ProductionLineRepository productionLineRepository;
     @Autowired private   DictDeviceRepository dictDeviceRepository;
+    @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+
 
 
 
@@ -160,6 +164,35 @@ public class DataToConversionImpl implements DataToConversionSvc {
 
 
     /**
+     * 效能的历史的返回
+     * @param energyHistoryMinuteEntities
+     * @return
+     */
+    @Override
+    public List<Map> resultProcessByEnergyHistoryMinuteEntity(List<EnergyHistoryMinuteEntity> energyHistoryMinuteEntities,String deviceName) {
+        if(CollectionUtils.isEmpty(energyHistoryMinuteEntities))
+        {
+            return new ArrayList<>();
+        }
+         //返回标题-能耗的
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        List<Map> mapList = new ArrayList<>();
+        for(EnergyHistoryMinuteEntity m:energyHistoryMinuteEntities)
+        {
+            Map  map1 = new HashMap();
+            map1.put("设备名称",deviceName);
+            map1.put("createdTime",m.getTs());
+            map1.put(getHomeKeyNameOnlyUtilNeW(KeyTitleEnums.key_water,mapNameToVo),m.getWaterValue());
+            map1.put(getHomeKeyNameOnlyUtilNeW(KeyTitleEnums.key_gas,mapNameToVo),m.getGasValue());
+            map1.put(getHomeKeyNameOnlyUtilNeW(KeyTitleEnums.key_cable,mapNameToVo),m.getCapacityValue());
+            mapList.add(map1);
+        }
+
+        return mapList;
+
+    }
+
+    /**
      * 翻译工厂的名称
      * @param factoryId
      * @param mapFactoryCache 局部map
@@ -274,6 +307,20 @@ public class DataToConversionImpl implements DataToConversionSvc {
         todayVo.setValue(filterEmpty(value));
         todayVo.setTotalValue(filterEmpty(historyValue));
         return  todayVo;
+    }
+
+
+    /**
+     * 能耗分析表头方法
+     * @param enums 定义的枚举类
+     * @param mapNameToVo 初始化数据
+     * @return
+     */
+    private  String getHomeKeyNameOnlyUtilNeW(KeyTitleEnums enums, Map<String,DictDeviceGroupPropertyVO> mapNameToVo)
+    {
+        DictDeviceGroupPropertyVO  dataVo= mapNameToVo.get(enums.getgName());
+        String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
+        return ""+title+" ("+dataVo.getUnit()+")";
     }
 
 

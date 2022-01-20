@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 
@@ -187,48 +189,40 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     }
 
 
-//    /**
-//     * sql片段
-//     * @param queryTsKvVo
-//     * @param sonSql01
-//     * @param param
-//     */
-//    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
-//    {
-//        if(queryTsKvVo.getTenantId() != null)
-//        {
-//            sonSql01.append(" and  d1.tenant_id = :tenantId");
-//            param.put("tenantId", queryTsKvVo.getTenantId());
-//            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
-//
-//        }
-//        if(queryTsKvVo.getFactoryId() != null)
-//        {
-//            sonSql01.append(" and  d1.factory_id = :factoryId");
-//            param.put("factoryId", queryTsKvVo.getFactoryId());
-//        }
-//        if(queryTsKvVo.getWorkshopId() != null)
-//        {
-//            sonSql01.append(" and  d1.workshop_id = :workshopId");
-//            param.put("workshopId", queryTsKvVo.getWorkshopId());
-//        }
-//        if(queryTsKvVo.getProductionLineId() != null)
-//        {
-//            sonSql01.append(" and  d1.production_line_id = :productionLineId");
-//            param.put("productionLineId", queryTsKvVo.getProductionLineId());
-//        }
-//        if(queryTsKvVo.getDeviceId()  != null) {
-//            sonSql01.append(" and  d1.id = :did");
-//            param.put("did", queryTsKvVo.getDeviceId());
-//        }
-//     }
-
-
-
-
-
-
-
+    /**
+     * 接口描述:  PC端的能耗今日排行版数据
+     * @param vo
+     * @return
+     */
+    public List<CensusSqlByDayEntity> queryTodayEffceency(PcTodayEnergyRaningVo vo)
+    {
+        Map<String, Object> param = new HashMap<>();
+        param.put("todayDate", vo.getDate());
+        StringBuffer  sql = new StringBuffer();
+        StringBuffer  sonSql01 = new StringBuffer();
+        sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        sql.append(" select h1.date,h1.entity_id,d1.name,h1.water_added_value,h1.gas_added_value,h1.electric_added_value  ")
+                .append(" from  hs_statistical_data h1 ,device d1")
+                .append("  where h1.entity_id =d1.id  ")
+                .append(" and h1.\"date\" =:todayDate")
+                .append(sonSql01);
+        KeyTitleEnums  enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+        if(enums == KeyTitleEnums.key_water)
+        {
+          sql.append(" ORDER BY h1.water_added_value ");
+        }
+        if(enums == KeyTitleEnums.key_cable)
+        {
+            sql.append(" ORDER BY h1.electric_added_value  ");
+        }
+        if(enums == KeyTitleEnums.key_gas)
+        {
+            sql.append(" ORDER BY h1.gas_added_value ");
+        }
+        sql.append("  LIMIT 10 ");
+        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_02");
+        return  list;
+    }
 
 
 

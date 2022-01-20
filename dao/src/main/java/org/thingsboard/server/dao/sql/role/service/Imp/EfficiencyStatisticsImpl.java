@@ -22,7 +22,10 @@ import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
+import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
@@ -53,6 +56,8 @@ import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
+import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
 import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
@@ -94,6 +99,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
     @Autowired private DataToConversionSvc  dataToConversionSvc;
+    @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
 
 
 
@@ -153,25 +159,48 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public Object queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink) {
-        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
+//        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
         }
         String deviceName = deviceInfo.getName();
-        //先查询能耗的属性
-        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-        queryTsKvVo.setKeys(keys1);
-        Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo,DaoUtil.toPageable(pageLink));
-        List<Map> list = page.getContent();
-        log.debug("查询当前角色下的用户绑定数据list{}",list);
-         if(CollectionUtils.isEmpty(list))
-         {
-             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
-         }
-        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
-        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+      return   energyHistoryMinuteSvc.queryTranslateTitle(queryTsKvVo,deviceName,pageLink);
+
+//        //先查询能耗的属性
+//        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+//        queryTsKvVo.setKeys(keys1);
+//        Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo,DaoUtil.toPageable(pageLink));
+//        List<Map> list = page.getContent();
+//        log.debug("查询当前角色下的用户绑定数据list{}",list);
+//         if(CollectionUtils.isEmpty(list))
+//         {
+//             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+//         }
+//        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
+//        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
+
+    /**
+     * 查询产能历史
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     */
+    @Override
+    public  PageData<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
+        if(deviceInfo == null)
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
+        }
+        String deviceName = deviceInfo.getName();
+        PageData<EnergyHistoryMinuteEntity>  page =  energyHistoryMinuteSvc.queryByDeviceIdAndTs(queryTsKvVo,pageLink);
+        List<EnergyHistoryMinuteEntity> list =   page.getData();
+        List<CapacityHistoryVo> capacityHistoryVos=  EnergyHistoryMinuteEntity.toCapacityHistoryVo(list,deviceName);
+        return new PageData<CapacityHistoryVo>(capacityHistoryVos, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
     @Override
@@ -760,6 +789,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return resultHomeEnergyAppVo;
     }
 
+
+    @Override
+    public List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo) {
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryTodayEffceency(vo);
+      return    dataVoToResultEnergyTopTenVo(entities,vo);
+
+    }
+
+
+
+
     /**
      * 获取当前租户的第一个工厂id
      * @param tenantId 当前登录人的租户
@@ -1307,6 +1347,38 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         vo.setUnit(properties.getUnit());
         resultList.add(vo);
         return  resultList;
+
+    }
+
+
+
+
+    private  List<ResultEnergyTopTenVo>  dataVoToResultEnergyTopTenVo(List<CensusSqlByDayEntity>  entities ,PcTodayEnergyRaningVo vo)
+    {
+        if(CollectionUtils.isEmpty(entities))
+        {
+            return  new ArrayList<>();
+        }
+        KeyTitleEnums  enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+        return    entities.stream().map(m1 ->{
+            ResultEnergyTopTenVo  vo1= new ResultEnergyTopTenVo();
+            vo1.setDeviceId(m1.getEntityId());
+            vo1.setDeviceName(m1.getDeviceName());
+            if(enums == KeyTitleEnums.key_water)
+            {
+                vo1.setValue(StringUtils.isNotEmpty(m1.getWaterAddedValue())?m1.getWaterAddedValue():"0");
+            }
+            if(enums == KeyTitleEnums.key_cable)
+            {
+                vo1.setValue(StringUtils.isNotEmpty(m1.getElectricAddedValue())?m1.getElectricAddedValue():"0");
+            }
+            if(enums == KeyTitleEnums.key_gas)
+            {
+                vo1.setValue(StringUtils.isNotEmpty(m1.getGasAddedValue())?m1.getGasAddedValue():"0");
+            }
+            return  vo1;
+        }).collect(Collectors.toList());
+
 
     }
 

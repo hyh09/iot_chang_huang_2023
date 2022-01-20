@@ -6,6 +6,7 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -48,5 +49,15 @@ public interface DataToConversionSvc {
 
 
     List<AppDeviceEnergyVo>   resultProcessingByEnergyApp(List<EnergyEffciencyNewEntity> pageList, Map<String, DictDeviceGroupPropertyVO> mapNameToVo,TenantId tenantId);
+
+
+    /**
+     * 查询历史能耗的数据
+        数据返回的处理
+     * @param energyHistoryMinuteEntities
+     * @param name 设备名称
+     * @return
+     */
+    List<Map> resultProcessByEnergyHistoryMinuteEntity(List<EnergyHistoryMinuteEntity> energyHistoryMinuteEntities,String name);
 
 }

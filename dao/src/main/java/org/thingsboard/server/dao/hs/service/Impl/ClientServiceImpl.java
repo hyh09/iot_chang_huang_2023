@@ -35,6 +35,7 @@ import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.InitEntity;
 import org.thingsboard.server.dao.hs.dao.InitRepository;
+import org.thingsboard.server.dao.hs.entity.bo.FactoryDetailBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
@@ -42,9 +43,7 @@ import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.enums.InitScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -70,6 +69,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -177,6 +177,41 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 查询设备id列表
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @Override
+    @SuppressWarnings("all")
+    public <T extends FactoryDeviceQuery> List<Device> listSimpleDevicesByQuery(TenantId tenantId, T t) {
+        var cb = entityManager.getCriteriaBuilder();
+        var query = cb.createQuery(DeviceEntity.class);
+        var root = query.from(DeviceEntity.class);
+        query.multiselect(root.<UUID>get("id"), root.get("name"));
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+        predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+        if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+            // do nothing
+        } else if (!StringUtils.isBlank(t.getDeviceId())) {
+            predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+        } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+            predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+        } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+            predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+        } else if (!StringUtils.isBlank(t.getFactoryId())) {
+            predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+        } else {
+            predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+        }
+        query.orderBy(cb.desc(root.get("createdTime")));
+        query.where(predicates.toArray(new Predicate[0]));
+
+        return DaoUtil.convertDataList(entityManager.createQuery(query).getResultList());
+    }
+
+    /**
      * 分页查询设备列表
      *
      * @param tenantId 租户Id
@@ -195,6 +230,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList) {
+        if (allDeviceIdList.isEmpty())
+            return Maps.newHashMap();
         if (persistToTelemetry) {
             Map<String, Boolean> map = new HashMap<>();
             for (UUID uuid : allDeviceIdList) {
@@ -362,37 +399,18 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         } else {
             long a1 = System.currentTimeMillis();
             var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
-            long a2 = System.currentTimeMillis();
-            log.info("方法findAllKeyIdsByEntityId执行时间："+(a2-a1));
-
-            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
-            long a3 = System.currentTimeMillis();
-            log.info("方法findAllByKeyIdIn执行时间："+(a3-a2));
-
             if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
-
-            var pageData = this.tsRepository.findTss(deviceId.getId(), Sets.newHashSet(keyIds), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
-            long a4 = System.currentTimeMillis();
-            log.info("方法findTss执行时间："+(a4-a3));
-
+            var latestKeyId = Optional.ofNullable(this.tsLatestRepository.findLatestKey(deviceId.getId())).orElse(keyIds.get(0));
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
+            
+            var pageData = this.tsRepository.findTss(deviceId.getId(), latestKeyId, timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
             if (pageData.getContent().isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
-
+            
             var time1 = pageData.getContent().get(0);
             var time2 = pageData.getContent().get(pageData.getContent().size() - 1);
-
-            List<TsKvEntity> kvEntityResult = Lists.newArrayList();
-            if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection())) {
-                kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsAsc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
-                long a5 = System.currentTimeMillis();
-                log.info("排序方法findAllByStartTsAndEndTsOrderByTsAsc执行时间："+(a5-a4));
-            } else {
-                long a = System.currentTimeMillis();
-                kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
-                long b = System.currentTimeMillis();
-                log.info("方法findAllByStartTsAndEndTsOrderByTsDesc执行时间为："+ (b-a));
-            }
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
 
             List<Map<String, Object>> result = new ArrayList<>();
             Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
@@ -406,8 +424,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
             });
-            long en = System.currentTimeMillis();
-            log.info("接口执行时间："+(en - sta));
+            
             return new PageData<>(result, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
         }
     }
@@ -703,11 +720,56 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    @Override
+    public List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId) {
+        return this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+    }
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    @Override
+    public List<String> listDeviceKeys(TenantId tenantId, UUID deviceId) {
+        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+        if (keyIds.isEmpty())
+            return Lists.newArrayList();
+        return this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().map(TsKvDictionary::getKey).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据当前登录人获得工厂层级列表
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 工厂层级列表
+     */
+    @Override
+    public FactoryDetailBO getFactoryHierarchy(TenantId tenantId, UUID factoryId) {
+        FactoryDetailBO factoryBO = new FactoryDetailBO();
+        CompletableFuture.allOf(this.factoryRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setFactories(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.workshopRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setWorkshops(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.productionLineRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setProductionLines(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setDevices(v.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList())))).join();
+        return factoryBO;
+    }
+
+    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id
      * @param t        extends FactoryDeviceQuery
      */
+    @SuppressWarnings("all")
     public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -731,6 +793,79 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
+    }
+
+    /**
+     * 查询历史遥测数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 历史遥测数据
+     */
+    @Override
+    @SuppressWarnings("all")
+    public List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        if (this.commonComponent.isPersistToCassandra()) {
+            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            if (keyList.isEmpty())
+                return Lists.newArrayList();
+
+            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), 1, Aggregation.COUNT, timePageLink.getSortOrder().getDirection().toString()))
+                    .collect(Collectors.toList());
+
+            var temp = this.tsService.findAll(tenantId, deviceId, tempQueries).get()
+                    .stream().map(KvEntry::getValue).map(e -> Integer.valueOf(String.valueOf(e))).collect(Collectors.toList());
+            if (temp.isEmpty())
+                return Lists.newArrayList();
+            var count = temp.stream().mapToInt(Integer::intValue).sum();
+
+            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
+                    .collect(Collectors.toList());
+
+            var KvResult = this.tsService.findAll(tenantId, deviceId, queries).get();
+            List<Map<String, Object>> result = new ArrayList<>();
+            Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
+            if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection()))
+                KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs)).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+            else
+                KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+            resultMap.forEach((k, v) -> {
+                v.put(HSConstants.CREATED_TIME, k);
+                result.add(v);
+            });
+            var total = result.size();
+
+            return result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
+        } else {
+            var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
+            if (keyIds.isEmpty())
+                return Lists.newArrayList();
+            var latestKeyId = Optional.ofNullable(this.tsLatestRepository.findLatestKey(deviceId.getId())).orElse(keyIds.get(0));
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
+            
+            var pageData = this.tsRepository.findTss(deviceId.getId(), latestKeyId, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getPageSize(), Math.max(0L, (timePageLink.getPage() - 1) * timePageLink.getPageSize()));
+            if (pageData.isEmpty())
+                return Lists.newArrayList();
+            
+            var time1 = pageData.get(0);
+            var time2 = pageData.get(pageData.size() - 1);
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+            List<Map<String, Object>> result = new ArrayList<>();
+            Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
+            kvEntityResult.stream().map(e -> {
+                e.setStrKey(keyIdToKeyMap.getOrDefault(e.getKey(), HSConstants.NULL_STR));
+                return e;
+            }).map(TsKvEntity::toData).forEach(v -> {
+                resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v));
+            });
+            resultMap.forEach((k, v) -> {
+                v.put(HSConstants.CREATED_TIME, k);
+                result.add(v);
+            });
+            
+            return result;
+        }
     }
 
     /**
