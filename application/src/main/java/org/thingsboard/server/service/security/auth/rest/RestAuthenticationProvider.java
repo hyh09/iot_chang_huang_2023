@@ -16,12 +16,9 @@
 package org.thingsboard.server.service.security.auth.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,14 +36,13 @@ import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.dao.audit.AuditLogService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.user.UserService;
+import org.thingsboard.server.service.security.auth.ProviderEnums;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.model.UserPrincipal;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 import ua_parser.Client;
 
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 @Component
@@ -77,22 +73,33 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         if (!(principal instanceof UserPrincipal)) {
             throw new BadCredentialsException("Authentication Failed. Bad user principal.");
         }
-
         UserPrincipal userPrincipal =  (UserPrincipal) principal;
         if (userPrincipal.getType() == UserPrincipal.Type.USER_NAME) {
             String username = userPrincipal.getValue();
-            String password = (String) authentication.getCredentials();
-            return authenticateByUsernameAndPassword(authentication, userPrincipal, username, password);
+            LoginRequest loginRequest = (LoginRequest) authentication.getCredentials();
+
+            return authenticateByUsernameAndPassword(authentication, userPrincipal, username, loginRequest);
         } else {
             String publicId = userPrincipal.getValue();
             return authenticateByPublicId(userPrincipal, publicId);
         }
     }
 
-    private Authentication authenticateByUsernameAndPassword(Authentication authentication, UserPrincipal userPrincipal, String username, String password) {
+    private Authentication authenticateByUsernameAndPassword(Authentication authentication, UserPrincipal userPrincipal, String username, LoginRequest loginRequest) {
+        String  password  =loginRequest.getPassword();
+        String  loginPlatform = loginRequest.getLoginPlatform();
+        String factoryId = loginRequest.getFactoryId();
         User user = new User();
         if(isEmail(username)) {
-              user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
+             user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
+            if(StringUtils.isEmpty(loginPlatform) || loginPlatform.equals(ProviderEnums.platform_0.getCode())) {
+                  //平台
+//               String userType =  user.getType();
+//               user.get
+//               if(StringUtils.isEmpty(userType))
+//               if(userType.equals(CreatorTypeEnum.TENANT_CATEGORY))
+            }
+
          }else {
             user = userService.findByPhoneNumber(username);
         }
