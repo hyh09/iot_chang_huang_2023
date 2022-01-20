@@ -259,7 +259,7 @@ public abstract class AbstractWebTest {
         this.token = null;
         this.refreshToken = null;
         this.username = null;
-        JsonNode tokenInfo = readResponse(doPost("/api/auth/login", new LoginRequest(username, password)).andExpect(status().isOk()), JsonNode.class);
+        JsonNode tokenInfo = readResponse(doPost("/api/auth/login", new LoginRequest(username, password,"","","")).andExpect(status().isOk()), JsonNode.class);
         validateAndSetJwtToken(tokenInfo, username);
     }
 
