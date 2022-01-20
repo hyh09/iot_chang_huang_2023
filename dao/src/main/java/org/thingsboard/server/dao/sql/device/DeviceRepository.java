@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.scheduling.annotation.Async;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.vo.device.DeviceDataSvc;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
@@ -33,6 +34,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by Valerii Sosliuk on 5/6/2017.
@@ -44,6 +46,13 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> findAllByTenantIdAndDictDeviceId(UUID tenantId, UUID dictDeviceId);
 
     List<DeviceEntity> findAllByTenantIdAndDictDeviceIdIn(UUID tenantId, Set<UUID> dictDeviceIds);
+
+    @Async
+    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+            "t.tenantId = :tenantId " +
+            "order by t.createdTime desc")
+    CompletableFuture<List<DeviceEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
+
 
     @Query("SELECT new org.thingsboard.server.dao.model.sql.DeviceInfoEntity(d, c.title, c.additionalInfo, p.name) " +
             "FROM DeviceEntity d " +

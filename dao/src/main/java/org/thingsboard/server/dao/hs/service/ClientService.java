@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.hs.entity.bo.FactoryDetailBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
@@ -19,6 +20,7 @@ import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.entity.vo.FactoryHierarchyResult;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -55,6 +57,14 @@ public interface ClientService {
      * @param t        extends FactoryDeviceQuery
      */
     <T extends FactoryDeviceQuery> List<Device> listDevicesByQuery(TenantId tenantId, T t);
+
+    /**
+     * 查询设备id列表
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    <T extends FactoryDeviceQuery> List<Device> listSimpleDevicesByQuery(TenantId tenantId, T t);
 
     /**
      * 分页查询设备列表
@@ -270,4 +280,42 @@ public interface ClientService {
      * @return 产线
      */
     ProductionLine getFirstProductionLineByWorkshopIdAndProductionLineName(TenantId tenantId, UUID workshopId, String productionLineName);
+
+    /**
+     * 根据当前登录人获得工厂层级列表
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 工厂层级列表
+     */
+    FactoryDetailBO getFactoryHierarchy(TenantId tenantId, UUID factoryId);
+
+    /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    List<String> listDeviceKeys(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 查询历史遥测数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 历史遥测数据
+     */
+    List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
+
 }
