@@ -56,6 +56,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.config.PubReids;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -72,8 +73,6 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
-import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
-import org.thingsboard.server.transport.mqtt.MqttTransportServerInitializer;
 import org.thingsboard.server.transport.mqtt.MqttTransportService;
 
 import javax.annotation.Nullable;
@@ -1079,7 +1078,7 @@ public class DeviceController extends BaseController {
     }
 
     @Autowired
-    private Pub1 pub;
+    private PubReids pub;
 
     @ApiOperation("设备配置下发")
     @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
@@ -1089,7 +1088,7 @@ public class DeviceController extends BaseController {
         log.info("/deviceIssue设备字典下发"+ new Gson().toJson(deviceIssueDto));
         //获取Mqtt实例
        // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
-        MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
+        //MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
         /*log.info("缓存取值："+handler.toString());
         log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
         log.info("handler值：" + handler.toString());
@@ -1141,17 +1140,22 @@ public class DeviceController extends BaseController {
             mapIssue.put("DRIVER_CONFIG",groupMap);
             //下发网关
             if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
+                List<String> gatewayIds = deviceIssueDto.getDeviceList().stream().distinct().map(e -> e.getGatewayId()).collect(Collectors.toList());
+                if(!CollectionUtils.isEmpty(gatewayIds)){
+                    Map publishRedisMap = new HashMap<>();
+                    publishRedisMap.put("body",mapIssue);
+                    publishRedisMap.put("topic",gatewayIds);
+                    pub.sendMessage("dictIssue", JSONObjectUtils.toJSONString(publishRedisMap));
+                }
+/*
                 for (DeviceIssueDto.DeviceFromIssue fromIssue : deviceIssueDto.getDeviceList()) {
                     String topic = "device/issue/" + fromIssue.getGatewayId();
                     if(topic != null ){
                         log.info("下发网关为：" + topic);
                         log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
                         String json = JSONObjectUtils.toJSONString(mapIssue);
-
-                        pub.sendMessage("dictIssue", json);
-
                         //发布mqtt消息
-                       /* if(handler != null){
+                        if(handler != null){
                             log.info("调用前：handler：" + handler.toString());
                             log.info("调用前handler内存地址：" +VM.current().addressOf(handler));
                             handler.dictIssue(topic,json);
@@ -1159,9 +1163,9 @@ public class DeviceController extends BaseController {
                             log.info("调用后handler内存地址：" +VM.current().addressOf(handler));
                         }else {
                             throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！",ThingsboardErrorCode.FAIL_VIOLATION);
-                        }*/
+                        }
                     }
-                }
+                }*/
             }
         }
         return mapIssue != null ?JSONObjectUtils.toJSONString(mapIssue) : null;

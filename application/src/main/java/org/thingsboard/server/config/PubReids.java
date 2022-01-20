@@ -1,4 +1,4 @@
-package org.thingsboard.server.controller;
+package org.thingsboard.server.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,15 +10,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 @Service
-public class Pub1 {
+public class PubReids {
     @Autowired
     @Resource(name="redisTemplate")
     private RedisTemplate<String, String> rt;
 
-    //@Autowired
     private GenericJackson2JsonRedisSerializer jackson2JsonRedisSerializer;
 
-    //Autowired
     private JdkSerializationRedisSerializer jdkSerializationRedisSerializer;
 
     @PostConstruct
