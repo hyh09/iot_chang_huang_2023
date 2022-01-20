@@ -36,8 +36,11 @@ import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.audit.AuditLogService;
 import org.thingsboard.server.dao.customer.CustomerService;
+import org.thingsboard.server.dao.sql.factoryUrl.entity.FactoryURLAppTableEntity;
+import org.thingsboard.server.dao.sql.factoryUrl.service.FactoryURLAppTableService;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.service.security.auth.ProviderEnums;
+import org.thingsboard.server.service.security.exception.UserDoesNotExistException;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.model.UserPrincipal;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
@@ -54,16 +57,20 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
     private final UserService userService;
     private final CustomerService customerService;
     private final AuditLogService auditLogService;
+    private final FactoryURLAppTableService factoryURLAppTableService;
 
     @Autowired
     public RestAuthenticationProvider(final UserService userService,
                                       final CustomerService customerService,
                                       final SystemSecurityService systemSecurityService,
-                                      final AuditLogService auditLogService) {
+                                      final AuditLogService auditLogService,
+                                      final  FactoryURLAppTableService factoryURLAppTableService
+                                      ) {
         this.userService = userService;
         this.customerService = customerService;
         this.systemSecurityService = systemSecurityService;
         this.auditLogService = auditLogService;
+        this.factoryURLAppTableService =factoryURLAppTableService;
     }
 
     @Override
@@ -229,12 +236,23 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
 
 
-    private  static  void checkUserLogin(User user,LoginRequest loginRequest)
+    private  void checkUserLogin(User user,LoginRequest loginRequest)
     {
         if(user.getAuthority().equals(Authority.SYS_ADMIN))
         {
                  return;
         }
+        if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
+        {
+            FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
+            if(factoryURLAppTableEntity == null)
+            {
+                log.info("查询不到配置表信息【FACTORY_URL_APP_TABLE】入参为{}",loginRequest.getAppUrl());
+               throw  new UserDoesNotExistException(" user does not exist ");
+            }
+            loginRequest.setFactoryId(factoryURLAppTableEntity.getFactoryId());
+        }
+
           String userType = user.getType();
           String factoryId =loginRequest.getFactoryId();
           if(loginRequest.getLoginPlatform().equals(ProviderEnums.Intranet_1.getCode()))
@@ -242,19 +260,19 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
                if(!userType.equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
                 {
                     log.info("(内网)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                     throw new UsernameNotFoundException("User not found: " + user.getEmail());
+                     throw new UserDoesNotExistException("User not found: " + user.getEmail());
                 }
 
                   if(StringUtils.isEmpty(factoryId))
                   {
                       log.info("(工厂为空)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                      throw new UsernameNotFoundException("User not found: " + user.getEmail());
+                      throw new UserDoesNotExistException("User not found: " + user.getEmail());
                   }
 
                   if(!user.getFactoryId().equals(UUID.fromString(factoryId)))
                   {
                       log.info("(工厂不等)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                      throw new UsernameNotFoundException("User not found: " + user.getEmail());
+                      throw new UserDoesNotExistException("User not found: " + user.getEmail());
                   }
 
           }else {
@@ -262,7 +280,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
               if(!userType.equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
               {
                   log.info("(默认是平台的)登录的邮箱[内网的]只能工厂类型登录:{}",user.getEmail());
-                  throw new UsernameNotFoundException("User not found: " + user.getEmail());
+                  throw new UserDoesNotExistException("User not found: " + user.getEmail());
               }
           }
 

@@ -1,5 +1,5 @@
-package org.thingsboard.server.dao.sql.factoryUrl.entity;	
-	
+package org.thingsboard.server.dao.sql.factoryUrl.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
@@ -8,6 +8,7 @@ import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 	
 /**	
@@ -18,11 +19,12 @@ import javax.persistence.Table;
 */	
 @Data	
 @Entity	
-@Table(name="FACTORY_U_R_L_APP_TABLE")	
+@Table(name="FACTORY_URL_APP_TABLE",indexes ={
+        @Index(name = "APP_URL_INDEX",columnList ="APP_URL",unique = true)
+})
 @DynamicInsert	
 @DynamicUpdate	
-//@Proxy(lazy = false)	
-@JsonIgnoreProperties(value={"hibernateLazyInitializer","handler","fieldHandler"})	
+@JsonIgnoreProperties(value={"hibernateLazyInitializer","handler","fieldHandler"})
 public class FactoryURLAppTableEntity  extends TenantBaseEntity {	
 	
 	
@@ -35,7 +37,7 @@ public class FactoryURLAppTableEntity  extends TenantBaseEntity {
     /**	
      *中文描述: app的请求url配置	
      */	
-    @Column(name="APP_URL")	
+    @Column(name="APP_URL")
     private String appUrl;	
     /**	
      *中文描述: 备注说明	
