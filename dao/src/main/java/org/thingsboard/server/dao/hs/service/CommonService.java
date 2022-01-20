@@ -114,7 +114,7 @@ public interface CommonService {
      */
     default Boolean calculateValueInMap(Map<String, Boolean> map, String str) {
         if (map == null || map.isEmpty()) return Boolean.FALSE;
-        return map.get(str);
+        return map.getOrDefault(str, false);
     }
 
     /**

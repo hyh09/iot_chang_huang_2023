@@ -4,9 +4,9 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.alarm.AlarmStatus;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.AlarmId;
+import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -196,4 +196,60 @@ public interface DeviceMonitorService {
      * @return 设备分组属性历史数据
      */
     PageData<DictDeviceGroupPropertyVO> listPageGroupPropertyHistories(TenantId tenantId, String deviceId, String groupPropertyName, TimePageLink timePageLink) throws ExecutionException, InterruptedException, ThingsboardException;
+
+    /**
+     * 获得实时监控列表数据 - 精简版
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @param pageLink 分页参数
+     * @return 实时监控列表数据
+     */
+    PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink);
+
+    /**
+     * 获得实时监控数据列表-设备在线状态
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控数据列表-设备在线状态
+     */
+    RTMonitorDeviceOnlineStatusResult getRTMonitorDeviceOnlineStatusData(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 获得实时监控数据列表-设备报警统计
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控数据列表-设备报警统计
+     */
+    List<AlarmTimesResult> getRTMonitorDeviceAlarmStatisticsResult(TenantId tenantId, FactoryDeviceQuery query);
+
+    /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    List<String> listDeviceKeys(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 查询设备历史数据-无分页
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param pageLink 分页参数
+     * @return 设备历史数据
+     */
+    List<Map<String, Object>> listDeviceTelemetryHistories(TenantId tenantId, DeviceId deviceId, TimePageLink pageLink) throws ExecutionException, InterruptedException;
 }

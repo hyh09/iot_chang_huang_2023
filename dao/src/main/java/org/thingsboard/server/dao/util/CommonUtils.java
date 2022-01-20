@@ -330,6 +330,26 @@ public class CommonUtils {
 
 
     /**
+     *  Conversion minutes
+     * @param ts
+     * @return 转换分钟
+     */
+    public  static Long getConversionMinutes(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        int second =localDateTime.getSecond();
+        localDateTime1  =  LocalDateTime.of(year,month,day,hour,minute,0,0);
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+    /**
      * localDateTime转long
      * @param localDateTime
      * @return

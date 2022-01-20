@@ -23,7 +23,7 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
     this.config.entityResources = entityTypeResources.get(EntityType.DEVICE_HISTORY);
 
     this.config.columns.push(
-      new DateEntityTableColumn<object>('createdTime', 'common.created-time', this.datePipe, '150px')
+      new DateEntityTableColumn<object>('createdTime', 'common.created-time', this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false)
     );
   }
 
