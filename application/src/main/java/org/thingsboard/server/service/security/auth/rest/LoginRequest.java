@@ -30,6 +30,7 @@ public class LoginRequest {
     //平台：0  ---  租户  type:租户
     //内网：1	  --- 工厂  type: 工厂
 
+    private  String appUrl;
 //    @JsonCreator
 //    public LoginRequest(@JsonProperty("username") String username, @JsonProperty("password") String password) {
 //        this.username = username;
@@ -39,11 +40,14 @@ public class LoginRequest {
 
     @JsonCreator
     public LoginRequest(@JsonProperty("username") String username, @JsonProperty("password") String password,
-                        @JsonProperty("factoryId") String factoryId,@JsonProperty("loginPlatform") String loginPlatform) {
+                        @JsonProperty("factoryId") String factoryId,@JsonProperty("loginPlatform") String loginPlatform,
+                        @JsonProperty("appUrl") String appUrl
+                        ) {
         this.username = username;
         this.password = password;
         this.loginPlatform=loginPlatform;
         this.factoryId = factoryId;
+        this.appUrl =appUrl;
 
     }
 
