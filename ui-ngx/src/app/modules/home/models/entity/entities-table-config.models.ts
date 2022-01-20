@@ -124,12 +124,13 @@ export class DateEntityTableColumn<T extends BaseData<HasId>> extends EntityTabl
               datePipe: DatePipe,
               width: string = '0px',
               dateFormat: string = 'yyyy-MM-dd HH:mm:ss',
+              sortable: boolean = true,
               cellStyleFunction: CellStyleFunction<T> = () => ({})) {
     super(key,
           title,
           width,
           (entity, property) => entity[property] ? datePipe.transform(entity[property], dateFormat) : '',
-          cellStyleFunction);
+          cellStyleFunction, sortable);
   }
 }
 

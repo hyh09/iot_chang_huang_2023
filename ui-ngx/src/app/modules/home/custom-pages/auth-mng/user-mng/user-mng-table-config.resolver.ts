@@ -78,10 +78,11 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.deleteEnabled = entity => (entity && entity.operationType !== 1);
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('user.add');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || (entity && entity.operationType === 1));
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 

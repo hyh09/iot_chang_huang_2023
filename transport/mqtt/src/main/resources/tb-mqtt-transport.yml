@@ -15,9 +15,9 @@
 #
 
 # If you enabled process metrics you should also enable 'web-environment'.
-spring.main.web-environment: "${WEB_APPLICATION_ENABLE:false}"
+spring.main.web-environment: "${WEB_APPLICATION_ENABLE:true}"
 # If you enabled process metrics you should set 'web-application-type' to 'servlet' value.
-spring.main.web-application-type: "${WEB_APPLICATION_TYPE:none}"
+spring.main.web-application-type: "${WEB_APPLICATION_TYPE:servlet}"
 
 server:
   # Server bind address (has no effect if web-environment is disabled).
