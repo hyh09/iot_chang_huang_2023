@@ -88,4 +88,6 @@ public interface MqttTransportAdaptor {
         payload.writeBytes(payloadInBytes);
         return new MqttPublishMessage(mqttFixedHeader, header, payload);
     }
+
+    Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx,String topic,String jsonStr);
 }

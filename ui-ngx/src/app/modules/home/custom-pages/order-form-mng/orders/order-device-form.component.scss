@@ -1,0 +1,27 @@
+.order-device-wrapper {
+  .form-item {
+    position: relative;
+    + .form-item {
+      margin-top: 1.25em;
+    }
+    mat-label {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.54);
+      display: block;
+      margin-bottom: 2px;
+      &[required]:after {
+        content: '*';
+        display: inline-block;
+        margin-left: 2px;
+      }
+    }
+    nz-select {
+      width: 100%;
+    }
+    .mat-error { 
+      font-size: 12px;
+      position: absolute;
+      top: 52px
+    }
+  }
+}

@@ -16,6 +16,7 @@
 
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { City } from '@app/core/http/custom/geography.service';
 import { COUNTRIES } from '@home/models/contact.models';
 
 @Component({
@@ -33,5 +34,10 @@ export class ContactComponent {
   @Input() isEdit: boolean;
 
   countries = COUNTRIES;
+
+  onSelectCity(cityInfo: City) {
+    const { countryName: country, cityName: city, postcode, latitude, longitude } = cityInfo;
+    this.parentForm.patchValue({ country, city, zip: postcode || '', latitude, longitude });
+  }
 
 }

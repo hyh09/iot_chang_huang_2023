@@ -10,14 +10,17 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -37,6 +40,41 @@ public class RTMonitorController extends BaseController {
     @Autowired
     DeviceMonitorService deviceMonitorService;
 
+    @Autowired
+    ClientService clientService;
+
+    /**
+     * 根据当前登录人获得工厂层级-适配
+     */
+    @ApiOperation(value = "根据当前登录人获得工厂层级-适配")
+    @GetMapping("/rtMonitor/factory/hierarchy")
+    public FactoryRedundantHierarchyResult getFactoryHierarchy() throws ThingsboardException {
+        var user = getCurrentUser();
+        UUID factoryId = null;
+        if (CreatorTypeEnum.FACTORY_MANAGEMENT.getCode().equalsIgnoreCase(user.getType())) {
+            factoryId = user.getFactoryId();
+            if (factoryId == null)
+                return new FactoryRedundantHierarchyResult();
+        }
+        return this.clientService.getFactoryHierarchy(getTenantId(), factoryId).toFactoryRedundantHierarchyResult();
+    }
+
+    /**
+     * 根据当前登录人获得工厂层级-通用
+     */
+    @ApiOperation(value = "根据当前登录人获得工厂层级-通用")
+    @GetMapping("/rtMonitor/factory/hierarchy/common")
+    public FactoryHierarchyResult getFactoryHierarchyCommon() throws ThingsboardException {
+        var user = getCurrentUser();
+        UUID factoryId = null;
+        if (CreatorTypeEnum.FACTORY_MANAGEMENT.getCode().equalsIgnoreCase(user.getType())) {
+            factoryId = user.getFactoryId();
+            if (factoryId == null)
+                return new FactoryHierarchyResult();
+        }
+        return this.clientService.getFactoryHierarchy(getTenantId(), factoryId).toFactoryHierarchyResult();
+    }
+
     /**
      * 获得实时监控数据列表
      */
@@ -46,6 +84,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
             @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
             @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+//            @ApiImplicitParam(name = "isDefaultFactory", value = "是否是默认第一个工厂", paramType = "query"),
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
             @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
@@ -57,13 +96,21 @@ public class RTMonitorController extends BaseController {
             @RequestParam int pageSize,
             @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+//            @RequestParam(required = false) Boolean isDefaultFactory,
             @RequestParam(required = false) String factoryId,
             @RequestParam(required = false) String workshopId,
             @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId) throws ThingsboardException {
+            @RequestParam(required = false) String deviceId
+    ) throws ThingsboardException {
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
-        var query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
+        FactoryDeviceQuery query;
+        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
+//        if (isDefaultFactory != null && isDefaultFactory) {
+//            var factories = this.clientService.listFactoriesByUserId(getTenantId(), getCurrentUser().getId());
+//            if (!factories.isEmpty())
+//                factoryId = factories.get(0).getId().toString();
+//            query = new FactoryDeviceQuery(factoryId, null, null, null);
         return this.deviceMonitorService.getRTMonitorData(getTenantId(), query, pageLink);
     }
 

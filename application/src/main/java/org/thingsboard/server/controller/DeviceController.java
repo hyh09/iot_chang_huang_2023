@@ -22,14 +22,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.gson.Gson;
 import com.nimbusds.jose.util.JSONObjectUtils;
-import io.netty.buffer.Unpooled;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.openjdk.jol.vm.VM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +37,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.thingsboard.mqtt.MqttClient;
-import org.thingsboard.mqtt.MqttClientConfig;
 import org.thingsboard.rule.engine.api.msg.DeviceCredentialsUpdateNotificationMsg;
 import org.thingsboard.rule.engine.api.msg.DeviceEdgeUpdateMsg;
 import org.thingsboard.server.common.data.*;
@@ -59,7 +57,6 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
-import org.thingsboard.server.config.MqttMessageListener;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -76,6 +73,10 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
+import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
+import org.thingsboard.server.transport.mqtt.MqttTransportServerInitializer;
+import org.thingsboard.server.transport.mqtt.MqttTransportService;
+import org.thingsboard.server.transport.mqtt.util.SpringUtil;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -104,6 +105,10 @@ public class DeviceController extends BaseController {
 
     @Autowired
     private TelemetryController telemetryController;
+
+    @Autowired
+    private MqttTransportService mqttTransportService;
+
 
 
     @ApiOperation("云对接查设备详情")
@@ -1043,7 +1048,7 @@ public class DeviceController extends BaseController {
 
     @ApiOperation("自定义条件查询设备列表")
     @ApiImplicitParam(name = "deviceQry",value = "入参实体",dataType = "DeviceQry",paramType="body")
-    @RequestMapping(value = "/findDeviceListByCdn", method = RequestMethod.POST)
+    @RequestMapping(value = "/findDeviceListByCdn", method = RequestMethod.GET)
     @ResponseBody
     public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
         List<DeviceVo> result = new ArrayList<>();
@@ -1079,15 +1084,22 @@ public class DeviceController extends BaseController {
     @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
     @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
     @ResponseBody
-    public Map deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
+    public String deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
+        log.info("/deviceIssue设备字典下发"+ new Gson().toJson(deviceIssueDto));
+        //获取Mqtt实例
+       // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+        log.info("DeviceController中MqttTransportService地址"+ SpringUtil.getBean(MqttTransportService.class));
+        MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
+        log.info("缓存取值："+handler.toString());
+        log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
+        log.info("handler值：" + handler.toString());
+
         //下发入参
         Map mapIssue = new HashMap();
         //设备信息
         List listIssueDevice = new ArrayList();
         //分组
         Map<String,List<Map<String,String>>> groupMap = new HashMap<>();
-        //网关令牌
-        List<String> credentials = new ArrayList();
 
         mapIssue.put("DEVICE",listIssueDevice);
         mapIssue.put("DRIVER_CONFIG",groupMap);
@@ -1125,54 +1137,31 @@ public class DeviceController extends BaseController {
             if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
                 listIssueDevice.addAll(deviceIssueDto.getDeviceList().stream().map(s->s.getDeviceName()).collect(Collectors.toList()));
             }
-            //查询网关令牌
-            List<String> gateways = deviceIssueDto.getDeviceList().stream().distinct().map(s -> s.getGatewayId()).collect(Collectors.toList());
-            if(!CollectionUtils.isEmpty(gateways)){
-                for (String gateway : gateways) {
-                    DeviceCredentials deviceCredentialsByDeviceId = deviceCredentialsService.findDeviceCredentialsByDeviceId(null, new DeviceId(toUUID(gateway)));
-                    if(deviceCredentialsByDeviceId != null){
-                        credentials.add(deviceCredentialsByDeviceId.getCredentialsId());
-                    }
-                    continue;
-                }
-            }
             mapIssue.put("DEVICE",listIssueDevice);
             mapIssue.put("DRIVER_CONFIG",groupMap);
             //下发网关
-            if(!CollectionUtils.isEmpty(credentials)){
-                for (String credential : credentials) {
-                    log.info("下发网关为：" + "device/issue/" + credential);
-                    log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
-                    /**  方法一： 使用mqttv3的mqtt **/
-                    /*TransportMqttClient transportMqttClient = new TransportMqttClient("tcp://47.96.109.1:1883");
-                    transportMqttClient.initialize();
-                    transportMqttClient.publish(JSONObjectUtils.toJSONString(mapIssue),"device/issue/" + credential);
-                    */
-
-
-                    /**  方法二： 使用平台的mqtt **/
-                    //MqttMessageListener listener = new MqttMessageListener();
-                    MqttClient mqttClient = getMqttClient(credential, null);
-                    Void unused = mqttClient.publish("device/issue/" + credential, Unpooled.wrappedBuffer(JSONObjectUtils.toJSONString(mapIssue).getBytes())).get();
-                    System.out.println(unused);
-                    /*Void unused1 = mqttClient.on("v1/devices/me/attributes/response/+", listener, MqttQoS.AT_LEAST_ONCE).get();
-                    System.out.println(unused1);
-                    */
+            if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
+                for (DeviceIssueDto.DeviceFromIssue fromIssue : deviceIssueDto.getDeviceList()) {
+                    String topic = "device/issue/" + fromIssue.getGatewayId();
+                    if(topic != null ){
+                        log.info("下发网关为：" + topic);
+                        log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
+                        String json = JSONObjectUtils.toJSONString(mapIssue);
+                        //发布mqtt消息
+                        if(handler != null){
+                            log.info("调用前：handler：" + handler.toString());
+                            log.info("调用前handler内存地址：" +VM.current().addressOf(handler));
+                            handler.dictIssue(topic,json);
+                            log.info("调用后：handler：" + handler.toString());
+                            log.info("调用后handler内存地址：" +VM.current().addressOf(handler));
+                        }else {
+                            throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！",ThingsboardErrorCode.FAIL_VIOLATION);
+                        }
+                    }
                 }
             }
         }
-        return mapIssue;
-    }
-    private MqttClient getMqttClient(String credential,MqttMessageListener listener) throws ExecutionException, InterruptedException {
-        String clientAttributeValue = RandomStringUtils.randomAlphanumeric(8);
-        MqttClientConfig clientConfig = new MqttClientConfig();
-        clientConfig.setClientId("客户端id:测试平台mqtt消息发布" + clientAttributeValue);
-        clientConfig.setUsername(credential);
-        MqttClient mqttClient = MqttClient.create(clientConfig, null);
-        mqttClient.connect("localhost", 1883).get();
-        //mqttClient.connect("localhost", 1883);
-        return mqttClient;
-
+        return mapIssue != null ?JSONObjectUtils.toJSONString(mapIssue) : null;
     }
 
 

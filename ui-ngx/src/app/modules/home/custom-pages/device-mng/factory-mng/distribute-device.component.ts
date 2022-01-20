@@ -64,9 +64,9 @@ export class DistributeDeviceComponent extends DialogComponent<DistributeDeviceC
       this.workShopList = this.allWorkShopList.filter(item => (item.factoryId === newFactoryId));
       this.form.clearValidators();
     });
-    this.form.get('workshopId').valueChanges.subscribe(newWrkshopId => {
+    this.form.get('workshopId').valueChanges.subscribe(newWorkshopId => {
       this.form.get('productionLineId').setValue('');
-      this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === newWrkshopId));
+      this.prodLineList = this.allProdLineList.filter(item => (item.workshopId === newWorkshopId));
       this.form.clearValidators();
     });
   }

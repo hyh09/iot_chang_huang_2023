@@ -165,18 +165,18 @@ export class DashboardsTableConfigResolver implements Resolve<EntityTableConfig<
       new DateEntityTableColumn<DashboardInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<DashboardInfo>('title', 'dashboard.title', '50%')
     ];
-    if (dashboardScope === 'tenant') {
-      columns.push(
-        new EntityTableColumn<DashboardInfo>('customersTitle', 'dashboard.assignedToCustomers',
-          '50%', entity => {
-            return getDashboardAssignedCustomersText(entity);
-          }, () => ({}), false),
-        new EntityTableColumn<DashboardInfo>('dashboardIsPublic', 'dashboard.public', '60px',
-          entity => {
-            return checkBoxCell(isPublicDashboard(entity));
-          }, () => ({}), false),
-      );
-    }
+    // if (dashboardScope === 'tenant') {
+    //   columns.push(
+    //     new EntityTableColumn<DashboardInfo>('customersTitle', 'dashboard.assignedToCustomers',
+    //       '50%', entity => {
+    //         return getDashboardAssignedCustomersText(entity);
+    //       }, () => ({}), false),
+    //     new EntityTableColumn<DashboardInfo>('dashboardIsPublic', 'dashboard.public', '60px',
+    //       entity => {
+    //         return checkBoxCell(isPublicDashboard(entity));
+    //       }, () => ({}), false),
+    //   );
+    // }
     return columns;
   }
 
@@ -214,24 +214,24 @@ export class DashboardsTableConfigResolver implements Resolve<EntityTableConfig<
           isEnabled: () => true,
           onAction: ($event, entity) => this.exportDashboard($event, entity)
         },
-        {
-          name: this.translate.instant('dashboard.make-public'),
-          icon: 'share',
-          isEnabled: (entity) => !isPublicDashboard(entity),
-          onAction: ($event, entity) => this.makePublic($event, entity)
-        },
-        {
-          name: this.translate.instant('dashboard.make-private'),
-          icon: 'reply',
-          isEnabled: (entity) => isPublicDashboard(entity),
-          onAction: ($event, entity) => this.makePrivate($event, entity)
-        },
-        {
-          name: this.translate.instant('dashboard.manage-assigned-customers'),
-          icon: 'assignment_ind',
-          isEnabled: () => true,
-          onAction: ($event, entity) => this.manageAssignedCustomers($event, entity)
-        }
+        // {
+        //   name: this.translate.instant('dashboard.make-public'),
+        //   icon: 'share',
+        //   isEnabled: (entity) => !isPublicDashboard(entity),
+        //   onAction: ($event, entity) => this.makePublic($event, entity)
+        // },
+        // {
+        //   name: this.translate.instant('dashboard.make-private'),
+        //   icon: 'reply',
+        //   isEnabled: (entity) => isPublicDashboard(entity),
+        //   onAction: ($event, entity) => this.makePrivate($event, entity)
+        // },
+        // {
+        //   name: this.translate.instant('dashboard.manage-assigned-customers'),
+        //   icon: 'assignment_ind',
+        //   isEnabled: () => true,
+        //   onAction: ($event, entity) => this.manageAssignedCustomers($event, entity)
+        // }
       );
     }
     if (dashboardScope === 'customer') {

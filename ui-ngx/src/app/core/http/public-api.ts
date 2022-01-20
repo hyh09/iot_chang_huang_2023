@@ -50,3 +50,4 @@ export * from './custom/role-mng.service';
 export * from './custom/system-mng.service';
 export * from './custom/tenant-menu.service';
 export * from './custom/user-mng.service';
+export * from './custom/geography.service';

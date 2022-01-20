@@ -30,6 +30,14 @@ public class ProductionLineEntity extends AbstractProductionLineEntity<Productio
         this.setTenantId(tenantId);
     }
 
+    public ProductionLineEntity(UUID id, String name, UUID factoryId, UUID workshopId) {
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setFactoryId(factoryId);
+        this.setWorkshopId(workshopId);
+    }
+
     @Override
     public ProductionLine toData() {
         return super.toProductionLine();

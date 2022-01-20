@@ -165,9 +165,29 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
                        @Param("startTs") long startTs,
                        @Param("endTs") long endTs, Pageable pageable);
 
+    @Query("SELECT distinct tskv.ts FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.ts >= :startTs AND tskv.ts < :endTs ")
+    Page<Long> findTss(@Param("entityId") UUID entityId,
+                       @Param("startTs") long startTs,
+                       @Param("endTs") long endTs, Pageable pageable);
+
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs")
     List<TsKvEntity> findAllByStartTsAndEndTs(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts asc")
+    List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsAsc(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts desc")
+    List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsDesc(@Param("entityId") UUID entityId,
                                               @Param("entityKeys") Set<Integer> keys,
                                               @Param("startTs") long startTs,
                                               @Param("endTs") long endTs);

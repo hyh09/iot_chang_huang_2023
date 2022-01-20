@@ -13,35 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const forwardUrl = "http://10.10.11.197:8080"; // http://10.10.11.197:8080  http://10.10.11.23:8080  http://10.10.10.179:8080  http://10.10.10.55:8080
-const wsForwardUrl = "ws://10.10.11.197:8080";
+const forwardUrl = "http://iot.textile-saas.huansi.net"; // http://iot.textile-saas.huansi.net  http://10.10.10.162:8080  http://10.10.11.23:8080  http://10.10.10.179:8080  http://10.10.10.55:8080
+const wsForwardUrl = "ws://iot.textile-saas.huansi.net";
 const ruleNodeUiforwardUrl = forwardUrl;
 
 const PROXY_CONFIG = {
   "/api": {
     "target": forwardUrl,
     "secure": false,
+    "changeOrigin": true
   },
   "/static/rulenode": {
     "target": ruleNodeUiforwardUrl,
     "secure": false,
+    "changeOrigin": true
   },
   "/static/widgets": {
     "target": forwardUrl,
     "secure": false,
+    "changeOrigin": true
   },
   "/oauth2": {
     "target": forwardUrl,
     "secure": false,
+    "changeOrigin": true
   },
   "/login/oauth2": {
     "target": forwardUrl,
     "secure": false,
+    "changeOrigin": true
   },
   "/api/ws": {
     "target": wsForwardUrl,
     "ws": true,
-    "secure": false
+    "secure": false,
+    "changeOrigin": true
   },
 };
 

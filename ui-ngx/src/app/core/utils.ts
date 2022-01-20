@@ -127,6 +127,10 @@ export function isEmpty(obj: any): boolean {
   return true;
 }
 
+export function isDate(value: any): boolean {
+  return value instanceof Date;
+}
+
 export function isLiteralObject(value: any) {
   return (!!value) && (value.constructor === Object);
 }
@@ -411,7 +415,7 @@ export function sortObjectKeys<T>(obj: T): T {
 }
 
 export function deepTrim<T>(obj: T): T {
-  if (isNumber(obj) || isUndefined(obj) || isString(obj) || obj === null || obj instanceof File) {
+  if (isNumber(obj) || isUndefined(obj) || isString(obj) || isDate(obj) || obj === null || obj instanceof File) {
     return obj;
   }
   return Object.keys(obj).reduce((acc, curr) => {
