@@ -35,6 +35,7 @@ export interface WorkShop extends BaseData<WorkShopId>, CommonData {
   title?: string;
   factoryId?: string;
   factoryName?: string;
+  logoImages?: string;
   bgImages?: string;
   rowType: FactoryRowType;
 }
@@ -47,6 +48,7 @@ export interface ProdLine extends BaseData<ProdLineId>, CommonData {
   workshopId?: string;
   workshopName?: string;
   rowType: FactoryRowType;
+  logoImages?: string;
 }
 
 export interface ProdDevice extends BaseData<DeviceId>, CommonData {
@@ -68,6 +70,7 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   warrantyPeriod?: string,
   picture?: string,
   fileName?: string,
+  logoImages?: string,
   comment?: string,
   standardPropertyList: Array<DeviceData>;
   propertyList?: Array<DeviceProperty>,
