@@ -162,7 +162,6 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
 
             user.setAuthority(Authority.TENANT_ADMIN);
-            user.setOperationType("0");
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
