@@ -15,13 +15,22 @@
 ///
 
 export const environment = {
+<<<<<<< HEAD
   appTitle: 'NTX IoT',
+=======
+  appTitle: 'HsIoT',
+>>>>>>> origin/prod-changshen-1.0.0
   production: true,
 // @ts-ignore
   tbVersion: TB_VERSION,
 // @ts-ignore
   supportedLangs: SUPPORTED_LANGS,
   defaultLang: 'zh_CN',
+<<<<<<< HEAD
   loginPlatform: 1,
   factoryId: '24d0aa00-589c-11ec-afcd-2bd77acada1c'
+=======
+  loginPlatform: 0,
+  factoryId: ''
+>>>>>>> origin/prod-changshen-1.0.0
 };

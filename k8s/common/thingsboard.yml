@@ -30,11 +30,11 @@ spec:
         app: tb-js-executor
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       containers:
       - name: server
         imagePullPolicy: Always
-        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-js-executor:latest
+        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-js-executor:latest
         env:
         - name: REMOTE_JS_EVAL_REQUEST_TOPIC
           value: "js_eval.requests"
@@ -68,7 +68,7 @@ spec:
         app: tb-mqtt-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-mqtt-transport-config
           configMap:
@@ -81,7 +81,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-mqtt-transport:latest
+        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-mqtt-transport:latest
         ports:
         - containerPort: 1883
           name: mqtt
@@ -146,7 +146,7 @@ spec:
         app: tb-http-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-http-transport-config
           configMap:
@@ -159,7 +159,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-http-transport:latest
+        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-http-transport:latest
         ports:
         - containerPort: 8080
           name: http
@@ -221,7 +221,7 @@ spec:
         app: tb-coap-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-coap-transport-config
           configMap:
@@ -234,7 +234,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-coap-transport:latest
+        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-coap-transport:latest
         ports:
         - containerPort: 5683
           name: coap
@@ -290,7 +290,7 @@ spec:
         app: tb-lwm2m-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-lwm2m-transport-config
           configMap:
@@ -303,7 +303,7 @@ spec:
       containers:
         - name: server
           imagePullPolicy: Always
-          image: 47.110.145.204:8084/huansiyl/thingsboard/tb-lwm2m-transport:latest
+          image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-lwm2m-transport:latest
           ports:
             - containerPort: 5685
               name: lwm2m
@@ -359,11 +359,11 @@ spec:
         app: tb-web-ui
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       containers:
       - name: server
         imagePullPolicy: Always
-        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-web-ui:latest
+        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-web-ui:latest
         ports:
         - containerPort: 8080
           name: http
