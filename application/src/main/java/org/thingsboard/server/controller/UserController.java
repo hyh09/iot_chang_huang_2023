@@ -456,11 +456,15 @@ public class UserController extends BaseController  {
          DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
         log.info("打印当前的管理人的信息:{}",securityUser);
-        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
+        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}，用户的等级:{}",securityUser.getFactoryId(),securityUser.getType(),securityUser.getUserLevel());
+
         try {
             if(user.getId() != null){
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
+            }
+            if(securityUser.getUserLevel() == 3){
+                user.setOperationType("1");
             }
 
             UserVo  vo0 = new UserVo();
