@@ -246,6 +246,8 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         {
                  return;
         }
+
+
         if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
         {
             FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
@@ -259,7 +261,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
           String userType = user.getType();
           String factoryId =loginRequest.getFactoryId();
-          if(loginRequest.getLoginPlatform().equals(ProviderEnums.Intranet_1.getCode()))
+          if(StringUtils.isNotBlank(loginRequest.getLoginPlatform()) && loginRequest.getLoginPlatform().equals(ProviderEnums.Intranet_1.getCode()))
           {
                if(!userType.equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
                 {
