@@ -37,6 +37,7 @@ import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.msg.tools.TbRateLimitsException;
 import org.thingsboard.server.service.security.exception.AuthMethodNotSupportedException;
 import org.thingsboard.server.service.security.exception.JwtExpiredTokenException;
+import org.thingsboard.server.service.security.exception.UserDoesNotExistException;
 import org.thingsboard.server.service.security.exception.UserPasswordExpiredException;
 
 import javax.servlet.ServletException;
@@ -158,7 +159,10 @@ public class ThingsboardErrorResponseHandler extends ResponseEntityExceptionHand
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         if (authenticationException instanceof BadCredentialsException || authenticationException instanceof UsernameNotFoundException) {
             mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("9"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
-        } else if (authenticationException instanceof DisabledException) {
+        }else  if(authenticationException instanceof UserDoesNotExistException){
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("12"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+        }
+        else if (authenticationException instanceof DisabledException) {
             mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("10"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         } else if (authenticationException instanceof LockedException) {
             mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("8"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
