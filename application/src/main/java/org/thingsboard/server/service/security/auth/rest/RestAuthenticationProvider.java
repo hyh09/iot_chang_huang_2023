@@ -238,6 +238,10 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private  void checkUserLogin(User user,LoginRequest loginRequest)
     {
+        if(user ==  null){
+            throw  new UserDoesNotExistException(" user does not exist ");
+        }
+        
         if(user.getAuthority().equals(Authority.SYS_ADMIN))
         {
                  return;
