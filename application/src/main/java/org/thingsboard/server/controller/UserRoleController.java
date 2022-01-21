@@ -55,10 +55,10 @@ public class UserRoleController extends BaseController{
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
         SecurityUser securityUser =  getCurrentUser();
-        entity.setOperationType("0");
         if(securityUser.getUserLevel() == 3){
             entity.setOperationType("1");
         }
+
         DataValidator.validateCode(entity.getRoleCode());
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setTenantId(securityUser.getTenantId().getId());
