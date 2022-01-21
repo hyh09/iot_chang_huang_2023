@@ -104,6 +104,13 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     @Column(name = ModelConstants.USER_USER_FACTORY_ID)
     private UUID  factoryId;
 
+    /**
+     *  0是默认值  正常逻辑
+     *  1 是只允许修改密码 （不可以编辑修改， 删除)
+     */
+    @Column(name = ModelConstants.USER_OPERATION_TYPE,columnDefinition="varchar(25) default '0'")
+    private  String  operationType="0";
+
 
 
 
@@ -148,6 +155,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.type  = user.getType();
         this.factoryId = user.getFactoryId();
         this.userLevel = user.getUserLevel();
+        this.operationType = user.getOperationType();
 
     }
 
@@ -194,6 +202,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
             user.setType(type);
 
         }
+        user.setOperationType(operationType);
 
         return user;
     }
