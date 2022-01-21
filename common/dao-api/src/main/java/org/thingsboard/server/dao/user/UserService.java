@@ -92,7 +92,7 @@ public interface UserService {
 
 	int onUserLoginIncorrectCredentials(TenantId tenantId, UserId userId);
 
-	Object findAll(Map<String, Object> queryParam,PageLink pageLink);
+	PageData<User>   findAll(Map<String, Object> queryParam,PageLink pageLink);
 
 	List<User> findAll(Map<String, Object> queryParam);
 

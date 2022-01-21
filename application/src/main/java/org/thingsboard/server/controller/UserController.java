@@ -464,7 +464,7 @@ public class UserController extends BaseController  {
               return   this.update(user);
             }
             if(securityUser.getUserLevel() == 3){
-                user.setOperationType("1");
+                user.setOperationType(1);
             }
 
             UserVo  vo0 = new UserVo();
@@ -666,7 +666,15 @@ public class UserController extends BaseController  {
              }
              queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
-             return userService.findAll(queryParam, pageLink);
+             queryParam.put("operationType",null);
+             PageData<User>  userPageData =  userService.findAll(queryParam, pageLink);
+             if(securityUser.getUserLevel() ==  3){
+                 List<User>  list =    userPageData.getData();
+                 list.stream().forEach(m1->{
+                     m1.setOperationType(0);
+                 });
+             }
+             return  userPageData;
          }catch (Exception  e)
          {
              e.printStackTrace();

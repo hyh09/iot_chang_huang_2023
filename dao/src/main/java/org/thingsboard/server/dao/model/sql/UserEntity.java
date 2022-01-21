@@ -109,7 +109,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
      *  1 是只允许修改密码 （不可以编辑修改， 删除)
      */
     @Column(name = ModelConstants.USER_OPERATION_TYPE,columnDefinition="varchar(25) default '0'")
-    private  String  operationType="0";
+    private  Integer  operationType=0;
 
 
 
