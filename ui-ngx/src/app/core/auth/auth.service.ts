@@ -48,6 +48,7 @@ import { OAuth2ClientInfo, PlatformType } from '@shared/models/oauth2.models';
 import { isMobileApp } from '@core/utils';
 import {ActionTenantUIChangeAll} from "@core/custom/tenant-ui.actions";
 import {initialState} from "@core/custom/tenant-ui.reducer";
+import { environment } from '@env/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -115,7 +116,9 @@ export class AuthService {
 
 
   public login(loginRequest: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>('/api/auth/login', loginRequest, defaultHttpOptions()).pipe(
+    return this.http.post<LoginResponse>('/api/auth/login', {
+      ...loginRequest, loginPlatform: environment.loginPlatform || 0, factoryId: environment.factoryId || '', appUrl: ''
+    }, defaultHttpOptions()).pipe(
       tap((loginResponse: LoginResponse) => {
           this.setUserFromJwtToken(loginResponse.token, loginResponse.refreshToken, true);
         }
@@ -126,7 +129,9 @@ export class AuthService {
     const publicLoginRequest: PublicLoginRequest = {
       publicId
     };
-    return this.http.post<LoginResponse>('/api/auth/login/public', publicLoginRequest, defaultHttpOptions());
+    return this.http.post<LoginResponse>('/api/auth/login/public', {
+      ...publicLoginRequest, loginPlatform: environment.loginPlatform || 0, factoryId: environment.factoryId || '', appUrl: ''
+    }, defaultHttpOptions());
   }
 
   public sendResetPasswordLink(email: string) {
@@ -332,7 +337,9 @@ export class AuthService {
           username,
           password
         };
-        return this.http.post<LoginResponse>('/api/auth/login', loginRequest, defaultHttpOptions()).pipe(
+        return this.http.post<LoginResponse>('/api/auth/login', {
+          ...loginRequest, loginPlatform: environment.loginPlatform || 0, factoryId: environment.factoryId || '', appUrl: ''
+        }, defaultHttpOptions()).pipe(
           mergeMap((loginResponse: LoginResponse) => {
               this.updateAndValidateTokens(loginResponse.token, loginResponse.refreshToken, false);
               return this.procceedJwtTokenValidate();

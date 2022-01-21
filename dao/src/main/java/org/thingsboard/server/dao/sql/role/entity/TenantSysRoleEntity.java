@@ -1,22 +1,19 @@
 package org.thingsboard.server.dao.sql.role.entity;	
 	
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.hibernate.annotations.DynamicInsert;	
-import org.hibernate.annotations.DynamicUpdate;	
-import org.hibernate.annotations.GenericGenerator;	
-import org.hibernate.annotations.CreationTimestamp;	
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.util.anno.JpaOperatorsType;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
-	
-import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.UUID;
 
 /**	
@@ -65,6 +62,15 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
      */
     @Column(name = ModelConstants.USER_USER_FACTORY_ID)
     private UUID factoryId;
+
+
+    /**
+     *  0是默认值  正常逻辑
+     *  1 是只允许修改密码 （不可以编辑修改， 删除)
+     */
+    @Column(name = ModelConstants.USER_OPERATION_TYPE,columnDefinition="varchar(25) default '0'")
+    private  String  operationType="0";
+
 
 
     /**
