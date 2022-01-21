@@ -124,6 +124,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
 
         });
+
+        List<DictDeviceGroupPropertyVO>    capList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.CAPACITY_001.getgName());
+        capList.stream().forEach(dataVo->{
+            strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
+
+        });
+
+
         dictVoList.stream().forEach(dataVo->{
             strings.add(getHomeKeyNameByUtilNeW(dataVo));
 
@@ -1009,6 +1017,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),StringUtilToll.roundUp(vo.getWaterAddedValue()));//耗水量 (T)
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),StringUtilToll.roundUp(vo.getElectricAddedValue()));//耗电量 (KWH)
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),StringUtilToll.roundUp(vo.getGasAddedValue()));//耗气量 (T)
+            map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_capacity,true),StringUtilToll.roundUp(vo.getCapacityAddedValue()));//耗气量 (T)
 
             String   capacityValue =vo.getCapacityAddedValue();
             //
