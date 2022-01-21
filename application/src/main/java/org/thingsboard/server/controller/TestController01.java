@@ -7,12 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.UserId;
-import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
-import org.thingsboard.server.dao.sql.factoryUrl.entity.FactoryURLAppTableEntity;
-import org.thingsboard.server.dao.sql.factoryUrl.service.FactoryURLAppTableService;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.tool.UserLanguageSvc;
@@ -78,30 +75,8 @@ public class TestController01   extends BaseController {
 
 
 
-  @Autowired
-  FactoryURLAppTableService factoryURLAppTableService;
 
 
-
-  @PostMapping("/appurl/save")
-  public  Object  save(@RequestBody FactoryURLAppTableEntity  factoryURLAppTableEntity) throws ThingsboardException {
-        SecurityUser  securityUser = getCurrentUser();
-        if(!securityUser.getAuthority().equals(Authority.SYS_ADMIN))
-        {
-          return "请求错误!";
-        }
-       return factoryURLAppTableService.save(factoryURLAppTableEntity);
-  }
-
-  @GetMapping("/appurl/findByUrl")
-  public  Object  findByUrl(@RequestParam("appUrl") String appUrl) throws ThingsboardException {
-    SecurityUser  securityUser = getCurrentUser();
-    if(!securityUser.getAuthority().equals(Authority.SYS_ADMIN))
-    {
-      return "请求错误!";
-    }
-    return factoryURLAppTableService.queryAllByAppUrl(appUrl);
-  }
 
 
 
