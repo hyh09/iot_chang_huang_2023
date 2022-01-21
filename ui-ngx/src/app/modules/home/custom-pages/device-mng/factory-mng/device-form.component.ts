@@ -74,7 +74,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       comment: [entity ? entity.comment : ''],
       picture: [entity ? entity.picture : ''],
       fileName: [entity ? entity.fileName : ''],
-      logoImages: [entity ? entity.logoImages : ''],
+      icon: [entity ? entity.icon : ''],
       type: [entity ? entity.type : ''],
       supplier: [entity ? entity.supplier : ''],
       model: [entity ? entity.model : ''],

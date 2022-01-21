@@ -70,7 +70,7 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   warrantyPeriod?: string,
   picture?: string,
   fileName?: string,
-  logoImages?: string,
+  icon?: string,
   comment?: string,
   standardPropertyList: Array<DeviceData>;
   propertyList?: Array<DeviceProperty>,
