@@ -98,9 +98,8 @@ public class JwtTokenFactory {
         if (securityUser.getFactoryId() != null) {
             claims.put(FACTORY_ID, securityUser.getFactoryId().toString());
         }
-        if (securityUser.getFactoryId() != null) {
-            claims.put(USER_LEVEL, securityUser.getUserLevel()+"");
-        }
+        claims.put(USER_LEVEL, securityUser.getUserLevel()+"");
+
 
 
         ZonedDateTime currentTime = ZonedDateTime.now();
