@@ -27,8 +27,7 @@ export const environment = {
   supportedLangs: SUPPORTED_LANGS,
   defaultLang: 'zh_CN',
   loginPlatform: 0,
-  factoryId: '',
-  host: 'http://iot.textile-saas.huansi.net'
+  factoryId: ''
 };
 
 /*

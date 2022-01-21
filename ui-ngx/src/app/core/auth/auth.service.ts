@@ -129,7 +129,9 @@ export class AuthService {
     const publicLoginRequest: PublicLoginRequest = {
       publicId
     };
-    return this.http.post<LoginResponse>('/api/auth/login/public', publicLoginRequest, defaultHttpOptions());
+    return this.http.post<LoginResponse>('/api/auth/login/public', {
+      ...publicLoginRequest, loginPlatform: environment.loginPlatform || 0, factoryId: environment.factoryId || '', appUrl: ''
+    }, defaultHttpOptions());
   }
 
   public sendResetPasswordLink(email: string) {
@@ -335,7 +337,9 @@ export class AuthService {
           username,
           password
         };
-        return this.http.post<LoginResponse>('/api/auth/login', loginRequest, defaultHttpOptions()).pipe(
+        return this.http.post<LoginResponse>('/api/auth/login', {
+          ...loginRequest, loginPlatform: environment.loginPlatform || 0, factoryId: environment.factoryId || '', appUrl: ''
+        }, defaultHttpOptions()).pipe(
           mergeMap((loginResponse: LoginResponse) => {
               this.updateAndValidateTokens(loginResponse.token, loginResponse.refreshToken, false);
               return this.procceedJwtTokenValidate();
