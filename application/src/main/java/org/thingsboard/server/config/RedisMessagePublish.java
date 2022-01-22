@@ -7,12 +7,11 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
 @Service
 public class RedisMessagePublish {
     @Autowired
-    @Resource(name="redisTemplate")
+    //@Resource(name="redisTemplate1")
     private RedisTemplate<String, String> rt;
 
     private GenericJackson2JsonRedisSerializer jackson2JsonRedisSerializer;
