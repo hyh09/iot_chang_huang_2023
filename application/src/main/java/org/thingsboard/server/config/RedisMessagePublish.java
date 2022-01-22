@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 @Service
 public class RedisMessagePublish {
     @Autowired
-    @Resource(name="redisTemplate")
+    @Resource(name="redisTemplateBiz")
     private RedisTemplate<String, String> rt;
 
     private GenericJackson2JsonRedisSerializer jackson2JsonRedisSerializer;
