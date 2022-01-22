@@ -28,6 +28,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
   isView: boolean;
   compDataExpanded: boolean = true;
   dataDictionaries: DataDictionary[] = [];
+  dataDictIds: string[] = [];
 
   constructor(
     protected store: Store<AppState>,
@@ -43,6 +44,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
     this.isEdit = this.data.compInfo ? this.data.compInfo.isEdit : false;
     this.isView = this.data.compInfo ? this.data.compInfo.isView : false;
     this.dataDictionaries = this.data.dataDictionaries;
+    this.dataDictIds = this.dataDictionaries.map(item => (item.id + ''));
     this.buildForm();
   }
 
@@ -76,7 +78,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
     if (this.compForm.valid) {
       this.dialogRef.close({
         ...(this.data.compInfo || {}),
-        ...this.compForm.value
+        ...this.compForm.getRawValue()
       });
     }
   }
@@ -92,7 +94,10 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content : '', Validators.required],
       title: [data ? data.title : ''],
-      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
+      dictDataId: [{
+        value: data && data.dictDataId && this.dataDictIds.includes(data.dictDataId) ? data.dictDataId : '',
+        disabled: this.isView
+      }]
     });
   }
   addCompData(event: MouseEvent) {

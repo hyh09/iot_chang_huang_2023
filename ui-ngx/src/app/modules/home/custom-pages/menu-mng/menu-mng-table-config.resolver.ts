@@ -39,7 +39,7 @@ export class MenuMngTableConfigResolver implements Resolve<EntityTableConfig<Men
       new EntityTableColumn<Menu>('name', 'menu-mng.name', '33.333333%'),
       new EntityTableColumn<Menu>('parentName', 'menu-mng.parent-name', '33.333333%'),
       new EntityTableColumn<Menu>('path', 'menu-mng.path', '33.333333%'),
-      new EntityTableColumn<Menu>('menuIcon', 'menu-mng.icon', '80px', ({ menuIcon }) => (menuIcon), () => ({}), false, () => ({}), () => undefined, false, null, true),
+      new EntityTableColumn<Menu>('menuIcon', 'menu-mng.icon', '80px', ({ menuIcon }) => (menuIcon), () => ({}), false, () => ({}), () => undefined, false, null, () => (true)),
       new EntityTableColumn<Menu>('isButton', 'menu-mng.is-button-or-not', '80px', ({isButton}) => {
         return isButton ? this.translate.instant('action.yes') : this.translate.instant('action.no');
       }),
