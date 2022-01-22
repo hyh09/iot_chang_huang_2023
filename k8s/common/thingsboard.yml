@@ -34,7 +34,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-js-executor:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-js-executor:latest
         env:
         - name: REMOTE_JS_EVAL_REQUEST_TOPIC
           value: "js_eval.requests"
@@ -81,7 +81,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-mqtt-transport:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-mqtt-transport:latest
         ports:
         - containerPort: 1883
           name: mqtt
@@ -159,7 +159,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-http-transport:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-http-transport:latest
         ports:
         - containerPort: 8080
           name: http
@@ -234,7 +234,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-coap-transport:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-coap-transport:latest
         ports:
         - containerPort: 5683
           name: coap
@@ -303,7 +303,7 @@ spec:
       containers:
         - name: server
           imagePullPolicy: Always
-          image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-lwm2m-transport:latest
+          image: 47.110.145.204:8084/huansiyl/thingsboard/tb-lwm2m-transport:latest
           ports:
             - containerPort: 5685
               name: lwm2m
@@ -363,7 +363,7 @@ spec:
       containers:
       - name: server
         imagePullPolicy: Always
-        image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-web-ui:latest
+        image: 47.110.145.204:8084/huansiyl/thingsboard/tb-web-ui:latest
         ports:
         - containerPort: 8080
           name: http
