@@ -44,8 +44,6 @@ public interface EfficiencyStatisticsSvc {
     PageData<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
-    @Deprecated
-    PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
     /**
      * 产能的新方法保证出入参
@@ -57,8 +55,6 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<AppDeviceCapVo> queryPCCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
-    @Deprecated
-    PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
 
     /**
@@ -72,11 +68,6 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<Map> queryEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
 
-    /**
-     * 产能接口
-     */
-     @Deprecated
-     ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
 
     /**
