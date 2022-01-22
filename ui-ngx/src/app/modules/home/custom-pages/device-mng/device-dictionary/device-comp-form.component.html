@@ -92,7 +92,7 @@
               </mat-form-field>
               <mat-form-field>
                 <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
-                <mat-select formControlName="dictDataId" [disabled]="isView">
+                <mat-select formControlName="dictDataId">
                   <mat-option value="">{{ 'common.none' | translate }}</mat-option>
                   <mat-option *ngFor="let option of dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
                 </mat-select>

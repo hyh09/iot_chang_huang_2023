@@ -35,7 +35,7 @@ export class ProdCapacitySettingsTableConfigResolver implements Resolve<EntityTa
 
     this.config.columns.push(
       new EntityTableColumn<ProdCapacitySettings>('flg', this.translate.instant('device-mng.in-calculation'), '80px', () => (''),
-      () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, false, true, (entity, flag) => {
+      () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
         this.prodCapacitySettingsService.setFlag(entity.deviceId, flag).subscribe();
       }),
       new EntityTableColumn<ProdCapacitySettings>('deviceName', this.translate.instant('device-mng.device-name'), '34%'),

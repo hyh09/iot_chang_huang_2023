@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { Component, forwardRef, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -37,6 +37,9 @@ export class MaterialIconSelectComponent extends PageComponent implements OnInit
 
   @Input()
   disabled: boolean;
+
+  @Output()
+  onSelect: EventEmitter<any> = new EventEmitter<any>();
 
   private modelValue: string;
 
@@ -99,6 +102,7 @@ export class MaterialIconSelectComponent extends PageComponent implements OnInit
           this.materialIconFormGroup.patchValue(
             {icon}, {emitEvent: true}
           );
+          this.onSelect.emit();
         }
       }
     );
