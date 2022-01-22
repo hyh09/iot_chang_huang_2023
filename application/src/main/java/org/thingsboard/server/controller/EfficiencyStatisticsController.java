@@ -38,27 +38,7 @@ public class EfficiencyStatisticsController extends BaseController {
 
 
 
-    /**
-     *
-     */
-    @ApiOperation(value = "【app端查询产能接口】  老接口 只是为了比对返回结果用")
-    @RequestMapping(value = "/queryCapacityTest", method = RequestMethod.POST)
-    @ResponseBody
-    public ResultCapAppVo queryCapacityTest(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        try {
-            if(queryTsKvVo.getEndTime() == null )
-            {
-                queryTsKvVo.setStartTime(CommonUtils.getZero());
-                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-            }
 
-            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
-        }
-    }
 
 
 

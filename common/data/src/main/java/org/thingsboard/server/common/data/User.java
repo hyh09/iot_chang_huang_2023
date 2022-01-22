@@ -93,7 +93,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private UUID  factoryId;
 
 
-    private  String operationType;
+    private  Integer operationType;
 
 
 

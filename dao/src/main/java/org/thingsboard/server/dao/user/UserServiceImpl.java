@@ -388,7 +388,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
     }
     @Override
-    public Object findAll(Map<String, Object> queryParam, PageLink pageLink) {
+    public PageData<User>   findAll(Map<String, Object> queryParam, PageLink pageLink) {
         return userDao.findAll(queryParam,pageLink);
     }
 
