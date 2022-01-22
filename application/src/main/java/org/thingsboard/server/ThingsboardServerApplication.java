@@ -54,11 +54,11 @@ public class ThingsboardServerApplication {
         return args;
     }
 
-   /* @Bean
+    @Bean("redisTemplateBiz")
     public RedisTemplate<String,Object> redisTemplate(JedisConnectionFactory redisConnectionFactory){
 
-        RedisTemplate<String,Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        RedisTemplate<String,Object> redisTemplate2 = new RedisTemplate<>();
+        redisTemplate2.setConnectionFactory(redisConnectionFactory);
 
         //自定义序列化方式
         Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
@@ -67,12 +67,12 @@ public class ThingsboardServerApplication {
         objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
 
-        redisTemplate.setKeySerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setHashKeySerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.afterPropertiesSet();
+        redisTemplate2.setKeySerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.setValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.setHashKeySerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.setHashValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.afterPropertiesSet();
 
-        return redisTemplate;
-    }*/
+        return redisTemplate2;
+    }
 }

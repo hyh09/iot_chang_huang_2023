@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class RedisMessagePublish {
     @Autowired
-    //@Resource(name="redisTemplate1")
+    @Resource(name="redisTemplateBiz")
     private RedisTemplate<String, String> rt;
 
     private GenericJackson2JsonRedisSerializer jackson2JsonRedisSerializer;
