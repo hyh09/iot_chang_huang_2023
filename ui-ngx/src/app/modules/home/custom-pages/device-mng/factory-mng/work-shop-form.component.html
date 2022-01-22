@@ -16,6 +16,11 @@
         <input matInput formControlName="remark">
       </mat-form-field>
       <tb-image-input
+        label="{{ 'device-mng.logo' | translate }}"
+        maxSizeByte="524288"
+        formControlName="logoImages"
+      ></tb-image-input>
+      <tb-image-input
         label="{{ 'device-mng.work-shop-bg' | translate }}"
         maxSizeByte="1048576"
         formControlName="bgImages"

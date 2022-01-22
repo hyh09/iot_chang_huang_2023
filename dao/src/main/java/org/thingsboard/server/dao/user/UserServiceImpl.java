@@ -15,7 +15,6 @@
  */
 package org.thingsboard.server.dao.user;
 
-import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,10 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Customer;
@@ -64,9 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.thingsboard.server.dao.service.Validator.validateId;
-import static org.thingsboard.server.dao.service.Validator.validatePageLink;
-import static org.thingsboard.server.dao.service.Validator.validateString;
+import static org.thingsboard.server.dao.service.Validator.*;
 
 @Service
 @Slf4j
@@ -167,7 +162,6 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
 
             user.setAuthority(Authority.TENANT_ADMIN);
-
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
@@ -394,7 +388,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
     }
     @Override
-    public Object findAll(Map<String, Object> queryParam, PageLink pageLink) {
+    public PageData<User>   findAll(Map<String, Object> queryParam, PageLink pageLink) {
         return userDao.findAll(queryParam,pageLink);
     }
 

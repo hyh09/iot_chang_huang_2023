@@ -456,11 +456,15 @@ public class UserController extends BaseController  {
          DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
         log.info("打印当前的管理人的信息:{}",securityUser);
-        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
+        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}，用户的等级:{}",securityUser.getFactoryId(),securityUser.getType(),securityUser.getUserLevel());
+
         try {
             if(user.getId() != null){
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
+            }
+            if(securityUser.getUserLevel() == 3){
+                user.setOperationType(1);
             }
 
             UserVo  vo0 = new UserVo();
@@ -662,7 +666,15 @@ public class UserController extends BaseController  {
              }
              queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
-             return userService.findAll(queryParam, pageLink);
+             queryParam.put("operationType",null);
+             PageData<User>  userPageData =  userService.findAll(queryParam, pageLink);
+             if(securityUser.getUserLevel() ==  3){
+                 List<User>  list =    userPageData.getData();
+                 list.stream().forEach(m1->{
+                     m1.setOperationType(0);
+                 });
+             }
+             return  userPageData;
          }catch (Exception  e)
          {
              e.printStackTrace();

@@ -30,7 +30,7 @@ spec:
         app: tb-node
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-node-fileupload
           persistentVolumeClaim:

@@ -138,32 +138,5 @@ public class BulletinBoardController extends BaseController{
 
 
 
-    private  String getValueByTime(String factoryId,String workshopId,String productionLineId, String deviceId,long startTime, long EndTime) throws ThingsboardException {
-        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
-        queryTsKvVo.setTenantId(getTenantId().getId());
-        if(StringUtils.isNotEmpty(factoryId)) {
-            queryTsKvVo.setFactoryId(UUID.fromString(factoryId));
-        }
-        if(StringUtils.isNotEmpty(workshopId)) {
-            queryTsKvVo.setWorkshopId(UUID.fromString(workshopId));
-        }
-        if(StringUtils.isNotEmpty(productionLineId)) {
-            queryTsKvVo.setProductionLineId(UUID.fromString(productionLineId));
-        }
-        if(StringUtils.isNotEmpty(deviceId)) {
-            queryTsKvVo.setDeviceId(UUID.fromString(deviceId));
-        }
-        queryTsKvVo.setStartTime(startTime);
-        queryTsKvVo.setEndTime(EndTime);
-        queryTsKvVo.setFilterFirstFactory(false);
-        ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
-        if(resultCapAppVo != null)
-        {
-            return  resultCapAppVo.getTotalValue();
-        }
-        return  "0";
-    }
-
-
 
 }
