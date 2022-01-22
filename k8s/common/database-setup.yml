@@ -34,7 +34,7 @@ spec:
   containers:
   - name: tb-db-setup
     imagePullPolicy: Always
-    image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-node:latest
+    image: 47.110.145.204:8084/huansiyl/thingsboard/tb-node:latest
     envFrom:
     - configMapRef:
         name: tb-node-db-config
