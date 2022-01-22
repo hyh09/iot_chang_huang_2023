@@ -282,7 +282,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
   setMapOfExpandedComp() {
     const map: { [code: string]: DeviceCompTreeNode[] } = {};
-    this.compListFormArray().value.forEach((item: DeviceComp) => {
+    this.compListFormArray().getRawValue().forEach((item: DeviceComp) => {
       map[item.code] = this.convertTreeToList(item);
     });
     this.mapOfExpandedComp = map;

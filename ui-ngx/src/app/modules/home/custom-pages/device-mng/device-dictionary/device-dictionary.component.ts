@@ -28,6 +28,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   expandedCompCode: Array<string> = [];
   initDataGroup: DeviceDataGroup[] = [];
   initDataGroupNames: string[] = [];
+  dataDictIds: string[] = [];
 
   constructor(
     protected store: Store<AppState>,
@@ -73,6 +74,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   updateForm(entity: DeviceDictionary) {
+    this.dataDictIds = (this.entitiesTableConfig.componentsData.dataDictionaries as DataDictionary[]).map(item => (item.id + ''));
     this.setInitDataGroup();
     this.initDataGroup = [];
     const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
@@ -183,7 +185,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
       dictDataId: [{
-        value: data && data.dictDataId ? data.dictDataId : '',
+        value: data && data.dictDataId && this.dataDictIds.includes(data.dictDataId) ? data.dictDataId : '',
         disabled: !this.isEdit
       }]
     })
@@ -318,7 +320,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   setMapOfExpandedComp() {
     const map: { [code: string]: DeviceCompTreeNode[] } = {};
-    this.compListFormArray().value.forEach((item: DeviceComp) => {
+    this.compListFormArray().getRawValue().forEach((item: DeviceComp) => {
       map[item.code] = this.convertTreeToList(item);
     });
     this.mapOfExpandedComp = map;
