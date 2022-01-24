@@ -80,6 +80,7 @@ public class ThingsboardServerApplication {
         redisTemplate2.setHashValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate2.afterPropertiesSet();
 
+
         return redisTemplate2;
     }
 }
