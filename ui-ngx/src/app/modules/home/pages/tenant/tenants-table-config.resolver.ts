@@ -61,14 +61,14 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
       new EntityTableColumn<TenantInfo>('title', 'tenant.title', '20%'),
       new EntityTableColumn<TenantInfo>('tenantProfileName', 'tenant-profile.tenant-profile', '20%'),
       new EntityTableColumn<TenantInfo>('email', 'contact.email', '20%'),
-      new EntityTableColumn<TenantInfo>('country', 'contact.country', '20%', ({country}) => (country ? this.translate.instant(`country.${country}`) : '')),
+      new EntityTableColumn<TenantInfo>('country', 'contact.country', '20%'),
       new EntityTableColumn<TenantInfo>('city', 'contact.city', '20%')
     );
 
     this.config.cellActionDescriptors.push(
       {
         name: this.translate.instant('tenant.set-tenant-menus'),
-        icon: 'menu',
+        mdiIcon: 'mdi:menu2',
         isEnabled: () => true,
         onAction: ($event, entity) => this.setTenantMenus($event, entity)
       },

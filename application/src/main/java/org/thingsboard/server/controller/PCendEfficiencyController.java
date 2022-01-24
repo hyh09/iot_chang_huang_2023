@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
@@ -14,12 +15,18 @@ import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
+import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.controller.example.AnswerExample;
+import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+import org.thingsboard.server.service.security.model.SecurityUser;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,7 +102,11 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
-    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据")
+
+
+
+
+    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###新接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
             @ApiImplicitParam(name = "endTime", value = "结束时间"),
@@ -134,10 +145,11 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setEndTime(endTime);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             Long lo1 = System.currentTimeMillis();
-            PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId(), pageLink);
+            queryTsKvVo.setTenantId(getTenantId().getId());
+            PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
             Long lo2 = System.currentTimeMillis();
             Long t3 = lo2-lo1;
-            log.info("--耗时时间--：{}毫秒",t3);
+            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
             return  obj;
 
         }catch (Exception e)
@@ -146,6 +158,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
+
 
 
 
@@ -172,12 +185,15 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
+
+
+
     @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
             @ApiImplicitParam(name = "endTime", value = "结束时间"),
             @ApiImplicitParam(name = "deviceId", value = "设备id")
-          })
+    })
     @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
     @ApiResponses({
             @ApiResponse(code = 200, message =queryEnergyHistory_messg),
@@ -217,21 +233,49 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
+    @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id")
+    })
+    @RequestMapping(value = "/queryCapacityHistory", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+    })
+    @ResponseBody
+    public PageData<CapacityHistoryVo> queryCapacityHistory(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId
+    ) throws ThingsboardException {
+        try {
+            if ( startTime == null  || endTime == null) {
+                startTime=(CommonUtils.getZero());
+                endTime=(CommonUtils.getNowTime());
+            }
 
-//    @ApiOperation("设备属性分组-分组后的属性属性接口")
-//    @RequestMapping(value = "/queryDictDevice", method = RequestMethod.GET)
-//    @ResponseBody
-//    public  Object queryGroupDict(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-//        try {
-//            log.info("打印当前的入参:{}", deviceId);
-//            return efficiencyStatisticsSvc.queryGroupDict(deviceId, getTenantId());
-//        }catch (Exception e)
-//        {
-//            log.error("【设备属性分组-分组后的属性属性接口】异常信息:{}",e);
-//            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
-//        }
-//
-//    }
+            QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
+            queryTsKvVo.setDeviceId(deviceId);
+            queryTsKvVo.setStartTime(startTime);
+            queryTsKvVo.setEndTime(endTime);
+            queryTsKvVo.setSortOrder(sortOrder);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+
+            return efficiencyStatisticsSvc.queryCapacityHistory(queryTsKvVo,getTenantId(), pageLink);
+        }catch (Exception e)
+        {
+            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
+
+
 
     /**
      * PC端
@@ -246,7 +290,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @ResponseBody
     public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
-        log.info("打印当前的入参:{}",deviceId);
+//        log.info("打印当前的入参:{}",deviceId);
         try {
             return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
         }catch (Exception e)
@@ -274,6 +318,26 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
+
+
+
+    @ApiOperation(value = "【PC端查询当前设备的运行状态】")
+    @PostMapping("/queryTodayEffceency")
+    public  List<ResultEnergyTopTenVo>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
+        try {
+            LocalDate today = LocalDate.now();
+            SecurityUser authUser = getCurrentUser();
+            vo.setTenantId(getTenantId().getId());
+            vo.setDate(today);
+            return efficiencyStatisticsSvc.queryPcResultEnergyTopTenVo(vo);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+
+        }
+    }
+
 
 
 

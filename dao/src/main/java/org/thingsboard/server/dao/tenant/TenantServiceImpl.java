@@ -136,7 +136,7 @@ public class TenantServiceImpl extends AbstractEntityService implements TenantSe
         }
         tenantValidator.validate(tenant, Tenant::getId);
         Tenant savedTenant = tenantDao.save(tenant.getId(), tenant);
-        geographicalSvc.saveCoordinate(savedTenant);
+//        geographicalSvc.saveCoordinate(savedTenant);
 
         if (tenant.getId() == null) {
             deviceProfileService.createDefaultDeviceProfile(savedTenant.getId());

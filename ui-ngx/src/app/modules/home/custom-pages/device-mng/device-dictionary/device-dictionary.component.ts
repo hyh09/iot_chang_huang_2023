@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, FormArray } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AppState } from '@app/core/core.state';
+import { UtilsService } from '@app/core/public-api';
 import { guid } from '@app/core/utils';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
@@ -27,6 +28,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   expandedCompCode: Array<string> = [];
   initDataGroup: DeviceDataGroup[] = [];
   initDataGroupNames: string[] = [];
+  dataDictIds: string[] = [];
 
   constructor(
     protected store: Store<AppState>,
@@ -35,7 +37,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceDictionary>,
     protected fb: FormBuilder,
     protected cd: ChangeDetectorRef,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    public utils: UtilsService
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
@@ -56,7 +59,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       version: [entity ? entity.version : ''],
       warrantyPeriod: [entity ? entity.version : ''],
       comment: [entity ? entity.comment : ''],
-      picture: [entity ? entity.picture : ''],
+      picture: [{
+        value: entity ? entity.picture : '',
+        disabled: !this.isEdit
+      }],
       deviceModel: [null],
       fileId: [entity ? entity.fileId : ''],
       fileName: [entity ? entity.fileName : ''],
@@ -68,6 +74,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   updateForm(entity: DeviceDictionary) {
+    this.dataDictIds = (this.entitiesTableConfig.componentsData.dataDictionaries as DataDictionary[]).map(item => (item.id + ''));
     this.setInitDataGroup();
     this.initDataGroup = [];
     const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
@@ -177,7 +184,10 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
-      dictDataId: [data && data.dictDataId ? data.dictDataId : '']
+      dictDataId: [{
+        value: data && data.dictDataId && this.dataDictIds.includes(data.dictDataId) ? data.dictDataId : '',
+        disabled: !this.isEdit
+      }]
     })
   }
   createGroupListControl(dataGroup?: DeviceDataGroup): AbstractControl {
@@ -310,7 +320,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   setMapOfExpandedComp() {
     const map: { [code: string]: DeviceCompTreeNode[] } = {};
-    this.compListFormArray().value.forEach((item: DeviceComp) => {
+    this.compListFormArray().getRawValue().forEach((item: DeviceComp) => {
       map[item.code] = this.convertTreeToList(item);
     });
     this.mapOfExpandedComp = map;

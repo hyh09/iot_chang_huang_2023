@@ -7,6 +7,8 @@ import org.thingsboard.server.common.data.kv.KvEntry;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -20,6 +22,47 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 格式化Excel错误信息
+     */
+    default String formatExcelErrorInfo(Integer rowNum, String info, Object oldValue) {
+//        return info + " 第「" + rowNum + "」行 值：「" + oldValue + "」";
+        return info + " 行：" + rowNum;
+    }
+
+    /**
+     * 格式化Excel错误信息
+     */
+    default String formatExcelErrorInfo(Integer rowNum, String info) {
+//        return info + " 第「" + rowNum + "」行";
+        return info + " 行：" + rowNum;
+    }
+
+    /**
+     * 格式化产量
+     */
+    default BigDecimal formatCapacity(BigDecimal val1) {
+        return val1.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
+    }
+
+    /**
+     * 计算完成度
+     */
+    default BigDecimal calculateCompleteness(BigDecimal val1, BigDecimal val2) {
+        if (val2.compareTo(BigDecimal.ZERO) == 0)
+            return BigDecimal.ZERO;
+        return val1.divide(val2, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100L)).stripTrailingZeros();
+    }
+
+    /**
+     * 计算百分比
+     */
+    default BigDecimal calculatePercentage(BigDecimal val1, BigDecimal val2) {
+        if (val2.compareTo(BigDecimal.ZERO) == 0)
+            return BigDecimal.ZERO;
+        return val1.divide(val2, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100L)).stripTrailingZeros();
+    }
 
     /**
      * 转换遥测数据为保留4位的
@@ -71,7 +114,7 @@ public interface CommonService {
      */
     default Boolean calculateValueInMap(Map<String, Boolean> map, String str) {
         if (map == null || map.isEmpty()) return Boolean.FALSE;
-        return map.get(str);
+        return map.getOrDefault(str, false);
     }
 
     /**
@@ -134,6 +177,47 @@ public interface CommonService {
      */
     default <T extends Device> Boolean isDeviceUnAllocation(T t) {
         return t.getProductionLineId() == null;
+    }
+
+    /**
+     * urlEncode data
+     */
+    default String urlEncode(String str) {
+        return Optional.ofNullable(str).map(v -> URLEncoder.encode(str.trim(), StandardCharsets.UTF_8)).orElse("");
+    }
+
+    /**
+     * 转换成政治正确的国家
+     */
+    default String toTrueCountry(String country) {
+        return Optional.ofNullable(country).map(v -> {
+            var temp = v.toLowerCase().trim();
+            if (temp.contains("tai") && temp.contains("wan")) {
+                return "China";
+            } else if (v.contains("台") && v.contains("湾")) {
+                return "中国";
+            } else if (v.contains("臺") && v.contains("灣")) {
+                return "中国";
+            }
+            return v;
+        }).orElse(null);
+    }
+
+    /**
+     * 转换成政治正确的地区显示名称
+     */
+    default String toTrueDisplayName(String displayName) {
+        return Optional.ofNullable(displayName).map(v -> {
+            var temp = v.toLowerCase().trim();
+            if (temp.contains("tai") && temp.contains("wan")) {
+                return v + ", China";
+            } else if (v.contains("台") && v.contains("湾")) {
+                return v + ", 中国";
+            } else if (v.contains("臺") && v.contains("灣")) {
+                return v + ", 中国";
+            }
+            return v;
+        }).orElse(null);
     }
 
     /**

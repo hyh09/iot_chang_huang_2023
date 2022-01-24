@@ -18,15 +18,21 @@ interface CommonData {
 export declare type FactoryRowType = 'factory' | 'workShop' | 'prodLine' | 'device';
 
 export interface Factory extends BaseData<FactoryId>, CommonData {
+  key?: string;
+  title?: string;
   country?: string;
   city?: string;
   address?: string;
   postalCode?: string;
   logoImages?: string;
   rowType?: FactoryRowType;
+  latitude?: string | number;
+  longitude?: string | number;
 }
 
 export interface WorkShop extends BaseData<WorkShopId>, CommonData {
+  key?: string;
+  title?: string;
   factoryId?: string;
   factoryName?: string;
   logoImages?: string;
@@ -35,15 +41,19 @@ export interface WorkShop extends BaseData<WorkShopId>, CommonData {
 }
 
 export interface ProdLine extends BaseData<ProdLineId>, CommonData {
+  key?: string;
+  title?: string;
   factoryId?: string;
   factoryName?: string;
   workshopId?: string;
   workshopName?: string;
-  logoImages?: string;
   rowType: FactoryRowType;
+  logoImages?: string;
 }
 
 export interface ProdDevice extends BaseData<DeviceId>, CommonData {
+  key?: string;
+  title?: string;
   factoryId?: string;
   factoryName?: string;
   workshopId?: string;
@@ -60,6 +70,7 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   warrantyPeriod?: string,
   picture?: string,
   fileName?: string,
+  icon?: string,
   comment?: string,
   standardPropertyList: Array<DeviceData>;
   propertyList?: Array<DeviceProperty>,
@@ -91,6 +102,8 @@ export interface FactoryTableOriginRow {
   name?: string;
   logoImages?: string;
   images?: string;
+  country?: string;
+  city?: string;
   address?: string;
   createdTime?: number;
   rowType?: FactoryRowType;
@@ -110,6 +123,8 @@ export interface FactoryTableTreeNode extends TableTreeNodeOptions {
   code?: string;
   name?: string;
   logoImages?: string;
+  country?: string;
+  city?: string;
   address?: string;
   createdTime?: number;
   rowType?: FactoryRowType;
@@ -136,4 +151,12 @@ export interface FactoryTreeNodeIds {
   workshopId?: string;
   productionLineId?: string;
   deviceId?: string;
+}
+
+export interface FactoryTreeList {
+  factories: Factory[];
+  workshops: WorkShop[];
+  productionLines: ProdLine[];
+  devices: ProdDevice[];
+  undistributedDevices: ProdDevice[];
 }

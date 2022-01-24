@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { defaultHttpOptionsFromConfig, RequestConfig } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, TimePageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { DeviceCapacityList, DeviceEnergyConsumptionList, RunningState } from '@app/shared/models/custom/potency.models';
@@ -23,7 +23,7 @@ export class PotencyService {
     private http: HttpClient
   ) { }
 
-  // 查询设备产能列表
+  // 查询设备产量列表
   public getDeviceCapacityList(pageLink: TimePageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceCapacityList> {
     let queryStr: string[] = [];
     if (params) {

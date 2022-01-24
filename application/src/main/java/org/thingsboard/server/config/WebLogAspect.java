@@ -43,6 +43,7 @@ public class WebLogAspect {
                     + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.FileController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.OrderController.*(..))"
     )
     public void webLog() {
     }
@@ -99,6 +100,8 @@ public class WebLogAspect {
                 return new ThingsboardException("设备字典编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
             else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_component"))
                 return new ThingsboardException("设备字典部件编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
+            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_hs_order_no"))
+                return new ThingsboardException("订单编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
         }
 
         if (exception.getCause() != null) {

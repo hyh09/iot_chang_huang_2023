@@ -27,7 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -36,7 +35,6 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
-import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.ota.OtaPackageUtil;
 import org.thingsboard.server.common.data.page.PageData;
@@ -51,7 +49,9 @@ import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.service.ClientService;
-import org.thingsboard.server.dao.model.sql.*;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.relation.RelationDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
@@ -866,6 +866,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public void updateFlgById(Boolean deviceFlg, UUID id) {
         deviceRepository.updateFlgById(deviceFlg,id);
+    }
+
+    @Override
+    public List<Device> queryAllByTenantIdAndName(TenantId tenantId, String name) {
+        return DaoUtil.convertDataList(deviceRepository.queryAllByTenantIdAndName(tenantId.getId(),name));
     }
 
     /**

@@ -15,6 +15,7 @@ public class HSConstants {
     public static final String UNGROUPED = "未分组";
     public static final String CODE_PREFIX_DICT_DATA = "SJZD";
     public static final String CODE_PREFIX_DICT_DEVICE = "SBZD";
+    public static final String CODE_PREFIX_ORDER = "DD";
     public static final String CODE_PREFIX_DICT_DEVICE_COMPONENT = "SBBJ";
     public static final String ATTR_ACTIVE = "active";
     public static final String ATTR_DEVICE_ID = "attrDeviceId";

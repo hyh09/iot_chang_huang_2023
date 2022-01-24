@@ -5,13 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
-import org.thingsboard.server.common.data.security.Authority;
-import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Service
-public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
+public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
 
     private final BCryptPasswordEncoder passwordEncoder;
@@ -189,7 +188,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc, DefalutSvc {
           user.setUserCode(str);
         }
 
-        String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
+        String  encodePassword =   passwordEncoder.encode(DataConstants.DEFAULT_PASSWORD);
         user.setTenantId(user1.getTenantId());
         user.setUserCreator(user1.getUuidId().toString());
         user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());

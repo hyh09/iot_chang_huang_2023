@@ -14,23 +14,27 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
-import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.TenantSysRoleService;
+import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.util.sql.jpa.repository.SortRowName;
-import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
-//import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+//import org.thingsboard.server.service.userrole.UserRoleMemuSvc;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,8 +54,12 @@ public class UserRoleController extends BaseController{
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     public   TenantSysRoleEntity  save(@RequestBody  TenantSysRoleEntity  entity) throws ThingsboardException {
-        DataValidator.validateCode(entity.getRoleCode());
         SecurityUser securityUser =  getCurrentUser();
+        if(securityUser.getUserLevel() == 3){
+            entity.setOperationType(1);
+        }
+
+        DataValidator.validateCode(entity.getRoleCode());
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setTenantId(securityUser.getTenantId().getId());
         if(entity.getId() != null)
@@ -103,29 +111,10 @@ public class UserRoleController extends BaseController{
         tenantSysRoleEntity.setType(securityUser.getType());
         tenantSysRoleEntity.setSystemTab("0");
         tenantSysRoleEntity.setTenantId(getTenantId().getId());
+        tenantSysRoleEntity.setOperationType(null);
         List<TenantSysRoleEntity>  result01= tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
         return  result01;
-//        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
-//        {
-//            log.info("如果是工厂管理员直接返回,不生成系统生成的工厂管理角色:");
-//            return  result01;
-//        }
-//       Long count1= result01.stream().filter(r->r.getRoleCode().equals(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode())).count();
-//       if(count1>0)
-//       {
-//           return  result01;
-//       }
-//        TenantSysRoleEntity entity = new TenantSysRoleEntity();
-//        entity.setCreatedUser(securityUser.getUuidId());
-//        entity.setUpdatedUser(securityUser.getUuidId());
-//        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
-//        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
-//        entity.setTenantId(getTenantId().getId());
-//        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-//        entity.setSystemTab("1");
-//        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
-//        result01.add(rmEntity);
-//        return  result01;
+
     }
 
 
@@ -195,7 +184,14 @@ public class UserRoleController extends BaseController{
         queryParam.put("type",securityUser.getType());
 
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        return tenantSysRoleService.pageQuery(queryParam,pageLink);
+        PageData<TenantSysRoleEntity>  roleEntityPageData  = tenantSysRoleService.pageQuery(queryParam,pageLink);
+        if(securityUser.getUserLevel() ==  3){
+            List<TenantSysRoleEntity>  list =    roleEntityPageData.getData();
+            list.stream().forEach(m1->{
+                m1.setOperationType(0);
+            });
+        }
+        return  roleEntityPageData;
     }
 
 

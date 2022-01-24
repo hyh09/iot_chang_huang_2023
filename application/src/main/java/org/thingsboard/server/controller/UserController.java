@@ -34,10 +34,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.rule.engine.api.MailService;
-import org.thingsboard.server.common.data.EntityType;
-import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.Tenant;
-import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -53,12 +50,13 @@ import org.thingsboard.server.common.data.security.Authority;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.security.model.JwtToken;
-import org.thingsboard.server.common.data.user.DefalutSvc;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
+import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
@@ -67,9 +65,6 @@ import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.ResultVo;
-import org.thingsboard.server.common.data.vo.user.CodeVo;
-import org.thingsboard.server.common.data.vo.user.UserVo;
-import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.auth.jwt.RefreshTokenRepository;
@@ -93,7 +88,7 @@ import java.util.stream.Collectors;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
-public class UserController extends BaseController implements DefalutSvc {
+public class UserController extends BaseController  {
 
 
     public static final String USER_ID = "userId";
@@ -222,8 +217,12 @@ public class UserController extends BaseController implements DefalutSvc {
             checkEntity(user.getId(), user, Resource.USER);
 
             boolean sendEmail = user.getId() == null && sendActivationMail;
-//             user.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-//             user.setFactoryId(null);
+
+            if(StringUtils.isEmpty(user.getUserName()))
+            {
+                String  userName =user.getFirstName()+user.getLastName();
+                user.setUserName(userName);
+            }
             User savedUser = checkNotNull(userService.saveUser(user));
             if (Authority.SYS_ADMIN.equals(getCurrentUser().getAuthority())) {
                 saveRole(savedUser);
@@ -434,16 +433,6 @@ public class UserController extends BaseController implements DefalutSvc {
         }
     }
 
-
-
-    @RequestMapping("/user/test")
-    @ResponseBody
-    public  String  get()
-    {
-        return "hello world";
-    }
-
-
     @ApiOperation(value = "用户管理界面下的修改密码")
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
@@ -467,11 +456,15 @@ public class UserController extends BaseController implements DefalutSvc {
          DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
         log.info("打印当前的管理人的信息:{}",securityUser);
-        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
+        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}，用户的等级:{}",securityUser.getFactoryId(),securityUser.getType(),securityUser.getUserLevel());
+
         try {
             if(user.getId() != null){
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
+            }
+            if(securityUser.getUserLevel() == 3){
+                user.setOperationType(1);
             }
 
             UserVo  vo0 = new UserVo();
@@ -513,7 +506,7 @@ public class UserController extends BaseController implements DefalutSvc {
             }
 
            log.info("【用户管理模块.用户添加接口】入参{}", user);
-            String  encodePassword =   passwordEncoder.encode(DEFAULT_PASSWORD);
+            String  encodePassword =   passwordEncoder.encode(DataConstants.DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
             savedUser.setRoleIds(user.getRoleIds());
@@ -592,7 +585,7 @@ public class UserController extends BaseController implements DefalutSvc {
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
         log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
-           if(count>0  && user.getFactoryId() == null)
+           if(count>0  && user.getUserLevel()==0)
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }
@@ -673,7 +666,15 @@ public class UserController extends BaseController implements DefalutSvc {
              }
              queryParam.put("type", securityUser.getType());
              queryParam.put("userLevel",0);
-             return userService.findAll(queryParam, pageLink);
+             queryParam.put("operationType",null);
+             PageData<User>  userPageData =  userService.findAll(queryParam, pageLink);
+             if(securityUser.getUserLevel() ==  3){
+                 List<User>  list =    userPageData.getData();
+                 list.stream().forEach(m1->{
+                     m1.setOperationType(0);
+                 });
+             }
+             return  userPageData;
          }catch (Exception  e)
          {
              e.printStackTrace();
@@ -710,6 +711,9 @@ public class UserController extends BaseController implements DefalutSvc {
 
 
     }
+
+
+
 
 
     private  void checkEmailAndPhone(User  user)
@@ -759,6 +763,7 @@ public class UserController extends BaseController implements DefalutSvc {
         userMenuRoleService.saveEntity(entityRR);
 
     }
+
 
 
 

@@ -1,4 +1,5 @@
-import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
+import { viewPortResize } from '@app/core/utils';
 import { AlarmTimesListItem } from '@app/shared/models/custom/device-monitor.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
@@ -10,7 +11,7 @@ import * as echarts from 'echarts';
             </div>`,
   styleUrls: ['./chart.component.scss']
 })
-export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class WarningStatisticsChartComponent implements AfterViewInit, OnChanges {
 
   @Input() data: AlarmTimesListItem[];
 
@@ -22,11 +23,9 @@ export class WarningStatisticsChartComponent implements AfterViewInit, OnDestroy
 
   ngAfterViewInit() {
     this.chart = echarts.init(this.warningStatisticsChart.nativeElement);
-    window.addEventListener('resize', this.chart.resize);
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('resize', this.chart.resize);
+    viewPortResize.subscribe(() => {
+      this.chart.resize();
+    });
   }
 
   ngOnChanges() {

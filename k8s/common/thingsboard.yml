@@ -20,7 +20,7 @@ metadata:
   name: tb-js-executor
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-js-executor
@@ -30,7 +30,7 @@ spec:
         app: tb-js-executor
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       containers:
       - name: server
         imagePullPolicy: Always
@@ -58,7 +58,7 @@ metadata:
   name: tb-mqtt-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-mqtt-transport
@@ -68,7 +68,7 @@ spec:
         app: tb-mqtt-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-mqtt-transport-config
           configMap:
@@ -136,7 +136,7 @@ metadata:
   name: tb-http-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-http-transport
@@ -146,7 +146,7 @@ spec:
         app: tb-http-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-http-transport-config
           configMap:
@@ -211,7 +211,7 @@ metadata:
   name: tb-coap-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-coap-transport
@@ -221,7 +221,7 @@ spec:
         app: tb-coap-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-coap-transport-config
           configMap:
@@ -280,7 +280,7 @@ metadata:
   name: tb-lwm2m-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-lwm2m-transport
@@ -290,7 +290,7 @@ spec:
         app: tb-lwm2m-transport
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
         - name: tb-lwm2m-transport-config
           configMap:
@@ -349,7 +349,7 @@ metadata:
   name: tb-web-ui
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-web-ui
@@ -359,7 +359,7 @@ spec:
         app: tb-web-ui
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       containers:
       - name: server
         imagePullPolicy: Always

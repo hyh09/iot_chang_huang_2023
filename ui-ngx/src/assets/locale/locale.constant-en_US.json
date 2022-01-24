@@ -240,7 +240,7 @@
           "all-platforms": "All platforms",
           "allowed-platforms": "Allowed platforms"
         }
-      },
+    },
     "alarm": {
         "alarm": "Alarm",
         "alarms": "Alarms",
@@ -3133,6 +3133,7 @@
     "icon": {
         "icon": "Icon",
         "select-icon": "Select icon",
+        "upload-icon": "Upload icon",
         "material-icons": "Material icons",
         "show-all": "Show all icons"
     },
@@ -3219,8 +3220,8 @@
         "little-endian-required": "Little endian in front is required.",
         "send-driver-config-success": "Configure distributed successfully.",
         "factory-mng": "Factory management",
-        "prod-capactity-settings": "产能运算配置",
-        "in-calculation": "参与产能运算",
+        "prod-capactity-settings": "产量运算配置",
+        "in-calculation": "参与产量运算",
         "delete-factory": "删除工厂",
         "delete-work-shop": "删除车间",
         "delete-prod-line": "删除产线",
@@ -3484,13 +3485,13 @@
       },
       "potency": {
         "potency": "效能分析",
-        "device-capacity": "产能分析",
+        "device-capacity": "产量分析",
         "energy-consumption": "能耗分析",
         "energy-consumption-history": "能耗历史",
         "running-state": "运行状态",
         "device-name": "设备名称",
-        "capacity": "产能 (M)",
-        "total-capacity": "总产能：",
+        "capacity": "产量 (M)",
+        "total-capacity": "总产量：",
         "total-energy-consumption": "总能耗：",
         "go-to-history": "查看历史数据",
         "created-time": "上报时间",

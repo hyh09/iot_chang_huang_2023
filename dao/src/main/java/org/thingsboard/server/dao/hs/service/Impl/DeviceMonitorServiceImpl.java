@@ -50,6 +50,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import javax.persistence.criteria.Predicate;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -211,7 +212,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .levelStr(level.getName())
                     .isCanBeConfirm(status.canBeConfirm())
                     .isCanBeClear(status.canBeClear())
-                    .info(Optional.ofNullable(e.getDetails()).map(v -> v.get("data")).map(JsonNode::toString).orElse(null))
+                    .info(Optional.ofNullable(e.getDetails()).map(v -> v.get("data")).map(JsonNode::asText).orElse(null))
                     .factoryStr(Optional.ofNullable(affiliationDTO.getFactoryMap().get(device.getFactoryId())).map(Factory::getName).orElse(null))
                     .workShopStr(Optional.ofNullable(affiliationDTO.getWorkshopMap().get(device.getWorkshopId())).map(Workshop::getName).orElse(null))
                     .productionLineStr(Optional.ofNullable(affiliationDTO.getProductionLineMap().get(device.getProductionLineId())).map(ProductionLine::getName).orElse(null))
@@ -231,41 +232,39 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      * @return 实时监控数据列表
      */
     @Override
+    @SuppressWarnings("all")
     public RTMonitorResult getRTMonitorData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
-        var allDeviceList = this.clientService.listDevicesByQuery(tenantId, query);
-        var allDeviceIdList = allDeviceList.stream().map(e -> e.getId().getId()).collect(Collectors.toList());
-        var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
-
-        var activeStatusMap = this.clientService.listDevicesOnlineStatus(allDeviceIdList);
-
-        var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
-        var map = new HashMap<String, DictDevice>();
-        if (!dictDeviceIds.isEmpty()) {
-            map = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
-                    .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
-        }
-
-        HashMap<String, DictDevice> finalMap = map;
-        var resultList = devicePageData.getData().stream().map(e -> {
-            var idStr = e.getId().toString();
-            return RTMonitorDeviceResult.builder()
-                    .id(idStr)
-                    .name(e.getName())
-                    .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(finalMap::get).map(DictDevice::getPicture).orElse(null)))
-                    .isOnLine(calculateValueInMap(activeStatusMap, idStr))
-                    .build();
-        }).collect(Collectors.toList());
-
-        int onLineCount = calculateValueInMap(activeStatusMap);
-
-        return RTMonitorResult.builder()
-                .devicePageData(new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext()))
-                .allDeviceCount(allDeviceList.size())
-                .offLineDeviceCount(allDeviceList.size() - onLineCount)
-                .onLineDeviceCount(onLineCount)
-                .alarmTimesList(this.listAlarmTimesResult(tenantId, allDeviceIdList))
-                .deviceIdList(allDeviceIdList.stream().map(UUID::toString).collect(Collectors.toList()))
-                .build();
+        var result = new RTMonitorResult();
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        result.setAllDeviceCount(uuids.size());
+        result.setDeviceIdList(uuids.stream().map(UUID::toString).collect(Collectors.toList()));
+        CompletableFuture.allOf(
+                CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
+                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
+                        .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
+                                    var uuidList = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+                                    if (uuidList.isEmpty())
+                                        return new HashMap<String, DictDevice>();
+                                    else
+                                        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), uuidList)).stream()
+                                                .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
+                                }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(uuids)),
+                                (dictDeviceMap, activeStatusMap) -> {
+                                    int onLineCount = this.calculateValueInMap(activeStatusMap);
+                                    result.setOnLineDeviceCount(onLineCount);
+                                    result.setOffLineDeviceCount(result.getAllDeviceCount() - onLineCount);
+                                    return devicePageData.getData().stream().map(e -> {
+                                        var idStr = e.getId().toString();
+                                        return RTMonitorDeviceResult.builder()
+                                                .id(idStr)
+                                                .name(e.getName())
+                                                .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                                                .isOnLine(calculateValueInMap(activeStatusMap, idStr))
+                                                .build();
+                                    }).collect(Collectors.toList());
+                                }).thenAcceptAsync(resultList -> result.setDevicePageData(new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext()))).join()
+                        )).join();
+        return result;
     }
 
     /**
@@ -784,7 +783,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 获得近几个月报警次数
      *
-     *
      * @param tenantId        租户id
      * @param allDeviceIdList 设备id列表
      */
@@ -836,6 +834,109 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             }
             this.recursionDealComponentData(componentVO.getComponentList(), kvEntryMap, dictDataMap, groupPropertyNameList);
         }
+    }
+
+    /**
+     * 获得实时监控列表数据 - 精简版
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @param pageLink 分页参数
+     * @return 实时监控列表数据
+     */
+    @Override
+    @SuppressWarnings("all")
+    public PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
+        if (devicePageData.getData().isEmpty())
+            return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+
+        return CompletableFuture.supplyAsync(() -> {
+            var dictDeviceIds = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+            if (dictDeviceIds.isEmpty())
+                return new HashMap<String, DictDevice>();
+            else
+                return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                        .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
+        }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList()))),
+                (dictDeviceMap, activeStatusMap) -> devicePageData.getData().stream().map(e -> {
+                    var idStr = e.getId().toString();
+                    return RTMonitorDeviceResult.builder()
+                            .id(idStr)
+                            .name(e.getName())
+                            .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                            .isOnLine(calculateValueInMap(activeStatusMap, idStr))
+                            .build();
+                }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
+    }
+
+    /**
+     * 获得实时监控数据列表-设备在线状态
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控数据列表-设备在线状态
+     */
+    @Override
+    public RTMonitorDeviceOnlineStatusResult getRTMonitorDeviceOnlineStatusData(TenantId tenantId, FactoryDeviceQuery query) {
+        RTMonitorDeviceOnlineStatusResult result = new RTMonitorDeviceOnlineStatusResult();
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        result.setAllDeviceCount(uuids.size());
+        result.setDeviceIdList(uuids);
+        result.setOnLineDeviceCount(this.calculateValueInMap(this.clientService.listDevicesOnlineStatus(uuids)));
+        result.setOffLineDeviceCount(result.getAllDeviceCount() - result.getOnLineDeviceCount());
+        return result;
+    }
+
+    /**
+     * 获得实时监控数据列表-设备报警统计
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控数据列表-设备报警统计
+     */
+    @Override
+    public List<AlarmTimesResult> getRTMonitorDeviceAlarmStatisticsResult(TenantId tenantId, FactoryDeviceQuery query) {
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listAlarmTimesResult(tenantId, uuids);
+    }
+
+    /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    @Override
+    public List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId) {
+        return this.clientService.listDeviceKeyIds(tenantId, deviceId);
+    }
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    @Override
+    public List<String> listDeviceKeys(TenantId tenantId, UUID deviceId) {
+        return this.clientService.listDeviceKeys(tenantId, deviceId);
+    }
+
+    /**
+     * 查询设备历史数据-无分页
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param pageLink 分页参数
+     * @return 设备历史数据
+     */
+    @Override
+    public List<Map<String, Object>> listDeviceTelemetryHistories(TenantId tenantId, DeviceId deviceId, TimePageLink pageLink) throws ExecutionException, InterruptedException {
+        return this.clientService.listTsHistories(tenantId, deviceId, pageLink);
     }
 
     @Autowired

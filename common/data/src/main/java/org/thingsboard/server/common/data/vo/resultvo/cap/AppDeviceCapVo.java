@@ -1,9 +1,12 @@
 package org.thingsboard.server.common.data.vo.resultvo.cap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+
+import java.util.UUID;
 
 /**
  * @program: springboot-jpa-20210106
@@ -53,4 +56,9 @@ public class AppDeviceCapVo {
      */
     @ApiModelProperty("是否加入产能运算 ")
     private Boolean flg;
+
+
+    @JsonIgnore
+    @ApiModelProperty("设备字典id  忽略不返回前端 ")
+    private UUID dictDeviceId;
 }

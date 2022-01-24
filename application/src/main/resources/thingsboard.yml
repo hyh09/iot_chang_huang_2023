@@ -22,7 +22,9 @@
 
 hs:
   file:
-    location: "${HS_FILE_LOCATION:/Users/wwj/Downloads}"
+    location: "${HS_FILE_LOCATION:/upload}"
+  geo:
+    address: "https://nominatim.openstreetmap.org"
 
 server:
   # Server bind address
@@ -492,8 +494,8 @@ spring:
     database-platform: "${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}"
   datasource:
     driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver}"
-#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/thingsboard}"
-    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/thingsboard}"
+#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.10.10.56:5432/thingsboard}"
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/hsiotdb}"
     username: "${SPRING_DATASOURCE_USERNAME:postgres}"
     password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
     hikari:
@@ -542,8 +544,8 @@ audit-log:
 
 state:
   # Should be greater then transport.sessions.report_timeout
-  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:600}"
-  defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:60}"
+  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:32}"
+  defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:10}"
   persistToTelemetry: "${PERSIST_STATE_TO_TELEMETRY:false}"
 
 js:

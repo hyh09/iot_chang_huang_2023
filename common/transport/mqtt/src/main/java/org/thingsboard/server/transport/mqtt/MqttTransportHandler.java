@@ -48,6 +48,7 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.TransportPayloadType;
 import org.thingsboard.server.common.data.device.profile.MqttTopics;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.OtaPackageId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.msg.EncryptionUtil;
@@ -67,6 +68,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.ProvisionDeviceRespo
 import org.thingsboard.server.gen.transport.TransportProtos.SessionEvent;
 import org.thingsboard.server.gen.transport.TransportProtos.ValidateDeviceX509CertRequestMsg;
 import org.thingsboard.server.queue.scheduler.SchedulerComponent;
+import org.thingsboard.server.transport.mqtt.adaptors.JsonMqttAdaptor;
 import org.thingsboard.server.transport.mqtt.adaptors.MqttTransportAdaptor;
 import org.thingsboard.server.transport.mqtt.session.DeviceSessionCtx;
 import org.thingsboard.server.transport.mqtt.session.GatewaySessionHandler;
@@ -75,6 +77,7 @@ import org.thingsboard.server.transport.mqtt.session.MqttTopicMatcher;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -102,6 +105,7 @@ import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 import static io.netty.handler.codec.mqtt.MqttQoS.FAILURE;
 import static org.thingsboard.server.common.data.device.profile.MqttTopics.DEVICE_FIRMWARE_REQUEST_TOPIC_PATTERN;
 import static org.thingsboard.server.common.data.device.profile.MqttTopics.DEVICE_SOFTWARE_REQUEST_TOPIC_PATTERN;
+import static org.thingsboard.server.common.transport.adaptor.ProtoConverter.GSON;
 
 /**
  * @author Andrew Shvayka
@@ -331,6 +335,11 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         }
     }
 
+    public void dictIssue(String topic,String json) throws ThingsboardException {
+        //设备字典下发
+        deviceSessionCtx.getContext().getJsonMqttAdaptor().convertToPublish(deviceSessionCtx,topic,json).ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
+    }
+
     private void processDevicePublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg, String topicName, int msgId) {
         try {
             Matcher fwMatcher;
@@ -552,6 +561,10 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                         registerSubQoS(topic, grantedQoSList, reqQoS);
                         break;
                     default:
+                        if(topic.startsWith(MqttTopics.DICT_ISSUE)){
+                            registerSubQoS(topic, grantedQoSList, reqQoS);
+                            break;
+                        }
                         log.warn("[{}] Failed to subscribe to [{}][{}]", sessionId, topic, reqQoS);
                         grantedQoSList.add(FAILURE.value());
                         break;

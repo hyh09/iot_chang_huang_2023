@@ -15,12 +15,19 @@
  */
 package org.thingsboard.server;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -52,5 +59,27 @@ public class ThingsboardServerApplication {
             return modifiedArgs;
         }
         return args;
+    }
+
+    @Bean("redisTemplateBiz")
+    public RedisTemplate<String,Object> redisTemplate(JedisConnectionFactory redisConnectionFactory){
+
+        RedisTemplate<String,Object> redisTemplate2 = new RedisTemplate<>();
+        redisTemplate2.setConnectionFactory(redisConnectionFactory);
+
+        //自定义序列化方式
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(Object.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+
+        redisTemplate2.setKeySerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.setValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.setHashKeySerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.setHashValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate2.afterPropertiesSet();
+
+        return redisTemplate2;
     }
 }

@@ -30,8 +30,11 @@ spec:
         app: tb-node
     spec:
       imagePullSecrets:
-        - name: zhowsregcred
+        - name: aliyunregcred
       volumes:
+        - name: tb-node-fileupload
+          persistentVolumeClaim:
+            claimName: tb-node-pv-claim
         - name: tb-node-config
           configMap:
             name: tb-node-config
@@ -78,6 +81,8 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: tb-node-config
+            - mountPath: /upload
+              name: tb-node-fileupload
           livenessProbe:
             httpGet:
               path: /login
@@ -85,6 +90,8 @@ spec:
             initialDelaySeconds: 300
             timeoutSeconds: 10
       restartPolicy: Always
+      nodeSelector:
+        iot: "tb-node-upload"
 ---
 apiVersion: v1
 kind: Service

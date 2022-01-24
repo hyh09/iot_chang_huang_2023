@@ -2,11 +2,13 @@
 <div style="min-width: 360px;">
   <div [fxShow]="!isEdit" class="tb-details-buttons" fxLayout.xs="column">
     <button
+      *ngIf="utils.hasPermission('auth-mng.bind-users')"
       mat-raised-button color="primary"
       [disabled]="(isLoading$ | async)"
       (click)="onEntityAction($event, 'bindUsers')"
     >{{'auth-mng.bind-users' | translate }}</button>
     <button
+      *ngIf="canSetPermission && utils.hasPermission('auth-mng.set-permissions')"
       mat-raised-button color="primary"
       [disabled]="(isLoading$ | async)"
       (click)="onEntityAction($event, 'setPermissions')"
@@ -16,7 +18,7 @@
     <form [formGroup]="entityForm">
       <fieldset [disabled]="(isLoading$ | async) || !isEdit">
         <fieldset [disabled]="!!entityForm.get('id').value">
-          <mat-form-field class="mat-block">
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
             <mat-label translate>auth-mng.role-code</mat-label>
             <input matInput formControlName="roleCode" required>
             <mat-error *ngIf="entityForm.get('roleCode').hasError('required')">

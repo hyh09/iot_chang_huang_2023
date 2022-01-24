@@ -16,6 +16,7 @@
 package org.thingsboard.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
@@ -28,7 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.alarm.Alarm;
@@ -86,6 +86,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
@@ -119,13 +120,14 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
-//import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
+
+//import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 @Slf4j
 @TbCoreComponent
@@ -304,6 +306,7 @@ public abstract class BaseController {
     @Autowired  protected UserLanguageSvc userLanguageSvc;
     @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
+    @Autowired  protected EffciencyAnalysisRepository effciencyAnalysisRepository;
 
 
     @ExceptionHandler(ThingsboardException.class)
@@ -363,8 +366,17 @@ public abstract class BaseController {
 
         }
     }
+    void checkParameterChinees(String name, String param) throws ThingsboardException {
+        if (StringUtils.isEmpty(param)) {
+            throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+        }
+    }
+    void checkParameterChinees(String name, Object param) throws ThingsboardException {
+        if(param == null || StringUtils.isBlank(param.toString())){
+            throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
 
-
+        }
+    }
 
     void checkArrayParameter(String name, String[] params) throws ThingsboardException {
         if (params == null || params.length == 0) {
@@ -1030,6 +1042,17 @@ public abstract class BaseController {
         } catch (Exception e) {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
+    }
+
+    /**
+     * 获得当前登录用户的语言环境，默认zh_cn
+     */
+    public String getUserLanguage() {
+        try {
+            return Optional.ofNullable(getCurrentUser().getAdditionalInfo()).map(v -> v.get("lang")).map(JsonNode::asText).orElse("zh_cn");
+        } catch (Exception ignore) {
+        }
+        return "zh_cn";
     }
 
     /**

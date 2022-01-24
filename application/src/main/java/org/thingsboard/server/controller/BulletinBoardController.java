@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
@@ -61,10 +62,9 @@ public class BulletinBoardController extends BaseController{
         ResultHomeCapAppVo result = new ResultHomeCapAppVo();
 
         try {
-            result.setTodayValue(getValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getValueByTime(factoryId,workshopId, productionLineId,deviceId,CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(bulletinBoardSvc.getHistoryCapValue(factoryId,getTenantId().getId()));
-            return result;
+            TsSqlDayVo tsSqlDayVo =    TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
+            tsSqlDayVo.setTenantId(getTenantId().getId());
+            return efficiencyStatisticsSvc.queryThreePeriodsCapacity(tsSqlDayVo);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -84,8 +84,6 @@ public class BulletinBoardController extends BaseController{
     @ResponseBody
     public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "factoryId")  String factoryId) throws ThingsboardException {
         try {
-
-
         QueryTsKvVo  vo =  new  QueryTsKvVo();
         vo.setStartTime(CommonUtils.getZero());
         vo.setEndTime(CommonUtils.getNowTime());
@@ -94,7 +92,7 @@ public class BulletinBoardController extends BaseController{
             vo.setFactoryId(UUID.fromString(factoryId));
         }
         vo.setTenantId(getTenantId().getId());
-       return bulletinBoardSvc.energyConsumptionToday(vo,getTenantId().getId());
+       return bulletinBoardSvc.energyConsumptionToday(vo,getTenantId());
         }catch (Exception  e)
         {
             log.error("打印看板设备今日耗能量:{}",e);
@@ -109,6 +107,7 @@ public class BulletinBoardController extends BaseController{
     public List<ConsumptionVo> totalEnergyConsumption(
           @RequestBody  QueryTsKvVo  vo
     ) throws ThingsboardException {
+//        log.info("=====QueryTsKvVo.totalEnergyConsumption==>:"+vo);
         try {
             if(vo.getEndTime() == null )
             {
@@ -137,33 +136,6 @@ public class BulletinBoardController extends BaseController{
 
 
 
-
-
-    private  String getValueByTime(String factoryId,String workshopId,String productionLineId, String deviceId,long startTime, long EndTime) throws ThingsboardException {
-        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
-        queryTsKvVo.setTenantId(getTenantId().getId());
-        if(StringUtils.isNotEmpty(factoryId)) {
-            queryTsKvVo.setFactoryId(UUID.fromString(factoryId));
-        }
-        if(StringUtils.isNotEmpty(workshopId)) {
-            queryTsKvVo.setWorkshopId(UUID.fromString(workshopId));
-        }
-        if(StringUtils.isNotEmpty(productionLineId)) {
-            queryTsKvVo.setProductionLineId(UUID.fromString(productionLineId));
-        }
-        if(StringUtils.isNotEmpty(deviceId)) {
-            queryTsKvVo.setDeviceId(UUID.fromString(deviceId));
-        }
-        queryTsKvVo.setStartTime(startTime);
-        queryTsKvVo.setEndTime(EndTime);
-        queryTsKvVo.setFilterFirstFactory(false);
-        ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
-        if(resultCapAppVo != null)
-        {
-            return  resultCapAppVo.getTotalValue();
-        }
-        return  "0";
-    }
 
 
 

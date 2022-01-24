@@ -3,14 +3,17 @@ package org.thingsboard.server.dao.sql.role.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
-import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
+import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
+import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
+import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
@@ -38,8 +41,9 @@ public interface EfficiencyStatisticsSvc {
 
     Object  queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
 
-    @Deprecated
-    PageDataAndTotalValue<AppDeviceCapVo> queryPCCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+    PageData<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+
+
 
     /**
      * 产能的新方法保证出入参
@@ -52,18 +56,49 @@ public interface EfficiencyStatisticsSvc {
 
 
 
-    PageDataAndTotalValue<Map> queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
     /**
-     * 产能接口
+     * 能耗的查询接口  【pc端】
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     * @throws JsonProcessingException
      */
-     ResultCapAppVo  queryCapApp(QueryTsKvVo queryTsKvVo, TenantId tenantId);
+    PageDataAndTotalValue<Map> queryEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
+
+
 
 
     /**
-     * 能耗的查询
+     * APP产能接口
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @return
      */
+     ResultCapAppVo queryCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
+
+
+    /**
+     * app端的能耗返回  注意返回和Pc不一样的
+     *  如果工厂id为空查询该租户下第一个工厂数据
+     * @param queryTsKvVo
+     * @param tenantId
+     * @param pageLink
+     * @param flg 是否过滤掉第一个工厂
+     * @return
+     */
+    ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId,PageLink pageLink,Boolean flg);
+
+
+    /**
+     * 能耗的查询  queryAppEntityByKeysNewMethod
+     */
+    @Deprecated
     ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);
+
+
 
     /**
      * PC端的运行状态
@@ -92,5 +127,28 @@ public interface EfficiencyStatisticsSvc {
      * @return
      */
     List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
+
+
+    /*********
+     *今天  昨天 历史的产能 接口
+     *  app 和 看板 共用
+     */
+    ResultHomeCapAppVo queryThreePeriodsCapacity(TsSqlDayVo  vo);
+
+    /***********
+     * 今天 昨天 历史 的能耗 【APP端】
+     *
+     */
+    ResultHomeEnergyAppVo queryAppThreePeriodsEnergy(TsSqlDayVo vo);
+
+
+    /**
+     * PC端能耗 top-10
+     * @return
+     */
+   List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo);
+
+
+
 
 }

@@ -93,6 +93,9 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private UUID  factoryId;
 
 
+    private  Integer operationType;
+
+
 
     //用户角色id
     @ApiModelProperty(value = "用户所需要绑定的角色【角色di】 更新的时候为空会清理此角色")
@@ -130,6 +133,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.type = user.getType();
         this.factoryId = user.getFactoryId();
         this.userLevel = user.getUserLevel();
+        this.operationType =user.getOperationType();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();

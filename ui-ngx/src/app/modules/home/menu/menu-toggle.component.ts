@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { MenuSection } from '@core/services/menu.models';
 import { Router } from '@angular/router';
 
@@ -58,4 +58,5 @@ export class MenuToggleComponent implements OnInit {
   trackBySectionPages(index: number, section: MenuSection){
     return section.id;
   }
+
 }

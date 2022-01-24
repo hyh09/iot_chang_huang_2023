@@ -71,7 +71,10 @@ public class ModelConstants {
     public  static  final String USER_USER_CREATOR_PROPERTY="user_creator";
     public  static  final String USER_USER_TYPE="type";
     public  static  final  String USER_USER_LEVEL="user_level";
-   public  static  final  String USER_USER_FACTORY_ID="factory_Id";
+    public  static  final  String USER_USER_FACTORY_ID="factory_Id";
+    public  static  final  String USER_OPERATION_TYPE="operation_type";
+
+
 
     public static final String USER_AUTHORITY_PROPERTY = "authority";
     public static final String USER_FIRST_NAME_PROPERTY = "first_name";
@@ -177,6 +180,10 @@ public class ModelConstants {
      * 生产线表.
      */
     public static final String PRODUCTION_LINE_COLUMN_FAMILY_NAME = "hs_production_line";
+    /**
+     * 系统版本表.
+     */
+    public static final String SYSTEM_VERSION_COLUMN_FAMILY_NAME = "hs_system_version";
     /**
      * Cassandra device constants.
      */

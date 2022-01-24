@@ -111,4 +111,12 @@ public class DataConstants {
     public static final String EDGE_MSG_SOURCE = "edge";
     public static final String MSG_SOURCE_KEY = "source";
 
+
+    public  static  final String DEFAULT_PASSWORD="123456";
+    //遥测数据的时间差
+    // 1800000=30分钟
+    //1800000=1000*60*30= 1800000
+    //         1000*60
+    public  static  final  Long  ENERGY_TIME_GAP=1800000L;
+
 }

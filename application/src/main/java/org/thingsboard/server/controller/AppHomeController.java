@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
@@ -49,10 +51,14 @@ public class AppHomeController extends BaseController{
         ResultHomeCapAppVo result = new ResultHomeCapAppVo();
 
         try {
-            result.setTodayValue(getValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(getValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
-            return result;
+            TsSqlDayVo tsSqlDayVo = new  TsSqlDayVo();
+            tsSqlDayVo.setFactoryId(factoryId);
+            tsSqlDayVo.setTenantId(getTenantId().getId());
+           return efficiencyStatisticsSvc.queryThreePeriodsCapacity(tsSqlDayVo);
+//            result.setTodayValue(getValueByTime(factoryId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+//            result.setYesterdayValue(getValueByTime(factoryId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+//            result.setHistory(getValueByTime(factoryId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+//            return result;
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -81,10 +87,13 @@ public class AppHomeController extends BaseController{
         ResultHomeEnergyAppVo result = new ResultHomeEnergyAppVo();
 
         try {
-            result.setTodayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
-            result.setYesterdayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
-            result.setHistory(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
-            return result;
+             TsSqlDayVo vo = TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
+                    vo.setTenantId(getTenantId().getId());
+            return  efficiencyStatisticsSvc.queryAppThreePeriodsEnergy(vo);
+//            result.setTodayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getZero(), CommonUtils.getNowTime()));
+//            result.setYesterdayValue(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getYesterdayZero(), CommonUtils.getYesterdayLastTime()));
+//            result.setHistory(getMapValueByTime(factoryId,workshopId,productionLineId,deviceId, CommonUtils.getHistoryPointTime(), CommonUtils.getNowTime()));
+//            return result;
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -122,18 +131,7 @@ public class AppHomeController extends BaseController{
 
 
 
-    private  String getValueByTime(UUID factoryId,long startTime,long EndTime) throws ThingsboardException {
-        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
-        queryTsKvVo.setFactoryId(factoryId);
-        queryTsKvVo.setStartTime(startTime);
-        queryTsKvVo.setEndTime(EndTime);
-        ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
-        if(resultCapAppVo != null)
-        {
-            return  resultCapAppVo.getTotalValue();
-        }
-        return  "0";
-    }
+
 
 
 
@@ -155,7 +153,8 @@ public class AppHomeController extends BaseController{
         }
         queryTsKvVo.setStartTime(startTime);
         queryTsKvVo.setEndTime(EndTime);
-        ResultEnergyAppVo resultEnergyAppVo =   efficiencyStatisticsSvc.queryEntityByKeys(queryTsKvVo,getTenantId(),false);
+        PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), "", "", "");
+        ResultEnergyAppVo resultEnergyAppVo =   efficiencyStatisticsSvc.queryAppEntityByKeysNewMethod(queryTsKvVo,getTenantId(),pageLink,false);
         if(resultEnergyAppVo != null)
         {
             return  resultEnergyAppVo.getTotalValue();

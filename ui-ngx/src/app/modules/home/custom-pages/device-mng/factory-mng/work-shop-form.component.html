@@ -15,17 +15,15 @@
         <mat-label translate>device-mng.remark</mat-label>
         <input matInput formControlName="remark">
       </mat-form-field>
-      <!-- <tb-image-input
+      <tb-image-input
         label="{{ 'device-mng.logo' | translate }}"
         maxSizeByte="524288"
         formControlName="logoImages"
-        [disabled]="!isEdit"
-      ></tb-image-input> -->
+      ></tb-image-input>
       <tb-image-input
         label="{{ 'device-mng.work-shop-bg' | translate }}"
         maxSizeByte="1048576"
         formControlName="bgImages"
-        [disabled]="!isEdit"
       ></tb-image-input>
     </fieldset>
   </form>

@@ -774,3 +774,113 @@ COMMENT ON TABLE "public"."hs_dict_device_standard_property" IS '设备字典-�
 -- December 6, 2021 11:03:14 GMT+8
 ALTER TABLE "public"."hs_dict_device" ADD COLUMN "is_default" bool NOT NULL DEFAULT 'FALSE';
 COMMENT ON COLUMN "public"."hs_dict_device"."is_default" IS '是否默认';
+
+--创建系统版本表
+CREATE TABLE IF NOT EXISTS public.hs_system_version
+(
+    id uuid NOT NULL,
+    version character varying(225) COLLATE pg_catalog."default" NOT NULL DEFAULT '0.0.1'::character varying,
+    publish_time bigint NOT NULL,
+    comment character varying(255) COLLATE pg_catalog."default",
+    tenant_id uuid NOT NULL,
+    created_user uuid,
+    created_time bigint NOT NULL,
+    updated_user uuid,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_system_version_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_system_version
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_system_version
+    IS '系统版本表';
+
+create table hs_energy_chart
+(
+    id                   uuid not null
+        constraint hs_energy_chart_pkey
+            primary key,
+    created_time         bigint,
+    created_user         uuid,
+    tenant_id            uuid,
+    updated_time         bigint,
+    updated_user         uuid,
+    capacity_added_value varchar(255),
+    capacity_first_time  bigint,
+    capacity_first_value varchar(255),
+    capacity_last_time   bigint,
+    capacity_value       varchar(255),
+    date                 date,
+    electric_added_value varchar(255),
+    electric_first_time  bigint,
+    electric_first_value varchar(255),
+    electric_last_time   bigint,
+    electric_value       varchar(255),
+    entity_id            uuid,
+    gas_added_value      varchar(255),
+    gas_first_time       bigint,
+    gas_first_value      varchar(255),
+    gas_last_time        bigint,
+    gas_value            varchar(255),
+    ts                   bigint,
+    water_added_value    varchar(255),
+    water_first_time     bigint,
+    water_first_value    varchar(255),
+    water_last_time      bigint,
+    water_value          varchar(255)
+);
+
+----新增表用于趋势图的统计时间差
+CREATE TABLE IF NOT EXISTS public.hs_enery_time_gap
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    entity_id uuid,
+    key_name character varying(255) COLLATE pg_catalog."default",
+    time_gap bigint,
+    ts bigint,
+    value character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_enery_time_gap_pkey PRIMARY KEY (id)
+)
+
+create table hs_statistical_data
+(
+    id                   uuid not null
+        constraint hs_statistical_data_pkey
+            primary key,
+    created_time         bigint,
+    created_user         uuid,
+    tenant_id            uuid,
+    updated_time         bigint,
+    updated_user         uuid,
+    capacity_added_value varchar(255),
+    capacity_first_time  bigint,
+    capacity_first_value varchar(255),
+    capacity_last_time   bigint,
+    capacity_value       varchar(255),
+    date                 date,
+    electric_added_value varchar(255),
+    electric_first_time  bigint,
+    electric_first_value varchar(255),
+    electric_last_time   bigint,
+    electric_value       varchar(255),
+    entity_id            uuid,
+    gas_added_value      varchar(255),
+    gas_first_time       bigint,
+    gas_first_value      varchar(255),
+    gas_last_time        bigint,
+    gas_value            varchar(255),
+    ts                   bigint,
+    water_added_value    varchar(255),
+    water_first_time     bigint,
+    water_first_value    varchar(255),
+    water_last_time      bigint,
+    water_value          varchar(255)
+);

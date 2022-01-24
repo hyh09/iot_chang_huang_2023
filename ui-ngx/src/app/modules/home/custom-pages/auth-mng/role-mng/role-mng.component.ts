@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AppState } from '@app/core/core.state';
+import { UtilsService } from '@app/core/services/utils.service';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
 import { Role } from '@app/shared/models/custom/auth-mng.models';
@@ -13,13 +14,16 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class RoleMngComponent extends EntityComponent<Role> {
 
+  canSetPermission = false;
+
   constructor(
     protected store: Store<AppState>,
     protected translate: TranslateService,
     @Inject('entity') protected entityValue: Role,
     @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<Role>,
     protected fb: FormBuilder,
-    protected cd: ChangeDetectorRef
+    protected cd: ChangeDetectorRef,
+    public utils: UtilsService
   ) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
@@ -36,6 +40,7 @@ export class RoleMngComponent extends EntityComponent<Role> {
 
   updateForm(entity: Role) {
     this.entityForm.patchValue(entity);
+    this.canSetPermission = entity && entity.operationType !== 1;
   }
 
 }

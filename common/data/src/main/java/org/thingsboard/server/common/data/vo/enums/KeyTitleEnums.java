@@ -12,7 +12,9 @@ public enum KeyTitleEnums {
     key_cable("耗电量","3"),//电
 
 
-    key_capacity("总产能","0"),//总产能
+    key_capacity("总产量","0"),//总产能
+
+
 
     ;
 
@@ -38,6 +40,22 @@ public enum KeyTitleEnums {
             if(code.equals(enums.getCode()))
             {
                 return enums.getgName();
+            }
+        }
+        return  null;
+    }
+
+
+
+    public static  KeyTitleEnums getEnumsByCode(String  code)
+    {
+
+
+        for(KeyTitleEnums enums:KeyTitleEnums.values())
+        {
+            if(code.equals(enums.getCode()))
+            {
+                return enums;
             }
         }
         return  null;

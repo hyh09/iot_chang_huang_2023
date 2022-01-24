@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { AfterViewInit, Component, forwardRef, Input, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -82,6 +82,15 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
   @Input()
   inputId = this.utils.guid();
 
+  @Input()
+  size = 100;
+
+  @Input()
+  hideEmptyText = false;
+
+  @Output()
+  onSelect: EventEmitter<any> = new EventEmitter<any>();
+
   imageUrl: string;
   safeImageUrl: SafeUrl;
 
@@ -123,6 +132,7 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
           }
         };
         reader.readAsDataURL(file);
+        this.onSelect.emit();
       }
     });
   }
@@ -164,7 +174,7 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
   //添加方法：获取允许的图片格式
   getAcceptImg() {
     if (this.imgSuffix) {
-      return { accept: this.imgSuffix.map((suffix) => 'image/' + suffix).join(',') };
+      return { accept: this.imgSuffix.map((suffix) => '.' + suffix).join(',') };
     } else {
       return { accept: 'image/*' };
     }

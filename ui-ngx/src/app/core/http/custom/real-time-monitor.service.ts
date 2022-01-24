@@ -1,11 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { AuthService } from "@app/core/auth/auth.service";
-import { RequestConfig, defaultHttpOptionsFromConfig, WINDOW } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { DeviceDetails, DevicePropHistory, RealTimeData } from "@app/shared/models/custom/device-monitor.models";
 import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
 import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
+import { WINDOW } from "@app/core/services/window.service";
 
 @Injectable({
   providedIn: 'root'
@@ -59,7 +60,7 @@ export class RealTimeMonitorService {
   // 获取某条属性/参数的历史数据
   public getPropHistoryData(deviceId: string, groupPropertyName: string, config?: RequestConfig): Observable<DevicePropHistory> {
     return this.http.get<DevicePropHistory>(
-      `/api/deviceMonitor/rtMonitor/device/groupProperty/history?deviceId=${deviceId}&groupPropertyName=${groupPropertyName}`,
+      `/api/deviceMonitor/rtMonitor/device/groupProperty/history?deviceId=${deviceId}&groupPropertyName=${encodeURIComponent(groupPropertyName)}`,
       defaultHttpOptionsFromConfig(config)
     );
   }

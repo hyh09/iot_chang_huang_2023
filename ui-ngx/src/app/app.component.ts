@@ -188,6 +188,12 @@ export class AppComponent implements OnInit {
       css += `color: ${ui.platformTextMainColor} !important;`;
     }
     css = css + '}';
+    if (ui.platformMainColor) {
+      css += `.tb-default tb-home-links .mat-figure .tb-card-button{background-color: ${ui.platformMainColor} !important;}`;
+    }
+    if (ui.platformTextMainColor) {
+      css += `.tb-default tb-home-links .mat-figure .tb-card-button{color: ${ui.platformTextMainColor} !important;}`;
+    }
     if (ui.platformSecondColor) {
       css += `.tb-default .tb-menu-toggle-list {background-color: ${ui.platformSecondColor}}`;
     }

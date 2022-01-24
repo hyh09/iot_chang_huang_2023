@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { RequestConfig, defaultHttpOptionsFromConfig } from "@app/core/public-api";
+import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { FactoryVersion } from "@app/shared/models/custom/system-mng.models";
 import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
