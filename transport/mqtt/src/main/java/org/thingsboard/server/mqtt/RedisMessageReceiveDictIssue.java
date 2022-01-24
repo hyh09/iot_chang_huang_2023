@@ -20,7 +20,7 @@ import java.util.Map;
 @Slf4j
 @Component
 public class RedisMessageReceiveDictIssue {
-    private final String topic = "";
+    private final String topic = "device/issue/";
 
     @Autowired
     private MqttTransportService mqttTransportService;
