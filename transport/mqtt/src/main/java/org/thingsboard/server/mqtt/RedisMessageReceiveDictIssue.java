@@ -41,6 +41,10 @@ public class RedisMessageReceiveDictIssue {
 
     private void dictIssue(String deserialize) throws ThingsboardException, ParseException {
         MqttTransportHandler handler = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+        if(handler == null){
+            log.error("handler 为空！");
+            return;
+        }
         if(StringUtils.isNotEmpty(deserialize)){
             Map<String, Object> parse = JSONObjectUtils.parse(deserialize);
             JSONArray topicObject = (JSONArray)parse.get("topic");
