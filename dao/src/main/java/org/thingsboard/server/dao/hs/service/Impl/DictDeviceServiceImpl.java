@@ -643,7 +643,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @return 遥测属性列表
      */
     @Override
-    public List<DictDeviceTsPropertyResult> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId) {
+    public List<DictDeviceTsPropertyResult> listDictDeviceIssueProperties(TenantId tenantId, UUID dictDeviceId) {
         var components = this.listDictDeviceComponents(dictDeviceId);
         List<DictDeviceTsPropertyResult> results = Lists.newArrayList();
         components.forEach(r -> {
@@ -795,6 +795,28 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                     .unit(Optional.ofNullable(v.getDictDataId()).flatMap(e -> this.dictDataRepository.findById(e).map(DictDataEntity::getUnit)).orElse(null))
                     .propertyType(propertyType)
                     .build()).orElse(null);
+    }
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 全部遥测属性
+     */
+    @Override
+    @SuppressWarnings("all")
+    public List<DictDeviceTsPropertyVO> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId) {
+        return CompletableFuture.supplyAsync(() -> {
+                    var components = this.listDictDeviceComponents(dictDeviceId);
+                    List<DictDeviceTsPropertyResult> results = Lists.newArrayList();
+                    components.forEach(r -> {
+                        results.addAll(r.getPropertyList().stream().map(e -> DictDeviceTsPropertyResult.builder().type(r.getName()).id(e.getId()).name(e.getName()).title(e.getTitle()).build()).collect(Collectors.toList()));
+                        this.packageTsPropertyList(r.getComponentList(), r.getName(), results);
+                    });
+                    return results.stream().map(v -> DictDeviceTsPropertyVO.builder().id(toUUID(v.getId())).name(v.getName()).title(v.getTitle()).propertyType(DictDevicePropertyTypeEnum.COMPONENT).build());
+                }
+        ).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.listDictDeviceGroups(dictDeviceId).stream().flatMap(v -> v.getGroupPropertyList().stream().map(e -> DictDeviceTsPropertyVO.builder().propertyType(DictDevicePropertyTypeEnum.DEVICE).id(toUUID(e.getId())).name(e.getName()).title(e.getTitle()).build()))), (s1, s2) -> Stream.concat(s1, s2).collect(Collectors.toList())).join();
     }
 
     /**

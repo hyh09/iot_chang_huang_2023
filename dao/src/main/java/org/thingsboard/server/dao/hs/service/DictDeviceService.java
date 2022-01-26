@@ -167,7 +167,7 @@ public interface DictDeviceService {
      * @param dictDeviceId 设备字典Id
      * @return 遥测属性列表
      */
-    List<DictDeviceTsPropertyResult> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId);
+    List<DictDeviceTsPropertyResult> listDictDeviceIssueProperties(TenantId tenantId, UUID dictDeviceId);
 
     /**
      * 设备字典-图表-列表
@@ -222,4 +222,13 @@ public interface DictDeviceService {
      * @return 遥测属性
      */
     DictDeviceTsPropertyVO getTsPropertyByPropertyName(UUID dictDeviceId, String tsPropertyName);
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 全部遥测属性
+     */
+    List<DictDeviceTsPropertyVO> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId);
 }
