@@ -1,0 +1,25 @@
+<div class="mat-padding" fxLayout="column" style="min-width: 360px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.chart-title</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'device-mng.chart-title-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.device-data</mat-label>
+        <mat-select formControlName="propertyIds" multiple required (selectionChange)="onSelectionChange()">
+          <mat-option *ngFor="let option of properties" [value]="option.id">{{ option.title || option.name }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="entityForm.get('propertyIds').invalid">
+          {{ 'device-mng.chart-prop-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-slide-toggle formControlName="enable" style="margin-top: 10px;">
+        {{ 'device-mng.chart-visible' | translate }}
+      </mat-slide-toggle>
+    </fieldset>
+  </form>
+</div>
