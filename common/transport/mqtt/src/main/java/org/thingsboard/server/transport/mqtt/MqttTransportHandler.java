@@ -40,6 +40,7 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.thingsboard.server.common.data.DataConstants;
@@ -128,6 +129,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     private final SslHandler sslHandler;
     private final ConcurrentMap<MqttTopicMatcher, Integer> mqttQoSMap;
 
+    @Getter
     final DeviceSessionCtx deviceSessionCtx;
     volatile InetSocketAddress address;
     volatile GatewaySessionHandler gatewaySessionHandler;
@@ -337,6 +339,13 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
     public void dictIssue(String topic,String json) throws ThingsboardException {
         //设备字典下发
+        log.info("deviceSessionCtx:==========>"+deviceSessionCtx.toString());
+        log.info("deviceSessionCtx.getContext()=========>"+deviceSessionCtx.getContext().toString());
+        log.info("deviceSessionCtx.getContext().getJsonMqttAdaptor()=========>"+deviceSessionCtx.getContext().getJsonMqttAdaptor().toString());
+        if(!deviceSessionCtx.isConnected()){
+            log.error("======>DeviceSessionCtx 连接已断开！");
+            return;
+        }
         deviceSessionCtx.getContext().getJsonMqttAdaptor().convertToPublish(deviceSessionCtx,topic,json).ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
     }
 
