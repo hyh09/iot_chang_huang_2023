@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 const forwardUrl = "http://iot.textile-saas.huansi.net"; // http://iot.textile-saas.huansi.net  http://10.10.10.162:8080  http://10.10.11.23:8080  http://10.10.10.179:8080  http://10.10.10.55:8080
-const wsForwardUrl = "ws://iot.textile-saas.huansi.net";
+const wsForwardUrl = "http://iot.textile-saas.huansi.net";
 const ruleNodeUiforwardUrl = forwardUrl;
 
 const PROXY_CONFIG = {
