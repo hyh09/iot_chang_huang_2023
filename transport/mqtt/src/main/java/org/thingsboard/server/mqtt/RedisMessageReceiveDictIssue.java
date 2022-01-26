@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
 import org.thingsboard.server.transport.mqtt.MqttTransportService;
+import org.thingsboard.server.transport.mqtt.session.DeviceSessionCtx;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -55,6 +56,11 @@ public class RedisMessageReceiveDictIssue {
                    log.info("发布MQTT消息");
                    log.info("消息主题：" + topic + gatewayId);
                    log.info("消息内容：" + body);
+                   try {
+                       handler.channelActive(DeviceSessionCtx.channel);
+                   } catch (Exception e) {
+                       e.printStackTrace();
+                   }
                    handler.dictIssue(topic + gatewayId,body);
                }
             }
