@@ -342,10 +342,6 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         log.info("deviceSessionCtx:==========>"+deviceSessionCtx.toString());
         log.info("deviceSessionCtx.getContext()=========>"+deviceSessionCtx.getContext().toString());
         log.info("deviceSessionCtx.getContext().getJsonMqttAdaptor()=========>"+deviceSessionCtx.getContext().getJsonMqttAdaptor().toString());
-        if(!deviceSessionCtx.isConnected()){
-            log.error("======>DeviceSessionCtx 连接已断开！");
-            return;
-        }
         deviceSessionCtx.getContext().getJsonMqttAdaptor().convertToPublish(deviceSessionCtx,topic,json).ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
     }
 
@@ -572,6 +568,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                     default:
                         if(topic.startsWith(MqttTopics.DICT_ISSUE)){
                             registerSubQoS(topic, grantedQoSList, reqQoS);
+                            log.info("=====>订阅topic :{}  sessionId:{}",topic,sessionId);
                             break;
                         }
                         log.warn("[{}] Failed to subscribe to [{}][{}]", sessionId, topic, reqQoS);

@@ -55,7 +55,7 @@ public class DeviceSessionCtx extends MqttDeviceAwareSessionContext {
 
     @Getter
     @Setter
-    private static ChannelHandlerContext channel;
+    private ChannelHandlerContext channel;
 
     @Getter
     private final MqttTransportContext context;
