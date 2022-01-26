@@ -8,23 +8,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "设备字典遥测属性实体类")
+@ApiModel(value = "历史数据图表属性时序值")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictDeviceTsPropertyResult {
+public class HistoryGraphPropertyTsKvVO {
 
-    @ApiModelProperty(value = "id")
-    private String id;
+    @ApiModelProperty(value = "时间")
+    private Long ts;
 
-    @ApiModelProperty(value = "名称")
-    private String name;
-
-    @ApiModelProperty(value = "标题")
-    private String title;
-
-    @ApiModelProperty(value = "类型")
-    private String type;
+    @ApiModelProperty(value = "值")
+    private String value;
 }

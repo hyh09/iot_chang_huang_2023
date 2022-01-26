@@ -18,8 +18,14 @@ import org.thingsboard.server.common.data.alarm.AlarmStatus;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
-import org.thingsboard.server.common.data.id.*;
-import org.thingsboard.server.common.data.kv.*;
+import org.thingsboard.server.common.data.id.AlarmId;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.kv.Aggregation;
+import org.thingsboard.server.common.data.kv.BaseReadTsKvQuery;
+import org.thingsboard.server.common.data.kv.ReadTsKvQuery;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -29,7 +35,13 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
@@ -41,14 +53,12 @@ import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
-import org.thingsboard.server.dao.hs.dao.*;
-import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
-import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
-import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import javax.persistence.criteria.Predicate;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -103,6 +113,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     // 二方库Service
     ClientService clientService;
 
+    // 图表Repository
+    DictDeviceGraphRepository graphRepository;
+
+    // 图表属性Repository
+    DictDeviceGraphItemRepository graphItemRepository;
+
     /**
      * 获得设备配置列表
      *
@@ -118,6 +134,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
             if (!StringUtils.isBlank(name))
                 predicates.add(cb.like(root.get("name"), "%" + name.trim() + "%"));
+
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
@@ -939,6 +956,73 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return this.clientService.listTsHistories(tenantId, deviceId, pageLink);
     }
 
+    /**
+     * 查询设备详情-遥测属性历史数据图表
+     *
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param tsPropertyName   遥测属性名称
+     * @param todayStartTime   开始时间
+     * @param todayCurrentTime 结束时间
+     * @return 遥测属性历史数据图表
+     */
+    @Override
+    public HistoryGraphVO getTsPropertyHistoryGraph(TenantId tenantId, UUID deviceId, String tsPropertyName, Long todayStartTime, Long todayCurrentTime) throws ThingsboardException {
+        var historyGraphVO = new HistoryGraphVO();
+        historyGraphVO.setName(tsPropertyName);
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId)).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("设备不存在", ThingsboardErrorCode.GENERAL));
+        var dictDeviceId = device.getDictDeviceId();
+        
+
+        var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), tsPropertyName, todayStartTime, todayCurrentTime);
+        var property = HistoryGraphPropertyVO.builder()
+                .name(tsPropertyName)
+                .title(historyGraphVO.getName())
+                .tsKvs(data)
+                .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
+                .build();
+        historyGraphVO.setName(property.getTitle());
+        historyGraphVO.setEnable(property.getIsShowChart());
+        historyGraphVO.setProperties(Lists.newArrayList(property));
+        return historyGraphVO;
+    }
+
+    /**
+     * 获得遥测时序数据
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param name      名称
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @SuppressWarnings("all")
+    public List<HistoryGraphPropertyTsKvVO> listTsKvs(TenantId tenantId, DeviceId deviceId, String name, Long startTime, Long endTime) {
+        try {
+            List<String> keyList = new ArrayList<>() {{
+                add(name);
+            }};
+            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, 1, Aggregation.COUNT, "desc"))
+                    .collect(Collectors.toList());
+
+            var tempResult = this.timeseriesService.findAll(tenantId, deviceId, tempQueries).get()
+                    .stream().collect(Collectors.toMap(TsKvEntry::getKey, Function.identity()));
+            if (tempResult.isEmpty())
+                return Lists.newArrayList();
+            int count = Integer.parseInt(String.valueOf(tempResult.get(name).getValue()));
+            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, count, Aggregation.NONE, "desc"))
+                    .collect(Collectors.toList());
+
+            return this.timeseriesService.findAll(tenantId, deviceId, queries).get()
+                    .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).map(e -> HistoryGraphPropertyTsKvVO.builder()
+                            .ts(e.getTs())
+                            .value(this.formatKvEntryValue(e))
+                            .build()).collect(Collectors.toList());
+        } catch (Exception ignore) {
+            return Lists.newArrayList();
+        }
+    }
+
     @Autowired
     public void setDeviceProfileRepository(DeviceProfileRepository deviceProfileRepository) {
         this.deviceProfileRepository = deviceProfileRepository;
@@ -997,5 +1081,15 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Autowired
     public void setCommonComponent(CommonComponent commonComponent) {
         this.commonComponent = commonComponent;
+    }
+
+    @Autowired
+    public void setGraphRepository(DictDeviceGraphRepository graphRepository) {
+        this.graphRepository = graphRepository;
+    }
+
+    @Autowired
+    public void setGraphItemRepository(DictDeviceGraphItemRepository graphItemRepository) {
+        this.graphItemRepository = graphItemRepository;
     }
 }
