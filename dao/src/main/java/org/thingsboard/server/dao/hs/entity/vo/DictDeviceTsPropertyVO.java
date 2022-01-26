@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
+
+import java.util.UUID;
 
 @Data
 @Accessors(chain = true)
@@ -14,10 +17,10 @@ import lombok.experimental.Accessors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictDeviceTsPropertyResult {
+public class DictDeviceTsPropertyVO {
 
     @ApiModelProperty(value = "id")
-    private String id;
+    private UUID id;
 
     @ApiModelProperty(value = "名称")
     private String name;
@@ -25,6 +28,9 @@ public class DictDeviceTsPropertyResult {
     @ApiModelProperty(value = "标题")
     private String title;
 
+    @ApiModelProperty(value = "单位")
+    private String unit;
+
     @ApiModelProperty(value = "类型")
-    private String type;
+    private DictDevicePropertyTypeEnum propertyType;
 }
