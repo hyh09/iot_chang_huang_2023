@@ -128,6 +128,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     private final SchedulerComponent scheduler;
     private final SslHandler sslHandler;
     private final ConcurrentMap<MqttTopicMatcher, Integer> mqttQoSMap;
+    static ConcurrentMap<String, DeviceSessionCtx> deviceSessionCtxConcurrentMap = new ConcurrentHashMap<>();
 
     @Getter
     final DeviceSessionCtx deviceSessionCtx;
@@ -339,10 +340,14 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
     public void dictIssue(String topic,String json) throws ThingsboardException {
         //设备字典下发
-        log.info("deviceSessionCtx:==========>"+deviceSessionCtx.toString());
-        log.info("deviceSessionCtx.getContext()=========>"+deviceSessionCtx.getContext().toString());
-        log.info("deviceSessionCtx.getContext().getJsonMqttAdaptor()=========>"+deviceSessionCtx.getContext().getJsonMqttAdaptor().toString());
-        deviceSessionCtx.getContext().getJsonMqttAdaptor().convertToPublish(deviceSessionCtx,topic,json).ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
+        String deviceId = topic.split("/")[2];
+        DeviceSessionCtx dctx = deviceSessionCtxConcurrentMap.get(deviceId);
+        dctx.getContext().getJsonMqttAdaptor().convertToPublish(dctx,topic,json).ifPresent(dctx.getChannel()::writeAndFlush);
+        log.info("deviceSessionCtx:==========>"+dctx.toString());
+        log.info("deviceSessionCtx.getContext()=========>"+dctx.getContext().toString());
+        log.info("deviceSessionCtx.getContext().getJsonMqttAdaptor()=========>"+dctx.getContext().getJsonMqttAdaptor().toString());
+
+        //deviceSessionCtx.getContext().getJsonMqttAdaptor().convertToPublish(deviceSessionCtx,topic,json).ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
     }
 
     private void processDevicePublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg, String topicName, int msgId) {
@@ -569,6 +574,8 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                         if(topic.startsWith(MqttTopics.DICT_ISSUE)){
                             registerSubQoS(topic, grantedQoSList, reqQoS);
                             log.info("=====>订阅topic :{}  sessionId:{}",topic,sessionId);
+                            String deviceId = topic.split("/")[2];
+                            deviceSessionCtxConcurrentMap.put(deviceId,deviceSessionCtx);
                             break;
                         }
                         log.warn("[{}] Failed to subscribe to [{}][{}]", sessionId, topic, reqQoS);

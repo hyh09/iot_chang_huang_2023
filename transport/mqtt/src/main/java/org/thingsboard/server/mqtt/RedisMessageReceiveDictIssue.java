@@ -56,11 +56,6 @@ public class RedisMessageReceiveDictIssue {
                    log.info("发布MQTT消息");
                    log.info("消息主题：" + topic + gatewayId);
                    log.info("消息内容：" + body);
-                   try {
-                       handler.channelActive(DeviceSessionCtx.channel);
-                   } catch (Exception e) {
-                       e.printStackTrace();
-                   }
                    handler.dictIssue(topic + gatewayId,body);
                }
             }
