@@ -6,6 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@ConditionalOnProperty(prefix = "database.ts", value = "type", havingValue = "cassandra")
-public @interface TsCassandra {
+@ConditionalOnProperty(prefix = "database.ts", value = "type", havingValue = "sql")
+public @interface TsSql {
 }

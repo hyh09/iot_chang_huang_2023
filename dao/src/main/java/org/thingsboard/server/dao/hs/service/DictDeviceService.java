@@ -4,6 +4,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
@@ -167,4 +168,58 @@ public interface DictDeviceService {
      * @return 遥测属性列表
      */
     List<DictDeviceTsPropertyResult> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 设备字典-图表-列表
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 设备字典-图表-列表
+     */
+    List<DictDeviceGraphVO> listDictDeviceGraphs(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 设备字典-图表-详情
+     *
+     * @param tenantId 租户Id
+     * @param graphId  设备字典图表Id
+     * @return 设备字典-图表-详情
+     */
+    DictDeviceGraphVO getDictDeviceGraphDetail(TenantId tenantId, UUID graphId) throws ThingsboardException;
+
+    /**
+     * 设备字典-图表-新增或修改
+     *
+     * @param tenantId          租户Id
+     * @param dictDeviceId      设备字典Id
+     * @param dictDeviceGraphVO 图表
+     * @return 图表
+     */
+    UUID updateOrSaveDictDeviceGraph(TenantId tenantId, UUID dictDeviceId, DictDeviceGraphVO dictDeviceGraphVO) throws ThingsboardException;
+
+    /**
+     * 设备字典-图表-删除
+     *
+     * @param tenantId 租户Id
+     * @param graphId  设备字典图表Id
+     */
+    void deleteDictDeviceGraph(TenantId tenantId, UUID graphId);
+
+    /**
+     * 设备字典-遥测属性查询
+     *
+     * @param propertyId   属性Id
+     * @param propertyType 属性类型
+     * @return 遥测属性
+     */
+    DictDeviceTsPropertyVO getTsPropertyByIdAndType(UUID propertyId, DictDevicePropertyTypeEnum propertyType);
+
+    /**
+     * 设备字典-遥测属性查询
+     *
+     * @param dictDeviceId   设备字典Id
+     * @param tsPropertyName 遥测属性名
+     * @return 遥测属性
+     */
+    DictDeviceTsPropertyVO getTsPropertyByPropertyName(UUID dictDeviceId, String tsPropertyName);
 }

@@ -7,5 +7,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @ConditionalOnProperty(prefix = "database.ts", value = "type", havingValue = "cassandra")
-public @interface cassandraService {
+public @interface TsCassandra {
 }
