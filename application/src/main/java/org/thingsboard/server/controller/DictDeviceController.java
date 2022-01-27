@@ -186,13 +186,25 @@ public class DictDeviceController extends BaseController {
     }
 
     /**
-     * 【不分页】获得设备字典全部遥测属性
+     * 获得设备字典全部遥测属性-配置下发专用
      */
-    @ApiOperation(value = "设备字典-属性-不分页")
+    @ApiOperation(value = "设备字典-属性-配置下发专用")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
     @GetMapping("/dict/device/properties")
-    public List<DictDeviceTsPropertyResult> listDictDeviceProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+    public List<DictDeviceTsPropertyResult> listDictDeviceIssueProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        return this.dictDeviceService.listDictDeviceIssueProperties(getTenantId(), toUUID(dictDeviceId));
+    }
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     */
+    @ApiOperation(value = "设备字典-全部属性-不分页")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
+    @GetMapping("/dict/device/all/properties")
+    public List<DictDeviceTsPropertyVO> listDictDeviceProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
         checkParameter("dictDeviceId", dictDeviceId);
         return this.dictDeviceService.listDictDeviceProperties(getTenantId(), toUUID(dictDeviceId));
     }

@@ -58,9 +58,9 @@ export class RealTimeMonitorService {
   }
 
   // 获取某条属性/参数的历史数据
-  public getPropHistoryData(deviceId: string, groupPropertyName: string, config?: RequestConfig): Observable<DevicePropHistory> {
+  public getPropHistoryData(deviceId: string, tsPropertyName: string, config?: RequestConfig): Observable<DevicePropHistory> {
     return this.http.get<DevicePropHistory>(
-      `/api/deviceMonitor/rtMonitor/device/groupProperty/history?deviceId=${deviceId}&groupPropertyName=${encodeURIComponent(groupPropertyName)}`,
+      `/api/deviceMonitor/rtMonitor/device/ts/property/history?deviceId=${deviceId}&tsPropertyName=${encodeURIComponent(tsPropertyName)}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
