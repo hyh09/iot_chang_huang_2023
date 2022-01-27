@@ -119,6 +119,14 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         this.isDefault = isDefault;
     }
 
+    public DictDeviceEntity(UUID id, String name, boolean isDefault, String model) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.isDefault = isDefault;
+        this.model = model;
+    }
+
     public DictDeviceEntity(DictDevice common) {
         if (common.getId() != null)
             this.id = UUID.fromString(common.getId());
