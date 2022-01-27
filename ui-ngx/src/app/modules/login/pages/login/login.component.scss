@@ -25,6 +25,7 @@
     background-size: cover;
     background-position: center;
     overflow: hidden;
+    filter: brightness(1.1);
     mat-progress-bar {
       position: fixed;
       top: 0;
