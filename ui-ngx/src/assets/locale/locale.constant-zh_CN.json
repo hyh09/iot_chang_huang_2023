@@ -2369,7 +2369,7 @@
     "email": "邮箱",
     "error": "登录错误",
     "expired-password-reset-message": "您的凭据已过期！请创建新密码。",
-    "forgot-password": "忘记密码",
+    "forgot-password": "忘记密码？",
     "login": "登录",
     "login-with": "使用 {{name}} 登录",
     "new-password": "新密码",
