@@ -23,7 +23,7 @@ import { Component } from '@angular/core';
 })
 export class LogoComponent {
 
-  logo = 'assets/logo.svg';
+  logo = 'assets/ntx_logo.png';
   logoTitle = "assets/logo_text.png";
 
 }
