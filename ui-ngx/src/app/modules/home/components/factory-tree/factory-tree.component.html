@@ -5,13 +5,12 @@
       nzNotFoundContent="{{ 'common.data-empty' | translate }}"
     ></nz-empty>
   </div>
-  <mat-form-field [fxShow]="treeData.length > 0" class="factory-tree-search">
-    <mat-label>{{ 'device-mng.search-name' | translate }}</mat-label>
-    <input type="text" matInput [(ngModel)]="searchValue" />
-    <button *ngIf="searchValue" matSuffix mat-icon-button aria-label="Clear" (click)="searchValue = ''">
-      <mat-icon class="material-icons">close</mat-icon>
-    </button>
-  </mat-form-field>
+  <nz-input-group [nzSuffix]="suffixIcon" class="factory-tree-search">
+    <input type="text" nz-input placeholder="{{ 'device-mng.search-name' | translate }}" [(ngModel)]="searchValue" />
+  </nz-input-group>
+  <ng-template #suffixIcon>
+    <i nz-icon nzType="search"></i>
+  </ng-template>
   <nz-tree
     [nzData]="treeData"
     [nzSearchValue]="searchValue"

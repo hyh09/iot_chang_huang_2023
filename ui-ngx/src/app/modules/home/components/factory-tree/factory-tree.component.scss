@@ -4,21 +4,12 @@
   position: relative;
   border-radius: 4px;
   overflow: hidden;
-  .mat-form-field {
-    width: 100%;
-    padding: 16px 12px 0;
-    ::ng-deep .mat-form-field-wrapper {
-      padding-bottom: 0;
-      .mat-form-field-infix {
-        border-top-width: 3px;
-      }
-      .mat-form-field-underline {
-        bottom: 0;
-      }
-    }
+  .factory-tree-search {
+    margin: 16px 16px 0;
+    width: calc(100% - 32px);
   }
   ::ng-deep .cdk-virtual-scroll-content-wrapper {
-    padding: 12px 5px;
+    padding: 16px 5px;
     .ant-tree-title {
       color: rgba(0, 0, 0, 0.87);
     }
