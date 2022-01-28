@@ -39,7 +39,6 @@ export class RealTimeMonitorService {
       this.telemetryUri = 'ws:';
     }
     this.telemetryUri += `//${this.window.location.hostname}:${port}/api/ws/plugins/telemetry`;
-    console.log(1)
   }
 
   // 获取实时监控数据

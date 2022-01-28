@@ -38,6 +38,7 @@
       .node-title {
         padding: 0 4px;
         border-radius: 2px;
+        white-space: nowrap;
       }
       .node-off-line {
         height: 16px;
@@ -48,6 +49,7 @@
         color: #fff;
         padding: 2px 4px;
         border-radius: 2px;
+        white-space: nowrap;
       }
     }
     .cdk-virtual-scroll-content-wrapper {
