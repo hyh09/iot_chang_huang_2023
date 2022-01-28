@@ -17,6 +17,20 @@
     [nzVirtualHeight]="scrollHeight"
     [nzSelectedKeys]="selectedKeys"
     [nzExpandedKeys]="expandedKeys"
+    [nzTreeTemplate]="treeTemplate"
     (nzClick)="onClickNode($event)"
-  ></nz-tree>
+  >
+    <ng-template #treeTemplate let-node let-origin="origin">
+      <div
+        *ngIf="origin.rowType === 'factory' || origin.rowType === 'device'; else defaultNode"
+        fxLayout="row" fxLayoutGap="4px" fxLayoutAlign="start center"
+      >
+        <div class="node-title">{{ node.title }}</div>
+        <div *ngIf="!origin.isOnline" class="node-off-line">{{ 'device-monitor.off-line' | translate }}</div>
+      </div>
+      <ng-template #defaultNode>
+        <div class="node-title">{{ node.title }}</div>
+      </ng-template>
+    </ng-template>
+  </nz-tree>
 </div>

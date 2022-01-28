@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
 import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
@@ -9,7 +9,10 @@ import { PageLink } from '@app/shared/public-api';
 @Component({
   selector: 'tb-real-time-monitor',
   templateUrl: './real-time-monitor.component.html',
-  styleUrls: ['./real-time-monitor.component.scss']
+  styleUrls: ['./real-time-monitor.component.scss'],
+  providers: [
+    { provide: 'RealTimeMonitorService', useClass: RealTimeMonitorService }
+  ]
 })
 export class RealTimeMonitorComponent implements OnDestroy {
 
@@ -34,7 +37,7 @@ export class RealTimeMonitorComponent implements OnDestroy {
   deviceList: DeviceItem[] = [];
 
   constructor(
-    private realTimeMonitorService: RealTimeMonitorService,
+    @Inject('RealTimeMonitorService') private realTimeMonitorService: RealTimeMonitorService,
     private router: Router
   ) { }
 
