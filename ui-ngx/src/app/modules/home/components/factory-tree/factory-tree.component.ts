@@ -95,7 +95,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           workshopId: item.workshopId,
           productionLineId: item.productionLineId,
           selectable: this.deviceOnly ? item.rowType === 'device' : true,
-          isOnline: item.rowType === 'factory' || item.rowType === 'device'
+          isOnLine: item.rowType === 'factory' || item.rowType === 'device'
         });
       });
       this.treeData = this.utils.formatTree(treeArr);
@@ -134,7 +134,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           treeMap[item.id] = item;
         });
         deviceIdList.forEach(id => {
-          treeMap[id].isOnline = _res[id];
+          treeMap[id].isOnLine = _res[id];
         });
         this.realTimeMonitorService.switchDevices(deviceIdList, true);
         this.realTimeMonitorService.subscribe(deviceIdList, ({ deviceId, isActive }) => {
