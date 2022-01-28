@@ -144,6 +144,7 @@ export interface FactoryTreeNodeOptions extends TreeNodeOptions {
   workshopName?: string;
   productionLineId?: string;
   productionLineName?: string;
+  isOnline?: boolean;
 }
 
 export interface FactoryTreeNodeIds {

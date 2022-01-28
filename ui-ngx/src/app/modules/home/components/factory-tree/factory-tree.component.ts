@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FactoryMngService } from '@app/core/http/custom/factory-mng.service';
-import { AppState, TreeNodeEmitEvent, UtilsService } from '@app/core/public-api';
+import { AppState, RealTimeMonitorService, TreeNodeEmitEvent, UtilsService } from '@app/core/public-api';
 import { FactoryTableOriginRow, FactoryTreeNodeIds, FactoryTreeNodeOptions } from '@app/shared/models/custom/factory-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -9,7 +9,10 @@ import { EntityTableHeaderComponent } from '../entity/entity-table-header.compon
 @Component({
   selector: 'tb-factory-tree',
   templateUrl: './factory-tree.component.html',
-  styleUrls: ['./factory-tree.component.scss']
+  styleUrls: ['./factory-tree.component.scss'],
+  providers: [
+    { provide: 'RealTimeMonitorService', useClass: RealTimeMonitorService }
+  ]
 })
 export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implements OnInit, AfterViewInit, OnDestroy {
 
@@ -28,7 +31,8 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
     protected store: Store<AppState>,
     protected translate: TranslateService,
     private factoryMngService: FactoryMngService,
-    private utils: UtilsService
+    private utils: UtilsService,
+    @Inject('RealTimeMonitorService') private realTimeMonitorService: RealTimeMonitorService
   ) {
     super(store);
   }
@@ -44,6 +48,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
 
   ngOnDestroy() {
     window.removeEventListener('resize', () => { this.setTreeHeight(); });
+    this.realTimeMonitorService.unsubscribe(true);
   }
 
   setTreeHeight() {
@@ -89,7 +94,8 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           factoryId: item.factoryId,
           workshopId: item.workshopId,
           productionLineId: item.productionLineId,
-          selectable: this.deviceOnly ? item.rowType === 'device' : true
+          selectable: this.deviceOnly ? item.rowType === 'device' : true,
+          isOnline: item.rowType === 'factory' || item.rowType === 'device'
         });
       });
       this.treeData = this.utils.formatTree(treeArr);
@@ -121,6 +127,26 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
           this.entitiesTableConfig.table.resetSortAndFilter(true);
         }
       }
+      this.factoryMngService.getOnlineStatus().subscribe(_res => {
+        const deviceIdList = Object.keys(_res || {});
+        const treeMap: {[id: string]: FactoryTreeNodeOptions} = {};
+        treeArr.forEach(item => {
+          treeMap[item.id] = item;
+        });
+        deviceIdList.forEach(id => {
+          treeMap[id].isOnline = _res[id];
+        });
+        this.realTimeMonitorService.switchDevices(deviceIdList, true);
+        this.realTimeMonitorService.subscribe(deviceIdList, ({ deviceId, isActive }) => {
+          if (deviceId === undefined || isActive === undefined) {
+            return;
+          }
+          const target = treeArr.filter(item => (['factory', 'device'].includes(item.rowType) && item.id === deviceId));
+          if (target.length > 0 && target[0].isOnLine !== !!isActive) {
+            target[0].isOnLine = !!isActive;
+          }
+        }, true);
+      });
     });
   }
 
