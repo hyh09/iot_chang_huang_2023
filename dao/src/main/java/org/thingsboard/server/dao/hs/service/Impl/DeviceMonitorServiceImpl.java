@@ -972,7 +972,35 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         historyGraphVO.setName(tsPropertyName);
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId)).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("设备不存在", ThingsboardErrorCode.GENERAL));
         var dictDeviceId = device.getDictDeviceId();
-        
+        if (device.getDictDeviceId() != null) {
+            DictDeviceTsPropertyVO tsProperty = this.dictDeviceService.getTsPropertyByPropertyName(dictDeviceId, tsPropertyName);
+            if (tsProperty != null) {
+                Optional.ofNullable(tsProperty.getTitle()).filter(StringUtils::isNotBlank).ifPresent(historyGraphVO::setName);
+                var graphId = this.graphItemRepository.findByPropertyIdAndPropertyType(tsProperty.getId(), tsProperty.getPropertyType().getCode())
+                        .map(DictDeviceGraphItemEntity::getGraphId).orElse(null);
+                if (graphId != null) {
+                    var graph = this.graphRepository.findById(graphId).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("图表不存在", ThingsboardErrorCode.GENERAL));
+                    historyGraphVO.setName(graph.getName());
+                    historyGraphVO.setEnable(graph.getEnable());
+                    historyGraphVO.setProperties(this.graphItemRepository.findAllByGraphIdOrderBySortAsc(graphId)
+                            .thenApplyAsync(v -> v.stream()
+                                    .map(e -> CompletableFuture.supplyAsync(() -> this.dictDeviceService.getTsPropertyByIdAndType(e.getPropertyId(), DictDevicePropertyTypeEnum.valueOf(e.getPropertyType()))))
+                                    .map(e -> e.thenApplyAsync(f -> {
+                                        var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), f.getName(), todayStartTime, todayCurrentTime);
+                                        return HistoryGraphPropertyVO.builder()
+                                                .tsKvs(data)
+                                                .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
+                                                .name(f.getName())
+                                                .title(f.getTitle())
+                                                .unit(f.getUnit())
+                                                .build();
+                                    }))
+                                    .map(CompletableFuture::join)
+                                    .collect(Collectors.toList())).join());
+                    return historyGraphVO;
+                }
+            }
+        }
 
         var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), tsPropertyName, todayStartTime, todayCurrentTime);
         var property = HistoryGraphPropertyVO.builder()
