@@ -18,6 +18,7 @@
           background-color: #fff;
           border-radius: 4px;
           padding: 16px;
+          box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
           .title {
             font-size: 16px;
             font-weight: bold;
@@ -50,6 +51,7 @@
         .line-chart-wrapper {
           .line-chart-item {
             height: calc((100% - 16px) / 2);
+            box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
           }
         }
       }
@@ -61,6 +63,7 @@
           height: 100%;
           position: relative;
           padding-top: 38px;
+          box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
           .title {
             font-size: 16px;
             font-weight: bold;
