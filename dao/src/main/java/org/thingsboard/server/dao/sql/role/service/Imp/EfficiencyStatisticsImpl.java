@@ -1237,7 +1237,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
             });
         dictDeviceDataVos.stream().forEach(m1->{
-            if(StringUtils.isNotBlank(attributesInChartMap.get(m1.getName())))
+            if(StringUtils.isEmpty(attributesInChartMap.get(m1.getName())))
             {
                 resultList.add(m1);
             }
