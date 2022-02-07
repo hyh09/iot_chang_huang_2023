@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { EnergyConsumptionTableConfigResolver } from './energy-consumption/energy-consumption-table-config.resolver';
 import { EnergyHistoryTableConfigResolver } from './energy-consumption/energy-history-table-config.resolver';
+import { ProductionHistoryCapacityTableConfigResolver } from './production-capacity/production-capacity-history-table-config.resolver';
 import { ProductionCapacityTableConfigResolver } from './production-capacity/production-capacity-table-config.resolver';
 import { RunningStateComponent } from './running-state/running-state.component';
 
@@ -17,17 +18,38 @@ const routes: Routes = [
       },
       {
         path: 'deviceCapacity',
-        component: EntitiesTableComponent,
         data: {
-          title: 'potency.device-capacity',
           breadcrumb: {
             label: 'potency.device-capacity',
             icon: 'mdi:capacity'
           }
         },
-        resolve: {
-          entitiesTableConfig: ProductionCapacityTableConfigResolver
-        }
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'potency.device-capacity',
+            },
+            resolve: {
+              entitiesTableConfig: ProductionCapacityTableConfigResolver
+            }
+          },
+          {
+            path: ':deviceId/history',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'potency.device-capacity-history',
+              breadcrumb: {
+                label: 'potency.device-capacity-history',
+                icon: 'mdi:history-data'
+              }
+            },
+            resolve: {
+              entitiesTableConfig: ProductionHistoryCapacityTableConfigResolver
+            }
+          }
+        ]
       },
       {
         path: 'energyConsumption',
@@ -85,7 +107,8 @@ const routes: Routes = [
   providers: [
     ProductionCapacityTableConfigResolver,
     EnergyConsumptionTableConfigResolver,
-    EnergyHistoryTableConfigResolver
+    EnergyHistoryTableConfigResolver,
+    ProductionHistoryCapacityTableConfigResolver
   ]
 })
 export class PotencyRoutingModule { }

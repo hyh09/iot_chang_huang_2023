@@ -1,54 +1,50 @@
 import { DeviceCapacity } from './../../../../../shared/models/custom/potency.models';
 import { Injectable } from "@angular/core";
-import { Resolve, Router } from "@angular/router";
+import { ActivatedRouteSnapshot, Resolve } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";
-import { EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
-import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
 import { map } from 'rxjs/operators';
 import { ProductionCapacityOverviewComponent } from './production-capacity-overview.component';
 import { getTheEndOfDay, getTheStartOfDay } from '@app/core/utils';
+import { DatePipe } from '@angular/common';
 
 @Injectable()
-export class ProductionCapacityTableConfigResolver implements Resolve<EntityTableConfig<DeviceCapacity>> {
+export class ProductionHistoryCapacityTableConfigResolver implements Resolve<EntityTableConfig<DeviceCapacity>> {
 
   private readonly config: EntityTableConfig<DeviceCapacity> = new EntityTableConfig<DeviceCapacity>();
+
+  private deviceId: string = '';
 
   constructor(
     private potencyService: PotencyService,
     private translate: TranslateService,
-    private router: Router
+    private datePipe: DatePipe
   ) {
-    this.config.entityType = EntityType.POTENCY;
-    this.config.leftComponent = FactoryTreeComponent;
+    this.config.entityType = EntityType.POTENCY_HISTORY;
     this.config.filterComponent = ProductionCapacityOverviewComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY_HISTORY);
+    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY_HISTORY);
 
     this.config.componentsData = {
-      factoryId: '',
-      workshopId: '',
-      productionLineId: '',
-      deviceId: '',
       dateRange: null,
       totalCapacity: 0
     }
 
     this.config.columns.push(
       new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName), () => ({}), false),
-      new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%')
+      new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%'),
+      new DateEntityTableColumn<DeviceCapacity>('createdTime', this.translate.instant('potency.created-time'), this.datePipe, '150px'),
     );
   }
 
-  resolve(): EntityTableConfig<DeviceCapacity> {
+  resolve(route: ActivatedRouteSnapshot): EntityTableConfig<DeviceCapacity> {
+
+    this.deviceId = route.params.deviceId;
 
     const now = new Date();
     this.config.componentsData = {
-      factoryId: '',
-      workshopId: '',
-      productionLineId: '',
-      deviceId: '',
       dateRange: [now, now],
       totalCapacity: 0
     }
@@ -60,10 +56,8 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
     this.config.detailsPanelEnabled = false;
     this.config.entitiesDeleteEnabled = false;
     this.config.selectionEnabled = false;
-    this.config.loadDataOnInit = false;
 
     this.config.entitiesFetchFunction = pageLink => {
-      const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
       let startTime: number, endTime: number;
       if (this.config.componentsData.dateRange) {
         startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
@@ -71,18 +65,11 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
-      return this.potencyService.getDeviceCapacityList(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
+      return this.potencyService.getDeviceCapacityHistoryList(timePageLink, this.deviceId).pipe(map(res => {
         this.config.componentsData.totalCapacity = res.totalValue || 0;
         return res;
       }));
     }
-
-    this.config.cellActionDescriptors = [{
-      name: this.translate.instant('potency.go-to-history'),
-      mdiIcon: 'mdi:history-data',
-      isEnabled: () => (true),
-      onAction: ($event, entity) => this.router.navigateByUrl(`/potency/deviceCapacity/${entity.deviceId}/history`)
-    }];
 
     return this.config;
 

@@ -34,6 +34,11 @@ export class PotencyService {
     return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacity${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 查询设备产量历史列表
+  public getDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<DeviceCapacityList> {
+    return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+  }
+
   // 获取能耗分析表头
   public getEnergyConsumptionTableHeader(config?: RequestConfig): Observable<string[]> {
     return this.http.get<string[]>(`/api/pc/efficiency/queryEntityByKeysHeader`, defaultHttpOptionsFromConfig(config));

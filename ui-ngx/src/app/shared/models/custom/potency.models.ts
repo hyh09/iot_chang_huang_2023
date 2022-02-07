@@ -4,8 +4,8 @@ export interface DeviceCapacity extends BaseData<any> {
   deviceId: string;
   value: string;
   deviceName: string;
-  productionName: string;
-  workshopName: string;
+  productionName?: string;
+  workshopName?: string;
 }
 
 export interface DeviceCapacityList {
