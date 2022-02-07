@@ -16,6 +16,7 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayProportionChartOutput;
 import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
@@ -336,6 +337,16 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
         }
     }
+
+
+    @ApiOperation(value = "【产能分布图表】")
+    @PostMapping("/queryTodayProportionChartOutput")
+    public  Object queryTodayProportionChartOutput(@RequestBody PcTodayProportionChartOutput vo)
+    {
+       return  null;
+    }
+
+
 
 
 

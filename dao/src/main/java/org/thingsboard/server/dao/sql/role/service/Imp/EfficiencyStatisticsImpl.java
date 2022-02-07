@@ -36,6 +36,8 @@ import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGraphPropertyVO;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGraphVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
@@ -503,17 +505,19 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             throw  new ThingsboardException("查询不到此设备!", ThingsboardErrorCode.FAIL_VIOLATION);
         }
+        List<DictDeviceGraphVO>  graphVOS =  this.dictDeviceService.listDictDeviceGraphs(tenantId, deviceInfo.getDictDeviceId());
+        log.info("查询的数据结果graphVOS：{}",graphVOS);
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
-        log.debug("查询到的结果dictDeviceDataVos：{}",dictDeviceDataVos);
+        log.info("查询到的结果dictDeviceDataVos：{}",dictDeviceDataVos);
         if(CollectionUtils.isEmpty(dictDeviceDataVos))
         {
             return deviceDictionaryPropertiesVos;
         }
         List<DictDeviceDataVo>  partsList  =  getParts(tenantId,deviceInfo.getDictDeviceId());
         dictDeviceDataVos.addAll(partsList);
+        List<DictDeviceDataVo> resultList=filterOutSaved(dictDeviceDataVos,graphVOS);
 
-
-        return  dictDeviceDataVos.stream().map(dataVo ->{
+        return  resultList.stream().map(dataVo ->{
             String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
             return new  DeviceDictionaryPropertiesVo(dataVo.getName(),title,dataVo.getUnit());
         }).collect(Collectors.toList());
@@ -1195,6 +1199,55 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }).collect(Collectors.toList());
 
 
+    }
+
+
+    /**
+     * 运行状态
+     *  将图表中的属性 在下拉框中剔除
+     */
+    private  List<DictDeviceDataVo>  filterOutSaved(List<DictDeviceDataVo> dictDeviceDataVos, List<DictDeviceGraphVO>  graphVOS)
+    {
+        List<DictDeviceDataVo>  resultList = new ArrayList<>();
+
+        if(CollectionUtils.isEmpty(graphVOS))
+        {
+           return  dictDeviceDataVos;
+        }
+         Map<String,String> attributesInChartMap = new HashMap<>();
+            graphVOS.stream().forEach(m1->{
+                if(m1.getEnable()) {
+                    DictDeviceDataVo vo = new DictDeviceDataVo();
+                    vo.setTitle(m1.getName());
+                    String unit="";
+                    vo.setName(m1.getName());
+                    resultList.add(vo);
+                    List<DictDeviceGraphPropertyVO> dictDeviceGraphPropertyVOList = m1.getProperties();
+                    if (!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOList)) {
+
+                        for (DictDeviceGraphPropertyVO v1 : dictDeviceGraphPropertyVOList) {
+                            if(StringUtils.isEmpty(unit))
+                            {
+                                unit=v1.getUnit();
+                            }
+                            attributesInChartMap.put(v1.getName(),m1.getName());
+                        }
+                    }
+                    vo.setUnit(unit);
+                }
+            });
+        dictDeviceDataVos.stream().forEach(m1->{
+            if(StringUtils.isNotBlank(attributesInChartMap.get(m1.getName())))
+            {
+                resultList.add(m1);
+            }
+        });
+
+
+
+
+
+        return  resultList;
     }
 
 

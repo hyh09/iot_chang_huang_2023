@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -32,6 +29,9 @@ public class DictDeviceGraphPropertyVO {
 
     @ApiModelProperty(value = "属性标题", notes = "仅显示")
     private String title;
+
+    @ApiModelProperty(value = "单位")
+    private String unit;
 
     @NotNull(message = "属性类型不能为空")
     @ApiModelProperty(value = "属性类型")
