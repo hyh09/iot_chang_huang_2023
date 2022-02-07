@@ -21,7 +21,6 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.controller.example.AnswerExample;
-import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -321,7 +320,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
-    @ApiOperation(value = "【PC端查询当前设备的运行状态】")
+    @ApiOperation(value = "【设备当天水能耗排行】")
     @PostMapping("/queryTodayEffceency")
     public  List<ResultEnergyTopTenVo>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
         try {
