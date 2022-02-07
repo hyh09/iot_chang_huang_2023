@@ -672,6 +672,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 .name(v.getName())
                 .id(v.getId())
                 .properties(Lists.newArrayList())
+                .createdTime(v.getCreatedTime())
                 .build())
                 .map(v -> this.graphItemRepository.findAllByGraphIdOrderBySortAsc(v.getId())
                         .thenApplyAsync(e -> DaoUtil.convertDataList(e).stream()
