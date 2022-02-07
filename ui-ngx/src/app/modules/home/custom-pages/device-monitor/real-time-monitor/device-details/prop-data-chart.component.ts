@@ -1,6 +1,6 @@
 import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
 import { viewPortResize } from '@app/core/utils';
-import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
+import { DevicePropHistory } from '@app/shared/models/custom/device-monitor.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
 
@@ -13,8 +13,7 @@ import * as echarts from 'echarts';
 })
 export class PropDataChartComponent implements AfterViewInit, OnChanges {
   
-  @Input() propName: string;
-  @Input() data: DeviceProp[];
+  @Input() data: DevicePropHistory;
 
   @ViewChild('propDataChart') propDataChart: ElementRef;
 
@@ -35,14 +34,38 @@ export class PropDataChartComponent implements AfterViewInit, OnChanges {
 
   init() {
     if (!this.chart) return;
-    const chartData = this.data.map(item => {
-      return [new Date(item.createdTime), item.content];
+    const series = [];
+    let latestTime = 0;
+    let earliestTime = new Date().getTime();
+    let unit = '';
+    (this.data.properties || []).forEach(item => {
+      if (item.isShowChart) {
+        series.push({
+          name: item.title || item.name,
+          data: (item.tsKvs || []).map(timeVal => {
+            return [new Date(timeVal.ts), timeVal.value];
+          }),
+          type: 'line',
+          symbol: 'none',
+          smooth: true,
+          tooltip: {
+            formatter: `{b}：{c}${item.unit}`
+          }
+        });
+        const timeList = item.tsKvs || [];
+        const _latestTime = (timeList[0] || {}).ts || 0;
+        const _earliestTime = (timeList[timeList.length - 1] || {}).ts || 0;
+        latestTime = _latestTime > latestTime ? _latestTime : latestTime;
+        earliestTime = _earliestTime < earliestTime ? _earliestTime : earliestTime;
+        if (!unit) {
+          unit = item.unit;
+        }
+      }
     });
-    const unit = this.data[0] && this.data[0].unit ? this.data[0].unit : '';
-    const minInterval = this.data[0] ? (this.data[0].createdTime - this.data[this.data.length - 1].createdTime < 600000 ? 10000 : 600000) : 1000;
+    const minInterval = latestTime - earliestTime < 600000 ? 10000 : 600000;
     const option = {
       title: {
-        text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.propName ? ` - ${this.propName}` : ''}`,
+        text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.data.name ? ` - ${this.data.name}` : ''}`,
         subtext: unit ? this.translate.instant('device-monitor.prop-unit', { unit: unit }) : '',
         left: -5,
         textStyle: {
@@ -71,18 +94,7 @@ export class PropDataChartComponent implements AfterViewInit, OnChanges {
       yAxis: {
         type: 'value'
       },
-      series: [
-        {
-          name: this.propName,
-          data: chartData,
-          type: 'line',
-          symbol: 'none',
-          smooth: true,
-          tooltip: {
-            formatter: `{b}：{c}${unit}`
-          }
-        }
-      ]
+      series
     };
     this.chart.setOption(option);
     this.chart.resize();

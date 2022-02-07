@@ -1,6 +1,6 @@
 {
   "system": {
-    "title": "环思物联"
+    "title": "NTX集团"
   },
   "access": {
     "access-forbidden": "禁止访问",
@@ -1685,6 +1685,7 @@
     "all-subtypes": "全部",
     "any-entity": "任意实体",
     "asset-name-starts-with": "以“{{prefix}}”开头的资产",
+    "chart-name-starts-with": "以“{{prefix}}”开头的图表",
     "columns-to-display": "要显示的列",
     "configure-alias": "别名“{{alias}}”配置",
     "create-new-alias": "创建一个新的！",
@@ -1719,6 +1720,7 @@
     "key-name": "Key name",
     "list-of-alarms": "{ count, plural, 1 {个警告} other {# 个警告} }",
     "list-of-assets": "{ count, plural, 1 {个资产} other {# 个资产} }",
+    "list-of-charts": "{ count, plural, 1 {个图表} other {# 个图表} }",
     "list-of-customers": "{ count, plural, 1 {个客户} other {# 个客户} }",
     "list-of-dashboards": "{ count, plural, 1 {个仪表板} other {# 个仪表板} }",
     "list-of-device-profiles": "{ count, plural, 1 {个设备配置} other {# 个设备配置} }",
@@ -1762,6 +1764,8 @@
     "type-api-usage-state": "Api使用状态",
     "type-asset": "资产",
     "type-assets": "资产",
+    "type-chart": "图表",
+    "type-charts": "图表",
     "type-current-customer": "当前客户",
     "type-current-tenant": "当前租户",
     "type-current-user": "当前用户",
@@ -2247,6 +2251,7 @@
     "icon": "图标",
     "material-icons": "素材图标",
     "select-icon": "选择图标",
+    "upload-icon": "上传图标",
     "show-all": "显示所有图标"
   },
   "import": {
@@ -2364,7 +2369,7 @@
     "email": "邮箱",
     "error": "登录错误",
     "expired-password-reset-message": "您的凭据已过期！请创建新密码。",
-    "forgot-password": "忘记密码",
+    "forgot-password": "忘记密码？",
     "login": "登录",
     "login-with": "使用 {{name}} 登录",
     "new-password": "新密码",
@@ -3179,6 +3184,7 @@
     "device-dic": "设备字典",
     "distribut-config": "配置下发",
     "distribut-config-with-dict-name": "配置下发：{{deviceDictName}}",
+    "chart-settings": "图表配置",
     "protocol-type": "协议类型",
     "protocol-type-required": "协议类型必填",
     "driver-version": "驱动版本",
@@ -3359,7 +3365,16 @@
     "edit-group-name": "修改分组名称",
     "factory-manager": "工厂管理员",
     "manage-factory-manager": "管理工厂管理员",
-    "set-factory-manager-permissions": "配置管理员权限"
+    "set-factory-manager-permissions": "配置管理员权限",
+    "bind-chart": "关联图表",
+    "chart-details": "图表详情",
+    "add-chart": "添加图表",
+    "no-charts-text": "未找到图表",
+    "selected-charts": "已选择 { count, plural, 1 {# 个图表} other {# 个图表} }",
+    "chart-title": "图表标题",
+    "chart-visible": "是否显示图表",
+    "chart-title-required": "图表标题必填",
+    "chart-prop-required": "设备参数必填"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",

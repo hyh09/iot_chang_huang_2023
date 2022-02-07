@@ -1,14 +1,16 @@
-import { deepClone } from '@core/utils';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
 import { DeviceComp, DeviceCompTreeNode } from '@app/shared/models/custom/device-mng.models';
-import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup } from '@app/shared/models/custom/device-monitor.models';
+import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup, DevicePropHistory } from '@app/shared/models/custom/device-monitor.models';
 
 @Component({
   selector: 'tb-device-details',
   templateUrl: './device-details.component.html',
-  styleUrls: ['./device-details.component.scss']
+  styleUrls: ['./device-details.component.scss'],
+  providers: [
+    { provide: 'RealTimeMonitorService', useClass: RealTimeMonitorService }
+  ]
 })
 export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
@@ -16,8 +18,8 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   private deviceName: string = '';
   baseInfo: DeviceBaseInfo = {}; // 基本信息
   currPropName: string = ''; // 当前选中的参数名称
-  currPropTitle: string = ''; // 当前选中的参数描述
-  propHistoryData: DeviceProp[] = []; // 参数历史数据
+  relatedPropName: string[] = []; // 当前选中的参数及其关联的其它参数名称
+  propHistoryData: DevicePropHistory = {}; // 参数历史数据
   alarmTimesList: AlarmTimesListItem[] = []; // 预警统计
   deviceData: DevicePropGroup[] = []; // 设备参数
   devcieComp: DeviceComp[] = []; // 设备部件
@@ -26,7 +28,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   showRealTimeChart: boolean;
 
   constructor(
-    private realTimeMonitorService: RealTimeMonitorService,
+    @Inject('RealTimeMonitorService') private realTimeMonitorService: RealTimeMonitorService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -71,25 +73,26 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         });
         this.setMapOfExpandedComp();
         if (isMqtt) {
-          this.fetchPropHistoryData(this.currPropName, this.currPropTitle);
+          this.fetchPropHistoryData(this.currPropName);
         } else if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
-          const { name, title } = this.deviceData[0].groupPropertyList[0];
-          this.fetchPropHistoryData(name, title, () => { this.subscribe(); });
+          const { name } = this.deviceData[0].groupPropertyList[0];
+          this.fetchPropHistoryData(name, () => { this.subscribe(); });
         } else {
           this.currPropName = '';
-          this.currPropTitle = '';
+          this.relatedPropName = [];
           this.subscribe();
         }
       });
     }
   }
 
-  fetchPropHistoryData(propName: string, propTitle: string, callFn?: Function) {
+  fetchPropHistoryData(propName: string, callFn?: Function) {
     this.currPropName = propName;
-    this.currPropTitle = propTitle;
+    this.relatedPropName = [];
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
-      if (propData.isShowChart) {
-        this.propHistoryData = propData.propertyVOList || [];
+      if (propData.enable) {
+        this.propHistoryData = propData || {};
+        this.relatedPropName = (propData.properties || []).map(item => (item.name));
         this.showRealTimeChart = true;
       } else {
         this.showRealTimeChart = false;
@@ -154,8 +157,11 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         const target = this.propMap[prop.name];
         if (target) {
           Object.assign(target, prop);
-          if (this.showRealTimeChart && prop.name === this.currPropName) {
-            this.propHistoryData = [deepClone(target), ...this.propHistoryData];
+          if (this.showRealTimeChart && this.relatedPropName.includes(prop.name)) {
+            const targetChartData = this.propHistoryData.properties.filter(item => (item.name === prop.name && item.isShowChart))[0];
+            if (targetChartData) {
+              targetChartData.tsKvs = [{ ts: target.createdTime, value: target.content }, ...targetChartData.tsKvs];
+            }
           }
         }
       });

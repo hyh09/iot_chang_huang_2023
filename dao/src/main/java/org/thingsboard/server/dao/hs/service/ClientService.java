@@ -318,4 +318,11 @@ public interface ClientService {
      */
     List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
 
+    /**
+     * 根据当前登录人获得全部设备的在线状态
+     * @param tenantId 租户Id
+     * @param factoryId 工厂Id
+     * @return 当前登录人获得全部设备的在线状态
+     */
+    Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId, UUID factoryId);
 }

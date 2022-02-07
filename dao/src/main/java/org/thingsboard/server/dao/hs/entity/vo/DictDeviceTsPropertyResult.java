@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 
 @Data
 @Accessors(chain = true)

@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { UserMngTableConfigResolver } from '../auth-mng/user-mng/user-mng-table-config.resolver';
+import { ChartSettingsTableConfigResolver } from './chart-settings/chart-settings-table-config.resolver';
+import { ChartsTableConfigResolver } from './chart-settings/charts-table-config.resolver';
 import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictionary-table-config.resolver';
 import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
 import { FactoryMngComponent } from './factory-mng/factory-mng.component';
@@ -89,6 +91,42 @@ const routes: Routes = [
         resolve: {
           entitiesTableConfig: ProdCapacitySettingsTableConfigResolver
         }
+      },
+      {
+        path: 'chartSettings',
+        data: {
+          breadcrumb: {
+            label: 'device-mng.chart-settings',
+            icon: 'mdi:chart-timeline-variant'
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.chart-settings'
+            },
+            resolve: {
+              entitiesTableConfig: ChartSettingsTableConfigResolver
+            }
+          },
+          {
+            path: ':deviceDictId/charts',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.bind-chart',
+              breadcrumb: {
+                label: 'device-mng.bind-chart',
+                icon: 'mdi:bind-chart',
+                isMdiIcon: true
+              }
+            },
+            resolve: {
+              entitiesTableConfig: ChartsTableConfigResolver
+            }
+          }
+        ]
       }
     ]
   }
@@ -101,7 +139,9 @@ const routes: Routes = [
     DataDictionaryTableConfigResolver,
     DeviceDictionaryTableConfigResolver,
     UserMngTableConfigResolver,
-    ProdCapacitySettingsTableConfigResolver
+    ProdCapacitySettingsTableConfigResolver,
+    ChartSettingsTableConfigResolver,
+    ChartsTableConfigResolver
   ]
 })
 export class DeviceMngRoutingModule { }
