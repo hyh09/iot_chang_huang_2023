@@ -38,7 +38,7 @@ export class ChartsTableConfigResolver implements Resolve<EntityTableConfig<Char
       new EntityTableColumn<Chart>('enable', 'device-mng.chart-visible', '150px', entity => (
         this.translate.instant(entity.enable ? 'action.yes' : 'action.no'))),
       new EntityTableColumn<Chart>('properties', 'device-mng.device-data', '100%', entity => (
-        (entity.properties || []).map(prop => { prop.name }).join('、'))),
+        ((entity.properties || []).map(prop => ( prop.title || prop.name ))).join('、'))),
       new DateEntityTableColumn<Chart>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }
