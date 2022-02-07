@@ -1,10 +1,12 @@
 package org.thingsboard.server.dao.hs.utils;
 
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.service.ClientService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,6 +27,9 @@ public class CommonComponent {
     @Value("${database.ts_latest.type:sql}")
     @Getter
     private String sqlType;
+
+    @Autowired
+    private ClientService clientService;
 
     /**
      * 是否cassandra持久

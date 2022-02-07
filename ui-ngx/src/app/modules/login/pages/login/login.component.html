@@ -1,13 +1,14 @@
 <div class="tb-login-content mat-app-background" fxFlex fxLayoutAlign="center center">
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async"></mat-progress-bar>
+  <div class="mask"></div>
   <mat-card>
-    <mat-card-content style="height: 100%">
+    <mat-card-content style="height: 100%; position: relative;">
       <form class="tb-login-form" [formGroup]="loginFormGroup" (ngSubmit)="login()">
         <fieldset [disabled]="isLoading$ | async" fxLayout="row" fxLayoutGap="112px" style="height: 100%">
-          <div fxLayout="column" fxLayoutAlign="center center" style="width: 320px">
+          <div fxLayoutAlign="start center" class="logo-wrapper">
             <tb-logo class="login-logo"></tb-logo>
           </div>
-          <div tb-toast fxFlex fxLayout="column" fxLayoutAlign="center stretch" style="padding-right: 50px">
+          <div tb-toast fxFlex fxLayout="column" fxLayoutAlign="center stretch" class="form-control-wrapper">
             <div class="oauth-container tb-default" fxLayout="column" fxLayoutGap="16px" *ngIf="oauth2Clients?.length">
               <ng-container *ngFor="let oauth2Client of oauth2Clients">
                 <a mat-raised-button class="login-with-button" href="{{ oauth2Client.url }}">

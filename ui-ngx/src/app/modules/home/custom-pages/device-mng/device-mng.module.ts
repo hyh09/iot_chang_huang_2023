@@ -19,6 +19,8 @@ import { ProdCapacitySettingsFiltersComponent } from './prod-capacity-settings/p
 import { DistributeConfigComponent } from './device-dictionary/distribute-config.component';
 import { DictDeviceTableFilterComponent } from './device-dictionary/dict-device-table-filter.component';
 import { DeviceConfigFormComponent } from './device-dictionary/driver-config-form.componen';
+import { ChartSettingsFiltersComponent } from './chart-settings/chart-settings-filters.component';
+import { ChartsComponent } from './chart-settings/charts.component';
 
 @NgModule({
   imports: [
@@ -43,7 +45,9 @@ import { DeviceConfigFormComponent } from './device-dictionary/driver-config-for
     ProdCapacitySettingsFiltersComponent,
     DistributeConfigComponent,
     DictDeviceTableFilterComponent,
-    DeviceConfigFormComponent
+    DeviceConfigFormComponent,
+    ChartSettingsFiltersComponent,
+    ChartsComponent
   ]
 })
 export class DeviceManagementModule { }

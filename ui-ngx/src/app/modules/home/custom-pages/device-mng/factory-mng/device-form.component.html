@@ -29,7 +29,11 @@
             (click)="$event.stopPropagation()"
             style="width: 250px;"
           >
-            <nz-option *ngFor="let option of deviceDictionaries" [nzLabel]="option.name" [nzValue]="option.id"></nz-option>
+            <nz-option
+              *ngFor="let option of deviceDictionaries"
+              [nzLabel]="option.name && option.model ? (option.name + ' (' + option.model + ')') : option.name"
+              [nzValue]="option.id"
+            ></nz-option>
           </nz-select>
         </mat-panel-description>
       </mat-expansion-panel-header>

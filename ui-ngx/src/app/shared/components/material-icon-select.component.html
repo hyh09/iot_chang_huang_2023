@@ -19,6 +19,6 @@
   <mat-icon (click)="openIconDialog()" [style.cursor]="disabled ? 'default' : 'pointer'">{{materialIconFormGroup.get('icon').value}}</mat-icon>
   <mat-form-field fxFlex>
     <mat-label translate>icon.icon</mat-label>
-    <input matInput formControlName="icon" (mousedown)="openIconDialog()">
+    <input matInput formControlName="icon" autocomplete="off" (mousedown)="openIconDialog()">
   </mat-form-field>
 </div>

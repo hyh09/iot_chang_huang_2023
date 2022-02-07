@@ -252,4 +252,16 @@ public interface DeviceMonitorService {
      * @return 设备历史数据
      */
     List<Map<String, Object>> listDeviceTelemetryHistories(TenantId tenantId, DeviceId deviceId, TimePageLink pageLink) throws ExecutionException, InterruptedException;
+
+    /**
+     * 查询设备详情-遥测属性历史数据图表
+     *
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param tsPropertyName   遥测属性名称
+     * @param todayStartTime   开始时间
+     * @param todayCurrentTime 结束时间
+     * @return 遥测属性历史数据图表
+     */
+    HistoryGraphVO getTsPropertyHistoryGraph(TenantId tenantId, UUID deviceId, String tsPropertyName, Long todayStartTime, Long todayCurrentTime) throws ThingsboardException;
 }

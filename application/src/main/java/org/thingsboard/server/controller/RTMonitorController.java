@@ -1,11 +1,14 @@
 package org.thingsboard.server.controller;
 
+import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.page.PageData;
@@ -77,6 +80,22 @@ public class RTMonitorController extends BaseController {
     }
 
     /**
+     * 根据当前登录人获得全部设备的在线状态
+     */
+    @ApiOperation(value = "根据当前登录人获得全部设备的在线状态")
+    @GetMapping("/rtMonitor/device/onlineStatus/all")
+    public Map<String, Boolean> getDeviceOnlineStatus() throws ThingsboardException {
+        var user = getCurrentUser();
+        UUID factoryId = null;
+        if (CreatorTypeEnum.FACTORY_MANAGEMENT.getCode().equalsIgnoreCase(user.getType())) {
+            factoryId = user.getFactoryId();
+            if (factoryId == null)
+                return Maps.newHashMap();
+        }
+        return this.clientService.getDeviceOnlineStatusMap(getTenantId(), factoryId);
+    }
+
+    /**
      * 获得实时监控数据列表
      */
     @ApiOperation(value = "获得实时监控数据列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
@@ -138,6 +157,25 @@ public class RTMonitorController extends BaseController {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
         return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, CommonUtil.getTodayStartTime(), CommonUtil.getTodayCurrentTime());
+    }
+
+    /**
+     * 查询设备详情-遥测属性历史数据图表
+     */
+    @ApiOperation(value = "查询设备详情-遥测属性历史数据图表", notes = "默认一天")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "tsPropertyName", value = "遥测属性名称", paramType = "query", required = true)
+    })
+    @GetMapping("/rtMonitor/device/ts/property/history")
+    public HistoryGraphVO listRTMonitorGroupPropertyHistory(
+            @RequestParam UUID deviceId,
+            @RequestParam String tsPropertyName) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("tsPropertyName", tsPropertyName);
+        if (StringUtils.isBlank(tsPropertyName))
+            throw new ThingsboardException("属性不能为空", ThingsboardErrorCode.GENERAL);
+        return this.deviceMonitorService.getTsPropertyHistoryGraph(getTenantId(), deviceId, tsPropertyName, CommonUtil.getTodayStartTime(), CommonUtil.getTodayCurrentTime());
     }
 
     /**
@@ -314,4 +352,5 @@ public class RTMonitorController extends BaseController {
         checkParameter("deviceId", deviceId);
         return this.deviceMonitorService.listDeviceKeys(getTenantId(), deviceId);
     }
+
 }
