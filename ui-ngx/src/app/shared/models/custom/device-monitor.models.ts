@@ -77,6 +77,8 @@ export interface DeviceProp {
   dictDataId?: string;
   title: string;
   unit: string;
+  chartId?: string;
+  attributeNames?: string[];
 }
 
 export interface DeviceHistoryProp {
