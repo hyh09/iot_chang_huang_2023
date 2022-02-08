@@ -15,8 +15,8 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
-import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
+import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
@@ -369,10 +369,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
 
-        List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
+        List<RunningStateVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
         List<String> keyNames  = vo.getKeyNames();
         if(CollectionUtils.isEmpty(vo.getKeyNames())) {
-            List<String>    keyNames0 = propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+            List<String>    keyNames0 = propertiesVos.stream().map(RunningStateVo::getName).collect(Collectors.toList());
              keyNames =   keyNames0.stream().limit(3).collect(Collectors.toList());
 //          log.debug("打印前三个属性:{}",keyNames);
         }
@@ -414,14 +414,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId tenantId,PageLink pageLink) throws ThingsboardException {
              log.debug("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
 
-        List<DeviceDictionaryPropertiesVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
+        List<RunningStateVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
              log.debug("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
-        Map<String, DeviceDictionaryPropertiesVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(DeviceDictionaryPropertiesVo::getName, a -> a,(k1,k2)->k1));
+        Map<String, RunningStateVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(RunningStateVo::getName, a -> a,(k1,k2)->k1));
         List<String> keyNames=  vo.getKeyNames();
         List<String> keyPages = new ArrayList<>();
         if(CollectionUtils.isEmpty(keyNames)) {
-            List<String>   keyNames01= propertiesVos.stream().map(DeviceDictionaryPropertiesVo::getName).collect(Collectors.toList());
+            List<String>   keyNames01= propertiesVos.stream().map(RunningStateVo::getName).collect(Collectors.toList());
             keyPages =   keyNames01.stream().limit(3).collect(Collectors.toList());
         }else {
             keyPages=  keyNames.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).collect(Collectors.toList());
@@ -444,7 +444,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             voList =  tsKvEntries.stream().map(TsKvEntry ->{
                       ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
                       String keyName=TsKvEntry.getKey();
-                DeviceDictionaryPropertiesVo trnaslateVo=   translateMap.get(keyName);
+                RunningStateVo trnaslateVo=   translateMap.get(keyName);
                       byDeviceVo.setKeyName(keyName);
                       byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
                       byDeviceVo.setTime(TsKvEntry.getTs());
@@ -498,8 +498,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @throws ThingsboardException
      */
     @Override
-    public List<DeviceDictionaryPropertiesVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException {
-        List<DeviceDictionaryPropertiesVo>   deviceDictionaryPropertiesVos= new ArrayList<>();
+    public List<RunningStateVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException {
+        List<RunningStateVo>    deviceDictionaryPropertiesVos= new ArrayList<>();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),deviceId);
         if(deviceInfo == null )
         {
@@ -515,12 +515,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<DictDeviceDataVo>  partsList  =  getParts(tenantId,deviceInfo.getDictDeviceId());
         dictDeviceDataVos.addAll(partsList);
-        List<DictDeviceDataVo> resultList=filterOutSaved(dictDeviceDataVos,graphVOS);
-
-        return  resultList.stream().map(dataVo ->{
-            String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
-            return new  DeviceDictionaryPropertiesVo(dataVo.getName(),title,dataVo.getUnit());
-        }).collect(Collectors.toList());
+        List<RunningStateVo>  resultList=filterOutSaved(dictDeviceDataVos,graphVOS);
+        return resultList;
     }
 
 
@@ -1155,10 +1151,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * 返回默认值
      * @return
      */
-    private  List<ResultRunStatusByDeviceVo>  getDefaultValue(Map<String, DeviceDictionaryPropertiesVo> translateMap,String  str)
+    private  List<ResultRunStatusByDeviceVo>  getDefaultValue(Map<String, RunningStateVo> translateMap,String  str)
     {
         List<ResultRunStatusByDeviceVo>  resultList = new ArrayList<>();
-        DeviceDictionaryPropertiesVo  properties =   translateMap.get(str);
+        RunningStateVo  properties =   translateMap.get(str);
         ResultRunStatusByDeviceVo  vo = new ResultRunStatusByDeviceVo();
         vo.setTitle(properties.getTitle());
         vo.setKeyName(properties.getName());
@@ -1206,25 +1202,28 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * 运行状态
      *  将图表中的属性 在下拉框中剔除
      */
-    private  List<DictDeviceDataVo>  filterOutSaved(List<DictDeviceDataVo> dictDeviceDataVos, List<DictDeviceGraphVO>  graphVOS)
+    private  List<RunningStateVo>   filterOutSaved(List<DictDeviceDataVo> dictDeviceDataVos, List<DictDeviceGraphVO>  graphVOS)
     {
-        List<DictDeviceDataVo>  resultList = new ArrayList<>();
+        List<RunningStateVo>   resultList = new ArrayList<>();
+        List<RunningStateVo>  runningStateVoList =  dictDeviceDataVos.stream().map(m0->{
+            return   RunningStateVo.toDataByDictDeviceDataVo(m0);
+        }).collect(Collectors.toList());
 
         if(CollectionUtils.isEmpty(graphVOS))
         {
-           return  dictDeviceDataVos;
+           return runningStateVoList;
+
         }
          Map<String,String> attributesInChartMap = new HashMap<>();
             graphVOS.stream().forEach(m1->{
                 if(m1.getEnable()) {
-                    DictDeviceDataVo vo = new DictDeviceDataVo();
-                    vo.setTitle(m1.getName());
+                    RunningStateVo  vo =  toRunningStateVoByDictDeviceVo(m1);
                     String unit="";
-                    vo.setName(m1.getName());
-                    resultList.add(vo);
+
                     List<DictDeviceGraphPropertyVO> dictDeviceGraphPropertyVOList = m1.getProperties();
                     if (!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOList)) {
-
+                      List<String> stringList=  dictDeviceGraphPropertyVOList.stream().map(DictDeviceGraphPropertyVO::getName).collect(Collectors.toList());
+                      vo.setAttributeNames(stringList);
                         for (DictDeviceGraphPropertyVO v1 : dictDeviceGraphPropertyVOList) {
                             if(StringUtils.isEmpty(unit))
                             {
@@ -1234,20 +1233,28 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                         }
                     }
                     vo.setUnit(unit);
+                    resultList.add(vo);
+
                 }
             });
-        dictDeviceDataVos.stream().forEach(m1->{
+        runningStateVoList.stream().forEach(m1->{
             if(StringUtils.isEmpty(attributesInChartMap.get(m1.getName())))
             {
                 resultList.add(m1);
             }
         });
-
-
-
-
-
         return  resultList;
+    }
+
+
+    private  RunningStateVo  toRunningStateVoByDictDeviceVo(DictDeviceGraphVO vo)
+    {
+        RunningStateVo  runningStateVo = new RunningStateVo();
+        runningStateVo.setTitle(vo.getName());
+//        runningStateVo.setName(vo.getName());
+        runningStateVo.setChartId(vo.getId()!= null ?vo.getId().toString():"");
+         return  runningStateVo;
+
     }
 
 

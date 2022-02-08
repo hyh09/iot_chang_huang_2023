@@ -13,7 +13,7 @@ import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
-import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
+import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayProportionChartOutput;
@@ -289,7 +289,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @ApiResponse(code = 200, message =pc_queryDictName),
     })
     @ResponseBody
-    public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+    public  List<RunningStateVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
 //        log.info("打印当前的入参:{}",deviceId);
         try {
             return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());

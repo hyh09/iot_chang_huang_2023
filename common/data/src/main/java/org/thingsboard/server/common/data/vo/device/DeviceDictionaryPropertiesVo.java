@@ -31,5 +31,10 @@ public class DeviceDictionaryPropertiesVo {
     @ApiModelProperty("单位")
     private  String unit="";
 
+//    @ApiModelProperty("对应的标题下的属性")
+//    private List<String> nameByProperty;
+
+
+
 
 }

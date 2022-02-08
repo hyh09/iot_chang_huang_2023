@@ -7,7 +7,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
-import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
+import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
@@ -126,7 +126,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
+    List<RunningStateVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
 
 
     /*********
