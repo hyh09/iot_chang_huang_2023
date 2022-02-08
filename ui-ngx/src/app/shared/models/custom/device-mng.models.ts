@@ -16,6 +16,7 @@ export interface DeviceProperty {
 }
 
 export interface DeviceData {
+  id?: string;
   name: string;
   content: string;
   title: string;
@@ -23,6 +24,7 @@ export interface DeviceData {
 }
 
 export interface DeviceDataGroup {
+  id?: string;
   name: string;
   groupPropertyList: Array<DeviceData>;
   editable?: boolean;
