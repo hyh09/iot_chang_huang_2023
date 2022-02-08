@@ -21,5 +21,16 @@ export interface DeviceEnergyConsumptionList extends PageData<object> {
 }
 
 export interface RunningState {
-  [key: string]: { time: number; value: string; }[];
+  tableName: string;
+  keyName?: string;
+  chartId?: string;
+  properties: {
+    title: string;
+    name?: string;
+    unit?: string;
+    tsKvs: {
+      ts: number;
+      value: string;
+    }[];
+  }[];
 }

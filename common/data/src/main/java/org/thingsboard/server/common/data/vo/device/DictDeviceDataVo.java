@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(value = "提供app端--【属性组-分组下的属性】")
+@ApiModel(value = "提供app端--【属性组-分组下的属性】 数据库返回")
 public class DictDeviceDataVo {
 
     //组name
