@@ -73,7 +73,7 @@ export class PropDataChartComponent implements AfterViewInit, OnChanges {
           color: 'rgba(0, 0, 0, 0.87)'
         }
       },
-      color: ['#0663ff'],
+      color: ['#0663ff', '#ffe148', '#99d5d4', '#fba341', '#5fbc4d', '#ff6c6c'],
       grid: {
         bottom: 5,
         right: 25,

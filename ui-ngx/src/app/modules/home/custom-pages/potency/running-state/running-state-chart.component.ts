@@ -1,5 +1,6 @@
 import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
 import { viewPortResize } from '@app/core/utils';
+import { RunningState } from '@app/shared/models/custom/potency.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
 
@@ -10,9 +11,7 @@ import * as echarts from 'echarts';
 })
 export class RunningStateChartComponent implements AfterViewInit, OnChanges {
 
-  @Input() title: string;
-  @Input() unit: string;
-  @Input() data: { time: number; value: string; }[];
+  @Input() data: RunningState;
 
   @ViewChild('runningStateChart') runningStateChart: ElementRef;
 
@@ -38,20 +37,33 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
 
   init() {
     if (!this.chart) return;
-    const chartData = this.data.map(item => {
-      return [new Date(item.time), item.value];
+    const series = (this.data.properties || []).map(prop => {
+      const chartData = prop.tsKvs.map(item => {
+        return [new Date(item.ts), item.value];
+      });
+      return {
+        name: prop.title || prop.name,
+        data: chartData,
+        type: 'line',
+        symbol: 'none',
+        smooth: true,
+        tooltip: {
+          formatter: `{b}：{c}`
+        }
+      }
     });
+    const unit = ((this.data.properties || [])[0] || {}).unit;
     const option = {
       title: {
-        text: this.title,
-        subtext: this.unit ? this.translate.instant('device-monitor.prop-unit', { unit: this.unit }) : '',
+        text: this.data.tableName,
+        subtext: unit ? this.translate.instant('device-monitor.prop-unit', { unit }) : '',
         left: -5,
         textStyle: {
           fontSize: 16,
           color: 'rgba(0, 0, 0, 0.87)'
         }
       },
-      color: ['#0663ff'],
+      color: ['#0663ff', '#ffe148', '#99d5d4', '#fba341', '#5fbc4d', '#ff6c6c'],
       grid: {
         bottom: 5,
         right: 25,
@@ -78,18 +90,7 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
           end: 100
         }
       ],
-      series: [
-        {
-          name: this.title,
-          data: chartData,
-          type: 'line',
-          symbol: 'none',
-          smooth: true,
-          tooltip: {
-            formatter: `{b}：{c}${this.unit}`
-          }
-        }
-      ]
+      series
     };
     this.chart.setOption(option);
     this.chart.resize();
