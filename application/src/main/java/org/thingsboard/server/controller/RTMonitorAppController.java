@@ -121,9 +121,9 @@ public class RTMonitorAppController extends BaseController {
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        if (startTime ==null || startTime ==0)
+        if (startTime == null || startTime == 0)
             startTime = CommonUtil.getTodayStartTime();
-        if (endTime ==null || endTime ==0)
+        if (endTime == null || endTime == 0)
             endTime = CommonUtil.getTodayCurrentTime();
         return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
     }
@@ -155,9 +155,9 @@ public class RTMonitorAppController extends BaseController {
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        if (startTime ==null || startTime ==0)
+        if (startTime == null || startTime == 0)
             startTime = CommonUtil.getTodayStartTime();
-        if (endTime ==null || endTime ==0)
+        if (endTime == null || endTime == 0)
             endTime = CommonUtil.getTodayCurrentTime();
         if (!sortProperty.toLowerCase().contains(HSConstants.TS))
             sortProperty = HSConstants.TS;
