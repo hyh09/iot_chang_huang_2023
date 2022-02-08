@@ -49,7 +49,7 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
       totalCapacity: 0
     }
 
-    this.config.tableTitle = this.translate.instant('potency.device-capacity');
+    this.config.tableTitle = this.translate.instant('potency.device-capacity-history');
     this.config.addEnabled = false;
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
