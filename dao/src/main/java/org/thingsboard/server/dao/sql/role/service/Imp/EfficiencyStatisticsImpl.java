@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service.Imp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1026,11 +1027,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                     UUID  uuid = UUID.fromString(m1.getChartId());
                  try {
                         DictDeviceGraphVO  dictDeviceGraphVO  =  this.dictDeviceService.getDictDeviceGraphDetail(tenantId, uuid);
-                        List<DictDeviceGraphPropertyVO>  dictDeviceGraphPropertyVOS =  dictDeviceGraphVO.getProperties();
-                        if(CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
+                        chartIdToKeyNameMap.put(m1.getChartId(),dictDeviceGraphVO);
+                         List<DictDeviceGraphPropertyVO>  dictDeviceGraphPropertyVOS =  dictDeviceGraphVO.getProperties();
+                        if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
                         {
                           List<String> strings =  dictDeviceGraphPropertyVOS.stream().map(DictDeviceGraphPropertyVO::getName).collect(Collectors.toList());
-                            chartIdToKeyNameMap.put(m1.getChartId(),dictDeviceGraphVO);
                             keyNames.addAll(strings);
                         }
 
@@ -1080,7 +1081,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             OutRunningStateVo  outRunningStateVo = new OutRunningStateVo();
             outRunningStateVo.setTableName(m1.getTitle());//如果是属性就是属性的名称
             List<OutOperationStatusChartDataVo> properties = new ArrayList<>();
-
                 //代表属性
                 if(StringUtils.isBlank(m1.getChartId())) {
                     OutOperationStatusChartDataVo  vo = new  OutOperationStatusChartDataVo();
@@ -1097,16 +1097,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                     }).collect(Collectors.toList());
                     vo.setTsKvs(tsKvs);
                     properties.add(vo);
+                    outRunningStateVo.setProperties(properties);
                 }else {
                     DictDeviceGraphVO graphVO = chartIdToKeyNameMap.get(m1.getChartId());
                     outRunningStateVo.setTableName(graphVO.getName());
+                    outRunningStateVo.setChartId(m1.getChartId());
                     List<OutOperationStatusChartDataVo>  rrlist2=getTheDataOfTheChart(graphVO,map1);
-
-
-
+                    logInfoJson("====最后的结构获取该图表下的属性resultList",rrlist2);
+                    outRunningStateVo.setProperties(rrlist2);
                 }
 
-            outRunningStateVo.setProperties(properties);
+
             outRunningStateVos.add(outRunningStateVo);
 
         });
@@ -1118,12 +1119,56 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private   List<OutOperationStatusChartDataVo> getTheDataOfTheChart( DictDeviceGraphVO graphVO, Map<String,List<ResultRunStatusByDeviceVo>>   map1)
     {
+        List<OutOperationStatusChartDataVo>  resultList = new ArrayList<>();
+
         List<DictDeviceGraphPropertyVO>  dictDeviceGraphPropertyVOS =  graphVO.getProperties();
+        logInfoJson("获取该图表下的属性",dictDeviceGraphPropertyVOS);
+        logInfoJson("获取该图表下的属性Map<String,List<ResultRunStatusByDeviceVo>>",map1);
+
         if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
-        {
+            {
+            dictDeviceGraphPropertyVOS.stream().forEach(m1->{
+                OutOperationStatusChartDataVo  v2 = new OutOperationStatusChartDataVo();
+
+                List<ResultRunStatusByDeviceVo>  resultRunStatusByDeviceVos =    map1.get(m1.getName());
+                logInfoJson("获取该图表下的属性MapresultRunStatusByDeviceVos",resultRunStatusByDeviceVos);
+
+                List<OutOperationStatusChartTsKvDataVo> list3=    resultRunStatusByDeviceVos.stream().map(m2 -> {
+                    OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
+                    tsKvDataVo.setTs(m2.getTime());
+                    tsKvDataVo.setValue(m2.getValue());
+                    return tsKvDataVo;
+                }).collect(Collectors.toList());
+                v2.setTitle(m1.getTitle());
+                v2.setName(m1.getName());
+                v2.setUnit(m1.getUnit());
+                v2.setTsKvs(list3);
+                logInfoJson("v2获取该图表下的属性resultList",v2);
+
+                resultList.add(v2);
+                logInfoJson("111获取该图表下的属性resultList",resultList);
+
+
+
+            });
 
         }
-  return  null;
+        logInfoJson("最后的结构获取该图表下的属性resultList",resultList);
+        return  resultList;
+
+    }
+
+
+    private  void logInfoJson(String str,Object obj)
+    {
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(obj);
+            log.info("打印【"+str+"】数据结果:"+json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
     }
 
