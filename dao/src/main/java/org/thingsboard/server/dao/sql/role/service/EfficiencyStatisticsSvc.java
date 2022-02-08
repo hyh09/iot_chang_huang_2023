@@ -92,11 +92,7 @@ public interface EfficiencyStatisticsSvc {
     ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId,PageLink pageLink,Boolean flg);
 
 
-    /**
-     * 能耗的查询  queryAppEntityByKeysNewMethod
-     */
-    @Deprecated
-    ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);
+
 
 
 

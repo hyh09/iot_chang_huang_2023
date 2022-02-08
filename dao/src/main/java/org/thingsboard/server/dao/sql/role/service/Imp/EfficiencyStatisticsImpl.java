@@ -295,69 +295,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return result;
     }
 
-    /**
-     * 能耗的查询
-     * @param vo
-     * @param tenantId
-     *   flg 是否查询第一个工厂
-     * @return
-     */
-    @Override
-    public ResultEnergyAppVo    queryEntityByKeys(QueryTsKvVo vo, TenantId tenantId,Boolean flg) {
-        log.debug("查询能耗的入参{}租户的id{}",vo,tenantId);
-        ResultEnergyAppVo appVo = new  ResultEnergyAppVo();
-        Map<String,String> totalValueMap = new HashMap<>();
-        List<String>  keys1 = new ArrayList<>();
-           keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
-          vo.setKeys(keys1);
-        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
-        if(vo.getFactoryId() == null && flg)
-        {
-            vo.setFactoryId(getFirstFactory(tenantId));
-        }
-        List<EffectTsKvEntity>  effectTsKvEntities =  effectTsKvRepository.queryEntityByKeys(vo,vo.getKeys());
-        log.debug("查询到的数据{}",effectTsKvEntities);
-        if(CollectionUtils.isEmpty(effectTsKvEntities))
-        {
-            keys1.stream().forEach(s -> {
-                totalValueMap.put(translateAppTitle(mapNameToVo,s),"0"+translateAppUnit(mapNameToVo,s));
-            });
-            appVo.setTotalValue(totalValueMap);
-            return appVo;  //如果查询不到; 应该返回的对应的key 且
-        }
-        Map<UUID,List<EffectTsKvEntity>> map = effectTsKvEntities.stream().collect(Collectors.groupingBy(EffectTsKvEntity::getEntityId));
-        log.debug("查询到的数据转换为设备维度:{}",map);
-        Set<UUID> keySet = map.keySet();
-        log.debug("打印当前的设备id:{}",keySet);
-        List<UUID> entityIdsAll  = keySet.stream().collect(Collectors.toList());
-        List<UUID>  pageList =  entityIdsAll.stream().skip((vo.getPage())*vo.getPageSize()).limit(vo.getPageSize()).
-                collect(Collectors.toList());
-        Map<UUID,List<EffectTsKvEntity>>  listMap =  new HashMap<>();
-
-
-        for(int i=0;i<pageList.size();i++)
-        {
-            UUID uuid= pageList.get(i);
-            listMap.put(uuid,map.get(uuid));
-        }
-
-        var dictDeviceIds = effectTsKvEntities.stream().map(EffectTsKvEntity::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
-        HashMap<String, DictDevice> finalMap = new HashMap<>();
-        if (!dictDeviceIds.isEmpty()){
-            finalMap = DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
-                    .collect(Collectors.toMap(DictDevice::getId, java.util.function.Function.identity(), (a, b)->a, HashMap::new));
-        }
-        HashMap<String, DictDevice> finalMap1 = finalMap;
-
-        List<AppDeviceEnergyVo>  vos=   getEntityKeyValue(finalMap1,listMap,tenantId);
-        appVo.setAppDeviceCapVoList(translateListAppTitle(vos,mapNameToVo));
-        keys1.stream().forEach(str->{
-            totalValueMap.put(translateAppTitle(mapNameToVo,str),getTotalValue(effectTsKvEntities,str)+translateAppUnit(mapNameToVo,str));
-        });
-        appVo.setTotalValue(totalValueMap);
-        return appVo;
-    }
-
 
     /**
      * PC端的运行状态接口数据返回
