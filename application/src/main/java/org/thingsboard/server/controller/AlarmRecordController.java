@@ -7,7 +7,8 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.alarm.*;
+import org.thingsboard.server.common.data.alarm.Alarm;
+import org.thingsboard.server.common.data.alarm.AlarmStatus;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -152,7 +153,7 @@ public class AlarmRecordController extends BaseController {
         var query = AlarmRecordQuery.builder()
                 .alarmSimpleStatus(status).alarmSimpleLevel(level).build();
         query.setDeviceId(deviceId).setProductionLineId(productionLineId)
-        .setFactoryId(factoryId).setWorkshopId(workshopId);
+                .setFactoryId(factoryId).setWorkshopId(workshopId);
         return this.deviceMonitorService.listPageAlarmRecords(getTenantId(), query, pageLink);
     }
 }

@@ -1,4 +1,7 @@
 {
+    "system": {
+        "title": "NTX Group"
+    },
     "access": {
         "unauthorized": "Unauthorized",
         "unauthorized-access": "Unauthorized Access",

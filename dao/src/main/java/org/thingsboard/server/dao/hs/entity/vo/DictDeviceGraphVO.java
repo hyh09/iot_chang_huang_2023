@@ -37,4 +37,7 @@ public class DictDeviceGraphVO {
     @NotNull(message = "属性列表不能为null")
     @ApiModelProperty(value = "属性列表")
     private List<DictDeviceGraphPropertyVO> properties;
+
+    @ApiModelProperty(value = "创建时间")
+    private Long createdTime;
 }

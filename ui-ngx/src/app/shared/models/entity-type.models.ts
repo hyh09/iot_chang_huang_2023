@@ -49,6 +49,7 @@ export enum EntityType {
   ALARM_RULES = 'ALARM_RULES',
   DEVICE_HISTORY = 'DEVICE_HISTORY',
   POTENCY = 'POTENCY',
+  POTENCY_HISTORY = 'POTENCY_HISTORY',
   FACTORY_VERSION = 'FACTORY_VERSION',
   PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS',
   ORDER_FORM = 'ORDER_FORM',
@@ -443,6 +444,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
+      EntityType.POTENCY_HISTORY,
+      {
+        noEntities: 'potency.no-device-capacity-history'
+      }
+    ],
+    [
       EntityType.FACTORY_VERSION,
       {
         noEntities: 'system-mng.no-factory-version'
@@ -645,6 +652,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.POTENCY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.POTENCY_HISTORY,
       {
         helpLinkId: ''
       }

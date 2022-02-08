@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
 import { DeviceComp, DeviceCompTreeNode } from '@app/shared/models/custom/device-mng.models';
@@ -7,7 +7,10 @@ import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup, Device
 @Component({
   selector: 'tb-device-details',
   templateUrl: './device-details.component.html',
-  styleUrls: ['./device-details.component.scss']
+  styleUrls: ['./device-details.component.scss'],
+  providers: [
+    { provide: 'RealTimeMonitorService', useClass: RealTimeMonitorService }
+  ]
 })
 export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
@@ -25,7 +28,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   showRealTimeChart: boolean;
 
   constructor(
-    private realTimeMonitorService: RealTimeMonitorService,
+    @Inject('RealTimeMonitorService') private realTimeMonitorService: RealTimeMonitorService,
     private router: Router,
     private route: ActivatedRoute
   ) {
