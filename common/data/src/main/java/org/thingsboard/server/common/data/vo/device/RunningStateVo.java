@@ -22,13 +22,13 @@ import java.util.List;
 @NoArgsConstructor
 @ApiModel(value = "PC端的运行状态下拉框参数")
 public class RunningStateVo {
-    @ApiModelProperty("名称")
+    @ApiModelProperty("名称") //keyName
     private  String name;
 
     /**
      * 如果标题为空取的是名称来的;
      */
-    @ApiModelProperty("标题")
+    @ApiModelProperty("标题 如果是图表就是图表的名称")
     private String title="";
     @ApiModelProperty("单位")
     private  String unit="";

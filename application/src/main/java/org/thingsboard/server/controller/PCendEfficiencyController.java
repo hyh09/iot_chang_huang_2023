@@ -10,17 +10,17 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
-import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
+import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
+import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayProportionChartOutput;
 import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
-import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -309,8 +309,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
-        try {
+    public List<OutRunningStateVo> queryTheRunningStatusByDevice(@RequestBody InputRunningSateVo queryTsKvVo) throws ThingsboardException {
+        try
+        {
             return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {

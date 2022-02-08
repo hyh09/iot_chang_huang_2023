@@ -17,6 +17,10 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
+import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
+import org.thingsboard.server.common.data.vo.device.out.OutOperationStatusChartDataVo;
+import org.thingsboard.server.common.data.vo.device.out.OutOperationStatusChartTsKvDataVo;
+import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
@@ -31,11 +35,9 @@ import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusB
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.PcDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
-import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.*;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGraphPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGraphVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
@@ -44,8 +46,6 @@ import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
-import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
-import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
@@ -55,7 +55,6 @@ import org.thingsboard.server.dao.sql.role.dao.EffectHistoryKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffectTsKvRepository;
 import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
-import org.thingsboard.server.dao.sql.role.entity.EffectTsKvEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
@@ -298,46 +297,34 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     /**
      * PC端的运行状态接口数据返回
-     * @param vo
+     * @param parameterVo 入参
      * @param tenantId
      * @return key: 遥测数据的key
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId tenantId) throws ThingsboardException {
-        log.debug("查询当前设备的运行状态入参:{}租户id{}",vo,tenantId.getId());
-
-        List<RunningStateVo>  propertiesVos=   queryDictDevice(vo.getDeviceId(),tenantId);
-        List<String> keyNames  = vo.getKeyNames();
-        if(CollectionUtils.isEmpty(vo.getKeyNames())) {
-            List<String>    keyNames0 = propertiesVos.stream().map(RunningStateVo::getName).collect(Collectors.toList());
-             keyNames =   keyNames0.stream().limit(3).collect(Collectors.toList());
-//          log.debug("打印前三个属性:{}",keyNames);
-        }
-
-        log.debug("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
+    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws Exception {
+        log.info("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
+        List<OutRunningStateVo>  resultVo = new ArrayList<>();
+        List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
+//         if( CollectionUtils.isEmpty(runningStateVoList))
+//         {
+//             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
+//             runningStateVoList =   propertiesVos.stream().limit(3).collect(Collectors.toList());
+//         }
+         Map<String,DictDeviceGraphVO> chartIdToKeyNameMap = new HashMap<>();
+         List<String>  keyNames = getKeyNameByVoList(runningStateVoList,tenantId,chartIdToKeyNameMap);
+       log.info("查询到的当前设备{}的配置的keyNames属性:{}",parameterVo.getDeviceId(),keyNames);
         List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
-        log.debug("查询到的当前设备{}的配置的kvDictionaries属性:{}",vo.getDeviceId(),kvDictionaries);
+        log.info("查询到的当前设备id{}的配置的kvDictionaries属性:{}",parameterVo.getDeviceId(),kvDictionaries);
         List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
         Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
-//        log.debug("查询到的当前设备{}的配置的keys属性:{}###mapDict:{}",vo.getDeviceId(),keys,mapDict);
-        List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(vo.getDeviceId(),keys,vo.getStartTime(),vo.getEndTime());
-//        log.debug("查询到的当前设备{}的配置的entities属性:{}",vo.getDeviceId(),entities);
+        List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
         List<TsKvEntry> tsKvEntries  = new ArrayList<>();
         entities.stream().forEach(tsKvEntity -> {
             tsKvEntity.setStrKey(mapDict.get(tsKvEntity.getKey()));
             tsKvEntries.add(tsKvEntity.toData());
         });
-        List<ResultRunStatusByDeviceVo>  voList = new ArrayList<>();
-        voList =  tsKvEntries.stream().map(TsKvEntry ->{
-            ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
-            byDeviceVo.setKeyName(TsKvEntry.getKey());
-            byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
-            byDeviceVo.setTime(TsKvEntry.getTs());
-            return     byDeviceVo;
-        }).collect(Collectors.toList());
-        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
-        log.debug("查询到的当前的数据:{}",map);
-        return  keyNameNotFound(keyNames,map);
+        return  getRunningStatusResults(tsKvEntries,parameterVo,keyNames,chartIdToKeyNameMap);
     }
 
 
@@ -568,180 +555,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         return factory.getId();
     }
-
-
-
-
-
-
-
-    private  String  getValueByEntity(EffectTsKvEntity entity)
-    {
-//        if(entity.getSubtractDouble()>0)
-//        {
-//            return  entity.getSubtractDouble().toString();
-//        }
-//        if(entity.getSubtractLong()>0)
-//        {
-//            return  entity.getSubtractLong().toString();
-//
-//        }
-        return entity.getValueLast2();
-    }
-
-
-    private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities)
-    {
-
-//        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(m->m.getFlg().equals(true)).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
-//                BigDecimal::add);
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
-                BigDecimal::add);
-        return   StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
-    }
-
-
-    private  String getTotalValue(List<EffectTsKvEntity> effectTsKvEntities,String key)
-    {
-        BigDecimal invoiceAmount = effectTsKvEntities.stream().filter(entity -> (StringUtils.isNotBlank(entity.getKeyName())&&entity.getKeyName().equals(key))).map(EffectTsKvEntity::getValueLast2).map(BigDecimal::new).reduce(BigDecimal.ZERO,
-                BigDecimal::add);
-        return  StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
-    }
-
- /**
-     * @param listMap
-     * @return
-     */
-    public  List<AppDeviceEnergyVo>  getEntityKeyValue(HashMap<String, DictDevice> finalMap1,Map<UUID,List<EffectTsKvEntity>> listMap,TenantId tenantId)
-    {
-        List<AppDeviceEnergyVo> appList  = new ArrayList<>();
-
-        listMap.forEach((key,value)->{
-            AppDeviceEnergyVo appDeviceEnergyVo  = new  AppDeviceEnergyVo();
-            Map<String,String> mapValue = new HashMap<>();
-            Map<String,Long> timeValueMap1= new HashMap<>();
-            Map<String,Long> timeValueMap = new HashMap<>();
-
-
-            appDeviceEnergyVo.setDeviceId(key.toString());
-            EffectTsKvEntity  entity1 =value.get(0);
-            if(entity1 != null) {
-              //  appDeviceEnergyVo.setPicture(entity1.getPicture());
-                appDeviceEnergyVo.setPicture(Optional.ofNullable(entity1.getPicture()).orElse(Optional.ofNullable(entity1.getDictDeviceId()).map(UUID::toString).map(finalMap1::get).map(DictDevice::getPicture).orElse(null)));
-               appDeviceEnergyVo.setDeviceName(entity1.getDeviceName());
-                appDeviceEnergyVo.setTime(entity1.getTs2());
-                if (entity1.getWorkshopId() != null) {
-                    Optional<WorkshopEntity> workshop = workshopRepository.findByTenantIdAndId(tenantId.getId(), entity1.getWorkshopId());
-                    appDeviceEnergyVo.setWorkshopName(workshop.isPresent()?workshop.get().getName():"");
-                }
-
-                if (entity1.getProductionLineId() != null) {
-                    Optional<ProductionLineEntity> productionLine = productionLineRepository.findByTenantIdAndId(tenantId.getId(), entity1.getProductionLineId());
-                    appDeviceEnergyVo.setProductionName(productionLine.isPresent()?productionLine.get().getName():"");
-                }
-
-                value.stream().forEach(effectTsKvEntity -> {
-                    if(effectTsKvEntity.getKeyName() != null) {
-                        mapValue.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getValueLast2());
-                        timeValueMap.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getTs2());
-                        timeValueMap1.put(effectTsKvEntity.getKeyName(), effectTsKvEntity.getTs());
-                    }
-
-                });
-                appDeviceEnergyVo.setMapValue(mapValue);
-                appDeviceEnergyVo.setTimeValueMap(timeValueMap);
-                appDeviceEnergyVo.setTimeValueMap1(timeValueMap1);
-            }
-
-            appList.add(appDeviceEnergyVo);
-            log.debug("appList:====>{}",appList);
-
-//            try{
-//                ObjectMapper mapper=new ObjectMapper();
-//               String   jsonStr=mapper.writeValueAsString(appList);
-//               log.debug("josn数据:{}",jsonStr);
-//            }catch (Exception e)
-//            {
-//                e.printStackTrace();
-//
-//            }
-
-        });
-
-        return  appList;
-    }
-
-
-    /**
-     *
-     * @param vos
-     * @param keyName 产能key
-     */
-    private  List<PcDeviceEnergyVo> unitMap(List<AppDeviceEnergyVo>  vos, String  keyName,List<String>  headerList)
-    {
-        List<PcDeviceEnergyVo> resultList = new ArrayList<>();
-        vos.stream().forEach(energyVo->{
-            PcDeviceEnergyVo  vo = new  PcDeviceEnergyVo();
-            vo.setDeviceId(energyVo.getDeviceId());
-            vo.setDeviceName(energyVo.getDeviceName());
-            vo.setProductionName(energyVo.getProductionName());
-            vo.setWorkshopName(energyVo.getWorkshopName());
-            Map<String,String>  mapOld =    energyVo.getMapValue();
-            if(CollectionUtils.isEmpty(mapOld))
-            {
-                headerList.stream().forEach(str->{
-                        mapOld.put(str,"0");
-                });
-            }
-            log.debug("headerList:====>headerList{}",headerList);
-            log.debug("mapOld:====>mapOld{}",mapOld);
-
-            String   keyNameValue1 =   mapOld.get(keyName);
-
-            String   keyNameValue =(StringUtils.isEmpty(keyNameValue1)?"0":keyNameValue1);
-         log.debug("当前设备的总产能:{}",keyNameValue);
-
-         Map<String,Long> timeValueMap = energyVo.getTimeValueMap();
-            Map<String,Long> timeValueMap1 = energyVo.getTimeValueMap1();
-           Long time001 =  timeValueMap.get(keyName);
-
-
-            Map<String,String>  map1 =  new HashMap<>();
-            Map<String,String>  map2 =  new HashMap<>();
-
-            mapOld.forEach((key,value1)->{
-              if(!key.equals(keyName))
-              {
-                 if(StringUtilToll.isZero(value1))
-                 {
-                     map2.put(key,"0");
-                 } else {
-
-                     //计算公式：总产能/总能耗/分钟数
-                     map1.put(key, value1);
-                     Long t01 = timeValueMap1.get(key);
-                     Long t02 = timeValueMap.get(key);
-                     log.debug("=====>t01{},t02{}", t01, t02);
-                     Long t3 = (t02 - t01) / 60000;
-
-                     String aDouble = StringUtilToll.div(keyNameValue, value1, t3.toString());
-                     map2.put(key, aDouble.toString());
-                 }
-              }
-            });
-
-            vo.setMapValue(map1);
-            vo.setMapUnitValue(map2);
-            resultList.add(vo);
-        });
-
-
-        return  resultList;
-
-    }
-
-
-
 
 
 
@@ -1187,10 +1000,130 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  RunningStateVo  toRunningStateVoByDictDeviceVo(DictDeviceGraphVO vo)
     {
         RunningStateVo  runningStateVo = new RunningStateVo();
-        runningStateVo.setTitle(vo.getName());
+        runningStateVo.setTitle(vo.getName());//图表的名称
 //        runningStateVo.setName(vo.getName());
         runningStateVo.setChartId(vo.getId()!= null ?vo.getId().toString():"");
          return  runningStateVo;
+
+    }
+
+
+    /**
+     * 获取入参下的keyName
+     *  1. 如果 chartId 不为空;就取图表下的属性;  #改为这种方式
+     *  2. 如果  attributeNames  为当前的图表下的属性;  ##目前采用这种方式  下拉框的keyName返回的不规范
+
+     * @param voList
+     * @return
+     */
+    private  List<String> getKeyNameByVoList(List<RunningStateVo>  voList,TenantId tenantId,Map<String,DictDeviceGraphVO> chartIdToKeyNameMap)
+    {
+        List<String>  keyNames = new ArrayList<>();
+        voList.stream().forEach(m1 ->{
+            if(StringUtils.isNotBlank(m1.getChartId()))
+            {
+                    //查询图表下的属性
+                    UUID  uuid = UUID.fromString(m1.getChartId());
+                 try {
+                        DictDeviceGraphVO  dictDeviceGraphVO  =  this.dictDeviceService.getDictDeviceGraphDetail(tenantId, uuid);
+                        List<DictDeviceGraphPropertyVO>  dictDeviceGraphPropertyVOS =  dictDeviceGraphVO.getProperties();
+                        if(CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
+                        {
+                          List<String> strings =  dictDeviceGraphPropertyVOS.stream().map(DictDeviceGraphPropertyVO::getName).collect(Collectors.toList());
+                            chartIdToKeyNameMap.put(m1.getChartId(),dictDeviceGraphVO);
+                            keyNames.addAll(strings);
+                        }
+
+                    } catch (ThingsboardException e) {
+                        e.printStackTrace();
+                        log.info("图表id查询的属性异常:{}",e);
+                    }
+            }else{
+                keyNames.add(m1.getName());
+            }
+
+        });
+        return keyNames;
+
+    }
+
+
+    /**
+     *
+     * @param tsKvEntries
+     * @param parameterVo
+     * @param keyNames
+     * @param chartIdToKeyNameMap 图表id 对应的 属性keyName
+     * @return
+     */
+    private  List<OutRunningStateVo>   getRunningStatusResults(List<TsKvEntry> tsKvEntries ,
+                                                               InputRunningSateVo parameterVo,
+                                                               List<String> keyNames,
+                                                               Map<String,DictDeviceGraphVO>  chartIdToKeyNameMap )
+    {
+        List<OutRunningStateVo>  outRunningStateVos = new ArrayList<>();
+        log.info("封装返回数据");
+        List<ResultRunStatusByDeviceVo>  voList = new ArrayList<>();
+        voList =  tsKvEntries.stream().map(TsKvEntry ->{
+            ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
+            byDeviceVo.setKeyName(TsKvEntry.getKey());
+            byDeviceVo.setValue(StringUtilToll.roundUp(TsKvEntry.getValue().toString()));
+            byDeviceVo.setTime(TsKvEntry.getTs());
+            return     byDeviceVo;
+        }).collect(Collectors.toList());
+        Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
+        log.info("查询到的当前的数据:{}",map);
+        Map<String,List<ResultRunStatusByDeviceVo>>   map1 =   keyNameNotFound(keyNames,map);
+
+        List<RunningStateVo>   runningStateVoList =   parameterVo.getAttributeParameterList();//入参
+        runningStateVoList.stream().forEach(m1 ->{
+            OutRunningStateVo  outRunningStateVo = new OutRunningStateVo();
+            outRunningStateVo.setTableName(m1.getTitle());//如果是属性就是属性的名称
+            List<OutOperationStatusChartDataVo> properties = new ArrayList<>();
+
+                //代表属性
+                if(StringUtils.isBlank(m1.getChartId())) {
+                    OutOperationStatusChartDataVo  vo = new  OutOperationStatusChartDataVo();
+                    List<OutOperationStatusChartTsKvDataVo> tsKvs = new ArrayList<>();
+                    List<ResultRunStatusByDeviceVo> runStatusByDeviceVos = map1.get(m1.getName());
+                    tsKvs = runStatusByDeviceVos.stream().map(m2 -> {
+                        outRunningStateVo.setKeyName(m2.getKeyName());
+                        vo.setName(m2.getKeyName());
+                        vo.setTitle(m1.getTitle());
+                        OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
+                        tsKvDataVo.setTs(m2.getTime());
+                        tsKvDataVo.setValue(m2.getValue());
+                        return tsKvDataVo;
+                    }).collect(Collectors.toList());
+                    vo.setTsKvs(tsKvs);
+                    properties.add(vo);
+                }else {
+                    DictDeviceGraphVO graphVO = chartIdToKeyNameMap.get(m1.getChartId());
+                    outRunningStateVo.setTableName(graphVO.getName());
+                    List<OutOperationStatusChartDataVo>  rrlist2=getTheDataOfTheChart(graphVO,map1);
+
+
+
+                }
+
+            outRunningStateVo.setProperties(properties);
+            outRunningStateVos.add(outRunningStateVo);
+
+        });
+
+        return  outRunningStateVos;
+
+    }
+
+
+    private   List<OutOperationStatusChartDataVo> getTheDataOfTheChart( DictDeviceGraphVO graphVO, Map<String,List<ResultRunStatusByDeviceVo>>   map1)
+    {
+        List<DictDeviceGraphPropertyVO>  dictDeviceGraphPropertyVOS =  graphVO.getProperties();
+        if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
+        {
+
+        }
+  return  null;
 
     }
 
