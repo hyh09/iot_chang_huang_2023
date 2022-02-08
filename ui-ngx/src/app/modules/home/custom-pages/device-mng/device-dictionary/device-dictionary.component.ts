@@ -181,6 +181,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   createDeviceDataControl(data?: DeviceData): AbstractControl {
     return this.fb.group({
+      id: [data ? data.id : null],
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
@@ -198,6 +199,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     }
     return this.fb.group({
+      id: [dataGroup ? dataGroup.id : null],
       name: [dataGroup ? dataGroup.name : '', [Validators.required]],
       groupPropertyList: this.fb.array(controls),
       editable: [dataGroup && dataGroup.editable !== undefined ? dataGroup.editable : !this.initDataGroupNames.includes(dataGroup ? dataGroup.name : '')]
