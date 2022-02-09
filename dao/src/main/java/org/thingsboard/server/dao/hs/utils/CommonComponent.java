@@ -45,8 +45,8 @@ public class CommonComponent {
      * @param tenantId 租户Id
      */
     public Path toFileRootDir(TenantId tenantId) throws IOException {
-         var path = Paths.get(location, tenantId.toString(), String.valueOf(CommonUtil.getTodayCurrentTime()));
-         Files.createDirectories(path);
+        var path = Paths.get(location, tenantId.toString(), String.valueOf(CommonUtil.getTodayCurrentTime()));
+        Files.createDirectories(path);
         return path;
     }
 

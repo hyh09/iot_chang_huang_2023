@@ -735,7 +735,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             BeanUtils.copyProperties(dictDeviceGraphVO, graph);
         } else {
             graph = this.graphRepository.findById(dictDeviceGraphVO.getId()).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("图表不存在！", ThingsboardErrorCode.GENERAL));
-            BeanUtils.copyProperties(dictDeviceGraphVO, graph, "id");
+            BeanUtils.copyProperties(dictDeviceGraphVO, graph, "id", "createdTime");
         }
         graphEntity = new DictDeviceGraphEntity(graph);
         graphEntity.setDictDeviceId(dictDeviceId);
