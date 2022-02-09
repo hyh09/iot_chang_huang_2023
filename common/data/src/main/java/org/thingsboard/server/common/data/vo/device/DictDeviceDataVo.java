@@ -41,6 +41,10 @@ public class DictDeviceDataVo {
     private List<String> attributeNames;
 
 
+    private Boolean  enable;
+
+
+
 
     public DictDeviceDataVo(String groupName, String name, String title, String unit) {
         this.groupName = groupName;

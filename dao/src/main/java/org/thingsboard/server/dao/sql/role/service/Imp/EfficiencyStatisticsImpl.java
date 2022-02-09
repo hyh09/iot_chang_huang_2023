@@ -406,17 +406,22 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<DictDeviceGraphVO>  graphVOS =  this.dictDeviceService.listDictDeviceGraphs(tenantId, deviceInfo.getDictDeviceId());
         log.info("【app运行状态参数列表】查询的数据结果graphVOS：{}",graphVOS);
         List<DictDeviceDataVo>  chartDataList =  conversionOfChartObjects(graphVOS);
+        List<DictDeviceDataVo>  chartShowList= chartDataList.stream().filter(s1->s1.getEnable()).collect(Collectors.toList());
         Map<String,List<DictDeviceDataVo>> map  = new HashMap<>();
-        map.put("图表",chartDataList);
+        if(!CollectionUtils.isEmpty(chartShowList))
+        {
+            map.put("图表",chartShowList);
+        }
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
         dictDeviceDataVos.stream().forEach(m1->{
             if (StringUtils.isBlank(m1.getTitle())) {
                 m1.setTitle(m1.getName());
             }});
         List<DictDeviceDataVo>  partsList = getParts( tenantId,deviceInfo.getDictDeviceId());
-        filterAlreadyExistsInTheChart(chartDataList,dictDeviceDataVos);
-        Map<String,List<DictDeviceDataVo>> map1 = dictDeviceDataVos.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
-        map.put("部件",partsList);
+        List<DictDeviceDataVo>  devicePropertiesList = filterAlreadyExistsInTheChart(chartDataList,dictDeviceDataVos);//过滤设备的属性
+        Map<String,List<DictDeviceDataVo>> map1 = devicePropertiesList.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
+        map.putAll(map1);
+        map.put("部件",filterAlreadyExistsInTheChart(chartDataList,partsList));
         return map;
     }
 
@@ -1055,6 +1060,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             DictDeviceDataVo  targetObject = new  DictDeviceDataVo();
             targetObject.setTitle(source1.getName());//图表的名称
             targetObject.setChartId(source1.getId()!=null ?source1.getId().toString():"" );//图表id
+            targetObject.setEnable(source1.getEnable());
             List<DictDeviceGraphPropertyVO>  dictDeviceGraphPropertyVOList =  source1.getProperties();
             if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOList))
             {
@@ -1071,13 +1077,41 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     /**
-     *
-     * @param chartDataList
-     * @return
+     * 过滤掉已经在图表中存在的属性
+     * @param chartDataList  图表的属性 attributeNames
+     * @param dictDeviceDataVos  属性 或者 部件的; 取name
      */
-    private  void  filterAlreadyExistsInTheChart(List<DictDeviceDataVo>  chartDataList,List<DictDeviceDataVo> dictDeviceDataVos )
+    private  List<DictDeviceDataVo>  filterAlreadyExistsInTheChart(List<DictDeviceDataVo>  chartDataList,List<DictDeviceDataVo> dictDeviceDataVos )
     {
+        if(CollectionUtils.isEmpty(chartDataList))
+        {
+          return dictDeviceDataVos;
+        }
+        Map<String,String> chartMap= new HashMap<>();
+        chartDataList.stream().forEach(s1->{
+            List<String>  list =  s1.getAttributeNames();
+            if(!CollectionUtils.isEmpty(list))
+            {
+               list.stream().forEach(str->{
+                   chartMap.put(str,str);
+               });
 
+            }
+        });
+        logInfoJson("chartMap打印的输入",chartMap);
+        if(CollectionUtils.isEmpty(chartMap))
+        {
+            return  dictDeviceDataVos;
+        }
+        List<DictDeviceDataVo>  targetList = new ArrayList<>();
+        dictDeviceDataVos.stream().forEach(s2->
+        {
+            if(StringUtils.isEmpty(chartMap.get(s2.getName())))
+            {
+                targetList.add(s2);
+            }
+        });
+        return  targetList;
     }
 
 
