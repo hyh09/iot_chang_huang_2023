@@ -144,6 +144,7 @@ public class UserController extends BaseController  {
         try {
             UserId userId = new UserId(toUUID(strUserId));
             User user = checkUserId(userId, Operation.READ);
+
             List<UserMenuRoleEntity> entities =    userMenuRoleService.queryRoleIdByUserId(toUUID(strUserId));
             if(!CollectionUtils.isEmpty(entities))
             {
@@ -158,6 +159,10 @@ public class UserController extends BaseController  {
                 if(userCredentials.isEnabled() && !additionalInfo.has("userCredentialsEnabled")) {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
+            }
+            SecurityUser securityUser = getCurrentUser();
+            if(securityUser.getUserLevel() ==  3){
+                user.setOperationType(0);
             }
             return user;
         } catch (Exception e) {
