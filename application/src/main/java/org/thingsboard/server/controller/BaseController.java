@@ -1106,7 +1106,10 @@ public abstract class BaseController {
      */
     public  void setParametersByUserLevel (Map<String, Object> queryParam) throws ThingsboardException {
         SecurityUser  securityUser=   getCurrentUser();
-        if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode())
+        if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()
+                || securityUser.getUserLevel() == UserLeveEnums.USER_SYSTEM_ADMIN.getCode()
+                || securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()
+        )
         {   //租户管理员：
             List<Integer> userLeve= new ArrayList<>();
             userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
