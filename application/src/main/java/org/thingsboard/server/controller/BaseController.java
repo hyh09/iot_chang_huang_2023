@@ -58,6 +58,7 @@ import org.thingsboard.server.common.data.rule.RuleChainType;
 import org.thingsboard.server.common.data.rule.RuleNode;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
 import org.thingsboard.server.common.transport.service.DefaultTransportService;
@@ -1096,6 +1097,23 @@ public abstract class BaseController {
     public  String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
          String message=   userLanguageSvc.getLanguageByUserLang(enums,getCurrentUser().getTenantId(),new UserId(getCurrentUser().getUuidId()));
         return  message;
+    }
+
+    /***
+     * 设置参数
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public  void setParametersByUserLevel (Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode())
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.TENANT_ADMIN.getCode());//租户管理员
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+            queryParam.put("userLevelIn",userLeve);
+        }
     }
 
 }

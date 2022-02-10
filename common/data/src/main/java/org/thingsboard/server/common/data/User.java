@@ -83,6 +83,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
      * 0为默认
      * 1为工厂管理员角色
      * 3为租户管理员角色
+     * 4为 用户系统管理员
      */
     private  int userLevel=0;
 
@@ -92,7 +93,10 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     @ApiModelProperty(value = "如果是工厂管理员新增字段【必传】")
     private UUID  factoryId;
 
-
+    /**
+     * 0是可编辑
+     * 1是不可编辑
+     */
     private  Integer operationType;
 
 

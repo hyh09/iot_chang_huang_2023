@@ -13,7 +13,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
 import java.util.*;
 
 @Slf4j
@@ -200,11 +199,17 @@ public class JpaQueryHelper {
 
 				Predicate p = null;
 				Field idField = null;
+				Field userLevel=null ;
 				for(Field f : entityFields){
-					log.info("==打印的===>:{},{},{},{}",f.getType(),f.getName(), queryParam.get(f.getName()),( queryParam.get(f.getName()) instanceof  UUID));
 					if(f.getAnnotation(Id.class) != null){
 						idField = f;
 					}
+					if(f.getName().equals("userLevel"))
+					{
+						userLevel=f;
+					}
+
+
 					if(queryParam.containsKey(f.getName())){  //如果入参的 key中存在 当前类的属性
 						Object value = queryParam.get(f.getName()); //当前入参key对应的value (key 要在类的属性中存在)
 						if(value != null) {
@@ -273,6 +278,19 @@ public class JpaQueryHelper {
 					}
 					if(!ids.isEmpty()){
 						pList.add(root.get(idField.getName()).in(ids).not());
+					}
+				}
+
+				if(idField != null && queryParam.containsKey("userLevelIn") ){
+					Object idObjs = queryParam.get("userLevelIn");
+					List<Object> ids = new ArrayList<Object>();
+					if(idObjs instanceof String){
+						ids = Arrays.asList(idObjs.toString().split(","));
+					} else if( idObjs instanceof List){
+						ids = (List<Object>) idObjs;
+					}
+					if(!ids.isEmpty()){
+						pList.add(root.get(userLevel.getName()).in(ids));
 					}
 				}
 

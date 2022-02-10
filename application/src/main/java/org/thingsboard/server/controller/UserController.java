@@ -59,6 +59,8 @@ import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.common.data.vo.user.enums.OperationTypeEums;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
@@ -469,9 +471,7 @@ public class UserController extends BaseController  {
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
             }
-            if(securityUser.getUserLevel() == 3){
-                user.setOperationType(1);
-            }
+
 
             UserVo  vo0 = new UserVo();
             vo0.setTenantId(securityUser.getTenantId().getId());
@@ -499,6 +499,7 @@ public class UserController extends BaseController  {
                 log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
                 user.setUserLevel(1);
+                user.setOperationType(OperationTypeEums.USER_DEFAULT.getValue());
                 TenantSysRoleEntity  tenantSysRoleEntity= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
                 List<UUID> roleIds = new ArrayList<>();
                 roleIds.add(tenantSysRoleEntity.getId());
@@ -507,7 +508,10 @@ public class UserController extends BaseController  {
             }else {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
-
+                if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()){
+                    user.setOperationType(OperationTypeEums.ROLE_NON_EDITABLE.getValue());
+                    user.setUserLevel(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());
+                }
 
             }
 
@@ -671,8 +675,8 @@ public class UserController extends BaseController  {
 
              }
              queryParam.put("type", securityUser.getType());
-             queryParam.put("userLevel",0);
              queryParam.put("operationType",null);
+             setParametersByUserLevel(queryParam);
              PageData<User>  userPageData =  userService.findAll(queryParam, pageLink);
              if(securityUser.getUserLevel() ==  3){
                  List<User>  list =    userPageData.getData();
