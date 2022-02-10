@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.kv.DataType;
 import org.thingsboard.server.common.data.kv.KvEntry;
+import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,6 +24,19 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 剔除无效遥测数据
+     */
+    default List<HistoryGraphPropertyTsKvVO> cleanGraphTsKvData(List<HistoryGraphPropertyTsKvVO> tsKvs) {
+        return tsKvs.stream().filter(v -> {
+            try {
+                return new BigDecimal(v.getValue()).compareTo(BigDecimal.ZERO) != 0;
+            } catch (Exception ignore) {
+                return true;
+            }
+        }).collect(Collectors.toList());
+    }
 
     /**
      * 格式化Excel错误信息

@@ -7,8 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-
-import java.util.List;
+import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
 
 @Data
 @Accessors(chain = true)
@@ -16,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HistoryGraphPropertyTsKvVO {
+public class HistoryGraphPropertyTsKvVO implements GraphTsKv {
 
     @ApiModelProperty(value = "时间")
     private Long ts;
