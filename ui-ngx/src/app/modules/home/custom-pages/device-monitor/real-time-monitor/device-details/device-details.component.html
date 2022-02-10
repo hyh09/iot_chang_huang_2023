@@ -16,7 +16,7 @@
     </div>
     <div fxFlex fxLayout="column" fxLayoutGap="16px" class="line-chart-wrapper">
       <div [fxShow]="showRealTimeChart" class="line-chart-item">
-        <tb-prop-data-chart [data]="propHistoryData"></tb-prop-data-chart>
+        <tb-prop-data-chart #propDataChart [data]="propHistoryData"></tb-prop-data-chart>
       </div>
       <div class="line-chart-item">
         <tb-warning-statistics-chart [data]="alarmTimesList"></tb-warning-statistics-chart>

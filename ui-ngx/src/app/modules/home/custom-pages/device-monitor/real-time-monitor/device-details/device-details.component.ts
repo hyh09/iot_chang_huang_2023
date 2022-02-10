@@ -1,8 +1,9 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
 import { DeviceComp, DeviceCompTreeNode } from '@app/shared/models/custom/device-mng.models';
 import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup, DevicePropHistory } from '@app/shared/models/custom/device-monitor.models';
+import { PropDataChartComponent } from './prop-data-chart.component';
 
 @Component({
   selector: 'tb-device-details',
@@ -13,6 +14,8 @@ import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup, Device
   ]
 })
 export class DeviceDetailsComponent implements OnInit, OnDestroy {
+
+  @ViewChild('propDataChart') propDataChart: PropDataChartComponent;
 
   private deviceId: string = '';
   private deviceName: string = '';
@@ -158,10 +161,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         if (target) {
           Object.assign(target, prop);
           if (this.showRealTimeChart && this.relatedPropName.includes(prop.name)) {
-            const targetChartData = this.propHistoryData.properties.filter(item => (item.name === prop.name && item.isShowChart))[0];
-            if (targetChartData) {
-              targetChartData.tsKvs = [{ ts: target.createdTime, value: target.content }, ...targetChartData.tsKvs];
-            }
+            this.propDataChart.pushData(prop.name, { ts: target.createdTime, value: target.content });
           }
         }
       });

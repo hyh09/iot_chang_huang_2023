@@ -146,14 +146,17 @@ export class RealTimeMonitorService {
       } else {
         const _res = JSON.parse(res.data);
         const _data = [];
-        if (_res) {
+        if (_res && _res.data) {
           const data = _res.data;
           Object.keys(data).forEach(key => {
-            _data.push({
-              name: key,
-              createdTime: data[key][0][0],
-              content: data[key][0][1]
-            });
+            const content = data[key][0][1];
+            if (content && content !== '0') {
+              _data.push({
+                name: key,
+                createdTime: data[key][0][0],
+                content
+              });
+            }
           });
         }
         onMessage(_data);
