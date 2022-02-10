@@ -56,6 +56,7 @@ import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
@@ -719,7 +720,15 @@ public class UserController extends BaseController  {
 
 
 
-
+    /**
+     * 编辑用户
+     */
+    @ApiOperation(value = "用户管理-系统开关的更新接口")
+    @RequestMapping(value="/user/updateOperationType",method = RequestMethod.POST)
+    @ResponseBody
+    public UpdateOperationVo updateOperationType(@RequestBody @Valid UpdateOperationVo vo) throws ThingsboardException {
+       return   userService.updateOperationType(vo);
+    }
 
     private  void checkEmailAndPhone(User  user)
     {
