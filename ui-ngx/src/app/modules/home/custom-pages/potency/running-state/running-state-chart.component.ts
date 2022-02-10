@@ -49,7 +49,8 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
         smooth: true,
         tooltip: {
           formatter: `{b}：{c}`
-        }
+        },
+        animation: false
       }
     });
     const unit = ((this.data.properties || [])[0] || {}).unit;
@@ -63,9 +64,9 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
           color: 'rgba(0, 0, 0, 0.87)'
         }
       },
-      color: ['#0663ff', '#ffe148', '#99d5d4', '#fba341', '#5fbc4d', '#ff6c6c'],
+      color: ['#0663ff', '#99D5D4', '#5FBC4D', '#C5DE66', '#FFE148', '#FBA341', '#FF6C6C', '#F14444', '#C19461', '#913030'],
       grid: {
-        bottom: 5,
+        bottom: 9,
         right: 25,
         left: 0,
         containLabel: true
@@ -87,7 +88,11 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
         {
           type: 'inside',
           start: 0,
-          end: 100
+          end: 20
+        },
+        {
+          start: 0,
+          end: 20
         }
       ],
       series

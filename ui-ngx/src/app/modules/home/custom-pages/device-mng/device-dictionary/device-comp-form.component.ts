@@ -91,6 +91,7 @@ export class DeviceCompFormComponent extends DialogComponent<DeviceCompFormCompo
   }
   createPropertyListControl(data?: DeviceData): AbstractControl {
     return this.fb.group({
+      id: [data ? data.id : null],
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content : '', Validators.required],
       title: [data ? data.title : ''],
