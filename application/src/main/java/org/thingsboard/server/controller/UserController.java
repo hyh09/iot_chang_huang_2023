@@ -668,22 +668,11 @@ public class UserController extends BaseController  {
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
-             }else {
-
-//                 List<UUID>   uuids =  userRoleSvc.getTenantRoleId(getTenantId().getId());
-//                 queryParam.put("notId", uuids);
-
              }
              queryParam.put("type", securityUser.getType());
              queryParam.put("operationType",null);
              setParametersByUserLevel(queryParam);
              PageData<User>  userPageData =  userService.findAll(queryParam, pageLink);
-             if(securityUser.getUserLevel() ==  3){
-                 List<User>  list =    userPageData.getData();
-                 list.stream().forEach(m1->{
-                     m1.setOperationType(0);
-                 });
-             }
              return  userPageData;
          }catch (Exception  e)
          {

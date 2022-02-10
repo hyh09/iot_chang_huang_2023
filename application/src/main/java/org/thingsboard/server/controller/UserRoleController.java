@@ -186,12 +186,12 @@ public class UserRoleController extends BaseController{
 
         PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
         PageData<TenantSysRoleEntity>  roleEntityPageData  = tenantSysRoleService.pageQuery(queryParam,pageLink);
-        if(securityUser.getUserLevel() ==  3){
-            List<TenantSysRoleEntity>  list =    roleEntityPageData.getData();
-            list.stream().forEach(m1->{
-                m1.setOperationType(0);
-            });
-        }
+//        if(securityUser.getUserLevel() ==  3){
+//            List<TenantSysRoleEntity>  list =    roleEntityPageData.getData();
+//            list.stream().forEach(m1->{
+//                m1.setOperationType(0);
+//            });
+//        }
         return  roleEntityPageData;
     }
 
