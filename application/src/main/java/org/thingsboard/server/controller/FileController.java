@@ -19,7 +19,10 @@ import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

@@ -1,6 +1,5 @@
 package org.thingsboard.server.config;
 
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -8,15 +7,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 /**
