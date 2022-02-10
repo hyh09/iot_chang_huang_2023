@@ -48,8 +48,7 @@ export class UserMngService {
 
   // 新增或更新用户信息
   public saveUser(userInfo: UserInfo, config?: RequestConfig): Observable<UserInfo> {
-    const operationType = userInfo.operationType ? 1 : 0;
-    return this.http.post<UserInfo>('/api/user/save', { ...userInfo, operationType }, defaultHttpOptionsFromConfig(config));
+    return this.http.post<UserInfo>('/api/user/save', userInfo, defaultHttpOptionsFromConfig(config));
   }
 
   // 删除用户

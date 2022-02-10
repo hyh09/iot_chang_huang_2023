@@ -53,9 +53,6 @@
           <mat-option value="0">{{ 'auth-mng.off' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-slide-toggle *ngIf="isAdd && !entityForm.get('factoryId').value || !isAdd && entityForm.get('userLevel').value === 0" formControlName="operationType" style="margin-top: 10px;">
-        {{ 'auth-mng.whether-sys-user' | translate }}
-      </mat-slide-toggle>
     </fieldset>
   </form>
 </div>
