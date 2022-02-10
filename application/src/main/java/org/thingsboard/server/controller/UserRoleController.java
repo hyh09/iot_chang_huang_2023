@@ -306,9 +306,7 @@ public class UserRoleController extends BaseController{
              vo.setFactoryId(securityUser.getFactoryId());
         }
         vo.setType(securityUser.getType());
-
-
-
+        vo.setUserLevel(securityUser.getUserLevel());//当前登录人的
         return userRoleMemuSvc.getUserByNotInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
     }
