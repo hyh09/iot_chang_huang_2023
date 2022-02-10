@@ -80,7 +80,7 @@ public interface DictDataService {
      * 按keys查询全部数据字典
      *
      * @param tenantId 租户Id
-     * @param keys key列表
+     * @param keys     key列表
      * @return 数据字典map
      */
     Map<String, DictData> getKeyToDictDataMap(TenantId tenantId, List<String> keys);
