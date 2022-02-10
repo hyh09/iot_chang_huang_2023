@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
 import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
+import org.thingsboard.server.common.data.vo.device.out.app.OutAppRunnigStateVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
@@ -109,8 +110,11 @@ public interface EfficiencyStatisticsSvc {
      */
     List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId  tenantId) throws Exception;
 
+
+    List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId  tenantId, PageLink pageLink) throws Exception;
+
     /**
-     * app端的返回的是描述字段
+     * app端的返回的是描述字段 【老接口】
      * @param vo
      * @param tenantId
      * @return

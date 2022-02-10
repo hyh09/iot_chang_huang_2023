@@ -45,6 +45,7 @@ import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
@@ -177,6 +178,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public int update(User user) {
          return userDao.update( user);
+    }
+
+    @Override
+    public UpdateOperationVo updateOperationType(UpdateOperationVo vo) {
+         userDao.updateOperationType(vo.getId(),vo.getOperationType());
+         return  vo;
     }
 
     @Override

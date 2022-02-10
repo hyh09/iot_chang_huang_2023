@@ -56,6 +56,7 @@ import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.model.sql.UserEntity;
@@ -144,6 +145,7 @@ public class UserController extends BaseController  {
         try {
             UserId userId = new UserId(toUUID(strUserId));
             User user = checkUserId(userId, Operation.READ);
+
             List<UserMenuRoleEntity> entities =    userMenuRoleService.queryRoleIdByUserId(toUUID(strUserId));
             if(!CollectionUtils.isEmpty(entities))
             {
@@ -158,6 +160,10 @@ public class UserController extends BaseController  {
                 if(userCredentials.isEnabled() && !additionalInfo.has("userCredentialsEnabled")) {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
+            }
+            SecurityUser securityUser = getCurrentUser();
+            if(securityUser.getUserLevel() ==  3){
+                user.setOperationType(0);
             }
             return user;
         } catch (Exception e) {
@@ -714,7 +720,15 @@ public class UserController extends BaseController  {
 
 
 
-
+    /**
+     * 编辑用户
+     */
+    @ApiOperation(value = "用户管理-系统开关的更新接口")
+    @RequestMapping(value="/user/updateOperationType",method = RequestMethod.POST)
+    @ResponseBody
+    public UpdateOperationVo updateOperationType(@RequestBody @Valid UpdateOperationVo vo) throws ThingsboardException {
+       return   userService.updateOperationType(vo);
+    }
 
     private  void checkEmailAndPhone(User  user)
     {

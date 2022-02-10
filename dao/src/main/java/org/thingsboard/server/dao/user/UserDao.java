@@ -38,6 +38,8 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
 
     int  update(User user);
 
+    int updateOperationType( UUID  userId,Integer  operationType);
+
     /**
      * Find user by email.
      *

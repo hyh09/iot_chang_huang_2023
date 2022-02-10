@@ -17,7 +17,6 @@ package org.thingsboard.server.dao.sql.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -92,6 +91,11 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
 
     @Query("select d  from UserEntity d where d.tenantId = :tenantId and d.userLevel=3")
     List<UserEntity> queyrTenantManagement(@Param("tenantId") UUID tenantId);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "update UserEntity  d set d.operationType= :operationType where d.id= :userId")
+    int updateOperationType(@Param("userId") UUID  userId,@Param("operationType") Integer  operationType);
 
 
 
