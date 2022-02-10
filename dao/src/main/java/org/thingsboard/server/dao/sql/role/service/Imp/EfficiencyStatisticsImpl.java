@@ -22,6 +22,8 @@ import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
 import org.thingsboard.server.common.data.vo.device.out.OutOperationStatusChartDataVo;
 import org.thingsboard.server.common.data.vo.device.out.OutOperationStatusChartTsKvDataVo;
 import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
+import org.thingsboard.server.common.data.vo.device.out.app.OutAppOperationStatusChartDataVo;
+import org.thingsboard.server.common.data.vo.device.out.app.OutAppRunnigStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
@@ -329,6 +331,28 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
     /**
+     * App端运行状态接口数据返回的封装
+     * @param parameterVo
+     * @param tenantId
+     * @param pageLink
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink) throws Exception {
+        //1.优化将app端的入参转换pc端入参;
+        InputRunningSateVo  runningSateVo =   new  InputRunningSateVo().toInputRunningSateVoByAppQuery(parameterVo);
+        if(CollectionUtils.isEmpty(runningSateVo.getAttributeParameterList()))
+        {
+            List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
+            propertiesVos =   propertiesVos.stream().limit(3).collect(Collectors.toList());
+            runningSateVo.setAttributeParameterList(propertiesVos);
+        }
+        List<OutRunningStateVo>  pcResultVo= queryPcTheRunningStatusByDevice(runningSateVo,tenantId);
+        return  pcResultVoToApp(pcResultVo);
+    }
+
+    /**
      * dictDeviceId
      * @param vo
      * @param tenantId
@@ -342,7 +366,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
              log.debug("查询到的当前设备{}的配置的属性条数:{}",vo.getDeviceId(),propertiesVos.size());
 
         Map<String, RunningStateVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(RunningStateVo::getName, a -> a,(k1,k2)->k1));
-        List<String> keyNames=  vo.getKeyNames();
+        List<String> keyNames= null;// vo.getKeyNames();
         List<String> keyPages = new ArrayList<>();
         if(CollectionUtils.isEmpty(keyNames)) {
             List<String>   keyNames01= propertiesVos.stream().map(RunningStateVo::getName).collect(Collectors.toList());
@@ -1131,6 +1155,43 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             e.printStackTrace();
         }
 
+    }
+
+
+    private  List<OutAppRunnigStateVo>  pcResultVoToApp(List<OutRunningStateVo>  pcResultVo)
+    {
+        List<OutAppRunnigStateVo>  outAppRunnigStateVos=
+        pcResultVo.stream().map(sourceVo -> {
+            OutAppRunnigStateVo aapVo = new OutAppRunnigStateVo();
+            aapVo.setChartId(sourceVo.getChartId());
+            aapVo.setTableName(sourceVo.getTableName());
+            List<OutOperationStatusChartDataVo> attributeSourceList = sourceVo.getProperties();
+            String chartUnit = attributeSourceList.stream().filter(s1 -> StringUtils.isNotEmpty(s1.getUnit())).findFirst().orElse(new OutOperationStatusChartDataVo()).getUnit();
+            aapVo.setChartUnit(chartUnit);//图表的单位
+
+            List<OutAppOperationStatusChartDataVo> propertiesAppList =  attributeSourceList.stream().map(s1->{
+                OutAppOperationStatusChartDataVo  t1 = new  OutAppOperationStatusChartDataVo();
+                t1.setName(s1.getName());
+                t1.setTitle(s1.getTitle());
+                t1.setUnit(s1.getUnit());
+                List<OutOperationStatusChartTsKvDataVo>  tskvList =   s1.getTsKvs();
+                List<List<Object>>  chartTsKv = new ArrayList<>();
+                tskvList.stream().forEach(m1->{
+                    List<Object>  strings = new ArrayList<>();
+                    strings.add(m1.getTs());
+                    strings.add(m1.getValue());
+                    chartTsKv.add(strings);
+                });
+                t1.setTsKvs(chartTsKv);
+                return  t1;
+            }).collect(Collectors.toList());
+
+            aapVo.setProperties(propertiesAppList);
+
+
+            return aapVo;
+        }).collect(Collectors.toList());
+      return  outAppRunnigStateVos;
     }
 
 
