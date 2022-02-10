@@ -18,6 +18,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
@@ -316,6 +317,15 @@ public class UserRoleController extends BaseController{
 
 
 
+    /**
+     * 编辑用户
+     */
+    @ApiOperation(value = "用户管理-系统开关的更新接口")
+    @RequestMapping(value="/updateOperationType",method = RequestMethod.POST)
+    @ResponseBody
+    public UpdateOperationVo updateOperationType(@RequestBody @Valid UpdateOperationVo vo) throws ThingsboardException {
+        return   tenantSysRoleService.updateOperationType(vo);
+    }
 
 
 
