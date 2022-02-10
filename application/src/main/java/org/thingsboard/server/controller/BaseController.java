@@ -1110,7 +1110,6 @@ public abstract class BaseController {
         {   //租户管理员：
             List<Integer> userLeve= new ArrayList<>();
             userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
-            userLeve.add(UserLeveEnums.TENANT_ADMIN.getCode());//租户管理员
             userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
             queryParam.put("userLevelIn",userLeve);
         }
