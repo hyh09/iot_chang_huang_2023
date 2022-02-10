@@ -3564,6 +3564,7 @@
     "user-name": "user name",
     "phone-number": "Phone numebr",
     "active-status": "Status",
+    "whether-sys-user": "System user",
     "on": "Enable",
     "off": "Disable",
     "email": "Email",

@@ -35,7 +35,8 @@ export class UserMngComponent extends EntityComponent<UserInfo> {
         phoneNumber: [entity ? entity.phoneNumber : '', [Validators.required, Validators.pattern(/^(1)\d{10}$/)]],
         email: [entity ? entity.email : '', [Validators.required, Validators.email]],
         roleIds: [entity && entity.roleIds ? entity.roleIds : []],
-        activeStatus: [entity && entity.activeStatus ? entity.activeStatus : '1']
+        activeStatus: [entity && entity.activeStatus ? entity.activeStatus : '1'],
+        operationType: [entity ? entity.operationType : 0]
       }
     );
   }
