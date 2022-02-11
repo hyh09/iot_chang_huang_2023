@@ -1012,6 +1012,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                         outRunningStateVo.setKeyName(m2.getKeyName());
                         vo.setName(m2.getKeyName());
                         vo.setTitle(m1.getTitle());
+                        vo.setUnit(m1.getUnit());
                         OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
                         tsKvDataVo.setTs(m2.getTime());
                         tsKvDataVo.setValue(m2.getValue());
