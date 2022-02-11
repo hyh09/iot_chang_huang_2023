@@ -1,5 +1,5 @@
-package org.thingsboard.server.dao.sql.role.entity;	
-	
+package org.thingsboard.server.dao.sql.role.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,6 +14,8 @@ import org.thingsboard.server.dao.util.sql.entity.TenantBaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.List;
 import java.util.UUID;
 
 /**	
@@ -67,19 +69,34 @@ public class TenantSysRoleEntity  extends TenantBaseEntity {
     /**
      *  0是默认值  正常逻辑
      *  1 是只允许修改密码 （不可以编辑修改， 删除)
+     *
+     *  默认是null ;---和0是一个意思
+     *    如果普通用户就带上null
      */
-    @Column(name = ModelConstants.USER_OPERATION_TYPE,columnDefinition=" integer DEFAULT 0;")
-    private  Integer   operationType=0;
+    @Column(name = ModelConstants.USER_OPERATION_TYPE,columnDefinition=" integer DEFAULT 0;")//;
+    private  Integer operationType;
 
 
 
     /**
-     * 1是系统生成的  系统生成的准删除
+     * 1是系统生成的  系统生成的不准删除
      * 0不是系统生成
      */
     @Column(name = "system_tab")
     @JpaOperatorsType(JpaQueryHelper.Operators.eq)
     private String  systemTab="0";
+
+  //    @JpaOperatorsType(JpaQueryHelper.Operators.in)
+    /**
+     * 和用户中的userLevel 一样
+     */
+    @Column(name = ModelConstants.USER_USER_LEVEL,columnDefinition=" integer DEFAULT 0;")
+    private  Integer userLevel;
+
+
+    @Transient
+    @JpaOperatorsType(value = JpaQueryHelper.Operators.in,columnName = "userLevel")
+    private List<Integer> userLevelList;
 
 
 

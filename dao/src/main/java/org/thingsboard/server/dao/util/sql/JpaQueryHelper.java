@@ -213,7 +213,13 @@ public class JpaQueryHelper {
 					if(queryParam.containsKey(f.getName())){  //如果入参的 key中存在 当前类的属性
 						Object value = queryParam.get(f.getName()); //当前入参key对应的value (key 要在类的属性中存在)
 						if(value != null) {
-							if (value.getClass().isArray()) {  //判断当前的value 的类型是不是集合
+							if(f.getAnnotation(JpaOperatorsType.class) != null)
+							{
+								log.info("==================valueJpaOperatorsType============= f.getName(){}=========={}", f.getName(), value);
+								JpaOperatorsType jpaOperatorsType = f.getAnnotation(JpaOperatorsType.class);
+								pList.add(jpaOperatorsType.value().buildPredicate(cb, root, org.apache.commons.lang3.StringUtils.isNotBlank(jpaOperatorsType.columnName())?jpaOperatorsType.columnName():f.getName(), value));
+							}
+							else if (value.getClass().isArray()) {  //判断当前的value 的类型是不是集合
 								CriteriaBuilder.In in = cb.in(root.get(f.getName()));
 								Object[] vs = (Object[]) value;
 								for(Object o : vs){
@@ -237,12 +243,7 @@ public class JpaQueryHelper {
 									pList.add(cb.equal(root.get(f.getName()).as(String.class), value));
 								}
 							}
-							else  if(f.getAnnotation(JpaOperatorsType.class) != null)
-							{
-						  		  log.info("==================valueJpaOperatorsType======================={}", value);
-						  		  JpaOperatorsType jpaOperatorsType = f.getAnnotation(JpaOperatorsType.class);
-						  		  pList.add(jpaOperatorsType.value().buildPredicate(cb, root, f.getName(), value));
-							}
+
 
 							else if (f.getType().isAssignableFrom(String.class) && f.getAnnotation(Id.class) == null) {
 								if(StringUtils.isNotEmpty((String) value) && !value.equals("0")) {  //
@@ -406,7 +407,6 @@ public class JpaQueryHelper {
 						pList.add(root.get(idField.getName()).in(ids).not());
 					}
 				}
-
 
 				if(idField != null && queryParam.containsKey("idlist") ){
 					Object idObjs = queryParam.get("idlist");

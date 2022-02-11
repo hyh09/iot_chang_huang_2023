@@ -1118,4 +1118,40 @@ public abstract class BaseController {
         }
     }
 
+
+    /***
+     * 设置参数 普通用户看不到
+     *   租户管理员创建的角色
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public  void setParametersByRoleLevel (Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+            queryParam.put("userLevelList",userLeve);
+        }
+    }
+
+    /***
+     * 设置参数 普通用户看不到
+     *   租户管理员创建的角色
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public   List<Integer>  setParametersByRoleLevel () throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+           return  userLeve;
+        }
+        return  null;
+    }
+
 }
