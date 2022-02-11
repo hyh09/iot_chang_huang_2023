@@ -342,11 +342,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink) throws Exception {
         //1.优化将app端的入参转换pc端入参;
         InputRunningSateVo  runningSateVo =   new  InputRunningSateVo().toInputRunningSateVoByAppQuery(parameterVo);
-        if(CollectionUtils.isEmpty(runningSateVo.getAttributeParameterList()))
+        if(CollectionUtils.isEmpty(parameterVo.getAttributes()))
         {
+             //首次加载的时候
             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
             propertiesVos =   propertiesVos.stream().limit(3).collect(Collectors.toList());
             runningSateVo.setAttributeParameterList(propertiesVos);
+        }
+        if(CollectionUtils.isEmpty(runningSateVo.getAttributeParameterList()))
+        {
+            //分页取不到了;
+            return  new ArrayList<>();
         }
         List<OutRunningStateVo>  pcResultVo= queryPcTheRunningStatusByDevice(runningSateVo,tenantId);
         return  pcResultVoToApp(pcResultVo);
@@ -1016,15 +1022,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                     outRunningStateVo.setProperties(properties);
                 }else {
                     DictDeviceGraphVO graphVO = chartIdToKeyNameMap.get(m1.getChartId());
-                    outRunningStateVo.setTableName(graphVO.getName());
-                    outRunningStateVo.setChartId(m1.getChartId());
-                    List<OutOperationStatusChartDataVo>  rrlist2=getTheDataOfTheChart(graphVO,map1);
-                    logInfoJson("====最后的结构获取该图表下的属性resultList",rrlist2);
-                    outRunningStateVo.setProperties(rrlist2);
+                    if(graphVO != null ) {
+                        outRunningStateVo.setTableName(graphVO.getName());
+                        outRunningStateVo.setChartId(m1.getChartId());
+                        List<OutOperationStatusChartDataVo> rrlist2 = getTheDataOfTheChart(graphVO, map1);
+                        logInfoJson("====最后的结构获取该图表下的属性resultList", rrlist2);
+                        outRunningStateVo.setProperties(rrlist2);
+                    }
                 }
-
-
-            outRunningStateVos.add(outRunningStateVo);
+          outRunningStateVos.add(outRunningStateVo);
 
         });
 
