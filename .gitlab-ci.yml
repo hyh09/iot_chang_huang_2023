@@ -32,6 +32,8 @@ package:
     - npm i pkg-fetch -g
     - npm i pkg -g
     - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2
+    - mvn clean install -pl tb-node -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
+    - mvn clean install -pl web-ui -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
     - ls application/target
   only:
     - dev
@@ -48,6 +50,8 @@ push:
   script:
     - echo "推送镜像"
     - docker info
+    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
+    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
   only:
     - dev
   after_script:
