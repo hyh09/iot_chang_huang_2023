@@ -7,6 +7,7 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -325,4 +326,20 @@ public interface ClientService {
      * @return 当前登录人获得全部设备的在线状态
      */
     Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId, UUID factoryId);
+
+    /**
+     * 获得全部设备的在线状态
+     *
+     * @param tenantId  租户Id
+     * @return 获得全部设备的在线状态
+     */
+    Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId);
+
+    /**
+     * 获得设备全部客户端及服务端、共享属性及值
+     *
+     * @param deviceId 设备Id
+     * @param tenantId 租户Id
+     */
+    List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId);
 }

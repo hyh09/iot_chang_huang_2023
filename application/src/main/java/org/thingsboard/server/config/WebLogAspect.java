@@ -35,7 +35,7 @@ public class WebLogAspect {
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorAppController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.BoardSceneController.*(..))"
-                    + "||execution(public * org.thingsboard.server.controller.BoardRTMonitorController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.RTMonitorBoardController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.FileController.*(..))"
