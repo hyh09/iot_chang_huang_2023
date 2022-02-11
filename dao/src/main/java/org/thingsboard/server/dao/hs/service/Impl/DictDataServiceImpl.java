@@ -129,7 +129,7 @@ public class DictDataServiceImpl extends AbstractEntityService implements DictDa
         var groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllByDictDataId(toUUID(id)));
         var standardPropertyList = DaoUtil.convertDataList(this.standardPropertyRepository.findAllByDictDataId(toUUID(id)));
         var componentList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDataId(toUUID(id)));
-        
+
         if (groupPropertyList.isEmpty() && componentList.isEmpty() && standardPropertyList.isEmpty())
             this.dataRepository.deleteById(toUUID(dictData.getId()));
         else {

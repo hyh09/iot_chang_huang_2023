@@ -988,7 +988,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                     .map(e -> e.thenApplyAsync(f -> {
                                         var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), f.getName(), todayStartTime, todayCurrentTime);
                                         return HistoryGraphPropertyVO.builder()
-                                                .tsKvs(data)
+                                                .tsKvs(this.cleanGraphTsKvData(data))
                                                 .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
                                                 .name(f.getName())
                                                 .title(f.getTitle())
@@ -1006,7 +1006,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var property = HistoryGraphPropertyVO.builder()
                 .name(tsPropertyName)
                 .title(historyGraphVO.getName())
-                .tsKvs(data)
+                .tsKvs(this.cleanGraphTsKvData(data))
+                .unit(Optional.ofNullable(dictDeviceId).map(e -> this.dictDeviceService.getTsPropertyByPropertyName(e, tsPropertyName)).map(DictDeviceTsPropertyVO::getUnit).orElse(null))
                 .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
                 .build();
         historyGraphVO.setName(property.getTitle());
