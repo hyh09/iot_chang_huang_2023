@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.hs.service.Impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -805,6 +807,36 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
         var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
         return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 获得全部设备的在线状态
+     *
+     * @param tenantId 租户Id
+     * @return 获得全部设备的在线状态
+     */
+    @Override
+    public Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId) {
+        var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
+        var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 获得设备全部客户端及服务端、共享属性及值
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     */
+    @Override
+    public List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId) {
+        return Arrays.stream(DataConstants.allScopes()).map(v->CompletableFuture.supplyAsync(()-> {
+            try {
+                return this.attributesService.findAll(tenantId, new DeviceId(deviceId), v).get();
+            } catch (Exception ignore) {
+                return null;
+            }
+        })).map(CompletableFuture::join).filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     /**

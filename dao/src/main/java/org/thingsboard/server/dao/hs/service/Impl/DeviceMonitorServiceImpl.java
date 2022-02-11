@@ -322,6 +322,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                 .id(v.getId())
                                 .unit(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                                 .icon(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null))
+                                .picture(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getPicture).orElse(null))
                                 .name(v.getName())
                                 .title(v.getTitle())
                                 .content(kvData.isEmpty() ? v.getContent() : this.formatKvEntryValue(kvData.get()))
