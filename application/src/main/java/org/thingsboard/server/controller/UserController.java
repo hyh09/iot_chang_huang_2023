@@ -471,8 +471,6 @@ public class UserController extends BaseController  {
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
             }
-
-
             UserVo  vo0 = new UserVo();
             vo0.setTenantId(securityUser.getTenantId().getId());
             vo0.setUserCode(user.getUserCode());

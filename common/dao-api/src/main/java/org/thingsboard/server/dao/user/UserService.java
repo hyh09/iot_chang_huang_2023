@@ -49,6 +49,7 @@ public interface UserService {
 
 	UpdateOperationVo updateOperationType(UpdateOperationVo vo);
 
+	int updateLevel(UUID  userId,Integer  level);
 
 
 	UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId);
