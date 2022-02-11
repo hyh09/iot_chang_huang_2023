@@ -60,7 +60,7 @@
                             <yarnVersion>v1.22.4</yarnVersion>
 <!--                            <nodeDownloadRoot>https://npm.taobao.org/mirrors/node/</nodeDownloadRoot>-->
 <!--                            <npmDownloadRoot>https://registry.npm.taobao.org/npm/</npmDownloadRoot>-->
-<!--                            <yarnDownloadRoot>https://npm.taobao.org/mirrors/yarn/</yarnDownloadRoot>-->
+                            <yarnDownloadRoot>https://mirrors.huaweicloud.com/yarn/</yarnDownloadRoot>
                         </configuration>
                     </execution>
                     <execution>
