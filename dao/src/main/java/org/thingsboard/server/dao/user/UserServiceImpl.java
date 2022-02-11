@@ -187,6 +187,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     }
 
     @Override
+    public int updateLevel(UUID userId, Integer level) {
+        return userDao.updateLevel(userId,level);
+    }
+
+    @Override
     public UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId) {
         log.trace("Executing findUserCredentialsByUserId [{}]", userId);
         validateId(userId, INCORRECT_USER_ID + userId);

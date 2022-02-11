@@ -70,6 +70,11 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
     }
 
     @Override
+    public int updateLevel(UUID userId, Integer level) {
+        return userRepository.updateLevel(userId,level);
+    }
+
+    @Override
     public User findByEmail(TenantId tenantId, String email) {
         return DaoUtil.getData(userRepository.findByEmail(email));
     }
