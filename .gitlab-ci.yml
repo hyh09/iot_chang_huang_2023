@@ -12,17 +12,14 @@ variables:
 before_script:
   - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
 
-
-cache:
-  paths:
-    - .m2/repository
-  # keep cache across branch
-  key: "${CI_COMMIT_REF_SLUG}"
-
-
 # 打包并构建镜像
 package:
   stage: package
+  cache:
+    paths:
+      - .m2/repository
+    # keep cache across branch
+    key: "${CI_COMMIT_REF_SLUG}"
   image: 47.110.145.204:8084/huansiyl/jdk11-mvn-node-docker
   retry: 1
   tags:
