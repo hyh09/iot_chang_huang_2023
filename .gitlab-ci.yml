@@ -29,7 +29,7 @@ package:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - mvn $MAVEN_CLI_OPTS clean install  -DskipTests
+    - mvn $MAVEN_CLI_OPTS clean install  -Dmaven.test.skip=true
     - mvn $MAVEN_CLI_OPTS clean install -pl tb-node -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
     - mvn $MAVEN_CLI_OPTS clean install -pl web-ui -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
   only:
