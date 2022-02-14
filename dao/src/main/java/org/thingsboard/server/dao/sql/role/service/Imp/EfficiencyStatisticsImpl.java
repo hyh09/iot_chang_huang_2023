@@ -512,7 +512,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             resultVO.setTodayValue(StringUtilToll.roundUp(nowDate.getIncrementCapacity()));
         }
-        resultVO.setHistory(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,KeyTitleEnums.key_capacity.getCode()));
+        resultVO.setHistory(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
         return resultVO;
     }
 

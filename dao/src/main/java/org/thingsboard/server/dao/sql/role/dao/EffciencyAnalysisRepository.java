@@ -201,20 +201,23 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
 
     /**
-     * 查询 能耗  产能历史数据
+
+     查询 能耗  产能历史数据
      * @param vo
+     * @param isCap 是否是产能的查询
      * @param type
-     *       1 表示是产能
-     *       2 表示查询能耗
      * @return
      */
-    public String queryHistoricalTelemetryData(TsSqlDayVo vo,String type)
+    public String queryHistoricalTelemetryData(TsSqlDayVo vo,boolean isCap,String type)
     {
 
         StringBuffer  sonSql01 = new StringBuffer();
         Map<String, Object> param = new HashMap<>();
         log.info("queryHistoricalTelemetryData打印的入参:{}",vo);
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        if(isCap) {
+            sonSql01.append(" and  d1.flg = true");
+        }
         log.info("queryHistoricalTelemetryData打印的sonSql01:{}",sonSql01);
         StringBuffer  sql = new StringBuffer();
         sql.append("select  d1.id as entity_id  from  device d1 where  1=1 ");
