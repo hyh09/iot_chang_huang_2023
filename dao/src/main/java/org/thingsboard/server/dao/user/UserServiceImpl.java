@@ -188,7 +188,8 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
     @Override
     public int updateLevel(UUID userId, Integer level) {
-        return userDao.updateLevel(userId,level);
+//        return userDao.updateLevel(userId,level);
+        return 1;//啥都不做
     }
 
     @Override
