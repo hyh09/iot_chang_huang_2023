@@ -6,7 +6,7 @@ stages:
 variables:
   #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   #MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_JOB_NAME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
@@ -17,7 +17,7 @@ cache:
   paths:
     - .m2/repository
   # keep cache across branch
-  key: "$CI_JOB_NAME"
+  key: "${CI_COMMIT_REF_SLUG}"
 
 
 # 打包并构建镜像
@@ -32,12 +32,13 @@ package:
     - mvn $MAVEN_CLI_OPTS clean install  -DskipTests
     - mvn $MAVEN_CLI_OPTS clean install -pl tb-node -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
     - mvn $MAVEN_CLI_OPTS clean install -pl web-ui -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
-    - ls application/target
   only:
     - dev
   after_script:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
+    - echo "删除无用镜像"
+    - docker rmi `docker images |grep "<none>"|awk '{print $3}'`
     
 # 打包并构建镜像
 push:
