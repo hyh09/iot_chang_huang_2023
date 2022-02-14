@@ -38,7 +38,7 @@ package:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
     - echo "删除无用镜像"
-    - docker rmi `docker images |grep "<none>"|awk '{print $3}'`
+    - docker rmi `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
     
 # 打包并构建镜像
 push:
