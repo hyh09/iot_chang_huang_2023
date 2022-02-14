@@ -506,14 +506,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if(data01 != null)
         {
             resultVO.setYesterdayValue(StringUtilToll.roundUp(data01.getIncrementCapacity()));
-            resultVO.setHistory(StringUtilToll.roundUp(data01.getHistoryCapacity()));
         }
         CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
         if(nowDate != null)
         {
             resultVO.setTodayValue(StringUtilToll.roundUp(nowDate.getIncrementCapacity()));
-            resultVO.setHistory(StringUtilToll.roundUp(nowDate.getHistoryCapacity()));
         }
+        resultVO.setHistory(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,KeyTitleEnums.key_capacity.getCode()));
         return resultVO;
     }
 
