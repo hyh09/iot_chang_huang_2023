@@ -208,7 +208,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
      *       2 表示查询能耗
      * @return
      */
-    public Object queryHistoricalTelemetryData(TsSqlDayVo vo,String type)
+    public String queryHistoricalTelemetryData(TsSqlDayVo vo,String type)
     {
 
         StringBuffer  sonSql01 = new StringBuffer();
