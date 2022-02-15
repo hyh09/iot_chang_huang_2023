@@ -13,11 +13,20 @@ import { MatDialog } from "@angular/material/dialog";
 import { EntityAction } from "@app/modules/home/models/entity/entity-component.models";
 import { SetPermissionsComponent, SetPermissionsDialogData } from "./set-permissions.component";
 import { UtilsService } from "@app/core/public-api";
+import { select, Store } from "@ngrx/store";
+import { AppState } from '@core/core.state';
+import { selectUserDetails } from "@app/core/auth/auth.selectors";
 
 @Injectable()
 export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Role>> {
 
   private readonly config: EntityTableConfig<Role> = new EntityTableConfig<Role>();
+
+  userLevel$ = this.store.pipe(
+    select(selectUserDetails),
+    map((user) => (user.userLevel))
+  );
+  userLevel: number;
 
   constructor(
     private translate: TranslateService,
@@ -25,7 +34,8 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     private roleMngService: RoleMngService,
     public dialog: MatDialog,
     private router: Router,
-    private utils: UtilsService
+    private utils: UtilsService,
+    private store: Store<AppState>
   ) {
     this.config.entityType = EntityType.ROLE_MNG;
     this.config.entityComponent = RoleMngComponent;
@@ -43,15 +53,25 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     this.config.deleteEntityContent = () => this.translate.instant('auth-mng.delete-role-text');
     this.config.deleteEntitiesTitle = count => this.translate.instant('auth-mng.delete-roles-title', {count});
     this.config.deleteEntitiesContent = () => this.translate.instant('auth-mng.delete-roles-text');
-
-    this.config.columns.push(
-      new EntityTableColumn<Role>('roleCode', 'auth-mng.role-code', '33.333333%'),
-      new EntityTableColumn<Role>('roleName', 'auth-mng.role-name', '33.333333%'),
-      new DateEntityTableColumn<Role>('createdTime', 'common.created-time', this.datePipe, '150px')
-    );
   }
 
   resolve(): EntityTableConfig<Role> {
+    this.config.columns = [
+      new EntityTableColumn<Role>('roleCode', 'auth-mng.role-code', '33.333333%'),
+      new EntityTableColumn<Role>('roleName', 'auth-mng.role-name', '33.333333%'),
+      new DateEntityTableColumn<Role>('createdTime', 'common.created-time', this.datePipe, '150px')
+    ];
+    this.userLevel$.subscribe(userLevel => {
+      userLevel = 3
+      this.userLevel = userLevel
+      if (userLevel === 3) {
+        this.config.columns.splice(5, 0, new EntityTableColumn<Role>('operationType', this.translate.instant('auth-mng.whether-sys-role'), '80px', () => (''),
+        () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
+          this.roleMngService.switchSysRole({id: entity.id.id, operationType: flag ? 1 : 0}).subscribe();
+        }));
+      }
+    });
+
     this.config.componentsData = {
       roleCode: '',
       roleName: '',
@@ -67,11 +87,11 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     this.config.tableTitle = this.translate.instant('auth-mng.role-mng');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
-    this.config.deleteEnabled = entity => (entity && entity.operationType !== 1);
+    this.config.deleteEnabled = entity => this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0);
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('auth-mng.add-role');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || (entity && entity.operationType === 1));
+      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 1));
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 
@@ -106,7 +126,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       actions.push({
         name: this.translate.instant('auth-mng.set-permissions'),
         mdiIcon: 'mdi:config',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.operationType !== 1)),
+        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.setPermissions($event, entity.id)
       });
     }
