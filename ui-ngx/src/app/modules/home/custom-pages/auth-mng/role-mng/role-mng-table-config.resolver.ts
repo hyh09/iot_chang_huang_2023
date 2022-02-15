@@ -62,7 +62,6 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       new DateEntityTableColumn<Role>('createdTime', 'common.created-time', this.datePipe, '150px')
     ];
     this.userLevel$.subscribe(userLevel => {
-      userLevel = 3
       this.userLevel = userLevel
       if (userLevel === 3) {
         this.config.columns.splice(5, 0, new EntityTableColumn<Role>('operationType', this.translate.instant('auth-mng.whether-sys-role'), '80px', () => (''),
