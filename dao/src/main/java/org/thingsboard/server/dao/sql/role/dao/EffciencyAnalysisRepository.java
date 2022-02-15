@@ -1,17 +1,27 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.sqlts.latest.SearchTsKvLatestRepository;
+import org.thingsboard.server.dao.util.StringUtilToll;
 
 import javax.persistence.Query;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @program: thingsboard
@@ -22,6 +32,8 @@ import java.util.Map;
 @Slf4j
 @Repository
 public class EffciencyAnalysisRepository extends JpaSqlTool{
+
+   @Autowired  private SearchTsKvLatestRepository searchTsKvLatestRepository;
 
 
     /**pc端产能接口 */
@@ -187,45 +199,39 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     }
 
 
-//    /**
-//     * sql片段
-//     * @param queryTsKvVo
-//     * @param sonSql01
-//     * @param param
-//     */
-//    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
-//    {
-//        if(queryTsKvVo.getTenantId() != null)
-//        {
-//            sonSql01.append(" and  d1.tenant_id = :tenantId");
-//            param.put("tenantId", queryTsKvVo.getTenantId());
-//            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
-//
-//        }
-//        if(queryTsKvVo.getFactoryId() != null)
-//        {
-//            sonSql01.append(" and  d1.factory_id = :factoryId");
-//            param.put("factoryId", queryTsKvVo.getFactoryId());
-//        }
-//        if(queryTsKvVo.getWorkshopId() != null)
-//        {
-//            sonSql01.append(" and  d1.workshop_id = :workshopId");
-//            param.put("workshopId", queryTsKvVo.getWorkshopId());
-//        }
-//        if(queryTsKvVo.getProductionLineId() != null)
-//        {
-//            sonSql01.append(" and  d1.production_line_id = :productionLineId");
-//            param.put("productionLineId", queryTsKvVo.getProductionLineId());
-//        }
-//        if(queryTsKvVo.getDeviceId()  != null) {
-//            sonSql01.append(" and  d1.id = :did");
-//            param.put("did", queryTsKvVo.getDeviceId());
-//        }
-//     }
+    /**
 
+     查询 能耗  产能历史数据
+     * @param vo
+     * @param isCap 是否是产能的查询
+     * @param type
+     * @return
+     */
+    public String queryHistoricalTelemetryData(TsSqlDayVo vo,boolean isCap,String type)
+    {
 
+        StringBuffer  sonSql01 = new StringBuffer();
+        Map<String, Object> param = new HashMap<>();
+        log.info("queryHistoricalTelemetryData打印的入参:{}",vo);
+        sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        if(isCap) {
+            sonSql01.append(" and  d1.flg = true");
+        }
+        log.info("queryHistoricalTelemetryData打印的sonSql01:{}",sonSql01);
+        StringBuffer  sql = new StringBuffer();
+        sql.append("select  d1.id as entity_id  from  device d1 where  1=1 ");
+        sql.append(sonSql01);
+        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_device");
+       List<UUID> uuidList =  list.stream().map(CensusSqlByDayEntity::getEntityId).collect(Collectors.toList());
+       List<TsKvEntry> tsKvEntryList=  DaoUtil.convertDataList(searchTsKvLatestRepository.findAllByEntityIdAndKey(uuidList,queryKeyName(type)));
+       if(CollectionUtils.isEmpty(tsKvEntryList))
+       {
+           return "0";
+       }
+        BigDecimal  sum =  tsKvEntryList.stream().filter(m1->m1.getValue() != null).map(m1->m1.getValue().toString()).map(BigDecimal::new).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return StringUtilToll.roundUp(sum.stripTrailingZeros().toPlainString());
 
-
+    }
 
 
 
