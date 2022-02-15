@@ -31,11 +31,7 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.SearchTextEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.UUID;
 
 /**
@@ -95,6 +91,12 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     @Column(name = ModelConstants.USER_USER_TYPE)
     private  String type;
 
+    /**
+     * 0为默认
+     * 1为工厂管理员角色
+     * 3为租户管理员角色
+     * 4为 用户系统管理员
+     */
     @Column(name = ModelConstants.USER_USER_LEVEL)
     private  int userLevel=0;
 

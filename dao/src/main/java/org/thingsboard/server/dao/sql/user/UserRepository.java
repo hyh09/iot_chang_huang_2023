@@ -97,6 +97,9 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
     @Query(value = "update UserEntity  d set d.operationType= :operationType where d.id= :userId")
     int updateOperationType(@Param("userId") UUID  userId,@Param("operationType") Integer  operationType);
 
-
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "update UserEntity  d set d.userLevel = :userLevel where d.id= :userId")
+    int updateLevel(@Param("userId") UUID  userId,@Param("userLevel") Integer  userLevel);
 
 }

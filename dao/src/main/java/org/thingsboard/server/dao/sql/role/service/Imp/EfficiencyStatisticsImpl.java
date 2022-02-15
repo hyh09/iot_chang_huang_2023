@@ -506,14 +506,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if(data01 != null)
         {
             resultVO.setYesterdayValue(StringUtilToll.roundUp(data01.getIncrementCapacity()));
-            resultVO.setHistory(StringUtilToll.roundUp(data01.getHistoryCapacity()));
         }
         CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
         if(nowDate != null)
         {
             resultVO.setTodayValue(StringUtilToll.roundUp(nowDate.getIncrementCapacity()));
-            resultVO.setHistory(StringUtilToll.roundUp(nowDate.getHistoryCapacity()));
         }
+        resultVO.setHistory(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
         return resultVO;
     }
 
@@ -528,7 +527,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         ResultHomeEnergyAppVo  resultHomeEnergyAppVo  = new  ResultHomeEnergyAppVo();
         Map<String,String> yesterdayMap  = new HashMap<>();
         Map<String,String> todayMap  = new HashMap<>();
-        Map<String,String> historyMap  = new HashMap<>();
 
         if(vo.getStartTime() ==  null)  //如果有值，则是看板的调用
         {
@@ -541,31 +539,21 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         LocalDate   localDate=  LocalDate.now();
         LocalDate yesterday = localDate.plusDays(-1);
         CensusSqlByDayEntity  data01 = appleMap.get(yesterday);
-//        if(data01 != null)
-//        {
-                yesterdayMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null?StringUtilToll.roundUp(data01.getIncrementWater()):"0"));
-                yesterdayMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ? StringUtilToll.roundUp(data01.getIncrementElectric()):"0"));
-                yesterdayMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getIncrementGas()):"0"));
+          yesterdayMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null?StringUtilToll.roundUp(data01.getIncrementWater()):"0"));
+          yesterdayMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ? StringUtilToll.roundUp(data01.getIncrementElectric()):"0"));
+          yesterdayMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getIncrementGas()):"0"));
 
-               historyMap.put(KeyTitleEnums.key_water.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryWater()):"0"));
-               historyMap.put(KeyTitleEnums.key_cable.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryElectric()):"0"));
-               historyMap.put(KeyTitleEnums.key_gas.getgName(),(data01 != null ?StringUtilToll.roundUp(data01.getHistoryGas()):"0"));
-//        }
+
         CensusSqlByDayEntity  nowDate = appleMap.get(localDate);
-//        if(nowDate != null)
-//        {
+
        todayMap.put(KeyTitleEnums.key_water.getgName(),(nowDate != null?StringUtilToll.roundUp(nowDate.getIncrementWater()):"0"));
        todayMap.put(KeyTitleEnums.key_cable.getgName(),(nowDate != null ? StringUtilToll.roundUp(nowDate.getIncrementElectric()):"0"));
        todayMap.put(KeyTitleEnums.key_gas.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getIncrementGas()):"0"));
 
-
-        historyMap.put(KeyTitleEnums.key_water.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getHistoryWater()):"0"));
-            historyMap.put(KeyTitleEnums.key_cable.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getHistoryElectric()):"0"));
-            historyMap.put(KeyTitleEnums.key_gas.getgName(),(nowDate != null ?StringUtilToll.roundUp(nowDate.getHistoryGas()):"0"));
-//        }
-        resultHomeEnergyAppVo.setHistory(historyMap);
+        resultHomeEnergyAppVo.setHistory(getEnergyHistroyMap(vo));
         resultHomeEnergyAppVo.setTodayValue(todayMap);
         resultHomeEnergyAppVo.setYesterdayValue(yesterdayMap);
+
         return resultHomeEnergyAppVo;
     }
 
@@ -1201,6 +1189,22 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
       return  outAppRunnigStateVos;
     }
 
+
+    private  Map<String,String> getEnergyHistroyMap(TsSqlDayVo vo)
+    {
+        Map<String,String> historyMap  = new HashMap<>();
+        setHistoryMapValue(vo,historyMap,KeyTitleEnums.key_water);
+        setHistoryMapValue(vo,historyMap,KeyTitleEnums.key_cable);
+        setHistoryMapValue(vo,historyMap,KeyTitleEnums.key_gas);
+     return  historyMap;
+    }
+
+    private void
+
+    setHistoryMapValue(TsSqlDayVo vo,Map<String,String> historyMap,KeyTitleEnums enums)
+    {
+        historyMap.put(enums.getgName(),effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,false,enums.getCode()));
+    }
 
 
 
