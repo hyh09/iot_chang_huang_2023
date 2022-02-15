@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller;
 
+import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -193,4 +194,19 @@ public class RTMonitorController extends BaseController {
         return this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, pageLink);
     }
 
+    /**
+     * 根据当前登录人获得全部设备的在线状态
+     */
+    @ApiOperation(value = "根据当前登录人获得全部设备的在线状态")
+    @GetMapping("/rtMonitor/device/onlineStatus/all")
+    public Map<String, Boolean> getDeviceOnlineStatus() throws ThingsboardException {
+        var user = getCurrentUser();
+        UUID factoryId = null;
+        if (CreatorTypeEnum.FACTORY_MANAGEMENT.getCode().equalsIgnoreCase(user.getType())) {
+            factoryId = user.getFactoryId();
+            if (factoryId == null)
+                return Maps.newHashMap();
+        }
+        return this.clientService.getDeviceOnlineStatusMap(getTenantId(), factoryId);
+    }
 }
