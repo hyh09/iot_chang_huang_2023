@@ -353,9 +353,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 this.componentPropertyRepository.saveAll(propertyList.stream().map(DictDeviceComponentPropertyEntity::new).collect(Collectors.toList()));
             }
 
-            if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
-                continue;
-            }
+            if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) continue;
             this.recursionSaveComponent(componentVO.getComponentList(), dictDeviceId, dictDeviceComponentEntity.getId().toString(), sort, pSort);
         }
     }
@@ -672,6 +670,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 .name(v.getName())
                 .id(v.getId())
                 .properties(Lists.newArrayList())
+                .createdTime(v.getCreatedTime())
                 .build())
                 .map(v -> this.graphItemRepository.findAllByGraphIdOrderBySortAsc(v.getId())
                         .thenApplyAsync(e -> DaoUtil.convertDataList(e).stream()
@@ -734,7 +733,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             BeanUtils.copyProperties(dictDeviceGraphVO, graph);
         } else {
             graph = this.graphRepository.findById(dictDeviceGraphVO.getId()).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("图表不存在！", ThingsboardErrorCode.GENERAL));
-            BeanUtils.copyProperties(dictDeviceGraphVO, graph, "id");
+            BeanUtils.copyProperties(dictDeviceGraphVO, graph, "id", "createdTime");
         }
         graphEntity = new DictDeviceGraphEntity(graph);
         graphEntity.setDictDeviceId(dictDeviceId);
@@ -834,11 +833,13 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                                 .id(v.getId())
                                 .name(v.getName())
                                 .title(v.getTitle())
+                                .unit(Optional.ofNullable(v.getDictDataId()).flatMap(f -> this.dictDataRepository.findById(f).map(DictDataEntity::getUnit)).orElse(null))
                                 .propertyType(DictDevicePropertyTypeEnum.DEVICE)
                                 .build()).orElse(p2.map(v -> DictDeviceTsPropertyVO.builder()
                                 .id(v.getId())
                                 .name(v.getName())
                                 .title(v.getTitle())
+                                .unit(Optional.ofNullable(v.getDictDataId()).flatMap(f -> this.dictDataRepository.findById(f).map(DictDataEntity::getUnit)).orElse(null))
                                 .propertyType(DictDevicePropertyTypeEnum.COMPONENT)
                                 .build()).orElse(null))).join();
     }

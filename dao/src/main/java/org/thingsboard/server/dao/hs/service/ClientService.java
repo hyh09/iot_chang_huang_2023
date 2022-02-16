@@ -7,6 +7,7 @@ import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -20,7 +21,6 @@ import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.hs.entity.vo.FactoryHierarchyResult;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -320,9 +320,26 @@ public interface ClientService {
 
     /**
      * 根据当前登录人获得全部设备的在线状态
-     * @param tenantId 租户Id
+     *
+     * @param tenantId  租户Id
      * @param factoryId 工厂Id
      * @return 当前登录人获得全部设备的在线状态
      */
     Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId, UUID factoryId);
+
+    /**
+     * 获得全部设备的在线状态
+     *
+     * @param tenantId  租户Id
+     * @return 获得全部设备的在线状态
+     */
+    Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId);
+
+    /**
+     * 获得设备全部客户端及服务端、共享属性及值
+     *
+     * @param deviceId 设备Id
+     * @param tenantId 租户Id
+     */
+    List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId);
 }

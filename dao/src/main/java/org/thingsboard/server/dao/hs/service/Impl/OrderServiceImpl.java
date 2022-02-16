@@ -140,7 +140,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         }).map(orderExcelBO -> CompletableFuture.supplyAsync(() -> {
             var result = (OrderExcelBO) SerializationUtils.clone(orderExcelBO);
             result.setIsUk(true);
-            this.orderRepository.findByTenantIdAndOrderNo(tenantId.getId(), orderExcelBO.getOrderNo()).ifPresent(l->result.setIsUk(false));
+            this.orderRepository.findByTenantIdAndOrderNo(tenantId.getId(), orderExcelBO.getOrderNo()).ifPresent(l -> result.setIsUk(false));
             var factory = this.clientService.getFactoryByFactoryNameExactly(tenantId, orderExcelBO.getFactoryName());
             Workshop workshop = null;
             ProductionLine productionLine = null;
@@ -460,6 +460,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                                 .orderNo(v.getOrderNo())
                                 .total(v.getTotal())
                                 .completeness(this.calculateCompleteness(Optional.ofNullable(dataMap.get(toUUID(v.getId()))).map(OrderCapacityBO::getCapacities).orElse(BigDecimal.ZERO), v.getTotal()))
+                                .isOvertime(v.getIntendedTime() != null && v.getIntendedTime() > CommonUtil.getTodayCurrentTime())
                                 .build()
                 ).collect(Collectors.toList())).join()).join();
     }

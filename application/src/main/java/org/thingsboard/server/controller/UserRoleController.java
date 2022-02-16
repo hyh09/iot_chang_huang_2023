@@ -18,6 +18,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
@@ -62,6 +63,7 @@ public class UserRoleController extends BaseController{
         DataValidator.validateCode(entity.getRoleCode());
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setTenantId(securityUser.getTenantId().getId());
+        entity.setUserLevel(securityUser.getUserLevel());
         if(entity.getId() != null)
         {
            return updateRecord(entity);
@@ -112,6 +114,7 @@ public class UserRoleController extends BaseController{
         tenantSysRoleEntity.setSystemTab("0");
         tenantSysRoleEntity.setTenantId(getTenantId().getId());
         tenantSysRoleEntity.setOperationType(null);
+        tenantSysRoleEntity.setUserLevelList(setParametersByRoleLevel());
         List<TenantSysRoleEntity>  result01= tenantSysRoleService.findAllByTenantSysRoleEntity(tenantSysRoleEntity);
         return  result01;
 
@@ -162,36 +165,32 @@ public class UserRoleController extends BaseController{
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String sortProperty,
             @RequestParam(required = false) String sortOrder) throws ThingsboardException {
-        SecurityUser securityUser =  getCurrentUser();
-        Map<String, Object> queryParam  =new HashMap<>();
-//        queryParam.put("updatedUser",securityUser.getUuidId().toString());
-        if(!StringUtils.isEmpty(roleCode))
-        {
-            queryParam.put("roleCode", roleCode);
-        }
-        if(!StringUtils.isEmpty(roleName))
-        {
-            queryParam.put("roleName", roleName);
-        }
+        try {
+            SecurityUser securityUser = getCurrentUser();
+            Map<String, Object> queryParam = new HashMap<>();
+            if (!StringUtils.isEmpty(roleCode)) {
+                queryParam.put("roleCode", roleCode);
+            }
+            if (!StringUtils.isEmpty(roleName)) {
+                queryParam.put("roleName", roleName);
+            }
 
-          queryParam.put("tenantId",securityUser.getTenantId().getId());
-        if(securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
+            queryParam.put("tenantId", securityUser.getTenantId().getId());
+            if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
+                log.info("当前用户是工厂类别的用户");
+                queryParam.put("factoryId", securityUser.getFactoryId());
+            }
+            queryParam.put("systemTab", "0");
+            queryParam.put("type", securityUser.getType());
+            setParametersByRoleLevel(queryParam);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            PageData<TenantSysRoleEntity> roleEntityPageData = tenantSysRoleService.pageQuery(queryParam, pageLink);
+            return roleEntityPageData;
+        }catch (Exception e)
         {
-            log.info("当前用户是工厂类别的用户");
-            queryParam.put("factoryId", securityUser.getFactoryId());
+            log.info("===>查询角色列表接口报错:{}",e);
+            return  new PageData<TenantSysRoleEntity>();
         }
-        queryParam.put("systemTab","0");
-        queryParam.put("type",securityUser.getType());
-
-        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        PageData<TenantSysRoleEntity>  roleEntityPageData  = tenantSysRoleService.pageQuery(queryParam,pageLink);
-        if(securityUser.getUserLevel() ==  3){
-            List<TenantSysRoleEntity>  list =    roleEntityPageData.getData();
-            list.stream().forEach(m1->{
-                m1.setOperationType(0);
-            });
-        }
-        return  roleEntityPageData;
     }
 
 
@@ -300,22 +299,27 @@ public class UserRoleController extends BaseController{
         log.info("打印当前的入参:{}",vo);
         SecurityUser securityUser =  getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
-//        vo.setCreateId(securityUser.getUuidId());
-
         if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
             log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
              vo.setFactoryId(securityUser.getFactoryId());
         }
         vo.setType(securityUser.getType());
-
-
-
+        vo.setUserLevel(securityUser.getUserLevel());//当前登录人的
         return userRoleMemuSvc.getUserByNotInRole(vo,pageLink,new SortRowName(sortProperty,sortOrder));
 
     }
 
 
 
+    /**
+     * 编辑用户
+     */
+    @ApiOperation(value = "用户管理-系统开关的更新接口")
+    @RequestMapping(value="/updateOperationType",method = RequestMethod.POST)
+    @ResponseBody
+    public UpdateOperationVo updateOperationType(@RequestBody @Valid UpdateOperationVo vo) throws ThingsboardException {
+        return   tenantSysRoleService.updateOperationType(vo);
+    }
 
 
 

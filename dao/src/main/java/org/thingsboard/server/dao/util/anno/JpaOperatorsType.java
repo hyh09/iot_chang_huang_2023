@@ -17,4 +17,8 @@ import java.lang.annotation.*;
 public @interface JpaOperatorsType {
 
     JpaQueryHelper.Operators value();
+
+    String  columnName() default "";
+
+
 }

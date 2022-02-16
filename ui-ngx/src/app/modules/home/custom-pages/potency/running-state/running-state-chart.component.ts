@@ -1,5 +1,6 @@
 import { Component, Input, AfterViewInit, ElementRef, ViewChild, OnChanges } from '@angular/core';
 import { viewPortResize } from '@app/core/utils';
+import { RunningState } from '@app/shared/models/custom/potency.models';
 import { TranslateService } from '@ngx-translate/core';
 import * as echarts from 'echarts';
 
@@ -10,9 +11,7 @@ import * as echarts from 'echarts';
 })
 export class RunningStateChartComponent implements AfterViewInit, OnChanges {
 
-  @Input() title: string;
-  @Input() unit: string;
-  @Input() data: { time: number; value: string; }[];
+  @Input() data: RunningState;
 
   @ViewChild('runningStateChart') runningStateChart: ElementRef;
 
@@ -38,22 +37,36 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
 
   init() {
     if (!this.chart) return;
-    const chartData = this.data.map(item => {
-      return [new Date(item.time), item.value];
+    const series = (this.data.properties || []).map(prop => {
+      const chartData = prop.tsKvs.map(item => {
+        return [new Date(item.ts), item.value];
+      });
+      return {
+        name: prop.title || prop.name,
+        data: chartData,
+        type: 'line',
+        symbol: 'none',
+        smooth: true,
+        tooltip: {
+          formatter: `{b}：{c}`
+        },
+        animation: false
+      }
     });
+    const unit = ((this.data.properties || [])[0] || {}).unit;
     const option = {
       title: {
-        text: this.title,
-        subtext: this.unit ? this.translate.instant('device-monitor.prop-unit', { unit: this.unit }) : '',
+        text: this.data.tableName,
+        subtext: unit ? this.translate.instant('device-monitor.prop-unit', { unit }) : '',
         left: -5,
         textStyle: {
           fontSize: 16,
           color: 'rgba(0, 0, 0, 0.87)'
         }
       },
-      color: ['#0663ff'],
+      color: ['#0663ff', '#99D5D4', '#5FBC4D', '#C5DE66', '#FFE148', '#FBA341', '#FF6C6C', '#F14444', '#C19461', '#913030'],
       grid: {
-        bottom: 5,
+        bottom: 9,
         right: 25,
         left: 0,
         containLabel: true
@@ -75,21 +88,14 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
         {
           type: 'inside',
           start: 0,
-          end: 100
+          end: 20
+        },
+        {
+          start: 0,
+          end: 20
         }
       ],
-      series: [
-        {
-          name: this.title,
-          data: chartData,
-          type: 'line',
-          symbol: 'none',
-          smooth: true,
-          tooltip: {
-            formatter: `{b}：{c}${this.unit}`
-          }
-        }
-      ]
+      series
     };
     this.chart.setOption(option);
     this.chart.resize();

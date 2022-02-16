@@ -6,8 +6,14 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.vo.*;
-import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
+import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
+import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.device.RunningStateVo;
+import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
+import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
+import org.thingsboard.server.common.data.vo.device.out.app.OutAppRunnigStateVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeEnergyAppVo;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
@@ -92,24 +98,23 @@ public interface EfficiencyStatisticsSvc {
     ResultEnergyAppVo queryAppEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId,PageLink pageLink,Boolean flg);
 
 
-    /**
-     * 能耗的查询  queryAppEntityByKeysNewMethod
-     */
-    @Deprecated
-    ResultEnergyAppVo queryEntityByKeys(QueryTsKvVo queryTsKvVo, TenantId tenantId,Boolean flg);
+
 
 
 
     /**
      * PC端的运行状态
-     * @param vo
+     * @param parameterVo 请求入参
      * @param tenantId
      * @return 返回的是 key:name ,
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryPcTheRunningStatusByDevice(QueryRunningStatusVo vo, TenantId  tenantId) throws ThingsboardException;
+    List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId  tenantId) throws Exception;
+
+
+    List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId  tenantId, PageLink pageLink) throws Exception;
 
     /**
-     * app端的返回的是描述字段
+     * app端的返回的是描述字段 【老接口】
      * @param vo
      * @param tenantId
      * @return
@@ -126,7 +131,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    List<DeviceDictionaryPropertiesVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
+    List<RunningStateVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
 
 
     /*********

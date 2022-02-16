@@ -10,15 +10,14 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.device.out.app.OutAppRunnigStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
-import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -92,8 +91,9 @@ public class EfficiencyStatisticsController extends BaseController {
     @ApiOperation(value = "【app端查询当前设备的运行状态】")
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody AppQueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
+    public  List<OutAppRunnigStateVo> queryTheRunningStatusByDevice(@RequestBody AppQueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
         try {
+
             if (queryTsKvVo.getEndTime() == null) {
                 queryTsKvVo.setStartTime(CommonUtils.getZero());
                 queryTsKvVo.setEndTime(CommonUtils.getNowTime());
@@ -104,7 +104,7 @@ public class EfficiencyStatisticsController extends BaseController {
             }
             PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), queryTsKvVo.getTextSearch(), queryTsKvVo.getSortProperty(), queryTsKvVo.getSortOrder());
 
-            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink);
+            return efficiencyStatisticsSvc.queryAppTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();

@@ -19,6 +19,9 @@ const wsForwardUrl = "http://iot.textile-saas.huansi.net";
 // const forwardUrl = "http://10.10.10.162:8080";
 // const wsForwardUrl = "http://10.10.10.162:8080";
 
+// const forwardUrl = "http://10.10.11.148:8080";
+// const wsForwardUrl = "http://10.10.11.148:8080";
+
 const ruleNodeUiforwardUrl = forwardUrl;
 
 const PROXY_CONFIG = {

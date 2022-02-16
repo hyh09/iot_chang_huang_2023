@@ -71,14 +71,16 @@ public class SolidTrendLineEntity extends AbstractTsKvEntity {
     /**
      * 当前的时间
      */
+    @Transient
     private  Long  time01;
 
     /**
      * 格式话的时间， 用于后端接口测试观察
      */
+    @Transient
     private  String time02;
 
-
+    @Transient
     private  Long mints;
 
 
