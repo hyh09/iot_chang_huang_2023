@@ -12,30 +12,22 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
-import org.thingsboard.server.common.data.memu.Menu;
 import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.model.sql.AbstractFactoryEntity;
 import org.thingsboard.server.dao.model.sql.AbstractProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.AbstractWorkshopEntity;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
-import org.thingsboard.server.dao.util.BeanToMap;
-import org.thingsboard.server.entity.factory.AbstractFactory;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
 import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
 import org.thingsboard.server.entity.factory.vo.FactoryLevelAllListVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
 import org.thingsboard.server.entity.factory.vo.FactoryVo;
-import org.thingsboard.server.entity.menu.vo.MenuVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Api(value="工厂管理Controller",tags={"工厂管理接口"})
@@ -292,5 +284,14 @@ public class FactoryController extends BaseController  {
             }
         }
         return list;
+    }
+
+    @ApiOperation("校验工厂下是否有网关（true-有，false-无）")
+    @ApiImplicitParam(name = "factoryId",value = "factoryId工厂标识",dataType = "string",paramType="query",required = true)
+    @RequestMapping(value = "/checkFactoryHaveGateway", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean checkFactoryHaveGateway(@RequestParam(required = true) String factoryId) throws ThingsboardException{
+        checkParameterChinees("id",factoryId);
+        return factoryService.checkFactoryHaveGateway(factoryId);
     }
 }
