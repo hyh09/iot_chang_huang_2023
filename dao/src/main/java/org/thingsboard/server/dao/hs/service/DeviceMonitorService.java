@@ -98,21 +98,23 @@ public interface DeviceMonitorService {
     /**
      * 查询设备遥测数据历史数据
      *
-     * @param tenantId     租户Id
-     * @param deviceId     设备Id
-     * @param timePageLink 时间分页参数
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
+     * @param timePageLink     时间分页参数
      * @return 设备遥测数据历史数据
      */
-    PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
+    PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, boolean isShowAttributes, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备历史-表头，包含时间
      *
-     * @param tenantId 租户Id
-     * @param deviceId 设备Id
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
      * @return 查询设备历史-表头，包含时间
      */
-    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId);
+    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes);
 
     /**
      * 【APP】获得实时监控列表数据

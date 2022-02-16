@@ -163,10 +163,7 @@ public class UserController extends BaseController  {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
             }
-            SecurityUser securityUser = getCurrentUser();
-            if(securityUser.getUserLevel() ==  3){
-                user.setOperationType(0);
-            }
+//            SecurityUser securityUser = getCurrentUser();
             return user;
         } catch (Exception e) {
             throw handleException(e);
