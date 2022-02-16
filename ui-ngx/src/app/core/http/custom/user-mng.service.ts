@@ -48,8 +48,7 @@ export class UserMngService {
 
   // 新增或更新用户信息
   public saveUser(userInfo: UserInfo, config?: RequestConfig): Observable<UserInfo> {
-    const operationType = userInfo.operationType ? 1 : 0;
-    return this.http.post<UserInfo>('/api/user/save', { ...userInfo, operationType }, defaultHttpOptionsFromConfig(config));
+    return this.http.post<UserInfo>('/api/user/save', userInfo, defaultHttpOptionsFromConfig(config));
   }
 
   // 删除用户
@@ -65,6 +64,11 @@ export class UserMngService {
   // 获取当前可用的用户编码
   public getAvailableCode(tenantId?: string): Observable<string> {
     return this.http.post(`/api/user/getCode`, { key: "1", tenantId }, { responseType: 'text' });
+  }
+
+  // 设置用户是否为系统用户（0：否  1：是）
+  public switchSysUser(params: { id: string; operationType: 0 | 1; }, config?: RequestConfig) {
+    return this.http.post(`/api/user/updateOperationType`, params, { responseType: 'text' });
   }
 
 }

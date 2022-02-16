@@ -13,6 +13,9 @@ import { RoleMngService } from "@app/core/http/custom/role-mng.service";
 import { MatDialog } from "@angular/material/dialog";
 import { UserMngChangePwdComponent } from "./user-mng-change-pwd.component";
 import { UtilsService } from "@app/core/public-api";
+import { select, Store } from "@ngrx/store";
+import { AppState } from '@core/core.state';
+import { selectUserDetails } from "@app/core/auth/auth.selectors";
 
 @Injectable()
 export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<UserInfo>>  {
@@ -21,13 +24,20 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
 
   factoryId: string;
 
+  userLevel$ = this.store.pipe(
+    select(selectUserDetails),
+    map((user) => (user.userLevel))
+  );
+  userLevel: number;
+
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
     private userMngService: UserMngService,
     private roleMngService: RoleMngService,
     public dialog: MatDialog,
-    private utils: UtilsService
+    private utils: UtilsService,
+    private store: Store<AppState>
   ) {
     this.config.entityType = EntityType.USER_MNG;
     this.config.entityComponent = UserMngComponent;
@@ -42,8 +52,10 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
       availableCode: '',
       roleList: []
     }
+  }
 
-    this.config.columns.push(
+  resolve(route: ActivatedRouteSnapshot): EntityTableConfig<UserInfo> {
+    this.config.columns = [
       new EntityTableColumn<UserInfo>('userCode', 'auth-mng.user-code', '33.333333%'),
       new EntityTableColumn<UserInfo>('userName', 'auth-mng.user-name', '33.333333%'),
       new EntityTableColumn<UserInfo>('phoneNumber', 'auth-mng.phone-number', '200px'),
@@ -52,10 +64,17 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
         return activeStatus === '0' ? this.translate.instant('auth-mng.off') : activeStatus === '1' ? this.translate.instant('auth-mng.on') : '';
       }),
       new DateEntityTableColumn<UserInfo>('createdTime', 'common.created-time', this.datePipe, '150px')
-    );
-  }
+    ];
+    this.userLevel$.subscribe(userLevel => {
+      this.userLevel = userLevel
+      if (userLevel === 3) {
+        this.config.columns.splice(5, 0, new EntityTableColumn<UserInfo>('operationType', this.translate.instant('auth-mng.whether-sys-user'), '80px', () => (''),
+        () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
+          this.userMngService.switchSysUser({id: entity.id.id, operationType: flag ? 1 : 0}).subscribe();
+        }));
+      }
+    });
 
-  resolve(route: ActivatedRouteSnapshot): EntityTableConfig<UserInfo> {
     this.config.componentsData = {
       factoryId: '',
       userCode: '',
@@ -78,11 +97,11 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
-    this.config.deleteEnabled = entity => (entity && entity.operationType !== 1);
+    this.config.deleteEnabled = entity => this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0);
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('user.add');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || (entity && entity.operationType === 1));
+      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 1));
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 
@@ -119,7 +138,7 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
       actions.push({
         name: this.translate.instant('auth-mng.change-pwd'),
         mdiIcon: 'mdi:pwd-key',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id)),
+        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.changePwd($event, entity.id.id)
       });
     }

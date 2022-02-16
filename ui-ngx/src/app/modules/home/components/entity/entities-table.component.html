@@ -189,7 +189,11 @@
                   <mat-icon *ngIf="!isMdiIcon(entity[column.key])" class="material-icons mat-icon">{{entity[column.key]}}</mat-icon>
                 </ng-container>
                 <ng-container *ngIf="column.isSwitchColumn">
-                  <mat-slide-toggle [(ngModel)]="entity[column.key]" (change)="column.onSwitch(entity, $event.checked)"></mat-slide-toggle>
+                  <mat-slide-toggle
+                    [(ngModel)]="entity[column.key]"
+                    (change)="column.onSwitch(entity, $event.checked)"
+                    (click)="$event.stopPropagation()"
+                  ></mat-slide-toggle>
                 </ng-container>
                 <span *ngIf="!column.isIconColumn(entity) && !column.isSwitchColumn" [innerHTML]="cellContent(entity, column, row)"></span>
                 <ng-template [ngIf]="column.actionCell">
