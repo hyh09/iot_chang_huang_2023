@@ -3416,6 +3416,8 @@
     "user-name": "用户名称",
     "phone-number": "手机号",
     "active-status": "状态",
+    "whether-sys-user": "是否系统用户",
+    "whether-sys-role": "是否系统角色",
     "on": "启用",
     "off": "禁用",
     "email": "邮箱",

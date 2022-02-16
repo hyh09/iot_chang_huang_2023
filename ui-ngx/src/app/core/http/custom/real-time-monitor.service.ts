@@ -66,14 +66,17 @@ export class RealTimeMonitorService {
   }
 
   // 获取设备历史数据表头
-  public getDeviceHistoryTableHeader(id: string, config?: RequestConfig): Observable<{ name: string; title: string }[]> {
-    return this.http.get<{ name: string; title: string }[]>(`/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}`, defaultHttpOptionsFromConfig(config));
+  public getDeviceHistoryTableHeader(id: string, isShowAttributes:boolean = false, config?: RequestConfig): Observable<{ name: string; title: string }[]> {
+    return this.http.get<{ name: string; title: string }[]>(
+      `/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}&isShowAttributes=${isShowAttributes}`,
+      defaultHttpOptionsFromConfig(config)
+    );
   }
 
   // 获取设备历史数据列表
-  public getDeviceHistoryDatas(pageLink: PageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
+  public getDeviceHistoryDatas(pageLink: PageLink, deviceId: string, isShowAttributes: boolean = false, config?: RequestConfig): Observable<PageData<object>> {
     return this.http.get<PageData<object>>(
-      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&deviceId=${deviceId}`,
+      `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&deviceId=${deviceId}&isShowAttributes=${isShowAttributes}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
@@ -146,14 +149,17 @@ export class RealTimeMonitorService {
       } else {
         const _res = JSON.parse(res.data);
         const _data = [];
-        if (_res) {
+        if (_res && _res.data) {
           const data = _res.data;
           Object.keys(data).forEach(key => {
-            _data.push({
-              name: key,
-              createdTime: data[key][0][0],
-              content: data[key][0][1]
-            });
+            const content = data[key][0][1];
+            if (content && content !== '0') {
+              _data.push({
+                name: key,
+                createdTime: data[key][0][0],
+                content
+              });
+            }
           });
         }
         onMessage(_data);

@@ -1,6 +1,6 @@
 package org.thingsboard.server.dao.hs.service;
 
-import com.aliyun.oss.model.*;
+import com.aliyun.oss.model.OSSObjectSummary;
 import lombok.NonNull;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 

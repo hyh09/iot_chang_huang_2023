@@ -22,10 +22,7 @@ import org.thingsboard.server.common.data.id.AlarmId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.kv.Aggregation;
-import org.thingsboard.server.common.data.kv.BaseReadTsKvQuery;
-import org.thingsboard.server.common.data.kv.ReadTsKvQuery;
-import org.thingsboard.server.common.data.kv.TsKvEntry;
+import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
@@ -293,6 +290,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException, ThingsboardException {
+        var attributeKvMap = this.clientService.listDeviceAttributeKvs(tenantId, toUUID(id)).stream().collect(Collectors.toMap(AttributeKvEntry::getKey, Function.identity(), (a, b) -> a));
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id))).map(DeviceEntity::toData).orElseThrow(() -> new ThingsboardException("设备不存在", ThingsboardErrorCode.GENERAL));
         var deviceBaseDTO = this.clientService.getFactoryBaseInfoByQuery(tenantId, new FactoryDeviceQuery(UUIDToString(device.getFactoryId()), UUIDToString(device.getWorkshopId()), UUIDToString(device.getProductionLineId()), device.getId().toString()));
 
@@ -317,21 +315,23 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .name(e.getName())
                     .groupPropertyList(e.getGroupPropertyList().stream().map(v -> {
                         var kvData = Optional.ofNullable(kvEntryMap.get(v.getName()));
+                        var abData = Optional.ofNullable(attributeKvMap.get(v.getName()));
                         kvData.ifPresent(k -> groupPropertyNameList.add(v.getName()));
                         return DictDeviceGroupPropertyVO.builder()
                                 .id(v.getId())
                                 .unit(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                                 .icon(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null))
+                                .picture(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getPicture).orElse(null))
                                 .name(v.getName())
                                 .title(v.getTitle())
-                                .content(kvData.isEmpty() ? v.getContent() : this.formatKvEntryValue(kvData.get()))
-                                .createdTime(kvData.isEmpty() ? v.getCreatedTime() : kvData.get().getTs())
+                                .content(kvData.map(this::formatKvEntryValue).orElse(abData.map(this::formatKvEntryValue).orElse(v.getContent())))
+                                .createdTime(kvData.map(TsKvEntry::getTs).orElse(abData.map(AttributeKvEntry::getLastUpdateTs).orElse(v.getCreatedTime())))
                                 .build();
                     }).collect(Collectors.toList()))
                     .build()).collect(Collectors.toList());
 
             componentList = dictDeviceDetail.getComponentList();
-            this.recursionDealComponentData(componentList, kvEntryMap, dictDataMap, groupPropertyNameList);
+            this.recursionDealComponentData(componentList, kvEntryMap, attributeKvMap, dictDataMap, groupPropertyNameList);
         }
 
         var ungrouped = DictDeviceGroupVO.builder().name(HSConstants.UNGROUPED).groupPropertyList(new ArrayList<>()).build();
@@ -415,32 +415,41 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 查询设备遥测数据历史数据
      *
-     * @param tenantId     租户Id
-     * @param deviceId     设备Id
-     * @param timePageLink 时间分页参数
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
+     * @param timePageLink     时间分页参数
      * @return 设备遥测数据历史数据
      */
     @Override
-    public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
-        return this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), timePageLink);
+    public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, boolean isShowAttributes, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        var pageData = this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), timePageLink);
+        if (isShowAttributes) {
+            var attributeData = this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().collect(Collectors.toMap(AttributeKvEntry::getKey, AttributeKvEntry::getValueAsString));
+            pageData.getData().forEach(v->v.putAll(attributeData));
+        }
+        return pageData;
     }
 
     /**
      * 查询设备历史-表头，包含时间
      *
-     * @param tenantId 租户Id
-     * @param deviceId 设备Id
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
      * @return 查询设备历史-表头，包含时间
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId) {
+    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) {
         List<DictDeviceGroupPropertyVO> propertyVOList = new ArrayList<>() {{
             add(DictDeviceGroupPropertyVO.builder()
                     .name(HSConstants.CREATED_TIME).title(HSConstants.CREATED_TIME).build());
         }};
 
         var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
+        if (isShowAttributes)
+           keyList.addAll( this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().map(AttributeKvEntry::getKey).collect(Collectors.toList()));
         if (keyList.isEmpty())
             return propertyVOList;
 
@@ -461,6 +470,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .unit(Optional.ofNullable(finalRMap.getOrDefault(e, null))
                         .map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                 .build()).collect(Collectors.toList()));
+
         return propertyVOList;
     }
 
@@ -831,25 +841,30 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      *
      * @param componentList         部件列表
      * @param kvEntryMap            遥测数据map
+     * @param attributeKvMap        设备属性map
      * @param dictDataMap           数据字典map
      * @param groupPropertyNameList 属性List
      */
-    public void recursionDealComponentData(List<DictDeviceComponentVO> componentList, Map<String, TsKvEntry> kvEntryMap, Map<String, DictData> dictDataMap, List<String> groupPropertyNameList) {
+    public void recursionDealComponentData(List<DictDeviceComponentVO> componentList, Map<String, TsKvEntry> kvEntryMap, Map<String, AttributeKvEntry> attributeKvMap, Map<String, DictData> dictDataMap, List<String> groupPropertyNameList) {
         for (DictDeviceComponentVO componentVO : componentList) {
             for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                 var kvData = Optional.ofNullable(kvEntryMap.get(propertyVO.getName()));
+                var abData = Optional.ofNullable(attributeKvMap.get(propertyVO.getName()));
                 propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
-                kvData.ifPresent(k -> {
+                kvData.ifPresentOrElse(k -> {
                     groupPropertyNameList.add(propertyVO.getName());
-                    propertyVO.setContent(this.formatKvEntryValue(kvData.get()));
+                    propertyVO.setContent(this.formatKvEntryValue(k));
                     propertyVO.setIcon(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null));
-                    propertyVO.setCreatedTime(kvData.get().getTs());
-                });
+                    propertyVO.setCreatedTime(k.getTs());
+                }, () -> abData.ifPresent(v -> {
+                    propertyVO.setContent(this.formatKvEntryValue(v));
+                    propertyVO.setCreatedTime(v.getLastUpdateTs());
+                }));
             }
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }
-            this.recursionDealComponentData(componentVO.getComponentList(), kvEntryMap, dictDataMap, groupPropertyNameList);
+            this.recursionDealComponentData(componentVO.getComponentList(), kvEntryMap, attributeKvMap, dictDataMap, groupPropertyNameList);
         }
     }
 
@@ -988,7 +1003,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                     .map(e -> e.thenApplyAsync(f -> {
                                         var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), f.getName(), todayStartTime, todayCurrentTime);
                                         return HistoryGraphPropertyVO.builder()
-                                                .tsKvs(data)
+                                                .tsKvs(this.cleanGraphTsKvData(data))
                                                 .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
                                                 .name(f.getName())
                                                 .title(f.getTitle())
@@ -1006,7 +1021,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var property = HistoryGraphPropertyVO.builder()
                 .name(tsPropertyName)
                 .title(historyGraphVO.getName())
-                .tsKvs(data)
+                .tsKvs(this.cleanGraphTsKvData(data))
+                .unit(Optional.ofNullable(dictDeviceId).map(e -> this.dictDeviceService.getTsPropertyByPropertyName(e, tsPropertyName)).map(DictDeviceTsPropertyVO::getUnit).orElse(null))
                 .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
                 .build();
         historyGraphVO.setName(property.getTitle());

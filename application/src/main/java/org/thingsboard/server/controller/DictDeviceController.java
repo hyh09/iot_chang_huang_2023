@@ -6,8 +6,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -123,6 +125,7 @@ public class DictDeviceController extends BaseController {
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
         CommonUtil.checkCode(dictDeviceVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE);
         CommonUtil.checkDuplicateName(dictDeviceVO, Sets.newHashSet());
+        CommonUtil.checkImageUpload(dictDeviceVO);
         return this.dictDeviceService.saveOrUpdateDictDevice(dictDeviceVO, getTenantId());
     }
 

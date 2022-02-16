@@ -2,8 +2,11 @@ package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.DataType;
 import org.thingsboard.server.common.data.kv.KvEntry;
+import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,6 +25,19 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 剔除无效遥测数据
+     */
+    default List<HistoryGraphPropertyTsKvVO> cleanGraphTsKvData(List<HistoryGraphPropertyTsKvVO> tsKvs) {
+        return tsKvs.stream().filter(v -> {
+            try {
+                return new BigDecimal(v.getValue()).compareTo(BigDecimal.ZERO) != 0;
+            } catch (Exception ignore) {
+                return true;
+            }
+        }).collect(Collectors.toList());
+    }
 
     /**
      * 格式化Excel错误信息
@@ -67,7 +83,28 @@ public interface CommonService {
     /**
      * 转换遥测数据为保留4位的
      */
+    @SuppressWarnings("all")
     default <T extends KvEntry> String formatKvEntryValue(T t) {
+        if (t == null)
+            return null;
+        String result = t.getValueAsString();
+        if (DataType.STRING.equals(t.getDataType()) || DataType.DOUBLE.equals(t.getDataType())) {
+            try {
+                BigDecimal bigDecimal = new BigDecimal(t.getValueAsString());
+                if (bigDecimal.scale() > 2) {
+                    return bigDecimal.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+                }
+            } catch (Exception ignore) {
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 转换遥测数据为保留4位的
+     */
+    @SuppressWarnings("all")
+    default <T extends AttributeKvEntry> String formatKvEntryValue(T t) {
         if (t == null)
             return null;
         String result = t.getValueAsString();

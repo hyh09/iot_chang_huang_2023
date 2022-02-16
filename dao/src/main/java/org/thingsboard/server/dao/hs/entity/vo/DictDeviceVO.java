@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.thingsboard.server.dao.hs.entity.bo.Image;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -18,7 +19,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictDeviceVO {
+public class DictDeviceVO implements Image {
     @ApiModelProperty(value = "设备字典Id,null或空则为新增")
     private String id;
 
