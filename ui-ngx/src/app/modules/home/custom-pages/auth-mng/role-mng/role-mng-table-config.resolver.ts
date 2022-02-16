@@ -66,7 +66,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       if (userLevel === 3) {
         this.config.columns.splice(5, 0, new EntityTableColumn<Role>('operationType', this.translate.instant('auth-mng.whether-sys-role'), '80px', () => (''),
         () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
-          this.roleMngService.switchSysRole({id: entity.id.id, operationType: flag ? 1 : 0}).subscribe();
+          this.roleMngService.switchSysRole({id: entity.id + '', operationType: flag ? 1 : 0}).subscribe();
         }));
       }
     });
@@ -125,7 +125,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       actions.push({
         name: this.translate.instant('auth-mng.set-permissions'),
         mdiIcon: 'mdi:config',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
+        isEnabled: (entity) => (!!(entity && entity.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.setPermissions($event, entity.id)
       });
     }
