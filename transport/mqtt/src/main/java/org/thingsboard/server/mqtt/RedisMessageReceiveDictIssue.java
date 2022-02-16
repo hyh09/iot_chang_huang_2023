@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
 import org.thingsboard.server.transport.mqtt.MqttTransportService;
+import org.thingsboard.server.transport.mqtt.session.DeviceSessionCtx;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -41,6 +42,10 @@ public class RedisMessageReceiveDictIssue {
 
     private void dictIssue(String deserialize) throws ThingsboardException, ParseException {
         MqttTransportHandler handler = mqttTransportService.getMqttTransportServerInitializer().getHandler();
+        if(handler == null){
+            log.error("handler 为空！");
+            return;
+        }
         if(StringUtils.isNotEmpty(deserialize)){
             Map<String, Object> parse = JSONObjectUtils.parse(deserialize);
             JSONArray topicObject = (JSONArray)parse.get("topic");
