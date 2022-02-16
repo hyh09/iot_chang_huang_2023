@@ -1,7 +1,6 @@
 package org.thingsboard.server.dao.factory;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -10,17 +9,11 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
-import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.id.factory.FactoryId;
-import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
-import org.thingsboard.server.common.data.id.workshop.WorkshopId;
-import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
-import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.relation.RelationDao;
@@ -303,6 +296,23 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         log.trace("执行 findFactoryByIdAsync [{}]", factoryId);
         validateId(factoryId, INCORRECT_FACTORY_ID + factoryId);
         return factoryDao.findByIdAsync(callerId, factoryId.getId());
+    }
+
+    /**
+     * 校验工厂下是否有网关（true-有，false-无）
+     * @param factoryId
+     * @return
+     * @throws ThingsboardException
+     */
+    @Override
+    public Boolean checkFactoryHaveGateway(String factoryId) throws ThingsboardException{
+        Device device = new Device();
+        device.setFactoryId(UUID.fromString(factoryId));
+        device.setOnlyGatewayFlag(true);
+        if(CollectionUtils.isNotEmpty(deviceService.findDeviceListByCdn(device))){
+            return true;
+        }
+        return false;
     }
 
 }
