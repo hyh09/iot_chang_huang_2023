@@ -21,6 +21,7 @@ package:
       - .m2/repository
       - .gradle/wrapper
       - .gradle/caches
+      - ui-ngx/node_modules
     # keep cache across branch
     key: "${CI_COMMIT_REF_SLUG}"
   image: 47.110.145.204:8084/huansiyl/jdk11-mvn-node-docker
