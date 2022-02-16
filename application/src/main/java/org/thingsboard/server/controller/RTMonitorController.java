@@ -183,17 +183,49 @@ public class RTMonitorController extends BaseController {
      */
     @ApiOperation(value = "查询设备历史数据-表头", notes = "包含时间")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true)
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "isShowAttributes", value = "是否显示属性", paramType = "query", defaultValue = "false")
     })
     @GetMapping("/rtMonitor/device/history/header")
-    public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId) throws ThingsboardException {
+    public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId, @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes) throws ThingsboardException {
         checkParameter("deviceId", deviceId);
-        return this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId);
+        return this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId, isShowAttributes);
+    }
+
+    /**
+     * 查询设备历史数据
+     */
+    @ApiOperation(value = "查询设备历史数据", notes = "默认倒序，不允许排序")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+            @ApiImplicitParam(name = "isShowAttributes", value = "是否显示属性", paramType = "query", defaultValue = "false")
+    })
+    @GetMapping("/rtMonitor/device/history")
+    public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(
+            @RequestParam String deviceId,
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes
+    ) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("startTime", startTime);
+        if (endTime == null || endTime <= 0L)
+            endTime = CommonUtil.getTodayCurrentTime();
+        TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
+        validatePageLink(pageLink);
+        return this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
     }
 
     /**
      * 查询设备历史数据-无分页
      */
+    @Deprecated
     @ApiOperation(value = "查询设备历史数据-无分页", notes = "默认倒序，不允许排序")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
@@ -220,36 +252,9 @@ public class RTMonitorController extends BaseController {
     }
 
     /**
-     * 查询设备历史数据
-     */
-    @ApiOperation(value = "查询设备历史数据", notes = "默认倒序，不允许排序")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
-            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
-    })
-    @GetMapping("/rtMonitor/device/history")
-    public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(
-            @RequestParam String deviceId,
-            @RequestParam int page,
-            @RequestParam int pageSize,
-            @RequestParam Long startTime,
-            @RequestParam(required = false) Long endTime
-    ) throws ThingsboardException, ExecutionException, InterruptedException {
-        checkParameter("deviceId", deviceId);
-        checkParameter("startTime", startTime);
-        if (endTime == null || endTime <= 0L)
-            endTime = CommonUtil.getTodayCurrentTime();
-        TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
-        validatePageLink(pageLink);
-        return this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, pageLink);
-    }
-
-    /**
      * 获得实时监控数据列表-精简版
      */
+    @Deprecated
     @ApiOperation(value = "获得实时监控数据列表-精简版", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
