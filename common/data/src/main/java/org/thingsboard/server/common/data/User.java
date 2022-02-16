@@ -97,7 +97,7 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
      * 0是可编辑
      * 1是不可编辑
      */
-    private  Integer operationType;
+    private  Integer operationType=0;
 
 
 
