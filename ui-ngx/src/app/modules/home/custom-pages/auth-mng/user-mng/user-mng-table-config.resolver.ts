@@ -55,26 +55,6 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
   }
 
   resolve(route: ActivatedRouteSnapshot): EntityTableConfig<UserInfo> {
-    this.config.columns = [
-      new EntityTableColumn<UserInfo>('userCode', 'auth-mng.user-code', '33.333333%'),
-      new EntityTableColumn<UserInfo>('userName', 'auth-mng.user-name', '33.333333%'),
-      new EntityTableColumn<UserInfo>('phoneNumber', 'auth-mng.phone-number', '200px'),
-      new EntityTableColumn<UserInfo>('email', 'auth-mng.email', '33.333333%'),
-      new EntityTableColumn<UserInfo>('activeStatus', 'auth-mng.active-status', '100px', ({activeStatus}) => {
-        return activeStatus === '0' ? this.translate.instant('auth-mng.off') : activeStatus === '1' ? this.translate.instant('auth-mng.on') : '';
-      }),
-      new DateEntityTableColumn<UserInfo>('createdTime', 'common.created-time', this.datePipe, '150px')
-    ];
-    this.userLevel$.subscribe(userLevel => {
-      this.userLevel = userLevel
-      if (userLevel === 3) {
-        this.config.columns.splice(5, 0, new EntityTableColumn<UserInfo>('operationType', this.translate.instant('auth-mng.whether-sys-user'), '80px', () => (''),
-        () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
-          this.userMngService.switchSysUser({id: entity.id.id, operationType: flag ? 1 : 0}).subscribe();
-        }));
-      }
-    });
-
     this.config.componentsData = {
       factoryId: '',
       userCode: '',
@@ -94,14 +74,34 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
         this.config.componentsData.roleList = res;
       });
     }
+
+    this.config.columns = [
+      new EntityTableColumn<UserInfo>('userCode', 'auth-mng.user-code', '33.333333%'),
+      new EntityTableColumn<UserInfo>('userName', 'auth-mng.user-name', '33.333333%'),
+      new EntityTableColumn<UserInfo>('phoneNumber', 'auth-mng.phone-number', '200px'),
+      new EntityTableColumn<UserInfo>('email', 'auth-mng.email', '33.333333%'),
+      new EntityTableColumn<UserInfo>('activeStatus', 'auth-mng.active-status', '100px', ({activeStatus}) => {
+        return activeStatus === '0' ? this.translate.instant('auth-mng.off') : activeStatus === '1' ? this.translate.instant('auth-mng.on') : '';
+      }),
+      new DateEntityTableColumn<UserInfo>('createdTime', 'common.created-time', this.datePipe, '150px')
+    ];
+    this.userLevel$.subscribe(userLevel => {
+      this.userLevel = userLevel
+      if (!this.factoryId && userLevel === 3) {
+        this.config.columns.splice(5, 0, new EntityTableColumn<UserInfo>('operationType', this.translate.instant('auth-mng.whether-sys-user'), '80px', () => (''),
+        () => ({ textAlign: 'center' }), false, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
+          this.userMngService.switchSysUser({id: entity.id.id, operationType: flag ? 1 : 0}).subscribe();
+        }));
+      }
+    });
     
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
-    this.config.deleteEnabled = entity => this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0);
+    this.config.deleteEnabled = entity => (!!this.factoryId || this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0));
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('user.add');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 1));
+      this.config.detailsReadonly = entity => (!this.factoryId && (!this.utils.hasPermission('action.edit') || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 1)));
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 
@@ -134,11 +134,11 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
 
   configureCellActions(): Array<CellActionDescriptor<UserInfo>> {
     const actions: Array<CellActionDescriptor<UserInfo>> = [];
-    if (this.utils.hasPermission('auth-mng.change-pwd')) {
+    if (this.factoryId || (!this.factoryId && this.utils.hasPermission('auth-mng.change-pwd'))) {
       actions.push({
         name: this.translate.instant('auth-mng.change-pwd'),
         mdiIcon: 'mdi:pwd-key',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
+        isEnabled: (entity) => (!!this.factoryId || !!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.changePwd($event, entity.id.id)
       });
     }

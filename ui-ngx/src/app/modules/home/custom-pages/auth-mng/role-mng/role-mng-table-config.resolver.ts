@@ -65,7 +65,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       this.userLevel = userLevel
       if (userLevel === 3) {
         this.config.columns.splice(5, 0, new EntityTableColumn<Role>('operationType', this.translate.instant('auth-mng.whether-sys-role'), '80px', () => (''),
-        () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
+        () => ({ textAlign: 'center' }), false, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
           this.roleMngService.switchSysRole({id: entity.id + '', operationType: flag ? 1 : 0}).subscribe();
         }));
       }
