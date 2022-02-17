@@ -450,15 +450,17 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 updateInactivityStateIfExpired(ts, deviceId);
             }
         });
+        log.info("系统设备在线状态校正耗时" + (System.currentTimeMillis() - ts));
     }
 
     void fixedAllDeviceState() {
         final long time1 = System.currentTimeMillis();
         List<DeviceId> deviceIds = Lists.newArrayList();
+        List<UUID> deviceUIds = Lists.newArrayList();
         partitionedDevices.forEach((tpi, ids) -> deviceIds.addAll(ids));
         if (!deviceIds.isEmpty()) {
             var timeout = TimeUnit.SECONDS.toMillis(defaultInactivityTimeoutInSec);
-            var deviceUIds = deviceIds.stream().map(DeviceId::getId).collect(Collectors.toList());
+            deviceUIds = deviceIds.stream().map(DeviceId::getId).collect(Collectors.toList());
             var tsKvLatestEntities = this.tsKvLatestRepository.findAllLatestByEntityIds(deviceUIds);
             var map = tsKvLatestEntities.stream().collect(Collectors.toMap(AbstractTsKvEntity::getEntityId, AbstractTsKvEntity::getTs));
             var activeDeviceUIds = tsKvLatestEntities.stream().map(TsKvLatestEntity::getEntityId).collect(Collectors.toList());
@@ -474,7 +476,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 }
             }));
         }
-        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1));
+        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1) + " 共：" + deviceIds.size() + " 处理:" + deviceUIds.size());
     }
 
     void updateInactivityStateIfExpired(long ts, DeviceId deviceId) {

@@ -331,6 +331,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 获得实时监控数据列表-设备全部keyIds
      */
+    @Deprecated
     @ApiOperation(value = "获得实时监控数据列表-设备全部keyIds")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "path")
@@ -346,6 +347,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 获得实时监控数据列表-设备全部keys
      */
+    @Deprecated
     @ApiOperation(value = "获得实时监控数据列表-设备全部keys")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "path")
