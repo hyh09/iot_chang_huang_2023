@@ -456,14 +456,14 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     void fixedAllDeviceState() {
         final long time1 = System.currentTimeMillis();
         List<DeviceId> deviceIds = Lists.newArrayList();
-        List<UUID> deviceUIds = Lists.newArrayList();
+        List<UUID> activeDeviceUIds = Lists.newArrayList();
         partitionedDevices.forEach((tpi, ids) -> deviceIds.addAll(ids));
         if (!deviceIds.isEmpty()) {
             var timeout = TimeUnit.SECONDS.toMillis(defaultInactivityTimeoutInSec);
-            deviceUIds = deviceIds.stream().map(DeviceId::getId).collect(Collectors.toList());
+            var deviceUIds = deviceIds.stream().map(DeviceId::getId).collect(Collectors.toList());
             var tsKvLatestEntities = this.tsKvLatestRepository.findAllLatestByEntityIds(deviceUIds);
             var map = tsKvLatestEntities.stream().collect(Collectors.toMap(AbstractTsKvEntity::getEntityId, AbstractTsKvEntity::getTs));
-            var activeDeviceUIds = tsKvLatestEntities.stream().map(TsKvLatestEntity::getEntityId).collect(Collectors.toList());
+            activeDeviceUIds = tsKvLatestEntities.stream().map(TsKvLatestEntity::getEntityId).collect(Collectors.toList());
             var attributeKvEntities = this.attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, activeDeviceUIds, ACTIVITY_STATE);
             attributeKvEntities.forEach(v -> Optional.ofNullable(map.get(v.getId().getEntityId())).ifPresent(b -> {
                 boolean isActive = (b + timeout) > time1;
@@ -476,7 +476,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 }
             }));
         }
-        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1) + " 共：" + deviceIds.size() + " 处理:" + deviceUIds.size());
+        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1) + " 共：" + deviceIds.size() + " 处理:" + activeDeviceUIds.size());
     }
 
     void updateInactivityStateIfExpired(long ts, DeviceId deviceId) {
