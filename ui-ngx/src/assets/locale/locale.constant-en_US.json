@@ -752,6 +752,7 @@
         "empty-image": "No image",
         "drop-image": "Drop an image or click to select a file to upload.",
         "maximum-upload-file-size": "Maximum upload file size: {{ size }}",
+        "upload-file-suffix": "Supported file suffix: {{suffix}}",
         "cannot-upload-file": "Cannot upload file",
         "settings": "Settings",
         "layout-settings": "Layout settings",
