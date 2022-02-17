@@ -1003,6 +1003,7 @@
     "management": "仪表板管理",
     "margin-required": "边距值必填",
     "maximum-upload-file-size": "文件大小上限：{{size}}",
+    "supported-upload-file-suffix": "支持的文件格式：{{suffix}}",
     "max-columns-count-message": "只允许最多1000列",
     "max-horizontal-margin-message": "只允许50作为最大水平边距值。",
     "max-margin-message": "仅允许50作为最大边距值。",

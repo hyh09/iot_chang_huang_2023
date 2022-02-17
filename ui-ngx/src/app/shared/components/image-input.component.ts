@@ -113,8 +113,17 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
   ngAfterViewInit() {
     this.autoUploadSubscription = this.flow.events$.subscribe(event => {
       if (event.type === 'fileAdded') {
-        const file = (event.event[0] as flowjs.FlowFile).file;
-        if (this.maxSizeByte && this.maxSizeByte < file.size) {
+        const fileObj = event.event[0] as flowjs.FlowFile
+        const file = fileObj.file;
+        if (!this.filterFile(fileObj)) {
+          this.dialog.alert(
+            this.translate.instant('dashboard.cannot-upload-file'),
+            this.translate.instant('dashboard.supported-upload-file-suffix', {suffix: (this.imgSuffix || []).join(' ')})
+          ).subscribe(
+            () => { }
+          );
+          return false;
+        } else if (this.maxSizeByte && this.maxSizeByte < file.size) {
           this.dialog.alert(
             this.translate.instant('dashboard.cannot-upload-file'),
             this.translate.instant('dashboard.maximum-upload-file-size', {size: this.fileSize.transform(this.maxSizeByte)})
@@ -177,6 +186,14 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
       return { accept: this.imgSuffix.map((suffix) => '.' + suffix).join(',') };
     } else {
       return { accept: 'image/*' };
+    }
+  }
+
+  private filterFile(file: flowjs.FlowFile): boolean {
+    if (this.imgSuffix) {
+      return this.imgSuffix.includes(file.getExtension());
+    } else {
+      return true;
     }
   }
 }
