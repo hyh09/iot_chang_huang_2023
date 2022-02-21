@@ -153,8 +153,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
         // 暂时新增设备active和ts_lasted遍历，修改active值 todo delete
         scheduledFixedExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("device-state-fixed-scheduled")));
-        scheduledFixedExecutor.scheduleAtFixedRate(this::fixedAllDeviceState, new Random().nextInt(defaultStateCheckIntervalInSec), defaultStateCheckIntervalInSec, TimeUnit.SECONDS);
-
+        scheduledFixedExecutor.scheduleAtFixedRate(this::fixedAllDeviceState, new Random().nextInt(Math.max(defaultStateCheckIntervalInSec * 6, 120)), defaultStateCheckIntervalInSec, TimeUnit.SECONDS);
     }
 
     @PreDestroy
