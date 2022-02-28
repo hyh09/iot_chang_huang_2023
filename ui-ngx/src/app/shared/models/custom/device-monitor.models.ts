@@ -77,11 +77,25 @@ export interface DeviceProp {
   dictDataId?: string;
   title: string;
   unit: string;
+  chartId?: string;
+  attributeNames?: string[];
+}
+
+export interface DeviceHistoryProp {
+  isShowChart: false;
+  name: string;
+  title: string;
+  tsKvs: {
+    ts: number;
+    value: string;
+  }[];
+  unit: string;
 }
 
 export interface DevicePropHistory {
-  isShowChart: boolean;
-  propertyVOList: DeviceProp[];
+  enable?: boolean;
+  name?: boolean;
+  properties?: DeviceHistoryProp[];
 }
 
 export interface DevicePropGroup {

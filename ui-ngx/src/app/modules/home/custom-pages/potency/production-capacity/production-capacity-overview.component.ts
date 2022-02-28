@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
@@ -12,11 +13,14 @@ import { differenceInCalendarDays } from 'date-fns';
 export class ProductionCapacityOverviewComponent extends EntityTableHeaderComponent<DeviceCapacity> {
 
   today = new Date();
+  isHistory:boolean = false;
 
   constructor(
-    protected store: Store<AppState>
+    protected store: Store<AppState>,
+    public router: Router
   ) {
     super(store);
+    this.isHistory = this.router.url.indexOf('history') > -1;
   }
 
   disabledDate = (current: Date): boolean => {

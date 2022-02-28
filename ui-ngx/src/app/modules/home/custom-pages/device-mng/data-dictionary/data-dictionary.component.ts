@@ -33,6 +33,7 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
         type: [entity ? entity.type : null, Validators.required],
         unit: [entity ? entity.unit : ''],
         comment: [entity ? entity.comment : ''],
+        iconStyle: [entity ? (entity.icon ? 0 : (entity.picture ? 1 : 0)) : 0],
         icon: [entity ? entity.icon : ''],
         picture: [{
           value: entity ? entity.picture : '',
@@ -44,6 +45,18 @@ export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
 
   updateForm(entity: DataDictionary) {
     this.entityForm.patchValue(entity);
+    this.entityForm.patchValue({
+      iconStyle: entity ? (entity.icon ? 0 : (entity.picture ? 1 : 0)) : 0
+    });
+  }
+
+  onChangeIconStyle(iconStyle: number) {
+    if (iconStyle === 0) {
+      this.entityForm.get('picture').setValue('');
+    } else if (iconStyle === 1) {
+      this.entityForm.get('icon').setValue('');
+    }
+    this.entityForm.updateValueAndValidity();
   }
 
 }

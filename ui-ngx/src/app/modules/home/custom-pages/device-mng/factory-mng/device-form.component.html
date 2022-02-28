@@ -29,7 +29,11 @@
             (click)="$event.stopPropagation()"
             style="width: 250px;"
           >
-            <nz-option *ngFor="let option of deviceDictionaries" [nzLabel]="option.name" [nzValue]="option.id"></nz-option>
+            <nz-option
+              *ngFor="let option of deviceDictionaries"
+              [nzLabel]="option.name && option.model ? (option.name + ' (' + option.model + ')') : option.name"
+              [nzValue]="option.id"
+            ></nz-option>
           </nz-select>
         </mat-panel-description>
       </mat-expansion-panel-header>
@@ -84,6 +88,11 @@
             {{ 'device-mng.device-model' | translate }}{{ 'common.colon' | translate }}{{ entityForm.get('fileName').value || ('common.none' | translate) }}
           </label>
         </div>
+        <tb-image-input
+          label="{{ 'device-mng.logo' | translate }}"
+          maxSizeByte="524288"
+          formControlName="icon"
+        ></tb-image-input>
         <fieldset [fxShow]="!!entityForm.get('dictDeviceId').value" [disabled]="true">
           <!--设备属性-->
           <ng-container *ngIf="devicePropFormArray().controls.length > 0">

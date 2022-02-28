@@ -13,6 +13,9 @@ import { RoleMngService } from "@app/core/http/custom/role-mng.service";
 import { MatDialog } from "@angular/material/dialog";
 import { UserMngChangePwdComponent } from "./user-mng-change-pwd.component";
 import { UtilsService } from "@app/core/public-api";
+import { select, Store } from "@ngrx/store";
+import { AppState } from '@core/core.state';
+import { selectUserDetails } from "@app/core/auth/auth.selectors";
 
 @Injectable()
 export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<UserInfo>>  {
@@ -21,13 +24,20 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
 
   factoryId: string;
 
+  userLevel$ = this.store.pipe(
+    select(selectUserDetails),
+    map((user) => (user.userLevel))
+  );
+  userLevel: number;
+
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
     private userMngService: UserMngService,
     private roleMngService: RoleMngService,
     public dialog: MatDialog,
-    private utils: UtilsService
+    private utils: UtilsService,
+    private store: Store<AppState>
   ) {
     this.config.entityType = EntityType.USER_MNG;
     this.config.entityComponent = UserMngComponent;
@@ -42,17 +52,6 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
       availableCode: '',
       roleList: []
     }
-
-    this.config.columns.push(
-      new EntityTableColumn<UserInfo>('userCode', 'auth-mng.user-code', '33.333333%'),
-      new EntityTableColumn<UserInfo>('userName', 'auth-mng.user-name', '33.333333%'),
-      new EntityTableColumn<UserInfo>('phoneNumber', 'auth-mng.phone-number', '200px'),
-      new EntityTableColumn<UserInfo>('email', 'auth-mng.email', '33.333333%'),
-      new EntityTableColumn<UserInfo>('activeStatus', 'auth-mng.active-status', '100px', ({activeStatus}) => {
-        return activeStatus === '0' ? this.translate.instant('auth-mng.off') : activeStatus === '1' ? this.translate.instant('auth-mng.on') : '';
-      }),
-      new DateEntityTableColumn<UserInfo>('createdTime', 'common.created-time', this.datePipe, '150px')
-    );
   }
 
   resolve(route: ActivatedRouteSnapshot): EntityTableConfig<UserInfo> {
@@ -67,7 +66,7 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     if (route.params.factoryId) {
       this.factoryId = route.params.factoryId;
       this.config.componentsData.factoryId = this.factoryId;
-      this.config.tableTitle = `${route.queryParams.factoryName}: ${this.translate.instant('device-mng.factory-manager')}`;
+      this.config.tableTitle = `${decodeURIComponent(route.queryParams.factoryName || '')}: ${this.translate.instant('device-mng.factory-manager')}`;
     } else {
       this.factoryId = '';
       this.config.tableTitle = this.translate.instant('auth-mng.user-mng');
@@ -75,13 +74,34 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
         this.config.componentsData.roleList = res;
       });
     }
+
+    this.config.columns = [
+      new EntityTableColumn<UserInfo>('userCode', 'auth-mng.user-code', '33.333333%'),
+      new EntityTableColumn<UserInfo>('userName', 'auth-mng.user-name', '33.333333%'),
+      new EntityTableColumn<UserInfo>('phoneNumber', 'auth-mng.phone-number', '200px'),
+      new EntityTableColumn<UserInfo>('email', 'auth-mng.email', '33.333333%'),
+      new EntityTableColumn<UserInfo>('activeStatus', 'auth-mng.active-status', '100px', ({activeStatus}) => {
+        return activeStatus === '0' ? this.translate.instant('auth-mng.off') : activeStatus === '1' ? this.translate.instant('auth-mng.on') : '';
+      }),
+      new DateEntityTableColumn<UserInfo>('createdTime', 'common.created-time', this.datePipe, '150px')
+    ];
+    this.userLevel$.subscribe(userLevel => {
+      this.userLevel = userLevel
+      if (!this.factoryId && userLevel === 3) {
+        this.config.columns.splice(5, 0, new EntityTableColumn<UserInfo>('operationType', this.translate.instant('auth-mng.whether-sys-user'), '80px', () => (''),
+        () => ({ textAlign: 'center' }), false, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
+          this.userMngService.switchSysUser({id: entity.id.id, operationType: flag ? 1 : 0}).subscribe();
+        }));
+      }
+    });
     
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
+    this.config.deleteEnabled = entity => (!!this.factoryId || this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0));
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('user.add');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+      this.config.detailsReadonly = entity => (!this.factoryId && (!this.utils.hasPermission('action.edit') || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 1)));
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 
@@ -114,11 +134,11 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
 
   configureCellActions(): Array<CellActionDescriptor<UserInfo>> {
     const actions: Array<CellActionDescriptor<UserInfo>> = [];
-    if (this.utils.hasPermission('auth-mng.change-pwd')) {
+    if (this.factoryId || (!this.factoryId && this.utils.hasPermission('auth-mng.change-pwd'))) {
       actions.push({
         name: this.translate.instant('auth-mng.change-pwd'),
         mdiIcon: 'mdi:pwd-key',
-        isEnabled: (entity) => (!!(entity && entity.id && entity.id.id)),
+        isEnabled: (entity) => (!!this.factoryId || !!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.changePwd($event, entity.id.id)
       });
     }
