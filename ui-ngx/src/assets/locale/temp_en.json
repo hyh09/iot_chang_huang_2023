@@ -3659,6 +3659,7 @@
     "version": "Version",
     "guarantee": "guarantee (days)",
     "rated-capacity": "Rated capacity (m/h)",
+    "is-core-device": "Core device",
     "picture": "Device picture",
     "device-model": "Device model",
     "standard-prop": "Standard energy consumption (per meter)",

@@ -70,6 +70,10 @@
             <mat-label translate>device-mng.guarantee</mat-label>
             <input matInput formControlName="warrantyPeriod">
           </mat-form-field>
+          <mat-form-field class="mat-block">
+            <mat-label translate>device-mng.rated-capacity</mat-label>
+            <input matInput formControlName="ratedCapacity">
+          </mat-form-field>
         </fieldset>
         <fieldset [disabled]="!!entityForm.get('dictDeviceId').value">
           <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('dictDeviceId').value">
@@ -77,6 +81,11 @@
             <input matInput formControlName="comment">
           </mat-form-field>
         </fieldset>
+        <div class="tb-container" style="margin-top: 0;">
+          <label class="tb-title">
+            {{ 'device-mng.is-core-device' | translate }}{{ 'common.colon' | translate }}{{ (entityForm.get('coreDevice').value ? 'action.yes' : 'action.no') | translate }}
+          </label>
+        </div>
         <tb-image-input
           label="{{ 'device-mng.picture' | translate }}"
           maxSizeByte="524288"
