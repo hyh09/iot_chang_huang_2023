@@ -51,6 +51,10 @@
           <input matInput formControlName="warrantyPeriod">
         </mat-form-field>
         <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.rated-capacity</mat-label>
+          <input matInput formControlName="ratedCapacity">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
           <mat-label translate>device-mng.comment</mat-label>
           <input matInput formControlName="comment">
         </mat-form-field>
@@ -127,7 +131,7 @@
           ></nz-empty>
         </div>
       </mat-expansion-panel>
-      <!--额定能耗-->
+      <!--标准单位能耗-->
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ 'device-mng.standard-prop' | translate }}</mat-panel-title>
