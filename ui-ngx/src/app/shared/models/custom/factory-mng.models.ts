@@ -35,6 +35,7 @@ export interface WorkShop extends BaseData<WorkShopId>, CommonData {
   title?: string;
   factoryId?: string;
   factoryName?: string;
+  logoImages?: string;
   bgImages?: string;
   rowType: FactoryRowType;
 }
@@ -47,6 +48,7 @@ export interface ProdLine extends BaseData<ProdLineId>, CommonData {
   workshopId?: string;
   workshopName?: string;
   rowType: FactoryRowType;
+  logoImages?: string;
 }
 
 export interface ProdDevice extends BaseData<DeviceId>, CommonData {
@@ -66,8 +68,11 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   model?: string,
   version?: string,
   warrantyPeriod?: string,
+  ratedCapacity?: string,
+  coreDevice?: boolean,
   picture?: string,
   fileName?: string,
+  icon?: string,
   comment?: string,
   standardPropertyList: Array<DeviceData>;
   propertyList?: Array<DeviceProperty>,
@@ -141,6 +146,7 @@ export interface FactoryTreeNodeOptions extends TreeNodeOptions {
   workshopName?: string;
   productionLineId?: string;
   productionLineName?: string;
+  isOnLine?: boolean;
 }
 
 export interface FactoryTreeNodeIds {

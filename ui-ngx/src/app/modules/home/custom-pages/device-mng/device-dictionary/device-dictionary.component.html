@@ -51,9 +51,20 @@
           <input matInput formControlName="warrantyPeriod">
         </mat-form-field>
         <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.rated-capacity</mat-label>
+          <input matInput formControlName="ratedCapacity">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
           <mat-label translate>device-mng.comment</mat-label>
           <input matInput formControlName="comment">
         </mat-form-field>
+        <div style="padding: 0.5em 0;">
+          <mat-label translate style="color: #666; font-size: 13px; font-weight: 400; margin-right: 16px;">device-mng.is-core-device</mat-label>
+          <mat-radio-group formControlName="coreDevice">
+            <mat-radio-button [value]="true">{{ 'action.yes' | translate }}</mat-radio-button>
+            <mat-radio-button [value]="false" style="margin-left: 16px;">{{ 'action.no' | translate }}</mat-radio-button>
+          </mat-radio-group>
+        </div>
         <tb-image-input
           label="{{ 'device-mng.picture' | translate }}"
           maxSizeByte="524288"
@@ -127,7 +138,7 @@
           ></nz-empty>
         </div>
       </mat-expansion-panel>
-      <!--额定能耗-->
+      <!--标准单位能耗-->
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ 'device-mng.standard-prop' | translate }}</mat-panel-title>

@@ -37,7 +37,26 @@
         <mat-label translate>device-mng.comment</mat-label>
         <input matInput formControlName="comment">
       </mat-form-field>
-      <tb-material-icon-select formControlName="icon"></tb-material-icon-select>
+      <mat-radio-group
+        formControlName="iconStyle"
+        style="color: rgba(0, 0, 0, 0.54);display: block;margin-bottom: 10px;"
+      >
+        <mat-radio-button [value]="0" style="margin-right: 16px;">{{ 'icon.select-icon' | translate }}</mat-radio-button>
+        <mat-radio-button [value]="1">{{ 'icon.upload-icon' | translate }}</mat-radio-button>
+      </mat-radio-group>
+      <tb-material-icon-select
+        [fxShow]="entityForm.get('iconStyle').value === 0"
+        formControlName="icon"
+        (onSelect)="onChangeIconStyle(0)"
+      ></tb-material-icon-select>
+      <tb-image-input
+        [fxShow]="entityForm.get('iconStyle').value === 1"
+        maxSizeByte="524288" size="40" [hideEmptyText]="true"
+        formControlName="picture"
+        style="display: block;margin-top: -5px;"
+        [imgSuffix]="['svg']"
+        (onSelect)="onChangeIconStyle(1)"
+      ></tb-image-input> 
     </fieldset>
   </form>
 </div>

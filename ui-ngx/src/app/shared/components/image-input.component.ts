@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { AfterViewInit, Component, forwardRef, Input, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -82,6 +82,15 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
   @Input()
   inputId = this.utils.guid();
 
+  @Input()
+  size = 100;
+
+  @Input()
+  hideEmptyText = false;
+
+  @Output()
+  onSelect: EventEmitter<any> = new EventEmitter<any>();
+
   imageUrl: string;
   safeImageUrl: SafeUrl;
 
@@ -104,8 +113,17 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
   ngAfterViewInit() {
     this.autoUploadSubscription = this.flow.events$.subscribe(event => {
       if (event.type === 'fileAdded') {
-        const file = (event.event[0] as flowjs.FlowFile).file;
-        if (this.maxSizeByte && this.maxSizeByte < file.size) {
+        const fileObj = event.event[0] as flowjs.FlowFile
+        const file = fileObj.file;
+        if (!this.filterFile(fileObj)) {
+          this.dialog.alert(
+            this.translate.instant('dashboard.cannot-upload-file'),
+            this.translate.instant('dashboard.supported-upload-file-suffix', {suffix: (this.imgSuffix || []).join(' ')})
+          ).subscribe(
+            () => { }
+          );
+          return false;
+        } else if (this.maxSizeByte && this.maxSizeByte < file.size) {
           this.dialog.alert(
             this.translate.instant('dashboard.cannot-upload-file'),
             this.translate.instant('dashboard.maximum-upload-file-size', {size: this.fileSize.transform(this.maxSizeByte)})
@@ -123,6 +141,7 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
           }
         };
         reader.readAsDataURL(file);
+        this.onSelect.emit();
       }
     });
   }
@@ -164,9 +183,17 @@ export class ImageInputComponent extends PageComponent implements AfterViewInit,
   //添加方法：获取允许的图片格式
   getAcceptImg() {
     if (this.imgSuffix) {
-      return { accept: this.imgSuffix.map((suffix) => 'image/' + suffix).join(',') };
+      return { accept: this.imgSuffix.map((suffix) => '.' + suffix).join(',') };
     } else {
       return { accept: 'image/*' };
+    }
+  }
+
+  private filterFile(file: flowjs.FlowFile): boolean {
+    if (this.imgSuffix) {
+      return this.imgSuffix.includes(file.getExtension());
+    } else {
+      return true;
     }
   }
 }

@@ -163,8 +163,17 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
     this.autoUploadSubscription = this.flow.events$.subscribe(event => {
       if (event.type === 'filesAdded') {
         const files = (event.event[0] as flowjs.FlowFile[]);
+        const suffixInvalid = files.filter(file => (!this.filterFile(file))).length > 0;
         const sizeOverLimit = files.filter(file => (this.maxSizeByte && this.maxSizeByte < file.size)).length > 0;
-        if (sizeOverLimit) {
+        if (suffixInvalid) {
+          this.dialog.alert(
+            this.translate.instant('dashboard.cannot-upload-file'),
+            this.translate.instant('dashboard.supported-upload-file-suffix', {suffix: (this.allowedExtensions.split(',') || []).join(' ')})
+          ).subscribe(
+            () => { }
+          );
+          return false;
+        } else if (sizeOverLimit) {
           this.dialog.alert(
             this.translate.instant('dashboard.cannot-upload-file'),
             this.translate.instant('dashboard.maximum-upload-file-size', {size: this.fileSize.transform(this.maxSizeByte)})
@@ -240,7 +249,7 @@ export class FileInputComponent extends PageComponent implements AfterViewInit, 
 
   private filterFile(file: flowjs.FlowFile): boolean {
     if (this.allowedExtensions) {
-      return this.allowedExtensions.split(',').indexOf(file.getExtension()) > -1;
+      return this.allowedExtensions.split(',').includes(file.getExtension());
     } else {
       return true;
     }

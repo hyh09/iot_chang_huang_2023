@@ -34,6 +34,11 @@ export class PotencyService {
     return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacity${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 查询设备产量历史列表
+  public getDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<DeviceCapacityList> {
+    return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+  }
+
   // 获取能耗分析表头
   public getEnergyConsumptionTableHeader(config?: RequestConfig): Observable<string[]> {
     return this.http.get<string[]>(`/api/pc/efficiency/queryEntityByKeysHeader`, defaultHttpOptionsFromConfig(config));
@@ -72,8 +77,8 @@ export class PotencyService {
   }
 
   // 获取设备运行状态
-  public getDeviceRunningState(params: { deviceId: string; keyNames: string[], startTime: number; endTime: number; }, config?: RequestConfig): Observable<RunningState> {
-    return this.http.post<RunningState>(`/api/pc/efficiency/queryTheRunningStatusByDevice`, params, defaultHttpOptionsFromConfig(config));
+  public getDeviceRunningState(params: { deviceId: string; attributeParameterList: DeviceProp[], startTime: number; endTime: number; }, config?: RequestConfig): Observable<RunningState[]> {
+    return this.http.post<RunningState[]>(`/api/pc/efficiency/queryTheRunningStatusByDevice`, params, defaultHttpOptionsFromConfig(config));
   }
 
 }
