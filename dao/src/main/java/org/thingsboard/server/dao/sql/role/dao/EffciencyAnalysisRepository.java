@@ -247,23 +247,25 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         StringBuffer  sql = new StringBuffer();
         StringBuffer  sonSql01 = new StringBuffer();
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
-        sql.append(" select h1.date,h1.entity_id,d1.name,h1.water_added_value,h1.gas_added_value,h1.electric_added_value  ")
+        sql.append(" select h1.date,h1.entity_id,d1.name,h1.water_added_value,h1.gas_added_value,h1.electric_added_value,h1.capacity_added_value  ")
                 .append(" from  hs_statistical_data h1 ,device d1")
                 .append("  where h1.entity_id =d1.id  ")
                 .append(" and h1.\"date\" =:todayDate")
                 .append(sonSql01);
-        KeyTitleEnums  enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
-        if(enums == KeyTitleEnums.key_water)
-        {
-          sql.append(" ORDER BY h1.water_added_value ");
-        }
-        if(enums == KeyTitleEnums.key_cable)
-        {
-            sql.append(" ORDER BY h1.electric_added_value  ");
-        }
-        if(enums == KeyTitleEnums.key_gas)
-        {
-            sql.append(" ORDER BY h1.gas_added_value ");
+        if(vo.getType().equals("0")){
+            sql.append(" and  d1.flg = true");
+            sql.append(" ORDER BY h1.capacity_added_value DESC ");
+        }else {
+            KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+            if (enums == KeyTitleEnums.key_water) {
+                sql.append(" ORDER BY h1.water_added_value DESC ");
+            }
+            if (enums == KeyTitleEnums.key_cable) {
+                sql.append(" ORDER BY h1.electric_added_value DESC  ");
+            }
+            if (enums == KeyTitleEnums.key_gas) {
+                sql.append(" ORDER BY h1.gas_added_value DESC ");
+            }
         }
         sql.append("  LIMIT 10 ");
         List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_02");

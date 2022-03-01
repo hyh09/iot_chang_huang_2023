@@ -561,6 +561,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo) {
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryTodayEffceency(vo);
+        log.info("打印查询的入参{}",vo);
+        log.info("打印查询的结果{}",entities);
       return    dataVoToResultEnergyTopTenVo(entities,vo);
 
     }
@@ -835,22 +837,24 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             return  new ArrayList<>();
         }
-        KeyTitleEnums  enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+           KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
         return    entities.stream().map(m1 ->{
             ResultEnergyTopTenVo  vo1= new ResultEnergyTopTenVo();
             vo1.setDeviceId(m1.getEntityId());
             vo1.setDeviceName(m1.getDeviceName());
-            if(enums == KeyTitleEnums.key_water)
-            {
-                vo1.setValue(StringUtils.isNotEmpty(m1.getWaterAddedValue())?m1.getWaterAddedValue():"0");
-            }
-            if(enums == KeyTitleEnums.key_cable)
-            {
-                vo1.setValue(StringUtils.isNotEmpty(m1.getElectricAddedValue())?m1.getElectricAddedValue():"0");
-            }
-            if(enums == KeyTitleEnums.key_gas)
-            {
-                vo1.setValue(StringUtils.isNotEmpty(m1.getGasAddedValue())?m1.getGasAddedValue():"0");
+            if(vo.getType().equals("0")){
+                vo1.setValue(StringUtils.isNotEmpty(m1.getCapacityAddedValue()) ? m1.getCapacityAddedValue() : "0");
+            }else {
+
+                if (enums == KeyTitleEnums.key_water) {
+                    vo1.setValue(StringUtils.isNotEmpty(m1.getWaterAddedValue()) ? m1.getWaterAddedValue() : "0");
+                }
+                if (enums == KeyTitleEnums.key_cable) {
+                    vo1.setValue(StringUtils.isNotEmpty(m1.getElectricAddedValue()) ? m1.getElectricAddedValue() : "0");
+                }
+                if (enums == KeyTitleEnums.key_gas) {
+                    vo1.setValue(StringUtils.isNotEmpty(m1.getGasAddedValue()) ? m1.getGasAddedValue() : "0");
+                }
             }
             return  vo1;
         }).collect(Collectors.toList());

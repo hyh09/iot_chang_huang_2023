@@ -68,6 +68,8 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   model?: string,
   version?: string,
   warrantyPeriod?: string,
+  ratedCapacity?: string,
+  coreDevice?: boolean,
   picture?: string,
   fileName?: string,
   icon?: string,

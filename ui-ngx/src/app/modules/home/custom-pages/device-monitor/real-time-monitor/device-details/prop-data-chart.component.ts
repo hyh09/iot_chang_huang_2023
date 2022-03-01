@@ -72,7 +72,7 @@ export class PropDataChartComponent implements AfterViewInit, OnChanges {
     const minInterval = latestTime - earliestTime < 600000 ? 10000 : 600000;
     const option = {
       title: {
-        text: `${this.translate.instant('device-monitor.real-time-data-chart')}${this.data.name ? ` - ${this.data.name}` : ''}`,
+        text: `${this.data.name || this.translate.instant('device-monitor.real-time-data-chart')}`,
         subtext: unit ? this.translate.instant('device-monitor.prop-unit', { unit }) : '',
         left: -5,
         textStyle: {

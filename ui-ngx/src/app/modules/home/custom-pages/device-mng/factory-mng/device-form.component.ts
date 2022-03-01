@@ -79,6 +79,8 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       supplier: [entity ? entity.supplier : ''],
       model: [entity ? entity.model : ''],
       warrantyPeriod: [entity ? entity.version : ''],
+      ratedCapacity: [entity ? entity.ratedCapacity: ''],
+      coreDevice: [!!(entity && entity.coreDevice)],
       version: [entity ? entity.version : ''],
       standardPropertyList: this.fb.array(standardPropControls),
       propertyList: this.fb.array(propertyListControls),
