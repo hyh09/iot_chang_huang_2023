@@ -10,6 +10,7 @@ import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.bodrd.TodaySectionHistoryVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
 import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
@@ -139,6 +140,13 @@ public interface EfficiencyStatisticsSvc {
      *  app 和 看板 共用
      */
     ResultHomeCapAppVo queryThreePeriodsCapacity(TsSqlDayVo  vo);
+
+    /**
+     * 今日 总产能（区间内), 历史产能
+     * @param vo
+     * @return
+     */
+    TodaySectionHistoryVo todaySectionHistory(TsSqlDayVo vo);
 
     /***********
      * 今天 昨天 历史 的能耗 【APP端】

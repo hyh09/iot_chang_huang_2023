@@ -5,8 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceHoursVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.dao.sql.trendChart.dao.EnergyChartDao;
 import org.thingsboard.server.dao.sql.trendChart.entity.EnergyChartEntity;
@@ -15,9 +18,10 @@ import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 import org.thingsboard.server.dao.util.sql.jpa.BaseSQLServiceImpl;
 
-import java.util.List;
-import java.util.UUID;
-/**	
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
   创建时间: 2021-12-27 13:29:55	
   创建人: HU.YUNHUI	
   描述: 【当天的产能能耗的增量数据和当天历史数据】 对应的service	
@@ -28,8 +32,11 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
 	
   	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-
-    private  final  String ZERO="0";
+    private final String ZERO="0";
+    private final String ONE="1";
+    private final String TWO="2";
+    private final String THREE="3";
+    private final Double ZERO_DOUBLE= 0.0;
 
 
 
@@ -245,7 +252,77 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
         return  entityNew;
     }
 
+    /**
+     * 查询设备每小时产量历史
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public List<CapacityDeviceHoursVo> getDeviceCapacity(UUID deviceId, long startTime, long endTime,String type,String keyNum){
+        List<CapacityDeviceHoursVo> resultList = new ArrayList<>();
+        List<EnergyChartEntity> energyChartEntityList = dao.queryAllByEntityIdAndBetweenDate(deviceId, startTime, endTime);
+        Map<String, Double> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(energyChartEntityList)){
+            for (EnergyChartEntity entity:energyChartEntityList) {
+                //时间
+                String dateAndHours = getDateAndHours(entity.getTs());
+                //产能/能耗
+                Double capacityOrEnergy = ZERO_DOUBLE;
 
+                if(ZERO.equals(type)){
+                    //产量
+                    capacityOrEnergy = this.getStringToDouble(entity.getCapacityAddedValue());
+                }else if(ONE.equals(type)){
+                    //能耗
+                    switch (keyNum){
+                        case ONE:
+                            //水
+                            capacityOrEnergy = this.getStringToDouble(entity.getWaterAddedValue());
+                            break;
+                        case TWO:
+                            //电
+                            capacityOrEnergy = this.getStringToDouble(entity.getElectricAddedValue());
+                            break;
+                        case THREE:
+                            //气
+                            capacityOrEnergy = this.getStringToDouble(entity.getGasAddedValue());
+                            break;
+                    }
+                }
+                if(map.containsKey(dateAndHours)){
+                    //取出相同时间区间的产能
+                    Double capacityAddedValueFromMap = map.get(dateAndHours);
+                    map.put(dateAndHours,capacityAddedValueFromMap + capacityOrEnergy);
+                }else {
+                    map.put(dateAndHours,capacityOrEnergy);
+                }
+            }
+        }
+        if(map != null){
+            for(Map.Entry<String,Double> entry : map.entrySet()){
+                resultList.add(new CapacityDeviceHoursVo(entry.getKey() +":00",entry.getValue()));
+            }
+        }
 
+        return resultList;
+    }
+
+    private Double getStringToDouble(String capacityAddedValue){
+        if(StringUtils.isNotEmpty(capacityAddedValue)){
+            return Double.parseDouble(capacityAddedValue);
+        }
+        return 0.0;
+    }
+
+    /**
+     * 获取日期加小时
+     * @param time
+     * @return
+     */
+    private String getDateAndHours(long time){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH");
+        return sdf.format(new Date(Long.parseLong(String.valueOf(time))));
+    }
 
 }	
