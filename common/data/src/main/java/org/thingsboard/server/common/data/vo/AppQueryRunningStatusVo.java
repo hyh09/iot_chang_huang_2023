@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +29,10 @@ public class AppQueryRunningStatusVo {
     @ApiModelProperty("设备id UUID类型")
     private UUID deviceId;
 
-    @ApiModelProperty("所属属性的name;")
-    List<String> keyNames;
+    @ApiModelProperty("参数列表;")
+    List<DictDeviceDataVo> attributes;
+
+
 
     @ApiModelProperty("分页的大小;")
    private   int pageSize=3;

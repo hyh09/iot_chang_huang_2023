@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
-import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 

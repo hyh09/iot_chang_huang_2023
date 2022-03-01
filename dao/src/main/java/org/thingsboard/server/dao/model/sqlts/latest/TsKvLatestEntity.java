@@ -61,8 +61,15 @@ import java.util.UUID;
                 query = SearchTsKvLatestRepository.FIND_ALL_BY_ENTITY_ID_QUERY,
                 resultSetMapping = "tsKvLatestFindMapping",
                 resultClass = TsKvLatestEntity.class
+        ),
+        @NamedNativeQuery(
+                name = SearchTsKvLatestRepository.FIND_ALL_BY_ENTITY_ID_KEY,
+                query = SearchTsKvLatestRepository.FIND_ALL_BY_ENTITY_ID_AND_KEY_QUERY,
+                resultSetMapping = "tsKvLatestFindMapping",
+                resultClass = TsKvLatestEntity.class
         )
 })
+
 public final class TsKvLatestEntity extends AbstractTsKvEntity {
 
     @Override
@@ -71,6 +78,11 @@ public final class TsKvLatestEntity extends AbstractTsKvEntity {
     }
 
     public TsKvLatestEntity() {
+    }
+
+    public TsKvLatestEntity(UUID entityId, Long ts) {
+        this.entityId = entityId;
+        this.ts = ts;
     }
 
     public TsKvLatestEntity(UUID entityId, Integer key, String strKey, String strValue, Boolean boolValue, Long longValue, Double doubleValue, String jsonValue, Long ts) {

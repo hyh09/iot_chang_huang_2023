@@ -8,7 +8,7 @@ package org.thingsboard.server.common.data.vo.enums;
  **/
 
 public enum  EfficiencyEnums {
-    CAPACITY_001("产能"), //产能
+    CAPACITY_001("产量"), //产能
     ENERGY_002("能耗"),//能耗
 
 

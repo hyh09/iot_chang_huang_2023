@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
 //import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
@@ -195,7 +196,14 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
 
         sql.append("select cast(t1.id as varchar(255)) as id ,t1.phone_number as phoneNumber, t1.active_status as activeStatus,t1.user_code as userCode ,t1.user_creator as userCreator," +
                 "   cast(t1.created_time as varchar(255))  as time, t1.email as email, t1.authority as authority, cast(t1.tenant_id as varchar(255)) as tenantId ,t1.user_name as userName  " +
-                "from  tb_user  t1  where  1=1  and t1.user_level=0  ");
+                "from  tb_user  t1  where  1=1  ");
+        if(vo.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()
+                || vo.getUserLevel() == UserLeveEnums.USER_SYSTEM_ADMIN.getCode()
+                || vo.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()
+          )
+        {
+            sql.append(" and t1.user_level in (0,4) ");
+        }
 
        StringBuffer whereSql  = new StringBuffer();
         if(vo.getRoleId() != null)

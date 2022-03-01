@@ -25,7 +25,9 @@ export const environment = {
   tbVersion: TB_VERSION,
 // @ts-ignore
   supportedLangs: SUPPORTED_LANGS,
-  defaultLang: 'zh_CN'
+  defaultLang: 'zh_CN',
+  loginPlatform: 0,
+  factoryId: ''
 };
 
 /*
