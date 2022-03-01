@@ -59,7 +59,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       version: [entity ? entity.version : ''],
       warrantyPeriod: [entity ? entity.version : ''],
       ratedCapacity: [entity ? entity.ratedCapacity : ''],
-      coreDevice: [!!(entity && entity.coreDevice)],
+      isCore: [!!(entity && entity.isCore)],
       comment: [entity ? entity.comment : ''],
       picture: [{
         value: entity ? entity.picture : '',

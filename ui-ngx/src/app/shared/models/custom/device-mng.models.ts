@@ -73,7 +73,7 @@ export interface DeviceDictionary extends BaseData<DeviceDictionaryId> {
   version: string;
   warrantyPeriod: string;
   ratedCapacity: string;
-  coreDevice: boolean;
+  isCore: boolean;
   picture: string;
   deviceModel: File;
   fileId: string;
