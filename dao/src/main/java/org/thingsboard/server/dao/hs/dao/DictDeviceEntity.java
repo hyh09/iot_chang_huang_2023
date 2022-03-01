@@ -2,19 +2,18 @@ package org.thingsboard.server.dao.hs.dao;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.model.ToData;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -103,6 +102,18 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
     @Column(name = HsModelConstants.DICT_DEVICE_IS_DEFAULT)
     private Boolean isDefault;
 
+    /**
+     * 是否核心
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_IS_CORE)
+    private Boolean isCore;
+
+    /**
+     * 额定产能
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_RATED_CAPACITY)
+    private String ratedCapacity;
+
     public DictDeviceEntity() {
     }
 
@@ -142,10 +153,15 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         this.comment = common.getComment();
         this.icon = common.getIcon();
         this.picture = common.getPicture();
-        if (this.isDefault != null)
+        if (common.getIsDefault() != null)
             this.isDefault = common.getIsDefault();
         else
             this.isDefault = Boolean.FALSE;
+        if (common.getIsCore() != null)
+            this.isCore = common.getIsCore();
+        else
+            this.isCore = Boolean.FALSE;
+        this.ratedCapacity = common.getRatedCapacity().stripTrailingZeros().toPlainString();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -170,6 +186,8 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         common.setIcon(icon);
         common.setPicture(picture);
         common.setIsDefault(isDefault);
+        common.setIsCore(isCore);
+        common.setRatedCapacity(new BigDecimal(ratedCapacity));
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);
