@@ -1,10 +1,11 @@
-package org.thingsboard.server.dao.sql.trendChart.dao;	
-	
+package org.thingsboard.server.dao.sql.trendChart.dao;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.thingsboard.server.dao.sql.trendChart.entity.EnergyChartEntity;
 import org.thingsboard.server.dao.util.sql.BaseSqlDao;
 
+import java.util.List;
 import java.util.UUID;
 	
 	
@@ -18,6 +19,8 @@ public interface EnergyChartDao extends BaseSqlDao<EnergyChartEntity,UUID> {
 
     @Query(value = "select t  from  EnergyChartEntity t  where t.entityId= :entityId AND t.ts = :ts")
     EnergyChartEntity queryAllByEntityIdAndDate(@Param("entityId") UUID entityId, @Param("ts") Long ts);
-	
+
+    @Query(value = "select t  from  EnergyChartEntity t  where t.entityId= :entityId AND t.ts between :statrtTime AND :endTime ORDER BY ts ASC")
+    List<EnergyChartEntity> queryAllByEntityIdAndBetweenDate(@Param("entityId") UUID entityId, @Param("statrtTime") Long statrtTime, @Param("endTime") Long endTime);
 	
 }	

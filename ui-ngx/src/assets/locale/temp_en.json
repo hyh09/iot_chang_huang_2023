@@ -3911,7 +3911,12 @@
     "total-energy-consumption": "Total: ",
     "go-to-history": "View history",
     "created-time": "Reporting time",
-    "property": "Parameter"
+    "property": "Parameter",
+    "today-energy-consumption-top10": "Today ranking of device energy consumption",
+    "today-capacity-top10": "Today ranking of device output",
+    "water": "Water (T)",
+    "electricity": "Electricity (KWH)",
+    "gas": "Gas (T)"
   },
   "order": {
     "order-form-mng": "Order management",

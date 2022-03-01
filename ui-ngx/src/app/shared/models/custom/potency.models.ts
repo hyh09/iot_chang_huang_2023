@@ -34,3 +34,12 @@ export interface RunningState {
     }[];
   }[];
 }
+
+export interface PotencyTop10Item {
+  deviceId: string;
+  deviceName: string;
+  value: string;
+  percent?: number;
+}
+
+export type PotencyTop10 = PotencyTop10Item[];

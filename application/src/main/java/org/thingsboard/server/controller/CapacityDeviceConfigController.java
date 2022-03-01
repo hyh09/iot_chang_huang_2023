@@ -6,20 +6,15 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.DeviceInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.device.AppCapacityDeviceVo;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceHoursVo;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
-import org.thingsboard.server.entity.device.dto.DeviceListQry;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +30,7 @@ import java.util.UUID;
 @TbCoreComponent
 @RequestMapping("/api/capacityDevice/")
 public class CapacityDeviceConfigController extends BaseController{
+    private  final  String ONE="1";
 
     @ApiOperation("查询列表接口")
     @RequestMapping(value = "/pageQuery", params = {"pageSize", "page"}, method = RequestMethod.GET)
@@ -71,7 +67,7 @@ public class CapacityDeviceConfigController extends BaseController{
             vo.setDeviceName(deviceName);
             vo.setTenantId(getTenantId().getId());
             log.info("配置入参的:{}",vo);
-            return   deviceService.queryPage(vo,pageLink);
+            return  deviceService.queryPage(vo,pageLink);
         } catch (Exception e) {
             e.printStackTrace();
             log.info("===产能运算配置界面接口查询==>{}",e);
@@ -141,6 +137,27 @@ public class CapacityDeviceConfigController extends BaseController{
            deviceService.updateFlgById(deviceFlg,deviceId);
 
         return "success";
+    }
+
+    @ApiOperation("查询设备时间区间内每小时产量/能耗历史")
+    @RequestMapping(value = "/getDeviceCapacity", method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备id",required = true,paramType = "query"),
+            @ApiImplicitParam(name = "startTime", value = "开始时间",paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间",paramType = "query"),
+            @ApiImplicitParam(name = "type", value = "0【产量】，1【能耗】",paramType = "query"),
+            @ApiImplicitParam(name = "keyNum", value = "1【水】，2【电】，3【气】；",paramType = "query")
+    })
+    @ResponseBody
+    public List<CapacityDeviceHoursVo> getDeviceCapacity(
+            @RequestParam UUID deviceId, @RequestParam long startTime,@RequestParam long endTime,@RequestParam String type,@RequestParam String keyNum
+    ) throws ThingsboardException {
+        checkParameterChinees("deviceId",deviceId);
+        checkParameterChinees("type 0【产量】，1【能耗",type);
+        if(ONE.equals(type)){
+            checkParameterChinees("keyNum 1【水】，2【电】，3【气",keyNum);
+        }
+        return energyChartService.getDeviceCapacity(deviceId,startTime,endTime,type,keyNum);
     }
 
 
