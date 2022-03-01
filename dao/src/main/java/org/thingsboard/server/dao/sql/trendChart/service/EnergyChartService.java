@@ -267,7 +267,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
             for (EnergyChartEntity entity:energyChartEntityList) {
                 //时间
                 String dateAndHours = getDateAndHours(entity.getTs());
-                //产能
+                //产能/能耗
                 Double capacityOrEnergy = ZERO_DOUBLE;
 
                 if(ZERO.equals(type)){
