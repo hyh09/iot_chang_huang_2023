@@ -58,6 +58,7 @@ import org.thingsboard.server.common.data.rule.RuleChainType;
 import org.thingsboard.server.common.data.rule.RuleNode;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
 import org.thingsboard.server.common.transport.service.DefaultTransportService;
@@ -86,6 +87,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
@@ -305,6 +307,7 @@ public abstract class BaseController {
     @Autowired  protected UserLanguageSvc userLanguageSvc;
     @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
+    @Autowired  protected EffciencyAnalysisRepository effciencyAnalysisRepository;
 
 
     @ExceptionHandler(ThingsboardException.class)
@@ -1094,6 +1097,61 @@ public abstract class BaseController {
     public  String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
          String message=   userLanguageSvc.getLanguageByUserLang(enums,getCurrentUser().getTenantId(),new UserId(getCurrentUser().getUuidId()));
         return  message;
+    }
+
+    /***
+     * 设置参数
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public  void setParametersByUserLevel (Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()
+                || securityUser.getUserLevel() == UserLeveEnums.USER_SYSTEM_ADMIN.getCode()
+                || securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()
+        )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+            queryParam.put("userLevelIn",userLeve);
+        }
+    }
+
+
+    /***
+     * 设置参数 普通用户看不到
+     *   租户管理员创建的角色
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public  void setParametersByRoleLevel (Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+            queryParam.put("userLevelList",userLeve);
+        }
+    }
+
+    /***
+     * 设置参数 普通用户看不到
+     *   租户管理员创建的角色
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public   List<Integer>  setParametersByRoleLevel () throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+           return  userLeve;
+        }
+        return  null;
     }
 
 }

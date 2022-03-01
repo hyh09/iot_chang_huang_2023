@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.entity.bo.Image;
 import org.thingsboard.server.dao.hs.entity.enums.EnumGetter;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
@@ -35,6 +36,14 @@ import java.util.stream.Collectors;
  * @since 2021.10.21
  */
 public class CommonUtil {
+
+    /**
+     * 检查图标和图片二选一
+     */
+    public static <T extends Image> void checkImageUpload(T t) throws ThingsboardException {
+        if (StringUtils.isNotBlank(t.getIcon()) && StringUtils.isNotBlank(t.getPicture()))
+            throw new ThingsboardException("图标和图片不可同时指定！", ThingsboardErrorCode.GENERAL);
+    }
 
     /**
      * 单个数据

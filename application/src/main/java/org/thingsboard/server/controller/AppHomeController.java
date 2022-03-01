@@ -131,18 +131,7 @@ public class AppHomeController extends BaseController{
 
 
 
-    private  String getValueByTime(UUID factoryId,long startTime,long EndTime) throws ThingsboardException {
-        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
-        queryTsKvVo.setFactoryId(factoryId);
-        queryTsKvVo.setStartTime(startTime);
-        queryTsKvVo.setEndTime(EndTime);
-        ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
-        if(resultCapAppVo != null)
-        {
-            return  resultCapAppVo.getTotalValue();
-        }
-        return  "0";
-    }
+
 
 
 

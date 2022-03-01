@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.rolevo.RoleBindUserVo;
 import org.thingsboard.server.common.data.vo.user.FindUserVo;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
@@ -102,7 +103,8 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
         }
        List<UUID> userIdInDB= userIdS.stream().map(User::getUuidId).collect(Collectors.toList());
-        relationUserBachByRole(userIdInDB,vo.getTenantSysRoleId());
+        relationUserBachByRole(userIdInDB,roleEntity);
+
         return   ResultVo.getSuccessFul(null);
 
     }
@@ -131,10 +133,20 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
             return ;
         }
         rId.forEach(item ->{
-            UserMenuRoleEntity entity = new UserMenuRoleEntity();
-            entity.setUserId(uuid);
-            entity.setTenantSysRoleId(item);
-            userMenuRoleService.saveEntity(entity);
+            TenantSysRoleEntity  roleEntity=   roleService.findById(item);
+            if(roleEntity != null){
+                UserMenuRoleEntity entity = new UserMenuRoleEntity();
+                entity.setUserId(uuid);
+                entity.setTenantSysRoleId(item);
+                userMenuRoleService.saveEntity(entity);
+                if(roleEntity.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode())
+                {
+                    //租户管理员角色--看成 相对于用户的系统角色
+                    userService.updateLevel(uuid,UserLeveEnums.USER_SYSTEM_ADMIN.getCode());
+                }
+            }
+
+
         });
     }
 
@@ -144,15 +156,21 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
      * 批量绑定 一个角色
      */
     @Transactional
-    public void  relationUserBachByRole(List<UUID> userIds, UUID roleId) {
+    public void  relationUserBachByRole(List<UUID> userIds, TenantSysRoleEntity roleEntity) {
         if(CollectionUtils.isEmpty(userIds)){
             return ;
         }
         userIds.forEach(item ->{
             UserMenuRoleEntity entity = new UserMenuRoleEntity();
             entity.setUserId(item);
-            entity.setTenantSysRoleId(roleId);
+            entity.setTenantSysRoleId(roleEntity.getId());
             userMenuRoleService.saveEntity(entity);
+            if(roleEntity.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode())
+            {
+                //租户管理员角色--看成 相对于用户的系统角色
+                userService.updateLevel(item,UserLeveEnums.USER_SYSTEM_ADMIN.getCode());
+            }
+
         });
     }
 

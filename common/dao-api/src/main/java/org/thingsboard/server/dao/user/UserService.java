@@ -25,6 +25,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,9 @@ public interface UserService {
 
 	int  update(User user);
 
+	UpdateOperationVo updateOperationType(UpdateOperationVo vo);
+
+	int updateLevel(UUID  userId,Integer  level);
 
 
 	UserCredentials findUserCredentialsByUserId(TenantId tenantId, UserId userId);
@@ -92,7 +96,7 @@ public interface UserService {
 
 	int onUserLoginIncorrectCredentials(TenantId tenantId, UserId userId);
 
-	Object findAll(Map<String, Object> queryParam,PageLink pageLink);
+	PageData<User>   findAll(Map<String, Object> queryParam,PageLink pageLink);
 
 	List<User> findAll(Map<String, Object> queryParam);
 

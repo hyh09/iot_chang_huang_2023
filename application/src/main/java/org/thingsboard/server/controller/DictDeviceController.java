@@ -9,10 +9,10 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
@@ -23,8 +23,8 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
-
 import java.util.List;
+import java.util.UUID;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -44,15 +44,12 @@ public class DictDeviceController extends BaseController {
     @Autowired
     DictDeviceService dictDeviceService;
 
-//    @Autowired
-//    DefaultTransportService defaultTransportService;
-
     /**
      * 获得设备字典界面资源
      *
      * @return 字典界面资源
      */
-    @ApiOperation(value = "获得设备字典界面资源")
+    @ApiOperation(value = "设备字典-界面资源")
     @GetMapping("/dict/device/resource")
     public DictDeviceResource listDictDeviceResources() throws ThingsboardException {
         return new DictDeviceResource().setDictDevicePropertyTypeList(CommonUtil.toResourceList(EnumUtils.getEnumList(DictDevicePropertyTypeEnum.class)));
@@ -64,7 +61,7 @@ public class DictDeviceController extends BaseController {
      *
      * @return 可用设备字典编码
      */
-    @ApiOperation(value = "获得当前可用设备字典编码")
+    @ApiOperation(value = "设备字典-可用编码")
     @GetMapping("/dict/device/availableCode")
     public String getAvailableCode() throws ThingsboardException {
         return this.dictDeviceService.getAvailableCode(getTenantId());
@@ -75,7 +72,7 @@ public class DictDeviceController extends BaseController {
      *
      * @return 分组及分组属性
      */
-    @ApiOperation(value = "获得当前默认初始化的分组及分组属性")
+    @ApiOperation(value = "设备字典-默认分组及分组属性")
     @GetMapping("/dict/device/group/initData")
     public List<DictDeviceGroupVO> getGroupInitData() throws ThingsboardException {
         return this.dictDeviceService.getDictDeviceGroupInitData();
@@ -93,7 +90,7 @@ public class DictDeviceController extends BaseController {
      * @param supplier     供应商
      * @return 设备字典列表
      */
-    @ApiOperation(value = "获得设备字典列表")
+    @ApiOperation(value = "设备字典-列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
             @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
@@ -123,22 +120,13 @@ public class DictDeviceController extends BaseController {
     /**
      * 新增或修改设备字典
      */
-    @ApiOperation(value = "新增或修改设备字典")
+    @ApiOperation(value = "设备字典-新增或修改")
     @PostMapping("/dict/device")
     public DictDeviceVO updateOrSaveDictDevice(@RequestBody @Valid DictDeviceVO dictDeviceVO) throws ThingsboardException {
         CommonUtil.checkCode(dictDeviceVO.getCode(), HSConstants.CODE_PREFIX_DICT_DEVICE);
-//        CommonUtil.recursionCheckComponentCode(dictDeviceVO.getComponentList(), new HashSet<>());
-//        CommonUtil.checkDictDeviceGroupVOListHeadIsUnlike(dictDeviceVO.getGroupList(), this.dictDeviceService.getGroupInitData());
         CommonUtil.checkDuplicateName(dictDeviceVO, Sets.newHashSet());
-//        boolean isSave = false;
-//        if (StringUtils.isNotBlank(dictDeviceVO.getId()))
-//            isSave = true;
-        var savedDictDeviceVO = this.dictDeviceService.saveOrUpdateDictDevice(dictDeviceVO, getTenantId());
-//        if (isSave)
-//            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_ADD);
-//        else
-//            this.transportService.publishDeviceDict(getTenantId().toString(), savedDictDeviceVO.getId(), TransportMqttClient.TYPE.POST_DICT_DEVICE_UPDATE);
-        return savedDictDeviceVO;
+        CommonUtil.checkImageUpload(dictDeviceVO);
+        return this.dictDeviceService.saveOrUpdateDictDevice(dictDeviceVO, getTenantId());
     }
 
     /**
@@ -146,7 +134,7 @@ public class DictDeviceController extends BaseController {
      *
      * @param id 设备字典id
      */
-    @ApiOperation(value = "获得设备字典详情")
+    @ApiOperation(value = "设备字典-详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true)})
     @GetMapping("/dict/device/{id}")
@@ -158,7 +146,7 @@ public class DictDeviceController extends BaseController {
     /**
      * 删除设备字典
      */
-    @ApiOperation(value = "删除设备字典")
+    @ApiOperation(value = "设备字典-删除")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true),})
     @DeleteMapping("/dict/device/{id}")
@@ -170,7 +158,7 @@ public class DictDeviceController extends BaseController {
     /**
      * 【不分页】获得设备字典列表
      */
-    @ApiOperation(value = "【不分页】获得设备字典列表")
+    @ApiOperation(value = "设备字典-列表-不分页")
     @GetMapping("/dict/device/all")
     public List<DictDevice> listAllDictDevice() throws ThingsboardException {
         return this.dictDeviceService.listDictDevices(getTenantId());
@@ -179,7 +167,7 @@ public class DictDeviceController extends BaseController {
     /**
      * 【不分页】获得设备字典绑定的部件
      */
-    @ApiOperation(value = "【不分页】获得设备字典绑定的部件")
+    @ApiOperation(value = "设备字典-部件-不分页")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
     @GetMapping("/dict/device/component")
@@ -191,7 +179,7 @@ public class DictDeviceController extends BaseController {
     /**
      * 设置默认设备字典
      */
-    @ApiOperation(value = "设置默认设备字典")
+    @ApiOperation(value = "设备字典-设置默认")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true),})
     @PostMapping("/dict/device/{id}/default")
@@ -201,14 +189,75 @@ public class DictDeviceController extends BaseController {
     }
 
     /**
-     * 【不分页】获得设备字典全部遥测属性
+     * 获得设备字典全部遥测属性-配置下发专用
      */
-    @ApiOperation(value = "【不分页】获得设备字典全部遥测属性")
+    @ApiOperation(value = "设备字典-属性-配置下发专用")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
     @GetMapping("/dict/device/properties")
-    public List<DictDeviceTsPropertyResult> listDictDeviceProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+    public List<DictDeviceTsPropertyResult> listDictDeviceIssueProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        return this.dictDeviceService.listDictDeviceIssueProperties(getTenantId(), toUUID(dictDeviceId));
+    }
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     */
+    @ApiOperation(value = "设备字典-全部属性-不分页")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true),})
+    @GetMapping("/dict/device/all/properties")
+    public List<DictDeviceTsPropertyVO> listDictDeviceProperties(@RequestParam("dictDeviceId") String dictDeviceId) throws ThingsboardException {
         checkParameter("dictDeviceId", dictDeviceId);
         return this.dictDeviceService.listDictDeviceProperties(getTenantId(), toUUID(dictDeviceId));
+    }
+
+    /**
+     * 设备字典-图表-列表
+     */
+    @ApiOperation(value = "设备字典-图表-列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "query", required = true)})
+    @GetMapping("/dict/device/graphs")
+    public List<DictDeviceGraphVO> listDictDeviceGraphs(@RequestParam("dictDeviceId") UUID dictDeviceId) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        return this.dictDeviceService.listDictDeviceGraphs(getTenantId(), dictDeviceId);
+    }
+
+    /**
+     * 设备字典-图表-详情
+     */
+    @ApiOperation(value = "设备字典-图表-详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "graphId", value = "设备字典图表id", paramType = "path", required = true)})
+    @GetMapping("/dict/device/graph/{graphId}")
+    public DictDeviceGraphVO getDictDeviceGraphDetail(@PathVariable("graphId") UUID graphId) throws ThingsboardException {
+        checkParameter("graphId", graphId);
+        return this.dictDeviceService.getDictDeviceGraphDetail(getTenantId(), graphId);
+    }
+
+    /**
+     * 设备字典-图表-新增或修改
+     */
+    @ApiOperation(value = "设备字典-图表-新增或修改")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dictDeviceId", value = "设备字典id", paramType = "path", required = true)})
+    @PostMapping("/dict/device/{dictDeviceId}/graph")
+    public DictDeviceGraphVO updateOrSaveDictDeviceGraph(@PathVariable("dictDeviceId") UUID dictDeviceId, @Valid @RequestBody DictDeviceGraphVO dictDeviceGraphVO) throws ThingsboardException {
+        checkParameter("dictDeviceId", dictDeviceId);
+        var uuid = this.dictDeviceService.updateOrSaveDictDeviceGraph(getTenantId(), dictDeviceId, dictDeviceGraphVO);
+        return this.dictDeviceService.getDictDeviceGraphDetail(getTenantId(), uuid);
+    }
+
+    /**
+     * 设备字典-图表-删除
+     */
+    @ApiOperation(value = "设备字典-图表-删除")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "graphId", value = "设备字典图表id", paramType = "path", required = true)})
+    @DeleteMapping("/dict/device/graph/{graphId}")
+    public void deleteDictDeviceGraph(@PathVariable("graphId") UUID graphId) throws ThingsboardException {
+        checkParameter("graphId", graphId);
+        this.dictDeviceService.deleteDictDeviceGraph(getTenantId(), graphId);
     }
 }

@@ -28,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.thingsboard.server.service.security.exception.AuthMethodNotSupportedException;
 import org.thingsboard.server.service.security.model.UserPrincipal;
 
@@ -70,16 +69,19 @@ public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingF
         try {
             loginRequest = objectMapper.readValue(request.getReader(), LoginRequest.class);
         } catch (Exception e) {
+            log.info("登录请求的Exception：{}",e);
             throw new AuthenticationServiceException("Invalid login request payload");
         }
+        log.info("登录请求的loginRequest：{}",loginRequest);
 
-        if (StringUtils.isBlank(loginRequest.getUsername()) || StringUtils.isBlank(loginRequest.getPassword())) {
+
+       if (StringUtils.isBlank(loginRequest.getUsername()) || StringUtils.isBlank(loginRequest.getPassword())) {
             throw new AuthenticationServiceException("Username or Password not provided");
         }
 
         UserPrincipal principal = new UserPrincipal(UserPrincipal.Type.USER_NAME, loginRequest.getUsername());
 
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal, loginRequest.getPassword());
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal, loginRequest);
         token.setDetails(authenticationDetailsSource.buildDetails(request));
         return this.getAuthenticationManager().authenticate(token);
     }

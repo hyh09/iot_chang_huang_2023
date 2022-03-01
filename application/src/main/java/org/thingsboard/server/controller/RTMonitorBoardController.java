@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 
@@ -29,13 +31,16 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/deviceMonitor/board")
-public class BoardRTMonitorController extends BaseController {
+public class RTMonitorBoardController extends BaseController {
 
     @Autowired
     DeviceMonitorService deviceMonitorService;
 
     @Autowired
     FileService fileService;
+
+    @Autowired
+    ClientService clientService;
 
     /**
      * 报表界面资源
@@ -149,5 +154,14 @@ public class BoardRTMonitorController extends BaseController {
         checkParameter("deviceId", deviceId);
         checkParameter("componentId", componentId);
         return this.deviceMonitorService.getRtMonitorDeviceComponentDetailForBoard(getTenantId(), toUUID(deviceId), toUUID(componentId));
+    }
+
+    /**
+     * 全部设备的在线状态
+     */
+    @ApiOperation(value = "全部设备的在线状态")
+    @GetMapping("/rtMonitor/device/onlineStatus/all")
+    public Map<String, Boolean> getDeviceOnlineStatus() throws ThingsboardException {
+        return this.clientService.getDeviceOnlineStatusMap(getTenantId());
     }
 }

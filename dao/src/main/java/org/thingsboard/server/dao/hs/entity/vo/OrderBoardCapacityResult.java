@@ -36,4 +36,7 @@ public class OrderBoardCapacityResult {
 
     @ApiModelProperty(value = "完成度")
     private BigDecimal completeness;
+
+    @ApiModelProperty(value = "是否超时")
+    private Boolean isOvertime;
 }

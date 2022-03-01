@@ -31,11 +31,7 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.SearchTextEntity;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.UUID;
 
 /**
@@ -95,6 +91,12 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
     @Column(name = ModelConstants.USER_USER_TYPE)
     private  String type;
 
+    /**
+     * 0为默认
+     * 1为工厂管理员角色
+     * 3为租户管理员角色
+     * 4为 用户系统管理员
+     */
     @Column(name = ModelConstants.USER_USER_LEVEL)
     private  int userLevel=0;
 
@@ -103,6 +105,13 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
      */
     @Column(name = ModelConstants.USER_USER_FACTORY_ID)
     private UUID  factoryId;
+
+    /**
+     *  0是默认值  正常逻辑
+     *  1 是只允许修改密码 （不可以编辑修改， 删除)
+     */
+    @Column(name = ModelConstants.USER_OPERATION_TYPE,columnDefinition="varchar(25) default '0'")
+    private  Integer  operationType=0;
 
 
 
@@ -148,6 +157,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
         this.type  = user.getType();
         this.factoryId = user.getFactoryId();
         this.userLevel = user.getUserLevel();
+        this.operationType = user.getOperationType();
 
     }
 
@@ -194,6 +204,7 @@ public class UserEntity extends BaseSqlEntity<User> implements SearchTextEntity<
             user.setType(type);
 
         }
+        user.setOperationType(operationType);
 
         return user;
     }
