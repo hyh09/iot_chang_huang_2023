@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 export class EnergyConsumptionOverviewComponent extends EntityTableHeaderComponent<object> implements AfterViewInit {
 
   today = new Date();
+  keyNum: '1' | '2' | '3' = '1';
   factoryId = '';
   chartData: PotencyTop10 = []
 
@@ -29,7 +30,7 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
     (this.entitiesTableConfig.componentsData.factroryChange$ as BehaviorSubject<string>).subscribe(factoryId => {
       if (factoryId) {
         this.factoryId = factoryId;
-        this.getTop10('1')
+        this.getTop10()
       }
     });
   }
@@ -38,7 +39,7 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
     return differenceInCalendarDays(current, this.today) > 0;
   };
 
-  getTop10(keyNum: '1' | '2' | '3') {
+  getTop10(keyNum: '1' | '2' | '3' = this.keyNum) {
     if (this.factoryId && keyNum) {
       this.potencyService.getTop10({
         factoryId: this.factoryId,

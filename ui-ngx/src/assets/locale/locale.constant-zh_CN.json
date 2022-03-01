@@ -3810,9 +3810,9 @@
     "property": "参数",
     "today-energy-consumption-top10": "今日设备能耗排行",
     "today-capacity-top10": "今日设备产量排行",
-    "water": "水（T）",
-    "electricity": "电（kWh）",
-    "gas": "气（T）"
+    "water": "水 (T)",
+    "electricity": "电 (KWH)",
+    "gas": "气 (T)"
   },
   "order": {
     "order-form-mng": "订单管理",

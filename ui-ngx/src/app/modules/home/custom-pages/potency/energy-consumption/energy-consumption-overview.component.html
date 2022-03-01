@@ -1,7 +1,11 @@
 <div *ngIf="chartData.length > 0" class="top10">
-  <div class="header">
+  <div fxLayout="row" fxLayoutAlign="space-between center" class="header">
     <div class="title">{{ 'potency.today-energy-consumption-top10' | translate }}</div>
-
+    <nz-radio-group [(ngModel)]="keyNum" nzSize="small" (ngModelChange)="getTop10()">
+      <label nz-radio-button nzValue="1">{{ 'potency.water' | translate }}</label>
+      <label nz-radio-button nzValue="2">{{ 'potency.electricity' | translate }}</label>
+      <label nz-radio-button nzValue="3">{{ 'potency.gas' | translate }}</label>
+    </nz-radio-group>
   </div>
   <div class="bar-wrapper">
     <div *ngFor="let item of chartData; let $index = index" class="bar-item">

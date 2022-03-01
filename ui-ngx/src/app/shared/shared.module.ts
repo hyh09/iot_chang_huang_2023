@@ -158,6 +158,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { SlideValidatorComponent } from '@app/modules/home/components/slide-validator/slide-validator.component';
 import { SelectCityComponent } from '@app/modules/home/components/select-city/select-city.component';
 import { SelectCityDialogComponent } from '@app/modules/home/components/select-city/select-city-dialog.component';
@@ -327,7 +328,8 @@ registerLocaleData(zh);
     NzTypographyModule,
     NzInputModule,
     NzIconModule,
-    NzProgressModule
+    NzProgressModule,
+    NzRadioModule
   ],
   exports: [
     FooterComponent,
@@ -431,6 +433,7 @@ registerLocaleData(zh);
     NzInputModule,
     NzIconModule,
     NzProgressModule,
+    NzRadioModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,
