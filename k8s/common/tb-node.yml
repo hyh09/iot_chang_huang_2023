@@ -46,7 +46,7 @@ spec:
       containers:
         - name: server
           imagePullPolicy: Always
-          image: registry.cn-hangzhou.aliyuncs.com/huansi_yl/tb-node:latest
+          image: 47.110.145.204:8084/huansiyl/thingsboard/tb-node:latest
           ports:
             - containerPort: 8080
               name: http

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -42,5 +43,9 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
             "left join  DictDataEntity  h2 on  t.dictDataId =h2.id  where   t1.dictDeviceId =:dictDeviceId   order by t.sort,t1.sort asc")
     List<DictDeviceDataVo> findGroupNameAndName(@Param("dictDeviceId") UUID dictDeviceId);
 
+    @Modifying
+    @Query("delete from DictDeviceGroupPropertyEntity d where d.dictDeviceId = :dictDeviceId and d.id not in :ids")
+    void deleteByDictDeviceAndIdsNotIn(@Param("dictDeviceId") UUID dictDeviceId, @Param("ids") List<UUID> ids);
 
+    Optional<DictDeviceGroupPropertyEntity> findByDictDeviceIdAndNameEquals(UUID dictDeviceId, String name);
 }

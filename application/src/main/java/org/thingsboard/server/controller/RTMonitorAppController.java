@@ -6,8 +6,10 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -23,6 +25,7 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -103,6 +106,34 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
+     * 查询设备详情-遥测属性历史数据图表
+     */
+    @ApiOperation(value = "查询设备详情-遥测属性历史数据图表", notes = "默认当天")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "tsPropertyName", value = "遥测属性名称", paramType = "query", required = true),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query")
+    })
+    @GetMapping("/ts/property/history")
+    public HistoryGraphVO listRTMonitorGroupPropertyHistory(
+            @RequestParam UUID deviceId,
+            @RequestParam String tsPropertyName,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime
+    ) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("tsPropertyName", tsPropertyName);
+        if (StringUtils.isBlank(tsPropertyName))
+            throw new ThingsboardException("属性不能为空", ThingsboardErrorCode.GENERAL);
+        if (startTime == null || startTime == 0)
+            startTime = CommonUtil.getTodayStartTime();
+        if (endTime == null || endTime == 0)
+            endTime = CommonUtil.getTodayCurrentTime();
+        return this.deviceMonitorService.getTsPropertyHistoryGraph(getTenantId(), deviceId, tsPropertyName, startTime, endTime);
+    }
+
+    /**
      * 设备监控-实时监控-查询设备详情-分组属性历史数据
      */
     @ApiOperation(value = "实时监控-查询设备详情-分组属性历史数据", notes = "默认当天")
@@ -121,9 +152,9 @@ public class RTMonitorAppController extends BaseController {
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        if (startTime ==null || startTime ==0)
+        if (startTime == null || startTime == 0)
             startTime = CommonUtil.getTodayStartTime();
-        if (endTime ==null || endTime ==0)
+        if (endTime == null || endTime == 0)
             endTime = CommonUtil.getTodayCurrentTime();
         return this.deviceMonitorService.getGroupPropertyHistory(getTenantId(), deviceId, groupPropertyName, startTime, endTime);
     }
@@ -155,9 +186,9 @@ public class RTMonitorAppController extends BaseController {
     ) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         checkParameter("groupPropertyName", groupPropertyName);
-        if (startTime ==null || startTime ==0)
+        if (startTime == null || startTime == 0)
             startTime = CommonUtil.getTodayStartTime();
-        if (endTime ==null || endTime ==0)
+        if (endTime == null || endTime == 0)
             endTime = CommonUtil.getTodayCurrentTime();
         if (!sortProperty.toLowerCase().contains(HSConstants.TS))
             sortProperty = HSConstants.TS;

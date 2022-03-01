@@ -29,7 +29,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.openjdk.jol.vm.VM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +56,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.config.RedisMessagePublish;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
@@ -73,10 +73,6 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
-import org.thingsboard.server.transport.mqtt.MqttTransportHandler;
-import org.thingsboard.server.transport.mqtt.MqttTransportServerInitializer;
-import org.thingsboard.server.transport.mqtt.MqttTransportService;
-import org.thingsboard.server.transport.mqtt.util.SpringUtil;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -107,8 +103,7 @@ public class DeviceController extends BaseController {
     private TelemetryController telemetryController;
 
     @Autowired
-    private MqttTransportService mqttTransportService;
-
+    private RedisMessagePublish pub;
 
 
     @ApiOperation("云对接查设备详情")
@@ -1080,20 +1075,13 @@ public class DeviceController extends BaseController {
 
     }
 
+
     @ApiOperation("设备配置下发")
     @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
     @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
     @ResponseBody
     public String deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
         log.info("/deviceIssue设备字典下发"+ new Gson().toJson(deviceIssueDto));
-        //获取Mqtt实例
-       // MqttTransportHandler handler1 = mqttTransportService.getMqttTransportServerInitializer().getHandler();
-        log.info("DeviceController中MqttTransportService地址"+ SpringUtil.getBean(MqttTransportService.class));
-        MqttTransportHandler handler = MqttTransportServerInitializer.handlerMap.get("handler");
-        log.info("缓存取值："+handler.toString());
-        log.info("获取handler实例内存地址：" +VM.current().addressOf(handler));
-        log.info("handler值：" + handler.toString());
-
         //下发入参
         Map mapIssue = new HashMap();
         //设备信息
@@ -1141,23 +1129,12 @@ public class DeviceController extends BaseController {
             mapIssue.put("DRIVER_CONFIG",groupMap);
             //下发网关
             if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
-                for (DeviceIssueDto.DeviceFromIssue fromIssue : deviceIssueDto.getDeviceList()) {
-                    String topic = "device/issue/" + fromIssue.getGatewayId();
-                    if(topic != null ){
-                        log.info("下发网关为：" + topic);
-                        log.info("下发参数为："+ JSONObjectUtils.toJSONString(mapIssue));
-                        String json = JSONObjectUtils.toJSONString(mapIssue);
-                        //发布mqtt消息
-                        if(handler != null){
-                            log.info("调用前：handler：" + handler.toString());
-                            log.info("调用前handler内存地址：" +VM.current().addressOf(handler));
-                            handler.dictIssue(topic,json);
-                            log.info("调用后：handler：" + handler.toString());
-                            log.info("调用后handler内存地址：" +VM.current().addressOf(handler));
-                        }else {
-                            throw new ThingsboardException("下发失败！MqttTransportHandler的实例对象值为空！",ThingsboardErrorCode.FAIL_VIOLATION);
-                        }
-                    }
+                List<String> gatewayIds = deviceIssueDto.getDeviceList().stream().distinct().map(e -> e.getGatewayId()).collect(Collectors.toList());
+                if(!CollectionUtils.isEmpty(gatewayIds)){
+                    Map publishRedisMap = new HashMap<>();
+                    publishRedisMap.put("body",mapIssue);
+                    publishRedisMap.put("topic",gatewayIds);
+                    pub.sendMessage("dictIssue", JSONObjectUtils.toJSONString(publishRedisMap));
                 }
             }
         }

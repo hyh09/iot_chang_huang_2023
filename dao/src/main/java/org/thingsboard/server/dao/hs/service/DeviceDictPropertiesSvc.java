@@ -42,7 +42,7 @@ public interface DeviceDictPropertiesSvc {
     Map<String,DictDeviceGroupPropertyVO> getMapPropertyVoByTitle();
 
     /**
-     * 获取初始化单位数据
+     * 获取初始化Title
      * @return
      */
     Map<String,String> getUnit();

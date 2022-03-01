@@ -56,8 +56,11 @@ import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.enums.RoleEnums;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.common.data.vo.user.enums.OperationTypeEums;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
@@ -144,6 +147,7 @@ public class UserController extends BaseController  {
         try {
             UserId userId = new UserId(toUUID(strUserId));
             User user = checkUserId(userId, Operation.READ);
+
             List<UserMenuRoleEntity> entities =    userMenuRoleService.queryRoleIdByUserId(toUUID(strUserId));
             if(!CollectionUtils.isEmpty(entities))
             {
@@ -159,6 +163,7 @@ public class UserController extends BaseController  {
                     additionalInfo.put("userCredentialsEnabled", true);
                 }
             }
+//            SecurityUser securityUser = getCurrentUser();
             return user;
         } catch (Exception e) {
             throw handleException(e);
@@ -433,16 +438,6 @@ public class UserController extends BaseController  {
         }
     }
 
-
-
-    @RequestMapping("/user/test")
-    @ResponseBody
-    public  String  get()
-    {
-        return "hello world";
-    }
-
-
     @ApiOperation(value = "用户管理界面下的修改密码")
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
@@ -466,13 +461,13 @@ public class UserController extends BaseController  {
          DataValidator.validateCode(user.getUserCode());
         SecurityUser  securityUser =  getCurrentUser();
         log.info("打印当前的管理人的信息:{}",securityUser);
-        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}",securityUser.getFactoryId(),securityUser.getType());
+        log.info("打印当前的管理人的信息工厂id:{},创建者类别{}，用户的等级:{}",securityUser.getFactoryId(),securityUser.getType(),securityUser.getUserLevel());
+
         try {
             if(user.getId() != null){
                 user.setStrId(user.getUuidId().toString());
               return   this.update(user);
             }
-
             UserVo  vo0 = new UserVo();
             vo0.setTenantId(securityUser.getTenantId().getId());
             vo0.setUserCode(user.getUserCode());
@@ -499,6 +494,7 @@ public class UserController extends BaseController  {
                 log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
                 user.setUserLevel(1);
+                user.setOperationType(OperationTypeEums.USER_DEFAULT.getValue());
                 TenantSysRoleEntity  tenantSysRoleEntity= tenantSysRoleService.queryAllByFactoryId(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),tenantId.getId(),user.getFactoryId());
                 List<UUID> roleIds = new ArrayList<>();
                 roleIds.add(tenantSysRoleEntity.getId());
@@ -507,7 +503,10 @@ public class UserController extends BaseController  {
             }else {
                 user.setType(securityUser.getType());
                 user.setFactoryId(securityUser.getFactoryId());
-
+                if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()){
+                    user.setOperationType(OperationTypeEums.ROLE_NON_EDITABLE.getValue());
+                    user.setUserLevel(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());
+                }
 
             }
 
@@ -664,15 +663,12 @@ public class UserController extends BaseController  {
              if (securityUser.getType().equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode())) {
                  log.info("如果当前用户如果是工厂类别的,就查询当前工厂下的数据:{}", securityUser.getFactoryId());
                  queryParam.put("factoryId", securityUser.getFactoryId());
-             }else {
-
-//                 List<UUID>   uuids =  userRoleSvc.getTenantRoleId(getTenantId().getId());
-//                 queryParam.put("notId", uuids);
-
              }
              queryParam.put("type", securityUser.getType());
-             queryParam.put("userLevel",0);
-             return userService.findAll(queryParam, pageLink);
+             queryParam.put("operationType",null);
+             setParametersByUserLevel(queryParam);
+             PageData<User>  userPageData =  userService.findAll(queryParam, pageLink);
+             return  userPageData;
          }catch (Exception  e)
          {
              e.printStackTrace();
@@ -710,6 +706,17 @@ public class UserController extends BaseController  {
 
     }
 
+
+
+    /**
+     * 编辑用户
+     */
+    @ApiOperation(value = "用户管理-系统开关的更新接口")
+    @RequestMapping(value="/user/updateOperationType",method = RequestMethod.POST)
+    @ResponseBody
+    public UpdateOperationVo updateOperationType(@RequestBody @Valid UpdateOperationVo vo) throws ThingsboardException {
+       return   userService.updateOperationType(vo);
+    }
 
     private  void checkEmailAndPhone(User  user)
     {

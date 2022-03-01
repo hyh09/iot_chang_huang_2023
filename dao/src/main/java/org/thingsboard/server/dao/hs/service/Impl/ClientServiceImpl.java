@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.hs.service.Impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -230,6 +232,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Map<String, Boolean> listDevicesOnlineStatus(List<UUID> allDeviceIdList) {
+        if (allDeviceIdList.isEmpty())
+            return Maps.newHashMap();
         if (persistToTelemetry) {
             Map<String, Boolean> map = new HashMap<>();
             for (UUID uuid : allDeviceIdList) {
@@ -360,6 +364,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     @SuppressWarnings("all")
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
             var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
             if (keyList.isEmpty())
@@ -394,24 +399,20 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
         } else {
+            long a1 = System.currentTimeMillis();
             var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
             if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
+            var latestKeyId = Optional.ofNullable(this.tsLatestRepository.findLatestKey(deviceId.getId())).orElse(keyIds.get(0));
             var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
 
-            var pageData = this.tsRepository.findTss(deviceId.getId(), timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
+            var pageData = this.tsRepository.findTss(deviceId.getId(), latestKeyId, timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
             if (pageData.getContent().isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
             var time1 = pageData.getContent().get(0);
             var time2 = pageData.getContent().get(pageData.getContent().size() - 1);
-
-            List<TsKvEntity> kvEntityResult = Lists.newArrayList();
-            if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection())) {
-                kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsAsc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
-            } else {
-                kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
-            }
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
 
             List<Map<String, Object>> result = new ArrayList<>();
             Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
@@ -425,6 +426,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
             });
+
             return new PageData<>(result, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
         }
     }
@@ -720,6 +722,33 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    @Override
+    public List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId) {
+        return this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+    }
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    @Override
+    public List<String> listDeviceKeys(TenantId tenantId, UUID deviceId) {
+        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+        if (keyIds.isEmpty())
+            return Lists.newArrayList();
+        return this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().map(TsKvDictionary::getKey).collect(Collectors.toList());
+    }
+
+    /**
      * 根据当前登录人获得工厂层级列表
      *
      * @param tenantId  租户Id
@@ -766,6 +795,123 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             query.orderBy(cb.desc(root.get("createdTime")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
+    }
+
+    /**
+     * 根据当前登录人获得全部设备的在线状态
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 当前登录人获得全部设备的在线状态
+     */
+    @Override
+    public Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId, UUID factoryId) {
+        var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
+        var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 获得全部设备的在线状态
+     *
+     * @param tenantId 租户Id
+     * @return 获得全部设备的在线状态
+     */
+    @Override
+    public Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId) {
+        var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
+        var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 获得设备全部客户端及服务端、共享属性及值
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     */
+    @Override
+    public List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId) {
+        return Arrays.stream(DataConstants.allScopes()).map(v->CompletableFuture.supplyAsync(()-> {
+            try {
+                return this.attributesService.findAll(tenantId, new DeviceId(deviceId), v).get();
+            } catch (Exception ignore) {
+                return null;
+            }
+        })).map(CompletableFuture::join).filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    /**
+     * 查询历史遥测数据
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param timePageLink 时间分页参数
+     * @return 历史遥测数据
+     */
+    @Override
+    @SuppressWarnings("all")
+    public List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        if (this.commonComponent.isPersistToCassandra()) {
+            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            if (keyList.isEmpty())
+                return Lists.newArrayList();
+
+            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), 1, Aggregation.COUNT, timePageLink.getSortOrder().getDirection().toString()))
+                    .collect(Collectors.toList());
+
+            var temp = this.tsService.findAll(tenantId, deviceId, tempQueries).get()
+                    .stream().map(KvEntry::getValue).map(e -> Integer.valueOf(String.valueOf(e))).collect(Collectors.toList());
+            if (temp.isEmpty())
+                return Lists.newArrayList();
+            var count = temp.stream().mapToInt(Integer::intValue).sum();
+
+            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getEndTime() - timePageLink.getStartTime(), count, Aggregation.NONE, timePageLink.getSortOrder().getDirection().toString()))
+                    .collect(Collectors.toList());
+
+            var KvResult = this.tsService.findAll(tenantId, deviceId, queries).get();
+            List<Map<String, Object>> result = new ArrayList<>();
+            Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
+            if (SortOrder.Direction.ASC.equals(timePageLink.getSortOrder().getDirection()))
+                KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs)).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+            else
+                KvResult.stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).forEach(v -> resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v)));
+            resultMap.forEach((k, v) -> {
+                v.put(HSConstants.CREATED_TIME, k);
+                result.add(v);
+            });
+            var total = result.size();
+
+            return result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
+        } else {
+            var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
+            if (keyIds.isEmpty())
+                return Lists.newArrayList();
+            var latestKeyId = Optional.ofNullable(this.tsLatestRepository.findLatestKey(deviceId.getId())).orElse(keyIds.get(0));
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
+
+            var pageData = this.tsRepository.findTss(deviceId.getId(), latestKeyId, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getPageSize(), Math.max(0L, (timePageLink.getPage() - 1) * timePageLink.getPageSize()));
+            if (pageData.isEmpty())
+                return Lists.newArrayList();
+
+            var time1 = pageData.get(0);
+            var time2 = pageData.get(pageData.size() - 1);
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
+            List<Map<String, Object>> result = new ArrayList<>();
+            Map<Long, Map<String, Object>> resultMap = Maps.newLinkedHashMap();
+            kvEntityResult.stream().map(e -> {
+                e.setStrKey(keyIdToKeyMap.getOrDefault(e.getKey(), HSConstants.NULL_STR));
+                return e;
+            }).map(TsKvEntity::toData).forEach(v -> {
+                resultMap.computeIfAbsent(v.getTs(), k -> new HashMap<>()).put(v.getKey(), this.formatKvEntryValue(v));
+            });
+            resultMap.forEach((k, v) -> {
+                v.put(HSConstants.CREATED_TIME, k);
+                result.add(v);
+            });
+
+            return result;
+        }
     }
 
     /**

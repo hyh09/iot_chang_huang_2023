@@ -162,4 +162,22 @@ public class HsModelConstants {
     public static final String ORDER_PLAN_ACTUAL_END_TIME = "actual_end_time";
     public static final String ORDER_PLAN_ENABLED = "enabled";
     public static final String ORDER_PLAN_SORT = "sort";
+
+    /**
+     * 设备字典图表
+     */
+    public static final String DICT_DEVICE_GRAPH_TABLE_NAME = "hs_dict_device_graph";
+    public static final String DICT_DEVICE_GRAPH_NAME = "name";
+
+
+    /**
+     * 设备字典图表分项
+     */
+    public static final String DICT_DEVICE_GRAPH_ITEM_TABLE_NAME = "hs_dict_device_graph_item";
+
+    public static final String DICT_DEVICE_GRAPH_ITEM_PROPERTY_ID = "property_id";
+    public static final String DICT_DEVICE_GRAPH_ITEM_PROPERTY_TYPE = "property_type";
+    public static final String DICT_DEVICE_GRAPH_ITEM_GRAPH_ID = "graph_id";
+    public static final String DICT_DEVICE_GRAPH_ITEM_SORT = "sort";
+    public static final String DICT_DEVICE_GRAPH_ENABLE = "enable";
 }

@@ -34,6 +34,10 @@ public class SearchTsKvLatestRepository {
             " ts_kv_latest.bool_v AS boolValue, ts_kv_latest.long_v AS longValue, ts_kv_latest.dbl_v AS doubleValue, ts_kv_latest.json_v AS jsonValue, ts_kv_latest.ts AS ts FROM ts_kv_latest " +
             "INNER JOIN ts_kv_dictionary ON ts_kv_latest.key = ts_kv_dictionary.key_id WHERE ts_kv_latest.entity_id = cast(:id AS uuid)";
 
+    public static final String FIND_ALL_BY_ENTITY_ID_KEY = "findAllByEntityIdAndKey";
+    public static final String FIND_ALL_BY_ENTITY_ID_AND_KEY_QUERY = "SELECT ts_kv_latest.entity_id AS entityId, ts_kv_latest.key AS key, ts_kv_dictionary.key AS strKey, ts_kv_latest.str_v AS strValue," +
+            " ts_kv_latest.bool_v AS boolValue, ts_kv_latest.long_v AS longValue, ts_kv_latest.dbl_v AS doubleValue, ts_kv_latest.json_v AS jsonValue, ts_kv_latest.ts AS ts FROM ts_kv_latest " +
+            "INNER JOIN ts_kv_dictionary ON ts_kv_latest.key = ts_kv_dictionary.key_id WHERE ts_kv_latest.entity_id in (:ids) and ts_kv_dictionary.key in (:key) ";
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -42,5 +46,16 @@ public class SearchTsKvLatestRepository {
                 .setParameter("id", entityId)
                 .getResultList();
     }
+
+
+    public List<TsKvLatestEntity> findAllByEntityIdAndKey(List<UUID> entityIds,List<String> keyName) {
+        return entityManager.createNamedQuery(FIND_ALL_BY_ENTITY_ID_KEY, TsKvLatestEntity.class)
+                .setParameter("ids", entityIds)
+                .setParameter("key", keyName)
+                .getResultList();
+    }
+
+
+
 
 }

@@ -18,7 +18,10 @@ import org.thingsboard.server.common.data.alarm.AlarmStatus;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
-import org.thingsboard.server.common.data.id.*;
+import org.thingsboard.server.common.data.id.AlarmId;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -29,7 +32,13 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
+import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
+import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
@@ -41,14 +50,12 @@ import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
-import org.thingsboard.server.dao.hs.dao.*;
-import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
-import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
-import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import javax.persistence.criteria.Predicate;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -103,6 +110,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     // 二方库Service
     ClientService clientService;
 
+    // 图表Repository
+    DictDeviceGraphRepository graphRepository;
+
+    // 图表属性Repository
+    DictDeviceGraphItemRepository graphItemRepository;
+
     /**
      * 获得设备配置列表
      *
@@ -118,6 +131,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
             if (!StringUtils.isBlank(name))
                 predicates.add(cb.like(root.get("name"), "%" + name.trim() + "%"));
+
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
 
@@ -232,6 +246,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      * @return 实时监控数据列表
      */
     @Override
+    @SuppressWarnings("all")
     public RTMonitorResult getRTMonitorData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
         var result = new RTMonitorResult();
         var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
@@ -241,13 +256,13 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
                 CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
                         .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
-                            var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
-                            if (uuidList.isEmpty())
-                                return new HashMap<String, DictDevice>();
-                            else
-                                return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), uuidList)).stream()
-                                        .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
-                        }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(uuids)),
+                                    var uuidList = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+                                    if (uuidList.isEmpty())
+                                        return new HashMap<String, DictDevice>();
+                                    else
+                                        return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), uuidList)).stream()
+                                                .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
+                                }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(uuids)),
                                 (dictDeviceMap, activeStatusMap) -> {
                                     int onLineCount = this.calculateValueInMap(activeStatusMap);
                                     result.setOnLineDeviceCount(onLineCount);
@@ -275,6 +290,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public DeviceDetailResult getRTMonitorDeviceDetail(TenantId tenantId, String id) throws ExecutionException, InterruptedException, ThingsboardException {
+        var attributeKvMap = this.clientService.listDeviceAttributeKvs(tenantId, toUUID(id)).stream().collect(Collectors.toMap(AttributeKvEntry::getKey, Function.identity(), (a, b) -> a));
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id))).map(DeviceEntity::toData).orElseThrow(() -> new ThingsboardException("设备不存在", ThingsboardErrorCode.GENERAL));
         var deviceBaseDTO = this.clientService.getFactoryBaseInfoByQuery(tenantId, new FactoryDeviceQuery(UUIDToString(device.getFactoryId()), UUIDToString(device.getWorkshopId()), UUIDToString(device.getProductionLineId()), device.getId().toString()));
 
@@ -299,21 +315,23 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     .name(e.getName())
                     .groupPropertyList(e.getGroupPropertyList().stream().map(v -> {
                         var kvData = Optional.ofNullable(kvEntryMap.get(v.getName()));
+                        var abData = Optional.ofNullable(attributeKvMap.get(v.getName()));
                         kvData.ifPresent(k -> groupPropertyNameList.add(v.getName()));
                         return DictDeviceGroupPropertyVO.builder()
                                 .id(v.getId())
                                 .unit(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                                 .icon(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null))
+                                .picture(Optional.ofNullable(v.getDictDataId()).map(dictDataMap::get).map(DictData::getPicture).orElse(null))
                                 .name(v.getName())
                                 .title(v.getTitle())
-                                .content(kvData.isEmpty() ? v.getContent() : this.formatKvEntryValue(kvData.get()))
-                                .createdTime(kvData.isEmpty() ? v.getCreatedTime() : kvData.get().getTs())
+                                .content(kvData.map(this::formatKvEntryValue).orElse(abData.map(this::formatKvEntryValue).orElse(v.getContent())))
+                                .createdTime(kvData.map(TsKvEntry::getTs).orElse(abData.map(AttributeKvEntry::getLastUpdateTs).orElse(v.getCreatedTime())))
                                 .build();
                     }).collect(Collectors.toList()))
                     .build()).collect(Collectors.toList());
 
             componentList = dictDeviceDetail.getComponentList();
-            this.recursionDealComponentData(componentList, kvEntryMap, dictDataMap, groupPropertyNameList);
+            this.recursionDealComponentData(componentList, kvEntryMap, attributeKvMap, dictDataMap, groupPropertyNameList);
         }
 
         var ungrouped = DictDeviceGroupVO.builder().name(HSConstants.UNGROUPED).groupPropertyList(new ArrayList<>()).build();
@@ -397,32 +415,41 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 查询设备遥测数据历史数据
      *
-     * @param tenantId     租户Id
-     * @param deviceId     设备Id
-     * @param timePageLink 时间分页参数
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
+     * @param timePageLink     时间分页参数
      * @return 设备遥测数据历史数据
      */
     @Override
-    public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
-        return this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), timePageLink);
+    public PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, boolean isShowAttributes, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        var pageData = this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), timePageLink);
+        if (isShowAttributes) {
+            var attributeData = this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().collect(Collectors.toMap(AttributeKvEntry::getKey, AttributeKvEntry::getValueAsString));
+            pageData.getData().forEach(v->v.putAll(attributeData));
+        }
+        return pageData;
     }
 
     /**
      * 查询设备历史-表头，包含时间
      *
-     * @param tenantId 租户Id
-     * @param deviceId 设备Id
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
      * @return 查询设备历史-表头，包含时间
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId) {
+    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) {
         List<DictDeviceGroupPropertyVO> propertyVOList = new ArrayList<>() {{
             add(DictDeviceGroupPropertyVO.builder()
                     .name(HSConstants.CREATED_TIME).title(HSConstants.CREATED_TIME).build());
         }};
 
         var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
+        if (isShowAttributes)
+           keyList.addAll( this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().map(AttributeKvEntry::getKey).collect(Collectors.toList()));
         if (keyList.isEmpty())
             return propertyVOList;
 
@@ -443,6 +470,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .unit(Optional.ofNullable(finalRMap.getOrDefault(e, null))
                         .map(dictDataMap::get).map(DictData::getUnit).orElse(null))
                 .build()).collect(Collectors.toList()));
+
         return propertyVOList;
     }
 
@@ -782,7 +810,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 获得近几个月报警次数
      *
-     *
      * @param tenantId        租户id
      * @param allDeviceIdList 设备id列表
      */
@@ -814,25 +841,229 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      *
      * @param componentList         部件列表
      * @param kvEntryMap            遥测数据map
+     * @param attributeKvMap        设备属性map
      * @param dictDataMap           数据字典map
      * @param groupPropertyNameList 属性List
      */
-    public void recursionDealComponentData(List<DictDeviceComponentVO> componentList, Map<String, TsKvEntry> kvEntryMap, Map<String, DictData> dictDataMap, List<String> groupPropertyNameList) {
+    public void recursionDealComponentData(List<DictDeviceComponentVO> componentList, Map<String, TsKvEntry> kvEntryMap, Map<String, AttributeKvEntry> attributeKvMap, Map<String, DictData> dictDataMap, List<String> groupPropertyNameList) {
         for (DictDeviceComponentVO componentVO : componentList) {
             for (DictDeviceComponentPropertyVO propertyVO : componentVO.getPropertyList()) {
                 var kvData = Optional.ofNullable(kvEntryMap.get(propertyVO.getName()));
+                var abData = Optional.ofNullable(attributeKvMap.get(propertyVO.getName()));
                 propertyVO.setUnit(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getUnit).orElse(null));
-                kvData.ifPresent(k -> {
+                kvData.ifPresentOrElse(k -> {
                     groupPropertyNameList.add(propertyVO.getName());
-                    propertyVO.setContent(this.formatKvEntryValue(kvData.get()));
+                    propertyVO.setContent(this.formatKvEntryValue(k));
                     propertyVO.setIcon(Optional.ofNullable(propertyVO.getDictDataId()).map(dictDataMap::get).map(DictData::getIcon).orElse(null));
-                    propertyVO.setCreatedTime(kvData.get().getTs());
-                });
+                    propertyVO.setCreatedTime(k.getTs());
+                }, () -> abData.ifPresent(v -> {
+                    propertyVO.setContent(this.formatKvEntryValue(v));
+                    propertyVO.setCreatedTime(v.getLastUpdateTs());
+                }));
             }
             if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
                 continue;
             }
-            this.recursionDealComponentData(componentVO.getComponentList(), kvEntryMap, dictDataMap, groupPropertyNameList);
+            this.recursionDealComponentData(componentVO.getComponentList(), kvEntryMap, attributeKvMap, dictDataMap, groupPropertyNameList);
+        }
+    }
+
+    /**
+     * 获得实时监控列表数据 - 精简版
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @param pageLink 分页参数
+     * @return 实时监控列表数据
+     */
+    @Override
+    @SuppressWarnings("all")
+    public PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
+        if (devicePageData.getData().isEmpty())
+            return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+
+        return CompletableFuture.supplyAsync(() -> {
+            var dictDeviceIds = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+            if (dictDeviceIds.isEmpty())
+                return new HashMap<String, DictDevice>();
+            else
+                return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
+                        .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
+        }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList()))),
+                (dictDeviceMap, activeStatusMap) -> devicePageData.getData().stream().map(e -> {
+                    var idStr = e.getId().toString();
+                    return RTMonitorDeviceResult.builder()
+                            .id(idStr)
+                            .name(e.getName())
+                            .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                            .isOnLine(calculateValueInMap(activeStatusMap, idStr))
+                            .build();
+                }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
+    }
+
+    /**
+     * 获得实时监控数据列表-设备在线状态
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控数据列表-设备在线状态
+     */
+    @Override
+    public RTMonitorDeviceOnlineStatusResult getRTMonitorDeviceOnlineStatusData(TenantId tenantId, FactoryDeviceQuery query) {
+        RTMonitorDeviceOnlineStatusResult result = new RTMonitorDeviceOnlineStatusResult();
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        result.setAllDeviceCount(uuids.size());
+        result.setDeviceIdList(uuids);
+        result.setOnLineDeviceCount(this.calculateValueInMap(this.clientService.listDevicesOnlineStatus(uuids)));
+        result.setOffLineDeviceCount(result.getAllDeviceCount() - result.getOnLineDeviceCount());
+        return result;
+    }
+
+    /**
+     * 获得实时监控数据列表-设备报警统计
+     *
+     * @param tenantId 租户Id
+     * @param query    查询参数
+     * @return 实时监控数据列表-设备报警统计
+     */
+    @Override
+    public List<AlarmTimesResult> getRTMonitorDeviceAlarmStatisticsResult(TenantId tenantId, FactoryDeviceQuery query) {
+        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listAlarmTimesResult(tenantId, uuids);
+    }
+
+    /**
+     * 获得实时监控数据列表-设备全部keyIds
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return keyIds
+     */
+    @Override
+    public List<Integer> listDeviceKeyIds(TenantId tenantId, UUID deviceId) {
+        return this.clientService.listDeviceKeyIds(tenantId, deviceId);
+    }
+
+    /**
+     * 获得实时监控数据列表-设备全部keys
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 全部keys
+     */
+    @Override
+    public List<String> listDeviceKeys(TenantId tenantId, UUID deviceId) {
+        return this.clientService.listDeviceKeys(tenantId, deviceId);
+    }
+
+    /**
+     * 查询设备历史数据-无分页
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param pageLink 分页参数
+     * @return 设备历史数据
+     */
+    @Override
+    public List<Map<String, Object>> listDeviceTelemetryHistories(TenantId tenantId, DeviceId deviceId, TimePageLink pageLink) throws ExecutionException, InterruptedException {
+        return this.clientService.listTsHistories(tenantId, deviceId, pageLink);
+    }
+
+    /**
+     * 查询设备详情-遥测属性历史数据图表
+     *
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param tsPropertyName   遥测属性名称
+     * @param todayStartTime   开始时间
+     * @param todayCurrentTime 结束时间
+     * @return 遥测属性历史数据图表
+     */
+    @Override
+    public HistoryGraphVO getTsPropertyHistoryGraph(TenantId tenantId, UUID deviceId, String tsPropertyName, Long todayStartTime, Long todayCurrentTime) throws ThingsboardException {
+        var historyGraphVO = new HistoryGraphVO();
+        historyGraphVO.setName(tsPropertyName);
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId)).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("设备不存在", ThingsboardErrorCode.GENERAL));
+        var dictDeviceId = device.getDictDeviceId();
+        if (device.getDictDeviceId() != null) {
+            DictDeviceTsPropertyVO tsProperty = this.dictDeviceService.getTsPropertyByPropertyName(dictDeviceId, tsPropertyName);
+            if (tsProperty != null) {
+                Optional.ofNullable(tsProperty.getTitle()).filter(StringUtils::isNotBlank).ifPresent(historyGraphVO::setName);
+                var graphId = this.graphItemRepository.findByPropertyIdAndPropertyType(tsProperty.getId(), tsProperty.getPropertyType().getCode())
+                        .map(DictDeviceGraphItemEntity::getGraphId).orElse(null);
+                if (graphId != null) {
+                    var graph = this.graphRepository.findById(graphId).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("图表不存在", ThingsboardErrorCode.GENERAL));
+                    historyGraphVO.setName(graph.getName());
+                    historyGraphVO.setEnable(graph.getEnable());
+                    historyGraphVO.setProperties(this.graphItemRepository.findAllByGraphIdOrderBySortAsc(graphId)
+                            .thenApplyAsync(v -> v.stream()
+                                    .map(e -> CompletableFuture.supplyAsync(() -> this.dictDeviceService.getTsPropertyByIdAndType(e.getPropertyId(), DictDevicePropertyTypeEnum.valueOf(e.getPropertyType()))))
+                                    .map(e -> e.thenApplyAsync(f -> {
+                                        var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), f.getName(), todayStartTime, todayCurrentTime);
+                                        return HistoryGraphPropertyVO.builder()
+                                                .tsKvs(this.cleanGraphTsKvData(data))
+                                                .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
+                                                .name(f.getName())
+                                                .title(f.getTitle())
+                                                .unit(f.getUnit())
+                                                .build();
+                                    }))
+                                    .map(CompletableFuture::join)
+                                    .collect(Collectors.toList())).join());
+                    return historyGraphVO;
+                }
+            }
+        }
+
+        var data = this.listTsKvs(tenantId, DeviceId.fromString(deviceId.toString()), tsPropertyName, todayStartTime, todayCurrentTime);
+        var property = HistoryGraphPropertyVO.builder()
+                .name(tsPropertyName)
+                .title(historyGraphVO.getName())
+                .tsKvs(this.cleanGraphTsKvData(data))
+                .unit(Optional.ofNullable(dictDeviceId).map(e -> this.dictDeviceService.getTsPropertyByPropertyName(e, tsPropertyName)).map(DictDeviceTsPropertyVO::getUnit).orElse(null))
+                .isShowChart(!data.isEmpty() && isNumberData(data.get(0).getValue()) ? Boolean.TRUE : Boolean.FALSE)
+                .build();
+        historyGraphVO.setName(property.getTitle());
+        historyGraphVO.setEnable(property.getIsShowChart());
+        historyGraphVO.setProperties(Lists.newArrayList(property));
+        return historyGraphVO;
+    }
+
+    /**
+     * 获得遥测时序数据
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param name      名称
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @SuppressWarnings("all")
+    public List<HistoryGraphPropertyTsKvVO> listTsKvs(TenantId tenantId, DeviceId deviceId, String name, Long startTime, Long endTime) {
+        try {
+            List<String> keyList = new ArrayList<>() {{
+                add(name);
+            }};
+            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, 1, Aggregation.COUNT, "desc"))
+                    .collect(Collectors.toList());
+
+            var tempResult = this.timeseriesService.findAll(tenantId, deviceId, tempQueries).get()
+                    .stream().collect(Collectors.toMap(TsKvEntry::getKey, Function.identity()));
+            if (tempResult.isEmpty())
+                return Lists.newArrayList();
+            int count = Integer.parseInt(String.valueOf(tempResult.get(name).getValue()));
+            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, count, Aggregation.NONE, "desc"))
+                    .collect(Collectors.toList());
+
+            return this.timeseriesService.findAll(tenantId, deviceId, queries).get()
+                    .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).map(e -> HistoryGraphPropertyTsKvVO.builder()
+                            .ts(e.getTs())
+                            .value(this.formatKvEntryValue(e))
+                            .build()).collect(Collectors.toList());
+        } catch (Exception ignore) {
+            return Lists.newArrayList();
         }
     }
 
@@ -894,5 +1125,15 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Autowired
     public void setCommonComponent(CommonComponent commonComponent) {
         this.commonComponent = commonComponent;
+    }
+
+    @Autowired
+    public void setGraphRepository(DictDeviceGraphRepository graphRepository) {
+        this.graphRepository = graphRepository;
+    }
+
+    @Autowired
+    public void setGraphItemRepository(DictDeviceGraphItemRepository graphItemRepository) {
+        this.graphItemRepository = graphItemRepository;
     }
 }
