@@ -3807,7 +3807,12 @@
     "total-energy-consumption": "总能耗：",
     "go-to-history": "查看历史数据",
     "created-time": "上报时间",
-    "property": "参数"
+    "property": "参数",
+    "today-energy-consumption-top10": "今日设备能耗排行",
+    "today-capacity-top10": "今日设备产量排行",
+    "water": "水（T）",
+    "electricity": "电（kWh）",
+    "gas": "气（T）"
   },
   "order": {
     "order-form-mng": "订单管理",
