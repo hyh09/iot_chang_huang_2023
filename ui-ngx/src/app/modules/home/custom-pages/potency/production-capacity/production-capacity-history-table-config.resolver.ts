@@ -5,10 +5,10 @@ import { PotencyService } from "@app/core/http/custom/potency.service";
 import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
-import { map } from 'rxjs/operators';
 import { ProductionCapacityOverviewComponent } from './production-capacity-overview.component';
 import { getTheEndOfDay, getTheStartOfDay } from '@app/core/utils';
 import { DatePipe } from '@angular/common';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class ProductionHistoryCapacityTableConfigResolver implements Resolve<EntityTableConfig<DeviceCapacity>> {
@@ -16,6 +16,7 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
   private readonly config: EntityTableConfig<DeviceCapacity> = new EntityTableConfig<DeviceCapacity>();
 
   private deviceId: string = '';
+  private deviceIdLoaded$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   constructor(
     private potencyService: PotencyService,
@@ -29,7 +30,8 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
 
     this.config.componentsData = {
       dateRange: null,
-      totalCapacity: 0
+      deviceIdLoaded$: this.deviceIdLoaded$,
+      deviceName: ''
     }
 
     this.config.columns.push(
@@ -40,14 +42,12 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
   }
 
   resolve(route: ActivatedRouteSnapshot): EntityTableConfig<DeviceCapacity> {
-
     this.deviceId = route.params.deviceId;
+    this.config.componentsData.deviceName = decodeURIComponent(route.queryParams.deviceName || '');
+    this.config.componentsData.deviceIdLoaded$.next(this.deviceId);
 
     const now = new Date();
-    this.config.componentsData = {
-      dateRange: [now, now],
-      totalCapacity: 0
-    }
+    this.config.componentsData.dateRange = [now, now];
 
     this.config.tableTitle = this.translate.instant('potency.device-capacity-history');
     this.config.addEnabled = false;
@@ -65,10 +65,7 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
-      return this.potencyService.getDeviceCapacityHistoryList(timePageLink, this.deviceId).pipe(map(res => {
-        this.config.componentsData.totalCapacity = res.totalValue || 0;
-        return res;
-      }));
+      return this.potencyService.getDeviceCapacityHistoryList(timePageLink, this.deviceId);
     }
 
     return this.config;

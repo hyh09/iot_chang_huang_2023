@@ -4,7 +4,7 @@ import { PotencyService } from "@app/core/http/custom/potency.service";
 import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
-import { Observable, Observer } from "rxjs";
+import { BehaviorSubject, Observable, Observer } from "rxjs";
 import { DatePipe } from "@angular/common";
 import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
 import { EnergyHistoryFilterComponent } from "./energy-history-filter.component";
@@ -15,6 +15,7 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
   private readonly config: EntityTableConfig<any> = new EntityTableConfig<any>();
 
   private deviceId: string = '';
+  private deviceIdLoaded$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   constructor(
     private potencyService: PotencyService,
@@ -28,22 +29,20 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
     this.config.filterComponent = EnergyHistoryFilterComponent;
 
     this.config.componentsData = {
-      dateRange: null
-    };
-
-    this.config.componentsData = {
-      totalValue: []
+      dateRange: null,
+      deviceIdLoaded$: this.deviceIdLoaded$,
+      deviceName: ''
     };
   }
 
   resolve(route: ActivatedRouteSnapshot): Observable<EntityTableConfig<any>> {
     this.deviceId = route.params.deviceId;
+    this.config.componentsData.deviceName = decodeURIComponent(route.queryParams.deviceName || '');
+    this.config.componentsData.deviceIdLoaded$.next(this.deviceId);
     return new Observable((observer: Observer<EntityTableConfig<any>>) => {
       this.potencyService.getEnergyHistoryTableHeader().subscribe(res => {
         const now = new Date();
-        this.config.componentsData = {
-          dateRange: [now, now]
-        };
+        this.config.componentsData.dateRange = [now, now];
 
         this.config.tableTitle = this.translate.instant('potency.energy-consumption-history');
         this.config.addEnabled = false;

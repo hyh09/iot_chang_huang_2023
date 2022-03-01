@@ -17,7 +17,7 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
   today = new Date();
   keyNum: '1' | '2' | '3' = '1';
   factoryId = '';
-  chartData: PotencyTop10 = []
+  top10: PotencyTop10 = []
 
   constructor(
     protected store: Store<AppState>,
@@ -46,7 +46,7 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
         keyNum,
         type: '1'
       }).subscribe(res => {
-        this.chartData = res || [];
+        this.top10 = res || [];
       })
     }
   }

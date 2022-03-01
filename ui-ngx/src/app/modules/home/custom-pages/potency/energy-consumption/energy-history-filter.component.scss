@@ -1,0 +1,30 @@
+.interval-data-chart {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 400;
+  margin-top: 16px;
+  .header {
+    margin-bottom: 16px;
+    .title {
+      font-size: 15px;
+      line-height: 21px;
+    }
+    .ant-radio-button-wrapper {
+      border-top: none;
+      border-bottom: none;
+      height: 18px;
+      line-height: 17px;
+      font-size: 15px;
+      border-color: #ccc !important;
+      &:first-child {
+        border-left: none;;
+      }
+      &:last-of-type {
+        border-right: none;
+      }
+    }
+  }
+  .chart {
+    width: 100%;
+    height: 300px;
+  }
+}

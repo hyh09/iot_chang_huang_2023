@@ -3812,7 +3812,9 @@
     "today-capacity-top10": "今日设备产量排行",
     "water": "水 (T)",
     "electricity": "电 (KWH)",
-    "gas": "气 (T)"
+    "gas": "气 (T)",
+    "interval-energy-consumption": "{{deviceName}}区间能耗",
+    "interval-capacity": "{{deviceName}}区间产量"
   },
   "order": {
     "order-form-mng": "订单管理",
