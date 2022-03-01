@@ -253,6 +253,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
                 .append(" and h1.\"date\" =:todayDate")
                 .append(sonSql01);
         if(vo.getType().equals("0")){
+            sql.append(" and  d1.flg = true");
             sql.append(" ORDER BY h1.capacity_added_value DESC ");
         }else {
             KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
