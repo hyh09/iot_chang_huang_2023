@@ -25,6 +25,9 @@ public class PcTodayEnergyRaningVo extends AbstractDeviceVo{
     @ApiModelProperty("1:水 2 气  3电")
     private  String  keyNum;
 
+    @ApiModelProperty("0:产能 1:能耗")
+    private  String type="0";
+
 
     public QueryTsKvVo toQueryTsKvVo()
     {
