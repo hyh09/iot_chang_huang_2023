@@ -145,7 +145,7 @@ public class CapacityDeviceConfigController extends BaseController{
             @ApiImplicitParam(name = "deviceId", value = "设备id",required = true,paramType = "query"),
             @ApiImplicitParam(name = "startTime", value = "开始时间",paramType = "query"),
             @ApiImplicitParam(name = "endTime", value = "结束时间",paramType = "query"),
-            @ApiImplicitParam(name = "type", value = "0【产量】，1【能耗】",paramType = "query"),
+            @ApiImplicitParam(name = "type", value = "0【产量】，1【能耗】",required = true,paramType = "query"),
             @ApiImplicitParam(name = "keyNum", value = "1【水】，2【电】，3【气】；",paramType = "query")
     })
     @ResponseBody

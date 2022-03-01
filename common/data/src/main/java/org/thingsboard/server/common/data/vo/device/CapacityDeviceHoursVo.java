@@ -6,16 +6,16 @@ import lombok.Data;
 @Data
 public class CapacityDeviceHoursVo {
 
-    @ApiModelProperty(name="时间（整点）")
+    @ApiModelProperty(name="时间")
     protected String dateTime;
 
-    @ApiModelProperty(name="产量")
-    protected Double capacityAddedValue;
+    @ApiModelProperty(name="产能/能耗")
+    protected Double capacityOrEnergy;
 
     public CapacityDeviceHoursVo(){}
 
-    public CapacityDeviceHoursVo(String dateTime,Double capacityAddedValue){
+    public CapacityDeviceHoursVo(String dateTime,Double capacityOrEnergy){
         this.dateTime = dateTime;
-        this.capacityAddedValue = capacityAddedValue;
+        this.capacityOrEnergy = capacityOrEnergy;
     }
 }
