@@ -188,7 +188,7 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         common.setPicture(picture);
         common.setIsDefault(Objects.requireNonNullElse(isDefault, false));
         common.setIsCore(Objects.requireNonNullElse(isCore, false));
-        common.setRatedCapacity(new BigDecimal(ratedCapacity));
+        common.setRatedCapacity(new BigDecimal(Objects.requireNonNullElse(ratedCapacity, "0")));
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);
