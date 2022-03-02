@@ -3895,7 +3895,8 @@
     "see-history": "View history",
     "device-comp": "Device components",
     "device-history": "Device history data",
-    "no-device-history": "No history data was found."
+    "no-device-history": "No history data was found.",
+    "no-trend": "No trend chart to display"
   },
   "potency": {
     "potency": "Efficiency analysis",
