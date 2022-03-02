@@ -185,6 +185,10 @@ public class ModelConstants {
      */
     public static final String SYSTEM_VERSION_COLUMN_FAMILY_NAME = "hs_system_version";
     /**
+     * 生产日历
+     */
+    public static final String PRODUCTION_CALENDAR_COLUMN_FAMILY_NAME = "hs_production_calendar";
+    /**
      * Cassandra device constants.
      */
     public static final String DEVICE_COLUMN_FAMILY_NAME = "device";
