@@ -106,6 +106,7 @@
           *ngFor="let item of devicePropFormArray().controls; let $index = index"
           formArrayName="propertyList"
           fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+          class="list-form"
         >
           <ng-container [formGroupName]="$index">
             <mat-form-field class="mat-block" [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit">
@@ -147,6 +148,7 @@
           *ngFor="let item of standardPropFormArray().controls; let $index = index"
           formArrayName="standardPropertyList"
           fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+          class="list-form"
         >
           <div fxFlex fxLayout="row" fxLayoutGap="10px" [formGroupName]="$index">
             <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit">
@@ -208,6 +210,7 @@
               *ngFor="let dataControl of groupControl.get('groupPropertyList').controls; let $subIndex = index;"
               formArrayName="groupPropertyList"
               fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+              class="list-form"
             >
               <ng-container [formGroupName]="$subIndex">
                 <fieldset fxFlex fxLayout="row" fxLayoutGap="10px" [disabled]="!groupControl.get('editable').value">

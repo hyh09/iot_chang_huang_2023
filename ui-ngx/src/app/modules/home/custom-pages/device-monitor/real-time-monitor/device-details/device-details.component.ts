@@ -1,8 +1,12 @@
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
+import { ActionNotificationShow } from '@app/core/notification/notification.actions';
+import { AppState } from '@app/core/public-api';
 import { DeviceComp, DeviceCompTreeNode } from '@app/shared/models/custom/device-mng.models';
 import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup, DevicePropHistory } from '@app/shared/models/custom/device-monitor.models';
+import { Store } from '@ngrx/store';
+import { TranslateService } from '@ngx-translate/core';
 import { PropDataChartComponent } from './prop-data-chart.component';
 
 @Component({
@@ -33,7 +37,9 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   constructor(
     @Inject('RealTimeMonitorService') private realTimeMonitorService: RealTimeMonitorService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    protected store: Store<AppState>,
+    protected translate: TranslateService
   ) {
     this.deviceId = this.route.snapshot.params.deviceId;
   }
@@ -89,7 +95,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  fetchPropHistoryData(propName: string, callFn?: Function) {
+  fetchPropHistoryData(propName: string, callFn?: Function, showTip: boolean = false) {
     this.currPropName = propName;
     this.relatedPropName = [];
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
@@ -99,6 +105,13 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         this.showRealTimeChart = true;
       } else {
         this.showRealTimeChart = false;
+        if (showTip) {
+          this.store.dispatch(new ActionNotificationShow({
+            message: this.translate.instant('device-monitor.no-trend'),
+            type: 'warn',
+            duration: 800
+          }));
+        }
       }
       callFn && callFn();
     });

@@ -44,7 +44,11 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       name: this.translate.instant('potency.go-to-history'),
       mdiIcon: 'mdi:history-data',
       isEnabled: () => (true),
-      onAction: ($event, entity) => this.router.navigateByUrl(`/potency/energyConsumption/${entity.deviceId}/history`)
+      onAction: ($event, entity) => this.router.navigate([`/potency/energyConsumption/${entity.deviceId}/history`], {
+        queryParams: {
+          deviceName: encodeURIComponent(entity['设备名称'])
+        }
+      })
     }];
   }
 

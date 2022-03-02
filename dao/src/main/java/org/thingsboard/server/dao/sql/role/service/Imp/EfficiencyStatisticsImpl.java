@@ -16,6 +16,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
+import org.thingsboard.server.common.data.vo.bodrd.TodaySectionHistoryVo;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
@@ -516,6 +517,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return resultVO;
     }
 
+
+    @Override
+    public TodaySectionHistoryVo todaySectionHistory(TsSqlDayVo vo) {
+        TodaySectionHistoryVo  resultVO = new TodaySectionHistoryVo();
+        resultVO.setTodayValue(todayValueOfOutput(vo));
+        resultVO.setSectionValue(sectionValueOfOutput(vo));
+        resultVO.setHistoryValue(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
+        return resultVO;
+    }
 
     /**
      * 今天 昨天 历史的 能耗  app
@@ -1203,12 +1213,65 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      return  historyMap;
     }
 
-    private void
-
-    setHistoryMapValue(TsSqlDayVo vo,Map<String,String> historyMap,KeyTitleEnums enums)
+    private void setHistoryMapValue(TsSqlDayVo vo,Map<String,String> historyMap,KeyTitleEnums enums)
     {
         historyMap.put(enums.getgName(),effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,false,enums.getCode()));
     }
+
+
+    /**
+     * 今天的总产能
+     * @param vo
+     * @return
+     */
+    private  String  todayValueOfOutput(TsSqlDayVo  vo)
+    {
+        String value ="0";
+
+        TsSqlDayVo  vo1 = new TsSqlDayVo();
+        vo1.setFactoryId(vo.getFactoryId());
+        vo1.setTenantId(vo.getTenantId());
+        vo1.setWorkshopId(vo.getWorkshopId());
+        vo1.setProductionLineId(vo.getProductionLineId());
+        vo1.setStartTime(CommonUtils.getZero());
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo1,true);
+        if(CollectionUtils.isEmpty(entities))
+        {
+           return  value;
+        }
+
+        for(CensusSqlByDayEntity m1:entities)
+        {
+           return StringUtilToll.roundUp(m1.getIncrementCapacity());
+
+        }
+       return  value;
+    }
+
+
+    /**
+     *
+     * @param vo
+     * @return
+     */
+    private  String  sectionValueOfOutput(TsSqlDayVo  vo)
+    {
+        List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryCensusSqlByDay(vo,true);
+        if(CollectionUtils.isEmpty(entities))
+        {
+            return "0";
+        }
+        List<String> nameList = entities.stream().map(CensusSqlByDayEntity::getIncrementCapacity).collect(Collectors.toList());
+        return  StringUtilToll.accumulator(nameList);
+    }
+
+
+
+
+
+
+
+
 
 
 
