@@ -35,6 +35,9 @@ spec:
         - name: tb-node-fileupload
           persistentVolumeClaim:
             claimName: tb-node-pv-claim
+        - name: tb-node-log
+          persistentVolumeClaim:
+            claimName: tb-node-log-pv-claim
         - name: tb-node-config
           configMap:
             name: tb-node-config
@@ -83,6 +86,8 @@ spec:
               name: tb-node-config
             - mountPath: /upload
               name: tb-node-fileupload
+            - mountPath: /var/log/thingsboard
+              name: tb-node-log
           livenessProbe:
             httpGet:
               path: /login
