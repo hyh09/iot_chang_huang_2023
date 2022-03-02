@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -185,8 +186,8 @@ public class DictDeviceEntity extends BasePgEntity<DictDeviceEntity> implements 
         common.setComment(comment);
         common.setIcon(icon);
         common.setPicture(picture);
-        common.setIsDefault(isDefault);
-        common.setIsCore(isCore);
+        common.setIsDefault(Objects.requireNonNullElse(isDefault, false));
+        common.setIsCore(Objects.requireNonNullElse(isCore, false));
         common.setRatedCapacity(new BigDecimal(ratedCapacity));
 
         common.setCreatedTime(createdTime);

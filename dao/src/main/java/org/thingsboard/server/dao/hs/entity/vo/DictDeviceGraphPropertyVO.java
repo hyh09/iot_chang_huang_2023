@@ -33,6 +33,9 @@ public class DictDeviceGraphPropertyVO {
     @ApiModelProperty(value = "单位")
     private String unit;
 
+    @ApiModelProperty(value = "连接符后缀")
+    private String suffix;
+
     @NotNull(message = "属性类型不能为空")
     @ApiModelProperty(value = "属性类型")
     private DictDevicePropertyTypeEnum propertyType;
