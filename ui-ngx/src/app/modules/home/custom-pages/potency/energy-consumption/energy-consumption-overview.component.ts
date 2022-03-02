@@ -51,4 +51,9 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
     }
   }
 
+  onTimeChange() {
+    this.entitiesTableConfig.table.resetSortAndFilter(true);
+    this.getTop10();
+  }
+
 }

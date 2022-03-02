@@ -4,7 +4,7 @@
   [nzDisabledDate]="disabledDate"
   [nzAllowClear]="false"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
-  (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
 <div class="interval-data-chart">
   <div fxLayout="row" fxLayoutAlign="space-between center" class="header">

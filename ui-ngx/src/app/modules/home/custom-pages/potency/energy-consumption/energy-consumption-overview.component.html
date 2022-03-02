@@ -25,7 +25,7 @@
   [nzDisabledDate]="disabledDate"
   [nzAllowClear]="false"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
-  (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
 <div class="data-overview">
   <div class="overview-item">{{ 'potency.total-energy-consumption' | translate }}</div>

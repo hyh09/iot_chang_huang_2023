@@ -20,7 +20,7 @@
   [nzDisabledDate]="disabledDate"
   [nzAllowClear]="false"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
-  (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
 <div *ngIf="!isHistory" class="data-overview">
   <div class="overview-item">{{ 'potency.total-capacity' | translate }}{{ entitiesTableConfig.componentsData.totalCapacity }} (M)</div>

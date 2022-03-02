@@ -146,7 +146,7 @@ export class ProductionCapacityOverviewComponent extends EntityTableHeaderCompon
             normal: {
 							color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
 								offset: 0,
-								color: "#0e4ba1" // 0% 处的颜色
+								color: "#5fbc4d" // 0% 处的颜色
 							}, {
 								offset: 1,
 								color: "#99d5d4" // 100% 处的颜色
@@ -159,6 +159,15 @@ export class ProductionCapacityOverviewComponent extends EntityTableHeaderCompon
     }
     this.chart.setOption(option);
     this.chart.resize();
+  }
+
+  onTimeChange() {
+    this.entitiesTableConfig.table.resetSortAndFilter(true);
+    if (this.isHistory) {
+      this.getIntervalData();
+    } else {
+      this.getTop10();
+    }
   }
 
 }

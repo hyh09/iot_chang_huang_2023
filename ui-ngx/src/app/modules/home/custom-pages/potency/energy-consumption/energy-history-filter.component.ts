@@ -131,4 +131,9 @@ export class EnergyHistoryFilterComponent extends EntityTableHeaderComponent<obj
     this.chart.resize();
   }
 
+  onTimeChange() {
+    this.entitiesTableConfig.table.resetSortAndFilter(true);
+    this.getIntervalData()
+  }
+
 }
