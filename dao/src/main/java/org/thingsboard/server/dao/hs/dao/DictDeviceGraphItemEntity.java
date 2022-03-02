@@ -62,6 +62,12 @@ public class DictDeviceGraphItemEntity extends BasePgEntity<DictDeviceGraphItemE
     @Column(name = HsModelConstants.DICT_DEVICE_GRAPH_ITEM_SORT)
     private Integer sort;
 
+    /**
+     * 连接符后缀
+     */
+    @Column(name = HsModelConstants.DICT_DEVICE_GRAPH_SUFFIX)
+    private String suffix;
+
     public DictDeviceGraphItemEntity() {
     }
 
@@ -72,6 +78,7 @@ public class DictDeviceGraphItemEntity extends BasePgEntity<DictDeviceGraphItemE
         this.propertyType = common.getPropertyType().getCode();
         this.graphId = common.getGraphId();
         this.sort = common.getSort();
+        this.suffix = common.getSuffix();
         this.setCreatedTimeAndCreatedUser(common);
     }
 
@@ -86,6 +93,7 @@ public class DictDeviceGraphItemEntity extends BasePgEntity<DictDeviceGraphItemE
         common.setPropertyType(DictDevicePropertyTypeEnum.valueOf(propertyType));
         common.setGraphId(graphId);
         common.setSort(sort);
+        common.setSuffix(suffix);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);
