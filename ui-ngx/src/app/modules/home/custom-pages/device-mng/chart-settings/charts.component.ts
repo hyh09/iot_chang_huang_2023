@@ -4,7 +4,7 @@ import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityComponent } from '@app/modules/home/components/entity/entity.component';
 import { EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Chart, ChartProp } from '@app/shared/models/custom/chart-settings.model';
 import { ChartSettingsService } from '@app/core/http/custom/chart-settings.service';
 
@@ -16,6 +16,7 @@ export class ChartsComponent extends EntityComponent<Chart> {
 
   properties: ChartProp[] = [];
   propertyMap: { [id: string]: ChartProp } = {};
+  propExpanded: boolean = true;
 
   constructor(
     protected store: Store<AppState>,
@@ -31,17 +32,51 @@ export class ChartsComponent extends EntityComponent<Chart> {
   }
 
   buildForm(entity: Chart): FormGroup {
+    const propertyControls: Array<AbstractControl> = [];
+    if (entity && entity.properties && entity.properties.length > 0) {
+      for (const property of entity.properties) {
+        propertyControls.push(this.createPropertyControls(property));
+      }
+    }
     return this.fb.group({
       name: [entity ? entity.name : '', Validators.required],
       enable: [entity && (entity.enable === true || entity.enable === false) ? entity.enable : true],
-      propertyIds: [entity ? (entity.properties || []).map(item => (item.id)) : [], Validators.minLength(1)],
-      properties: [entity ? (entity.properties || []) : []]
+      properties: this.fb.array(propertyControls)
     });
+  }
+
+  chartPropFormArray(): FormArray {
+    return this.entityForm.get('properties') as FormArray;
+  }
+  createPropertyControls(property?: ChartProp): AbstractControl {
+    return this.fb.group({
+      id: [property ? property.id : '', Validators.required],
+      name: [property ? property.name : ''],
+      propertyType: [property ? property.propertyType : ''],
+      title: [property ? property.title : ''],
+      suffix: [property ? property.suffix: ''],
+      unit: [property ? property.unit: '']
+    });
+  }
+  addParam(event: MouseEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.chartPropFormArray().push(this.createPropertyControls());
+  }
+  removeParam(index: number) {
+    this.chartPropFormArray().removeAt(index);
   }
 
   updateForm(entity: Chart) {
     this.entityForm.patchValue(entity);
-    this.entityForm.get('propertyIds').patchValue(entity && entity.properties ? entity.properties.map(item => (item.id)) : []);
+    const propertyControls: Array<AbstractControl> = [];
+    if (entity && entity.properties && entity.properties.length > 0) {
+      for (const property of entity.properties) {
+        propertyControls.push(this.createPropertyControls(property));
+      }
+    }
+    this.entityForm.controls.properties = this.fb.array(propertyControls);
+    this.entityForm.updateValueAndValidity();
   }
 
   loadChartProps() {
@@ -55,12 +90,12 @@ export class ChartsComponent extends EntityComponent<Chart> {
     });
   }
 
-  onSelectionChange() {
-    const arr = [];
-    (this.entityForm.get('propertyIds').value as string[]).forEach(id => {
-      id && this.propertyMap[id] && arr.push(this.propertyMap[id]);
-    });
-    this.entityForm.get('properties').patchValue(arr);
+  onSelectionChange(id: string, index: number) {
+    if (id && this.propertyMap[id]) {
+      const control = this.chartPropFormArray().controls[index];
+      control.patchValue(this.propertyMap[id]);
+      control.updateValueAndValidity();
+    }
   }
 
 }
