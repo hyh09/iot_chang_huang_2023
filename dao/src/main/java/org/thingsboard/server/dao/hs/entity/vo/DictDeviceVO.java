@@ -10,7 +10,9 @@ import lombok.experimental.Accessors;
 import org.thingsboard.server.dao.hs.entity.bo.Image;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -76,4 +78,12 @@ public class DictDeviceVO implements Image {
     @Valid
     @ApiModelProperty(value = "标准属性列表")
     private List<DictDeviceStandardPropertyVO> standardPropertyList;
+
+    @NotNull
+    @ApiModelProperty(value = "是否核心")
+    private Boolean isCore;
+
+    @Digits(integer = 9, fraction=2, message = "额定能耗格式不正确")
+    @ApiModelProperty(value = "额定能耗")
+    private BigDecimal ratedCapacity;
 }

@@ -3895,7 +3895,8 @@
     "see-history": "View history",
     "device-comp": "Device components",
     "device-history": "Device history data",
-    "no-device-history": "No history data was found."
+    "no-device-history": "No history data was found.",
+    "no-trend": "No trend chart to display"
   },
   "potency": {
     "potency": "Efficiency analysis",
@@ -3913,10 +3914,12 @@
     "created-time": "Reporting time",
     "property": "Parameter",
     "today-energy-consumption-top10": "Today ranking of device energy consumption",
-    "today-capacity-top10": "Today ranking of device output",
+    "today-capacity-top10": "Today ranking of device yield",
     "water": "Water (T)",
     "electricity": "Electricity (KWH)",
-    "gas": "Gas (T)"
+    "gas": "Gas (T)",
+    "interval-energy-consumption": "Interval energy consumption of {{deviceName}}",
+    "interval-capacity": "Internal yield of {{deviceName}}"
   },
   "order": {
     "order-form-mng": "Order management",
