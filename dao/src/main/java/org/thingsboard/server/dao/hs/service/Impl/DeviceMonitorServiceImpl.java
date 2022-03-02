@@ -302,6 +302,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         List<DictDeviceGroupVO> groupResultList = new ArrayList<>();
         List<DictDeviceComponentVO> componentList = new ArrayList<>();
         List<String> groupPropertyNameList = new ArrayList<>();
+        List<DictDeviceGraphVO> dictDeviceGraphList = new ArrayList<>();
 
         DictDevice dictDevice = new DictDevice();
         if (device.getDictDeviceId() != null) {
@@ -332,6 +333,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
             componentList = dictDeviceDetail.getComponentList();
             this.recursionDealComponentData(componentList, kvEntryMap, attributeKvMap, dictDataMap, groupPropertyNameList);
+
+            dictDeviceGraphList = this.dictDeviceService.listDictDeviceGraphs(tenantId, device.getDictDeviceId());
         }
 
         var ungrouped = DictDeviceGroupVO.builder().name(HSConstants.UNGROUPED).groupPropertyList(new ArrayList<>()).build();
@@ -359,6 +362,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .componentList(componentList)
                 .resultUngrouped(ungrouped)
                 .alarmTimesList(this.listAlarmTimesResult(tenantId, List.of(toUUID(id))))
+                .dictDeviceGraphs(dictDeviceGraphList)
                 .build();
     }
 

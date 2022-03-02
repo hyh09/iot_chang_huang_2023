@@ -48,4 +48,9 @@ public class DictDeviceGraphItem extends BasePO {
      * 排序
      */
     private Integer sort;
+
+    /**
+     * 连接符后缀
+     */
+    private String suffix;
 }

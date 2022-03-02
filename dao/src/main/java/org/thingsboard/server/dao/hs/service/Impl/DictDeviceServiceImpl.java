@@ -678,6 +678,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                                     DictDeviceGraphPropertyVO graphProperty = new DictDeviceGraphPropertyVO();
                                     var tsProperty = this.getTsPropertyByIdAndType(f.getPropertyId(), f.getPropertyType());
                                     BeanUtils.copyProperties(tsProperty, graphProperty);
+                                    graphProperty.setSuffix(f.getSuffix());
                                     return graphProperty;
                                 }).collect(Collectors.toList())).thenApplyAsync(e -> {
                             v.setProperties(e);
@@ -708,6 +709,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                                     DictDeviceGraphPropertyVO graphProperty = new DictDeviceGraphPropertyVO();
                                     var tsProperty = this.getTsPropertyByIdAndType(f.getPropertyId(), f.getPropertyType());
                                     BeanUtils.copyProperties(tsProperty, graphProperty);
+                                    graphProperty.setSuffix(f.getSuffix());
                                     return graphProperty;
                                 }).collect(Collectors.toList())).thenApplyAsync(e -> {
                             v.setProperties(e);
@@ -751,6 +753,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                         .propertyType(v.getPropertyType())
                         .sort(sortNum.get())
                         .propertyId(v.getId())
+                        .suffix(v.getSuffix())
                         .build();
             }).map(DictDeviceGraphItemEntity::new).collect(Collectors.toList()));
         return graphEntity.getId();
