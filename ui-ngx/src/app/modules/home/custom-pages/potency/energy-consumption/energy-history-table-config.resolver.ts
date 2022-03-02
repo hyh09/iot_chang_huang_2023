@@ -55,7 +55,7 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
         this.config.columns = [];
         (res || []).forEach((col, index) => {
           if (col !== 'createdTime') {
-            this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col]), () => ({}), false));
+            this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col] || ''), () => ({}), false));
           }
         });
         this.config.columns.push(new DateEntityTableColumn<any>('createdTime', 'potency.created-time', this.datePipe, '150px'));
