@@ -83,6 +83,7 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
 import org.thingsboard.server.dao.oauth2.OAuth2Service;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productioncalender.ProductionCalenderService;
 import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
@@ -288,6 +289,10 @@ public abstract class BaseController {
 
     @Autowired
     protected EnergyChartService energyChartService;
+
+    @Autowired
+    protected ProductionCalenderService productionCalenderService;
+
 /*
 
     @Autowired
