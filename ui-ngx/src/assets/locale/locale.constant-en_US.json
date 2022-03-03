@@ -3990,6 +3990,9 @@
     "order-excel": "Order excel",
     "download-template": "Download template",
     "drop-order": "Drop an excel or click to select a file to upload.",
-    "import-template-name": "Order import template.xlsx"
+    "import-template-name": "Order import template.xlsx",
+    "intended-capacity": "Intended capacity",
+    "actual-capacity": "Actual capacity",
+    "maintain-time": "Maintenance time"
   }
 }
