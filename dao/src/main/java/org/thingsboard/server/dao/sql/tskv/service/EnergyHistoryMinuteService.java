@@ -41,7 +41,6 @@ public class EnergyHistoryMinuteService  extends BaseSQLServiceImpl<EnergyHistor
     @Override
     @Transactional
     public void  saveByMinute(EntityId entityId, TsKvEntry tsKvEntry, String  title) {
-        log.info("测试日志:设备id{}遥测数据:{}标题:{}",entityId,tsKvEntry,title);
         EnergyHistoryMinuteEntity entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
         if(entityDatabase == null){
             EnergyHistoryMinuteEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);

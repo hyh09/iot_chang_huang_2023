@@ -3673,7 +3673,8 @@
     "separator": "分隔符",
     "add-associated-param-tip": "请点击右上角的“+”号来添加关联参数",
     "associated-param-empty": "暂无关联参数",
-    "device-param-required": "设备参数必填"
+    "device-param-required": "设备参数必填",
+    "associated-data": "关联数据"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",
@@ -3798,7 +3799,8 @@
     "device-comp": "设备部件",
     "device-history": "设备历史数据",
     "no-device-history": "找不到历史数据",
-    "no-trend": "该参数无趋势图"
+    "no-trend": "该参数无趋势图",
+    "param-not-config": "未指定参数"
   },
   "potency": {
     "potency": "效能分析",
