@@ -449,7 +449,6 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 updateInactivityStateIfExpired(ts, deviceId);
             }
         });
-        log.info("系统设备在线状态校正耗时" + (System.currentTimeMillis() - ts));
     }
 
     void fixedAllDeviceState() {
@@ -469,13 +468,13 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 if (!v.getBooleanValue().equals(isActive)) {
                     try {
                         this.attributeKvRepository.updateActiveByEntityId(v.getId().getEntityId(), isActive);
-                        log.info("设备在线状态校正：" + v.getId().getEntityId() + " 修改为：" + isActive);
+//                        log.info("设备在线状态校正：" + v.getId().getEntityId() + " 修改为：" + isActive);
                     } catch (Exception ignore) {
                     }
                 }
             }));
         }
-        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1) + " 共：" + deviceIds.size() + " 处理:" + activeDeviceUIds.size());
+//        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1) + " 共：" + deviceIds.size() + " 处理:" + activeDeviceUIds.size());
     }
 
     void updateInactivityStateIfExpired(long ts, DeviceId deviceId) {
