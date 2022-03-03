@@ -83,7 +83,7 @@ public class DictDeviceVO implements Image {
     @ApiModelProperty(value = "是否核心")
     private Boolean isCore;
 
-    @Digits(integer = 9, fraction=2, message = "额定能耗格式不正确")
+    @Digits(integer = 19, fraction=2, message = "额定能耗格式不正确")
     @ApiModelProperty(value = "额定能耗")
     private BigDecimal ratedCapacity;
 }
