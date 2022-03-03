@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
 import { DeviceCapacity, PotencyInterval, PotencyTop10 } from '@app/shared/models/custom/potency.models';
@@ -34,7 +34,8 @@ export class ProductionCapacityOverviewComponent extends EntityTableHeaderCompon
   constructor(
     protected store: Store<AppState>,
     public router: Router,
-    private potencyService: PotencyService
+    private potencyService: PotencyService,
+    protected cd: ChangeDetectorRef
   ) {
     super(store);
     this.isHistory = this.router.url.indexOf('history') > -1;
@@ -72,6 +73,8 @@ export class ProductionCapacityOverviewComponent extends EntityTableHeaderCompon
         type: '0'
       }).subscribe(res => {
         this.top10 = res || [];
+        this.cd.markForCheck();
+        this.cd.detectChanges();
       })
     }
   }
