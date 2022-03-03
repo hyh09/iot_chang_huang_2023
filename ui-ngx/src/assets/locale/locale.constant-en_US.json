@@ -3778,7 +3778,8 @@
     "separator": "Separator",
     "add-associated-param-tip": "Please click the '+' sign in the upper right corner to add associated parameter.",
     "associated-param-empty": "No associated parameter",
-    "device-param-required": "Device parameter is required."
+    "device-param-required": "Device parameter is required.",
+    "associated-data": "Associated data"
   },
   "menu-mng": {
     "menu-mng": "Menu management",
@@ -3902,7 +3903,8 @@
     "device-comp": "Device components",
     "device-history": "Device history data",
     "no-device-history": "No history data was found.",
-    "no-trend": "No trend chart to display"
+    "no-trend": "No trend chart to display",
+    "param-not-config": "No parameters specified"
   },
   "potency": {
     "potency": "Efficiency analysis",

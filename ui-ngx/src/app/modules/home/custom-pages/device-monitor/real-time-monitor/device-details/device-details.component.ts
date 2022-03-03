@@ -4,7 +4,7 @@ import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.
 import { ActionNotificationShow } from '@app/core/notification/notification.actions';
 import { AppState } from '@app/core/public-api';
 import { DeviceComp, DeviceCompTreeNode } from '@app/shared/models/custom/device-mng.models';
-import { AlarmTimesListItem, DeviceBaseInfo, DeviceProp, DevicePropGroup, DevicePropHistory } from '@app/shared/models/custom/device-monitor.models';
+import { AlarmTimesListItem, AssociatedProp, DeviceBaseInfo, DeviceProp, DevicePropGroup, DevicePropHistory } from '@app/shared/models/custom/device-monitor.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { PropDataChartComponent } from './prop-data-chart.component';
@@ -30,6 +30,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   alarmTimesList: AlarmTimesListItem[] = []; // 预警统计
   deviceData: DevicePropGroup[] = []; // 设备参数
   devcieComp: DeviceComp[] = []; // 设备部件
+  associatedProps: AssociatedProp[] = []; // 关联的参数
   propMap: { [name: string]: DeviceProp } = {};
   mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
   showRealTimeChart: boolean;
@@ -59,18 +60,45 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         this.baseInfo = { picture, name, factoryName, workShopName, productionLineName };
         this.deviceName = name;
         this.alarmTimesList = res.alarmTimesList || [];
+
+        this.associatedProps = res.dictDeviceGraphs || [];
+        const associatedPropNames = [];
+        this.associatedProps.forEach(associatedProp => {
+          associatedProp.firstPropName = ((associatedProp.properties || [])[0] || {}).name || '';
+          (associatedProp.properties || []).forEach(prop => {
+            associatedPropNames.push(prop.name);
+            this.propMap[prop.name] = prop;
+          });
+        });
+
         this.deviceData = res.resultList || [];
         this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
         this.devcieComp = res.componentList || [];
         this.deviceData.forEach(group => {
+          const sameIds = [];
           (group.groupPropertyList || []).forEach(prop => {
+            if (associatedPropNames.includes(prop.name)) {
+              sameIds.push(prop.id);
+              this.propMap[prop.name].content = prop.content;
+              return;
+            };
             this.propMap[prop.name] = prop;
           });
+          // 移除已被关联的设备参数
+          group.groupPropertyList = (group.groupPropertyList || []).filter(prop => (!sameIds.includes(prop.id)));
         });
         const setCompPropMap = (comp: DeviceComp) => {
+          const sameIds = [];
           (comp.propertyList || []).forEach(prop => {
+            if (associatedPropNames.includes(prop.name)) {
+              sameIds.push(prop.id);
+              this.propMap[prop.name].content = prop.content; 
+              return;
+            };
             this.propMap[prop.name] = prop;
           });
+          // 移除已被关联的部件参数
+          comp.propertyList = (comp.propertyList || []).filter(prop => (!sameIds.includes(prop.id)));
           if (comp.componentList && comp.componentList.length > 0) {
             comp.componentList.forEach(_comp => {
               setCompPropMap(_comp);
@@ -96,6 +124,14 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   }
 
   fetchPropHistoryData(propName: string, callFn?: Function, showTip: boolean = false) {
+    if (!propName) {
+      this.store.dispatch(new ActionNotificationShow({
+        message: this.translate.instant('device-mng.param-not-config'),
+        type: 'warn',
+        duration: 800
+      }));
+      return;
+    }
     this.currPropName = propName;
     this.relatedPropName = [];
     this.realTimeMonitorService.getPropHistoryData(this.deviceId, propName).subscribe(propData => {
