@@ -80,6 +80,7 @@ export interface DeviceProp {
   unit: string;
   chartId?: string;
   attributeNames?: string[];
+  associatedId?: string;
 }
 
 export interface DeviceHistoryProp {
@@ -107,6 +108,7 @@ export interface DevicePropGroup {
 
 export interface AssociatedPropItem extends ChartProp {
   content?: string;
+  associatedId?: string;
 }
 
 export interface AssociatedProp {

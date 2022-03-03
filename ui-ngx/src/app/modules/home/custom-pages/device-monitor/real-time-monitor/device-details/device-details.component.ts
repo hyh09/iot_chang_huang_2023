@@ -63,42 +63,71 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
 
         this.associatedProps = res.dictDeviceGraphs || [];
         const associatedPropNames = [];
+        const associationMap = {};
         this.associatedProps.forEach(associatedProp => {
+          associationMap[associatedProp.id] = associatedProp;
           associatedProp.firstPropName = ((associatedProp.properties || [])[0] || {}).name || '';
           (associatedProp.properties || []).forEach(prop => {
+            prop.associatedId = associatedProp.id;
             associatedPropNames.push(prop.name);
             this.propMap[prop.name] = prop;
           });
         });
+
+        const insertedAssociationIds = [];
 
         this.deviceData = res.resultList || [];
         this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
         this.devcieComp = res.componentList || [];
         this.deviceData.forEach(group => {
           const sameIds = [];
+          const associationIds = [];
           (group.groupPropertyList || []).forEach(prop => {
             if (associatedPropNames.includes(prop.name)) {
               sameIds.push(prop.id);
               this.propMap[prop.name].content = prop.content;
+              if (!associationIds.includes(this.propMap[prop.name].associatedId)) {
+                associationIds.push(this.propMap[prop.name].associatedId);
+              }
               return;
             };
             this.propMap[prop.name] = prop;
           });
           // 移除已被关联的设备参数
           group.groupPropertyList = (group.groupPropertyList || []).filter(prop => (!sameIds.includes(prop.id)));
+          // 添加关联合并的参数
+          associationIds.forEach(associationId => {
+            if (!insertedAssociationIds.includes(associationId)) {
+              group.groupPropertyList.push(associationMap[associationId]);
+              insertedAssociationIds.push(associationId);
+            }
+          });
         });
+
         const setCompPropMap = (comp: DeviceComp) => {
           const sameIds = [];
+          const associationIds = [];
           (comp.propertyList || []).forEach(prop => {
             if (associatedPropNames.includes(prop.name)) {
               sameIds.push(prop.id);
-              this.propMap[prop.name].content = prop.content; 
+              this.propMap[prop.name].content = prop.content;
+              if (!associationIds.includes(this.propMap[prop.name].associatedId)) {
+                associationIds.push(this.propMap[prop.name].associatedId);
+              }
               return;
             };
             this.propMap[prop.name] = prop;
           });
           // 移除已被关联的部件参数
           comp.propertyList = (comp.propertyList || []).filter(prop => (!sameIds.includes(prop.id)));
+          // 添加关联合并的参数
+          associationIds.forEach(associationId => {
+            if (!insertedAssociationIds.includes(associationId)) {
+              comp.propertyList.push(associationMap[associationId]);
+              insertedAssociationIds.push(associationId);
+            }
+          });
+
           if (comp.componentList && comp.componentList.length > 0) {
             comp.componentList.forEach(_comp => {
               setCompPropMap(_comp);
@@ -109,6 +138,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
           setCompPropMap(comp);
         });
         this.setMapOfExpandedComp();
+
         if (isMqtt) {
           this.fetchPropHistoryData(this.currPropName);
         } else if (this.deviceData.length > 0 && this.deviceData[0].groupPropertyList.length > 0) {
