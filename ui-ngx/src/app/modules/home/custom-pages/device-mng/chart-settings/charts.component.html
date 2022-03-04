@@ -1,23 +1,70 @@
-<div class="mat-padding" fxLayout="column" style="min-width: 360px;">
+<div class="mat-padding" fxLayout="column" style="min-width: 560px;">
   <form [formGroup]="entityForm">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
       <mat-form-field class="mat-block">
         <mat-label translate>device-mng.chart-title</mat-label>
-        <input matInput formControlName="name" required>
+        <input matInput formControlName="name" required autocomplete="off">
         <mat-error *ngIf="entityForm.get('name').hasError('required')">
           {{ 'device-mng.chart-title-required' | translate }}
         </mat-error>
       </mat-form-field>
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-mng.device-data</mat-label>
-        <mat-select formControlName="propertyIds" multiple required (selectionChange)="onSelectionChange()">
-          <mat-option *ngFor="let option of properties" [value]="option.id">{{ option.title || option.name }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="entityForm.get('propertyIds').invalid">
-          {{ 'device-mng.chart-prop-required' | translate }}
-        </mat-error>
-      </mat-form-field>
-      <mat-slide-toggle formControlName="enable" style="margin-top: 10px;">
+      <!--关联参数-->
+      <mat-expansion-panel [expanded]="propExpanded" (opened)="propExpanded = true" (closed)="propExpanded = false" style="margin-top: 0">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'device-mng.associated-params' | translate }}</mat-panel-title>
+          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+            <mat-icon
+              *ngIf="isEdit && propExpanded"
+              class="material-icons"
+              matTooltip="{{ 'device-mng.associated-param' | translate }}"
+              matTooltipPosition="above"
+              (click)="addParam($event)"
+            >add</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div 
+          *ngFor="let item of chartPropFormArray().controls; let $index = index"
+          formArrayName="properties"
+          fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+          class="list-form"
+        >
+          <ng-container [formGroupName]="$index">
+            <mat-form-field class="mat-block" fxFlex>
+              <mat-label>{{ 'device-mng.device-data' | translate }}</mat-label>
+              <mat-select [disabled]="(isLoading$ | async) || !isEdit" formControlName="id" (selectionChange)="onSelectionChange($event.value, $index)">
+                <mat-option *ngFor="let option of properties" [value]="option.id">{{ option.title || option.name }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="item.get('id').hasError('required')">
+                {{ 'device-mng.device-param-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="(isLoading$ | async) || !isEdit">
+              <mat-label translate>device-mng.separator</mat-label>
+              <input matInput formControlName="suffix" autocomplete="off">
+            </mat-form-field>
+            <button
+              *ngIf="isEdit"
+              mat-icon-button
+              type="button"
+              matTooltip="{{ 'action.delete' | translate }}"
+              matTooltipPosition="above"
+              (click)="removeParam($index)"
+            >
+              <mat-icon class="material-icons" >delete</mat-icon>
+            </button>
+          </ng-container>
+        </div>
+        <div *ngIf="isEdit && chartPropFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+          {{ 'device-mng.add-associated-param-tip' | translate }}
+        </div>
+        <div *ngIf="!isEdit && chartPropFormArray().controls.length === 0" fxFlex fxLayoutAlign="center center">
+          <nz-empty
+            nzNotFoundImage="../../../../../../assets/data-empty.svg"
+            nzNotFoundContent="{{ 'device-mng.associated-param-empty' | translate }}"
+          ></nz-empty>
+        </div>
+      </mat-expansion-panel>
+      <mat-slide-toggle formControlName="enable" style="margin-top: 1.25em;">
         {{ 'device-mng.chart-visible' | translate }}
       </mat-slide-toggle>
     </fieldset>

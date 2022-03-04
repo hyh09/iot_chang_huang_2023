@@ -4,5 +4,16 @@
   [nzDisabledDate]="disabledDate"
   [nzAllowClear]="false"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
-  (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
+<div class="interval-data-chart">
+  <div fxLayout="row" fxLayoutAlign="space-between center" class="header">
+    <div class="title">{{ 'potency.interval-energy-consumption' | translate: { deviceName: entitiesTableConfig.componentsData.deviceName} }}</div>
+    <nz-radio-group [(ngModel)]="keyNum" nzSize="small" (ngModelChange)="getIntervalData()">
+      <label nz-radio-button nzValue="1">{{ 'potency.water' | translate }}</label>
+      <label nz-radio-button nzValue="2">{{ 'potency.electricity' | translate }}</label>
+      <label nz-radio-button nzValue="3">{{ 'potency.gas' | translate }}</label>
+    </nz-radio-group>
+  </div>
+  <div #chartWrapper class="chart"></div>
+</div>

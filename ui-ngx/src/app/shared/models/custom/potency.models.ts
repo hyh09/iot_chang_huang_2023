@@ -43,3 +43,10 @@ export interface PotencyTop10Item {
 }
 
 export type PotencyTop10 = PotencyTop10Item[];
+
+export interface PotencyIntervalItem {
+  capacityOrEnergy: number;
+  dateTime: string;
+}
+
+export type PotencyInterval = PotencyIntervalItem[];

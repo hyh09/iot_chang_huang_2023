@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -15,6 +16,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
+import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
@@ -43,6 +45,9 @@ public class RTMonitorController extends BaseController {
 
     @Autowired
     DeviceMonitorService deviceMonitorService;
+
+    @Autowired
+    DeviceService deviceService;
 
     @Autowired
     ClientService clientService;
@@ -190,6 +195,23 @@ public class RTMonitorController extends BaseController {
     public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId, @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes) throws ThingsboardException {
         checkParameter("deviceId", deviceId);
         return this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId, isShowAttributes);
+    }
+
+    /**
+     * 查询设备历史数据-表头-图表
+     */
+    @ApiOperation(value = "查询设备历史数据-表头-图表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true)
+    })
+    @GetMapping("/rtMonitor/device/history/header/graphs")
+    public List<DictDeviceGraphVO> listRTMonitorHistoryGraphs(@RequestParam String deviceId) throws ThingsboardException {
+        checkParameter("deviceId", deviceId);
+        var device = deviceService.findDeviceById(getTenantId(), DeviceId.fromString(deviceId));
+        if (device.getDictDeviceId() != null)
+            return this.dictDeviceService.listDictDeviceGraphs(getTenantId(), device.getDictDeviceId());
+        else
+            return Lists.newArrayList();
     }
 
     /**

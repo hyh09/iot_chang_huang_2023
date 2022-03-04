@@ -16,7 +16,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
 
   private readonly config: EntityTableConfig<DeviceCapacity> = new EntityTableConfig<DeviceCapacity>();
   private oldFactoryId: string = '';
-  factroryChange$: BehaviorSubject<string> = new BehaviorSubject<string>('')
+  factroryChange$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   constructor(
     private potencyService: PotencyService,
@@ -40,7 +40,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
     }
 
     this.config.columns.push(
-      new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName), () => ({}), false),
+      new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName || ''), () => ({}), false),
       new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%')
     );
   }
@@ -90,7 +90,11 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       name: this.translate.instant('potency.go-to-history'),
       mdiIcon: 'mdi:history-data',
       isEnabled: () => (true),
-      onAction: ($event, entity) => this.router.navigateByUrl(`/potency/deviceCapacity/${entity.deviceId}/history`)
+      onAction: ($event, entity) => this.router.navigate([`/potency/deviceCapacity/${entity.deviceId}/history`], {
+        queryParams: {
+          deviceName: encodeURIComponent(entity.deviceName)
+        }
+      })
     }];
 
     return this.config;
