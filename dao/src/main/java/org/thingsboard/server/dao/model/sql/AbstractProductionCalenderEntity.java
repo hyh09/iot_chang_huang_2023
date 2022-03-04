@@ -36,19 +36,19 @@ public abstract class AbstractProductionCalenderEntity <T extends ProductionCale
     public long endTime;
 
     @Column(name = "tenant_id")
-    private UUID tenantId;
+    public UUID tenantId;
 
     @Column(name = "created_time")
-    private long createdTime;
+    public long createdTime;
 
     @Column(name = "created_user")
-    private UUID createdUser;
+    public UUID createdUser;
 
     @Column(name = "updated_time")
-    private long updatedTime;
+    public long updatedTime;
 
     @Column(name = "updated_user")
-    private UUID updatedUser;
+    public UUID updatedUser;
 
     public AbstractProductionCalenderEntity(){}
     public AbstractProductionCalenderEntity(ProductionCalender productionCalender){
@@ -107,5 +107,4 @@ public abstract class AbstractProductionCalenderEntity <T extends ProductionCale
         }
         return productionCalender;
     }
-
 }

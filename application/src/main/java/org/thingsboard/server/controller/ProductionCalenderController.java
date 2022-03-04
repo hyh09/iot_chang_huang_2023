@@ -58,7 +58,7 @@ public class ProductionCalenderController extends BaseController{
         }
     }
 
-    @ApiOperation("生产日历分页查询）")
+    @ApiOperation("生产日历分页查询")
     @RequestMapping(value = "/getPageList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryId", value = "工厂id",paramType = "query"),
