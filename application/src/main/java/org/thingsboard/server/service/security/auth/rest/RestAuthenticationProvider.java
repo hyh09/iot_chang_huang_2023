@@ -102,8 +102,6 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
          }else {
             user = userService.findByPhoneNumber(username);
         }
-
-        System.out.println("打印的结果:"+user);
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
@@ -127,7 +125,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
             SecurityUser securityUser = new SecurityUser(user, userCredentials.isEnabled(), userPrincipal);
             logLoginAction(user, authentication, ActionType.LOGIN, null);
-            log.info("====securityUser.getType();=>"+securityUser.getType());
+//            log.info("====securityUser.getType();=>"+securityUser.getType());
             return new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
         } catch (Exception e) {
             logLoginAction(user, authentication, ActionType.LOGIN, e);

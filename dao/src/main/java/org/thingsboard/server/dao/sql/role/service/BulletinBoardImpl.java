@@ -88,7 +88,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TrendVo resultResults = new TrendVo();
 
         try {
-            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
+//            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
             List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
             List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
             print("打印查询longs的数据", longs);
