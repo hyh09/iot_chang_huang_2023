@@ -17,13 +17,11 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.ProductionCalenderEntity;
 import org.thingsboard.server.dao.productioncalender.ProductionCalenderDao;
+import org.thingsboard.server.dao.sql.role.dao.JpaSqlTool;
 
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class JpaProductionCalenderDao implements ProductionCalenderDao {
@@ -32,6 +30,42 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     private ProductionCalenderRepository productionCalenderRepository;
     @Autowired
     private FactoryDao factoryDao;
+    @Autowired
+    private JpaSqlTool jpaSqlTool;
+
+
+    private Page<ProductionCalenderEntity> queryWhereSql(ProductionCalender productionCalender,Pageable pageable){
+        Map<String, Object> param = new HashMap<>();
+        StringBuffer  sonSql01 = new StringBuffer();
+        sonSql01.append(" select t1.* from hs_production_calendar as t1 " +
+                " inner join (" +
+                "    SELECT device_id,max(end_time)as end_time FROM hs_production_calendar " +
+                "    group by device_id " +
+                " )as t2 " +
+                " on t1.device_id = t2.device_id and t1.end_time = t2.end_time " +
+                " where 1 = 1  " );
+
+        if(productionCalender != null){
+            if(productionCalender.getFactoryId() != null){
+                sonSql01.append(" and t1.factory_id = :factoryId");
+                param.put("factoryId",productionCalender.getFactoryId());
+            }
+            if(StringUtils.isNotEmpty(productionCalender.getDeviceName())){
+                sonSql01.append(" and t1.device_name like :deviceName");
+                param.put("deviceName","%" + productionCalender.getDeviceName() + "%");
+            }
+            if(productionCalender.getStartTime() != null){
+                sonSql01.append(" and t1.start_time < :startTime");
+                param.put("startTime",productionCalender.getStartTime());
+            }
+            if(productionCalender.getEndTime() != null){
+                sonSql01.append(" and t1.end_time > :endTime");
+                param.put("endTime",productionCalender.getEndTime());
+            }
+        }
+        return jpaSqlTool.querySql(sonSql01.toString(), param, pageable, "productionCalendarEntity_01");
+    }
+
 
     /**
      * 新增/修改
@@ -84,14 +118,12 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
      * @return
      */
     @Override
-    public PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink) {
+    public PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink){
         List<ProductionCalender> result = new ArrayList<>();
-        // 动态条件查询
-        Specification<ProductionCalenderEntity> specification = dynamicCondition(productionCalender);
-        Pageable pageable = DaoUtil.toPageable(pageLink);
-        Page<ProductionCalenderEntity> productionCalenderEntities = productionCalenderRepository.findAll(specification, pageable);
+        Pageable pageable1 = DaoUtil.toPageable(pageLink);
+        Page<ProductionCalenderEntity> page = queryWhereSql(productionCalender,pageable1);// productionCalenderRepository.findPage(productionCalender.factoryId, productionCalender.getDeviceName(), productionCalender.getStartTime(), productionCalender.getEndTime(),pageable1);
         //转换数据
-        List<ProductionCalenderEntity> content = productionCalenderEntities.getContent();
+        List<ProductionCalenderEntity> content = page.getContent();
 
         if(CollectionUtils.isNotEmpty(content)){
             content.forEach(i->{
@@ -99,7 +131,7 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
             });
         }
         PageData<ProductionCalender> resultPage = new PageData<>();
-        resultPage = new PageData<ProductionCalender>(result,productionCalenderEntities.getTotalPages(),productionCalenderEntities.getTotalElements(),productionCalenderEntities.hasNext());
+        resultPage = new PageData<ProductionCalender>(result,page.getTotalPages(),page.getTotalElements(),page.hasNext());
         return resultPage;
     }
 

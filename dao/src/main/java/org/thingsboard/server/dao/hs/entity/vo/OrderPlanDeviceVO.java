@@ -37,19 +37,15 @@ public class OrderPlanDeviceVO {
     @ApiModelProperty(value = "设备名称", notes = "仅用于展示")
     private String deviceName;
 
-    @NotNull
     @ApiModelProperty(value = "计划开始时间", required = true)
     private Long intendedStartTime;
 
-    @NotNull
     @ApiModelProperty(value = "计划结束时间", required = true)
     private Long intendedEndTime;
 
-    @NotNull
     @ApiModelProperty(value = "实际开始时间", required = true)
     private Long actualStartTime;
 
-    @NotNull
     @ApiModelProperty(value = "实际结束时间", required = true)
     private Long actualEndTime;
 
