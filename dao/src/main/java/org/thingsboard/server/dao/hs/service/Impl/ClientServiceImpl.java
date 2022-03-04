@@ -594,7 +594,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             log.trace("查询设备指定时间段产能：" + "empty");
             return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() == null).filter(f -> f.getEndTime() == null).collect(Collectors.toList()));
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList()));
             log.trace("查询设备指定时间段产能：" + dataMap);
             var deviceCapacities = plans.stream().map(v -> OrderDeviceCapacityBO.builder()
                     .planId(toUUID(v.getId()))
@@ -620,7 +620,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             log.trace("查询设备指定时间段产能：" + "empty");
             return Maps.newHashMap();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() == null).filter(f -> f.getEndTime() == null).collect(Collectors.toList())).entrySet().stream()
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList())).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, v -> new BigDecimal(v.getValue())));
             log.trace("查询设备指定时间段产能：" + dataMap);
             return dataMap;
