@@ -345,9 +345,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
     private  void print(String str,Object   obj)  {
         try {
-            ObjectMapper mapper=new ObjectMapper();
-            String jsonStr=mapper.writeValueAsString(obj);
-            log.info("[json]"+str+jsonStr);
+//            ObjectMapper mapper=new ObjectMapper();
+//            String jsonStr=mapper.writeValueAsString(obj);
+////            log.info("[json]"+str+jsonStr);
         }catch (Exception e)
         {
             log.info(str+obj);
