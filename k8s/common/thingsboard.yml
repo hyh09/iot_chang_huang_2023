@@ -30,7 +30,7 @@ spec:
         app: tb-js-executor
     spec:
       imagePullSecrets:
-        - name: aliyunregcred
+        - name: zhowsregcred
       containers:
       - name: server
         imagePullPolicy: Always
@@ -68,7 +68,7 @@ spec:
         app: tb-mqtt-transport
     spec:
       imagePullSecrets:
-        - name: aliyunregcred
+        - name: zhowsregcred
       volumes:
         - name: tb-mqtt-transport-config
           configMap:
@@ -146,7 +146,7 @@ spec:
         app: tb-http-transport
     spec:
       imagePullSecrets:
-        - name: aliyunregcred
+        - name: zhowsregcred
       volumes:
         - name: tb-http-transport-config
           configMap:
@@ -221,7 +221,7 @@ spec:
         app: tb-coap-transport
     spec:
       imagePullSecrets:
-        - name: aliyunregcred
+        - name: zhowsregcred
       volumes:
         - name: tb-coap-transport-config
           configMap:
@@ -290,7 +290,7 @@ spec:
         app: tb-lwm2m-transport
     spec:
       imagePullSecrets:
-        - name: aliyunregcred
+        - name: zhowsregcred
       volumes:
         - name: tb-lwm2m-transport-config
           configMap:
@@ -359,7 +359,7 @@ spec:
         app: tb-web-ui
     spec:
       imagePullSecrets:
-        - name: aliyunregcred
+        - name: zhowsregcred
       containers:
       - name: server
         imagePullPolicy: Always

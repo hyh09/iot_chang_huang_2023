@@ -6,38 +6,40 @@ stages:
 variables:
   #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   #MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_JOB_NAME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
   - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
-
-
-cache:
-  paths:
-    - .m2/repository
-  # keep cache across branch
-  key: "$CI_JOB_NAME"
-
+  - export GRADLE_USER_HOME=`pwd`/.gradle
 
 # 打包并构建镜像
 package:
   stage: package
+  cache:
+    paths:
+      - .m2/repository
+      - .gradle/wrapper
+      - .gradle/caches
+      - ui-ngx/node_modules
+    # keep cache across branch
+    key: "${CI_COMMIT_REF_SLUG}"
   image: 47.110.145.204:8084/huansiyl/jdk11-mvn-node-docker
   retry: 1
   tags:
     - hz-k8s-iot-test
   script:
     - echo "打包并构建镜像"
-    - npm i pkg-fetch -g
-    - npm i pkg -g
-    - mvn $MAVEN_CLI_OPTS clean install -DskipTests -Dhttps.protocols=TLSv1.2
-    - ls application/target
+    - mvn $MAVEN_CLI_OPTS clean install  -Dmaven.test.skip=true
+    - mvn $MAVEN_CLI_OPTS clean install -pl tb-node -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
+    - mvn $MAVEN_CLI_OPTS clean install -pl web-ui -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
   only:
     - dev
   after_script:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
+    - echo "删除无用镜像"
+    - docker rmi `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
     
 # 打包并构建镜像
 push:
@@ -48,6 +50,8 @@ push:
   script:
     - echo "推送镜像"
     - docker info
+    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
+    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
   only:
     - dev
   after_script:

@@ -24,3 +24,30 @@ spec:
   hostPath:
     path: "/mnt/upload"
 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tb-node-log-pv-claim
+  namespace: hsyl-iot
+  labels:
+    app: tb-node-log
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tb-node-log-pv-volume
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/logs"
+
