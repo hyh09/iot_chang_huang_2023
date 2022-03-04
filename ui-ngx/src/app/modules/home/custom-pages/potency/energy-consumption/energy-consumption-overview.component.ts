@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { PotencyService } from '@app/core/http/custom/potency.service';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
@@ -21,7 +21,8 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
 
   constructor(
     protected store: Store<AppState>,
-    private potencyService: PotencyService
+    private potencyService: PotencyService,
+    protected cd: ChangeDetectorRef
   ) {
     super(store);
   }
@@ -47,6 +48,8 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
         type: '1'
       }).subscribe(res => {
         this.top10 = res || [];
+        this.cd.markForCheck();
+        this.cd.detectChanges();
       })
     }
   }

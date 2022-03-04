@@ -56,6 +56,8 @@ export interface DeviceComp {
   type?: string;
   version?: string;
   warrantyPeriod?: string;
+  ratedCapacity?: string;
+  isCore?: boolean;
   propertyList?: DeviceCompProp[]
 }
 
