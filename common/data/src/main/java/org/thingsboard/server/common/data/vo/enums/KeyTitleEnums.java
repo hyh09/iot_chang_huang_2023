@@ -80,7 +80,7 @@ public enum KeyTitleEnums {
 
         for(KeyTitleEnums enums:KeyTitleEnums.values())
         {
-            if(pcCode.equals(enums.getCode()))
+            if(pcCode.equals(enums.getPcCode()))
             {
                 return enums;
             }
