@@ -51,6 +51,7 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
     const planDevices = this.data.planDevices;
     const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, maintainStartTime, maintainEndTime } = (planDevices || {});
     this.orderDeviceForm = this.fb.group({
+      id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : '', Validators.required],
       intendedCapacity: [planDevices ? planDevices.intendedCapacity : ''],
       actualCapacity: [planDevices ? planDevices.actualCapacity : ''],
@@ -96,21 +97,22 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
   save() {
     if (this.orderDeviceForm.valid) {
       const {
-        deviceId, intendedCapacity, actualCapacity, intendedStartTime,
+        id, deviceId, intendedCapacity, actualCapacity, intendedStartTime,
         intendedEndTime, actualStartTime, actualEndTime, enabled, maintainStartTime, maintainEndTime
       } = this.orderDeviceForm.value
       this.dialogRef.close({
         ...(this.data.planDevices || {}),
+        id,
         deviceId,
         intendedCapacity,
         actualCapacity,
         deviceName: this.deviceMap[deviceId].name,
-        intendedStartTime: new Date(intendedStartTime).getTime(),
-        intendedEndTime: new Date(intendedEndTime).getTime(),
-        actualStartTime: new Date(actualStartTime).getTime(),
-        actualEndTime: new Date(actualEndTime).getTime(),
-        maintainStartTime: new Date(maintainStartTime).getTime(),
-        maintainEndTime: new Date(maintainEndTime).getTime(),
+        intendedStartTime: intendedStartTime ? new Date(intendedStartTime).getTime() : null,
+        intendedEndTime: intendedEndTime ? new Date(intendedEndTime).getTime() : null,
+        actualStartTime: actualStartTime ? new Date(actualStartTime).getTime() : null,
+        actualEndTime: actualEndTime ? new Date(actualEndTime).getTime() : null,
+        maintainStartTime: maintainStartTime ? new Date(maintainStartTime).getTime() : null,
+        maintainEndTime: maintainEndTime ? new Date(maintainEndTime).getTime() : null,
         enabled
       });
     }
