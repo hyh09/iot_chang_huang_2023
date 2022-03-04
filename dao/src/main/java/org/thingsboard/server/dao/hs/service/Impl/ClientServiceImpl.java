@@ -766,20 +766,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
-     * 根据当前登录人获得全部设备的在线状态
-     *
-     * @param tenantId  租户Id
-     * @param factoryId 工厂Id
-     * @return 当前登录人获得全部设备的在线状态
-     */
-    @Override
-    public Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId, UUID factoryId) {
-        var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
-        var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
-        return this.listDevicesOnlineStatus(deviceIds);
-    }
-
-    /**
      * 组装设备请求 specification
      *
      * @param tenantId 租户Id
