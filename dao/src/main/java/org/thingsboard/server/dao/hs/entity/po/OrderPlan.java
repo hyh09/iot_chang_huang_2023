@@ -6,6 +6,8 @@ import lombok.*;
 import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
+import java.math.BigDecimal;
+
 /**
  * 订单设备
  *
@@ -51,6 +53,18 @@ public class OrderPlan extends BasePO {
 
     @ApiModelProperty(value = "排序值")
     private Integer sort;
+
+    @ApiModelProperty(value = "实际产能")
+    private BigDecimal actualCapacity;
+
+    @ApiModelProperty(value = "计划产能")
+    private BigDecimal intendedCapacity;
+
+    @ApiModelProperty(value = "维护开始时间")
+    private Long maintainStartTime;
+
+    @ApiModelProperty(value = "维护结束时间")
+    private Long maintainEndTime;
 
     public DeviceCapacityVo toDeviceCapacityVO() {
         DeviceCapacityVo capacityVO = new DeviceCapacityVo();

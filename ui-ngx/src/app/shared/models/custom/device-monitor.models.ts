@@ -1,5 +1,6 @@
 import { BaseData, DeviceProfile } from "@app/shared/public-api";
 import { AlarmRecordId } from "../id/custom/alarm-record-id.models";
+import { ChartProp } from "./chart-settings.model";
 import { DeviceComp } from "./device-mng.models";
 
 export enum AlarmStatusType {
@@ -75,10 +76,11 @@ export interface DeviceProp {
   content?: string;
   createdTime?: number;
   dictDataId?: string;
-  title: string;
+  title?: string;
   unit: string;
   chartId?: string;
   attributeNames?: string[];
+  associatedId?: string;
 }
 
 export interface DeviceHistoryProp {
@@ -104,9 +106,24 @@ export interface DevicePropGroup {
   groupPropertyList: DeviceProp[]
 }
 
+export interface AssociatedPropItem extends ChartProp {
+  content?: string;
+  associatedId?: string;
+}
+
+export interface AssociatedProp {
+  id?: string;
+  name: string;
+  enable: boolean;
+  properties: AssociatedPropItem[];
+  createdTime: number;
+  firstPropName: string;
+}
+
 export interface DeviceDetails extends DeviceBaseInfo {
   alarmTimesList?: AlarmTimesListItem[];
   resultList?: DevicePropGroup[]; // 设备参数
   resultUngrouped?: DevicePropGroup; // 设备属性
   componentList?: DeviceComp[]; // 设备部件
+  dictDeviceGraphs?: AssociatedProp[]; // 关联的属性
 }

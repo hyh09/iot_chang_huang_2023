@@ -338,6 +338,10 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             orderPlanEntity.setTenantId(tenantId.getId());
             orderPlanEntity.setOrderId(orderEntity.getId());
             orderPlanEntity.setSort(sort.get());
+            orderPlanEntity.setActualCapacity(v.getActualCapacity().stripTrailingZeros().toPlainString());
+            orderPlanEntity.setIntendedCapacity(v.getIntendedCapacity().stripTrailingZeros().toPlainString());
+            orderPlanEntity.setMaintainEndTime(v.getMaintainEndTime());
+            orderPlanEntity.setMaintainStartTime(v.getMaintainStartTime());
             sort.addAndGet(1);
             return orderPlanEntity;
         }).collect(Collectors.toList()));
