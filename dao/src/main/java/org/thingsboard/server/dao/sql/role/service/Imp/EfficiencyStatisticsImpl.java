@@ -847,7 +847,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             return  new ArrayList<>();
         }
-           KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+           KeyTitleEnums enums = KeyTitleEnums.getEnumsByPCCode(vo.getKeyNum());
         return    entities.stream().map(m1 ->{
             ResultEnergyTopTenVo  vo1= new ResultEnergyTopTenVo();
             vo1.setDeviceId(m1.getEntityId());
