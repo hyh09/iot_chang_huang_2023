@@ -1279,4 +1279,33 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
 
 
+
+
+
+
+
+
+
+    private  Map<String,String> getEnergyHistroyMap(TsSqlDayVo vo)
+    {
+        Map<String,String> historyMap  = new HashMap<>();
+        setHistoryMapValue(vo,historyMap,KeyTitleEnums.key_water);
+        setHistoryMapValue(vo,historyMap,KeyTitleEnums.key_cable);
+        setHistoryMapValue(vo,historyMap,KeyTitleEnums.key_gas);
+     return  historyMap;
+    }
+
+    private void
+
+    setHistoryMapValue(TsSqlDayVo vo,Map<String,String> historyMap,KeyTitleEnums enums)
+    {
+        historyMap.put(enums.getgName(),effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,false,enums.getCode()));
+    }
+
+
+
+
+
+
+
 }
