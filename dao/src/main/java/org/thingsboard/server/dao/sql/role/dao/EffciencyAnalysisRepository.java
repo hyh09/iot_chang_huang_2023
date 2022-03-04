@@ -256,7 +256,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
             sql.append(" and  d1.flg = true");
             sql.append(" ORDER BY to_number(h1.capacity_added_value,'99999999999999999999999999.9999') DESC ");
         }else {
-            KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(vo.getKeyNum());
+            KeyTitleEnums enums = KeyTitleEnums.getEnumsByPCCode(vo.getKeyNum());
             if (enums == KeyTitleEnums.key_water) {
                 sql.append(" ORDER BY to_number(h1.water_added_value,'99999999999999999999999999.9999') DESC ");
             }
