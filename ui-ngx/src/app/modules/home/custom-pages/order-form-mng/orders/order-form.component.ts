@@ -116,6 +116,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
 
   createOrderDeviceControl(planDevices?: OrderDevice): AbstractControl {
     return this.fb.group({
+      id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : ''],
       deviceName: [planDevices ? planDevices.deviceName : ''],
       enabled: [planDevices ? planDevices.enabled : false],
