@@ -16,6 +16,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Data
@@ -107,8 +108,8 @@ public class OrderPlanEntity extends BasePgEntity<OrderPlanEntity> implements To
         common.setIntendedStartTime(intendedStartTime);
         common.setEnabled(enabled);
         common.setSort(sort);
-        common.setActualCapacity(new BigDecimal(Objects.requireNonNull(actualCapacity, "0")));
-        common.setIntendedCapacity(new BigDecimal(Objects.requireNonNull(actualCapacity, "0")));
+        common.setActualCapacity(Optional.ofNullable(actualCapacity).map(BigDecimal::new).orElse(null));
+        common.setIntendedCapacity(Optional.ofNullable(intendedCapacity).map(BigDecimal::new).orElse(null));
         common.setMaintainEndTime(maintainEndTime);
         common.setMaintainStartTime(maintainStartTime);
 
