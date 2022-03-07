@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.dao.board.BulletinV3BoardVsSvc;
 import org.thingsboard.server.dao.sql.role.entity.BoardV3DeviceDitEntity;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +47,16 @@ public class BulletinBoardV3Controller   extends BaseController {
                                                                @RequestParam(required = false ,value = "productionLineId")  String productionLineId,
                                                                @RequestParam(required = false ,value = "deviceId")  String deviceId)
     {
-        TsSqlDayVo tsSqlDayVo =    TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
-        return bulletinV3BoardVsSvc.queryDeviceDictionaryByEntityVo(tsSqlDayVo);
+
+        try {
+            TsSqlDayVo tsSqlDayVo =    TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
+            tsSqlDayVo.setTenantId(getTenantId().getId());
+            return bulletinV3BoardVsSvc.queryDeviceDictionaryByEntityVo(tsSqlDayVo);
+
+        } catch (ThingsboardException e) {
+            log.error("【看板3期】查询设备字典接口异常：{}",e);
+            e.printStackTrace();
+            return  new ArrayList<>();
+        }
     }
 }
