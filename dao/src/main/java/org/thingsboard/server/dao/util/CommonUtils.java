@@ -232,8 +232,6 @@ public class CommonUtils {
         // 获取本月第一天的时间戳
         Date zero = c.getTime();
         String s = format1.format(zero);
-        System.out.println("==获取本月第一天的时间戳====>"+s);
-        System.out.println(c.getTimeInMillis());
         vo.setStartTime(zero.getTime());
         vo.setStrStartTime(s);
 
@@ -250,10 +248,8 @@ public class CommonUtils {
         //将毫秒至0
         ca.set(Calendar.MILLISECOND, 59);
         // 获取本月最后一天的时间戳
-        System.out.println(ca.getTimeInMillis());
         Date zero2 = ca.getTime();
         String s2 = format1.format(zero2);
-        System.out.println("==获取本月第最后天的时间戳====>"+s2);
         vo.setEndTime(zero2.getTime());
         vo.setStrEndTime(s2);
 
@@ -330,6 +326,26 @@ public class CommonUtils {
 
 
     /**
+     *  Conversion minutes
+     * @param ts
+     * @return 转换分钟
+     */
+    public  static Long getConversionMinutes(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        int second =localDateTime.getSecond();
+        localDateTime1  =  LocalDateTime.of(year,month,day,hour,minute,0,0);
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+    /**
      * localDateTime转long
      * @param localDateTime
      * @return
@@ -374,9 +390,6 @@ public class CommonUtils {
             Calendar tempStart = Calendar.getInstance();
             tempStart.setTime(startTime1);
             while (startTime1.getTime() <= endTime1.getTime()) {
-                System.out.println(format2.format(startTime1));
-//                    tempStart.add(Calendar.DAY_OF_YEAR, -1);
-
                 startTime1 = tempStart.getTime();
                 tempStart.add(Calendar.MINUTE, 30);//30分钟前的时间
                 resultTimeList.add(startTime1.getTime());

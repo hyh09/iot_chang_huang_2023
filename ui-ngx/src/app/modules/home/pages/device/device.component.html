@@ -22,7 +22,8 @@
           [fxShow]="!isEdit && deviceScope === 'tenant' && !isAssignedToCustomer(entity) && !entity?.customerIsPublic">
     {{'device.make-public' | translate }}
   </button>
-  <button mat-raised-button color="primary"
+  <button *ngIf="utils.hasPermission('device-mng.distribute-device')"
+          mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'distributeDevice')"
           [fxShow]="!isEdit && deviceScope === 'tenant' && !isAssignedToCustomer(entity)">
@@ -100,7 +101,7 @@
         <mat-label translate>device-mng.device-dic</mat-label>
         <mat-select formControlName="dictDeviceId">
           <mat-option *ngFor="let option of deviceDictionaries" [value]="option.id">
-            {{ option.name }}
+            {{ option.name && option.model ? (option.name + ' (' + option.model + ')') : option.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>

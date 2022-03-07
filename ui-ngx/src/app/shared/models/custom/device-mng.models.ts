@@ -16,6 +16,7 @@ export interface DeviceProperty {
 }
 
 export interface DeviceData {
+  id?: string;
   name: string;
   content: string;
   title: string;
@@ -23,6 +24,7 @@ export interface DeviceData {
 }
 
 export interface DeviceDataGroup {
+  id?: string;
   name: string;
   groupPropertyList: Array<DeviceData>;
   editable?: boolean;
@@ -54,6 +56,8 @@ export interface DeviceComp {
   type?: string;
   version?: string;
   warrantyPeriod?: string;
+  ratedCapacity?: string;
+  isCore?: boolean;
   propertyList?: DeviceCompProp[]
 }
 
@@ -70,6 +74,8 @@ export interface DeviceDictionary extends BaseData<DeviceDictionaryId> {
   model: string;
   version: string;
   warrantyPeriod: string;
+  ratedCapacity: string;
+  isCore: boolean;
   picture: string;
   deviceModel: File;
   fileId: string;

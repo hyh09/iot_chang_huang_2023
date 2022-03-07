@@ -66,4 +66,9 @@ export class UserMngService {
     return this.http.post(`/api/user/getCode`, { key: "1", tenantId }, { responseType: 'text' });
   }
 
+  // 设置用户是否为系统用户（0：否  1：是）
+  public switchSysUser(params: { id: string; operationType: 0 | 1; }, config?: RequestConfig) {
+    return this.http.post(`/api/user/updateOperationType`, params, { responseType: 'text' });
+  }
+
 }

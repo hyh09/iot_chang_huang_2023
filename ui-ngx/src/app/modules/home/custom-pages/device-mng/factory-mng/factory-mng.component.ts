@@ -234,7 +234,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     if (factoryId) {
       this.router.navigate([`/deviceManagement/factoryManagement/${factoryId}/users`], {
         queryParams: {
-          factoryName
+          factoryName: encodeURIComponent(factoryName)
         }
       });
     }

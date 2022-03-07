@@ -9,13 +9,15 @@
       min-height: 700px;
       min-width: 1100px;
       .left-content {
-        width: calc(0.24 * (100% - 32px));
+        width: 280px;
         border-radius: 4px;
         overflow: hidden;
       }
-      .center-content,
+      .center-content {
+        width: calc(0.48 * (100% - 32px - 280px));
+      }
       .right-content {
-        width: calc(0.38 * (100% - 32px));
+        width: calc(0.52 * (100% - 32px - 280px));
       }
       .device-list {
         overflow: auto;
@@ -35,6 +37,7 @@
             padding: 16px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
             .device-name {
               white-space: nowrap;
               overflow: hidden;

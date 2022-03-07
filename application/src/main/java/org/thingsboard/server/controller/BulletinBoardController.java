@@ -13,8 +13,8 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.bodrd.TodaySectionHistoryVo;
 import org.thingsboard.server.common.data.vo.home.ResultHomeCapAppVo;
-import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.TrendVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.ConsumptionVo;
@@ -138,30 +138,39 @@ public class BulletinBoardController extends BaseController{
 
 
 
-    private  String getValueByTime(String factoryId,String workshopId,String productionLineId, String deviceId,long startTime, long EndTime) throws ThingsboardException {
-        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
-        queryTsKvVo.setTenantId(getTenantId().getId());
-        if(StringUtils.isNotEmpty(factoryId)) {
-            queryTsKvVo.setFactoryId(UUID.fromString(factoryId));
-        }
-        if(StringUtils.isNotEmpty(workshopId)) {
-            queryTsKvVo.setWorkshopId(UUID.fromString(workshopId));
-        }
-        if(StringUtils.isNotEmpty(productionLineId)) {
-            queryTsKvVo.setProductionLineId(UUID.fromString(productionLineId));
-        }
-        if(StringUtils.isNotEmpty(deviceId)) {
-            queryTsKvVo.setDeviceId(UUID.fromString(deviceId));
-        }
-        queryTsKvVo.setStartTime(startTime);
-        queryTsKvVo.setEndTime(EndTime);
-        queryTsKvVo.setFilterFirstFactory(false);
-        ResultCapAppVo resultCapAppVo =   efficiencyStatisticsSvc.queryCapApp(queryTsKvVo,getTenantId());
-        if(resultCapAppVo != null)
+    @ApiOperation(value = "今天 ，总产量,历史产量")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query"),
+            @ApiImplicitParam(name = "workshopId",value = "工厂的",dataType = "string",paramType = "query"),
+            @ApiImplicitParam(name = "productionLineId",value = "工厂的",dataType = "string",paramType = "query"),
+            @ApiImplicitParam(name = "deviceId",value = "工厂的",dataType = "string",paramType = "query")
+
+    })
+    @RequestMapping(value = "/todaySectionHistory", method = RequestMethod.GET)
+    @ResponseBody
+    public TodaySectionHistoryVo todaySectionHistory(@RequestParam(required = false ,value = "startTime")  Long startTime,
+                                                     @RequestParam(required = false ,value = "endTime")  Long endTime,
+                                                     @RequestParam(required = false ,value = "factoryId")  String factoryId,
+                                                     @RequestParam(required = false ,value = "workshopId")  String workshopId,
+                                                     @RequestParam(required = false ,value = "productionLineId")  String productionLineId,
+                                                     @RequestParam(required = false ,value = "deviceId")  String deviceId
+    )
+    {
+        TodaySectionHistoryVo result = new TodaySectionHistoryVo();
+
+        try {
+            TsSqlDayVo tsSqlDayVo =    TsSqlDayVo.constructionTsSqlDayVo(factoryId,workshopId,productionLineId,deviceId);
+            tsSqlDayVo.setTenantId(getTenantId().getId());
+            tsSqlDayVo.setStartTime(startTime);
+            tsSqlDayVo.setEndTime(endTime);
+            return efficiencyStatisticsSvc.todaySectionHistory(tsSqlDayVo);
+
+        }catch (Exception e)
         {
-            return  resultCapAppVo.getTotalValue();
+            e.printStackTrace();
+
         }
-        return  "0";
+        return  result;
     }
 
 

@@ -4,8 +4,8 @@ export interface DeviceCapacity extends BaseData<any> {
   deviceId: string;
   value: string;
   deviceName: string;
-  productionName: string;
-  workshopName: string;
+  productionName?: string;
+  workshopName?: string;
 }
 
 export interface DeviceCapacityList {
@@ -21,5 +21,32 @@ export interface DeviceEnergyConsumptionList extends PageData<object> {
 }
 
 export interface RunningState {
-  [key: string]: { time: number; value: string; }[];
+  tableName: string;
+  keyName?: string;
+  chartId?: string;
+  properties: {
+    title: string;
+    name?: string;
+    unit?: string;
+    tsKvs: {
+      ts: number;
+      value: string;
+    }[];
+  }[];
 }
+
+export interface PotencyTop10Item {
+  deviceId: string;
+  deviceName: string;
+  value: string;
+  percent?: number;
+}
+
+export type PotencyTop10 = PotencyTop10Item[];
+
+export interface PotencyIntervalItem {
+  capacityOrEnergy: number;
+  dateTime: string;
+}
+
+export type PotencyInterval = PotencyIntervalItem[];

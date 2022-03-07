@@ -73,6 +73,12 @@ public class DeviceDetailResult {
     private DictDeviceGroupVO resultUngrouped;
 
     /**
+     * 图表
+     */
+    @ApiModelProperty(value = "相关的图表数据")
+    private List<DictDeviceGraphVO> dictDeviceGraphs;
+
+    /**
      * 预警次数列表，从远及近
      */
     @ApiModelProperty("预警次数列表，从远及近")

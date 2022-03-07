@@ -45,7 +45,14 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     this.config.columns.push(
       new EntityTableColumn<DataDictionary>('code', 'device-mng.code', '50%'),
       new EntityTableColumn<DataDictionary>('name', 'device-mng.name', '50%'),
-      new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({ icon }) => (icon), () => ({}), false, () => ({}), () => undefined, false, null, true),
+      new EntityTableColumn<DataDictionary>('icon', 'device-mng.icon', '80px', ({ icon, picture }) => {
+        if (icon) {
+          return icon;
+        } else if (picture) {
+          return `<img src=${picture} style="width: 24px; height: 24px;" />`;
+        }
+        return '';
+      }, () => ({}), false, () => ({}), () => undefined, false, null, ({ icon }) => (!!icon)),
       new EntityTableColumn<DataDictionary>('type', 'device-mng.data-type', '150px', ({type}) => {
         if (this.config.componentsData.dataTypeMap[type]) {
           return this.translate.instant(this.config.componentsData.dataTypeMap[type]);

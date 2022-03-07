@@ -1,17 +1,28 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.sqlts.latest.SearchTsKvLatestRepository;
+import org.thingsboard.server.dao.util.StringUtilToll;
 
 import javax.persistence.Query;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @program: thingsboard
@@ -22,6 +33,8 @@ import java.util.Map;
 @Slf4j
 @Repository
 public class EffciencyAnalysisRepository extends JpaSqlTool{
+
+   @Autowired  private SearchTsKvLatestRepository searchTsKvLatestRepository;
 
 
     /**pc端产能接口 */
@@ -187,48 +200,77 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     }
 
 
-//    /**
-//     * sql片段
-//     * @param queryTsKvVo
-//     * @param sonSql01
-//     * @param param
-//     */
-//    private  void sqlPartOnDevice(QueryTsKvVo queryTsKvVo,StringBuffer  sonSql01,Map<String, Object> param)
-//    {
-//        if(queryTsKvVo.getTenantId() != null)
-//        {
-//            sonSql01.append(" and  d1.tenant_id = :tenantId");
-//            param.put("tenantId", queryTsKvVo.getTenantId());
-//            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
-//
-//        }
-//        if(queryTsKvVo.getFactoryId() != null)
-//        {
-//            sonSql01.append(" and  d1.factory_id = :factoryId");
-//            param.put("factoryId", queryTsKvVo.getFactoryId());
-//        }
-//        if(queryTsKvVo.getWorkshopId() != null)
-//        {
-//            sonSql01.append(" and  d1.workshop_id = :workshopId");
-//            param.put("workshopId", queryTsKvVo.getWorkshopId());
-//        }
-//        if(queryTsKvVo.getProductionLineId() != null)
-//        {
-//            sonSql01.append(" and  d1.production_line_id = :productionLineId");
-//            param.put("productionLineId", queryTsKvVo.getProductionLineId());
-//        }
-//        if(queryTsKvVo.getDeviceId()  != null) {
-//            sonSql01.append(" and  d1.id = :did");
-//            param.put("did", queryTsKvVo.getDeviceId());
-//        }
-//     }
+    /**
+
+     查询 能耗  产能历史数据
+     * @param vo
+     * @param isCap 是否是产能的查询
+     * @param type
+     * @return
+     */
+    public String queryHistoricalTelemetryData(TsSqlDayVo vo,boolean isCap,String type)
+    {
+
+        StringBuffer  sonSql01 = new StringBuffer();
+        Map<String, Object> param = new HashMap<>();
+        log.info("queryHistoricalTelemetryData打印的入参:{}",vo);
+        sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        if(isCap) {
+            sonSql01.append(" and  d1.flg = true");
+        }
+        log.info("queryHistoricalTelemetryData打印的sonSql01:{}",sonSql01);
+        StringBuffer  sql = new StringBuffer();
+        sql.append("select  d1.id as entity_id  from  device d1 where  1=1 ");
+        sql.append(sonSql01);
+        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_device");
+       List<UUID> uuidList =  list.stream().map(CensusSqlByDayEntity::getEntityId).collect(Collectors.toList());
+       List<TsKvEntry> tsKvEntryList=  DaoUtil.convertDataList(searchTsKvLatestRepository.findAllByEntityIdAndKey(uuidList,queryKeyName(type)));
+       if(CollectionUtils.isEmpty(tsKvEntryList))
+       {
+           return "0";
+       }
+        BigDecimal  sum =  tsKvEntryList.stream().filter(m1->m1.getValue() != null).map(m1->m1.getValue().toString()).map(BigDecimal::new).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return StringUtilToll.roundUp(sum.stripTrailingZeros().toPlainString());
+
+    }
 
 
-
-
-
-
-
+    /**
+     * 接口描述:  PC端的能耗今日排行版数据
+     * @param vo
+     * @return
+     */
+    public List<CensusSqlByDayEntity> queryTodayEffceency(PcTodayEnergyRaningVo vo)
+    {
+        Map<String, Object> param = new HashMap<>();
+        param.put("todayDate", vo.getDate());
+        StringBuffer  sql = new StringBuffer();
+        StringBuffer  sonSql01 = new StringBuffer();
+        sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        sql.append(" select h1.date,h1.entity_id,d1.name,h1.water_added_value,h1.gas_added_value,h1.electric_added_value,h1.capacity_added_value  ")
+                .append(" from  hs_statistical_data h1 ,device d1")
+                .append("  where h1.entity_id =d1.id  ")
+                .append(" and h1.\"date\" =:todayDate")
+                .append(sonSql01);
+        if(vo.getType().equals("0")){
+            sql.append(" and  d1.flg = true");
+            sql.append(" ORDER BY to_number(h1.capacity_added_value,'99999999999999999999999999.9999') DESC ");
+        }else {
+            KeyTitleEnums enums = KeyTitleEnums.getEnumsByPCCode(vo.getKeyNum());
+            if (enums == KeyTitleEnums.key_water) {
+                sql.append(" ORDER BY to_number(h1.water_added_value,'99999999999999999999999999.9999') DESC ");
+            }
+            if (enums == KeyTitleEnums.key_cable) {
+                sql.append(" ORDER BY to_number(h1.electric_added_value,'99999999999999999999999999.9999') DESC ");
+            }
+            if (enums == KeyTitleEnums.key_gas) {
+                sql.append(" ORDER BY to_number(h1.gas_added_value,'99999999999999999999999999.9999') DESC ");
+            }
+        }
+        sql.append("  LIMIT 10 ");
+        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_02");
+        return  list;
+    }
 
 
 

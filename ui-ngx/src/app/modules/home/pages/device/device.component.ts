@@ -38,6 +38,7 @@ import { OtaUpdateType } from '@shared/models/ota-package.models';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { DeviceDictionary } from '@app/shared/models/custom/device-mng.models';
 import { DeviceDictionaryService } from '@app/core/http/public-api';
+import { UtilsService } from '@app/core/services/utils.service';
 
 @Component({
   selector: 'tb-device',
@@ -62,7 +63,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
               @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceInfo>,
               public fb: FormBuilder,
               protected cd: ChangeDetectorRef,
-              private deviceDictionaryService: DeviceDictionaryService) {
+              private deviceDictionaryService: DeviceDictionaryService,
+              public utils: UtilsService) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
     this.deviceDictionaryService.getAllDeviceDictionaries().subscribe(res => {
       this.deviceDictionaries = res || [];

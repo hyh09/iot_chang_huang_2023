@@ -95,4 +95,9 @@ export class RoleMngService {
     return this.http.post(`/api/roleMenu/binding`, { menuVoList, semiSelectList, roleId, factoryId }, { responseType: 'text' });
   }
 
+  // 设置角色是否为系统角色（0：否  1：是）
+  public switchSysRole(params: { id: string; operationType: 0 | 1; }, config?: RequestConfig) {
+    return this.http.post(`/api/role/updateOperationType`, params, { responseType: 'text' });
+  }
+
 }

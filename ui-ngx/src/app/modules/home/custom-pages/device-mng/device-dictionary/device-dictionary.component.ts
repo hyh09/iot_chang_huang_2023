@@ -28,6 +28,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   expandedCompCode: Array<string> = [];
   initDataGroup: DeviceDataGroup[] = [];
   initDataGroupNames: string[] = [];
+  dataDictIds: string[] = [];
 
   constructor(
     protected store: Store<AppState>,
@@ -57,6 +58,8 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       model: [entity ? entity.model : ''],
       version: [entity ? entity.version : ''],
       warrantyPeriod: [entity ? entity.version : ''],
+      ratedCapacity: [entity ? entity.ratedCapacity : ''],
+      isCore: [!!(entity && entity.isCore)],
       comment: [entity ? entity.comment : ''],
       picture: [{
         value: entity ? entity.picture : '',
@@ -73,6 +76,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
 
   updateForm(entity: DeviceDictionary) {
+    this.dataDictIds = (this.entitiesTableConfig.componentsData.dataDictionaries as DataDictionary[]).map(item => (item.id + ''));
     this.setInitDataGroup();
     this.initDataGroup = [];
     const { standardPropControls, propertyListControls, groupListControls, compControls } = this.generateFromArray(entity);
@@ -179,11 +183,12 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   createDeviceDataControl(data?: DeviceData): AbstractControl {
     return this.fb.group({
+      id: [data ? data.id : null],
       name: [data ? data.name : '', Validators.required],
       content: [data ? data.content: '', Validators.required],
       title: [data ? data.title : ''],
       dictDataId: [{
-        value: data && data.dictDataId ? data.dictDataId : '',
+        value: data && data.dictDataId && this.dataDictIds.includes(data.dictDataId) ? data.dictDataId : '',
         disabled: !this.isEdit
       }]
     })
@@ -196,6 +201,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
       }
     }
     return this.fb.group({
+      id: [dataGroup ? dataGroup.id : null],
       name: [dataGroup ? dataGroup.name : '', [Validators.required]],
       groupPropertyList: this.fb.array(controls),
       editable: [dataGroup && dataGroup.editable !== undefined ? dataGroup.editable : !this.initDataGroupNames.includes(dataGroup ? dataGroup.name : '')]
@@ -318,7 +324,7 @@ export class DeviceDictionaryComponent extends EntityComponent<DeviceDictionary>
   }
   setMapOfExpandedComp() {
     const map: { [code: string]: DeviceCompTreeNode[] } = {};
-    this.compListFormArray().value.forEach((item: DeviceComp) => {
+    this.compListFormArray().getRawValue().forEach((item: DeviceComp) => {
       map[item.code] = this.convertTreeToList(item);
     });
     this.mapOfExpandedComp = map;

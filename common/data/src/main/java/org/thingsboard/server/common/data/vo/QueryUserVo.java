@@ -41,6 +41,7 @@ public class QueryUserVo {
 
     private  String type;
 
+    private  int userLevel;
 
 
 

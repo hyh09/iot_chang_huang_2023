@@ -2,11 +2,13 @@
 <div style="min-width: 360px;">
   <div [fxShow]="!isEdit" class="tb-details-buttons" fxLayout.xs="column">
     <button
+      *ngIf="utils.hasPermission('auth-mng.bind-users')"
       mat-raised-button color="primary"
       [disabled]="(isLoading$ | async)"
       (click)="onEntityAction($event, 'bindUsers')"
     >{{'auth-mng.bind-users' | translate }}</button>
     <button
+      *ngIf="canSetPermission && utils.hasPermission('auth-mng.set-permissions')"
       mat-raised-button color="primary"
       [disabled]="(isLoading$ | async)"
       (click)="onEntityAction($event, 'setPermissions')"

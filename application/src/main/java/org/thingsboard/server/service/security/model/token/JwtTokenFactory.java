@@ -60,6 +60,7 @@ public class JwtTokenFactory {
     private static final String CUSTOMER_ID = "customerId";
     private static  final  String TYPE="type";
     private static  final String  FACTORY_ID="factoryId";
+    private static  final String  USER_LEVEL="userLevel";
 
     private final JwtSettings settings;
 
@@ -97,6 +98,9 @@ public class JwtTokenFactory {
         if (securityUser.getFactoryId() != null) {
             claims.put(FACTORY_ID, securityUser.getFactoryId().toString());
         }
+        claims.put(USER_LEVEL, securityUser.getUserLevel()+"");
+
+
 
         ZonedDateTime currentTime = ZonedDateTime.now();
 
@@ -142,6 +146,10 @@ public class JwtTokenFactory {
         }
         String factoryId = claims.get(FACTORY_ID, String.class);
         securityUser.setFactoryId(StringUtils.isBlank(factoryId)?null:UUID.fromString(factoryId));
+
+        String userLevel = claims.get(USER_LEVEL, String.class);
+        securityUser.setUserLevel(StringUtils.isBlank(userLevel) ? 0:Integer.valueOf(userLevel));
+
 
         return securityUser;
     }

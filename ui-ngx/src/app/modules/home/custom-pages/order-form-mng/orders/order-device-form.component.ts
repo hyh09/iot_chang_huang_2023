@@ -49,15 +49,21 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
 
   buildForm() {
     const planDevices = this.data.planDevices;
-    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime } = (planDevices || {});
+    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, maintainStartTime, maintainEndTime } = (planDevices || {});
     this.orderDeviceForm = this.fb.group({
+      id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : '', Validators.required],
+      intendedCapacity: [planDevices ? planDevices.intendedCapacity : ''],
+      actualCapacity: [planDevices ? planDevices.actualCapacity : ''],
       intendedTime: [intendedStartTime && intendedEndTime ? [intendedStartTime, intendedEndTime] : null],
       intendedStartTime: [planDevices ? planDevices.intendedStartTime : null],
       intendedEndTime: [planDevices ? planDevices.intendedEndTime : null],
       actualTime: [actualStartTime && actualEndTime ? [actualStartTime, actualEndTime] : null],
       actualStartTime: [planDevices ? planDevices.actualStartTime : null],
       actualEndTime: [planDevices ? planDevices.actualEndTime : null],
+      maintainTime: [maintainStartTime && maintainEndTime ? [maintainStartTime, maintainEndTime] : null],
+      maintainStartTime: [planDevices ? planDevices.maintainStartTime : null],
+      maintainEndTime: [planDevices ? planDevices.maintainEndTime : null],
       enabled: [planDevices ? planDevices.enabled : false]
     });
     this.orderDeviceForm.get('intendedTime').valueChanges.subscribe(res => {
@@ -74,6 +80,13 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
         actualEndTime: hasVal ? res[1] : null
       });
     });
+    this.orderDeviceForm.get('maintainTime').valueChanges.subscribe(res => {
+      const hasVal = res && res.length === 2;
+      this.orderDeviceForm.patchValue({
+        maintainStartTime: hasVal ? res[0] : null,
+        maintainEndTime: hasVal ? res[1] : null
+      });
+    });
     this.orderDeviceForm.get('deviceId').clearValidators();
   }
 
@@ -83,15 +96,23 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
 
   save() {
     if (this.orderDeviceForm.valid) {
-      const { deviceId, intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, enabled } = this.orderDeviceForm.value
+      const {
+        id, deviceId, intendedCapacity, actualCapacity, intendedStartTime,
+        intendedEndTime, actualStartTime, actualEndTime, enabled, maintainStartTime, maintainEndTime
+      } = this.orderDeviceForm.value
       this.dialogRef.close({
         ...(this.data.planDevices || {}),
+        id,
         deviceId,
+        intendedCapacity,
+        actualCapacity,
         deviceName: this.deviceMap[deviceId].name,
-        intendedStartTime: new Date(intendedStartTime).getTime(),
-        intendedEndTime: new Date(intendedEndTime).getTime(),
-        actualStartTime: new Date(actualStartTime).getTime(),
-        actualEndTime: new Date(actualEndTime).getTime(),
+        intendedStartTime: intendedStartTime ? new Date(intendedStartTime).getTime() : null,
+        intendedEndTime: intendedEndTime ? new Date(intendedEndTime).getTime() : null,
+        actualStartTime: actualStartTime ? new Date(actualStartTime).getTime() : null,
+        actualEndTime: actualEndTime ? new Date(actualEndTime).getTime() : null,
+        maintainStartTime: maintainStartTime ? new Date(maintainStartTime).getTime() : null,
+        maintainEndTime: maintainEndTime ? new Date(maintainEndTime).getTime() : null,
         enabled
       });
     }

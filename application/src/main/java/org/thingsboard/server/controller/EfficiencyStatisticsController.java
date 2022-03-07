@@ -10,15 +10,14 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.AppQueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.device.out.app.OutAppRunnigStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.resultvo.cap.ResultCapAppVo;
-import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -38,27 +37,7 @@ public class EfficiencyStatisticsController extends BaseController {
 
 
 
-    /**
-     *
-     */
-    @ApiOperation(value = "【app端查询产能接口】  老接口 只是为了比对返回结果用")
-    @RequestMapping(value = "/queryCapacityTest", method = RequestMethod.POST)
-    @ResponseBody
-    public ResultCapAppVo queryCapacityTest(@RequestBody QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        try {
-            if(queryTsKvVo.getEndTime() == null )
-            {
-                queryTsKvVo.setStartTime(CommonUtils.getZero());
-                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-            }
 
-            return efficiencyStatisticsSvc.queryCapApp(queryTsKvVo, getTenantId());
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
-        }
-    }
 
 
 
@@ -112,8 +91,9 @@ public class EfficiencyStatisticsController extends BaseController {
     @ApiOperation(value = "【app端查询当前设备的运行状态】")
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody AppQueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
+    public  List<OutAppRunnigStateVo> queryTheRunningStatusByDevice(@RequestBody AppQueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
         try {
+
             if (queryTsKvVo.getEndTime() == null) {
                 queryTsKvVo.setStartTime(CommonUtils.getZero());
                 queryTsKvVo.setEndTime(CommonUtils.getNowTime());
@@ -124,7 +104,7 @@ public class EfficiencyStatisticsController extends BaseController {
             }
             PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), queryTsKvVo.getTextSearch(), queryTsKvVo.getSortProperty(), queryTsKvVo.getSortOrder());
 
-            return efficiencyStatisticsSvc.queryTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink);
+            return efficiencyStatisticsSvc.queryAppTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink);
         }catch (Exception e)
         {
             e.printStackTrace();

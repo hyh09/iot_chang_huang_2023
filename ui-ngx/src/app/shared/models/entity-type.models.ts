@@ -49,9 +49,12 @@ export enum EntityType {
   ALARM_RULES = 'ALARM_RULES',
   DEVICE_HISTORY = 'DEVICE_HISTORY',
   POTENCY = 'POTENCY',
+  POTENCY_HISTORY = 'POTENCY_HISTORY',
   FACTORY_VERSION = 'FACTORY_VERSION',
   PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS',
-  ORDER_FORM = 'ORDER_FORM'
+  ORDER_FORM = 'ORDER_FORM',
+  CHART_SETTINGS = 'CHART_SETTINGS',
+  CHART = 'CHART'
 }
 
 export enum AliasEntityType {
@@ -441,6 +444,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
+      EntityType.POTENCY_HISTORY,
+      {
+        noEntities: 'potency.no-device-capacity-history'
+      }
+    ],
+    [
       EntityType.FACTORY_VERSION,
       {
         noEntities: 'system-mng.no-factory-version'
@@ -465,6 +474,27 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         selectedEntities: 'order.selected-orders'
       }
     ],
+    [
+      EntityType.CHART_SETTINGS,
+      {
+        type: 'entity.type-device-dic',
+        typePlural: 'entity.type-device-dics',
+        list: 'entity.list-of-device-dics'
+      }
+    ],
+    [
+      EntityType.CHART,
+      {
+        type: 'entity.type-chart',
+        typePlural: 'entity.type-charts',
+        list: 'entity.list-of-charts',
+        nameStartsWith: 'entity.chart-name-starts-with',
+        details: 'device-mng.chart-details',
+        add: 'device-mng.add-chart',
+        noEntities: 'device-mng.no-charts-text',
+        selectedEntities: 'device.selected-charts'
+      }
+    ]
   ]
 );
 
@@ -627,6 +657,12 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       }
     ],
     [
+      EntityType.POTENCY_HISTORY,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
       EntityType.FACTORY_VERSION,
       {
         helpLinkId: ''
@@ -640,6 +676,18 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.ORDER_FORM,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.CHART_SETTINGS,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.CHART,
       {
         helpLinkId: ''
       }

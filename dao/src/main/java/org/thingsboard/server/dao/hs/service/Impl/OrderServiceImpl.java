@@ -140,7 +140,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         }).map(orderExcelBO -> CompletableFuture.supplyAsync(() -> {
             var result = (OrderExcelBO) SerializationUtils.clone(orderExcelBO);
             result.setIsUk(true);
-            this.orderRepository.findByTenantIdAndOrderNo(tenantId.getId(), orderExcelBO.getOrderNo()).ifPresent(l->result.setIsUk(false));
+            this.orderRepository.findByTenantIdAndOrderNo(tenantId.getId(), orderExcelBO.getOrderNo()).ifPresent(l -> result.setIsUk(false));
             var factory = this.clientService.getFactoryByFactoryNameExactly(tenantId, orderExcelBO.getFactoryName());
             Workshop workshop = null;
             ProductionLine productionLine = null;
@@ -338,6 +338,8 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             orderPlanEntity.setTenantId(tenantId.getId());
             orderPlanEntity.setOrderId(orderEntity.getId());
             orderPlanEntity.setSort(sort.get());
+            orderPlanEntity.setActualCapacity(Optional.ofNullable(v.getActualCapacity()).map(BigDecimal::stripTrailingZeros).map(BigDecimal::toPlainString).orElse(null));
+            orderPlanEntity.setIntendedCapacity(Optional.ofNullable(v.getIntendedCapacity()).map(BigDecimal::stripTrailingZeros).map(BigDecimal::toPlainString).orElse(null));
             sort.addAndGet(1);
             return orderPlanEntity;
         }).collect(Collectors.toList()));
@@ -460,6 +462,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                                 .orderNo(v.getOrderNo())
                                 .total(v.getTotal())
                                 .completeness(this.calculateCompleteness(Optional.ofNullable(dataMap.get(toUUID(v.getId()))).map(OrderCapacityBO::getCapacities).orElse(BigDecimal.ZERO), v.getTotal()))
+                                .isOvertime(v.getIntendedTime() != null && v.getIntendedTime() > CommonUtil.getTodayCurrentTime())
                                 .build()
                 ).collect(Collectors.toList())).join()).join();
     }

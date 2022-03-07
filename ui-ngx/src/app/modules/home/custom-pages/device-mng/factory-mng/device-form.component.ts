@@ -74,10 +74,13 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       comment: [entity ? entity.comment : ''],
       picture: [entity ? entity.picture : ''],
       fileName: [entity ? entity.fileName : ''],
+      icon: [entity ? entity.icon : ''],
       type: [entity ? entity.type : ''],
       supplier: [entity ? entity.supplier : ''],
       model: [entity ? entity.model : ''],
       warrantyPeriod: [entity ? entity.version : ''],
+      ratedCapacity: [entity ? entity.ratedCapacity: ''],
+      isCore: [!!(entity && entity.isCore)],
       version: [entity ? entity.version : ''],
       standardPropertyList: this.fb.array(standardPropControls),
       propertyList: this.fb.array(propertyListControls),
@@ -128,8 +131,8 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   onDeviceDicChange(dictDeviceId: string) {
     if (dictDeviceId) {
       this.deviceDictionaryService.getDeviceDictionary(dictDeviceId).subscribe(deviceDictInfo => {
-        const { comment, picture, fileName, type, supplier, model, warrantyPeriod, version, standardPropertyList, propertyList, groupList, componentList } = deviceDictInfo;
-        this.updateForm({ comment, picture, fileName, type, supplier, model, warrantyPeriod, version, standardPropertyList, propertyList, groupList, componentList });
+        const { comment, picture, fileName, type, supplier, model, warrantyPeriod, ratedCapacity, isCore, version, standardPropertyList, propertyList, groupList, componentList } = deviceDictInfo;
+        this.updateForm({ comment, picture, fileName, type, supplier, model, warrantyPeriod, ratedCapacity, isCore, version, standardPropertyList, propertyList, groupList, componentList });
         this.stopExpandPropagation();
       });
     } else {
@@ -141,6 +144,8 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
         supplier: '',
         model: '',
         warrantyPeriod: '',
+        ratedCapacity: '',
+        isCore: false,
         version: '',
         standardPropertyList: [],
         propertyList: [],
@@ -248,7 +253,9 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       supplier: [comp ? comp.supplier: ''],
       type: [comp ? comp.type: ''],
       version: [comp ? comp.version: ''],
-      warrantyPeriod: [comp ? comp.warrantyPeriod: ''],
+      warrantyPeriod: [comp ? comp.warrantyPeriod : ''],
+      ratedCapacity: [comp ? comp.ratedCapacity : ''],
+      isCore: [!!(comp && comp.isCore)],
       propertyList: this.fb.array(propertyListControls)
     });
     this.mapOfCompControl[control.get('code').value] = control;
@@ -281,7 +288,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
   }
   setMapOfExpandedComp() {
     const map: { [code: string]: DeviceCompTreeNode[] } = {};
-    this.compListFormArray().value.forEach((item: DeviceComp) => {
+    this.compListFormArray().getRawValue().forEach((item: DeviceComp) => {
       map[item.code] = this.convertTreeToList(item);
     });
     this.mapOfExpandedComp = map;
