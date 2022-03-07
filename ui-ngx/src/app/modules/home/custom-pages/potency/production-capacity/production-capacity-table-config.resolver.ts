@@ -9,11 +9,14 @@ import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/
 import { map } from 'rxjs/operators';
 import { ProductionCapacityOverviewComponent } from './production-capacity-overview.component';
 import { getTheEndOfDay, getTheStartOfDay } from '@app/core/utils';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class ProductionCapacityTableConfigResolver implements Resolve<EntityTableConfig<DeviceCapacity>> {
 
   private readonly config: EntityTableConfig<DeviceCapacity> = new EntityTableConfig<DeviceCapacity>();
+  private oldFactoryId: string = '';
+  factroryChange$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   constructor(
     private potencyService: PotencyService,
@@ -32,11 +35,12 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       productionLineId: '',
       deviceId: '',
       dateRange: null,
-      totalCapacity: 0
+      totalCapacity: 0,
+      factroryChange$: this.factroryChange$
     }
 
     this.config.columns.push(
-      new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName), () => ({}), false),
+      new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName || ''), () => ({}), false),
       new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%')
     );
   }
@@ -50,7 +54,8 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       productionLineId: '',
       deviceId: '',
       dateRange: [now, now],
-      totalCapacity: 0
+      totalCapacity: 0,
+      factroryChange$: this.factroryChange$
     }
 
     this.config.tableTitle = this.translate.instant('potency.device-capacity');
@@ -64,6 +69,10 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
 
     this.config.entitiesFetchFunction = pageLink => {
       const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
+      if (factoryId && this.oldFactoryId !== factoryId) {
+        this.config.componentsData.factroryChange$.next(factoryId);
+        this.oldFactoryId = factoryId;
+      }
       let startTime: number, endTime: number;
       if (this.config.componentsData.dateRange) {
         startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
@@ -81,7 +90,11 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       name: this.translate.instant('potency.go-to-history'),
       mdiIcon: 'mdi:history-data',
       isEnabled: () => (true),
-      onAction: ($event, entity) => this.router.navigateByUrl(`/potency/deviceCapacity/${entity.deviceId}/history`)
+      onAction: ($event, entity) => this.router.navigate([`/potency/deviceCapacity/${entity.deviceId}/history`], {
+        queryParams: {
+          deviceName: encodeURIComponent(entity.deviceName)
+        }
+      })
     }];
 
     return this.config;

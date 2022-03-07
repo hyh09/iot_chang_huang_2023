@@ -88,7 +88,7 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         TrendVo resultResults = new TrendVo();
 
         try {
-            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
+//            log.info("看板的能耗趋势图（实线 和虚线）的能耗参数的入参vo：{}", vo);
             List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
             List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime());
             print("打印查询longs的数据", longs);
@@ -345,9 +345,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
     private  void print(String str,Object   obj)  {
         try {
-            ObjectMapper mapper=new ObjectMapper();
-            String jsonStr=mapper.writeValueAsString(obj);
-            log.info("[json]"+str+jsonStr);
+//            ObjectMapper mapper=new ObjectMapper();
+//            String jsonStr=mapper.writeValueAsString(obj);
+////            log.info("[json]"+str+jsonStr);
         }catch (Exception e)
         {
             log.info(str+obj);

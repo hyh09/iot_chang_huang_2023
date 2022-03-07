@@ -116,13 +116,18 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
 
   createOrderDeviceControl(planDevices?: OrderDevice): AbstractControl {
     return this.fb.group({
+      id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : ''],
       deviceName: [planDevices ? planDevices.deviceName : ''],
       enabled: [planDevices ? planDevices.enabled : false],
+      intendedCapacity: [planDevices ? planDevices.intendedCapacity : ''],
+      actualCapacity: [planDevices ? planDevices.actualCapacity : ''],
       intendedStartTime: [planDevices ? planDevices.intendedStartTime : ''],
       intendedEndTime: [planDevices ? planDevices.intendedEndTime : ''],
       actualStartTime: [planDevices ? planDevices.actualStartTime : ''],
       actualEndTime: [planDevices ? planDevices.actualEndTime : ''],
+      maintainStartTime: [planDevices ? planDevices.maintainStartTime : ''],
+      maintainEndTime: [planDevices ? planDevices.maintainEndTime : ''],
       capacities: [planDevices ? planDevices.capacities : 0]
     });
   }
@@ -212,6 +217,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
         }
       }).afterClosed().subscribe(res => {
         if (res) {
+          console.log(res)
           target.patchValue(res);
           this.cd.markForCheck();
           this.cd.detectChanges();

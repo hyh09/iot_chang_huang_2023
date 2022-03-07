@@ -83,6 +83,7 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
 import org.thingsboard.server.dao.oauth2.OAuth2Service;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productioncalender.ProductionCalenderService;
 import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
@@ -91,6 +92,7 @@ import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
+import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -284,6 +286,13 @@ public abstract class BaseController {
 
     @Autowired
     protected DefaultTransportService transportService;
+
+    @Autowired
+    protected EnergyChartService energyChartService;
+
+    @Autowired
+    protected ProductionCalenderService productionCalenderService;
+
 /*
 
     @Autowired

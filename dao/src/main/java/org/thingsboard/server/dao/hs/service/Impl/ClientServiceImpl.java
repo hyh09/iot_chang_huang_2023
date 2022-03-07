@@ -591,11 +591,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
-            log.info("查询设备指定时间段产能：" + "empty");
+            log.trace("查询设备指定时间段产能：" + "empty");
             return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList()));
-            log.info("查询设备指定时间段产能：" + dataMap);
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList()));
+            log.trace("查询设备指定时间段产能：" + dataMap);
             var deviceCapacities = plans.stream().map(v -> OrderDeviceCapacityBO.builder()
                     .planId(toUUID(v.getId()))
                     .enabled(v.getEnabled())
@@ -617,12 +617,12 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
         if (plans.isEmpty()) {
-            log.info("查询设备指定时间段产能：" + "empty");
+            log.trace("查询设备指定时间段产能：" + "empty");
             return Maps.newHashMap();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList())).entrySet().stream()
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList())).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, v -> new BigDecimal(v.getValue())));
-            log.info("查询设备指定时间段产能：" + dataMap);
+            log.trace("查询设备指定时间段产能：" + dataMap);
             return dataMap;
         }
     }
@@ -832,7 +832,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId) {
-        return Arrays.stream(DataConstants.allScopes()).map(v->CompletableFuture.supplyAsync(()-> {
+        return Arrays.stream(DataConstants.allScopes()).map(v -> CompletableFuture.supplyAsync(() -> {
             try {
                 return this.attributesService.findAll(tenantId, new DeviceId(deviceId), v).get();
             } catch (Exception ignore) {

@@ -3659,15 +3659,22 @@
     "factory-manager": "工厂管理员",
     "manage-factory-manager": "管理工厂管理员",
     "set-factory-manager-permissions": "配置管理员权限",
-    "bind-chart": "关联图表",
-    "chart-details": "图表详情",
-    "add-chart": "添加图表",
-    "no-charts-text": "未找到图表",
+    "bind-chart": "关联参数",
+    "associated-params": "关联参数",
+    "chart-details": "关联详情",
+    "add-chart": "添加关联",
+    "no-charts-text": "未找到关联",
     "selected-charts": "已选择 { count, plural, 1 {# 个图表} other {# 个图表} }",
-    "chart-title": "图表标题",
+    "chart-title": "关联名称",
     "chart-visible": "是否显示图表",
-    "chart-title-required": "图表标题必填",
-    "chart-prop-required": "设备参数必填"
+    "chart-title-required": "关联名称必填",
+    "chart-prop-required": "设备参数必填",
+    "associated-param": "添加关联参数",
+    "separator": "分隔符",
+    "add-associated-param-tip": "请点击右上角的“+”号来添加关联参数",
+    "associated-param-empty": "暂无关联参数",
+    "device-param-required": "设备参数必填",
+    "associated-data": "关联数据"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",
@@ -3791,7 +3798,9 @@
     "see-history": "查看历史",
     "device-comp": "设备部件",
     "device-history": "设备历史数据",
-    "no-device-history": "找不到历史数据"
+    "no-device-history": "找不到历史数据",
+    "no-trend": "该参数无趋势图",
+    "param-not-config": "未指定参数"
   },
   "potency": {
     "potency": "效能分析",
@@ -3807,7 +3816,14 @@
     "total-energy-consumption": "总能耗：",
     "go-to-history": "查看历史数据",
     "created-time": "上报时间",
-    "property": "参数"
+    "property": "参数",
+    "today-energy-consumption-top10": "今日设备能耗排行",
+    "today-capacity-top10": "今日设备产量排行",
+    "water": "水 (T)",
+    "electricity": "电 (KWH)",
+    "gas": "气 (T)",
+    "interval-energy-consumption": "{{deviceName}}区间能耗",
+    "interval-capacity": "{{deviceName}}区间产量"
   },
   "order": {
     "order-form-mng": "订单管理",
@@ -3870,6 +3886,9 @@
     "order-excel": "订单excel",
     "download-template": "下载模板",
     "drop-order": "拖拽excel文件或单击以选择要导入的excel文件。",
-    "import-template-name": "订单导入模板.xlsx"
+    "import-template-name": "订单导入模板.xlsx",
+    "intended-capacity": "计划产能",
+    "actual-capacity": "实际产能",
+    "maintain-time": "维护时间"
   }
 }
