@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.board.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.dao.sql.role.dao.JpaSqlTool;
@@ -20,8 +21,7 @@ import java.util.Map;
 @Repository
 public class BoardV3DeviceDictionaryReposutory extends JpaSqlTool {
 
-    private  String  HS_DICT_DEVICE_SQL="select h1.id,h1.code,h1.name  from  hs_dict_device h1 ,device d1  where h1.id = d1.dict_device_id ";
-    private    String MAP_RESULT_01="boardV3DeviceDitEntity_map01";
+    private  String  HS_DICT_DEVICE_SQL="select h1.id,h1.code,h1.name  from  hs_dict_device h1 where  1=1 ";
 
 
 
@@ -32,10 +32,19 @@ public class BoardV3DeviceDictionaryReposutory extends JpaSqlTool {
      */
     public List<BoardV3DeviceDitEntity>  queryDeviceDictionaryByEntityVo(TsSqlDayVo vo){
         Map<String, Object> param = new HashMap<>();
+        StringBuffer  sql=new StringBuffer();
+        sql.append(HS_DICT_DEVICE_SQL);
+
         StringBuffer  sonSql01 = new StringBuffer();
-        sonSql01.append(HS_DICT_DEVICE_SQL);
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
-        List<BoardV3DeviceDitEntity> resultEntity= querySql(sonSql01.toString(),param,"boardV3DeviceDitEntity_map01");
+        if(StringUtils.isNotEmpty(sonSql01.toString()))
+        {
+            sql.append(" and  h1.id in (  select  d1.dict_device_id   from device d1  where 1=1  ");
+            sql.append(sonSql01);
+            sql.append(")");
+
+        }
+        List<BoardV3DeviceDitEntity> resultEntity= querySql(sql.toString(),param,"boardV3DeviceDitEntity_map01");
         return  resultEntity;
     }
 }
