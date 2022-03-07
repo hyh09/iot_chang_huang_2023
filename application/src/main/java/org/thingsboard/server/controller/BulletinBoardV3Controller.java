@@ -31,6 +31,14 @@ public class BulletinBoardV3Controller   extends BaseController {
     @Autowired
     private BulletinV3BoardVsSvc bulletinV3BoardVsSvc;
 
+    /**
+     * 查询设备字典
+     * @param factoryId 工厂id
+     * @param workshopId 车间id
+     * @param productionLineId 产线id
+     * @param deviceId 设备id
+     * @return
+     */
     @RequestMapping("/queryDeviceDictionary")
     public List<BoardV3DeviceDitEntity>  queryDeviceDictionary(@RequestParam(required = false ,value = "factoryId")  String factoryId,
                                                                @RequestParam(required = false ,value = "workshopId")  String workshopId,
