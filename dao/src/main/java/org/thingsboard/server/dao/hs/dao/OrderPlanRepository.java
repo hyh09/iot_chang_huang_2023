@@ -30,4 +30,7 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
 
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByOrderId(UUID orderId);
+
+    @Async
+    CompletableFuture<List<OrderPlanEntity>> findAllByTenantIdAndActualStartTimeLessThanEqualAndActualEndTimeGreaterThanEqual(UUID tenantId, Long startTime, Long endTime);
 }

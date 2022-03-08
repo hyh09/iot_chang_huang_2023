@@ -37,11 +37,13 @@ import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderExcelBO;
 import org.thingsboard.server.dao.hs.entity.po.Order;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.OrderService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.util.CommonUtils;
 
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
@@ -442,7 +444,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      * @param timeQuery  时间请求参数
      */
     @Override
-    public List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
+    public List<OrderCustomCapacityResult> listCustomCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
         return CompletableFuture.supplyAsync(() -> DaoUtil.convertDataList(this.orderRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
@@ -457,7 +459,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         }))).thenApplyAsync(orders -> CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(orders.stream().map(Order::getFactoryId)
                 .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
                 .thenCombineAsync(CompletableFuture.supplyAsync(() -> this.mapOrderIdToCapacity(orders.stream().map(Order::getId).map(this::toUUID).collect(Collectors.toList()))), (factoryMap, dataMap) -> orders.stream().map(v ->
-                        OrderBoardCapacityResult.builder()
+                        OrderCustomCapacityResult.builder()
                                 .factoryId(v.getFactoryId())
                                 .factoryName(Optional.ofNullable(v.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
                                 .orderNo(v.getOrderNo())
@@ -469,6 +471,45 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     }
 
     /**
+     * 看板-订单监控
+     *
+     * @param tenantId   租户Id
+     * @param factoryId  工厂Id
+     * @param workshopId 车间Id
+     * @param timeQuery  时间参数
+     * @return 订单
+     */
+    @Override
+    public List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery) {
+        return this.orderPlanRepository.findAllByTenantIdAndActualStartTimeLessThanEqualAndActualEndTimeGreaterThanEqual(tenantId.getId(), timeQuery.getStartTime(), timeQuery.getEndTime())
+                .thenApplyAsync(plans -> plans.stream().map(OrderPlanEntity::getOrderId).collect(Collectors.toSet()))
+                .thenApplyAsync(ids -> {
+                    if (factoryId != null) {
+                        return this.orderRepository.findAllByTenantIdAndFactoryIdAndIdInOrderByCreatedTimeDesc(tenantId.getId(), factoryId, ids).join();
+                    } else if (workshopId != null) {
+                        return this.orderRepository.findAllByTenantIdAndWorkshopIdAndIdInOrderByCreatedTimeDesc(tenantId.getId(), workshopId, ids).join();
+                    } else {
+                        return this.orderRepository.findAllByTenantIdAndIdInOrderByCreatedTimeDesc(tenantId.getId(), ids).join();
+                    }
+                }).thenApplyAsync(DaoUtil::convertDataList)
+                .thenApplyAsync(orders -> CompletableFuture.supplyAsync(() -> this.clientService.mapIdToFactory(orders.stream().map(Order::getFactoryId)
+                        .filter(Objects::nonNull).map(this::toUUID).collect(Collectors.toList())))
+                        .thenCombineAsync(CompletableFuture.supplyAsync(() -> this.mapOrderIdToCapacity(orders.stream().map(Order::getId).map(this::toUUID).collect(Collectors.toList()))), (factoryMap, dataMap) -> orders.stream().map(v -> {
+                                    var completedCapacities = Optional.ofNullable(dataMap.get(toUUID(v.getId()))).map(OrderCapacityBO::getCapacities).orElse(BigDecimal.ZERO);
+                                    return OrderCustomCapacityResult.builder()
+                                            .factoryId(v.getFactoryId())
+                                            .factoryName(Optional.ofNullable(v.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
+                                            .orderNo(v.getOrderNo())
+                                            .total(v.getTotal())
+                                            .completedCapacities(completedCapacities)
+                                            .completeness(this.calculateCompleteness(completedCapacities, v.getTotal()))
+                                            .isOvertime((v.getIntendedTime() != null && v.getIntendedTime() > CommonUtil.getTodayCurrentTime()) & (completedCapacities.compareTo(v.getTotal()) < 0))
+                                            .build();
+                                }
+                        ).filter(v->v.getCompletedCapacities().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
+    }
+
+    /**
      * 订单产能监控-App-首页
      *
      * @param tenantId   租户id
@@ -477,7 +518,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public OrderAppIndexCapacityResult getAppIndexOrderCapacityResult(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery) {
-        var result = this.listBoardCapacityMonitorOrders(tenantId, factoryIds, timeQuery);
+        var result = this.listCustomCapacityMonitorOrders(tenantId, factoryIds, timeQuery);
         return OrderAppIndexCapacityResult.builder()
                 .num(result.size())
                 .completeness(result.isEmpty() ? BigDecimal.ZERO : this.calculatePercentage(BigDecimal.valueOf(result.stream()

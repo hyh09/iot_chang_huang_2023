@@ -7,11 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 /**
  * 订单Repository
@@ -27,8 +24,18 @@ public interface OrderRepository extends PagingAndSortingRepository<OrderEntity,
     Optional<OrderEntity> findByTenantIdAndOrderNo(UUID tenantId, String orderNo);
 
     @Async
+    CompletableFuture<List<OrderEntity>> findAllByTenantIdAndIdInOrderByCreatedTimeDesc(UUID tenantId, Set<UUID> ids);
+
+    @Async
+    CompletableFuture<List<OrderEntity>> findAllByTenantIdAndFactoryIdAndIdInOrderByCreatedTimeDesc(UUID tenantId, UUID factoryId, Set<UUID> ids);
+
+    @Async
+    CompletableFuture<List<OrderEntity>> findAllByTenantIdAndWorkshopIdAndIdInOrderByCreatedTimeDesc(UUID tenantId, UUID workshopId, Set<UUID> ids);
+
+    @Async
     @Query("SELECT new OrderEntity(e.orderNo) FROM OrderEntity e WHERE " +
             "e.tenantId = :tenantId " +
             "AND e.orderNo LIKE CONCAT(:orderNo, '%') ")
     CompletableFuture<List<OrderEntity>> findAllOrderNoByTenantIdAndOrderNoLike(@Param("tenantId") UUID tenantId, @Param("orderNo") String orderNo);
+
 }
