@@ -4,11 +4,11 @@ import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.vo.BoardV3DeviceDictionaryVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
+import org.thingsboard.server.common.data.vo.bodrd.DashboardV3Vo;
 import org.thingsboard.server.dao.board.BulletinV3BoardVsSvc;
 import org.thingsboard.server.dao.sql.role.entity.BoardV3DeviceDitEntity;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -59,4 +59,37 @@ public class BulletinBoardV3Controller   extends BaseController {
             return  new ArrayList<>();
         }
     }
+
+
+    /**
+     *
+     * @param deviceDictionaryVo
+     * @return
+     */
+    @PostMapping("/queryDashboardValue")
+    public  List<DashboardV3Vo>  queryDashboardValue(@RequestBody BoardV3DeviceDictionaryVo  deviceDictionaryVo)
+    {
+
+        try {
+            return bulletinV3BoardVsSvc.queryDashboardValue(deviceDictionaryVo);
+
+        } catch (Exception e) {
+            log.error("【看板3期】queryDashboardValue接口异常：{}",e);
+            e.printStackTrace();
+            return  new ArrayList<>();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
