@@ -46,9 +46,9 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 " where 1 = 1  " );
 
         if(productionCalender != null){
-            if(productionCalender.getFactoryId() != null){
-                sonSql01.append(" and t1.factory_id = :factoryId");
-                param.put("factoryId",productionCalender.getFactoryId());
+            if(productionCalender.getFactoryName() != null){
+                sonSql01.append(" and t1.factory_name like :factoryName");
+                param.put("factoryName","%" + productionCalender.getFactoryName() + "%");
             }
             if(StringUtils.isNotEmpty(productionCalender.getDeviceName())){
                 sonSql01.append(" and t1.device_name like :deviceName");
