@@ -198,6 +198,45 @@ public class RTMonitorAppController extends BaseController {
     }
 
     /**
+     * 设备监控-实时监控-查询设备详情-关联图表历史数据-【分页】
+     */
+    @ApiOperation(value = "设备监控-实时监控-查询设备详情-关联图表历史数据-【分页】", notes = "默认当天")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "ts"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "graphId", value = "关联图表Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device/graph/history/page")
+    public HistoryGraphAppVO listPageRTMonitorGroupPropertyHistory(
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false, defaultValue = "ts") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam UUID deviceId,
+            @RequestParam UUID graphId,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime
+    ) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("graphId", graphId);
+        if (startTime == null || startTime == 0)
+            startTime = CommonUtil.getTodayStartTime();
+        if (endTime == null || endTime == 0)
+            endTime = CommonUtil.getTodayCurrentTime();
+        if (!sortProperty.toLowerCase().contains(HSConstants.TS))
+            sortProperty = HSConstants.TS;
+
+        TimePageLink timePageLink = createTimePageLink(pageSize, page, null, sortProperty, sortOrder, startTime, endTime);
+        validatePageLink(timePageLink);
+        return this.deviceMonitorService.getGraphHistoryForApp(getTenantId(), deviceId, graphId, timePageLink);
+    }
+
+    /**
      * 设备监控-获得报警记录列表
      *
      * @see AlarmController#getAlarms
