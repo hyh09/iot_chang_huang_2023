@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.service.queue;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.ProtocolStringList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -255,12 +256,21 @@ public class DefaultTbRuleEngineConsumerService extends AbstractConsumerService<
                 final TbRuleEngineSubmitStrategy submitStrategy = getSubmitStrategy(configuration);
                 final TbRuleEngineProcessingStrategy ackStrategy = getAckStrategy(configuration);
                 submitStrategy.init(msgs);
+                long startTime = 0;
+                long endTime = 0;
+                if(msgs.toString().indexOf("ycy_prefix")!=-1){
+                    startTime = System.currentTimeMillis();
+                }
                 while (!stopped) {
                     TbMsgPackProcessingContext ctx = new TbMsgPackProcessingContext(configuration.getName(), submitStrategy);
                     submitStrategy.submitAttempt((id, msg) -> submitExecutor.submit(() -> submitMessage(configuration, stats, ctx, id, msg)));
 
                     final boolean timeout = !ctx.await(configuration.getPackProcessingTimeout(), TimeUnit.MILLISECONDS);
-
+                    if(msgs.toString().indexOf("ycy_prefix")!=-1){
+                        endTime = System.currentTimeMillis();
+                        log.info("=====>遥测数据耗{}条",msgs.size());
+                        log.info("=====>遥测数据耗{}ms",endTime-startTime);
+                    }
                     TbRuleEngineProcessingResult result = new TbRuleEngineProcessingResult(configuration.getName(), timeout, ctx);
                     if (timeout) {
                         printFirstOrAll(configuration, ctx, ctx.getPendingMap(), "Timeout");
