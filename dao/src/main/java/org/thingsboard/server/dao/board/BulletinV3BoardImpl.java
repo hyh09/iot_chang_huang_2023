@@ -84,4 +84,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
        return  vo1;
 
     }
+
+
+
 }
