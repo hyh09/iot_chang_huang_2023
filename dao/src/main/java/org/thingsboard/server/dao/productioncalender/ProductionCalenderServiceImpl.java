@@ -69,8 +69,10 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
         List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(productionCalender.getTenantId(), productionCalender.getFactoryId(), productionCalender.getWorkshopId(), true));
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             List<UUID> deviceIds = deviceListByCdn.stream().map(m -> m.getId().getId()).collect(Collectors.toList());
-            //查询设备完成量/计划量
-            orderService.getDeviceAchieveOrPlanList(deviceIds,productionCalender.getStartTime(),productionCalender.getEndTime());
+            // 根据设备id以及实际时间查询订单信息
+            //List<OrderPlanEntity> deviceAchieveOrPlanList = orderService.findDeviceAchieveOrPlanList(deviceIds, productionCalender.getStartTime(), productionCalender.getEndTime());
+
+
         }
 
         return null;

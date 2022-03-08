@@ -14,6 +14,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.model.sql.ProductionCalenderEntity;
 import org.thingsboard.server.dao.productioncalender.ProductionCalenderDao;
@@ -31,36 +32,34 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     @Autowired
     private FactoryDao factoryDao;
     @Autowired
+    private DeviceDao deviceDao;
+    @Autowired
     private JpaSqlTool jpaSqlTool;
 
 
     private Page<ProductionCalenderEntity> queryWhereSql(ProductionCalender productionCalender,Pageable pageable){
         Map<String, Object> param = new HashMap<>();
         StringBuffer  sonSql01 = new StringBuffer();
-        sonSql01.append(" select t1.* from hs_production_calendar as t1 " +
-                " inner join (" +
-                "    SELECT device_id,max(end_time)as end_time FROM hs_production_calendar " +
-                "    group by device_id " +
-                " )as t2 " +
-                " on t1.device_id = t2.device_id and t1.end_time = t2.end_time " +
-                " where 1 = 1  " );
+        sonSql01.append(" select a1.id as device_id,a1.name as device_name,a2.name as factory_name,a3.start_time,a3.end_time from device as a1 " +
+                " left join hs_factory as a2 on a1.factory_id = a2.id " +
+                " left join (" +
+                "    select t1.* from hs_production_calendar as t1 " +
+                "    inner join ( " +
+                "       SELECT device_id,max(end_time)as end_time FROM hs_production_calendar " +
+                "       group by device_id  " +
+                "    )as t2  " +
+                "    on t1.device_id = t2.device_id and t1.end_time = t2.end_time " +
+                " ) as a3 on a3.device_id = a1.id " +
+                " where 1 = 1  and position('\"gateway\":true' in a1.additional_info)=0 " );
 
         if(productionCalender != null){
             if(productionCalender.getFactoryName() != null){
-                sonSql01.append(" and t1.factory_name like :factoryName");
+                sonSql01.append(" and a2.name like :factoryName");
                 param.put("factoryName","%" + productionCalender.getFactoryName() + "%");
             }
             if(StringUtils.isNotEmpty(productionCalender.getDeviceName())){
-                sonSql01.append(" and t1.device_name like :deviceName");
+                sonSql01.append(" and a1.name like :deviceName");
                 param.put("deviceName","%" + productionCalender.getDeviceName() + "%");
-            }
-            if(productionCalender.getStartTime() != null){
-                sonSql01.append(" and t1.start_time < :startTime");
-                param.put("startTime",productionCalender.getStartTime());
-            }
-            if(productionCalender.getEndTime() != null){
-                sonSql01.append(" and t1.end_time > :endTime");
-                param.put("endTime",productionCalender.getEndTime());
             }
         }
         return jpaSqlTool.querySql(sonSql01.toString(), param, pageable, "productionCalendarEntity_01");
@@ -121,10 +120,10 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     public PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink){
         List<ProductionCalender> result = new ArrayList<>();
         Pageable pageable1 = DaoUtil.toPageable(pageLink);
-        Page<ProductionCalenderEntity> page = queryWhereSql(productionCalender,pageable1);// productionCalenderRepository.findPage(productionCalender.factoryId, productionCalender.getDeviceName(), productionCalender.getStartTime(), productionCalender.getEndTime(),pageable1);
+        //统计生产日历设备分组信息
+        Page<ProductionCalenderEntity> page = queryWhereSql(productionCalender,pageable1);
         //转换数据
         List<ProductionCalenderEntity> content = page.getContent();
-
         if(CollectionUtils.isNotEmpty(content)){
             content.forEach(i->{
                 result.add(i.toData());
