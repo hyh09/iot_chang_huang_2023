@@ -9,6 +9,7 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.io.IOException;
@@ -136,4 +137,13 @@ public interface OrderService {
      * @param timeVO   时间参数
      */
     void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID planId, OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException;
+
+    /**
+     * 查询设备订单信息
+     * @param deviceIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<OrderPlanEntity>  getDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime);
 }

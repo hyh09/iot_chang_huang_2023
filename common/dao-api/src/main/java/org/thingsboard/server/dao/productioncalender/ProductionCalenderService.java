@@ -46,5 +46,11 @@ public interface ProductionCalenderService {
      */
     List<ProductionCalender> getHistoryById(UUID deviceId);
 
+    /**
+     * 查询看板设备监控统计
+     * @return
+     */
+    List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender);
+
 
 }

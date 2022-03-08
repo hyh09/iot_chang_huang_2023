@@ -185,6 +185,14 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.setName(name);
     }
 
+    public Device(UUID tenantId, UUID factoryId, UUID workshopId,Boolean filterGatewayFlag) {
+        this.tenantId = new TenantId(tenantId);
+        this.factoryId = factoryId;
+        this.workshopId = workshopId;
+        this.filterGatewayFlag = filterGatewayFlag;
+    }
+
+
     public Device (UUID tenantId){
         this.setTenantId(new TenantId(tenantId));
     }

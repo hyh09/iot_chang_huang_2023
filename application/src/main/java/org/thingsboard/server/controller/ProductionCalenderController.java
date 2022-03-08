@@ -13,8 +13,10 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.entity.productioncalender.dto.ProductionCalenderAddDto;
+import org.thingsboard.server.entity.productioncalender.dto.ProductionMonitorListQry;
 import org.thingsboard.server.entity.productioncalender.vo.ProductionCalenderHisListVo;
 import org.thingsboard.server.entity.productioncalender.vo.ProductionCalenderPageListVo;
+import org.thingsboard.server.entity.productioncalender.vo.ProductionMonitorListVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
@@ -61,20 +63,20 @@ public class ProductionCalenderController extends BaseController{
     @ApiOperation("生产日历分页查询")
     @RequestMapping(value = "/getPageList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂id",paramType = "query"),
+            @ApiImplicitParam(name = "factoryName", value = "工厂名称",paramType = "query"),
             @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query"),
             @ApiImplicitParam(name = "startTime", value = "开始时间",paramType = "query"),
             @ApiImplicitParam(name = "endTime", value = "结束时间",paramType = "query")
     })
     @ResponseBody
     public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,
-                                                                          @RequestParam UUID factoryId, @RequestParam String deviceName,
+                                                                          @RequestParam String factoryName, @RequestParam String deviceName,
                                                                           @RequestParam Long startTime, @RequestParam Long endTime) throws ThingsboardException {
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             List<ProductionCalenderPageListVo> calenderPageListVos = new ArrayList<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryId,startTime,endTime),pageLink);
+            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,startTime,endTime),pageLink);
             List<ProductionCalender> productionCalenderList = productionCalenderPageData.getData();
             if(!CollectionUtils.isEmpty(productionCalenderList)){
                 for (ProductionCalender productionCalender : productionCalenderList) {
@@ -143,6 +145,25 @@ public class ProductionCalenderController extends BaseController{
         try {
             checkParameter("id",id);
             productionCalenderService.delProductionCalender(toUUID(id));
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @ApiOperation("看板大屏生产监控")
+    @ApiImplicitParam(name = "productionMonitorListQry",value = "设备标识",dataType = "ProductionMonitorListQry",paramType="query")
+    @RequestMapping(value = "/dp/getHistoryById", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ProductionMonitorListVo> getProductionMonitorList(ProductionMonitorListQry dto)throws ThingsboardException{
+        try {
+            List<ProductionMonitorListVo> result = new ArrayList<>();
+            List<ProductionCalender> calenderList = productionCalenderService.getProductionMonitorList(dto.toProductionCalender(getCurrentUser().getTenantId().getId()));
+            if(!org.springframework.util.CollectionUtils.isEmpty(calenderList)){
+                for (ProductionCalender productionCalender :calenderList){
+                    result.add(new ProductionMonitorListVo(productionCalender));
+                }
+            }
+            return result;
         } catch (Exception e) {
             throw handleException(e);
         }
