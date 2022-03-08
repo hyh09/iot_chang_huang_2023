@@ -64,19 +64,16 @@ public class ProductionCalenderController extends BaseController{
     @RequestMapping(value = "/getPageList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryName", value = "工厂名称",paramType = "query"),
-            @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query"),
-            @ApiImplicitParam(name = "startTime", value = "开始时间",paramType = "query"),
-            @ApiImplicitParam(name = "endTime", value = "结束时间",paramType = "query")
+            @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query")
     })
     @ResponseBody
     public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,
-                                                                          @RequestParam String factoryName, @RequestParam String deviceName,
-                                                                          @RequestParam Long startTime, @RequestParam Long endTime) throws ThingsboardException {
+                                                                          @RequestParam String factoryName, @RequestParam String deviceName) throws ThingsboardException {
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             List<ProductionCalenderPageListVo> calenderPageListVos = new ArrayList<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,startTime,endTime),pageLink);
+            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,getCurrentUser().getTenantId().getId()),pageLink);
             List<ProductionCalender> productionCalenderList = productionCalenderPageData.getData();
             if(!CollectionUtils.isEmpty(productionCalenderList)){
                 for (ProductionCalender productionCalender : productionCalenderList) {

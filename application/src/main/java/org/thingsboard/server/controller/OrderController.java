@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -204,23 +205,27 @@ public class OrderController extends BaseController {
     }
 
     /**
-     * 看板-订单产能监控
+     * 看板-订单产能监控(含集团、工厂、车间)
      */
-    @ApiOperation(value = "看板-订单产能监控", notes = "工厂Id不传，则显示全部工厂")
+    @ApiOperation(value = "看板-订单产能监控(含集团、工厂、车间)", notes = "默认当天；工厂Id和车间Id均不传，则显示全部工厂")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = true),
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query")
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query")
     })
     @GetMapping("/order/board/capacityMonitor")
-    public List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(
+    public List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(
             @RequestParam("startTime") Long startTime,
             @RequestParam("endTime") Long endTime,
-            @RequestParam(value = "factoryId", required = false) String factoryId) throws ThingsboardException {
-        checkParameter("startTime", startTime);
-        checkParameter("endTime", endTime);
-        var factoryIds = Optional.ofNullable(factoryId).filter(StringUtils::isNotBlank).map(this::toUUID).map(List::of).orElse(List.of());
-        return this.orderService.listBoardCapacityMonitorOrders(getTenantId(), factoryIds, TimeQuery.builder().startTime(startTime).endTime(endTime).build());
+            @RequestParam(value = "factoryId", required = false) UUID factoryId,
+            @RequestParam(value = "workshopId", required = false) UUID workshopId
+    ) throws ThingsboardException {
+        if (startTime == null || startTime == 0)
+            startTime = CommonUtil.getTodayStartTime();
+        if (endTime == null || endTime == 0)
+            endTime = CommonUtil.getTodayCurrentTime();
+        return this.orderService.listBoardCapacityMonitorOrders(getTenantId(), factoryId, workshopId, TimeQuery.builder().startTime(startTime).endTime(endTime).build());
     }
 
     /**
