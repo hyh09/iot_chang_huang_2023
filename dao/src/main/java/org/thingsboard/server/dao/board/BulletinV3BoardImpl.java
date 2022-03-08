@@ -1,26 +1,35 @@
 package org.thingsboard.server.dao.board;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.BoardV3DeviceDictionaryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.bodrd.DashboardV3Vo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.common.data.vo.tskv.TrendChart02Vo;
+import org.thingsboard.server.common.data.vo.tskv.consumption.TrendLineVo;
+import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.board.repository.BoardV3DeviceDictionaryReposutory;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyEntity;
 import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyRepository;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.sql.role.dao.BoardTrendChartRepositoryNewMethon;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.entity.BoardV3DeviceDitEntity;
+import org.thingsboard.server.dao.sql.role.entity.EnergyChartOfBoardEntity;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +50,8 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
     @Autowired  private DictDeviceStandardPropertyRepository dictDeviceStandardPropertyRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
+    @Autowired  private BoardTrendChartRepositoryNewMethon boardTrendChartRepositoryNewMethon;
+
 
 
 
@@ -80,7 +91,27 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
     }
 
 
-    private DashboardV3Vo getResultList(Map<String,String> stringStringMap,KeyTitleEnums  enums, Map<String, DictDeviceGroupPropertyVO> map ,String actulValue)
+    /**
+     * 趋势图
+     * @param vo
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public TrendChart02Vo trendChart(TrendParameterVo vo, TenantId tenantId) {
+        TrendChart02Vo  trendVo = new TrendChart02Vo();
+        List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
+        Map<String, DictDeviceGroupPropertyVO>  map = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        String namekey = map.get(KeyTitleEnums.getNameByCode(vo.getKey())).getName();
+        List<String> name = new ArrayList<String>();
+        name.add(namekey);
+        List<DictDeviceStandardPropertyEntity>   entityList= dictDeviceStandardPropertyRepository.findAllByInContentAndDictDataId(vo.getDictDeviceId(),name);
+        trendVo.setSolidLine(getSolidLineData(vo,solidLineData));
+        trendVo.setDottedLine(entityList.stream().findFirst().orElse(new DictDeviceStandardPropertyEntity()).getContent());
+        return trendVo;
+    }
+
+    private DashboardV3Vo getResultList(Map<String,String> stringStringMap, KeyTitleEnums  enums, Map<String, DictDeviceGroupPropertyVO> map , String actulValue)
     {
         DashboardV3Vo  vo1 = new DashboardV3Vo();
         DictDeviceGroupPropertyVO  dictVo =  map.get(enums.getgName());
@@ -118,6 +149,71 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         resultVo.setGas(StringUtilToll.div(gasValue,value));
         log.info("打印的输出的结果:{}",resultVo);
         return  resultVo;
+    }
+
+
+    /**
+     * 实线部分
+     */
+    /**
+     * 优化后的实线的逻辑
+     * @param vo
+     * @return
+     */
+    private List<TrendLineVo> getSolidLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData)
+    {
+        Map<Long,List<EnergyChartOfBoardEntity> >  longListMap = new HashMap<>();
+        List<TrendLineVo>  trendLineVos = new ArrayList<>();
+
+        print("打印查询的数据", solidLineData);
+         solidLineData.stream().forEach(m1->{
+             Long hours=  CommonUtils.getConversionHours(m1.getTs());
+             List<EnergyChartOfBoardEntity>   list=  longListMap.get(hours);
+             list.add(m1);
+             longListMap.put(hours,list);
+         });
+
+         //每小时的运算
+        longListMap.forEach((k1,v2)->{
+            TrendLineVo  trendLineVo = new  TrendLineVo();
+            trendLineVo.setTime(k1);
+            List<EnergyChartOfBoardEntity>  list1=   v2;
+
+                //每小时的产能加起来
+                String capValue =  StringUtilToll.accumulator(list1.stream().map(EnergyChartOfBoardEntity::getCapacityAddedValue).collect(Collectors.toList()));
+                //每小时的水加起来
+                String value =  StringUtilToll.accumulator(list1.stream().map(m1->{
+                if(KeyTitleEnums.getEnumsByCode(vo.getKey() )== KeyTitleEnums.key_water)
+                {
+                    return m1.getWaterAddedValue();
+                }else if(KeyTitleEnums.getEnumsByCode(vo.getKey() )== KeyTitleEnums.key_gas) {
+                    return m1.getGasAddedValue();
+                }
+                return m1.getElectricAddedValue();
+                }).collect(Collectors.toList()));
+                //每小时的水 除以  每小时的产能 =单位能耗
+                trendLineVo.setValue(StringUtilToll.div(value,capValue));
+            trendLineVos.add(trendLineVo);
+
+        });
+
+
+
+         return  trendLineVos;
+
+    }
+
+
+
+    private  void print(String str,Object   obj)  {
+        try {
+            ObjectMapper mapper=new ObjectMapper();
+            String jsonStr=mapper.writeValueAsString(obj);
+//            log.info("[json]"+str+jsonStr);
+        }catch (Exception e)
+        {
+            log.info(str+obj);
+        }
     }
 
 

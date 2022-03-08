@@ -15,6 +15,8 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.bodrd.DashboardV3Vo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
+import org.thingsboard.server.common.data.vo.tskv.TrendChart02Vo;
+import org.thingsboard.server.common.data.vo.tskv.parameter.TrendParameterVo;
 import org.thingsboard.server.dao.board.BulletinV3BoardVsSvc;
 import org.thingsboard.server.dao.sql.role.entity.BoardV3DeviceDitEntity;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
@@ -115,6 +117,28 @@ public class BulletinBoardV3Controller   extends BaseController {
             return  new ConsumptionTodayVo();
         }
     }
+
+
+    /**
+     * 维度 1小时
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation(value = "【3.新增设备单位能耗/标准单位能耗趋势图】")
+    @RequestMapping(value = "/trendChart ", method = RequestMethod.POST)
+    @ResponseBody
+    public TrendChart02Vo trendChart(@RequestBody TrendParameterVo vo) throws ThingsboardException {
+        try {
+            log.info("3.新增设备单位能耗/标准单位能耗趋势图:{}",vo);
+           vo.setTenantId(getTenantId().getId());
+            return bulletinV3BoardVsSvc.trendChart(vo,getTenantId());
+        }catch (Exception  e)
+        {
+            log.error("新增设备单位能耗/标准单位能耗趋势图:{}",e);
+            return  new TrendChart02Vo();
+        }
+    }
+
 
 
 

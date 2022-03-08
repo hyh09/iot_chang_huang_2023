@@ -25,6 +25,9 @@ public class TrendParameterVo {
 
     private  UUID workshopId;
 
+    private UUID  dictDeviceId;
+
+
     private  Long startTime;
 
     private  Long  endTime;
@@ -39,6 +42,7 @@ public class TrendParameterVo {
         vo.setTenantId(this.tenantId);
         vo.setFactoryId(this.factoryId);
         vo.setWorkshopId(this.workshopId);
+        vo.setDictDeviceId(this.dictDeviceId);
 //        vo.setProductionLineId(null);
 //        vo.setDeviceId(this.deviceId);
         return  vo;
