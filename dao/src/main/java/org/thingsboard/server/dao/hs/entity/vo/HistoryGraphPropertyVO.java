@@ -30,6 +30,9 @@ public class HistoryGraphPropertyVO {
     @ApiModelProperty(value = "属性单位")
     private String unit;
 
+    @ApiModelProperty(value = "属性后缀")
+    private String suffix;
+
     @ApiModelProperty(value = "时序数据列表")
     List<HistoryGraphPropertyTsKvVO> tsKvs;
 }

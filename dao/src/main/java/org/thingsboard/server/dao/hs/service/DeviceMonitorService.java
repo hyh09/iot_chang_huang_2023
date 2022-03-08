@@ -266,4 +266,15 @@ public interface DeviceMonitorService {
      * @return 遥测属性历史数据图表
      */
     HistoryGraphVO getTsPropertyHistoryGraph(TenantId tenantId, UUID deviceId, String tsPropertyName, Long todayStartTime, Long todayCurrentTime) throws ThingsboardException;
+
+    /**
+     * 【app】查询图表历史
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param graphId      图表Id
+     * @param timePageLink 时间
+     * @return 图表历史
+     */
+    HistoryGraphAppVO getGraphHistoryForApp(TenantId tenantId, UUID deviceId, UUID graphId, TimePageLink timePageLink) throws ThingsboardException, ExecutionException, InterruptedException;
 }
