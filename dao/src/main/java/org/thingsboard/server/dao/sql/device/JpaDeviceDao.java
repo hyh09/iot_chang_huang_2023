@@ -874,6 +874,47 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     /**
+     * 查询设备排除网关，返回工厂名
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Device> findDeviceFilterGatewayByTenantId(UUID tenantId) {
+        List<Device> resultList = new ArrayList<>();
+        List<DeviceEntity> deviceFilterGatewayByTenantId = deviceRepository.findDeviceFilterGatewayByTenantId(tenantId);
+        if(CollectionUtils.isNotEmpty(deviceFilterGatewayByTenantId)){
+            deviceFilterGatewayByTenantId.forEach(i->{
+                resultList.add(i.toData());
+            });
+        }
+        return this.getFactoryByList(resultList);
+    }
+
+    /**
+     * 查工厂名称
+     * @param deviceList
+     * @return
+     */
+    public List<Device> getFactoryByList(List<Device> deviceList){
+        if(CollectionUtils.isNotEmpty(deviceList)){
+            //查询产线名称
+            List<UUID> factoryIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<Factory> resultFactory = factoryDao.getFactoryByIdList(factoryIds);
+            deviceList.forEach(i->{
+                if(CollectionUtils.isNotEmpty(resultFactory)){
+                    resultFactory.forEach(j->{
+                        if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId().toString())){
+                            i.setFactoryName(j.getName());
+                        }
+                    });
+                }
+            });
+        }
+        return deviceList;
+    }
+
+
+    /**
      * 获取父级名称
      * @param deviceList
      * @return

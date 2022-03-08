@@ -139,13 +139,14 @@ public interface OrderService {
     void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID planId, OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException;
 
     /**
-     * 查询设备订单信息
+     * 根据设备id以及实际时间查询订单信息
      * @param deviceIds
      * @param startTime
      * @param endTime
      * @return
      */
-    List<OrderPlanEntity>  getDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime);
+    List<OrderPlanEntity> findDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime);
+
 
     /**
      * 看板-订单监控

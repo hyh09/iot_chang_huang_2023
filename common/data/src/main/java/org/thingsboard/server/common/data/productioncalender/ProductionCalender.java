@@ -54,11 +54,10 @@ public class ProductionCalender {
 
     public ProductionCalender(){}
 
-    public ProductionCalender(String deviceName,String factoryName, Long startTime, Long endTime) {
+    public ProductionCalender(String deviceName,String factoryName,UUID tenantId) {
         this.deviceName = deviceName;
         this.factoryName = factoryName;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.tenantId = tenantId;
     }
 
     public ProductionCalender(UUID deviceId){

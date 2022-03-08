@@ -300,5 +300,8 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.name =:name ")
     List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId,@Param("name") String name );
 
+    @Query(nativeQuery = true,value = "select * from device d  where d.tenant_id = ?1 and position('\"gateway\":true' in d.additional_info)=0")
+    List<DeviceEntity> findDeviceFilterGatewayByTenantId(UUID tenantId );
+
 
 }
