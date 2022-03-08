@@ -102,13 +102,13 @@ public interface OrderService {
     OrderVO getOrderCapacityMonitorDetail(TenantId tenantId, UUID orderId) throws ThingsboardException;
 
     /**
-     * 订单产能监控-看板
+     * 订单产能监控
      *
      * @param tenantId   租户id
      * @param factoryIds 工厂Id
      * @param timeQuery  时间请求参数
      */
-    List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery);
+    List<OrderCustomCapacityResult> listCustomCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery);
 
     /**
      * 订单产能监控-App-首页
@@ -145,5 +145,17 @@ public interface OrderService {
      * @param endTime
      * @return
      */
-    List<OrderPlanEntity>  findDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime);
+    List<OrderPlanEntity> findDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime);
+
+
+    /**
+     * 看板-订单监控
+     *
+     * @param tenantId 租户Id
+     * @param factoryId 工厂Id
+     * @param workshopId 车间Id
+     * @param timeQuery 时间参数
+     * @return 订单
+     */
+    List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery);
 }

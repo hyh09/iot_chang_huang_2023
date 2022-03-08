@@ -21,6 +21,7 @@ import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -342,4 +343,15 @@ public interface ClientService {
      * @param tenantId 租户Id
      */
     List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId);
+
+    /**
+     * 查询不同属性在时间段内的遥测值
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param properties 属性
+     */
+    Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties);
 }
