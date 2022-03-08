@@ -430,7 +430,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var pageData = this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(deviceId), timePageLink);
         if (isShowAttributes) {
             var attributeData = this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().collect(Collectors.toMap(AttributeKvEntry::getKey, AttributeKvEntry::getValueAsString));
-            pageData.getData().forEach(v->v.putAll(attributeData));
+            pageData.getData().forEach(v -> v.putAll(attributeData));
         }
         return pageData;
     }
@@ -453,7 +453,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
         var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
         if (isShowAttributes)
-           keyList.addAll( this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().map(AttributeKvEntry::getKey).collect(Collectors.toList()));
+            keyList.addAll(this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().map(AttributeKvEntry::getKey).collect(Collectors.toList()));
         if (keyList.isEmpty())
             return propertyVOList;
 
@@ -1033,6 +1033,53 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         historyGraphVO.setEnable(property.getIsShowChart());
         historyGraphVO.setProperties(Lists.newArrayList(property));
         return historyGraphVO;
+    }
+
+    /**
+     * 【app】查询图表历史
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param graphId      图表Id
+     * @param timePageLink 时间
+     * @return 图表历史
+     */
+    @Override
+    public HistoryGraphAppVO getGraphHistoryForApp(TenantId tenantId, UUID deviceId, UUID graphId, TimePageLink timePageLink) throws ThingsboardException, ExecutionException, InterruptedException {
+        var dictDeviceGraphVO = this.dictDeviceService.getDictDeviceGraphDetail(tenantId, graphId);
+        List<HistoryGraphPropertyVO> historyGraphProperties = Lists.newArrayList();
+        if (!dictDeviceGraphVO.getProperties().isEmpty()) {
+            var firstV = dictDeviceGraphVO.getProperties().get(0);
+            var firstVs = this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(UUIDToString(deviceId)), firstV.getName(), timePageLink);
+            var tsList = firstVs.getData().stream().map(DictDeviceGroupPropertyVO::getCreatedTime).collect(Collectors.toList());
+            var time1 = tsList.get(0);
+            var time2 = tsList.get(tsList.size() - 1);
+            var others = dictDeviceGraphVO.getProperties().stream().map(DictDeviceGraphPropertyVO::getName).filter(name -> !firstV.getName().equals(name)).collect(Collectors.toList());
+            Map<String, List<HistoryGraphPropertyTsKvVO>> data = Maps.newHashMap();
+            if (!others.isEmpty()) {
+                data = this.clientService.listTsHistoriesByProperties(tenantId, deviceId, Math.min(time2, time1), Math.max(time2, time1), others);
+            }
+            data.put(firstV.getName(), firstVs.getData().stream().map(v -> HistoryGraphPropertyTsKvVO.builder().ts(v.getCreatedTime()).value(v.getContent()).build()).collect(Collectors.toList()));
+
+            Map<String, List<HistoryGraphPropertyTsKvVO>> finalData = data;
+            historyGraphProperties = dictDeviceGraphVO.getProperties().stream().map(v -> {
+                var map = finalData.getOrDefault(v.getName(), Lists.newArrayList()).stream().filter(f -> StringUtils.isNotBlank(f.getValue())).collect(Collectors.toMap(HistoryGraphPropertyTsKvVO::getTs, HistoryGraphPropertyTsKvVO::getValue));
+                return HistoryGraphPropertyVO.builder()
+                        .suffix(v.getSuffix())
+                        .unit(v.getUnit())
+                        .name(v.getName())
+                        .title(v.getTitle())
+                        .tsKvs(tsList.stream().map(g -> HistoryGraphPropertyTsKvVO.builder().ts(g).value(map.getOrDefault(g, null)).build()).collect(Collectors.toList()))
+                        .build();
+            }).collect(Collectors.toList());
+        }
+
+
+        return HistoryGraphAppVO.builder()
+                .enable(dictDeviceGraphVO.getEnable())
+                .name(dictDeviceGraphVO.getName())
+                .properties(historyGraphProperties)
+                .build();
     }
 
     /**

@@ -399,7 +399,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             var subList = result.subList(Math.min(timePageLink.getPageSize() * timePageLink.getPage(), total), Math.min(timePageLink.getPageSize() * (timePageLink.getPage() + 1), total));
             return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(total)), timePageLink.getPage() + 1 < totalPage);
         } else {
-            long a1 = System.currentTimeMillis();
             var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId.getId());
             if (keyIds.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
@@ -822,6 +821,32 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
         var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
         return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 查询不同属性在时间段内的遥测值
+     *
+     * @param tenantId   租户Id
+     * @param deviceId   设备Id
+     * @param startTime  开始时间
+     * @param endTime    结束时间
+     * @param properties 属性
+     */
+    @Override
+    public Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) {
+        // TODO consider cassandra
+        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+        if (keyIds.isEmpty())
+            return Maps.newHashMap();
+        var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIn(properties).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey));
+        var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+        Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
+
+        kvEntityResult.forEach(v-> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k->Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
+                .ts(v.getTs())
+                .value(this.formatKvEntryValue(v.toData()))
+                .build()));
+        return map;
     }
 
     /**

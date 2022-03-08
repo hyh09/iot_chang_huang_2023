@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -532,5 +533,40 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                 .map(v -> v.thenApplyAsync(e -> this.clientService.getOrderCapacities(e.getRight(), e.getLeft())))
                 .map(CompletableFuture::join)
                 .collect(Collectors.toMap(OrderCapacityBO::getOrderId, Function.identity()));
+    }
+
+    /**
+     * 查询设备订单信息
+     * @param deviceIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<OrderPlanEntity> getDeviceAchieveOrPlanList(List<UUID> deviceIds,Long startTime, Long endTime){
+        Specification<OrderPlanEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+           /* // 下面是一个 IN查询
+            CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
+            deviceIds.forEach(in::value);
+            predicates.add(in);
+
+            predicates.add(cb.between(root.get))
+
+
+            //增加筛选条件
+            Predicate predicate = cb.conjunction();
+            //起始日期
+            if (startTime != null) {
+                predicate.getExpressions().add(cb.greaterThanOrEqualTo(root.get("createTime").as(String.class), startTime));
+            }
+            //结束日期
+            if (endTime != null) {
+                predicate.getExpressions().add(cb.lessThanOrEqualTo(root.get("createTime").as(String.class), endTime));
+            }*/
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return orderPlanRepository.findAll(specification);
     }
 }
