@@ -33,27 +33,47 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
 
     return new Observable((observer: Observer<EntityTableConfig<object>>) => {
       this.realTimeMonitorService.getDeviceHistoryTableHeader(this.deviceId).subscribe(res => {
+        let headers = res || [];
+
         this.config.tableTitle = this.deviceName;
         this.config.addEnabled = false;
         this.config.searchEnabled = false;
-        this.config.refreshEnabled = false;
         this.config.detailsPanelEnabled = false;
         this.config.entitiesDeleteEnabled = false;
         this.config.selectionEnabled = false;
         this.config.useTimePageLink = true;
         this.config.timeWindowInFilter = true;
 
-        this.config.columns.splice(1, this.config.columns.length - 1);
-        (res || []).forEach(col => {
-          if (col.name !== 'createdTime') {
-            this.config.columns.push(new EntityTableColumn<object>(col.name, col.title || col.name, '', (entity) => (entity[col.name] || ''), () => ({}), false));
-          }
+        this.realTimeMonitorService.getDeviceRelatedParams(this.deviceId).subscribe(_res => {
+          const relatedHeaderNames = [];
+          (_res || []).forEach(item => {
+            if (item.properties && item.properties.length > 0) {
+              headers.splice(0, 0, item);
+              relatedHeaderNames.push(...(item.properties.map(prop => (prop.name))));
+            }
+          });
+          headers = headers.filter(header => (!relatedHeaderNames.includes(header.name)));
+
+          this.config.columns.splice(1, this.config.columns.length - 1);
+          headers.forEach(col => {
+            if (col.name !== 'createdTime') {
+              if (col.properties) {
+                this.config.columns.push(new EntityTableColumn<object>(col.name, col.name, '', (entity) => {
+                  let content = '';
+                  col.properties.forEach(prop => (content += `${entity[prop.name] || ''}${prop.unit || ''}${prop.suffix || ''}`));
+                  return content;
+                }, () => ({}), false));
+              } else {
+                this.config.columns.push(new EntityTableColumn<object>(col.name, col.title || col.name, '', (entity) => (entity[col.name] || ''), () => ({}), false));
+              }
+            }
+          });
+
+          this.config.entitiesFetchFunction = pageLink => this.realTimeMonitorService.getDeviceHistoryDatas(pageLink, this.deviceId);
+
+          observer.next(this.config);
+          observer.complete();
         });
-
-        this.config.entitiesFetchFunction = pageLink => this.realTimeMonitorService.getDeviceHistoryDatas(pageLink, this.deviceId);
-
-        observer.next(this.config);
-        observer.complete();
       });
     });
   }
