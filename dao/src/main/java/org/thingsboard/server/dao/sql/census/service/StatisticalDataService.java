@@ -31,9 +31,8 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
 
 
     @Transactional
-    public  StatisticalDataEntity  todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry,String  title)
+    public  StatisticalDataEntity  todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry,String  title,String valueOLd)
     {
-//        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
         StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
         if(entityDatabase == null){
             StatisticalDataEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
