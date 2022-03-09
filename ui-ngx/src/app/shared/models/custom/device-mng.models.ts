@@ -181,3 +181,23 @@ export interface DictDevice extends BaseData<any> {
   workshopName?: string;
   productionLineName?: string;
 }
+
+export interface ProdMng extends BaseData<any> {
+  factoryId: string;
+  factoryName: string;
+  deviceId: string;
+  deviceName: string;
+  startTime: number;
+  endTime: number;
+}
+
+export interface ProdCalendar extends BaseData<any> {
+  deviceId: string;
+  deviceName: string;
+  factoryId: string;
+  factoryName: string;
+  startTime: number;
+  endTime: number;
+  updatedTime: number;
+  createdTime: number;
+}
