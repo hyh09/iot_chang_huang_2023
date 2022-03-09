@@ -158,7 +158,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
         StringBuffer  sql = new StringBuffer();
 //        sql.append(SELECT_START_DEVICE_02).append(",").append(TODAY_SQL_02).append(FROM_SQL_02);
-        sql.append(SELECT_START_DEVICE_02).append(",tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value,tb.ts ").append(FROM_SQL_02);
+        sql.append(SELECT_START_DEVICE_02).append(",tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value,tb.capacity_added_value,tb.ts ").append(FROM_SQL_02);
 
         sql.append(sonSql01);
         List<EnergyEffciencyNewEntity>   entityList = querySql(sql.toString(),param,"energyEffciencyNewEntity_03");

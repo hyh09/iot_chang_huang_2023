@@ -232,7 +232,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
         {
 //            log.info("打印当前的数据打印标题{}",title);
             statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
-            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
+//            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
             energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
 
         }
