@@ -8,6 +8,8 @@ import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictio
 import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
 import { FactoryMngComponent } from './factory-mng/factory-mng.component';
 import { ProdCapacitySettingsTableConfigResolver } from './prod-capacity-settings/prod-capacity-settings-table-config.resolver';
+import { MngCalendarTableConfigResolver } from './prod-mng/mng-calendar-table-config.resolver';
+import { ProdMngTableConfigResolver } from './prod-mng/prod-mng-table-config.resolver';
 
 const routes: Routes = [
   {
@@ -127,6 +129,41 @@ const routes: Routes = [
             }
           }
         ]
+      },
+      {
+        path: 'prodManagement',
+        data: {
+          breadcrumb: {
+            label: 'device-mng.prod-mng',
+            icon: 'mdi:prod-mng'
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.prod-mng'
+            },
+            resolve: {
+              entitiesTableConfig: ProdMngTableConfigResolver
+            }
+          },
+          {
+            path: ':factoryId/:deviceId/calendars',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.mng-calendars',
+              breadcrumb: {
+                label: 'device-mng.mng-calendars',
+                icon: 'mdi:calendar'
+              }
+            },
+            resolve: {
+              entitiesTableConfig: MngCalendarTableConfigResolver
+            }
+          }
+        ]
       }
     ]
   }
@@ -141,7 +178,9 @@ const routes: Routes = [
     UserMngTableConfigResolver,
     ProdCapacitySettingsTableConfigResolver,
     ChartSettingsTableConfigResolver,
-    ChartsTableConfigResolver
+    ChartsTableConfigResolver,
+    ProdMngTableConfigResolver,
+    MngCalendarTableConfigResolver
   ]
 })
 export class DeviceMngRoutingModule { }

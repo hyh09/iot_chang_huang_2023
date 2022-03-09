@@ -127,3 +127,17 @@ export interface DeviceDetails extends DeviceBaseInfo {
   componentList?: DeviceComp[]; // 设备部件
   dictDeviceGraphs?: AssociatedProp[]; // 关联的属性
 }
+
+export interface RelatedParams {
+  createdTime: number;
+  enable: boolean;
+  id: string;
+  name: string;
+  properties: ChartProp[];
+}
+
+export interface DevcieHistoryHeader {
+  name: string;
+  title?: string;
+  properties?: ChartProp[];
+}
