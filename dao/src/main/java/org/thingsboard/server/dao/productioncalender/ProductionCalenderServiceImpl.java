@@ -20,7 +20,10 @@ import org.thingsboard.server.dao.hs.dao.OrderRepository;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,10 +67,14 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
     public PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink) {
         return productionCalenderDao.findProductionCalenderPage(productionCalender, pageLink);
     }
-
+    /**
+     * 设备生产日历历史记录分页列表
+     * @param deviceId
+     * @return
+     */
     @Override
-    public List<ProductionCalender> getHistoryById(UUID deviceId) {
-        return productionCalenderDao.getHistoryById(deviceId);
+    public PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink){
+        return productionCalenderDao.getHistoryPageByDeviceId(deviceId,pageLink);
     }
 
     /**
@@ -82,22 +89,23 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
             case 1:
                 //集团看板生产监控查询
                 ///查询租户下所有工厂
-                List<Factory> factoryByTenantId = factoryDao.findFactoryByTenantId(productionCalender.getTenantId());
-                if (!CollectionUtils.isEmpty(factoryByTenantId)) {
+                List<Factory> factoryList = factoryDao.findFactoryByTenantId(productionCalender.getTenantId());
+                if (!CollectionUtils.isEmpty(factoryList)) {
                     //查询工厂所有的订单
-                    List<OrderEntity> allByFactoryIds = orderRepository.findAllByFactoryIds(factoryByTenantId.stream().map(m -> m.getId()).collect(Collectors.toList()));
-                    if (!CollectionUtils.isEmpty(allByFactoryIds)) {
+                    List<OrderEntity> orderEntityList = orderRepository.findAllByFactoryIds(factoryList.stream().map(m -> m.getId()).collect(Collectors.toList()));
+                    if (!CollectionUtils.isEmpty(orderEntityList)) {
                         //查询满足时间范围内的所有订单计划
-                        List<OrderPlanEntity> allByOrderIds = orderPlanRepository.findAllByOrderIdsAndTime(allByFactoryIds.stream().map(m -> m.getId()).collect(Collectors.toList()), productionCalender.getStartTime(), productionCalender.getEndTime());
-                        if (!CollectionUtils.isEmpty(allByOrderIds)) {
-                            //查询所有的设备产能
-                            Map<UUID, String> uuidStringMap = this.statisticsDeviceoutput(allByOrderIds, productionCalender.getStartTime(), productionCalender.getEndTime());
-                            for (Factory factory : factoryByTenantId) {
+                        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findAllByOrderIdsAndTime(orderEntityList.stream().map(m -> m.getId()).collect(Collectors.toList()), productionCalender.getStartTime(), productionCalender.getEndTime());
+                        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+                            for (Factory factory : factoryList) {
                                 ProductionCalender resultProductionCalender = new ProductionCalender();
                                 resultProductionCalender.setFactoryId(factory.getId());
                                 resultProductionCalender.setFactoryName(factory.getName());
                                 //当前租户工厂下的所有订单设备完成量/计划量
-                                resultProductionCalenders.add(this.statisticsFactory(factory.getId(), allByFactoryIds, allByOrderIds));
+                                resultProductionCalenders.add(this.statisticsFactory(factory.getId(), orderEntityList, orderPlanEntityList));
+
+                                //查询每个工厂下所有的设备产能
+                                this.statisticsDeviceoutput(factory.getId(), orderEntityList, orderPlanEntityList, productionCalender.getStartTime(), productionCalender.getEndTime());
                             }
 
                         }
@@ -161,28 +169,65 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
     /**
      * 批量查询设备在查询时间区间内的产量
      *
-     * @param allByOrderIds
+     * @param orderPlanEntityList
      * @param startTime
      * @param endTime
      * @return
      */
-    public Map<UUID, String> statisticsDeviceoutput(List<OrderPlanEntity> allByOrderIds, Long startTime, Long endTime) {
+    public String statisticsDeviceoutput(UUID factoryId, List<OrderEntity> orderEntityList, List<OrderPlanEntity> orderPlanEntityList, Long startTime, Long endTime) {
         List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(allByOrderIds)) {
-            for (OrderPlanEntity orderPlanEntity : allByOrderIds) {
-                Long actualStartTime = orderPlanEntity.getActualStartTime();
-                Long actualEndTime = orderPlanEntity.getActualEndTime();
-                //时间要取交叉时间
-                if (orderPlanEntity.getActualStartTime() != null){
-                    if(actualStartTime > startTime && actualEndTime < endTime){
+        if (!CollectionUtils.isEmpty(orderEntityList)) {
+            for (OrderEntity orderEntity : orderEntityList) {
 
+                //同一个工厂
+                if(orderEntity.getFactoryId() != null && orderEntity.getFactoryId() == factoryId){
+
+                    if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+                        for (OrderPlanEntity orderPlanEntity : orderPlanEntityList) {
+
+                            //同一个订单
+                            if(orderEntity.getId() == orderPlanEntity.getOrderId()){
+                                Long actualStartTime = orderPlanEntity.getActualStartTime();
+                                Long actualEndTime = orderPlanEntity.getActualEndTime();
+                                //时间要取交叉时间
+                                if (actualStartTime != null && actualEndTime != null) {
+                                    if (startTime < actualStartTime && actualEndTime < endTime) {
+                                        actualStartTime = actualStartTime;
+                                        actualEndTime = actualEndTime;
+                                    }
+                                    if (startTime < actualStartTime && actualStartTime < endTime && endTime < actualEndTime) {
+                                        actualStartTime = actualStartTime;
+                                        actualEndTime = endTime;
+                                    }
+                                    if (actualStartTime < startTime && actualEndTime < endTime) {
+                                        actualStartTime = startTime;
+                                        actualEndTime = actualEndTime;
+                                    }
+                                    if (actualStartTime < startTime && actualStartTime < endTime && endTime < actualStartTime) {
+                                        actualStartTime = startTime;
+                                        actualEndTime = endTime;
+                                    }
+                                    deviceCapacityVoList.add(new DeviceCapacityVo(orderPlanEntity.getId(), orderPlanEntity.getDeviceId(), actualStartTime, actualEndTime));
+                                }
+
+                            }
+                        }
                     }
                 }
-
-                deviceCapacityVoList.add(new DeviceCapacityVo(orderPlanEntity.getId(),orderPlanEntity.getDeviceId(), startTime, endTime));
             }
         }
-        return bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
+        if(!CollectionUtils.isEmpty(deviceCapacityVoList)){
+            Map<UUID, String> map = bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
+            //计算总产量
+            if(map != null){
+
+                /*for (EntityKeyValueType valueType:map.entrySet()){
+
+                }*/
+
+            }
+        }
+        return null;
     }
 
 }

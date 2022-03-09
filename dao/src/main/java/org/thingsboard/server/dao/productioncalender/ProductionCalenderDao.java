@@ -5,7 +5,6 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface ProductionCalenderDao {
@@ -41,9 +40,10 @@ public interface ProductionCalenderDao {
 
     /**
      * 查询设备历史生产日历记录列表
-     * @param id
+     * @param deviceId
+     * @param pageLink
      * @return
      */
-    List<ProductionCalender> getHistoryById(UUID id);
+    PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink);
 
 }
