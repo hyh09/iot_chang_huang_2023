@@ -153,6 +153,7 @@ public class ProductionCalenderController extends BaseController{
     @ResponseBody
     public List<ProductionMonitorListVo> getProductionMonitorList(ProductionMonitorListQry dto)throws ThingsboardException{
         try {
+            checkParameterChinees("qryType",dto.getQryType());
             List<ProductionMonitorListVo> result = new ArrayList<>();
             List<ProductionCalender> calenderList = productionCalenderService.getProductionMonitorList(dto.toProductionCalender(getCurrentUser().getTenantId().getId()));
             if(!org.springframework.util.CollectionUtils.isEmpty(calenderList)){

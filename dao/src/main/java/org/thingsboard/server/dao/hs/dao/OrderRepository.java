@@ -38,4 +38,8 @@ public interface OrderRepository extends PagingAndSortingRepository<OrderEntity,
             "AND e.orderNo LIKE CONCAT(:orderNo, '%') ")
     CompletableFuture<List<OrderEntity>> findAllOrderNoByTenantIdAndOrderNoLike(@Param("tenantId") UUID tenantId, @Param("orderNo") String orderNo);
 
+    @Async
+    @Query("SELECT e FROM OrderEntity e WHERE e.factoryId in :factoryIds " )
+    List<OrderEntity> findAllByFactoryIds(@Param("factoryIds") List<UUID> factoryIds);
+
 }

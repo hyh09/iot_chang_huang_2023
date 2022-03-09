@@ -22,13 +22,13 @@ import java.util.UUID;
                         @ConstructorResult(
                                 targetClass = ProductionCalenderEntity.class,
                                 columns = {
-                                      /*  @ColumnResult(name = "id", type = UUID.class),*/
+                                        /*  @ColumnResult(name = "id", type = UUID.class),*/
                                         @ColumnResult(name = "device_id", type = UUID.class),
-                                        @ColumnResult(name = "device_name",type = String.class),
-                                       /* @ColumnResult(name = "factory_id",type = UUID.class),*/
-                                        @ColumnResult(name = "factory_name",type = String.class),
-                                        @ColumnResult(name = "start_time",type = Long.class),
-                                        @ColumnResult(name = "end_time",type = Long.class),
+                                        @ColumnResult(name = "device_name", type = String.class),
+                                        @ColumnResult(name = "factory_id", type = UUID.class),
+                                        @ColumnResult(name = "factory_name", type = String.class),
+                                        @ColumnResult(name = "start_time", type = Long.class),
+                                        @ColumnResult(name = "end_time", type = Long.class),
                                         /*@ColumnResult(name = "tenant_id",type = UUID.class),
                                         @ColumnResult(name = "created_time",type = Long.class),
                                         @ColumnResult(name = "created_user",type = UUID.class),
@@ -56,9 +56,10 @@ public class ProductionCalenderEntity extends AbstractProductionCalenderEntity<P
     }
 
 
-    public ProductionCalenderEntity(UUID deviceId, String deviceName,String factoryName, Long startTime, Long endTime) {
+    public ProductionCalenderEntity(UUID deviceId, String deviceName, UUID factoryId, String factoryName, Long startTime, Long endTime) {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
+        this.factoryId = factoryId;
         this.factoryName = factoryName;
         this.startTime = startTime;
         this.endTime = endTime;
