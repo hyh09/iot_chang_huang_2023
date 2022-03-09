@@ -88,6 +88,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         dashboardV3Vos.add(getResultList(stringStringMap,KeyTitleEnums.key_water,map,totalCalculationVo.getWater()));
         dashboardV3Vos.add(getResultList(stringStringMap,KeyTitleEnums.key_cable,map,totalCalculationVo.getElectric()));
         dashboardV3Vos.add(getResultList(stringStringMap,KeyTitleEnums.key_gas,map,totalCalculationVo.getGas()));
+
         return dashboardV3Vos;
     }
 
@@ -119,6 +120,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         vo1.setName(enums.getgName());
         vo1.setStandardValue(stringStringMap.get(dictVo.getName()));
         vo1.setActualValue(actulValue);
+        vo1.setUnit(dictVo.getUnit());
        return  vo1;
 
     }
