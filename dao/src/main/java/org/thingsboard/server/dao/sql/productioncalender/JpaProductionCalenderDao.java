@@ -173,6 +173,9 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 if(StringUtils.isNotEmpty(productionCalender.getDeviceName())){
                     predicates.add(cb.like(root.get("deviceName"),productionCalender.getDeviceName()));
                 }
+                if(productionCalender.getDeviceId() != null){
+                    predicates.add(cb.equal(root.get("deviceId"),productionCalender.getDeviceId()));
+                }
             }
             /**
              * order By
