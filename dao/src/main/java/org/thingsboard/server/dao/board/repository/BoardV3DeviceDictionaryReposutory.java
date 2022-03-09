@@ -26,7 +26,7 @@ public class BoardV3DeviceDictionaryReposutory extends JpaSqlTool {
 
 
     /**
-     *
+     *查询设备字典
      * @param vo
      * @return
      */

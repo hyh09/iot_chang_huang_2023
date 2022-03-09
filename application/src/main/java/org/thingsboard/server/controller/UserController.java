@@ -589,7 +589,7 @@ public class UserController extends BaseController  {
         int count =  userService.update(user);
         userService.updateEnableByUserId(user.getUuidId(),((user.getActiveStatus().equals("1"))?true:false));
         log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
-           if(count>0  && user.getUserLevel()==0)
+           if(count>0  && UserLeveEnums.getEnableCanByCode(user.getUserLevel()))
            {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
            }

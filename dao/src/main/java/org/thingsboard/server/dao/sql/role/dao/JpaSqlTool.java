@@ -140,6 +140,11 @@ public class JpaSqlTool {
             sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
+        if(queryTsKvVo.getDictDeviceId() != null)
+        {
+            sonSql01.append(" and  d1.dict_device_id = :dictId ");
+            param.put("dictId", queryTsKvVo.getDictDeviceId());
+        }
     }
 
 
