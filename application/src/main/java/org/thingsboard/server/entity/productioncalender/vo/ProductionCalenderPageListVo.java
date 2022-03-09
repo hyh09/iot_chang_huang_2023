@@ -15,6 +15,8 @@ public class ProductionCalenderPageListVo{
     public UUID deviceId;
     @ApiModelProperty("设备名称")
     public String deviceName;
+    @ApiModelProperty("工厂id")
+    public UUID factoryId;
     @ApiModelProperty("工厂名称")
     public String factoryName;
     @ApiModelProperty("开始时间")
@@ -26,6 +28,7 @@ public class ProductionCalenderPageListVo{
         if (productionCalender != null) {
             this.deviceId = productionCalender.getDeviceId();
             this.deviceName = productionCalender.getDeviceName();
+            this.factoryId = productionCalender.getFactoryId();
             this.factoryName = productionCalender.getFactoryName();
             this.startTime = productionCalender.getStartTime();
             this.endTime = productionCalender.getEndTime();

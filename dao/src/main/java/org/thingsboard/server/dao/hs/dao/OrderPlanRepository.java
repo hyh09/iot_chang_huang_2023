@@ -44,4 +44,9 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
             " and t2.deviceId in :deviceId ")
     List<OrderPlanEntity> findDeviceAchieveOrPlanList(@Param("deviceId") List<UUID> deviceId, @Param("actualStartTime") Long actualStartTime, @Param("actualEndTime") Long actualEndTime);
 
+    @Async
+    @Query("SELECT t1 FROM OrderPlanEntity t1 WHERE t1.orderId in :orderIds and ( t1.actualStartTime > :actualEndTime or t1.actualStartTime < :actualStartTime ) " )
+    List<OrderPlanEntity> findAllByOrderIdsAndTime(@Param("orderIds") List<UUID> orderIds, @Param("actualStartTime") Long actualStartTime, @Param("actualEndTime") Long actualEndTime);
+
+
 }

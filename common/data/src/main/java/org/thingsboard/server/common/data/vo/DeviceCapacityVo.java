@@ -44,4 +44,13 @@ public class DeviceCapacityVo {
      */
     @ApiModelProperty("中文描述: 结束时间;【必填】  ")
     private  Long endTime;
+
+    public DeviceCapacityVo(){}
+
+    public DeviceCapacityVo(UUID id,UUID entityId, Long startTime, Long endTime) {
+        this.id = id;
+        this.entityId = entityId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }
