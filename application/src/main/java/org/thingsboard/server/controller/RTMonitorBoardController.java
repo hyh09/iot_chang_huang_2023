@@ -18,6 +18,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 
@@ -163,5 +164,17 @@ public class RTMonitorBoardController extends BaseController {
     @GetMapping("/rtMonitor/device/onlineStatus/all")
     public Map<String, Boolean> getDeviceOnlineStatus() throws ThingsboardException {
         return this.clientService.getDeviceOnlineStatusMap(getTenantId());
+    }
+
+    /**
+     * 车间-设备关键参数
+     */
+    @ApiOperation(value = "车间-设备关键参数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+    })
+    @GetMapping("/rtMonitor/device/keyParameters")
+    public DeviceKeyParametersResult getDeviceKeyParameters(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+        return this.deviceMonitorService.getDeviceKeyParameters(getTenantId(), deviceId);
     }
 }

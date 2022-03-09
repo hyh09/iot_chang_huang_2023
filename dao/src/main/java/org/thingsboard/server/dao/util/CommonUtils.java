@@ -414,6 +414,29 @@ public class CommonUtils {
     }
 
 
+    /**
+     *
+     * @param ts
+     * @return 小时
+     */
+    public  static Long getConversionHours(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+//        if(minute >0)
+//        {
+//            localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
+//        }else {
+            localDateTime1 = LocalDateTime.of(year, month, day, hour, 0, 0, 0);
+//        }
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
 
 
 

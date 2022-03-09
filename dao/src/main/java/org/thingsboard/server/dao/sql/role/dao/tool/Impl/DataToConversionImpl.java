@@ -101,6 +101,28 @@ public class DataToConversionImpl implements DataToConversionSvc {
         return resultVo;
     }
 
+    @Override
+    public ConsumptionTodayVo todayUntiEnergyByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId) {
+        ConsumptionTodayVo  resultVo = new ConsumptionTodayVo();
+        List<TkTodayVo> waterList = new ArrayList<>();
+        List<TkTodayVo> electricList = new ArrayList<>();
+        List<TkTodayVo> gasList = new ArrayList<>();
+
+        Map<UUID,String> mapFactoryCache = new HashMap<>();
+        entityList.stream().forEach(m1->{
+
+            waterList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getWaterAddedValue(),m1.getWaterValue()));
+            electricList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue()));
+            gasList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getGasAddedValue(),m1.getGasValue()));
+
+        });
+
+        resultVo.setWaterList(compareToMaxToMin(waterList));
+        resultVo.setElectricList(compareToMaxToMin(electricList));
+        resultVo.setGasList(compareToMaxToMin(gasList));
+        return resultVo;
+    }
+
     /**
      * 计算总产能的
      * @param effectTsKvEntities
@@ -308,6 +330,25 @@ public class DataToConversionImpl implements DataToConversionSvc {
         todayVo.setTotalValue(filterEmpty(historyValue));
         return  todayVo;
     }
+
+
+    /**
+     * 单位能耗的计算
+     */
+    private  TkTodayVo  toDayreturnTheData(EnergyEffciencyNewEntity m1, Map<UUID,String> mapFactoryCache,String  value,String historyValue )
+    {
+        TkTodayVo  todayVo = new TkTodayVo();
+        todayVo.setDeviceId(m1.getEntityId().toString());
+        todayVo.setDeviceName(m1.getDeviceName());
+        todayVo.setTs(m1.getTs());
+        todayVo.setFactoryName(getFactoryNameById(m1.getFactoryId(),mapFactoryCache));
+        String  value1 = StringUtilToll.div(value,m1.getCapacityAddedValue());
+        todayVo.setValue(filterEmpty(value1));
+        todayVo.setTotalValue(filterEmpty(historyValue));
+        return  todayVo;
+
+    }
+
 
 
     /**

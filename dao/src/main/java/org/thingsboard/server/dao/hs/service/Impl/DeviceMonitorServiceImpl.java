@@ -1052,12 +1052,14 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             var firstV = dictDeviceGraphVO.getProperties().get(0);
             var firstVs = this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(UUIDToString(deviceId)), firstV.getName(), timePageLink);
             var tsList = firstVs.getData().stream().map(DictDeviceGroupPropertyVO::getCreatedTime).collect(Collectors.toList());
-            var time1 = tsList.get(0);
-            var time2 = tsList.get(tsList.size() - 1);
-            var others = dictDeviceGraphVO.getProperties().stream().map(DictDeviceGraphPropertyVO::getName).filter(name -> !firstV.getName().equals(name)).collect(Collectors.toList());
             Map<String, List<HistoryGraphPropertyTsKvVO>> data = Maps.newHashMap();
-            if (!others.isEmpty()) {
-                data = this.clientService.listTsHistoriesByProperties(tenantId, deviceId, Math.min(time2, time1), Math.max(time2, time1), others);
+            if (!tsList.isEmpty()){
+                var time1 = tsList.get(0);
+                var time2 = tsList.get(tsList.size() - 1);
+                var others = dictDeviceGraphVO.getProperties().stream().map(DictDeviceGraphPropertyVO::getName).filter(name -> !firstV.getName().equals(name)).collect(Collectors.toList());
+                if (!others.isEmpty()) {
+                    data = this.clientService.listTsHistoriesByProperties(tenantId, deviceId, Math.min(time2, time1), Math.max(time2, time1), others);
+                }
             }
             data.put(firstV.getName(), firstVs.getData().stream().map(v -> HistoryGraphPropertyTsKvVO.builder().ts(v.getCreatedTime()).value(v.getContent()).build()).collect(Collectors.toList()));
 
@@ -1080,6 +1082,19 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 .name(dictDeviceGraphVO.getName())
                 .properties(historyGraphProperties)
                 .build();
+    }
+
+    /**
+     * 【看板】设备关键参数
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 设备关键参数
+     */
+    @Override
+    public DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) {
+
+        return null;
     }
 
     /**

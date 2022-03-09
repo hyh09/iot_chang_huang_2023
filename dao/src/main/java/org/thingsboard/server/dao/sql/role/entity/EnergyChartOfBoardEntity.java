@@ -46,6 +46,9 @@ import java.util.UUID;
                                         @ColumnResult(name = "gas_first_time",type = Long.class),
                                         @ColumnResult(name = "gas_last_time",type = Long.class),
 
+                                        //产能
+                                        @ColumnResult(name = "capacity_added_value",type = String.class),
+
 
 
                                 }
@@ -83,7 +86,8 @@ public class EnergyChartOfBoardEntity extends AbstractStatisticalDataEntity {
     public EnergyChartOfBoardEntity(UUID entityId, Long ts,
                                     String waterAddedValue, Long waterFirstTime, Long waterLastTime,
                                     String electricAddedValue, Long electricFirstTime, Long electricLastTime,
-                                    String gasAddedValue, Long gasFirstTime, Long gasLastTime
+                                    String gasAddedValue, Long gasFirstTime, Long gasLastTime,
+                                    String capacityAddedValue
                               ) {
         this.entityId = entityId;
         this.ts = ts;
@@ -102,6 +106,8 @@ public class EnergyChartOfBoardEntity extends AbstractStatisticalDataEntity {
         this.gasAddedValue = gasAddedValue;
         this.gasFirstTime =gasFirstTime;
         this.gasLastTime =gasLastTime;
+
+        this.capacityAddedValue=capacityAddedValue;
 
 
     }

@@ -38,11 +38,17 @@ public class QueryTsKvVo {
     @ApiModelProperty("工厂id  UUID类型")
     private UUID factoryId;
 
+    @ApiModelProperty("设备字典id  UUID类型")
+    private UUID  dictDeviceId;
+
+
     @ApiModelProperty("当前要传的属性 数组类型  ###不需要前端传了")
     private String key;
 
     @ApiModelProperty("当前要传的属性 数组类型  ###能耗的水 电气 入参; ##也不需要传了")
     private List<String> keys;
+
+
 
 
     @ApiModelProperty("分页参数大小 不传默认是2")

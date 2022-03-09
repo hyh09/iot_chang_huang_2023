@@ -1,12 +1,10 @@
 package org.thingsboard.server.dao.hs.dao;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,4 +23,7 @@ public interface DictDeviceStandardPropertyRepository extends PagingAndSortingRe
     List<DictDeviceStandardPropertyEntity> findAllByDictDeviceIdOrderBySortAsc(UUID dictDataId);
 
     void deleteAllByDictDeviceId(UUID dictDeviceId);
+
+    @Query("select t  from  DictDeviceStandardPropertyEntity  t where t.dictDeviceId= :dictDeviceId and t.name in (:name) ")
+    List<DictDeviceStandardPropertyEntity>  findAllByInContentAndDictDataId(@Param("dictDeviceId") UUID dictDeviceId,@Param("name") List<String> name);
 }
