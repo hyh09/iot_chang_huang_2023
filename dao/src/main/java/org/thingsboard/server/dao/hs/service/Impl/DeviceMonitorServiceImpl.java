@@ -1085,6 +1085,19 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     /**
+     * 【看板】设备关键参数
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 设备关键参数
+     */
+    @Override
+    public DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) {
+
+        return null;
+    }
+
+    /**
      * 获得遥测时序数据
      *
      * @param tenantId  租户Id

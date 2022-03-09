@@ -277,4 +277,13 @@ public interface DeviceMonitorService {
      * @return 图表历史
      */
     HistoryGraphAppVO getGraphHistoryForApp(TenantId tenantId, UUID deviceId, UUID graphId, TimePageLink timePageLink) throws ThingsboardException, ExecutionException, InterruptedException;
+
+    /**
+     * 【看板】设备关键参数
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 设备关键参数
+     */
+    DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId);
 }
