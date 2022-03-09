@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.board;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
@@ -168,7 +169,12 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         print("打印查询的数据", solidLineData);
          solidLineData.stream().forEach(m1->{
              Long hours=  CommonUtils.getConversionHours(m1.getTs());
-             List<EnergyChartOfBoardEntity>   list=  longListMap.get(hours);
+             List<EnergyChartOfBoardEntity>   list= new ArrayList<>() ;
+             List<EnergyChartOfBoardEntity>  ofBoardEntities =  longListMap.get(hours);
+             if(CollectionUtils.isNotEmpty(ofBoardEntities))
+             {
+                 list.addAll(ofBoardEntities);
+             }
              list.add(m1);
              longListMap.put(hours,list);
          });
@@ -209,7 +215,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         try {
             ObjectMapper mapper=new ObjectMapper();
             String jsonStr=mapper.writeValueAsString(obj);
-//            log.info("[json]"+str+jsonStr);
+            log.info("[json]"+str+jsonStr);
         }catch (Exception e)
         {
             log.info(str+obj);

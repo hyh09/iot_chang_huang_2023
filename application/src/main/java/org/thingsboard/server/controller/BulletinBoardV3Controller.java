@@ -125,7 +125,7 @@ public class BulletinBoardV3Controller   extends BaseController {
      * @throws ThingsboardException
      */
     @ApiOperation(value = "【3.新增设备单位能耗/标准单位能耗趋势图】")
-    @RequestMapping(value = "/trendChart ", method = RequestMethod.POST)
+    @PostMapping("/queryChart")
     @ResponseBody
     public TrendChart02Vo trendChart(@RequestBody TrendParameterVo vo) throws ThingsboardException {
         try {
