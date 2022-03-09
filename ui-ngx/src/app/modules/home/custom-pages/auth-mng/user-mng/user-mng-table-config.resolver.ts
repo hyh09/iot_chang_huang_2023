@@ -66,7 +66,7 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
     if (route.params.factoryId) {
       this.factoryId = route.params.factoryId;
       this.config.componentsData.factoryId = this.factoryId;
-      this.config.tableTitle = `${decodeURIComponent(route.queryParams.factoryName || '')}: ${this.translate.instant('device-mng.factory-manager')}`;
+      this.config.tableTitle = `${decodeURIComponent(route.queryParams.factoryName || '')}${this.translate.instant('common.colon')}${this.translate.instant('device-mng.factory-manager')}`;
     } else {
       this.factoryId = '';
       this.config.tableTitle = this.translate.instant('auth-mng.user-mng');

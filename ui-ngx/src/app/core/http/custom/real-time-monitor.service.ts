@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { AuthService } from "@app/core/auth/auth.service";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
-import { DeviceDetails, DevicePropHistory, RealTimeData } from "@app/shared/models/custom/device-monitor.models";
+import { DevcieHistoryHeader, DeviceDetails, DevicePropHistory, RealTimeData, RelatedParams } from "@app/shared/models/custom/device-monitor.models";
 import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
 import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
@@ -66,9 +66,17 @@ export class RealTimeMonitorService {
   }
 
   // 获取设备历史数据表头
-  public getDeviceHistoryTableHeader(id: string, isShowAttributes:boolean = false, config?: RequestConfig): Observable<{ name: string; title: string }[]> {
-    return this.http.get<{ name: string; title: string }[]>(
-      `/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${id}&isShowAttributes=${isShowAttributes}`,
+  public getDeviceHistoryTableHeader(deviceId: string, isShowAttributes:boolean = false, config?: RequestConfig): Observable<DevcieHistoryHeader[]> {
+    return this.http.get<DevcieHistoryHeader[]>(
+      `/api/deviceMonitor/rtMonitor/device/history/header?deviceId=${deviceId}&isShowAttributes=${isShowAttributes}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
+  // 获取设备关联参数
+  public getDeviceRelatedParams(deviceId: string, config?: RequestConfig): Observable<RelatedParams[]> {
+    return this.http.get<RelatedParams[]>(
+      `/api/deviceMonitor/rtMonitor/device/history/header/graphs?deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)
     );
   }

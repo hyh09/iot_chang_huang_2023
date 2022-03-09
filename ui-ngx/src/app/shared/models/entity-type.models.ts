@@ -54,7 +54,9 @@ export enum EntityType {
   PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS',
   ORDER_FORM = 'ORDER_FORM',
   CHART_SETTINGS = 'CHART_SETTINGS',
-  CHART = 'CHART'
+  CHART = 'CHART',
+  PROD_MNG = 'PROD_MNG',
+  MNG_CALENDAR = 'MNG_CALENDAR'
 }
 
 export enum AliasEntityType {
@@ -494,6 +496,25 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         noEntities: 'device-mng.no-charts-text',
         selectedEntities: 'device.selected-charts'
       }
+    ],
+    [
+      EntityType.PROD_MNG,
+      {
+        noEntities: 'device.no-devices-text'
+      }
+    ],
+    [
+      EntityType.MNG_CALENDAR,
+      {
+        type: 'entity.type-prod-calendar',
+        typePlural: 'entity.type-prod-calendars',
+        list: 'entity.list-of-prod-calendars',
+        nameStartsWith: 'entity.prod-calendar-name-starts-with',
+        details: 'device-mng.prod-calendar-details',
+        add: 'device-mng.add-prod-calendar',
+        noEntities: 'device-mng.no-prod-calendars-text',
+        selectedEntities: 'device-mng.selected-prod-calendars'
+      }
     ]
   ]
 );
@@ -688,6 +709,18 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     ],
     [
       EntityType.CHART,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.PROD_MNG,
+      {
+        helpLinkId: ''
+      }
+    ],
+    [
+      EntityType.MNG_CALENDAR,
       {
         helpLinkId: ''
       }
