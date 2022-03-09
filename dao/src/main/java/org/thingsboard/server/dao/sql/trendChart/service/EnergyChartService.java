@@ -262,7 +262,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
     public List<CapacityDeviceHoursVo> getDeviceCapacity(UUID deviceId, long startTime, long endTime,String type,String keyNum){
         List<CapacityDeviceHoursVo> resultList = new ArrayList<>();
         List<EnergyChartEntity> energyChartEntityList = dao.queryAllByEntityIdAndBetweenDate(deviceId, startTime, endTime);
-        Map<String, Double> map = new HashMap<>();
+        LinkedHashMap<String, Double> map = new LinkedHashMap<>();
         if (!CollectionUtils.isEmpty(energyChartEntityList)){
             for (EnergyChartEntity entity:energyChartEntityList) {
                 //时间
