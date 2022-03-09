@@ -11,6 +11,11 @@ import lombok.Data;
 @Data
 public class DashboardV3Vo {
 
+    /**
+     * 单位
+     */
+    private  String unit;
+
     private  String name;
     /**
      * 标准值
