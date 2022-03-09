@@ -121,6 +121,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         vo1.setStandardValue(stringStringMap.get(dictVo.getName()));
         vo1.setActualValue(actulValue);
         vo1.setUnit(dictVo.getUnit());
+        vo1.setKey(enums.getCode());
        return  vo1;
 
     }
