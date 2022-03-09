@@ -40,7 +40,7 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     private Page<ProductionCalenderEntity> queryWhereSql(ProductionCalender productionCalender,Pageable pageable){
         Map<String, Object> param = new HashMap<>();
         StringBuffer  sonSql01 = new StringBuffer();
-        sonSql01.append(" select a1.id as device_id,a1.name as device_name,a2.name as factory_name,a3.start_time,a3.end_time from device as a1 " +
+        sonSql01.append(" select a1.id as device_id,a1.name as device_name,a2.id as factory_id ,a2.name as factory_name,a3.start_time,a3.end_time from device as a1 " +
                 " left join hs_factory as a2 on a1.factory_id = a2.id " +
                 " left join (" +
                 "    select t1.* from hs_production_calendar as t1 " +
@@ -78,7 +78,7 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
             UUID uuid = Uuids.timeBased();
             productionCalenderEntity.setId(uuid);
         }
-        if(productionCalender.getFactoryId() != null){
+        if(StringUtils.isEmpty(productionCalender.getFactoryName()) && productionCalender.getFactoryId() != null){
             Factory byId = factoryDao.findById(productionCalender.getFactoryId());
             if(byId != null){
                 productionCalenderEntity.setFactoryName(byId.getName());
