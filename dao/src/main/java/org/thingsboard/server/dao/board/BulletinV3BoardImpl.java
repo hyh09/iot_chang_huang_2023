@@ -142,6 +142,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         queryTsKvVo.setStartTime(vo.getStartTime());
         queryTsKvVo.setEndTime(vo.getEndTime());
         queryTsKvVo.setDictDeviceId(vo.getId());
+        queryTsKvVo.setFactoryId(vo.getFactoryId());
         List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(queryTsKvVo);
         String  gasValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).collect(Collectors.toList())) ;
         String  waterValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).collect(Collectors.toList())) ;
@@ -187,7 +188,6 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
             TrendLineVo  trendLineVo = new  TrendLineVo();
             trendLineVo.setTime(k1);
             List<EnergyChartOfBoardEntity>  list1=   v2;
-
                 //每小时的产能加起来
                 String capValue =  StringUtilToll.accumulator(list1.stream().map(EnergyChartOfBoardEntity::getCapacityAddedValue).collect(Collectors.toList()));
                 //每小时的水加起来

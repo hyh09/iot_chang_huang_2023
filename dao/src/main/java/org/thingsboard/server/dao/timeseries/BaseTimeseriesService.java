@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
@@ -282,4 +282,27 @@ public class BaseTimeseriesService implements TimeseriesService  {
             throw new IncorrectParameterException("Incorrect DeleteTsKvQuery. Key can't be empty");
         }
     }
+
+
+    private   void  saveLocaData(TenantId tenantId,TsKvEntry tsKvEntry,EntityId entityId,String title)
+    {
+        if(!StringUtils.isEmpty(title))
+        {
+            try {
+                String valueOLd="";
+                if(tsKvEntry.getValue().toString().equals("0")) {
+                    ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
+                    TsKvEntry  tsKvEntryOld = tsKvEntryListenableFuture.get();
+                    valueOLd=   tsKvEntryOld.getValue().toString();
+                }
+                statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title,valueOLd);
+                energyChartService.todayDataProcessing( entityId,tsKvEntry,title,valueOLd);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+     }
+
 }
