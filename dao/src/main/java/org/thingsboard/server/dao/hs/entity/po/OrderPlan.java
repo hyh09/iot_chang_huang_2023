@@ -4,8 +4,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
+import org.thingsboard.server.dao.hs.dao.HsModelConstants;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
+import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -69,6 +71,12 @@ public class OrderPlan extends BasePO {
 
     @ApiModelProperty(value = "工厂Id")
     private UUID factoryId;
+
+    @ApiModelProperty(value = "车间Id")
+    private UUID workshopId;
+
+    @ApiModelProperty(value = "产线Id")
+    private UUID productionLineId;
 
     public DeviceCapacityVo toDeviceCapacityVO() {
         DeviceCapacityVo capacityVO = new DeviceCapacityVo();
