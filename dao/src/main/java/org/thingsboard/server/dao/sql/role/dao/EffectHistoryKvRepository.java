@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
-import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -91,4 +90,60 @@ public class EffectHistoryKvRepository {
         Page<Map> page = new PageImpl<>(list, pageable, totalObj);
         return  page;
     }
+
+
+
+//
+//    public Page<Map> queryEntity02(QueryTsKvHisttoryVo queryTsKvVo, Pageable pageable)
+//    {
+//
+//        boolean enablePage = false;
+//        if(pageable != null ){
+//            if(pageable.getPageSize() != Integer.MAX_VALUE){
+//                enablePage = true;
+//            }
+//        }
+//        Query countQuery = null;
+//        Query query = null;
+//        List<Map> mapList = new ArrayList<>();
+//        Map<String, Object> param = new HashMap<>();
+//
+//        StringBuffer  sql = new StringBuffer();
+//        sql.append(with_sql);
+//        param.put("entityId",queryTsKvVo.getDeviceId());
+//        param.put("ids",queryTsKvVo.getKeys());
+//        param.put("startTime",queryTsKvVo.getStartTime());
+//        param.put("endTime",queryTsKvVo.getEndTime());
+//        sql.append(select_sql);
+//        queryTsKvVo.getKeys().stream().forEach(str->{
+//            sql.append(" , ").append("MAX(case when key= (select  key_id  from ts_kv_dictionary  where  key= ").append("\'").append(str).append( "\' ) then cast(value as VARCHAR) else '0' end) as ").append(str);
+//        });
+//        sql.append(from_sql);
+//        String sqlCount = "select count(*) from (" + sql + ") t_count_0";
+//
+//        if(StringUtils.isNotEmpty(queryTsKvVo.getSortOrder()))
+//        {
+//            sql.append(" "+queryTsKvVo.getSortOrder()+" ");
+//        }
+//        countQuery = entityManager.createNativeQuery(sqlCount).unwrap(NativeQuery.class);
+//        query= entityManager.createNativeQuery(sql.toString());
+//
+//        query.unwrap(SQLQuery.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+//
+//        if(!CollectionUtils.isEmpty(param)) {
+//            for (Map.Entry<String, Object> entry : param.entrySet()) {
+//                query.setParameter(entry.getKey(), entry.getValue());
+//                countQuery.setParameter(entry.getKey(), entry.getValue());
+//
+//            }
+//        }
+//        Long totalObj = 0l;
+//        if(enablePage){
+//            totalObj = Long.parseLong(countQuery.getSingleResult().toString());
+//            query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize() ).setMaxResults(pageable.getPageSize());
+//        }
+//        List<Map> list = query.getResultList();
+//        Page<Map> page = new PageImpl<>(list, pageable, totalObj);
+//        return  page;
+//    }
 }

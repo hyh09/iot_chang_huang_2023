@@ -90,9 +90,7 @@ public abstract class AbstractProductionCalenderEntity <T extends ProductionCale
     public ProductionCalender toProductionCalender(){
         ProductionCalender productionCalender = new ProductionCalender();
         if(productionCalender != null){
-            if(productionCalender.getId() != null){
-                this.id = productionCalender.getId();
-            }
+            productionCalender.setId(this.id);
             productionCalender.setDeviceId(this.deviceId);
             productionCalender.setDeviceName(this.deviceName);
             productionCalender.setFactoryId(this.factoryId);
@@ -107,4 +105,5 @@ public abstract class AbstractProductionCalenderEntity <T extends ProductionCale
         }
         return productionCalender;
     }
+
 }

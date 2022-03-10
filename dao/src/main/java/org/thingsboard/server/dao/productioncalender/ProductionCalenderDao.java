@@ -41,9 +41,17 @@ public interface ProductionCalenderDao {
 
     /**
      * 查询设备历史生产日历记录列表
-     * @param id
+     * @param deviceId
+     * @param pageLink
      * @return
      */
-    List<ProductionCalender> getHistoryById(UUID id);
+    PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink);
+
+    /**
+     * 设备生产日历历史记录列表
+     * @param deviceId
+     * @return
+     */
+    List<ProductionCalender> getHistoryByDeviceId(UUID deviceId);
 
 }

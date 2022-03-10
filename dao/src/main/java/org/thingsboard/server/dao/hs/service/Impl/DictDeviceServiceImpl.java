@@ -848,6 +848,16 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     }
 
     /**
+     * 根据设备字典id查询设备字典信息
+     * @param dictDeviceId
+     * @return
+     */
+    @Override
+    public DictDevice findById(UUID dictDeviceId){
+        return dictDeviceRepository.findById(dictDeviceId).get().toData();
+    }
+
+    /**
      * 包装属性列表
      *
      * @param components 部件列表

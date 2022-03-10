@@ -47,7 +47,7 @@ public class EnergyHistoryMinuteEntity extends AbstractStatisticalDataEntity {
             vo.setDeviceName(deviceName);
             vo.setDeviceId(m.getEntityId().toString());
             vo.setValue(StringUtils.isNotEmpty(m.getCapacityValue())?m.getCapacityValue():"0");
-            vo.setCreatedTime(m.getTs());
+            vo.setCreatedTime(m.getTs()+"");
             return  vo;
         }).collect(Collectors.toList());
 

@@ -61,6 +61,10 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 sonSql01.append(" and a1.name like :deviceName");
                 param.put("deviceName","%" + productionCalender.getDeviceName() + "%");
             }
+            if(productionCalender.getTenantId() != null){
+                sonSql01.append(" and a1.tenant_id = :tenantId");
+                param.put("tenantId", productionCalender.getTenantId());
+            }
         }
         return jpaSqlTool.querySql(sonSql01.toString(), param, pageable, "productionCalendarEntity_01");
     }
@@ -74,7 +78,7 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     @Override
     public void saveProductionCalender(ProductionCalender productionCalender) throws ThingsboardException {
         ProductionCalenderEntity productionCalenderEntity = new ProductionCalenderEntity(productionCalender);
-        if (productionCalenderEntity.getUuid() == null) {
+        if (productionCalenderEntity.getId() == null) {
             UUID uuid = Uuids.timeBased();
             productionCalenderEntity.setId(uuid);
         }
@@ -135,17 +139,42 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     }
 
     /**
-     * 查询历史
+     * 设备生产日历历史记录分页列表
      * @param deviceId
+     * @param pageLink
      * @return
      */
     @Override
-    public List<ProductionCalender> getHistoryById(UUID deviceId) {
+    public PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink) {
 
         List<ProductionCalender> result = new ArrayList<>();
         // 动态条件查询
         Specification<ProductionCalenderEntity> specification = dynamicCondition(new ProductionCalender(deviceId));
+        Pageable pageable = DaoUtil.toPageable(pageLink);
+        Page<ProductionCalenderEntity> page = productionCalenderRepository.findAll(specification, pageable);
 
+        List<ProductionCalenderEntity> entityList =page.getContent();
+        if(CollectionUtils.isNotEmpty(entityList)){
+            entityList.forEach(s->{
+                result.add(s.toData());
+            });
+        }
+        PageData<ProductionCalender> resultPage = new PageData<>();
+        resultPage = new PageData<ProductionCalender>(result,page.getTotalPages(),page.getTotalElements(),page.hasNext());
+        return resultPage;
+    }
+
+    /**
+     * 设备生产日历历史记录列表
+     * @param deviceId
+     * @return
+     */
+    @Override
+    public List<ProductionCalender> getHistoryByDeviceId(UUID deviceId) {
+
+        List<ProductionCalender> result = new ArrayList<>();
+        // 动态条件查询
+        Specification<ProductionCalenderEntity> specification = dynamicCondition(new ProductionCalender(deviceId));
         List<ProductionCalenderEntity> entityList = productionCalenderRepository.findAll(specification);
         if(CollectionUtils.isNotEmpty(entityList)){
             entityList.forEach(s->{

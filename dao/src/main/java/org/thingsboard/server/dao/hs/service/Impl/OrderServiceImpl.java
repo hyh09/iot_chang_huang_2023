@@ -340,6 +340,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             orderPlanEntity.setTenantId(tenantId.getId());
             orderPlanEntity.setOrderId(orderEntity.getId());
             orderPlanEntity.setSort(sort.get());
+            orderPlanEntity.setFactoryId(orderEntity.getFactoryId());
             orderPlanEntity.setActualCapacity(Optional.ofNullable(v.getActualCapacity()).map(BigDecimal::stripTrailingZeros).map(BigDecimal::toPlainString).orElse(null));
             orderPlanEntity.setIntendedCapacity(Optional.ofNullable(v.getIntendedCapacity()).map(BigDecimal::stripTrailingZeros).map(BigDecimal::toPlainString).orElse(null));
             sort.addAndGet(1);
