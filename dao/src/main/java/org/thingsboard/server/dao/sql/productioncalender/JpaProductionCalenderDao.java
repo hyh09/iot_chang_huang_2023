@@ -161,6 +161,26 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     }
 
     /**
+     * 设备生产日历历史记录列表
+     * @param deviceId
+     * @return
+     */
+    @Override
+    public List<ProductionCalender> getHistoryByDeviceId(UUID deviceId) {
+
+        List<ProductionCalender> result = new ArrayList<>();
+        // 动态条件查询
+        Specification<ProductionCalenderEntity> specification = dynamicCondition(new ProductionCalender(deviceId));
+        List<ProductionCalenderEntity> entityList = productionCalenderRepository.findAll(specification);
+        if(CollectionUtils.isNotEmpty(entityList)){
+            entityList.forEach(s->{
+                result.add(s.toData());
+            });
+        }
+        return result;
+    }
+
+    /**
      * 动态条件
      * @param productionCalender
      * @return

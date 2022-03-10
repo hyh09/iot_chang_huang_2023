@@ -231,4 +231,11 @@ public interface DictDeviceService {
      * @return 全部遥测属性
      */
     List<DictDeviceTsPropertyVO> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 根据设备字典id查询设备字典信息
+     * @param dictDeviceId
+     * @return
+     */
+    DictDevice findById(UUID dictDeviceId);
 }

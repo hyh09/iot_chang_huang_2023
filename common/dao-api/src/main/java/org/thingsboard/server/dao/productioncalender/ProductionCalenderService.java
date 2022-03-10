@@ -47,6 +47,13 @@ public interface ProductionCalenderService {
     PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink);
 
     /**
+     * 设备生产日历历史记录列表
+     * @param deviceId
+     * @return
+     */
+    List<ProductionCalender> getHistoryByDeviceId(UUID deviceId);
+
+    /**
      * 查询看板设备监控统计
      * @return
      */
