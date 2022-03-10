@@ -7,6 +7,7 @@ import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * 订单设备
@@ -65,6 +66,9 @@ public class OrderPlan extends BasePO {
 
     @ApiModelProperty(value = "维护结束时间")
     private Long maintainEndTime;
+
+    @ApiModelProperty(value = "工厂Id")
+    private UUID factoryId;
 
     public DeviceCapacityVo toDeviceCapacityVO() {
         DeviceCapacityVo capacityVO = new DeviceCapacityVo();

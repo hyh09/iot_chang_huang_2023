@@ -167,6 +167,7 @@ public class HsModelConstants {
     public static final String ORDER_PLAN_INTENDED_CAPACITY = "intended_capacity";
     public static final String ORDER_PLAN_MAINTAIN_START_TIME = "maintain_start_time";
     public static final String ORDER_PLAN_MAINTAIN_END_TIME = "maintain_end_time";
+    public static final String ORDER_PLAN_FACTORY_ID = "factory_id";
 
     /**
      * 设备字典图表
