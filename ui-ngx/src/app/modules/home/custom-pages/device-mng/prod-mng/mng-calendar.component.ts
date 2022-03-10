@@ -34,25 +34,24 @@ export class MngCalendarComponent extends EntityComponent<ProdCalendar> {
     const form = this.fb.group(
       {
         id: [entity && entity.id ? entity.id : null],
-        factoryId: [entity ? entity.factoryId : this.entitiesTableConfig.componentsData.factoryId],
-        deviceId: [entity ? entity.deviceId : this.entitiesTableConfig.componentsData.deviceId],
-        startTime: [startTime || null, Validators.required],
-        endTime: [endTime || null, Validators.required],
-        shift: [startTime && endTime ? [new Date(startTime), new Date(endTime)] : null]
+        date: [null, Validators.required],
+        start: [null, Validators.required],
+        end: [null, Validators.required],
+        startTime: [startTime || null],
+        endTime: [endTime || null]
       }
     );
-    form.get('shift').valueChanges.subscribe(res => {
-      const hasVal = res && res.length === 2;
-      form.patchValue({
-        startTime: hasVal ? res[0].getTime() : null,
-        endTime: hasVal ? res[1].getTime() : null
-      });
-    });
     return form;
   }
 
   updateForm(entity: ProdCalendar) {
-    this.entityForm.patchValue(entity);
+    const { startTime, endTime } = entity || {};
+    this.entityForm.patchValue({
+      ...entity,
+      date: new Date(startTime),
+      start: new Date(startTime),
+      end: new Date(endTime)
+    });
   }
 
 }
