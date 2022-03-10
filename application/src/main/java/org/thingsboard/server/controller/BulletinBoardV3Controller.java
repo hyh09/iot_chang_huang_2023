@@ -100,7 +100,8 @@ public class BulletinBoardV3Controller   extends BaseController {
     })
     @RequestMapping(value = "/energyConsumptionToday", method = RequestMethod.GET)
     @ResponseBody
-    public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "dictDeviceId")  String dictDeviceId) throws ThingsboardException {
+    public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "dictDeviceId")  String dictDeviceId,
+                                                     @RequestParam(required = false ,value = "factoryId")  String factoryId) throws ThingsboardException {
         try {
             QueryTsKvVo vo =  new  QueryTsKvVo();
             vo.setStartTime(CommonUtils.getZero());
@@ -110,6 +111,10 @@ public class BulletinBoardV3Controller   extends BaseController {
                 vo.setDictDeviceId(UUID.fromString(dictDeviceId));
             }
             vo.setTenantId(getTenantId().getId());
+            if(StringUtils.isNotEmpty(factoryId))
+            {
+                vo.setFactoryId(UUID.fromString(factoryId));
+            }
             return bulletinBoardSvc.todayUnitEnergy(vo,getTenantId());
         }catch (Exception  e)
         {

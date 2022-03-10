@@ -19,6 +19,10 @@ public class BoardV3DeviceDictionaryVo {
      * 设备字典
      */
     private UUID id;
+
+
+    private  UUID factoryId;
+
     /**
      * 起始的时间
      */

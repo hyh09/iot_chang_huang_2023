@@ -25,4 +25,9 @@ public class DashboardV3Vo {
      * 实际值
      */
     private  String actualValue;
+
+    /**
+     * 自定义key
+     */
+    private String key;
 }
