@@ -18,7 +18,7 @@
             [nzDisabled]="device.id !== orderDeviceForm.get('deviceId').value && existDeviceIds.indexOf(device.id) > -1"
           ></nz-option>
         </nz-select>
-        <mat-error *ngIf="orderDeviceForm.get('deviceId').hasError('required')">
+        <mat-error *ngIf="orderDeviceForm.dirty && orderDeviceForm.get('deviceId').hasError('required')">
           {{ 'device.device-required' | translate }}
         </mat-error>
       </div>
@@ -32,7 +32,12 @@
       </div>
       <div class="form-item">
         <mat-label translate>order.intended-time</mat-label>
-        <nz-range-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="intendedTime"></nz-range-picker>
+        <nz-range-picker
+          [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="intendedTime"
+          [nzDisabled]="!orderDeviceForm.get('deviceId').value"
+          [nzDisabledDate]="disabledDate"
+          [nzDisabledTime]="disabledRangeTime"
+        ></nz-range-picker>
       </div>
       <div class="form-item">
         <mat-label translate>order.actual-time</mat-label>

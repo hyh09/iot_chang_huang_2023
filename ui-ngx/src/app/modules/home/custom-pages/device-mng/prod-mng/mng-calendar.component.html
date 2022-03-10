@@ -3,15 +3,24 @@
   <div class="mat-padding" fxLayout="column">
     <form [formGroup]="entityForm">
       <div class="form-item">
-        <mat-label translate>device-mng.device-schedual</mat-label>
-        <nz-range-picker
-          [nzShowTime]="{ nzFormat: 'HH:mm' }"
-          nzFormat="yyyy-MM-dd HH:mm"
-          formControlName="shift"
-          [disabled]="(isLoading$ | async) || !isEdit"
-        ></nz-range-picker>
-        <mat-error *ngIf="entityForm.dirty && (entityForm.get('startTime').hasError('required') || entityForm.get('endTime').hasError('required'))">
-          {{ 'device-mng.device-schedual-required' | translate }}
+        <mat-label required translate>device-mng.shift-date</mat-label>
+        <nz-date-picker formControlName="date" [disabled]="(isLoading$ | async) || !isEdit"></nz-date-picker>
+        <mat-error *ngIf="entityForm.get('date').dirty && entityForm.get('date').hasError('required')">
+          {{ 'device-mng.shift-date-required' | translate }}
+        </mat-error>
+      </div>
+      <div class="form-item">
+        <mat-label required translate>datetime.time-from</mat-label>
+        <nz-time-picker formControlName="start" [disabled]="(isLoading$ | async) || !isEdit" nzFormat="HH:mm"></nz-time-picker>
+        <mat-error *ngIf="entityForm.get('start').dirty && entityForm.get('start').hasError('required')">
+          {{ 'device-mng.start-time-required' | translate }}
+        </mat-error>
+      </div>
+      <div class="form-item">
+        <mat-label required translate>datetime.time-to</mat-label>
+        <nz-time-picker formControlName="end" [disabled]="(isLoading$ | async) || !isEdit" nzFormat="HH:mm"></nz-time-picker>
+        <mat-error *ngIf="entityForm.get('end').dirty && entityForm.get('end').hasError('required')">
+          {{ 'device-mng.end-time-required' | translate }}
         </mat-error>
       </div>
     </form>
