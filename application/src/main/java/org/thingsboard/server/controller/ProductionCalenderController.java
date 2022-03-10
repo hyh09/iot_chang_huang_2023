@@ -89,9 +89,9 @@ public class ProductionCalenderController extends BaseController{
 
     @ApiOperation("设备生产日历历史记录分页列表")
     @ApiImplicitParam(name = "deviceId",value = "设备标识",dataType = "String",paramType="query",required = true)
-    @RequestMapping(value = "/getHistoryByDeviceId", method = RequestMethod.GET)
+    @RequestMapping(value = "/getHistoryPageByDeviceId", method = RequestMethod.GET)
     @ResponseBody
-    public PageData<ProductionCalenderHisListVo> getHistoryByDeviceId(@RequestParam int pageSize, @RequestParam int page,@RequestParam("deviceId") String deviceId)throws ThingsboardException{
+    public PageData<ProductionCalenderHisListVo> getHistoryPageByDeviceId(@RequestParam int pageSize, @RequestParam int page,@RequestParam("deviceId") String deviceId)throws ThingsboardException{
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
@@ -107,6 +107,27 @@ public class ProductionCalenderController extends BaseController{
                 }
             }
             return new PageData<>(result,calenderPageData.getTotalPages(),calenderPageData.getTotalElements(),calenderPageData.hasNext());
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @ApiOperation("设备生产日历历史记录列表")
+    @ApiImplicitParam(name = "deviceId",value = "设备标识",dataType = "String",paramType="query",required = true)
+    @RequestMapping(value = "/getHistoryByDeviceId", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ProductionCalenderHisListVo> getHistoryByDeviceId(@RequestParam("deviceId") String deviceId)throws ThingsboardException{
+        try {
+            List<ProductionCalenderHisListVo> result = new ArrayList<>();
+            checkParameterChinees("deviceId",deviceId);
+            List<ProductionCalender> productionCalenderList = productionCalenderService.getHistoryByDeviceId(toUUID(deviceId));
+            if(!org.springframework.util.CollectionUtils.isEmpty(productionCalenderList)){
+                long systemTime = System.currentTimeMillis();
+                for (ProductionCalender productionCalender :productionCalenderList){
+                    result.add(new ProductionCalenderHisListVo(productionCalender,systemTime));
+                }
+            }
+            return result;
         } catch (Exception e) {
             throw handleException(e);
         }
