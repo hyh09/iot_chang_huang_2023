@@ -57,7 +57,7 @@ public interface ProductionCalenderService {
      * 查询看板设备监控统计
      * @return
      */
-    List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender);
+    List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender) throws ThingsboardException;
 
 
 }
