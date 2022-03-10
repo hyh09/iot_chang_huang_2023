@@ -41,7 +41,6 @@ import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.kafka.service.KafkaProducerService;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.service.Validator;
-import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
@@ -51,7 +50,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -97,7 +95,6 @@ public class BaseTimeseriesService implements TimeseriesService  {
     private EntityViewService entityViewService;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EneryTimeGapService eneryTimeGapService;
-    @Autowired private StatisticalDataService statisticalDataService;
     @Autowired private EnergyChartService energyChartService;
     @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
     @Autowired  private KafkaProducerService kafkaProducerService;
@@ -188,7 +185,13 @@ public class BaseTimeseriesService implements TimeseriesService  {
         if (entityId.getEntityType().equals(EntityType.ENTITY_VIEW)) {
             throw new IncorrectParameterException("Telemetry data can't be stored for entity view. Read only");
         }
-       if(CollectionUtils.isEmpty(dataInitMap))
+//        log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
+//        log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
+        if(CollectionUtils.isEmpty(globalEneryList)) {
+            List<String> keys1 = deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+            globalEneryList.addAll(keys1);
+        }
+        if(CollectionUtils.isEmpty(dataInitMap))
         {
             Map<String,String>   map=  deviceDictPropertiesSvc.getUnit();
             dataInitMap=map;
@@ -256,8 +259,6 @@ public class BaseTimeseriesService implements TimeseriesService  {
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
         futures.add(timeseriesDao.save(tenantId, entityId, tsKvEntry, ttl));
-        String  title =    dataInitMap.get(tsKvEntry.getKey());
-        saveLocaData(tenantId,tsKvEntry,entityId,title);
     }
 
     private List<ReadTsKvQuery> updateQueriesForEntityView(EntityView entityView, List<ReadTsKvQuery> queries) {
