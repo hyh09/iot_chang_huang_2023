@@ -61,6 +61,10 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 sonSql01.append(" and a1.name like :deviceName");
                 param.put("deviceName","%" + productionCalender.getDeviceName() + "%");
             }
+            if(productionCalender.getTenantId() != null){
+                sonSql01.append(" and a1.tenant_id = :tenantId");
+                param.put("tenantId", productionCalender.getTenantId());
+            }
         }
         return jpaSqlTool.querySql(sonSql01.toString(), param, pageable, "productionCalendarEntity_01");
     }
