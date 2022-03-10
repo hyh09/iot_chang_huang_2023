@@ -37,7 +37,7 @@ public class BoardTrendChartRepositoryNewMethon extends JpaSqlTool {
         StringBuffer  sonSql01 = new StringBuffer();
         sqlPartOnDevice(queryVo.toQueryTsKvVo(),sonSql01,param);
         StringBuffer  sql = new StringBuffer();
-        sql.append(SQL_FRAGMENT_MAIN_TABLE).append(" and t1.ENTITY_ID IN (  select  d1.id  from  device  d1 where 1= 1 ").append(sonSql01).append(") ");
+        sql.append(SQL_FRAGMENT_MAIN_TABLE).append(" and t1.ENTITY_ID IN (  select  d1.id  from  device  d1 where 1= 1 ").append(sonSql01).append(") order by  ts ");
         List<EnergyChartOfBoardEntity>   list  = querySql(sql.toString(),param, "energyChartOfBoardEntityMap");
         return  list;
 

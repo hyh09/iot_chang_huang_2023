@@ -41,8 +41,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
 
 
     @Transactional
-    public EnergyChartEntity todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry, String  title) {
-//        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
+    public EnergyChartEntity todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry, String  title,String valueOLd) {
         EnergyChartEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
         if(entityDatabase == null){
             EnergyChartEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
