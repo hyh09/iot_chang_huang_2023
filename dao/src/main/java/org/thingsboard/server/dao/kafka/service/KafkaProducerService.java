@@ -57,7 +57,7 @@ public class KafkaProducerService {
 
             @Override
             public void onSuccess(Object o) {
-                System.out.println("failure");
+//                System.out.println("failure");
 
             }
         });

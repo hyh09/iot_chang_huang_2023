@@ -238,7 +238,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
         {
             DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(entityId,tsKvEntry,title);
             try {
-                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
+//                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
                 kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
             } catch (InterruptedException e) {
                 e.printStackTrace();
