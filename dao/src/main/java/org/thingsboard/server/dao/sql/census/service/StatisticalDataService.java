@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.census.dao.StatisticalDataDao;
 import org.thingsboard.server.dao.sql.census.entity.StatisticalDataEntity;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -31,14 +32,15 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
 
 
     @Transactional
-    public  StatisticalDataEntity  todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry,String  title,String valueOLd)
+    public  StatisticalDataEntity  todayDataProcessing(UUID entityId, DataBodayVo tsKvEntry, String  title)
     {
-        StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
+//        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
+        StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId,tsKvEntry.getTs());
         if(entityDatabase == null){
-            StatisticalDataEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title, valueOLd);
+            StatisticalDataEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
                return   this.save(entityNew);
         }else {
-            StatisticalDataEntity   entityNew = setEntityProper(entityDatabase,tsKvEntry,title, valueOLd);
+            StatisticalDataEntity   entityNew = setEntityProper(entityDatabase,tsKvEntry,title);
              return updateRecord(entityNew);
 
         }
@@ -97,25 +99,18 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
      * @param title
      * @return
      */
-      private   StatisticalDataEntity     setEntityProper  (StatisticalDataEntity  entityDatabase,TsKvEntry tsKvEntry,String  title,String valueOLd){
+      private   StatisticalDataEntity     setEntityProper  (StatisticalDataEntity  entityDatabase,DataBodayVo tsKvEntry,String  title){
           StatisticalDataEntity  entityNew = new  StatisticalDataEntity();
           entityNew.setEntityId(entityDatabase.getEntityId());
           entityNew.setId(entityDatabase.getId());
           long ts =   tsKvEntry.getTs();
           entityNew.setTs(ts);
-          String value=tsKvEntry.getValue().toString();
-          if(value.equals(ZERO))
-          {
-              value=valueOLd;
-          }
-
-
           if(title.equals(KeyTitleEnums.key_capacity.getgName()))
           {
               String  capOld = entityDatabase.getCapacityFirstValue();//要取今天第一条
               if(capOld == null)
               {
-                  entityNew.setCapacityFirstValue(value);
+                  entityNew.setCapacityFirstValue(tsKvEntry.getValue().toString());
               }
 
               Long firstTs = entityDatabase.getCapacityFirstTime();
@@ -124,17 +119,17 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
                   entityDatabase.setCapacityFirstTime(ts);
               }
               entityDatabase.setCapacityLastTime(ts);
-              String  capNow= value;
+              String  capNow= tsKvEntry.getValue().toString();
               String capValue =StringUtilToll.sub(capNow,capOld);
               entityNew.setCapacityAddedValue(capValue);
-              entityNew.setCapacityValue(value);
+              entityNew.setCapacityValue(tsKvEntry.getValue().toString());
           }
           if(title.equals(KeyTitleEnums.key_cable.getgName()))
           {
               String  electricOld= entityDatabase.getElectricFirstValue();
               if(electricOld == null)
               {
-                  entityNew.setElectricFirstValue(value);
+                  entityNew.setElectricFirstValue(tsKvEntry.getValue().toString());
               }
 
               Long firstTs = entityDatabase.getElectricFirstTime();
@@ -144,10 +139,10 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
               }
               entityDatabase.setElectricLastTime(ts);
 
-              String  valueNew= value;
+              String  valueNew= tsKvEntry.getValue().toString();
               String subValue =StringUtilToll.sub(valueNew,electricOld);
               entityNew.setElectricAddedValue(subValue);
-              entityNew.setElectricValue(value);
+              entityNew.setElectricValue(tsKvEntry.getValue().toString());
           }
           //气
           if(title.equals(KeyTitleEnums.key_gas.getgName()))
@@ -155,7 +150,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
               String  gasOld= entityDatabase.getGasFirstValue();
               if(gasOld == null)
               {
-                  entityNew.setGasFirstValue(value);
+                  entityNew.setGasFirstValue(tsKvEntry.getValue().toString());
               }
 
               Long firstTs = entityDatabase.getGasFirstTime();
@@ -165,10 +160,10 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
               }
               entityDatabase.setGasLastTime(ts);
 
-              String  valueNew= value;
+              String  valueNew= tsKvEntry.getValue().toString();
               String subValue =StringUtilToll.sub(valueNew,gasOld);
               entityNew.setGasAddedValue(subValue);
-              entityNew.setGasValue(value);
+              entityNew.setGasValue(tsKvEntry.getValue().toString());
           }
 
           //水
@@ -177,7 +172,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
               String  waterOld= entityDatabase.getWaterFirstValue();
               if(waterOld == null)
               {
-                  entityNew.setWaterFirstValue(value);
+                  entityNew.setWaterFirstValue(tsKvEntry.getValue().toString());
               }
 
               Long firstTs = entityDatabase.getWaterFirstTime();
@@ -187,10 +182,10 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
               }
               entityDatabase.setWaterLastTime(ts);
 
-              String  valueNew= value;
+              String  valueNew= tsKvEntry.getValue().toString();
               String subValue =StringUtilToll.sub(valueNew,waterOld);
               entityNew.setWaterAddedValue(subValue);
-              entityNew.setWaterValue(value);
+              entityNew.setWaterValue(tsKvEntry.getValue().toString());
           }
 
 
@@ -205,23 +200,17 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
      * @param title
      * @return
      */
-    private   StatisticalDataEntity     setEntityProperOnSave  (EntityId entityId,TsKvEntry tsKvEntry,String  title,String valueOLd){
+    private   StatisticalDataEntity     setEntityProperOnSave  (UUID entityId,DataBodayVo tsKvEntry,String  title){
         StatisticalDataEntity  entityNew = new  StatisticalDataEntity();
-        entityNew.setEntityId(entityId.getId());
+        entityNew.setEntityId(entityId);
         entityNew.setTs(tsKvEntry.getTs());
-
-        String value=tsKvEntry.getValue().toString();
-        if(value.equals(ZERO))
-        {
-          value=valueOLd;
-        }
         if(title.equals(KeyTitleEnums.key_capacity.getgName()))
         {
             entityNew.setCapacityFirstValue(tsKvEntry.getValue().toString());
             entityNew.setCapacityFirstTime(tsKvEntry.getTs());
             entityNew.setCapacityLastTime(tsKvEntry.getTs());
             entityNew.setCapacityAddedValue(ZERO);
-            entityNew.setCapacityValue(value);
+            entityNew.setCapacityValue(tsKvEntry.getValue().toString());
         }
         if(title.equals(KeyTitleEnums.key_cable.getgName()))
         {
@@ -229,7 +218,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
             entityNew.setElectricFirstTime(tsKvEntry.getTs());
             entityNew.setElectricLastTime(tsKvEntry.getTs());
             entityNew.setElectricAddedValue(ZERO);
-            entityNew.setElectricValue(value);
+            entityNew.setElectricValue(tsKvEntry.getValue().toString());
         }
         //气
         if(title.equals(KeyTitleEnums.key_gas.getgName()))
@@ -238,7 +227,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
             entityNew.setGasFirstTime(tsKvEntry.getTs());
             entityNew.setGasLastTime(tsKvEntry.getTs());
             entityNew.setGasAddedValue(ZERO);
-            entityNew.setGasValue(value);
+            entityNew.setGasValue(tsKvEntry.getValue().toString());
         }
 
         //水
@@ -248,7 +237,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
             entityNew.setWaterFirstTime(tsKvEntry.getTs());
             entityNew.setWaterLastTime(tsKvEntry.getTs());
             entityNew.setWaterAddedValue(ZERO);
-            entityNew.setWaterValue(value);
+            entityNew.setWaterValue(tsKvEntry.getValue().toString());
         }
 
 
