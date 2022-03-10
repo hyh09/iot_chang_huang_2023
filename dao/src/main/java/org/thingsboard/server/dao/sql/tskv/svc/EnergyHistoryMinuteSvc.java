@@ -5,9 +5,11 @@ import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -20,7 +22,7 @@ public interface EnergyHistoryMinuteSvc {
     /**
      * 保存数据
      */
-    void  saveByMinute(EntityId entityId, TsKvEntry tsKvEntry, String  title);
+    void  saveByMinute(UUID entityId, DataBodayVo tsKvEntry, String  title);
 
 
     /**

@@ -11,6 +11,7 @@ import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceHoursVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.trendChart.dao.EnergyChartDao;
 import org.thingsboard.server.dao.sql.trendChart.entity.EnergyChartEntity;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -41,9 +42,8 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
 
 
     @Transactional
-    public EnergyChartEntity todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry, String  title) {
-//        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
-        EnergyChartEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
+    public EnergyChartEntity todayDataProcessing(UUID  entityId, DataBodayVo tsKvEntry, String  title) {
+        EnergyChartEntity  entityDatabase = this.queryTodayByEntityId(entityId,tsKvEntry.getTs());
         if(entityDatabase == null){
             EnergyChartEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
             entityNew.setTs(CommonUtils.getTimeClip(tsKvEntry.getTs()));
@@ -106,7 +106,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
      * @param title
      * @return
      */
-    private   EnergyChartEntity     setEntityProper  (EnergyChartEntity  entityDatabase,TsKvEntry tsKvEntry,String  title){
+    private   EnergyChartEntity     setEntityProper  (EnergyChartEntity  entityDatabase,DataBodayVo tsKvEntry,String  title){
         EnergyChartEntity  entityNew = new  EnergyChartEntity();
         entityNew.setEntityId(entityDatabase.getEntityId());
         entityNew.setId(entityDatabase.getId());
@@ -208,9 +208,9 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
      * @param title
      * @return
      */
-    private   EnergyChartEntity     setEntityProperOnSave  (EntityId entityId,TsKvEntry tsKvEntry,String  title){
+    private   EnergyChartEntity     setEntityProperOnSave  (UUID entityId,DataBodayVo tsKvEntry,String  title){
         EnergyChartEntity  entityNew = new  EnergyChartEntity();
-        entityNew.setEntityId(entityId.getId());
+        entityNew.setEntityId(entityId);
 //        entityNew.setTs(tsKvEntry.getTs());
         if(title.equals(KeyTitleEnums.key_capacity.getgName()))
         {
