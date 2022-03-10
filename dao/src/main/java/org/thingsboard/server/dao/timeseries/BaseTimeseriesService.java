@@ -38,14 +38,19 @@ import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.kafka.service.KafkaProducerService;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
+import org.thingsboard.server.dao.util.JsonUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -94,6 +99,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
     @Autowired private StatisticalDataService statisticalDataService;
     @Autowired private EnergyChartService energyChartService;
     @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
+    @Autowired  private KafkaProducerService kafkaProducerService;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -230,10 +236,21 @@ public class BaseTimeseriesService implements TimeseriesService  {
          String  title =    dataInitMap.get(tsKvEntry.getKey());
         if(StringUtils.isNotBlank(title))
         {
+            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(entityId,tsKvEntry,title);
+            try {
+//                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
+                kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
 //            log.info("打印当前的数据打印标题{}",title);
-            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
-            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
-            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
+//            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
+//            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
+//            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
 
         }
 //        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();

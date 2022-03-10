@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.census.dao.StatisticalDataDao;
 import org.thingsboard.server.dao.sql.census.entity.StatisticalDataEntity;
 import org.thingsboard.server.dao.util.BeanToMap;
@@ -31,10 +32,10 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
 
 
     @Transactional
-    public  StatisticalDataEntity  todayDataProcessing(EntityId entityId, TsKvEntry tsKvEntry,String  title)
+    public  StatisticalDataEntity  todayDataProcessing(UUID entityId, DataBodayVo tsKvEntry, String  title)
     {
 //        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
-        StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
+        StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId,tsKvEntry.getTs());
         if(entityDatabase == null){
             StatisticalDataEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
                return   this.save(entityNew);
@@ -98,7 +99,7 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
      * @param title
      * @return
      */
-      private   StatisticalDataEntity     setEntityProper  (StatisticalDataEntity  entityDatabase,TsKvEntry tsKvEntry,String  title){
+      private   StatisticalDataEntity     setEntityProper  (StatisticalDataEntity  entityDatabase,DataBodayVo tsKvEntry,String  title){
           StatisticalDataEntity  entityNew = new  StatisticalDataEntity();
           entityNew.setEntityId(entityDatabase.getEntityId());
           entityNew.setId(entityDatabase.getId());
@@ -199,9 +200,9 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
      * @param title
      * @return
      */
-    private   StatisticalDataEntity     setEntityProperOnSave  (EntityId entityId,TsKvEntry tsKvEntry,String  title){
+    private   StatisticalDataEntity     setEntityProperOnSave  (UUID entityId,DataBodayVo tsKvEntry,String  title){
         StatisticalDataEntity  entityNew = new  StatisticalDataEntity();
-        entityNew.setEntityId(entityId.getId());
+        entityNew.setEntityId(entityId);
         entityNew.setTs(tsKvEntry.getTs());
         if(title.equals(KeyTitleEnums.key_capacity.getgName()))
         {
