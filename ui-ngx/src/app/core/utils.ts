@@ -463,7 +463,7 @@ export function randomAlphanumeric(length: number): string {
 
 export function getTheStartOfDay(date: Date, timestamp: boolean = true): Date | number {
   if (!date) return null;
-  const _date = new Date(date.toDateString());
+  const _date = new Date(new Date(date).toDateString());
   return timestamp ? _date.getTime() : _date;
 }
 
