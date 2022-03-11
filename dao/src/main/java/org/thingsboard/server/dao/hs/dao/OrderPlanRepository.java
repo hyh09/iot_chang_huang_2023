@@ -6,6 +6,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
+import org.thingsboard.server.dao.model.sql.ProductionCalenderEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,15 @@ import java.util.concurrent.CompletableFuture;
 @Repository
 public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPlanEntity, UUID>, JpaSpecificationExecutor<OrderPlanEntity> {
     Optional<OrderPlanEntity> findByTenantIdAndId(UUID tenantId, UUID id);
+
+    @Async
+    @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.maintainStartTime is not null and p.maintainEndTime is not null and (p.maintainEndTime >= :startTime or p.maintainStartTime <= :endTime)")
+    CompletableFuture<List<OrderPlanEntity>> findAllMaintainTimeCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
+
+
+    @Async
+    @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.actualStartTime is not null and p.actualEndTime is not null and (p.actualEndTime >= :startTime or p.actualStartTime <= :endTime)")
+    CompletableFuture<List<OrderPlanEntity>> findAllActualTimeCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
 
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByTenantIdAndOrderIdOrderBySortAsc(UUID tenantId, UUID orderId);

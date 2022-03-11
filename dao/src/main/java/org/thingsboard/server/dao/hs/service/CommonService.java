@@ -6,6 +6,7 @@ import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.DataType;
 import org.thingsboard.server.common.data.kv.KvEntry;
 import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
+import org.thingsboard.server.dao.hs.entity.bo.KeyParamTime;
 import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 
 import java.math.BigDecimal;
@@ -25,6 +26,41 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 统计时间
+     */
+    default <T extends KeyParamTime> Long statisticsTime(List<T> t) {
+        if (t == null || t.isEmpty())
+            return 0L;
+        return t.stream().map(v -> v.getEndTime() - v.getStartTime()).reduce(0L, Long::sum, (a, b) -> null);
+    }
+
+    /**
+     * 毫秒转换成小时
+     */
+    default double toDoubleHour(Long time) {
+        if (time == null || time == 0)
+            return 0d;
+        return BigDecimal.valueOf(time / (1000 * 60 * 60.0d)).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().doubleValue();
+    }
+
+    /**
+     * 毫秒转换成小时
+     */
+    default BigDecimal toDecimalHour(Long time) {
+        if (time == null || time == 0)
+            return BigDecimal.ZERO;
+        return BigDecimal.valueOf(time / (1000 * 60 * 60.0d));
+    }
+
+    /**
+     * 格式化数据
+     */
+    default double formatDoubleData(BigDecimal val1) {
+        return val1.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().doubleValue();
+    }
+
 
     /**
      * 剔除无效遥测数据
