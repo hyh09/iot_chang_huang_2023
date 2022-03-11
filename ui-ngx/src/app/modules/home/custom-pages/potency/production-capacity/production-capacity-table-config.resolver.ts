@@ -16,7 +16,6 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
 
   private readonly config: EntityTableConfig<DeviceCapacity> = new EntityTableConfig<DeviceCapacity>();
   private oldFactoryId: string = '';
-  factroryChange$: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
   constructor(
     private potencyService: PotencyService,
@@ -28,16 +27,6 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
     this.config.filterComponent = ProductionCapacityOverviewComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
     this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
-
-    this.config.componentsData = {
-      factoryId: '',
-      workshopId: '',
-      productionLineId: '',
-      deviceId: '',
-      dateRange: null,
-      totalCapacity: 0,
-      factroryChange$: this.factroryChange$
-    }
 
     this.config.columns.push(
       new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName || ''), () => ({}), false),
@@ -55,7 +44,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       deviceId: '',
       dateRange: [now, now],
       totalCapacity: 0,
-      factroryChange$: this.factroryChange$
+      factroryChange$: new BehaviorSubject<string>('')
     }
 
     this.config.tableTitle = this.translate.instant('potency.device-capacity');
