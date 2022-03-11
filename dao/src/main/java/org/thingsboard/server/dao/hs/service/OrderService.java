@@ -176,4 +176,22 @@ public interface OrderService {
      * @return
      */
     String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+
+    /**
+     * 查询时间范围内的车间计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     *查询时间范围内的车间计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime);
 }

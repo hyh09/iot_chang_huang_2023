@@ -629,4 +629,26 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         }
         return sumActual.toString();
     }
+
+    @Override
+    public String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime) {
+        BigDecimal sumActual = new BigDecimal(0);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByDeviceId(deviceId,startTime,endTime);
+        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+            orderPlanEntityList.forEach(i->{
+                String actualCapacity = i.getActualCapacity();
+                if(StringUtils.isNotEmpty(actualCapacity)){
+                    sumActual.add(new BigDecimal(actualCapacity));
+                }
+            });
+        }
+        return sumActual.toString();
+    }
+
+    @Override
+    public String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime) {
+       return null;
+    }
+
+
 }
