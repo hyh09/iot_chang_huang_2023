@@ -332,7 +332,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws Exception {
         log.info("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
-        List<OutRunningStateVo>  resultVo = new ArrayList<>();
         List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
 //         if( CollectionUtils.isEmpty(runningStateVoList))
 //         {
@@ -1113,7 +1112,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     /**
      *
      * @param tsKvEntries
-     * @param parameterVo
+     * @param parameterVo   入参的对象
      * @param keyNames
      * @param chartIdToKeyNameMap 图表id 对应的 属性keyName
      * @return
@@ -1141,6 +1140,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         runningStateVoList.stream().forEach(m1 ->{
             OutRunningStateVo  outRunningStateVo = new OutRunningStateVo();
             outRunningStateVo.setTableName(m1.getTitle());//如果是属性就是属性的名称
+            outRunningStateVo.setKeyName(m1.getName());
             List<OutOperationStatusChartDataVo> properties = new ArrayList<>();
                 //代表属性
                 if(StringUtils.isBlank(m1.getChartId())) {
