@@ -149,7 +149,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
             Long lo2 = System.currentTimeMillis();
             Long t3 = lo2-lo1;
-            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
+//            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
             return  obj;
 
         }catch (Exception e)
