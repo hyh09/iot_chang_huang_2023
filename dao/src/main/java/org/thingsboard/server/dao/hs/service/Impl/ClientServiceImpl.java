@@ -8,6 +8,7 @@ import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -57,6 +58,7 @@ import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
+import org.thingsboard.server.dao.sql.productioncalender.ProductionCalenderRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.sql.user.UserRepository;
@@ -141,6 +143,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     // BulletinBoardSvc
     BulletinBoardSvc bulletinBoardSvc;
+
+    // ProductionCalenderRepository
+    ProductionCalenderRepository calenderRepository;
 
     /**
      * 查询用户
@@ -824,6 +829,52 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 查询设备关键参数
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<DeviceKeyParamShiftResult> listDeviceShirtTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        return this.calenderRepository.findAllCross(tenantId.getId(), deviceId, startTime, endTime)
+                .thenApplyAsync(calenders -> calenders.stream().map(ProductionCalenderEntity::toData)
+                        .map(v -> DeviceKeyParamShiftResult.builder()
+                                .startTime(v.getStartTime() < startTime ? startTime : v.getStartTime())
+                                .endTime(v.getEndTime() > endTime ? endTime : v.getEndTime())
+                                .build()).collect(Collectors.toList())).join();
+    }
+
+    /**
+     * 查询设备在时间段内的全部遥测时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<Long> listDeviceTss(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+        if (keyIds.isEmpty())
+            return Lists.newArrayList();
+        return this.tsRepository.findTss(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+    }
+
+    /**
+     * 查询设备oee
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param currentTime 当前时间
+     */
+    @Override
+    public Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime) {
+        return Double.parseDouble("0");
+    }
+
+    /**
      * 查询不同属性在时间段内的遥测值
      *
      * @param tenantId   租户Id
@@ -842,7 +893,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
         Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
 
-        kvEntityResult.forEach(v-> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k->Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
+        kvEntityResult.forEach(v -> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
                 .ts(v.getTs())
                 .value(this.formatKvEntryValue(v.toData()))
                 .build()));
@@ -1050,5 +1101,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setBulletinBoardSvc(BulletinBoardSvc bulletinBoardSvc) {
         this.bulletinBoardSvc = bulletinBoardSvc;
+    }
+
+    @Autowired
+    public void setCalenderRepository(ProductionCalenderRepository calenderRepository) {
+        this.calenderRepository = calenderRepository;
     }
 }

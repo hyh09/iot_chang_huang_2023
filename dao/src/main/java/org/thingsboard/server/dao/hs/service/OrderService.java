@@ -178,6 +178,28 @@ public interface OrderService {
     String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
 
     /**
+     * 查询订单-生产计划-单个设备在一个时间段内的维护时间列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 维护时间列表
+     */
+    List<DeviceKeyParamMaintainResult> listDeviceMaintainTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询订单-生产计划-单个设备在一个时间段内的实际时间的生产计划列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 生产计划列表
+     */
+    List<OrderPlan> listDeviceOrderPlansInActualTimeField(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
      * 查询时间范围内的车间计划产量
      * @param deviceId
      * @param startTime
