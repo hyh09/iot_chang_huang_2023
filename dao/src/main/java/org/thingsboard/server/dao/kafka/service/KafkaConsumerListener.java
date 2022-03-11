@@ -40,7 +40,7 @@ public class KafkaConsumerListener {
 
 
             statisticalDataService.todayDataProcessing( entityId,dataBodayVo,title);
-            energyHistoryMinuteSvc.saveByMinute( entityId,dataBodayVo,title);
+//            energyHistoryMinuteSvc.saveByMinute( entityId,dataBodayVo,title);
             energyChartService.todayDataProcessing( entityId,dataBodayVo,title);
 
 //            Long endTime = System.currentTimeMillis();
