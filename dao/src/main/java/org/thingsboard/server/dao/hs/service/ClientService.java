@@ -18,10 +18,7 @@ import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceBaseDTO;
 import org.thingsboard.server.dao.hs.entity.dto.DeviceListAffiliationDTO;
 import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -331,7 +328,7 @@ public interface ClientService {
     /**
      * 获得全部设备的在线状态
      *
-     * @param tenantId  租户Id
+     * @param tenantId 租户Id
      * @return 获得全部设备的在线状态
      */
     Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId);
@@ -347,11 +344,40 @@ public interface ClientService {
     /**
      * 查询不同属性在时间段内的遥测值
      *
-     * @param tenantId 租户Id
-     * @param deviceId 设备Id
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param tenantId   租户Id
+     * @param deviceId   设备Id
+     * @param startTime  开始时间
+     * @param endTime    结束时间
      * @param properties 属性
      */
     Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties);
+
+    /**
+     * 查询设备班次时间列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    List<DeviceKeyParamShiftResult> listDeviceShirtTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询设备在时间段内的全部遥测时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    List<Long> listDeviceTss(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询设备oee
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param currentTime 当前时间
+     */
+    Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime);
 }

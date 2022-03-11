@@ -10,6 +10,7 @@ import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.io.IOException;
@@ -151,10 +152,10 @@ public interface OrderService {
     /**
      * 看板-订单监控
      *
-     * @param tenantId 租户Id
-     * @param factoryId 工厂Id
+     * @param tenantId   租户Id
+     * @param factoryId  工厂Id
      * @param workshopId 车间Id
-     * @param timeQuery 时间参数
+     * @param timeQuery  时间参数
      * @return 订单
      */
     List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery);
@@ -176,4 +177,26 @@ public interface OrderService {
      * @return
      */
     String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+
+    /**
+     * 查询订单-生产计划-单个设备在一个时间段内的维护时间列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 维护时间列表
+     */
+    List<DeviceKeyParamMaintainResult> listDeviceMaintainTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询订单-生产计划-单个设备在一个时间段内的实际时间的生产计划列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 生产计划列表
+     */
+    List<OrderPlan> listDeviceOrderPlansInActualTimeField(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
 }

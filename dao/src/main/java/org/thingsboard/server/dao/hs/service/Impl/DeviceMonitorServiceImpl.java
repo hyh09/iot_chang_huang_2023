@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +34,7 @@ import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
+import org.thingsboard.server.dao.hs.entity.bo.DeviceTimeBO;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleLevel;
 import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
@@ -52,6 +54,8 @@ import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -115,6 +119,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
     // 图表属性Repository
     DictDeviceGraphItemRepository graphItemRepository;
+
+    // 订单Service
+    OrderService orderService;
 
     /**
      * 获得设备配置列表
@@ -1053,7 +1060,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             var firstVs = this.clientService.listPageTsHistories(tenantId, DeviceId.fromString(UUIDToString(deviceId)), firstV.getName(), timePageLink);
             var tsList = firstVs.getData().stream().map(DictDeviceGroupPropertyVO::getCreatedTime).collect(Collectors.toList());
             Map<String, List<HistoryGraphPropertyTsKvVO>> data = Maps.newHashMap();
-            if (!tsList.isEmpty()){
+            if (!tsList.isEmpty()) {
                 var time1 = tsList.get(0);
                 var time2 = tsList.get(tsList.size() - 1);
                 var others = dictDeviceGraphVO.getProperties().stream().map(DictDeviceGraphPropertyVO::getName).filter(name -> !firstV.getName().equals(name)).collect(Collectors.toList());
@@ -1076,7 +1083,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             }).collect(Collectors.toList());
         }
 
-
         return HistoryGraphAppVO.builder()
                 .enable(dictDeviceGraphVO.getEnable())
                 .name(dictDeviceGraphVO.getName())
@@ -1092,9 +1098,91 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      * @return 设备关键参数
      */
     @Override
-    public DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) {
+    public DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) throws ThingsboardException {
+        var result = new DeviceKeyParametersResult();
+        result.setOperationRate(0d);
+        result.setQualityRate(0d);
+        result.setCapacityEfficiency(0d);
 
-        return null;
+        var now = System.currentTimeMillis();
+        var todayStartTime = CommonUtil.getTodayStartTime();
+        var tomorrowStartTime = CommonUtil.getTomorrowStartTime();
+        CompletableFuture.allOf(
+                CompletableFuture.supplyAsync(() -> this.orderService.listDeviceMaintainTimes(tenantId, deviceId, todayStartTime, tomorrowStartTime))
+                        .thenAcceptAsync(v -> result.setMaintenanceDuration(this.toDoubleHour(this.statisticsTime(v)))),
+
+                CompletableFuture.supplyAsync(() -> this.clientService.getDeviceOEE(tenantId, deviceId, now))
+                        .thenAcceptAsync(result::setOee),
+
+                CompletableFuture.runAsync(() -> {
+                    var shirtTimes = this.clientService.listDeviceShirtTimes(tenantId, deviceId, todayStartTime, tomorrowStartTime);
+                    var shirtTimeL = this.statisticsTime(shirtTimes);
+                    result.setShiftDuration(this.toDoubleHour(shirtTimeL));
+
+                    CompletableFuture.allOf(
+                            CompletableFuture.runAsync(() -> {
+                                var deviceTimeBO = shirtTimes.stream().map(v -> CompletableFuture.supplyAsync(() -> ImmutablePair.of(v, this.clientService.listDeviceTss(tenantId, deviceId, todayStartTime, tomorrowStartTime))))
+                                        .map(v -> v.thenApplyAsync(f -> {
+                                            if (f.getRight().isEmpty())
+                                                return DeviceTimeBO.builder().startingUpTime(0L).shutdownTime(f.getLeft().getEndTime() - f.getLeft().getStartTime()).build();
+                                            else {
+                                                var total = 0L;
+                                                var cTime = f.getLeft().getStartTime();
+                                                for (Long t : f.getRight()) {
+                                                    if ((t - cTime) >= 30 * 60 * 1000) {
+                                                        total += (t - cTime);
+                                                    }
+                                                    cTime = t;
+                                                }
+                                                if ((f.getLeft().getEndTime() - cTime) >= 30 * 60 * 1000)
+                                                    total += (f.getLeft().getEndTime() - cTime);
+                                                return DeviceTimeBO.builder().startingUpTime((f.getLeft().getEndTime() - f.getLeft().getStartTime()) - total).shutdownTime(total).build();
+                                            }
+                                        })).map(CompletableFuture::join).reduce(new DeviceTimeBO(), (r, e) -> {
+                                            r.setStartingUpTime(r.getStartingUpTime() + e.getStartingUpTime());
+                                            r.setShutdownTime(r.getShutdownTime() + e.getShutdownTime());
+                                            return r;
+                                        }, (a, b) -> null);
+
+                                result.setStartingUpDuration(this.toDoubleHour(deviceTimeBO.getStartingUpTime()));
+                                result.setShutdownDuration(this.toDoubleHour(deviceTimeBO.getShutdownTime()));
+                                if (shirtTimeL != 0L)
+                                    result.setOperationRate(this.formatDoubleData(BigDecimal.valueOf(deviceTimeBO.getStartingUpTime() * 1.0d / shirtTimeL * 100)));
+                            }),
+
+                            CompletableFuture.runAsync(() -> {
+                                var device = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId).toData();
+                                result.setId(device.getId().toString());
+                                result.setName(device.getName());
+
+                                var plans = this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, todayStartTime, tomorrowStartTime);
+                                var actualCapacityTotal = plans.stream().reduce(BigDecimal.ZERO, (r, e) -> {
+                                    if (e.getActualCapacity() != null) {
+                                        return r.add(e.getActualCapacity());
+                                    }
+                                    return r;
+                                }, (a, b) -> null);
+
+                                try {
+                                    var ratedCapacity = this.dictDeviceService.getDictDeviceDetail(device.getDictDeviceId().toString(), tenantId).getRatedCapacity();
+                                    var trueCapacityTotal = this.clientService.getOrderCapacities(plans);
+                                    result.setCapacityEfficiency(this.formatDoubleData(trueCapacityTotal.multiply(new BigDecimal(100)).divide(ratedCapacity.multiply(this.toDecimalHour(shirtTimeL)), 2, RoundingMode.HALF_UP)));
+                                } catch (Exception ignore) {
+                                }
+
+                                var shirtActualCapacityTotal = shirtTimes.stream().map(v -> CompletableFuture.supplyAsync(() -> this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, v.getStartTime(), v.getEndTime())))
+                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacities(f))).map(CompletableFuture::join).reduce(BigDecimal.ZERO, BigDecimal::add, (a, b) -> null);
+
+                                result.setOutput(this.formatDoubleData(shirtActualCapacityTotal));
+                                if (shirtActualCapacityTotal.compareTo(BigDecimal.ZERO) > 0)
+                                    result.setQualityRate(this.formatDoubleData(actualCapacityTotal.multiply(new BigDecimal(100)).divide(shirtActualCapacityTotal, 2, RoundingMode.HALF_UP)));
+                                result.setInQualityNum(this.formatDoubleData(shirtActualCapacityTotal.subtract(actualCapacityTotal)));
+                            })
+                    ).join();
+                })
+        ).join();
+
+        return result;
     }
 
     /**
@@ -1201,5 +1289,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Autowired
     public void setGraphItemRepository(DictDeviceGraphItemRepository graphItemRepository) {
         this.graphItemRepository = graphItemRepository;
+    }
+
+    @Autowired
+    public void setOrderService(OrderService orderService) {
+        this.orderService = orderService;
     }
 }
