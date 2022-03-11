@@ -4009,8 +4009,8 @@
     "download-template": "Download template",
     "drop-order": "Drop an excel or click to select a file to upload.",
     "import-template-name": "Order import template.xlsx",
-    "intended-capacity": "Intended capacity",
-    "actual-capacity": "Actual capacity",
+    "intended-capacity": "Intended yield",
+    "actual-capacity": "Actual yield",
     "maintain-time": "Maintenance time"
   }
 }

@@ -15,7 +15,6 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
 
   private readonly config: EntityTableConfig<any> = new EntityTableConfig<any>();
   private oldFactoryId: string = '';
-  factroryChange$: BehaviorSubject<string> = new BehaviorSubject<string>('')
 
   constructor(
     private potencyService: PotencyService,
@@ -29,16 +28,6 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
     this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
 
     this.config.loadDataOnInit = false;
-
-    this.config.componentsData = {
-      factoryId: '',
-      workshopId: '',
-      productionLineId: '',
-      deviceId: '',
-      dateRange: null,
-      totalValue: [],
-      factroryChange$: this.factroryChange$
-    };
 
     this.config.cellActionDescriptors = [{
       name: this.translate.instant('potency.go-to-history'),
@@ -61,7 +50,7 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       deviceId: '',
       dateRange: [now, now],
       totalValue: [],
-      factroryChange$: this.factroryChange$
+      factroryChange$: new BehaviorSubject<string>('')
     };
     return new Observable((observer: Observer<EntityTableConfig<any>>) => {
       this.potencyService.getEnergyConsumptionTableHeader().subscribe(res => {
