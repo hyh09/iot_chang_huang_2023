@@ -3906,8 +3906,8 @@
     "download-template": "下载模板",
     "drop-order": "拖拽excel文件或单击以选择要导入的excel文件。",
     "import-template-name": "订单导入模板.xlsx",
-    "intended-capacity": "计划产能",
-    "actual-capacity": "实际产能",
+    "intended-capacity": "计划产量",
+    "actual-capacity": "实际产量",
     "maintain-time": "维护时间"
   }
 }
