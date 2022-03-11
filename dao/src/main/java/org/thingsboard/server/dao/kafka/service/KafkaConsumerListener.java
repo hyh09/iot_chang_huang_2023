@@ -5,12 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.id.EntityId;
-import org.thingsboard.server.common.data.kv.BasicTsKvEntry;
-import org.thingsboard.server.common.data.kv.KvEntry;
-import org.thingsboard.server.common.data.kv.StringDataEntry;
-import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
+import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
 import org.thingsboard.server.dao.util.JsonUtils;
@@ -26,8 +22,8 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class KafkaConsumerListener {
-//    @Autowired
-////    private StatisticalDataService statisticalDataService;
+
+    @Autowired  private StatisticalDataService statisticalDataService;
     @Autowired private EnergyChartService energyChartService;
     @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
 
@@ -43,8 +39,8 @@ public class KafkaConsumerListener {
             UUID  entityId= dataBodayVo.getEntityId();
 
 
-//            statisticalDataService.todayDataProcessing( entityId,dataBodayVo,title);
-            energyHistoryMinuteSvc.saveByMinute( entityId,dataBodayVo,title);
+            statisticalDataService.todayDataProcessing( entityId,dataBodayVo,title);
+//            energyHistoryMinuteSvc.saveByMinute( entityId,dataBodayVo,title);
             energyChartService.todayDataProcessing( entityId,dataBodayVo,title);
 
 //            Long endTime = System.currentTimeMillis();
