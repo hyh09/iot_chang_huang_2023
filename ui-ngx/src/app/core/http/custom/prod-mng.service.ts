@@ -23,28 +23,31 @@ export class ProdMngService {
     );
   }
 
-  // 获取设备生产日历列表
-  public getProdCalendarList(deviceId: string, config?: RequestConfig): Observable<PageData<ProdCalendar>> {
-    return this.http.get<ProdCalendar[]>(
-      `/api/productionCalender/getHistoryById?deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config)
-    ).pipe(map(res => {
-      return {
-        data: res || [],
-        totalPages: 1,
-        totalElements: (res || []).length,
-        hasNext: false
-      }
-    }));
+  // 分页获取设备生产日历列表
+  public getProdCalendarList(pageLink: PageLink, deviceId: string, config?: RequestConfig): Observable<PageData<ProdCalendar>> {
+    return this.http.get<PageData<ProdCalendar>>(`/api/productionCalender/getHistoryPageByDeviceId${pageLink.toQuery()}&deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取设备所有的生产日历
+  public getAllProdCalendars(deviceId: string, config?: RequestConfig): Observable<ProdCalendar[]> {
+    return this.http.get<ProdCalendar[]>(`/api/productionCalender/getHistoryByDeviceId?deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 新增或编辑生产日历
-  public saveProdCalendar(ProdCalendar: ProdCalendar, config?: RequestConfig): Observable<ProdCalendar> {
-    return this.http.post<ProdCalendar>('/api/productionCalender/save', ProdCalendar, defaultHttpOptionsFromConfig(config));
+  public saveProdCalendar(prodCalendar: ProdCalendar, config?: RequestConfig): Observable<ProdCalendar> {
+    return this.http.post<ProdCalendar>('/api/productionCalender/save', prodCalendar, defaultHttpOptionsFromConfig(config)).pipe(map(() => {
+      return prodCalendar;
+    }));
+  }
+
+  // 查询生产日历详情
+  public getProdCalendar(id: HasUUID, config?: RequestConfig): Observable<ProdCalendar> {
+    return this.http.get<ProdCalendar>(`/api/productionCalender/${id}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 删除生产日历
   public deleteProdCalendar(id: HasUUID, config?: RequestConfig) {
-    return this.http.delete(`/api/productionCalender/delete/${id}`, defaultHttpOptionsFromConfig(config));
+    return this.http.delete(`/api/productionCalender/deleteById/${id}`, defaultHttpOptionsFromConfig(config));
   }
   
 }

@@ -48,5 +48,24 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     @Query("SELECT t1 FROM OrderPlanEntity t1 WHERE t1.orderId in :orderIds and ( t1.actualStartTime > :actualEndTime or t1.actualStartTime < :actualStartTime ) " )
     List<OrderPlanEntity> findAllByOrderIdsAndTime(@Param("orderIds") List<UUID> orderIds, @Param("actualStartTime") Long actualStartTime, @Param("actualEndTime") Long actualEndTime);
 
+    /**
+     * 查询时间范围内的实际产量
+     * @param factoryId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Query("select t from OrderPlanEntity t where t.factoryId = :factoryId and ( t.actualStartTime > :endTime or t.actualEndTime < :startTime )")
+    List<OrderPlanEntity> findActualByFactoryIds(@Param("factoryId") UUID factoryId,@Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
+
+    /**
+     * 查询时间范围内的计划产量
+     * @param factoryId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Query("select t from OrderPlanEntity t where t.factoryId = :factoryId and ( t.intendedStartTime > :endTime or t.intendedEndTime < :startTime )")
+    List<OrderPlanEntity> findIntendedByFactoryIds(@Param("factoryId") UUID factoryId,@Param("startTime") Long startTime, @Param("endTime") Long endTime);
 }

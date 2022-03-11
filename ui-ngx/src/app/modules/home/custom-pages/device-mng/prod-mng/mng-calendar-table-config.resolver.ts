@@ -51,14 +51,25 @@ export class MngCalendarTableConfigResolver implements Resolve<EntityTableConfig
     });
 
     this.config.searchEnabled = false;
-    this.config.refreshEnabled = false;
-    this.config.displayPagination = false;
     this.config.tableTitle = `${decodeURIComponent(factoryName || '')}${this.translate.instant('common.colon')}${decodeURIComponent(deviceName || '')}`;
     this.config.deleteEntityTitle = () => this.translate.instant('device-mng.delete-prod-calendar-title');
     this.config.deleteEntitiesTitle = count => this.translate.instant('device-mng.delete-prod-calendar-title', {count});
 
-    this.config.entitiesFetchFunction = () => this.prodMngService.getProdCalendarList(this.config.componentsData.deviceId);
-    this.config.saveEntity = calendar => this.prodMngService.saveProdCalendar(calendar);
+    this.config.entitiesFetchFunction = pageLink => this.prodMngService.getProdCalendarList(pageLink, deviceId);
+    this.config.saveEntity = calendar => {
+      const { date, start, end } = calendar;
+      const _date = new Date(new Date(new Date(date).toLocaleDateString()));
+      _date.setHours(start.getHours());
+      _date.setMinutes(start.getMinutes());
+      const startTime = _date.getTime();
+      _date.setHours(end.getHours());
+      _date.setMinutes(end.getMinutes());
+      const endTime = _date.getTime();
+      return this.prodMngService.saveProdCalendar({
+        ...calendar, factoryId, deviceId, startTime, endTime
+      });
+    }
+    this.config.loadEntity = id => this.prodMngService.getProdCalendar(id);
     this.config.deleteEntity = id => this.prodMngService.deleteProdCalendar(id);
 
     return this.config;

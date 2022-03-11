@@ -3,26 +3,25 @@ package org.thingsboard.server.dao.productioncalender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
+import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
-import org.thingsboard.server.dao.hs.dao.OrderEntity;
 import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
 import org.thingsboard.server.dao.hs.dao.OrderPlanRepository;
-import org.thingsboard.server.dao.hs.dao.OrderRepository;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
+import org.thingsboard.server.dao.hs.service.OrderService;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,20 +31,20 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
 
     private final ProductionCalenderDao productionCalenderDao;
     private final DeviceDao deviceDao;
-    private final OrderRepository orderRepository;
     private final OrderPlanRepository orderPlanRepository;
     private final FactoryDao factoryDao;
     private final BulletinBoardSvc bulletinBoardSvc;
     private final DictDeviceService dictDeviceService;
+    private final OrderService orderService;
 
-    public ProductionCalenderServiceImpl(ProductionCalenderDao productionCalenderDao, DeviceDao deviceDao, OrderRepository orderRepository, FactoryDao factoryDao, OrderPlanRepository orderPlanRepository, BulletinBoardSvc bulletinBoardSvc,DictDeviceService dictDeviceService) {
+    public ProductionCalenderServiceImpl(ProductionCalenderDao productionCalenderDao, DeviceDao deviceDao, FactoryDao factoryDao, OrderPlanRepository orderPlanRepository, BulletinBoardSvc bulletinBoardSvc, DictDeviceService dictDeviceService, OrderService orderService) {
         this.productionCalenderDao = productionCalenderDao;
         this.deviceDao = deviceDao;
-        this.orderRepository = orderRepository;
         this.factoryDao = factoryDao;
         this.orderPlanRepository = orderPlanRepository;
         this.bulletinBoardSvc = bulletinBoardSvc;
         this.dictDeviceService = dictDeviceService;
+        this.orderService = orderService;
     }
 
     @Override
@@ -96,216 +95,169 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
      * @return
      */
     @Override
-    public List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender) {
+    public List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender) throws ThingsboardException{
         List<ProductionCalender> resultProductionCalenders = new ArrayList<>();
-        switch (productionCalender.getQryType()) {
-            case 1:
-                //集团看板生产监控查询
-                ///查询租户下所有工厂
-                List<Factory> factoryList = factoryDao.findFactoryByTenantId(productionCalender.getTenantId());
-                if (!CollectionUtils.isEmpty(factoryList)) {
-                    //查询工厂所有的订单
-                    List<OrderEntity> orderEntityList = orderRepository.findAllByFactoryIds(factoryList.stream().map(m -> m.getId()).collect(Collectors.toList()));
-                    if (!CollectionUtils.isEmpty(orderEntityList)) {
-                        //查询满足时间范围内的所有订单计划
-                        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findAllByOrderIdsAndTime(orderEntityList.stream().map(m -> m.getId()).collect(Collectors.toList()), productionCalender.getStartTime(), productionCalender.getEndTime());
-                        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-                            for (Factory factory : factoryList) {
-                                ProductionCalender resultProductionCalender = new ProductionCalender();
-                                resultProductionCalender.setFactoryId(factory.getId());
-                                resultProductionCalender.setFactoryName(factory.getName());
-                                //当前租户工厂下的所有订单设备完成量/计划量
-                                resultProductionCalenders.add(this.statisticsFactory(factory.getId(), orderEntityList, orderPlanEntityList));
+        Long startTime = productionCalender.getStartTime();
+        Long endTime = productionCalender.getEndTime();
+        //集团看板生产监控查询
+        ///查询租户下所有工厂
+        List<Factory> factoryList = factoryDao.findFactoryByTenantId(productionCalender.getTenantId());
+        if (!CollectionUtils.isEmpty(factoryList)) {
+            factoryList.forEach(factory -> {
+                ProductionCalender resultProductionCalender = new ProductionCalender();
+                //1.统计每个工厂的设备完成量/计划量
+                //1.1总完成量
+                String actual = orderService.findActualByFactoryIds(factory.getId(), startTime, endTime);
+                //1.2总计划量
+                String intended = orderService.findIntendedByFactoryIds(factory.getId(), startTime, endTime);
 
-                                //查询每个工厂下所有的设备总产能
-                                Double sumOutput = this.statisticsDeviceoutput(factory.getId(), orderEntityList, orderPlanEntityList, productionCalender.getStartTime(), productionCalender.getEndTime());
-                                //设备的标准产能*设备日历的总和
-                                //String dividend = this.statisticsDeviceoutput(factory.getId(), orderEntityList, orderPlanEntityList, productionCalender.getStartTime(), productionCalender.getEndTime());
+                resultProductionCalender.setFactoryId(factory.getId());
+                resultProductionCalender.setFactoryName(factory.getName());
+                resultProductionCalender.setAchieveOrPlan(actual + "/" + intended);
 
-                            }
+                //2.产能达成率 = 选择设备实际时间范围内(默认当天)参与产能运算的设备实际计算产量总和/(订单关联的设备的标准产能*设备日历中的时间总和)
+                //2.1 参与产能运算的设备实际计算产量总和   注意：只取交叉时间内的产量
+                //筛选参与计算的设备 以及 每个设备在订单计划中，实际生产时间与查询时间条件，两者的交叉时间（包含开始与结束），再用这个时间去查产能历史记录，查到具体产能。
 
-                        }
+                //一个工厂下产量总和  (实际产量总和)
+                BigDecimal deviceOutputReality = new BigDecimal(0);
+                //每个（设备标准产能 * 设备日历中的时间）的总和   （预计总产量）
+                BigDecimal deviceOutputPredict = new BigDecimal(0);
+
+                List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factory.getId(), startTime, endTime);
+                if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+                    //每个设备
+                    for (OrderPlanEntity orderPlanEntity : orderPlanEntityList) {
+                        UUID deviceId = orderPlanEntity.getDeviceId();
+                        List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
+                        Map<String, Long> mapTime = this.intersectionTime(orderPlanEntity.getActualStartTime(), orderPlanEntity.getActualEndTime(), startTime, endTime);
+                        deviceCapacityVoList.add(new DeviceCapacityVo(deviceId, mapTime.get("startTime"), mapTime.get("endTime")));
+                        //每个设备的产能
+                        Map<UUID, String> map = bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
+                        deviceOutputReality.add(new BigDecimal(map.get(deviceId)));
                     }
+
+                    //2.2 每个"订单关联的设备的标准产能*设备日历中的时间总和"相加    注意：只取交叉时间值（单位小时）
+
+                    orderPlanEntityList.stream().map(m -> m.getDeviceId()).collect(Collectors.toList()).forEach(deviceId -> {
+                        //设备标准产能
+                        BigDecimal ratedCapacity = dictDeviceService.findById(deviceDao.getDeviceInfo(deviceId).getDictDeviceId()).getRatedCapacity();
+                        //单个设备生产日历总时间
+                        BigDecimal time = new BigDecimal(0);
+
+                        //生产日历时间
+                        List<ProductionCalender> historyList = productionCalenderDao.getHistoryByDeviceId(deviceId);
+                        if (!CollectionUtils.isEmpty(historyList)) {
+                            for (ProductionCalender pc : historyList) {
+                                Map<String, Long> mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
+                                time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
+                            }
+                        }
+                        //单个设备 预计产量
+                        deviceOutputPredict.add(ratedCapacity.multiply(time));
+                    });
+                }
+                //年产能达成率
+                if(deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0){
+                    resultProductionCalender.setYearAchieve("0");
+                }else {
+                    resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict).toString());
                 }
 
-                break;
-            default:
-                break;
-        }
+                //3.生产状态:工厂下网关的在线、离线状态。在线视为正常，有一个离线视为异常
+                try {
+                    resultProductionCalender.setProductionState(factoryDao.checkoutFactoryStatus(factory.getId()));
+                } catch (ThingsboardException e) {
+                    new ThingsboardException("查询工厂在线报错", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
 
-        //查询所有设备
-        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(productionCalender.getTenantId(), productionCalender.getFactoryId(), productionCalender.getWorkshopId(), true));
-        if (!CollectionUtils.isEmpty(deviceListByCdn)) {
-            List<UUID> deviceIds = deviceListByCdn.stream().map(m -> m.getId().getId()).collect(Collectors.toList());
-            // 根据设备id以及实际时间查询订单信息
-            List<OrderPlanEntity> deviceAchieveOrPlanList = null;//orderService.findDeviceAchieveOrPlanList(deviceIds, productionCalender.getStartTime(), productionCalender.getEndTime());
-            if (!CollectionUtils.isEmpty(deviceAchieveOrPlanList)) {
-                log.isTraceEnabled();
-            }
+                resultProductionCalenders.add(resultProductionCalender);
+            });
         }
-
-        return null;
+        return resultProductionCalenders;
     }
+
 
     /**
      * 计算工厂的的总实际完成量/总计划量
      *
-     * @param factoryId
-     * @param allByFactoryIds 工厂下订单
-     * @param allByOrderIds   工厂下所有订单计划
+     * @param orderPlanEntityList
      * @return
      */
-    public ProductionCalender statisticsFactory(UUID factoryId, List<OrderEntity> allByFactoryIds, List<OrderPlanEntity> allByOrderIds) {
+    public ProductionCalender statisticsFactory(List<OrderPlanEntity> orderPlanEntityList) {
         ProductionCalender resultProductionCalender = new ProductionCalender();
-
         //实际完成量
         Double actualCapacity = 0.0;
         //计划完成量
         Double intendedCapacity = 0.0;
-        for (OrderEntity orderEntity : allByFactoryIds) {
-            if (orderEntity.getFactoryId() == factoryId) {
-                for (OrderPlanEntity orderPlanEntity : allByOrderIds) {
-                    Double qryActualCapacity = 0.0;
-                    Double qryIntendedCapacity = 0.0;
-                    if (StringUtils.isNotEmpty(orderPlanEntity.getActualCapacity())) {
-                        qryActualCapacity = Double.parseDouble(orderPlanEntity.getActualCapacity());
-                    }
-                    if (StringUtils.isNotEmpty(orderPlanEntity.getIntendedCapacity())) {
-                        qryIntendedCapacity = Double.parseDouble(orderPlanEntity.getIntendedCapacity());
-                    }
-                    actualCapacity += qryActualCapacity;
-                    intendedCapacity += qryIntendedCapacity;
-                }
+        for (OrderPlanEntity orderPlanEntity : orderPlanEntityList) {
+            Double qryActualCapacity = 0.0;
+            Double qryIntendedCapacity = 0.0;
+            if (StringUtils.isNotEmpty(orderPlanEntity.getActualCapacity())) {
+                qryActualCapacity = Double.parseDouble(orderPlanEntity.getActualCapacity());
             }
+            if (StringUtils.isNotEmpty(orderPlanEntity.getIntendedCapacity())) {
+                qryIntendedCapacity = Double.parseDouble(orderPlanEntity.getIntendedCapacity());
+            }
+            actualCapacity += qryActualCapacity;
+            intendedCapacity += qryIntendedCapacity;
         }
         resultProductionCalender.setAchieveOrPlan(actualCapacity.toString() + "/" + intendedCapacity.toString());
         return resultProductionCalender;
     }
 
     /**
-     * 批量查询设备在查询时间区间内的产量
+     * 计算时间交集
+     * @param actualStartTime 实际数据-开始时间
+     * @param actualEndTime   实际数据-结束时间
+     * @param startTimeQry    查询条件开始时间
+     * @param endTimeQry      查询条件结束时间
+     * @return
+     */
+    public Map<String, Long> intersectionTime(Long actualStartTime, Long actualEndTime, Long startTimeQry, Long endTimeQry) {
+        Map<String, Long> map = new HashMap<>();
+        map.put("startTime", new Long(0));
+        map.put("endTime", new Long(0));
+
+        Long startTime = new Long(0);
+        Long endTime = new Long(0);
+
+        //时间要取交叉时间
+        if (startTimeQry < actualStartTime && actualEndTime < endTimeQry) {
+            startTime = actualStartTime;
+            endTime = actualEndTime;
+        }
+        if (startTimeQry < actualStartTime && actualStartTime < endTimeQry && endTimeQry < actualEndTime) {
+            startTime = actualStartTime;
+            endTime = endTimeQry;
+        }
+        if (actualStartTime < startTimeQry && startTimeQry < actualEndTime && actualEndTime < endTimeQry) {
+            startTime = startTimeQry;
+            endTime = actualEndTime;
+        }
+        if (actualStartTime < startTimeQry && endTimeQry < actualStartTime) {
+            startTime = startTimeQry;
+            endTime = endTimeQry;
+        }
+        map.put("startTime", startTime);
+        map.put("endTime", endTime);
+
+        return map;
+    }
+
+    /**
+     * 计算时间戳相间隔的小时数
      *
-     * @param orderPlanEntityList
      * @param startTime
      * @param endTime
      * @return
      */
-    public Double statisticsDeviceoutput(UUID factoryId, List<OrderEntity> orderEntityList, List<OrderPlanEntity> orderPlanEntityList, Long startTime, Long endTime) {
-        /*List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
-        //产能达成率 = 选择设备实际时间范围内(默认当天)参与产能运算的设备实际计算产量总和/(订 单关联的设备的标准产能*设备日历中的时间总和)
-        BigDecimal yearAchieve = new BigDecimal(0);
-        //总产量
-        BigDecimal sumOutput = new BigDecimal(0);
-
-
-
-        if (!CollectionUtils.isEmpty(orderEntityList)) {
-            for (OrderEntity orderEntity : orderEntityList) {
-
-                //同一个工厂
-                if (orderEntity.getFactoryId() != null && orderEntity.getFactoryId() == factoryId) {
-
-                    if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-                        for (OrderPlanEntity orderPlanEntity : orderPlanEntityList) {
-
-                            //同一个订单
-                            if (orderEntity.getId() == orderPlanEntity.getOrderId()) {
-                                Long actualStartTime = orderPlanEntity.getActualStartTime();
-                                Long actualEndTime = orderPlanEntity.getActualEndTime();
-                                //时间要取交叉时间
-                                if (actualStartTime != null && actualEndTime != null) {
-                                    if (startTime < actualStartTime && actualEndTime < endTime) {
-                                        actualStartTime = actualStartTime;
-                                        actualEndTime = actualEndTime;
-                                    }
-                                    if (startTime < actualStartTime && actualStartTime < endTime && endTime < actualEndTime) {
-                                        actualStartTime = actualStartTime;
-                                        actualEndTime = endTime;
-                                    }
-                                    if (actualStartTime < startTime && startTime < actualEndTime && actualEndTime < endTime) {
-                                        actualStartTime = startTime;
-                                        actualEndTime = actualEndTime;
-                                    }
-                                    if (actualStartTime < startTime && endTime < actualStartTime) {
-                                        actualStartTime = startTime;
-                                        actualEndTime = endTime;
-                                    }
-                                    //产量
-                                    deviceCapacityVoList.add(new DeviceCapacityVo(orderPlanEntity.getId(), orderPlanEntity.getDeviceId(), actualStartTime, actualEndTime));
-                                }
-                            }
-                        }
-
-                        //计算每个设备的生产时间
-                       *//* List<UUID> deviceIdList = orderPlanEntityList.stream().map(m -> m.getDeviceId()).distinct().collect(Collectors.toList());
-                        if(!CollectionUtils.isEmpty(deviceIdList)){
-                            deviceIdList.forEach(i->{
-                                for (OrderPlanEntity orderPlanEntity : orderPlanEntityList) {
-                                    if(){
-
-                                    }
-                                }
-
-                            });
-                        }*//*
-
-
-
-                        //计算设备的生产日历，里面计划的时间
-                        //每个设备 标准产能
-                        BigDecimal ratedCapacity = dictDeviceService.findById(deviceDao.getDeviceInfo(orderPlanEntity.getDeviceId()).getDictDeviceId()).getRatedCapacity();
-
-                        //每个设备日历时间（小时）
-                        BigDecimal productionTimeHours = null;
-
-                        List<ProductionCalender> productionCalenderList = productionCalenderDao.getHistoryByDeviceId(orderPlanEntity.getDeviceId());
-                        if(!CollectionUtils.isEmpty(productionCalenderList)){
-                            Long productionTime = null;
-                            for (ProductionCalender productionCalender : productionCalenderList){
-                                Long productionStartTime = productionCalender.getStartTime();
-                                Long productionEndTime = productionCalender.getEndTime();
-
-                                //时间要取交叉时间
-                                if (productionStartTime != null && productionEndTime != null) {
-                                    if (startTime < productionStartTime && productionEndTime < endTime) {
-                                        productionStartTime = productionStartTime;
-                                        productionEndTime = productionEndTime;
-                                    }
-                                    if (startTime < productionStartTime && productionStartTime < endTime && endTime < productionEndTime) {
-                                        productionStartTime = productionStartTime;
-                                        productionEndTime = endTime;
-                                    }
-                                    if (productionStartTime < startTime && startTime < productionEndTime && productionEndTime < endTime) {
-                                        productionStartTime = startTime;
-                                        productionEndTime = productionEndTime;
-                                    }
-                                    if (productionStartTime < startTime && endTime < productionStartTime) {
-                                        productionStartTime = startTime;
-                                        productionEndTime = endTime;
-                                    }
-                                    productionTime += endTime-startTime;
-                                }
-                            }
-                            long day = productionTime / (24 * 60 * 60 * 1000);
-                            long hour = (productionTime / (60 * 60 * 1000) - day * 24);
-                            productionTimeHours = new BigDecimal(hour);
-                        }
-
-                    }
-                }
-            }
-        }
-        if (!CollectionUtils.isEmpty(deviceCapacityVoList)) {
-            Map<UUID, String> map = bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
-            //计算总产量
-            if (map != null) {
-                for (Map.Entry<UUID, String> entry : map.entrySet()) {
-                    sumOutput += StringUtils.isNotEmpty(entry.getValue()) ? Double.parseDouble(entry.getValue()) : 0.0;
-                }
-
-            }
-        }*/
-        return 0.0;
+    public BigDecimal timeDifferenceForHours(Long startTime, Long endTime) {
+        Long timeDifference = endTime - startTime;
+        Long day = timeDifference / (24 * 60 * 60 * 1000);
+        Long hour = (timeDifference / (60 * 60 * 1000) - day * 24);
+        return new BigDecimal(hour);
     }
+
 
 }

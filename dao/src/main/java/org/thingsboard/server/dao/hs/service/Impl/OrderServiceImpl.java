@@ -12,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -36,13 +37,11 @@ import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderExcelBO;
 import org.thingsboard.server.dao.hs.entity.po.Order;
-import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.OrderService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
-import org.thingsboard.server.dao.util.CommonUtils;
 
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
@@ -586,5 +585,48 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     public List<OrderPlanEntity> findDeviceAchieveOrPlanList(List<UUID> deviceIds,Long startTime, Long endTime){
         return orderPlanRepository.findDeviceAchieveOrPlanList(deviceIds,startTime,endTime);
+    }
+
+    /**
+     * 查询时间范围内的总实际产量
+     * @param factoryIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public String findActualByFactoryIds(UUID factoryIds,Long startTime, Long endTime){
+        BigDecimal sumActual = new BigDecimal(0);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factoryIds, startTime, endTime);
+        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+            orderPlanEntityList.forEach(i->{
+                String actualCapacity = i.getActualCapacity();
+                if(StringUtils.isNotEmpty(actualCapacity)){
+                    sumActual.add(new BigDecimal(actualCapacity));
+                }
+            });
+        }
+        return sumActual.toString();
+    }
+    /**
+     * 查询时间范围内的总计划产量
+     * @param factoryIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime){
+        BigDecimal sumActual = new BigDecimal(0);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByFactoryIds(factoryIds,startTime,endTime);
+        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+            orderPlanEntityList.forEach(i->{
+                String actualCapacity = i.getActualCapacity();
+                if(StringUtils.isNotEmpty(actualCapacity)){
+                    sumActual.add(new BigDecimal(actualCapacity));
+                }
+            });
+        }
+        return sumActual.toString();
     }
 }
