@@ -173,7 +173,7 @@ public class ProductionCalenderController extends BaseController{
     }
 
     @ApiOperation("集团看板大屏生产监控")
-    @ApiImplicitParam(name = "productionMonitorListQry",value = "设备标识",dataType = "ProductionMonitorListQry",paramType="query")
+    @ApiImplicitParam(name = "dto",value = "入参",dataType = "ProductionMonitorListQry",paramType="query")
     @RequestMapping(value = "/dp/getProductionMonitorTenantList", method = RequestMethod.GET)
     @ResponseBody
     public List<ProductionMonitorListVo> getProductionMonitorenantList(ProductionMonitorListQry dto)throws ThingsboardException{
