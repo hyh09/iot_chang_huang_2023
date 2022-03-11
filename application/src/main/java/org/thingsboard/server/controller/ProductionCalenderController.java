@@ -172,13 +172,12 @@ public class ProductionCalenderController extends BaseController{
         }
     }
 
-    @ApiOperation("看板大屏生产监控")
+    @ApiOperation("集团看板大屏生产监控")
     @ApiImplicitParam(name = "productionMonitorListQry",value = "设备标识",dataType = "ProductionMonitorListQry",paramType="query")
-    @RequestMapping(value = "/dp/getHistoryById", method = RequestMethod.GET)
+    @RequestMapping(value = "/dp/getProductionMonitorTenantList", method = RequestMethod.GET)
     @ResponseBody
-    public List<ProductionMonitorListVo> getProductionMonitorList(ProductionMonitorListQry dto)throws ThingsboardException{
+    public List<ProductionMonitorListVo> getProductionMonitorenantList(ProductionMonitorListQry dto)throws ThingsboardException{
         try {
-            checkParameterChinees("qryType",dto.getQryType());
             List<ProductionMonitorListVo> result = new ArrayList<>();
             List<ProductionCalender> calenderList = productionCalenderService.getProductionMonitorList(dto.toProductionCalender(getCurrentUser().getTenantId().getId()));
             if(!org.springframework.util.CollectionUtils.isEmpty(calenderList)){

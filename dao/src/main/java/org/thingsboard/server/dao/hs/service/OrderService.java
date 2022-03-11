@@ -158,4 +158,22 @@ public interface OrderService {
      * @return 订单
      */
     List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery);
+
+    /**
+     * 查询时间范围内的实际产量
+     * @param factoryIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findActualByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+
+    /**
+     * 查询时间范围内的计划产量
+     * @param factoryIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
 }

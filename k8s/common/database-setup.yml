@@ -21,7 +21,7 @@ metadata:
   namespace: hsyl-iot
 spec:
   imagePullSecrets:
-    - name: zhowsregcred
+    - name: aliyunregcred
   volumes:
   - name: tb-node-config
     configMap:

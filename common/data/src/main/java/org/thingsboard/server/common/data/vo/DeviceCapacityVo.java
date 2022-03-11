@@ -53,4 +53,10 @@ public class DeviceCapacityVo {
         this.startTime = startTime;
         this.endTime = endTime;
     }
+    public DeviceCapacityVo(UUID entityId, Long startTime, Long endTime) {
+        this.id = entityId;
+        this.entityId = entityId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }

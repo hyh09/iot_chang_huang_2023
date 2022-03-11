@@ -43,8 +43,8 @@ public class ProductionCalender {
     @ApiModelProperty("年产能达成率")
     private String yearAchieve;
 
-    @ApiModelProperty("生产状态")
-    private String productionState;
+    @ApiModelProperty("生产状态(true正常  false异常)")
+    private Boolean productionState;
 
     @ApiModelProperty("车间id")
     private UUID workshopId;
@@ -71,7 +71,7 @@ public class ProductionCalender {
      * @param yearAchieve
      * @param productionState
      */
-    public ProductionCalender(String deviceName,String achieveOrPlan, String yearAchieve, String productionState) {
+    public ProductionCalender(String deviceName,String achieveOrPlan, String yearAchieve, Boolean productionState) {
         this.deviceName = deviceName;
         this.achieveOrPlan = achieveOrPlan;
         this.yearAchieve = yearAchieve;
@@ -80,19 +80,13 @@ public class ProductionCalender {
 
     /**
      * 看板生产监控数据入参
-     * @param qryType
      * @param startTime
      * @param endTime
-     * @param factoryId
-     * @param workshopId
      * @param tenantId
      */
-    public ProductionCalender(Integer qryType,Long startTime,Long endTime, UUID factoryId, UUID workshopId,UUID tenantId) {
-        this.qryType = qryType;
+    public ProductionCalender(Long startTime,Long endTime,UUID tenantId) {
         this.startTime = startTime;
         this.endTime = endTime;
-        this.factoryId = factoryId;
-        this.workshopId = workshopId;
         this.tenantId = tenantId;
     }
 

@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,24 +29,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
-import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.*;
+import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.kafka.service.KafkaProducerService;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.service.Validator;
-import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
+import org.thingsboard.server.dao.util.JsonUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -91,9 +95,9 @@ public class BaseTimeseriesService implements TimeseriesService  {
     private EntityViewService entityViewService;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EneryTimeGapService eneryTimeGapService;
-    @Autowired private StatisticalDataService statisticalDataService;
     @Autowired private EnergyChartService energyChartService;
     @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
+    @Autowired  private KafkaProducerService kafkaProducerService;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -181,16 +185,80 @@ public class BaseTimeseriesService implements TimeseriesService  {
         if (entityId.getEntityType().equals(EntityType.ENTITY_VIEW)) {
             throw new IncorrectParameterException("Telemetry data can't be stored for entity view. Read only");
         }
-       if(CollectionUtils.isEmpty(dataInitMap))
+//        log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
+//        log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
+        if(CollectionUtils.isEmpty(globalEneryList)) {
+            List<String> keys1 = deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+            globalEneryList.addAll(keys1);
+        }
+        if(CollectionUtils.isEmpty(dataInitMap))
         {
             Map<String,String>   map=  deviceDictPropertiesSvc.getUnit();
             dataInitMap=map;
         }
+
+////        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
+//       Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
+//        if(count>0) {
+//            ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
+////            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
+//            try {
+//                TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
+////                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
+//                long  t1=  tsKvEntry.getTs();
+//                long  t2=  tsKvEntry1.getTs();//要避免夸天的相减
+//              if(CommonUtils.isItToday(t2)) {
+//                  long t3 = t1 - t2;
+////                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
+//                  if (t3 > ENERGY_TIME_GAP) {
+//                      EneryTimeGapEntity eneryTimeGapEntity = new EneryTimeGapEntity();
+//                      eneryTimeGapEntity.setEntityId(entityId.getId());
+//                      eneryTimeGapEntity.setTenantId(tenantId.getId());
+//                      eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
+//                      eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
+//                      eneryTimeGapEntity.setTs(tsKvEntry.getTs());
+//                      eneryTimeGapEntity.setTimeGap(t3);
+//                      eneryTimeGapService.save(eneryTimeGapEntity);
+//                  }
+//              }
+//
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//        }
+
+         String  title =    dataInitMap.get(tsKvEntry.getKey());
+        if(StringUtils.isNotBlank(title))
+        {
+            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(entityId,tsKvEntry,title);
+            try {
+//                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
+                kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+//            log.info("打印当前的数据打印标题{}",title);
+//            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
+//            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
+//            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
+
+        }
+//        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
+//        if(count>0) {
+//            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
+//        }
+
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
         futures.add(timeseriesDao.save(tenantId, entityId, tsKvEntry, ttl));
-        String  title =    dataInitMap.get(tsKvEntry.getKey());
-        saveLocaData(tenantId,tsKvEntry,entityId,title);
     }
 
     private List<ReadTsKvQuery> updateQueriesForEntityView(EntityView entityView, List<ReadTsKvQuery> queries) {
@@ -282,27 +350,4 @@ public class BaseTimeseriesService implements TimeseriesService  {
             throw new IncorrectParameterException("Incorrect DeleteTsKvQuery. Key can't be empty");
         }
     }
-
-
-    private   void  saveLocaData(TenantId tenantId,TsKvEntry tsKvEntry,EntityId entityId,String title)
-    {
-        if(!StringUtils.isEmpty(title))
-        {
-            try {
-                String valueOLd="";
-                if(tsKvEntry.getValue().toString().equals("0")) {
-                    ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
-                    TsKvEntry  tsKvEntryOld = tsKvEntryListenableFuture.get();
-                    valueOLd=   tsKvEntryOld.getValue().toString();
-                }
-                statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title,valueOLd);
-                energyChartService.todayDataProcessing( entityId,tsKvEntry,title,valueOLd);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-     }
-
 }

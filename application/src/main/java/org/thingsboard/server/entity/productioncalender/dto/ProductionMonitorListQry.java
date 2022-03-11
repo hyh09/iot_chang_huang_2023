@@ -11,26 +11,17 @@ import java.util.UUID;
 @Data
 public class ProductionMonitorListQry {
 
-    @ApiModelProperty(value = "查询类型（1.集团看板 2.工厂看板，3.车间看板）")
-    private Integer qryType;
     @ApiModelProperty(value = "区间开始时间")
     private Long startTime;
     @ApiModelProperty(value = "区间结束时间")
     private Long endTime;
-    @ApiModelProperty(value = "工厂Id")
-    private UUID factoryId;
-    @ApiModelProperty(value = "车间Id")
-    private UUID workshopId;
 
     public ProductionMonitorListQry(){}
 
     public ProductionCalender toProductionCalender(UUID tenantId){
         return new ProductionCalender(
-                this.qryType,
                 this.startTime,
                 this.endTime,
-                this.factoryId,
-                this.workshopId,
                 tenantId);
     }
 

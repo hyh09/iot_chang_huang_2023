@@ -60,4 +60,11 @@ public interface FactoryDao extends Dao<Factory>{
      * @return
      */
     List<Factory> findAllByCdn(Factory factory);
+
+    /**
+     * 校验工厂是否在线，有一个不在线视为不在线
+     * @param factoryId
+     * @return
+     */
+    Boolean checkoutFactoryStatus(UUID factoryId)throws ThingsboardException;
 }
