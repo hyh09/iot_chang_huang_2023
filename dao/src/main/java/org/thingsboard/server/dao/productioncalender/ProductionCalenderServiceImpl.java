@@ -90,12 +90,31 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
     }
 
     /**
-     * 查询看板设备监控统计
-     *
+     * 看板生产监控统计
+     * @param productionCalender
      * @return
+     * @throws ThingsboardException
      */
     @Override
     public List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender) throws ThingsboardException{
+        List<ProductionCalender> result = new ArrayList<>();
+        if (productionCalender.getWorkshopId() != null) {
+
+        } else if (productionCalender.getFactoryId() != null) {
+
+        }else {
+            log.info("集团看板生产监控统计");
+            result = this.getProductionMonitorTenantList(productionCalender);
+        }
+        return result;
+    }
+
+    /**
+     * 查询集团看板设备监控统计
+     *
+     * @return
+     */
+    public List<ProductionCalender> getProductionMonitorTenantList(ProductionCalender productionCalender) throws ThingsboardException{
         List<ProductionCalender> resultProductionCalenders = new ArrayList<>();
         Long startTime = productionCalender.getStartTime();
         Long endTime = productionCalender.getEndTime();

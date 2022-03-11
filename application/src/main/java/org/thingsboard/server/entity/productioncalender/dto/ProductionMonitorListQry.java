@@ -16,12 +16,19 @@ public class ProductionMonitorListQry {
     @ApiModelProperty(value = "区间结束时间")
     private Long endTime;
 
+    @ApiModelProperty(value = "工厂id")
+    private UUID factoryId;
+    @ApiModelProperty(value = "车间id")
+    private UUID workshopId;
+
     public ProductionMonitorListQry(){}
 
     public ProductionCalender toProductionCalender(UUID tenantId){
         return new ProductionCalender(
                 this.startTime,
                 this.endTime,
+                this.factoryId,
+                this.workshopId,
                 tenantId);
     }
 
