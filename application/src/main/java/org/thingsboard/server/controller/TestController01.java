@@ -9,6 +9,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.dao.kafka.service.KafkaProducerService;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
@@ -19,6 +20,8 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 
 import java.time.LocalDate;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @program: thingsboard
@@ -34,44 +37,24 @@ import java.time.LocalDate;
 @RequestMapping("/api/test/")
 public class TestController01   extends BaseController {
 
-  @Autowired  private JwtTokenFactory jwtTokenFactory;
-  @Autowired  private UserLanguageSvc  userLanguageSvc;
-  @Autowired  private UserRoleMenuSvc  userRoleMenuSvc;
-  @Autowired  private UserService userService;
-  @Autowired  private DeviceRepository deviceRepository;
+  @Autowired  private KafkaProducerService kafkaProducerService;
 
-  @GetMapping("/getLanguageByUserLang")
-  public  String  Test001() throws ThingsboardException {
-    try {
-      SecurityUser authUser = getCurrentUser();
-      UserId userId = new UserId((authUser.getUuidId()));
-     return userLanguageSvc.getLanguageByUserLang(ErrorMessageEnums.SING_ON_AUTHENTICATION, authUser.getTenantId(), userId);
-    }catch (Exception e)
-    {
-       e.printStackTrace();
-      return  null;
-    }
+
+
+  @PostMapping(value="/post")
+  public void sendMessage(@RequestParam("msg") String msg) {
+
+      try {
+        kafkaProducerService.sendMessageSync("",msg);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+
   }
 
 
 
-  @Autowired  private EffciencyAnalysisRepository effciencyAnalysisRepository;
-
-
-  @PostMapping("/queryTodayTest")
-  public  Object  queryTodayE(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
-    try {
-      LocalDate today = LocalDate.now();
-      SecurityUser authUser = getCurrentUser();
-      vo.setTenantId(getTenantId().getId());
-      vo.setDate(today);
-        return effciencyAnalysisRepository.queryTodayEffceency(vo);
-    }catch (Exception e)
-    {
-      e.printStackTrace();
-      return  e;
-    }
-  }
 
 
 
