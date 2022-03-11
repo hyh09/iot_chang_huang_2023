@@ -3688,6 +3688,10 @@
     "selected-prod-calendars": "已选择 { count, plural, 1 {# 个生产日历} other {# 个生产日历} }",
     "device-schedual": "设备班次时间",
     "device-schedual-required": "设备班次时间必填",
+    "shift-date": "班次日期",
+    "shift-date-required": "班次日期必填",
+    "start-time-required": "开始时间必填",
+    "end-time-required": "结束时间必填",
     "delete-prod-calendar-title": "确认删除该班次吗？删除后不可撤销。",
     "delete-prod-calendar-titles": "确认删除这{{count}}个班次吗？删除后不可撤销。"
   },

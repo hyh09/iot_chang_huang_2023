@@ -200,4 +200,7 @@ export interface ProdCalendar extends BaseData<any> {
   endTime: number;
   updatedTime: number;
   createdTime: number;
+  date?: Date;
+  start?: Date;
+  end?: Date;
 }
