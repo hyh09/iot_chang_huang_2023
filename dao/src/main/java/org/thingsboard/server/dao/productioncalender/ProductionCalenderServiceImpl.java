@@ -199,6 +199,7 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
             });
         }
 
+        resultProductionCalenders.stream().sorted(Comparator.comparing(ProductionCalender::getAchieveOrPlan).reversed()).collect(Collectors.toList());
         return resultProductionCalenders;
     }
 
