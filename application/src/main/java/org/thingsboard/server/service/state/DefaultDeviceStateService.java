@@ -152,8 +152,8 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         scheduledExecutor.scheduleAtFixedRate(this::updateInactivityStateIfExpired, new Random().nextInt(defaultStateCheckIntervalInSec), defaultStateCheckIntervalInSec, TimeUnit.SECONDS);
 
         // 暂时新增设备active和ts_lasted遍历，修改active值
-//        scheduledFixedExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("device-state-fixed-scheduled")));
-//        scheduledFixedExecutor.scheduleAtFixedRate(this::fixedAllDeviceState, new Random().nextInt(Math.max(defaultStateCheckIntervalInSec * 6, 120)), Math.max(defaultStateCheckIntervalInSec * 6, 120), TimeUnit.SECONDS);
+        scheduledFixedExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("device-state-fixed-scheduled")));
+        scheduledFixedExecutor.scheduleAtFixedRate(this::fixedAllDeviceState, new Random().nextInt(Math.max(defaultStateCheckIntervalInSec * 6, 120)), Math.max(defaultStateCheckIntervalInSec * 6, 120), TimeUnit.SECONDS);
     }
 
     @PreDestroy
