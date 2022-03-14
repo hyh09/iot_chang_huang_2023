@@ -12,6 +12,7 @@ public interface ProductionCalenderDao {
 
     /**
      * 保存
+     *
      * @param productionCalender
      * @return
      */
@@ -19,6 +20,7 @@ public interface ProductionCalenderDao {
 
     /**
      * 删除
+     *
      * @param id
      * @param id
      * @return
@@ -27,6 +29,7 @@ public interface ProductionCalenderDao {
 
     /**
      * 查询详情
+     *
      * @param id
      * @return
      */
@@ -34,6 +37,7 @@ public interface ProductionCalenderDao {
 
     /**
      * 分页查询
+     *
      * @param pageLink
      * @return
      */
@@ -41,6 +45,7 @@ public interface ProductionCalenderDao {
 
     /**
      * 查询设备历史生产日历记录列表
+     *
      * @param deviceId
      * @param pageLink
      * @return
@@ -49,9 +54,16 @@ public interface ProductionCalenderDao {
 
     /**
      * 设备生产日历历史记录列表
+     *
      * @param deviceId
      * @return
      */
     List<ProductionCalender> getHistoryByDeviceId(UUID deviceId);
 
+    /**
+     * 查询设备某时间区间内班次
+     * @param deviceId
+     * @return
+     */
+    List<ProductionCalender> getDeviceByTimenterval(UUID deviceId,long startTime,long endTime);
 }

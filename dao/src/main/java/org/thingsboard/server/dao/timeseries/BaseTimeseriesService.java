@@ -234,7 +234,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
          String  title =    dataInitMap.get(tsKvEntry.getKey());
         if(StringUtils.isNotBlank(title))
         {
-            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(entityId,tsKvEntry,title);
+            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(tenantId,entityId,tsKvEntry,title);
             try {
 //                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
                 kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));

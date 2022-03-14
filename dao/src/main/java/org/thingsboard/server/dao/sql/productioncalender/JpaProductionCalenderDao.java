@@ -214,6 +214,31 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
         };
     }
 
+    /**
+     * 查询设备当天班次
+     * @param deviceId
+     * @return
+     */
+    @Override
+    public List<ProductionCalender> getDeviceByTimenterval(UUID deviceId,long startTime,long endTime) {
+        List<ProductionCalender> result = new ArrayList<>();
+        // 动态条件查询
+        Specification<ProductionCalenderEntity> specification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("deviceId"), deviceId));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("startTime"), startTime));
+            predicates.add(cb.lessThanOrEqualTo(root.get("endTime"), endTime));
+            Order orderByEndTime = cb.desc(root.get("endTime"));
+            return query.orderBy(orderByEndTime).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        };
+        List<ProductionCalenderEntity> entityList = productionCalenderRepository.findAll(specification);
+        if (CollectionUtils.isNotEmpty(entityList)) {
+            entityList.forEach(s -> {
+                result.add(s.toData());
+            });
+        }
+        return result;
+    }
 
 
 }

@@ -152,10 +152,10 @@ public interface OrderService {
     /**
      * 看板-订单监控
      *
-     * @param tenantId   租户Id
-     * @param factoryId  工厂Id
+     * @param tenantId 租户Id
+     * @param factoryId 工厂Id
      * @param workshopId 车间Id
-     * @param timeQuery  时间参数
+     * @param timeQuery 时间参数
      * @return 订单
      */
     List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery);
@@ -199,4 +199,22 @@ public interface OrderService {
      * @return 生产计划列表
      */
     List<OrderPlan> listDeviceOrderPlansInActualTimeField(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询时间范围内的车间计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     *查询时间范围内的车间计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime);
 }

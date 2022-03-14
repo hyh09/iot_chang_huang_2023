@@ -6,7 +6,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
-import org.thingsboard.server.dao.model.sql.ProductionCalenderEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,11 @@ import java.util.concurrent.CompletableFuture;
  */
 @Repository
 public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPlanEntity, UUID>, JpaSpecificationExecutor<OrderPlanEntity> {
+
     Optional<OrderPlanEntity> findByTenantIdAndId(UUID tenantId, UUID id);
+
+    @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.maintainStartTime is not null and p.maintainEndTime is not null and (p.maintainEndTime >= :startTime or p.maintainStartTime <= :endTime)")
+    List<OrderPlanEntity> findAllByIntendedTimeIn(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
 
     @Async
     @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.maintainStartTime is not null and p.maintainEndTime is not null and (p.maintainEndTime >= :startTime or p.maintainStartTime <= :endTime)")
@@ -78,4 +81,24 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      */
     @Query("select t from OrderPlanEntity t where t.factoryId = :factoryId and ( t.intendedStartTime > :endTime or t.intendedEndTime < :startTime )")
     List<OrderPlanEntity> findIntendedByFactoryIds(@Param("factoryId") UUID factoryId,@Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
+    /**
+     * 查询设备时间范围内的计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Query("select t from OrderPlanEntity t where t.deviceId = :deviceId and ( t.intendedStartTime > :endTime or t.intendedEndTime < :startTime )")
+    List<OrderPlanEntity> findIntendedByDeviceId(@Param("deviceId")UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
+    /**
+     * 查询设备时间范围内的计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Query("select t from OrderPlanEntity t where t.deviceId = :deviceId and ( t.actualStartTime > :endTime or t.actualEndTime < :startTime )")
+    List<OrderPlanEntity> findActualByDeviceId(@Param("deviceId")UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 }

@@ -29,6 +29,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
@@ -66,6 +67,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
+import org.thingsboard.server.dao.statisticoee.StatisticOeeService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.persistence.EntityManager;
@@ -146,6 +148,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     // ProductionCalenderRepository
     ProductionCalenderRepository calenderRepository;
+
+    // StatisticOeeService
+    StatisticOeeService statisticOeeService;
 
     /**
      * 查询用户
@@ -249,6 +254,16 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
                     .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
         }
+    }
+
+    /**
+     * 查询简易设备信息
+     *
+     * @param deviceId 设备Id
+     */
+    @Override
+    public Device getSimpleDevice(UUID deviceId) {
+        return this.deviceRepository.findSimpleById(deviceId).toData();
     }
 
     /**
@@ -863,6 +878,19 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 查询时间段内的班次时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<ProductionCalender> listProductionCalenders(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        return DaoUtil.convertDataList(this.calenderRepository.findAllByTenantIdAndDeviceIdAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(tenantId.getId(), deviceId, startTime, endTime));
+    }
+
+    /**
      * 查询设备oee
      *
      * @param tenantId    租户Id
@@ -871,7 +899,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime) {
-        return Double.parseDouble("0");
+        return this.formatDoubleData(this.statisticOeeService.getStatisticOeeDeviceByCurrentDay(deviceId));
     }
 
     /**
@@ -1106,5 +1134,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setCalenderRepository(ProductionCalenderRepository calenderRepository) {
         this.calenderRepository = calenderRepository;
+    }
+
+    @Autowired
+    public void setStatisticOeeService(StatisticOeeService statisticOeeService) {
+        this.statisticOeeService = statisticOeeService;
     }
 }

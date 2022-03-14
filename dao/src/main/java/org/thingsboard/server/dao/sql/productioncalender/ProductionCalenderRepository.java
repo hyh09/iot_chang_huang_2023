@@ -14,6 +14,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ProductionCalenderRepository extends PagingAndSortingRepository<ProductionCalenderEntity, UUID>, JpaSpecificationExecutor<ProductionCalenderEntity> {
 
+    List<ProductionCalenderEntity> findAllByTenantIdAndDeviceIdAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(UUID tenantId, UUID deviceId, Long startTime, Long endTime);
+
     @Async
     @Query("select p from ProductionCalenderEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.startTime is not null and p.endTime is not null and (p.endTime >= :startTime or p.startTime <= :endTime)")
     CompletableFuture<List<ProductionCalenderEntity>> findAllCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
