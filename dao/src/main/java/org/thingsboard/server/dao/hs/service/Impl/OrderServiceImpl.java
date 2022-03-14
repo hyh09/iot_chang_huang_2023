@@ -37,6 +37,7 @@ import org.thingsboard.server.dao.hs.entity.bo.OrderCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderDeviceCapacityBO;
 import org.thingsboard.server.dao.hs.entity.bo.OrderExcelBO;
 import org.thingsboard.server.dao.hs.entity.po.Order;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
@@ -328,13 +329,24 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             order.setTenantId(tenantId.toString());
         }
 
+        for (OrderPlanDeviceVO plan : orderVO.getPlanDevices()) {
+            if (plan.getIntendedStartTime() != null && plan.getIntendedEndTime() !=null) {
+                if (this.clientService.listProductionCalenders(tenantId, toUUID(plan.getDeviceId()), plan.getIntendedStartTime(), plan.getIntendedEndTime()).isEmpty())
+                    throw new ThingsboardException("生产计划不在班次时间内：开始时间 " + plan.getIntendedStartTime() + "~ 结束时间" + plan.getIntendedEndTime(), ThingsboardErrorCode.GENERAL);
+            }
+        }
+
         OrderEntity orderEntity = new OrderEntity(order);
         this.orderRepository.save(orderEntity);
 
         AtomicInteger sort = new AtomicInteger(1);
         this.orderPlanRepository.saveAll(orderVO.getPlanDevices().stream().map(v -> {
             OrderPlanEntity orderPlanEntity = new OrderPlanEntity();
+            var device = this.clientService.getSimpleDevice(toUUID(v.getDeviceId()));
             BeanUtils.copyProperties(v, orderPlanEntity);
+            orderPlanEntity.setFactoryId(device.getFactoryId());
+            orderPlanEntity.setWorkshopId(device.getWorkshopId());
+            orderPlanEntity.setProductionLineId(device.getProductionLineId());
             orderPlanEntity.setDeviceId(toUUID(v.getDeviceId()));
             orderPlanEntity.setTenantId(tenantId.getId());
             orderPlanEntity.setOrderId(orderEntity.getId());
@@ -470,6 +482,45 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     }
 
     /**
+     * 查询订单-生产计划-单个设备在一个时间段内的实际时间的生产计划列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 生产计划列表
+     */
+    @Override
+    public List<OrderPlan> listDeviceOrderPlansInActualTimeField(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        var temp = this.orderPlanRepository.findAllActualTimeCross(tenantId.getId(), deviceId, startTime, endTime)
+                .thenApplyAsync(plans -> plans.stream().map(OrderPlanEntity::toData).collect(Collectors.toList())).join();
+        temp.forEach(v -> {
+            v.setActualEndTime(v.getActualEndTime() > endTime ? endTime : v.getActualEndTime());
+            v.setActualStartTime(v.getActualStartTime() < startTime ? startTime : v.getActualStartTime());
+        });
+        return temp;
+    }
+
+    /**
+     * 查询订单-生产计划-单个设备在一个时间段内的维护时间列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 维护时间列表
+     */
+    @Override
+    public List<DeviceKeyParamMaintainResult> listDeviceMaintainTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        return this.orderPlanRepository.findAllMaintainTimeCross(tenantId.getId(), deviceId, startTime, endTime)
+                .thenApplyAsync(plans -> plans.stream().map(OrderPlanEntity::toData)
+                        .map(v -> DeviceKeyParamMaintainResult.builder()
+                                .startTime(v.getMaintainStartTime() < startTime ? startTime : v.getMaintainStartTime())
+                                .endTime(v.getMaintainEndTime() > endTime ? endTime : v.getMaintainEndTime())
+                                .build()).collect(Collectors.toList())).join();
+    }
+
+    /**
      * 看板-订单监控
      *
      * @param tenantId   租户Id
@@ -505,7 +556,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                                             .isOvertime((v.getIntendedTime() != null && v.getIntendedTime() > CommonUtil.getTodayCurrentTime()) & (completedCapacities.compareTo(v.getTotal()) < 0))
                                             .build();
                                 }
-                        ).filter(v->v.getCompletedCapacities().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
+                        ).filter(v -> v.getCompletedCapacities().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
     }
 
     /**
@@ -577,48 +628,67 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
 
     /**
      * 查询设备订单信息
+     *
      * @param deviceIds
      * @param startTime
      * @param endTime
      * @return
      */
     @Override
-    public List<OrderPlanEntity> findDeviceAchieveOrPlanList(List<UUID> deviceIds,Long startTime, Long endTime){
-        return orderPlanRepository.findDeviceAchieveOrPlanList(deviceIds,startTime,endTime);
+    public List<OrderPlanEntity> findDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime) {
+        return orderPlanRepository.findDeviceAchieveOrPlanList(deviceIds, startTime, endTime);
     }
 
     /**
      * 查询时间范围内的总实际产量
+     *
      * @param factoryIds
      * @param startTime
      * @param endTime
      * @return
      */
     @Override
-    public String findActualByFactoryIds(UUID factoryIds,Long startTime, Long endTime){
+    public String findActualByFactoryIds(UUID factoryIds, Long startTime, Long endTime) {
         BigDecimal sumActual = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factoryIds, startTime, endTime);
-        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
-            orderPlanEntityList.forEach(i->{
+        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+            orderPlanEntityList.forEach(i -> {
                 String actualCapacity = i.getActualCapacity();
-                if(StringUtils.isNotEmpty(actualCapacity)){
+                if (StringUtils.isNotEmpty(actualCapacity)) {
                     sumActual.add(new BigDecimal(actualCapacity));
                 }
             });
         }
         return sumActual.toString();
     }
+
     /**
      * 查询时间范围内的总计划产量
+     *
      * @param factoryIds
      * @param startTime
      * @param endTime
      * @return
      */
     @Override
-    public String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime){
+    public String findIntendedByFactoryIds(UUID factoryIds, Long startTime, Long endTime) {
         BigDecimal sumActual = new BigDecimal(0);
-        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByFactoryIds(factoryIds,startTime,endTime);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByFactoryIds(factoryIds, startTime, endTime);
+        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+            orderPlanEntityList.forEach(i -> {
+                String actualCapacity = i.getActualCapacity();
+                if (StringUtils.isNotEmpty(actualCapacity)) {
+                    sumActual.add(new BigDecimal(actualCapacity));
+                }
+            });
+        }
+        return sumActual.toString();
+    }
+
+    @Override
+    public String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime) {
+        BigDecimal sumActual = new BigDecimal(0);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByDeviceId(deviceId,startTime,endTime);
         if(!CollectionUtils.isEmpty(orderPlanEntityList)){
             orderPlanEntityList.forEach(i->{
                 String actualCapacity = i.getActualCapacity();
@@ -629,4 +699,11 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         }
         return sumActual.toString();
     }
+
+    @Override
+    public String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime) {
+       return null;
+    }
+
+
 }

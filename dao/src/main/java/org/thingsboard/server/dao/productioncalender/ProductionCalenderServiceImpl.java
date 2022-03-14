@@ -1,22 +1,29 @@
 package org.thingsboard.server.dao.productioncalender;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.dao.device.DeviceDao;
+import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
 import org.thingsboard.server.dao.hs.dao.OrderPlanRepository;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.service.OrderService;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
+import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 
 import javax.transaction.Transactional;
@@ -36,6 +43,12 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
     private final BulletinBoardSvc bulletinBoardSvc;
     private final DictDeviceService dictDeviceService;
     private final OrderService orderService;
+    // 设备Service
+    @Autowired
+    DeviceService deviceService;
+
+    @Autowired
+    private AttributeKvRepository attributeKvRepository;
 
     public ProductionCalenderServiceImpl(ProductionCalenderDao productionCalenderDao, DeviceDao deviceDao, FactoryDao factoryDao, OrderPlanRepository orderPlanRepository, BulletinBoardSvc bulletinBoardSvc, DictDeviceService dictDeviceService, OrderService orderService) {
         this.productionCalenderDao = productionCalenderDao;
@@ -99,14 +112,95 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
     public List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender) throws ThingsboardException{
         List<ProductionCalender> result = new ArrayList<>();
         if (productionCalender.getWorkshopId() != null) {
-
+            log.info("车间看板生产监控统计");
+            result = getProductionMonitorListResult(productionCalender);
         } else if (productionCalender.getFactoryId() != null) {
-
+            log.info("工厂看板生产监控统计");
+            result = getProductionMonitorListResult(productionCalender);
         }else {
             log.info("集团看板生产监控统计");
             result = this.getProductionMonitorTenantList(productionCalender);
         }
         return result;
+    }
+
+
+    /**
+     * 查询车间看板设备监控统计
+     *
+     * @return
+     */
+    public List<ProductionCalender> getProductionMonitorListResult(ProductionCalender productionCalender) throws ThingsboardException{
+        List<ProductionCalender> resultProductionCalenders = new ArrayList<>();
+        Long startTime = productionCalender.getStartTime();
+        Long endTime = productionCalender.getEndTime();
+        UUID tenantId = productionCalender.getTenantId();
+        UUID factoryId = productionCalender.getFactoryId();
+        UUID workshopId = productionCalender.getWorkshopId();
+
+        Device deviceParam = new Device();
+        deviceParam.setTenantId(new TenantId(tenantId));
+        deviceParam.setFactoryId(factoryId);
+        deviceParam.setWorkshopId(workshopId);
+        List<Device> deviceList = deviceService.findDeviceListByCdn(deviceParam);
+
+        if (!CollectionUtils.isEmpty(deviceList)) {
+            deviceList.forEach(device -> {
+                UUID deviceId = device.getUuidId();
+                ProductionCalender resultProductionCalender = new ProductionCalender();
+                //1.计算每个设备的完成量/计划量
+                String actual = orderService.findActualByDeviceId(deviceId, startTime, endTime);
+                String  intended = orderService.findIntendedByDeviceId(deviceId ,startTime, endTime);
+
+                resultProductionCalender.setDeviceId(deviceId);
+                resultProductionCalender.setDeviceName(device.getName());
+                resultProductionCalender.setAchieveOrPlan((actual==null?"0":actual) + "/" + (intended==null?"0":intended));
+                //2.产能达成率 = 选择设备实际时间范围内（默认当天）参与产能运算的设备实际计算产量总和【调云辉提供的接口】/（订单关联的设备的标准产能【设备字典的额定产能】*设备日历中的时间【生产日历-取交叉-取小时】总和）
+                //2.1 时间范围内设备实际产能总和
+                BigDecimal deviceOutputReality = new BigDecimal(0);
+                List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
+                DeviceCapacityVo dcv = new DeviceCapacityVo(deviceId,startTime, endTime);
+                deviceCapacityVoList.add(dcv);
+                var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
+                deviceOutputReality = new BigDecimal(dataMap.get(deviceId));
+                //2.2 订单关联的设备的标准产能【设备字典的额定产能】* 设备日历中的时间【生产日历-取交叉-取小时】总和
+                BigDecimal deviceOutputPredict = new BigDecimal(0);
+                //设备标准产能
+                UUID dictDiviceId = deviceDao.getDeviceInfo(deviceId).getDictDeviceId();
+                BigDecimal ratedCapacity = new BigDecimal(0);
+                if(dictDiviceId !=null){
+                    ratedCapacity = dictDeviceService.findById(dictDiviceId).getRatedCapacity();
+                }
+                //单个设备生产日历总时间
+                BigDecimal time = new BigDecimal(0);
+                //生产日历时间
+                List<ProductionCalender> historyList = productionCalenderDao.getHistoryByDeviceId(deviceId);
+                if (!CollectionUtils.isEmpty(historyList)) {
+                    for (ProductionCalender pc : historyList) {
+                        Map<String, Long> mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
+                        time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
+                    }
+                }
+                //单个设备 预计产量
+                deviceOutputPredict = ratedCapacity.multiply(time);
+
+                //3.达成率
+                if(deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0){
+                    resultProductionCalender.setYearAchieve("0");
+                }else {
+                    resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict).toString());
+                }
+
+                //4.生产状态
+                AttributeKvEntity attributeKvEntity =  attributeKvRepository.findOneKeyByEntityId(EntityType.DEVICE,deviceId,"active");
+                resultProductionCalender.setProductionState(attributeKvEntity.getBooleanValue());
+
+                resultProductionCalenders.add(resultProductionCalender);
+            });
+        }
+
+        resultProductionCalenders.stream().sorted(Comparator.comparing(ProductionCalender::getAchieveOrPlan).reversed()).collect(Collectors.toList());
+        return resultProductionCalenders;
     }
 
     /**
