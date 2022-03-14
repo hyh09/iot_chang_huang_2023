@@ -551,7 +551,7 @@ mat-label {
 
   mat-toolbar.mat-table-toolbar {
     background: #fff;
-    padding: 0 24px;
+    padding: 0 20px;
     .mat-toolbar-tools {
       padding: 0;
       & > button.mat-icon-button:last-child {
@@ -560,7 +560,10 @@ mat-label {
     }
   }
 
-  mat-toolbar.mat-table-toolbar:not(.mat-primary), .mat-cell, .mat-expansion-panel-header {
+  mat-toolbar.mat-table-toolbar:not(.mat-primary),
+  .mat-cell,
+  .mat-expansion-panel-header,
+  .list-form {
     button.mat-icon-button {
       mat-icon {
         color: rgba(0, 0, 0, .54);

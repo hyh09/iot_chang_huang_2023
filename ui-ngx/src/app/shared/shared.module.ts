@@ -155,6 +155,10 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTimePickerModule } from 'ng-zorro-antd/time-picker';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { SlideValidatorComponent } from '@app/modules/home/components/slide-validator/slide-validator.component';
 import { SelectCityComponent } from '@app/modules/home/components/select-city/select-city.component';
 import { SelectCityDialogComponent } from '@app/modules/home/components/select-city/select-city-dialog.component';
@@ -321,7 +325,11 @@ registerLocaleData(zh);
     NzEmptyModule,
     NzTimePickerModule,
     NzDatePickerModule,
-    NzTypographyModule
+    NzTypographyModule,
+    NzInputModule,
+    NzIconModule,
+    NzProgressModule,
+    NzRadioModule
   ],
   exports: [
     FooterComponent,
@@ -422,6 +430,10 @@ registerLocaleData(zh);
     NzTimePickerModule,
     NzDatePickerModule,
     NzTypographyModule,
+    NzInputModule,
+    NzIconModule,
+    NzProgressModule,
+    NzRadioModule,
     ConfirmDialogComponent,
     AlertDialogComponent,
     TodoDialogComponent,

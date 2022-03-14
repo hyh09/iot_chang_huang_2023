@@ -43,4 +43,7 @@ public class DictDeviceGroupPropertyVO {
 
     @ApiModelProperty(value = "图标", notes = "仅用于遥测数据展示")
     private String icon;
+
+    @ApiModelProperty(value = "图片", notes = "仅用于遥测数据展示")
+    private String picture;
 }

@@ -53,6 +53,9 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
 
+    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+            "t.id = :id ")
+    DeviceEntity findSimpleById(@Param("id") UUID id);
 
     @Query("SELECT new org.thingsboard.server.dao.model.sql.DeviceInfoEntity(d, c.title, c.additionalInfo, p.name) " +
             "FROM DeviceEntity d " +
@@ -299,6 +302,9 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
 
     @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.name =:name ")
     List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId,@Param("name") String name );
+
+    @Query(nativeQuery = true,value = "select * from device d  where d.tenant_id = ?1 and position('\"gateway\":true' in d.additional_info)=0")
+    List<DeviceEntity> findDeviceFilterGatewayByTenantId(UUID tenantId );
 
 
 }

@@ -7,12 +7,12 @@ package org.thingsboard.server.common.data.vo.enums;
  * @create: 2021-12-08 16:18
  **/
 public enum KeyTitleEnums {
-    key_water("耗水量","1"), //水
-    key_gas("耗气量","2"),//气
-    key_cable("耗电量","3"),//电
+    key_water("耗水量","1","1"), //水
+    key_gas("耗气量","2","3"),//气
+    key_cable("耗电量","3","2"),//电
 
 
-    key_capacity("总产量","0"),//总产能
+    key_capacity("总产量","0",""),//总产能
 
 
 
@@ -25,9 +25,15 @@ public enum KeyTitleEnums {
 
     private  String code;
 
-    KeyTitleEnums(String gName, String code) {
+    /**
+     * Pc端的入参
+     */
+    private  String pcCode;
+
+    KeyTitleEnums(String gName, String code,String pcCode) {
         this.gName = gName;
         this.code = code;
+        this.pcCode=pcCode;
     }
 
 
@@ -62,6 +68,27 @@ public enum KeyTitleEnums {
     }
 
 
+    /******
+     * 为了兼容Pc端
+     * pc端的入参 前端传的 不按KeyTitleEnums code来
+     * @param pcCode
+     * @return
+     */
+    public static  KeyTitleEnums getEnumsByPCCode(String  pcCode)
+    {
+
+
+        for(KeyTitleEnums enums:KeyTitleEnums.values())
+        {
+            if(pcCode.equals(enums.getPcCode()))
+            {
+                return enums;
+            }
+        }
+        return  null;
+    }
+
+
 
 
     public String getgName() {
@@ -78,5 +105,14 @@ public enum KeyTitleEnums {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+
+    public String getPcCode() {
+        return pcCode;
+    }
+
+    public void setPcCode(String pcCode) {
+        this.pcCode = pcCode;
     }
 }

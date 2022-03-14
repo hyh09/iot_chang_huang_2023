@@ -1,6 +1,5 @@
 package org.thingsboard.server.config;
 
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -8,15 +7,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 /**
@@ -39,7 +35,7 @@ public class WebLogAspect {
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorAppController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.RTMonitorController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.BoardSceneController.*(..))"
-                    + "||execution(public * org.thingsboard.server.controller.BoardRTMonitorController.*(..))"
+                    + "||execution(public * org.thingsboard.server.controller.RTMonitorBoardController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDataController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.DictDeviceController.*(..))"
                     + "||execution(public * org.thingsboard.server.controller.FileController.*(..))"
@@ -102,6 +98,8 @@ public class WebLogAspect {
                 return new ThingsboardException("设备字典部件编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
             else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_hs_order_no"))
                 return new ThingsboardException("订单编码重复！请重新输入", ThingsboardErrorCode.GENERAL);
+            else if (sqlEx.getConstraintName().equalsIgnoreCase("uk_graph_item"))
+                return new ThingsboardException("属性重复使用！请重新输入", ThingsboardErrorCode.GENERAL);
         }
 
         if (exception.getCause() != null) {

@@ -70,6 +70,7 @@ import {
   AddEntitiesToEdgeDialogData
 } from '@home/dialogs/add-entities-to-edge-dialog.component';
 import { DistributeDeviceComponent, DistributeDeviceDialogData } from '../../custom-pages/device-mng/factory-mng/distribute-device.component';
+import { UtilsService } from '@app/core/services/utils.service';
 
 @Injectable()
 export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<DeviceInfo>> {
@@ -87,7 +88,8 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
               private homeDialogs: HomeDialogsService,
               private translate: TranslateService,
               private datePipe: DatePipe,
-              private dialog: MatDialog) {
+              private dialog: MatDialog,
+              private utils: UtilsService) {
 
     this.config.entityType = EntityType.DEVICE;
     this.config.entityComponent = DeviceComponent;
@@ -181,9 +183,9 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
       new DateEntityTableColumn<DeviceInfo>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<DeviceInfo>('name', 'device.name', '20%'),
       new EntityTableColumn<DeviceInfo>('type', 'device-profile.device-profile', '20%'),
-      new EntityTableColumn<DeviceInfo>('factoryName', 'device-mng.factory', '20%'),
-      new EntityTableColumn<DeviceInfo>('workshopName', 'device-mng.work-shop', '20%'),
-      new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%')
+      new EntityTableColumn<DeviceInfo>('factoryName', 'device-mng.factory', '20%', (entity) => (entity.factoryName || ''), () => ({}), false),
+      new EntityTableColumn<DeviceInfo>('workshopName', 'device-mng.work-shop', '20%', (entity) => (entity.workshopName || ''), () => ({}), false),
+      new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%', (entity) => (entity.productionLineName || ''), () => ({}), false)
       // new EntityTableColumn<DeviceInfo>('label', 'device.label', '25%')
     ];
     if (deviceScope === 'tenant') {
@@ -234,12 +236,6 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
           isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
           onAction: ($event, entity) => this.makePublic($event, entity)
         },
-        {
-          name: this.translate.instant('device-mng.distribute-device'),
-          mdiIcon: 'mdi:distribute',
-          isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
-          onAction: ($event, entity) => this.distributeDevice($event, [entity.id], entity.additionalInfo && entity.additionalInfo.gateway)
-        },
         // {
         //   name: this.translate.instant('device.assign-to-customer'),
         //   icon: 'assignment_ind',
@@ -252,19 +248,27 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
         //   isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
         //   onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
         // },
-        {
-          name: this.translate.instant('device.make-private'),
-          icon: 'reply',
-          isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && entity.customerIsPublic),
-          onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
-        },
-        {
-          name: this.translate.instant('device.manage-credentials'),
-          icon: 'security',
-          isEnabled: () => true,
-          onAction: ($event, entity) => this.manageCredentials($event, entity)
-        }
       );
+      if (this.utils.hasPermission('device-mng.distribute-device')) {
+        actions.push({
+          name: this.translate.instant('device-mng.distribute-device'),
+          mdiIcon: 'mdi:distribute',
+          isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
+          onAction: ($event, entity) => this.distributeDevice($event, [entity.id], entity.additionalInfo && entity.additionalInfo.gateway)
+        });
+      }
+      actions.push({
+        name: this.translate.instant('device.make-private'),
+        icon: 'reply',
+        isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && entity.customerIsPublic),
+        onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
+      },
+      {
+        name: this.translate.instant('device.manage-credentials'),
+        icon: 'security',
+        isEnabled: () => true,
+        onAction: ($event, entity) => this.manageCredentials($event, entity)
+      });
     }
     if (deviceScope === 'customer') {
       actions.push(
@@ -313,36 +317,36 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
 
   configureGroupActions(deviceScope: string): Array<GroupActionDescriptor<DeviceInfo>> {
     const actions: Array<GroupActionDescriptor<DeviceInfo>> = [];
-    if (deviceScope === 'tenant') {
-      actions.push(
-        {
-          name: this.translate.instant('device.assign-devices'),
-          icon: 'assignment_ind',
-          isEnabled: true,
-          onAction: ($event, entities) => this.assignToCustomer($event, entities.map((entity) => entity.id))
-        }
-      );
-    }
-    if (deviceScope === 'customer') {
-      actions.push(
-        {
-          name: this.translate.instant('device.unassign-devices'),
-          icon: 'assignment_return',
-          isEnabled: true,
-          onAction: ($event, entities) => this.unassignDevicesFromCustomer($event, entities)
-        }
-      );
-    }
-    if (deviceScope === 'edge') {
-      actions.push(
-        {
-          name: this.translate.instant('device.unassign-devices-from-edge'),
-          icon: 'assignment_return',
-          isEnabled: true,
-          onAction: ($event, entities) => this.unassignDevicesFromEdge($event, entities)
-        }
-      );
-    }
+    // if (deviceScope === 'tenant') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('device.assign-devices'),
+    //       icon: 'assignment_ind',
+    //       isEnabled: true,
+    //       onAction: ($event, entities) => this.assignToCustomer($event, entities.map((entity) => entity.id))
+    //     }
+    //   );
+    // }
+    // if (deviceScope === 'customer') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('device.unassign-devices'),
+    //       icon: 'assignment_return',
+    //       isEnabled: true,
+    //       onAction: ($event, entities) => this.unassignDevicesFromCustomer($event, entities)
+    //     }
+    //   );
+    // }
+    // if (deviceScope === 'edge') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('device.unassign-devices-from-edge'),
+    //       icon: 'assignment_return',
+    //       isEnabled: true,
+    //       onAction: ($event, entities) => this.unassignDevicesFromEdge($event, entities)
+    //     }
+    //   );
+    // }
     return actions;
   }
 

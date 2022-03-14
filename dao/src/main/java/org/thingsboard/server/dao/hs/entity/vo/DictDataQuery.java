@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.thingsboard.server.dao.hs.entity.bo.Image;
 import org.thingsboard.server.dao.hs.entity.enums.DictDataDataTypeEnum;
 
 import javax.validation.constraints.NotNull;
@@ -11,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @Accessors(chain = true)
 @ApiModel(value = "数据字典请求参数实体类")
-public class DictDataQuery {
+public class DictDataQuery implements Image {
     @ApiModelProperty(value = "数据字典Id,null或空则为新增")
     private String id;
 

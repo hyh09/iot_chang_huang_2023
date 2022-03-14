@@ -2,10 +2,14 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { UserMngTableConfigResolver } from '../auth-mng/user-mng/user-mng-table-config.resolver';
+import { ChartSettingsTableConfigResolver } from './chart-settings/chart-settings-table-config.resolver';
+import { ChartsTableConfigResolver } from './chart-settings/charts-table-config.resolver';
 import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictionary-table-config.resolver';
 import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
 import { FactoryMngComponent } from './factory-mng/factory-mng.component';
 import { ProdCapacitySettingsTableConfigResolver } from './prod-capacity-settings/prod-capacity-settings-table-config.resolver';
+import { MngCalendarTableConfigResolver } from './prod-mng/mng-calendar-table-config.resolver';
+import { ProdMngTableConfigResolver } from './prod-mng/prod-mng-table-config.resolver';
 
 const routes: Routes = [
   {
@@ -89,6 +93,77 @@ const routes: Routes = [
         resolve: {
           entitiesTableConfig: ProdCapacitySettingsTableConfigResolver
         }
+      },
+      {
+        path: 'chartSettings',
+        data: {
+          breadcrumb: {
+            label: 'device-mng.chart-settings',
+            icon: 'mdi:chart-timeline-variant'
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.chart-settings'
+            },
+            resolve: {
+              entitiesTableConfig: ChartSettingsTableConfigResolver
+            }
+          },
+          {
+            path: ':deviceDictId/charts',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.bind-chart',
+              breadcrumb: {
+                label: 'device-mng.bind-chart',
+                icon: 'mdi:bind-chart',
+                isMdiIcon: true
+              }
+            },
+            resolve: {
+              entitiesTableConfig: ChartsTableConfigResolver
+            }
+          }
+        ]
+      },
+      {
+        path: 'prodManagement',
+        data: {
+          breadcrumb: {
+            label: 'device-mng.prod-mng',
+            icon: 'mdi:prod-mng'
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.prod-mng'
+            },
+            resolve: {
+              entitiesTableConfig: ProdMngTableConfigResolver
+            }
+          },
+          {
+            path: ':factoryId/:deviceId/calendars',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.mng-calendars',
+              breadcrumb: {
+                label: 'device-mng.mng-calendars',
+                icon: 'mdi:calendar'
+              }
+            },
+            resolve: {
+              entitiesTableConfig: MngCalendarTableConfigResolver
+            }
+          }
+        ]
       }
     ]
   }
@@ -101,7 +176,11 @@ const routes: Routes = [
     DataDictionaryTableConfigResolver,
     DeviceDictionaryTableConfigResolver,
     UserMngTableConfigResolver,
-    ProdCapacitySettingsTableConfigResolver
+    ProdCapacitySettingsTableConfigResolver,
+    ChartSettingsTableConfigResolver,
+    ChartsTableConfigResolver,
+    ProdMngTableConfigResolver,
+    MngCalendarTableConfigResolver
   ]
 })
 export class DeviceMngRoutingModule { }

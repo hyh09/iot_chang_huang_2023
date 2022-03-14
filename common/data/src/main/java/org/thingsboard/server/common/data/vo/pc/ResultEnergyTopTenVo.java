@@ -30,5 +30,5 @@ public class ResultEnergyTopTenVo {
     private UUID deviceId;
 
     @ApiModelProperty("值 ")
-    private  String value;
+    private  String value="0";
 }

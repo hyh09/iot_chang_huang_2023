@@ -14,6 +14,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Data
@@ -56,6 +59,27 @@ public class OrderPlanEntity extends BasePgEntity<OrderPlanEntity> implements To
     @Column(name = HsModelConstants.ORDER_PLAN_SORT)
     private Integer sort;
 
+    @Column(name = HsModelConstants.ORDER_PLAN_ACTUAL_CAPACITY)
+    private String actualCapacity;
+
+    @Column(name = HsModelConstants.ORDER_PLAN_INTENDED_CAPACITY)
+    private String intendedCapacity;
+
+    @Column(name = HsModelConstants.ORDER_PLAN_MAINTAIN_START_TIME)
+    private Long maintainStartTime;
+
+    @Column(name = HsModelConstants.ORDER_PLAN_MAINTAIN_END_TIME)
+    private Long maintainEndTime;
+
+    @Column(name = HsModelConstants.ORDER_PLAN_FACTORY_ID)
+    private UUID factoryId;
+
+    @Column(name = HsModelConstants.ORDER_PLAN_WORKSHOP_ID)
+    private UUID workshopId;
+
+    @Column(name = HsModelConstants.ORDER_PLAN_PRODUCTION_LINE_ID)
+    private UUID productionLineId;
+
     public OrderPlanEntity() {
     }
 
@@ -70,6 +94,13 @@ public class OrderPlanEntity extends BasePgEntity<OrderPlanEntity> implements To
         this.actualStartTime = common.getActualStartTime();
         this.enabled = common.getEnabled();
         this.sort = common.getSort();
+        this.actualCapacity = common.getActualCapacity().stripTrailingZeros().toPlainString();
+        this.intendedCapacity = common.getIntendedCapacity().stripTrailingZeros().toPlainString();
+        this.maintainStartTime = common.getMaintainStartTime();
+        this.maintainEndTime = common.getMaintainEndTime();
+        this.factoryId = common.getFactoryId();
+        this.workshopId = common.getWorkshopId();
+        this.productionLineId = common.getProductionLineId();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -89,6 +120,13 @@ public class OrderPlanEntity extends BasePgEntity<OrderPlanEntity> implements To
         common.setIntendedStartTime(intendedStartTime);
         common.setEnabled(enabled);
         common.setSort(sort);
+        common.setActualCapacity(Optional.ofNullable(actualCapacity).map(BigDecimal::new).orElse(null));
+        common.setIntendedCapacity(Optional.ofNullable(intendedCapacity).map(BigDecimal::new).orElse(null));
+        common.setMaintainEndTime(maintainEndTime);
+        common.setMaintainStartTime(maintainStartTime);
+        common.setFactoryId(factoryId);
+        common.setWorkshopId(workshopId);
+        common.setProductionLineId(productionLineId);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

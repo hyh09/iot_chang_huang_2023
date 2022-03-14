@@ -9,6 +9,8 @@ import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
+import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.io.IOException;
@@ -101,13 +103,13 @@ public interface OrderService {
     OrderVO getOrderCapacityMonitorDetail(TenantId tenantId, UUID orderId) throws ThingsboardException;
 
     /**
-     * 订单产能监控-看板
+     * 订单产能监控
      *
      * @param tenantId   租户id
      * @param factoryIds 工厂Id
      * @param timeQuery  时间请求参数
      */
-    List<OrderBoardCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery);
+    List<OrderCustomCapacityResult> listCustomCapacityMonitorOrders(TenantId tenantId, List<UUID> factoryIds, TimeQuery timeQuery);
 
     /**
      * 订单产能监控-App-首页
@@ -136,4 +138,83 @@ public interface OrderService {
      * @param timeVO   时间参数
      */
     void updateOrderPlanDeviceActualTime(TenantId tenantId, UUID planId, OrderPlanDeviceActualTimeVO timeVO) throws ThingsboardException;
+
+    /**
+     * 根据设备id以及实际时间查询订单信息
+     * @param deviceIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<OrderPlanEntity> findDeviceAchieveOrPlanList(List<UUID> deviceIds, Long startTime, Long endTime);
+
+
+    /**
+     * 看板-订单监控
+     *
+     * @param tenantId 租户Id
+     * @param factoryId 工厂Id
+     * @param workshopId 车间Id
+     * @param timeQuery 时间参数
+     * @return 订单
+     */
+    List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery);
+
+    /**
+     * 查询时间范围内的实际产量
+     * @param factoryIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findActualByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+
+    /**
+     * 查询时间范围内的计划产量
+     * @param factoryIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+
+    /**
+     * 查询订单-生产计划-单个设备在一个时间段内的维护时间列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 维护时间列表
+     */
+    List<DeviceKeyParamMaintainResult> listDeviceMaintainTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询订单-生产计划-单个设备在一个时间段内的实际时间的生产计划列表
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 生产计划列表
+     */
+    List<OrderPlan> listDeviceOrderPlansInActualTimeField(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询时间范围内的车间计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     *查询时间范围内的车间计划产量
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime);
 }

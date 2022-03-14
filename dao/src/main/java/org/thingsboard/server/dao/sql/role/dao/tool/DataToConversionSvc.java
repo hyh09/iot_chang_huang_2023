@@ -32,6 +32,9 @@ public interface DataToConversionSvc {
      */
     ConsumptionTodayVo   resultProcessByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId);
 
+    ConsumptionTodayVo   todayUntiEnergyByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId);
+
+
     /**
      * 计算总产能的接口
      * @param effectTsKvEntities

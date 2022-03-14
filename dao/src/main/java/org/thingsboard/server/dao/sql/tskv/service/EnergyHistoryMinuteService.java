@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.role.dao.tool.DataToConversionSvc;
 import org.thingsboard.server.dao.sql.tskv.dao.EnergyHistoryMinuteDao;
 import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
@@ -40,9 +41,8 @@ public class EnergyHistoryMinuteService  extends BaseSQLServiceImpl<EnergyHistor
 
     @Override
     @Transactional
-    public void  saveByMinute(EntityId entityId, TsKvEntry tsKvEntry, String  title) {
-        log.info("测试日志:设备id{}遥测数据:{}标题:{}",entityId,tsKvEntry,title);
-        EnergyHistoryMinuteEntity entityDatabase = this.queryTodayByEntityId(entityId.getId(),tsKvEntry.getTs());
+    public void  saveByMinute(UUID  entityId, DataBodayVo tsKvEntry, String  title) {
+        EnergyHistoryMinuteEntity entityDatabase = this.queryTodayByEntityId(entityId,tsKvEntry.getTs());
         if(entityDatabase == null){
             EnergyHistoryMinuteEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
             entityNew.setTs(CommonUtils.getConversionMinutes(tsKvEntry.getTs()));
@@ -104,7 +104,7 @@ public class EnergyHistoryMinuteService  extends BaseSQLServiceImpl<EnergyHistor
      * @param title
      * @return
      */
-    private EnergyHistoryMinuteEntity setEntityProper  (EnergyHistoryMinuteEntity  entityDatabase, TsKvEntry tsKvEntry, String  title){
+    private EnergyHistoryMinuteEntity setEntityProper  (EnergyHistoryMinuteEntity  entityDatabase, DataBodayVo tsKvEntry, String  title){
         EnergyHistoryMinuteEntity  entityNew = new  EnergyHistoryMinuteEntity();
         entityNew.setEntityId(entityDatabase.getEntityId());
         entityNew.setId(entityDatabase.getId());
@@ -206,9 +206,9 @@ public class EnergyHistoryMinuteService  extends BaseSQLServiceImpl<EnergyHistor
      * @param title
      * @return
      */
-    private   EnergyHistoryMinuteEntity     setEntityProperOnSave  (EntityId entityId, TsKvEntry tsKvEntry, String  title){
+    private   EnergyHistoryMinuteEntity     setEntityProperOnSave  (UUID  entityId, DataBodayVo tsKvEntry, String  title){
         EnergyHistoryMinuteEntity entityNew = new  EnergyHistoryMinuteEntity();
-        entityNew.setEntityId(entityId.getId());
+        entityNew.setEntityId(entityId);
 //        entityNew.setTs(tsKvEntry.getTs());
         if(title.equals(KeyTitleEnums.key_capacity.getgName()))
         {

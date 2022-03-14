@@ -98,21 +98,23 @@ public interface DeviceMonitorService {
     /**
      * 查询设备遥测数据历史数据
      *
-     * @param tenantId     租户Id
-     * @param deviceId     设备Id
-     * @param timePageLink 时间分页参数
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
+     * @param timePageLink     时间分页参数
      * @return 设备遥测数据历史数据
      */
-    PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
+    PageData<Map<String, Object>> listPageDeviceTelemetryHistories(TenantId tenantId, String deviceId, boolean isShowAttributes, TimePageLink timePageLink) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备历史-表头，包含时间
      *
-     * @param tenantId 租户Id
-     * @param deviceId 设备Id
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param isShowAttributes 是否显示属性
      * @return 查询设备历史-表头，包含时间
      */
-    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId);
+    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes);
 
     /**
      * 【APP】获得实时监控列表数据
@@ -252,4 +254,36 @@ public interface DeviceMonitorService {
      * @return 设备历史数据
      */
     List<Map<String, Object>> listDeviceTelemetryHistories(TenantId tenantId, DeviceId deviceId, TimePageLink pageLink) throws ExecutionException, InterruptedException;
+
+    /**
+     * 查询设备详情-遥测属性历史数据图表
+     *
+     * @param tenantId         租户Id
+     * @param deviceId         设备Id
+     * @param tsPropertyName   遥测属性名称
+     * @param todayStartTime   开始时间
+     * @param todayCurrentTime 结束时间
+     * @return 遥测属性历史数据图表
+     */
+    HistoryGraphVO getTsPropertyHistoryGraph(TenantId tenantId, UUID deviceId, String tsPropertyName, Long todayStartTime, Long todayCurrentTime) throws ThingsboardException;
+
+    /**
+     * 【app】查询图表历史
+     *
+     * @param tenantId     租户Id
+     * @param deviceId     设备Id
+     * @param graphId      图表Id
+     * @param timePageLink 时间
+     * @return 图表历史
+     */
+    HistoryGraphAppVO getGraphHistoryForApp(TenantId tenantId, UUID deviceId, UUID graphId, TimePageLink timePageLink) throws ThingsboardException, ExecutionException, InterruptedException;
+
+    /**
+     * 【看板】设备关键参数
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 设备关键参数
+     */
+    DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) throws ThingsboardException;
 }

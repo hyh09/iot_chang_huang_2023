@@ -102,8 +102,6 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
          }else {
             user = userService.findByPhoneNumber(username);
         }
-
-        System.out.println("打印的结果:"+user);
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
@@ -127,7 +125,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
             SecurityUser securityUser = new SecurityUser(user, userCredentials.isEnabled(), userPrincipal);
             logLoginAction(user, authentication, ActionType.LOGIN, null);
-            log.info("====securityUser.getType();=>"+securityUser.getType());
+//            log.info("====securityUser.getType();=>"+securityUser.getType());
             return new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
         } catch (Exception e) {
             logLoginAction(user, authentication, ActionType.LOGIN, e);
@@ -238,10 +236,16 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private  void checkUserLogin(User user,LoginRequest loginRequest)
     {
+        if(user ==  null){
+            throw  new UserDoesNotExistException(" user does not exist ");
+        }
+        
         if(user.getAuthority().equals(Authority.SYS_ADMIN))
         {
                  return;
         }
+
+
         if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
         {
             FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
@@ -255,7 +259,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
           String userType = user.getType();
           String factoryId =loginRequest.getFactoryId();
-          if(loginRequest.getLoginPlatform().equals(ProviderEnums.Intranet_1.getCode()))
+          if(StringUtils.isNotBlank(loginRequest.getLoginPlatform()) && loginRequest.getLoginPlatform().equals(ProviderEnums.Intranet_1.getCode()))
           {
                if(!userType.equals(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode()))
                 {

@@ -6,7 +6,7 @@ import { EntityType, entityTypeTranslations, entityTypeResources, TimePageLink }
 import { TranslateService } from "@ngx-translate/core";
 import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
 import { map } from 'rxjs/operators';
-import { Observable, Observer } from "rxjs";
+import { BehaviorSubject, Observable, Observer } from "rxjs";
 import { EnergyConsumptionOverviewComponent } from "./energy-consumption-overview.component";
 import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
 
@@ -14,6 +14,7 @@ import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
 export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTableConfig<any>> {
 
   private readonly config: EntityTableConfig<any> = new EntityTableConfig<any>();
+  private oldFactoryId: string = '';
 
   constructor(
     private potencyService: PotencyService,
@@ -28,20 +29,15 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
 
     this.config.loadDataOnInit = false;
 
-    this.config.componentsData = {
-      factoryId: '',
-      workshopId: '',
-      productionLineId: '',
-      deviceId: '',
-      dateRange: null,
-      totalValue: []
-    };
-
     this.config.cellActionDescriptors = [{
       name: this.translate.instant('potency.go-to-history'),
       mdiIcon: 'mdi:history-data',
       isEnabled: () => (true),
-      onAction: ($event, entity) => this.router.navigateByUrl(`/potency/energyConsumption/${entity.deviceId}/history`)
+      onAction: ($event, entity) => this.router.navigate([`/potency/energyConsumption/${entity.deviceId}/history`], {
+        queryParams: {
+          deviceName: encodeURIComponent(entity['设备名称'])
+        }
+      })
     }];
   }
 
@@ -53,7 +49,8 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       productionLineId: '',
       deviceId: '',
       dateRange: [now, now],
-      totalValue: []
+      totalValue: [],
+      factroryChange$: new BehaviorSubject<string>('')
     };
     return new Observable((observer: Observer<EntityTableConfig<any>>) => {
       this.potencyService.getEnergyConsumptionTableHeader().subscribe(res => {
@@ -72,6 +69,10 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
 
         this.config.entitiesFetchFunction = pageLink => {
           const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
+          if (factoryId && this.oldFactoryId !== factoryId) {
+            this.config.componentsData.factroryChange$.next(factoryId);
+            this.oldFactoryId = factoryId;
+          }
           let startTime: number, endTime: number;
           if (this.config.componentsData.dateRange) {
             startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);

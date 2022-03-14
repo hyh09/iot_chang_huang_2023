@@ -13,6 +13,7 @@ import { WarningStatisticsChartComponent } from './real-time-monitor/warning-sta
 import { DeviceDetailsComponent } from './real-time-monitor/device-details/device-details.component';
 import { PropDataChartComponent } from './real-time-monitor/device-details/prop-data-chart.component';
 import { AlarmRulesTableFilterComponent } from './alarm-rules/alarm-rules-table-filter.component';
+import { DeviceHistoryFilterComponent } from './real-time-monitor/device-history-filter.component';
 
 @NgModule({
   imports: [
@@ -31,7 +32,8 @@ import { AlarmRulesTableFilterComponent } from './alarm-rules/alarm-rules-table-
     RunStateChartComponent,
     WarningStatisticsChartComponent,
     DeviceDetailsComponent,
-    PropDataChartComponent
+    PropDataChartComponent,
+    DeviceHistoryFilterComponent
   ]
 })
 export class DeviceMonitorModule { }

@@ -1,0 +1,1 @@
+ALTER TABLE TB_TENANT_SYS_ROLE add COLUMN user_level integer DEFAULT 0;

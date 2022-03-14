@@ -163,4 +163,9 @@ export class FactoryMngService {
     return this.http.get<string[]>(`/api/factory/getEntityAttributeList?entity=${entity}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 根据当前登录人获取全部设备（含网关）的在线状态
+  public getOnlineStatus(config?: RequestConfig): Observable<{[id: string]: boolean}> {
+    return this.http.get<{[id: string]: boolean}>(`/api/deviceMonitor/rtMonitor/device/onlineStatus/all`, defaultHttpOptionsFromConfig(config));
+  }
+
 }

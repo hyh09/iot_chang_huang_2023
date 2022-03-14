@@ -343,5 +343,8 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
     List<Device> queryAllByTenantIdAndName(TenantId tenantId,String name);
 
+    //查询租户下所有设备，包含工厂名称。过滤网关
+    List<Device> findDeviceFilterGatewayByTenantId(UUID tenantId);
+
 
 }

@@ -50,7 +50,6 @@ public class HsModelConstants {
     /**
      * 设备字典
      */
-
     public static final String DICT_DEVICE_TABLE_NAME = "hs_dict_device";
     public static final String DICT_DEVICE_CODE = "code";
     public static final String DICT_DEVICE_NAME = "name";
@@ -63,6 +62,8 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_ICON = "icon";
     public static final String DICT_DEVICE_PICTURE = "picture";
     public static final String DICT_DEVICE_IS_DEFAULT = "is_default";
+    public static final String DICT_DEVICE_IS_CORE = "is_core";
+    public static final String DICT_DEVICE_RATED_CAPACITY = "rated_capacity";
 
     public static final String DICT_DEVICE_COMPONENT_TABLE_NAME = "hs_dict_device_component";
     public static final String DICT_DEVICE_COMPONENT_PARENT_ID = "parent_id";
@@ -162,4 +163,30 @@ public class HsModelConstants {
     public static final String ORDER_PLAN_ACTUAL_END_TIME = "actual_end_time";
     public static final String ORDER_PLAN_ENABLED = "enabled";
     public static final String ORDER_PLAN_SORT = "sort";
+    public static final String ORDER_PLAN_ACTUAL_CAPACITY = "actual_capacity";
+    public static final String ORDER_PLAN_INTENDED_CAPACITY = "intended_capacity";
+    public static final String ORDER_PLAN_MAINTAIN_START_TIME = "maintain_start_time";
+    public static final String ORDER_PLAN_MAINTAIN_END_TIME = "maintain_end_time";
+    public static final String ORDER_PLAN_FACTORY_ID = "factory_id";
+    public static final String ORDER_PLAN_WORKSHOP_ID = "workshop_id";
+    public static final String ORDER_PLAN_PRODUCTION_LINE_ID = "production_line_id";
+
+    /**
+     * 设备字典图表
+     */
+    public static final String DICT_DEVICE_GRAPH_TABLE_NAME = "hs_dict_device_graph";
+    public static final String DICT_DEVICE_GRAPH_NAME = "name";
+
+
+    /**
+     * 设备字典图表分项
+     */
+    public static final String DICT_DEVICE_GRAPH_ITEM_TABLE_NAME = "hs_dict_device_graph_item";
+
+    public static final String DICT_DEVICE_GRAPH_ITEM_PROPERTY_ID = "property_id";
+    public static final String DICT_DEVICE_GRAPH_ITEM_PROPERTY_TYPE = "property_type";
+    public static final String DICT_DEVICE_GRAPH_ITEM_GRAPH_ID = "graph_id";
+    public static final String DICT_DEVICE_GRAPH_ITEM_SORT = "sort";
+    public static final String DICT_DEVICE_GRAPH_ENABLE = "enable";
+    public static final String DICT_DEVICE_GRAPH_SUFFIX = "suffix";
 }

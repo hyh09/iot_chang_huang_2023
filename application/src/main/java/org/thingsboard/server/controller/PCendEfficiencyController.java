@@ -10,18 +10,18 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
-import org.thingsboard.server.common.data.vo.QueryRunningStatusVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
-import org.thingsboard.server.common.data.vo.device.DeviceDictionaryPropertiesVo;
+import org.thingsboard.server.common.data.vo.device.RunningStateVo;
+import org.thingsboard.server.common.data.vo.device.input.InputRunningSateVo;
+import org.thingsboard.server.common.data.vo.device.out.OutRunningStateVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.parameter.PcTodayEnergyRaningVo;
+import org.thingsboard.server.common.data.vo.parameter.PcTodayProportionChartOutput;
 import org.thingsboard.server.common.data.vo.pc.ResultEnergyTopTenVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
-import org.thingsboard.server.common.data.vo.resultvo.devicerun.ResultRunStatusByDeviceVo;
 import org.thingsboard.server.controller.example.AnswerExample;
-import org.thingsboard.server.dao.sql.role.entity.CensusSqlByDayEntity;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -149,7 +149,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
             Long lo2 = System.currentTimeMillis();
             Long t3 = lo2-lo1;
-            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
+//            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
             return  obj;
 
         }catch (Exception e)
@@ -185,6 +185,50 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
+
+
+
+//    @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+//            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+//            @ApiImplicitParam(name = "deviceId", value = "设备id")
+//    })
+//    @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
+//    @ApiResponses({
+//            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+//    })
+//    @ResponseBody
+//    public Object queryEnergyHistory(
+//            @RequestParam int pageSize,
+//            @RequestParam int page,
+//            @RequestParam(required = false) String textSearch,
+//            @RequestParam(required = false) String sortProperty,
+//            @RequestParam(required = false) String sortOrder,
+//            @RequestParam(required = false) Long startTime,
+//            @RequestParam(required = false) Long endTime,
+//            @RequestParam(required = false) UUID deviceId
+//    ) throws ThingsboardException {
+//        try {
+//            if ( startTime == null  || endTime == null) {
+//                startTime=(CommonUtils.getZero());
+//                endTime=(CommonUtils.getNowTime());
+//            }
+//
+//            QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
+//            queryTsKvVo.setDeviceId(deviceId);
+//            queryTsKvVo.setStartTime(startTime);
+//            queryTsKvVo.setEndTime(endTime);
+//            queryTsKvVo.setSortOrder(sortOrder);
+//            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+//
+//            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
+//        }catch (Exception e)
+//        {
+//            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
+//            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+//        }
+//    }
 
 
 
@@ -289,7 +333,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @ApiResponse(code = 200, message =pc_queryDictName),
     })
     @ResponseBody
-    public  List<DeviceDictionaryPropertiesVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+    public  List<RunningStateVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
 //        log.info("打印当前的入参:{}",deviceId);
         try {
             return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
@@ -309,8 +353,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(@RequestBody QueryRunningStatusVo queryTsKvVo) throws ThingsboardException {
-        try {
+    public List<OutRunningStateVo> queryTheRunningStatusByDevice(@RequestBody InputRunningSateVo queryTsKvVo) throws ThingsboardException {
+        try
+        {
             return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId());
         }catch (Exception e)
         {
@@ -321,7 +366,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
-    @ApiOperation(value = "【PC端查询当前设备的运行状态】")
+    @ApiOperation(value = "【设备当天水能耗排行】")
     @PostMapping("/queryTodayEffceency")
     public  List<ResultEnergyTopTenVo>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
         try {
@@ -337,6 +382,16 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
         }
     }
+
+
+    @ApiOperation(value = "【产能分布图表】")
+    @PostMapping("/queryTodayProportionChartOutput")
+    public  Object queryTodayProportionChartOutput(@RequestBody PcTodayProportionChartOutput vo)
+    {
+       return  null;
+    }
+
+
 
 
 

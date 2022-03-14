@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * 订单看板产能监控
+ * 产能监控
  *
  * @author wwj
  * @since 2021.10.18
@@ -19,8 +19,8 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "订单看板产能监控")
-public class OrderBoardCapacityResult {
+@ApiModel(value = "产能监控")
+public class OrderCustomCapacityResult {
 
     @ApiModelProperty(value = "订单号")
     private String orderNo;
@@ -34,6 +34,12 @@ public class OrderBoardCapacityResult {
     @ApiModelProperty(value = "总数量")
     private BigDecimal total;
 
+    @ApiModelProperty(value = "完成产量")
+    private BigDecimal completedCapacities;
+
     @ApiModelProperty(value = "完成度")
     private BigDecimal completeness;
+
+    @ApiModelProperty(value = "是否超时")
+    private Boolean isOvertime;
 }

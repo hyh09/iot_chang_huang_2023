@@ -4,7 +4,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
+import org.thingsboard.server.dao.hs.dao.HsModelConstants;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+
+import javax.persistence.Column;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * 订单设备
@@ -51,6 +56,27 @@ public class OrderPlan extends BasePO {
 
     @ApiModelProperty(value = "排序值")
     private Integer sort;
+
+    @ApiModelProperty(value = "实际产能")
+    private BigDecimal actualCapacity;
+
+    @ApiModelProperty(value = "计划产能")
+    private BigDecimal intendedCapacity;
+
+    @ApiModelProperty(value = "维护开始时间")
+    private Long maintainStartTime;
+
+    @ApiModelProperty(value = "维护结束时间")
+    private Long maintainEndTime;
+
+    @ApiModelProperty(value = "工厂Id")
+    private UUID factoryId;
+
+    @ApiModelProperty(value = "车间Id")
+    private UUID workshopId;
+
+    @ApiModelProperty(value = "产线Id")
+    private UUID productionLineId;
 
     public DeviceCapacityVo toDeviceCapacityVO() {
         DeviceCapacityVo capacityVO = new DeviceCapacityVo();

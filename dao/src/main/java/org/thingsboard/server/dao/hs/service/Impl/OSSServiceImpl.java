@@ -5,8 +5,6 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.*;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.service.OSSService;
 
@@ -28,16 +26,16 @@ import java.util.UUID;
 @Slf4j
 public class OSSServiceImpl implements OSSService {
 
-//    @Value("${hs_oss.endpoint}")
+    //    @Value("${hs_oss.endpoint}")
     private String endpoint;
 
-//    @Value("${hs_oss.accessKeyId}")
+    //    @Value("${hs_oss.accessKeyId}")
     private String accessKeyId;
 
-//    @Value("${hs_oss.accessKeySecret}")
+    //    @Value("${hs_oss.accessKeySecret}")
     private String accessKeySecret;
 
-//    @Value("${hs_oss.bucketName}")
+    //    @Value("${hs_oss.bucketName}")
     private String bucketName;
 
     /**

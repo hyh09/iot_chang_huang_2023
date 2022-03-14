@@ -2,18 +2,27 @@ package org.thingsboard.server.dao.sql.role.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.NativeQuery;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
+import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
+import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
+import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
+import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @program: thingsboard
@@ -27,6 +36,11 @@ public class JpaSqlTool {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired  protected TsKvDictionaryRepository tsKvDictionaryRepository;
+
 
     /**
      * 分页的返回
@@ -126,6 +140,62 @@ public class JpaSqlTool {
             sonSql01.append(" and  d1.id = :did");
             param.put("did", queryTsKvVo.getDeviceId());
         }
+        if(queryTsKvVo.getDictDeviceId() != null)
+        {
+            sonSql01.append(" and  d1.dict_device_id = :dictId ");
+            param.put("dictId", queryTsKvVo.getDictDeviceId());
+        }
+    }
+
+
+    /**
+     * 获取能耗
+     *    产能的 keyId
+     * @param type 1:产量
+     *             2:能耗
+     * @return
+     */
+    public  List<Integer>  queryKeyIds(String type)
+    {
+        List<Integer>  keyIds = new ArrayList<>();
+        if(type.equals("1"))
+        {
+            List<DictDeviceGroupPropertyVO>    dictVoList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.CAPACITY_001.getgName());
+            String keyName = dictVoList.stream().findFirst().orElse(new DictDeviceGroupPropertyVO()).getName();
+            Optional<TsKvDictionary> tsKvDictionary =  tsKvDictionaryRepository.findByKey(keyName);
+            int keyId = tsKvDictionary.isPresent()?tsKvDictionary.get().getKeyId():76;
+            keyIds.add(keyId);
+           return  keyIds;
+        }
+        if(type.equals("2"))
+        {
+
+        }
+
+        return  keyIds;
+
+    }
+
+
+    /**
+     * 获取能耗
+     *    产能的 keyId
+     * @param type 1:产量
+     *             2:能耗
+     * @return
+     */
+    public  List<String>  queryKeyName(String type)
+    {
+        List<String>  keyIds = new ArrayList<>();
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        DictDeviceGroupPropertyVO  dictDeviceGroupPropertyVO = mapNameToVo.get(KeyTitleEnums.getEnumsByCode(type).getgName());
+       if(dictDeviceGroupPropertyVO != null )
+       {
+           keyIds.add(dictDeviceGroupPropertyVO.getName());
+       }
+
+        return  keyIds;
+
     }
 
 }

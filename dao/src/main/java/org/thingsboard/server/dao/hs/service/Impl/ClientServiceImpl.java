@@ -3,9 +3,12 @@ package org.thingsboard.server.dao.hs.service.Impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,6 +29,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
@@ -55,6 +59,7 @@ import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
+import org.thingsboard.server.dao.sql.productioncalender.ProductionCalenderRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 import org.thingsboard.server.dao.sql.user.UserRepository;
@@ -62,6 +67,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
+import org.thingsboard.server.dao.statisticoee.StatisticOeeService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.persistence.EntityManager;
@@ -139,6 +145,12 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     // BulletinBoardSvc
     BulletinBoardSvc bulletinBoardSvc;
+
+    // ProductionCalenderRepository
+    ProductionCalenderRepository calenderRepository;
+
+    // StatisticOeeService
+    StatisticOeeService statisticOeeService;
 
     /**
      * 查询用户
@@ -242,6 +254,16 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
                     .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
         }
+    }
+
+    /**
+     * 查询简易设备信息
+     *
+     * @param deviceId 设备Id
+     */
+    @Override
+    public Device getSimpleDevice(UUID deviceId) {
+        return this.deviceRepository.findSimpleById(deviceId).toData();
     }
 
     /**
@@ -362,6 +384,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     @SuppressWarnings("all")
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
+        long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
             var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
             if (keyList.isEmpty())
@@ -401,11 +424,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
             var latestKeyId = Optional.ofNullable(this.tsLatestRepository.findLatestKey(deviceId.getId())).orElse(keyIds.get(0));
             var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
-            
+
             var pageData = this.tsRepository.findTss(deviceId.getId(), latestKeyId, timePageLink.getStartTime(), timePageLink.getEndTime(), DaoUtil.toPageable(timePageLink));
             if (pageData.getContent().isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
-            
+
             var time1 = pageData.getContent().get(0);
             var time2 = pageData.getContent().get(pageData.getContent().size() - 1);
             var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
@@ -422,7 +445,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
             });
-            
+
             return new PageData<>(result, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
         }
     }
@@ -587,11 +610,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
-            log.info("查询设备指定时间段产能：" + "empty");
+            log.trace("查询设备指定时间段产能：" + "empty");
             return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList()));
-            log.info("查询设备指定时间段产能：" + dataMap);
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList()));
+            log.trace("查询设备指定时间段产能：" + dataMap);
             var deviceCapacities = plans.stream().map(v -> OrderDeviceCapacityBO.builder()
                     .planId(toUUID(v.getId()))
                     .enabled(v.getEnabled())
@@ -613,12 +636,12 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
         if (plans.isEmpty()) {
-            log.info("查询设备指定时间段产能：" + "empty");
+            log.trace("查询设备指定时间段产能：" + "empty");
             return Maps.newHashMap();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).collect(Collectors.toList())).entrySet().stream()
+            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList())).entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, v -> new BigDecimal(v.getValue())));
-            log.info("查询设备指定时间段产能：" + dataMap);
+            log.trace("查询设备指定时间段产能：" + dataMap);
             return dataMap;
         }
     }
@@ -794,6 +817,135 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 根据当前登录人获得全部设备的在线状态
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 当前登录人获得全部设备的在线状态
+     */
+    @Override
+    public Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId, UUID factoryId) {
+        var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
+        var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 获得全部设备的在线状态
+     *
+     * @param tenantId 租户Id
+     * @return 获得全部设备的在线状态
+     */
+    @Override
+    public Map<String, Boolean> getDeviceOnlineStatusMap(TenantId tenantId) {
+        var devices = DaoUtil.convertDataList(this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).join());
+        var deviceIds = devices.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+        return this.listDevicesOnlineStatus(deviceIds);
+    }
+
+    /**
+     * 查询设备关键参数
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<DeviceKeyParamShiftResult> listDeviceShirtTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        return this.calenderRepository.findAllCross(tenantId.getId(), deviceId, startTime, endTime)
+                .thenApplyAsync(calenders -> calenders.stream().map(ProductionCalenderEntity::toData)
+                        .map(v -> DeviceKeyParamShiftResult.builder()
+                                .startTime(v.getStartTime() < startTime ? startTime : v.getStartTime())
+                                .endTime(v.getEndTime() > endTime ? endTime : v.getEndTime())
+                                .build()).collect(Collectors.toList())).join();
+    }
+
+    /**
+     * 查询设备在时间段内的全部遥测时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<Long> listDeviceTss(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+        if (keyIds.isEmpty())
+            return Lists.newArrayList();
+        return this.tsRepository.findTss(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+    }
+
+    /**
+     * 查询时间段内的班次时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<ProductionCalender> listProductionCalenders(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        return DaoUtil.convertDataList(this.calenderRepository.findAllByTenantIdAndDeviceIdAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(tenantId.getId(), deviceId, startTime, endTime));
+    }
+
+    /**
+     * 查询设备oee
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param currentTime 当前时间
+     */
+    @Override
+    public Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime) {
+        return this.formatDoubleData(this.statisticOeeService.getStatisticOeeDeviceByCurrentDay(deviceId));
+    }
+
+    /**
+     * 查询不同属性在时间段内的遥测值
+     *
+     * @param tenantId   租户Id
+     * @param deviceId   设备Id
+     * @param startTime  开始时间
+     * @param endTime    结束时间
+     * @param properties 属性
+     */
+    @Override
+    public Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) {
+        // TODO consider cassandra
+        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+        if (keyIds.isEmpty())
+            return Maps.newHashMap();
+        var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIn(properties).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey));
+        var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+        Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
+
+        kvEntityResult.forEach(v -> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
+                .ts(v.getTs())
+                .value(this.formatKvEntryValue(v.toData()))
+                .build()));
+        return map;
+    }
+
+    /**
+     * 获得设备全部客户端及服务端、共享属性及值
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     */
+    @Override
+    public List<AttributeKvEntry> listDeviceAttributeKvs(TenantId tenantId, UUID deviceId) {
+        return Arrays.stream(DataConstants.allScopes()).map(v -> CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.attributesService.findAll(tenantId, new DeviceId(deviceId), v).get();
+            } catch (Exception ignore) {
+                return null;
+            }
+        })).map(CompletableFuture::join).filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    /**
      * 查询历史遥测数据
      *
      * @param tenantId     租户Id
@@ -841,11 +993,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 return Lists.newArrayList();
             var latestKeyId = Optional.ofNullable(this.tsLatestRepository.findLatestKey(deviceId.getId())).orElse(keyIds.get(0));
             var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIdIn(Sets.newHashSet(keyIds)).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey, (a, b) -> a));
-            
+
             var pageData = this.tsRepository.findTss(deviceId.getId(), latestKeyId, timePageLink.getStartTime(), timePageLink.getEndTime(), timePageLink.getPageSize(), Math.max(0L, (timePageLink.getPage() - 1) * timePageLink.getPageSize()));
             if (pageData.isEmpty())
                 return Lists.newArrayList();
-            
+
             var time1 = pageData.get(0);
             var time2 = pageData.get(pageData.size() - 1);
             var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId.getId(), Sets.newHashSet(keyIds), Math.min(time1, time2), Math.max(time1, time2));
@@ -861,7 +1013,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 v.put(HSConstants.CREATED_TIME, k);
                 result.add(v);
             });
-            
+
             return result;
         }
     }
@@ -977,5 +1129,15 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setBulletinBoardSvc(BulletinBoardSvc bulletinBoardSvc) {
         this.bulletinBoardSvc = bulletinBoardSvc;
+    }
+
+    @Autowired
+    public void setCalenderRepository(ProductionCalenderRepository calenderRepository) {
+        this.calenderRepository = calenderRepository;
+    }
+
+    @Autowired
+    public void setStatisticOeeService(StatisticOeeService statisticOeeService) {
+        this.statisticOeeService = statisticOeeService;
     }
 }

@@ -16,7 +16,7 @@ export class RunningStateComponent {
   selectedProps: string[] = [];
   properties: DeviceProp[] = [];
   propertyMap: { [key: string]: DeviceProp; } = {};
-  runningStateData: RunningState = {};
+  runningStateData: { [key: string]: RunningState } = {};
   displayedProps: string[] = [];
   pageLink: PageLink = new PageLink(2, 0, null, null);
   startTime: Date;
@@ -39,11 +39,11 @@ export class RunningStateComponent {
       this.displayedProps = [];
       this.potencyService.getDeviceProps(this.deviceId).subscribe(properties => {
         this.properties = properties || [];
-        this.selectedProps = this.properties.map(prop => (prop.name));
+        this.selectedProps = this.properties.map(prop => (prop.name || prop.chartId));
         this.displayedProps = this.selectedProps.slice(0, 2);
         this.propertyMap = {};
         this.properties.forEach(prop => {
-          this.propertyMap[prop.name] = prop;
+          this.propertyMap[prop.name || prop.chartId] = prop;
         });
         this.getRunningStateData();
       });
@@ -56,11 +56,13 @@ export class RunningStateComponent {
     this.runningStateData = {};
     this.potencyService.getDeviceRunningState({
       deviceId: this.deviceId,
-      keyNames: this.displayedProps,
+      attributeParameterList: this.displayedProps.map(prop => (this.propertyMap[prop])),
       startTime: this.startTime.getTime(),
       endTime: this.endTime.getTime()
     }).subscribe(res => {
-      this.runningStateData = res || {};
+      (res || []).forEach(item => {
+        this.runningStateData[item.chartId || item.keyName] = item;
+      });
     });
   }
 

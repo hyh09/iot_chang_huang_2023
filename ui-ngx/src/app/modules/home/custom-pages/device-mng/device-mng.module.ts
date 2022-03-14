@@ -19,6 +19,10 @@ import { ProdCapacitySettingsFiltersComponent } from './prod-capacity-settings/p
 import { DistributeConfigComponent } from './device-dictionary/distribute-config.component';
 import { DictDeviceTableFilterComponent } from './device-dictionary/dict-device-table-filter.component';
 import { DeviceConfigFormComponent } from './device-dictionary/driver-config-form.componen';
+import { ChartSettingsFiltersComponent } from './chart-settings/chart-settings-filters.component';
+import { ChartsComponent } from './chart-settings/charts.component';
+import { ProdMngFiltersComponent } from './prod-mng/prod-mng-filters.component';
+import { MngCalendarComponent } from './prod-mng/mng-calendar.component';
 
 @NgModule({
   imports: [
@@ -43,7 +47,11 @@ import { DeviceConfigFormComponent } from './device-dictionary/driver-config-for
     ProdCapacitySettingsFiltersComponent,
     DistributeConfigComponent,
     DictDeviceTableFilterComponent,
-    DeviceConfigFormComponent
+    DeviceConfigFormComponent,
+    ChartSettingsFiltersComponent,
+    ChartsComponent,
+    ProdMngFiltersComponent,
+    MngCalendarComponent
   ]
 })
 export class DeviceManagementModule { }

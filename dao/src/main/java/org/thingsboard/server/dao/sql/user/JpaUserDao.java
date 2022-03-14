@@ -17,7 +17,6 @@ package org.thingsboard.server.dao.sql.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.User;
@@ -37,8 +36,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.thingsboard.server.dao.model.ModelConstants.NULL_UUID;
 
 /**
  * @author Valerii Sosliuk
@@ -65,6 +62,16 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
     @Override
     public int update(User user) {
          return  userRepository.update(user);
+    }
+
+    @Override
+    public int updateOperationType(UUID userId, Integer operationType) {
+        return userRepository.updateOperationType(userId,operationType);
+    }
+
+    @Override
+    public int updateLevel(UUID userId, Integer level) {
+        return userRepository.updateLevel(userId,level);
     }
 
     @Override
@@ -137,14 +144,12 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
     @Override
     public PageData<User> findAll(Map<String, Object> queryParam, PageLink pageLink) {
         Page<UserEntity> list = this.userRepository.findAll(JpaQueryHelper.createQueryByMap(queryParam,UserEntity.class ),  DaoUtil.toPageable(pageLink));
-        System.out.println("打印当前的数据:"+list);
         return  DaoUtil.toPageData(list);
     }
 
     @Override
     public List<User> findAll(Map<String, Object> queryParam) {
         List<UserEntity> list = this.userRepository.findAll(JpaQueryHelper.createQueryByMap(queryParam,UserEntity.class ));
-        System.out.println("打印当前的数据:"+list);
         return list.stream().map(DaoUtil::getData).collect(Collectors.toList());
     }
 

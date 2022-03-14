@@ -47,22 +47,36 @@ import java.util.UUID;
                 }
 
         ),@SqlResultSetMapping(
-                name = "censusSqlByDayEntity_02",
+        name = "censusSqlByDayEntity_02",
         classes = {
                 @ConstructorResult(    targetClass = CensusSqlByDayEntity.class,
-                columns = {
-                        @ColumnResult(name = "date", type = LocalDate.class),
-                        @ColumnResult(name="name",type = String.class),
-                        @ColumnResult(name = "entity_id",type = UUID.class),
-                        @ColumnResult(name = "water_added_value",type = String.class),
-                        @ColumnResult(name = "electric_added_value",type = String.class),
-                        @ColumnResult(name = "gas_added_value",type = String.class)
+                        columns = {
+                                @ColumnResult(name = "date", type = LocalDate.class),
+                                @ColumnResult(name="name",type = String.class),
+                                @ColumnResult(name = "entity_id",type = UUID.class),
+                                @ColumnResult(name = "water_added_value",type = String.class),
+                                @ColumnResult(name = "electric_added_value",type = String.class),
+                                @ColumnResult(name = "gas_added_value",type = String.class),
+                                @ColumnResult(name = "capacity_added_value",type = String.class)
 
-                }
+
+                        }
                 )
         }
 
-)
+),
+        @SqlResultSetMapping(
+                name = "censusSqlByDayEntity_device",
+                classes = {
+                        @ConstructorResult(    targetClass = CensusSqlByDayEntity.class,
+                                columns = {
+                                  @ColumnResult(name = "entity_id",type = UUID.class),
+
+                                }
+                        )
+                }
+
+        )
 
 
 })
@@ -136,13 +150,19 @@ public class CensusSqlByDayEntity  extends AbstractStatisticalDataEntity {
                                  UUID entityId,
                                  String waterAddedValue,
                                  String electricAddedValue,
-                                 String gasAddedValue) {
+                                 String gasAddedValue,
+                                 String capacityAddedValue) {
         this.date = date;
         this.deviceName = deviceName;
         this.entityId = entityId;
         this.waterAddedValue = waterAddedValue;
         this.electricAddedValue = electricAddedValue;
         this.gasAddedValue = gasAddedValue;
+        this.capacityAddedValue = capacityAddedValue;
 
+    }
+
+    public CensusSqlByDayEntity(UUID entityId) {
+        this.entityId = entityId;
     }
 }
