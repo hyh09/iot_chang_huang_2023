@@ -494,6 +494,7 @@ spring:
     database-platform: "${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}"
   datasource:
     driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver}"
+#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.4.80.151:30685/hsiotdb}"
 #    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.10.10.56:5432/test-prod1}"
     url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/hsiotdb}"
 #    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/hsiotdb}"
@@ -754,7 +755,7 @@ swagger:
   version: "${SWAGGER_VERSION:2.0}"
 
 queue:
-  type: "${TB_QUEUE_TYPE:kafka}" # in-memory or kafka (Apache Kafka) or aws-sqs (AWS SQS) or pubsub (PubSub) or service-bus (Azure Service Bus) or rabbitmq (RabbitMQ)
+  type: "${TB_QUEUE_TYPE:in-memory}" # in-memory or kafka (Apache Kafka) or aws-sqs (AWS SQS) or pubsub (PubSub) or service-bus (Azure Service Bus) or rabbitmq (RabbitMQ)
   in_memory:
     stats:
       # For debug lvl
