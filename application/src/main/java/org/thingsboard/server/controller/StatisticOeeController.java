@@ -30,20 +30,16 @@ public class StatisticOeeController extends BaseController {
     @RequestMapping(value = "/dp/getStatisticOeeList", method = RequestMethod.GET)
     @ResponseBody
     public List<StatisticOeeVo> getStatisticOeeList(StatisticOeeQry dto) throws ThingsboardException {
-        try {
-            List<StatisticOeeVo> result = new ArrayList<>();
-            checkParameterChinees("startTime",dto.getStartTime());
-            checkParameterChinees("endTime",dto.getEndTime());
-            List<StatisticOee> statisticOees = statisticOeeService.getStatisticOeeEveryHourList(dto.toStatisticOee(getCurrentUser().getTenantId().getId()));
-            if (!org.springframework.util.CollectionUtils.isEmpty(statisticOees)) {
-                for (StatisticOee oee : statisticOees) {
-                    result.add(new StatisticOeeVo(oee));
-                }
+        List<StatisticOeeVo> result = new ArrayList<>();
+        checkParameterChinees("startTime",dto.getStartTime());
+        checkParameterChinees("endTime",dto.getEndTime());
+        List<StatisticOee> statisticOees = statisticOeeService.getStatisticOeeEveryHourList(dto.toStatisticOee(getCurrentUser().getTenantId().getId()));
+        if (!org.springframework.util.CollectionUtils.isEmpty(statisticOees)) {
+            for (StatisticOee oee : statisticOees) {
+                result.add(new StatisticOeeVo(oee));
             }
-            return result;
-        } catch (Exception e) {
-            throw handleException(e);
         }
+        return result;
     }
     /**
      * 查询设备当天OEE
