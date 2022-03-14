@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.thingsboard.server.common.data.statisticoee.StatisticOee;
 
+import java.math.BigDecimal;
+
 @Data
 @ApiModel("StatisticOeeVo")
 public class StatisticOeeVo {
@@ -13,7 +15,7 @@ public class StatisticOeeVo {
     private Long timeHours;
 
     @ApiModelProperty("OEE值")
-    private Double oeeValue;
+    private BigDecimal oeeValue;
 
     public StatisticOeeVo(StatisticOee oee) {
         this.timeHours = oee.getTimeHours();
