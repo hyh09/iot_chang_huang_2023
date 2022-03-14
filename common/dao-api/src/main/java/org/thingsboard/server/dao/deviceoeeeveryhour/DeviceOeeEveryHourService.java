@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.statisticoee;
+package org.thingsboard.server.dao.deviceoeeeveryhour;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.statisticoee.StatisticOee;
@@ -7,13 +7,20 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-public interface StatisticOeeService {
+public interface DeviceOeeEveryHourService {
 
     /**
-     * OEE计算，返回每小时的值
+     * 查询OEE计算历史，返回每小时的值
      * @return
      */
     List<StatisticOee> getStatisticOeeEveryHourList(StatisticOee statisticOee) throws ThingsboardException;
+
+    /**
+     * 查询OEE实时数据，返回每小时的值
+     * @return
+     */
+    List<StatisticOee> getStatisticOeeListByRealTime(StatisticOee statisticOee) throws ThingsboardException;
+
 
     /**
      * 查询设备当天OEE
@@ -23,4 +30,9 @@ public interface StatisticOeeService {
      * @return
      */
     BigDecimal getStatisticOeeDeviceByCurrentDay(UUID deviceId);
+
+    /**
+     * 手动执行当天所有设备每小时OEE同步
+     */
+    void statisticOeeByTimedTask();
 }
