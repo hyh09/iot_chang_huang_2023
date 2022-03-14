@@ -68,11 +68,27 @@ public class JpaDeviceOeeEveryHourDao implements DeviceOeeEveryHourDao {
             List<Predicate> predicates = new ArrayList<>();
             Order orderByCdn = null;
             if (deviceOeeEveryHour != null) {
+                if(deviceOeeEveryHour.getTenantId() != null){
+                    predicates.add(cb.equal(root.get("tenantId"), deviceOeeEveryHour.getTenantId()));
+                }
+                if(deviceOeeEveryHour.getFactoryId() != null){
+                    predicates.add(cb.equal(root.get("factoryId"), deviceOeeEveryHour.getFactoryId()));
+                }
+                if(deviceOeeEveryHour.getWorkshopId() != null){
+                    predicates.add(cb.equal(root.get("workshopId"), deviceOeeEveryHour.getWorkshopId()));
+                }
+                if(deviceOeeEveryHour.getProductionLineId() != null){
+                    predicates.add(cb.equal(root.get("productionLineId"), deviceOeeEveryHour.getProductionLineId()));
+                }
                 if (deviceOeeEveryHour.getDeviceId() != null) {
                     predicates.add(cb.equal(root.get("deviceId"), deviceOeeEveryHour.getDeviceId()));
                 }
                 if (deviceOeeEveryHour.getTs() != null) {
                     predicates.add(cb.equal(root.get("ts"), deviceOeeEveryHour.getTs()));
+                }
+                if(deviceOeeEveryHour.getStartTime() != null && deviceOeeEveryHour.getEndTime() != null){
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("ts"), deviceOeeEveryHour.getStartTime()));
+                    predicates.add(cb.lessThanOrEqualTo(root.get("ts"), deviceOeeEveryHour.getEndTime()));
                 }
                 if(StringUtils.isNotEmpty(orderByFile) && StringUtils.isNotEmpty(orderByType)){
                     if("DESC".equals(orderByType)){

@@ -143,7 +143,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
     @Override
     public List<StatisticOee> getStatisticOeeEveryHourList(StatisticOee statisticOee) throws ThingsboardException {
         List<StatisticOee> statisticOeeList = new ArrayList<>();
-        List<DeviceOeeEveryHour> deviceOeeEveryHours = deviceOeeEveryHourDao.findAllByCdn(new DeviceOeeEveryHour(statisticOee.getDeviceId(), null), "ts", "ASC");
+        List<DeviceOeeEveryHour> deviceOeeEveryHours = deviceOeeEveryHourDao.findAllByCdn(new DeviceOeeEveryHour(statisticOee), "ts", "ASC");
         if(!CollectionUtils.isEmpty(deviceOeeEveryHours)){
             for (DeviceOeeEveryHour iter:deviceOeeEveryHours ) {
                 statisticOeeList.add(new StatisticOee(iter.getTs(),iter.getOeeValue()));

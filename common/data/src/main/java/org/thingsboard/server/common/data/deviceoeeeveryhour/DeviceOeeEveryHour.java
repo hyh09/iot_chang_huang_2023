@@ -2,6 +2,7 @@ package org.thingsboard.server.common.data.deviceoeeeveryhour;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.thingsboard.server.common.data.statisticoee.StatisticOee;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -28,6 +29,18 @@ public class DeviceOeeEveryHour {
    @ApiModelProperty( "创建时间")
     public long createdTime;
 
+
+
+   /******************************************/
+
+
+   @ApiModelProperty(value = "区间开始时间")
+   private Long startTime;
+    @ApiModelProperty(value = "区间结束时间")
+    private Long endTime;
+
+   /******************************************/
+
     public DeviceOeeEveryHour() {
 
     }
@@ -42,4 +55,14 @@ public class DeviceOeeEveryHour {
         this.deviceId = deviceId;
         this.ts = ts;
     }
+
+    public DeviceOeeEveryHour(StatisticOee statisticOee) {
+        this.deviceId = statisticOee.getDeviceId();
+        this.startTime = statisticOee.getStartTime();
+        this.endTime = statisticOee.getEndTime();
+        this.factoryId = statisticOee.getFactoryId();
+        this.workshopId = statisticOee.getWorkshopId();
+        this.tenantId = statisticOee.getTenantId();
+    }
+
 }
