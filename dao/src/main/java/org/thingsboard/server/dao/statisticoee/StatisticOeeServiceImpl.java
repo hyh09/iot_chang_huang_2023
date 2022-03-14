@@ -131,6 +131,11 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
         if (deviceListByCdn != null) {
             //计算每个小时的总和
             for (int i = 0; i < dateList.size(); i++) {
+                //排除最后一个
+                if (i + 1 == dateList.size()) {
+                    break;
+                }
+
                 //每个小时设备OEE值总和
                 BigDecimal oeeValue = new BigDecimal(0);
 
@@ -143,11 +148,6 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
                 statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size())));
                 statisticOee.setTimeHours(dateList.get(i));
                 result.add(statisticOee);
-
-                //排除最后一个
-                if (i + 1 == dateList.size()) {
-                    break;
-                }
             }
         }
         return result;
@@ -168,15 +168,14 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
     public List<StatisticOee> statisticOeeDeviceEveryHour(List<Long> dateList, UUID deviceId) {
         List<StatisticOee> result = new ArrayList<>();
         for (int i = 0; i < dateList.size(); i++) {
-            StatisticOee statisticOee = new StatisticOee();
-            statisticOee.setOeeValue(this.getDeviceOeeValue(deviceId, dateList.get(i), dateList.get(i + 1)));
-            statisticOee.setTimeHours(dateList.get(i));
-            result.add(statisticOee);
-
             //排除最后一个
             if (i + 1 == dateList.size()) {
                 break;
             }
+            StatisticOee statisticOee = new StatisticOee();
+            statisticOee.setOeeValue(this.getDeviceOeeValue(deviceId, dateList.get(i), dateList.get(i + 1)));
+            statisticOee.setTimeHours(dateList.get(i));
+            result.add(statisticOee);
         }
         return result;
     }
@@ -220,6 +219,9 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
 
         //设备标准产能
         BigDecimal ratedCapacity = dictDeviceService.findById(deviceDao.getDeviceInfo(deviceId).getDictDeviceId()).getRatedCapacity();
+        if (ratedCapacity.compareTo(BigDecimal.ZERO) == 0) {
+            return deviceOutputPredict;
+        }
         //单个设备生产日历总时间
         BigDecimal time = new BigDecimal(0);
 
