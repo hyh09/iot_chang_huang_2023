@@ -210,7 +210,7 @@ public interface OrderService {
     String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime);
 
     /**
-     *查询时间范围内的车间计划产量
+     *查询时间范围内的车间实际产量
      * @param deviceId
      * @param startTime
      * @param endTime
