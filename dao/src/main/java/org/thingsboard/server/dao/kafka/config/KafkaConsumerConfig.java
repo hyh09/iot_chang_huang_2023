@@ -35,12 +35,11 @@ public class KafkaConsumerConfig {
         // 设置消费者工厂
         factory.setConsumerFactory(consumerFactory());
         // 消费者组中线程数量
-        factory.setConcurrency(3);
+        factory.setConcurrency(1);
         // 拉取超时时间
         factory.getContainerProperties().setPollTimeout(3000);
-
         // 当使用批量监听器时需要设置为true
-        factory.setBatchListener(true);
+        factory.setBatchListener(false);
 
         return factory;
     }

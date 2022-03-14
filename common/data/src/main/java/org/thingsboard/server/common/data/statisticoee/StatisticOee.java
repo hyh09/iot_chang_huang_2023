@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 
@@ -25,7 +26,7 @@ public class StatisticOee {
     @ApiModelProperty("时间")
     private Long timeHours;
     @ApiModelProperty("OEE值")
-    private Double oeeValue;
+    private BigDecimal oeeValue;
     @ApiModelProperty(value = "租户id")
     private UUID tenantId;
 
@@ -39,7 +40,7 @@ public class StatisticOee {
      * @param timeHours
      * @param oeeValue
      */
-    public StatisticOee(Long timeHours, Double oeeValue) {
+    public StatisticOee(Long timeHours, BigDecimal oeeValue) {
         this.timeHours = timeHours;
         this.oeeValue = oeeValue;
     }

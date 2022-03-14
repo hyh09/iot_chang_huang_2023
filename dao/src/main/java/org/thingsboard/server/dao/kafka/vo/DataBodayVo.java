@@ -1,8 +1,8 @@
 package org.thingsboard.server.dao.kafka.vo;
 
-import jdk.jfr.DataAmount;
 import lombok.Data;
 import org.thingsboard.server.common.data.id.EntityId;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 
 import java.util.UUID;
@@ -16,6 +16,8 @@ import java.util.UUID;
 @Data
 public class DataBodayVo {
 
+    private  UUID tenantId;
+
     private  UUID  entityId;
 
     private  long  ts;
@@ -28,8 +30,10 @@ public class DataBodayVo {
     public DataBodayVo() {
     }
 
-    public static  DataBodayVo  toDataBodayVo(EntityId entityId , TsKvEntry tsKvEntry , String  title) {
-         return  new DataBodayVo(entityId.getId(),tsKvEntry.getTs(),title,tsKvEntry.getKey(),tsKvEntry.getValue().toString());
+    public static  DataBodayVo  toDataBodayVo(TenantId tenantId,EntityId entityId , TsKvEntry tsKvEntry , String  title) {
+        DataBodayVo  dataBodayV=   new DataBodayVo(entityId.getId(),tsKvEntry.getTs(),title,tsKvEntry.getKey(),tsKvEntry.getValue().toString());
+        dataBodayV.setTenantId(tenantId.getId());
+        return  dataBodayV;
     }
 
     public DataBodayVo(UUID entityId) {
