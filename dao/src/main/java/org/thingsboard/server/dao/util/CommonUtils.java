@@ -311,8 +311,14 @@ public class CommonUtils {
         int second =localDateTime.getSecond();
         if(minute >30)
         {
+            if(hour>=23){
+                hour =-1;
+            }
             localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
         }else  if(minute == 30 && second>0){
+            if(hour>=23){
+                hour =-1;
+            }
             localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
         }
         else  if(minute == 0 && second== 0){
