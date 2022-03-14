@@ -67,6 +67,7 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
+import org.thingsboard.server.dao.statisticoee.StatisticOeeService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.persistence.EntityManager;
@@ -147,6 +148,9 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     // ProductionCalenderRepository
     ProductionCalenderRepository calenderRepository;
+
+    // StatisticOeeService
+    StatisticOeeService statisticOeeService;
 
     /**
      * 查询用户
@@ -895,7 +899,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime) {
-        return Double.parseDouble("0");
+        return this.formatDoubleData(this.statisticOeeService.getStatisticOeeDeviceByCurrentDay(deviceId));
     }
 
     /**
@@ -1130,5 +1134,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setCalenderRepository(ProductionCalenderRepository calenderRepository) {
         this.calenderRepository = calenderRepository;
+    }
+
+    @Autowired
+    public void setStatisticOeeService(StatisticOeeService statisticOeeService) {
+        this.statisticOeeService = statisticOeeService;
     }
 }

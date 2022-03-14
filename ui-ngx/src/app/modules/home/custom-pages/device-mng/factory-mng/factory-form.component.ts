@@ -37,6 +37,10 @@ export class FactoryFormComponent extends EntityComponent<Factory> {
       logoImages: [{
         value: entity ? entity.logoImages : '',
         disabled: !this.isEdit
+      }],
+      dashboardImages: [{
+        value: entity ? entity.dashboardImages : '',
+        disabled: !this.isEdit
       }]
     });
   }
