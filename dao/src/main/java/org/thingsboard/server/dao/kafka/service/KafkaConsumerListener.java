@@ -41,7 +41,7 @@ public class KafkaConsumerListener {
     public void kafkaListener(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
-            log.info("打印mess:{}",message);
+//            log.info("打印mess:{}",message);
 
             DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
             String title = dataBodayVo.getTitle();
@@ -55,12 +55,12 @@ public class KafkaConsumerListener {
 
             Long endTime = System.currentTimeMillis();
             Long tempTime = (endTime - startTime);
-            log.info("消费端的花费时间："+
-                    (((tempTime/86400000)>0)?((tempTime/86400000)+"d"):"")+
-                    ((((tempTime/86400000)>0)||((tempTime%86400000/3600000)>0))?((tempTime%86400000/3600000)+"h"):(""))+
-                    ((((tempTime/3600000)>0)||((tempTime%3600000/60000)>0))?((tempTime%3600000/60000)+"m"):(""))+
-                    ((((tempTime/60000)>0)||((tempTime%60000/1000)>0))?((tempTime%60000/1000)+"s"):(""))+
-                    ((tempTime%1000)+"ms"));
+//            log.info("消费端的花费时间："+
+//                    (((tempTime/86400000)>0)?((tempTime/86400000)+"d"):"")+
+//                    ((((tempTime/86400000)>0)||((tempTime%86400000/3600000)>0))?((tempTime%86400000/3600000)+"h"):(""))+
+//                    ((((tempTime/3600000)>0)||((tempTime%3600000/60000)>0))?((tempTime%3600000/60000)+"m"):(""))+
+//                    ((((tempTime/60000)>0)||((tempTime%60000/1000)>0))?((tempTime%60000/1000)+"s"):(""))+
+//                    ((tempTime%1000)+"ms"));
 
         }
 
