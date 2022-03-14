@@ -53,6 +53,9 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
 
+    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+            "t.id = :id ")
+    DeviceEntity findSimpleById(@Param("id") UUID id);
 
     @Query("SELECT new org.thingsboard.server.dao.model.sql.DeviceInfoEntity(d, c.title, c.additionalInfo, p.name) " +
             "FROM DeviceEntity d " +

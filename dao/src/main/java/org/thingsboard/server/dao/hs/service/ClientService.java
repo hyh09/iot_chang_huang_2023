@@ -11,6 +11,7 @@ import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.hs.entity.bo.FactoryDetailBO;
@@ -86,6 +87,13 @@ public interface ClientService {
      * @param deviceList 设备列表
      */
     DeviceListAffiliationDTO getDevicesAffiliationInfo(List<Device> deviceList);
+
+    /**
+     * 查询简易设备信息
+     *
+     * @param deviceId 设备Id
+     */
+    Device getSimpleDevice(UUID deviceId);
 
     /**
      * 获得设备字典初始化数据
@@ -380,4 +388,14 @@ public interface ClientService {
      * @param currentTime 当前时间
      */
     Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime);
+
+    /**
+     * 查询时间段内的班次时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    List<ProductionCalender> listProductionCalenders(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
 }

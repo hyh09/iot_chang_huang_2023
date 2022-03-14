@@ -29,6 +29,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.page.SortOrder;
 import org.thingsboard.server.common.data.page.TimePageLink;
+import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
@@ -249,6 +250,16 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
                     .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
         }
+    }
+
+    /**
+     * 查询简易设备信息
+     *
+     * @param deviceId 设备Id
+     */
+    @Override
+    public Device getSimpleDevice(UUID deviceId) {
+        return this.deviceRepository.findSimpleById(deviceId).toData();
     }
 
     /**
@@ -860,6 +871,19 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         if (keyIds.isEmpty())
             return Lists.newArrayList();
         return this.tsRepository.findTss(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+    }
+
+    /**
+     * 查询时间段内的班次时间
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @Override
+    public List<ProductionCalender> listProductionCalenders(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
+        return DaoUtil.convertDataList(this.calenderRepository.findAllByTenantIdAndDeviceIdAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(tenantId.getId(), deviceId, startTime, endTime));
     }
 
     /**
