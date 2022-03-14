@@ -1,37 +1,36 @@
-package org.thingsboard.server.entity.productioncalender.dto;
+package org.thingsboard.server.entity.statisticoee.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
+import org.thingsboard.server.common.data.statisticoee.StatisticOee;
 
 import java.util.UUID;
 
-@ApiModel(value = "ProductionCalenderAddDto",description = "看板生产监控查询")
 @Data
-public class ProductionMonitorListQry {
+@ApiModel("StatisticOeeDto")
+public class StatisticOeeQry {
 
     @ApiModelProperty(value = "区间开始时间")
     private Long startTime;
     @ApiModelProperty(value = "区间结束时间")
     private Long endTime;
-
     @ApiModelProperty(value = "工厂id")
     private UUID factoryId;
     @ApiModelProperty(value = "车间id")
     private UUID workshopId;
+    @ApiModelProperty(value = "设备id")
+    private UUID deviceId;
 
-    public ProductionMonitorListQry(){}
+    public StatisticOeeQry(){}
 
-    public ProductionCalender toProductionCalender(UUID tenantId){
-        return new ProductionCalender(
+    public StatisticOee toStatisticOee(UUID tenantId){
+        return new StatisticOee(
                 this.startTime,
                 this.endTime,
                 this.factoryId,
                 this.workshopId,
+                this.deviceId,
                 tenantId);
     }
-
-
-
 }

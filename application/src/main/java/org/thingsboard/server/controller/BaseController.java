@@ -93,6 +93,7 @@ import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
+import org.thingsboard.server.dao.statisticoee.StatisticOeeService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -292,6 +293,9 @@ public abstract class BaseController {
 
     @Autowired
     protected ProductionCalenderService productionCalenderService;
+
+    @Autowired
+    protected StatisticOeeService statisticOeeService;
 
 /*
 

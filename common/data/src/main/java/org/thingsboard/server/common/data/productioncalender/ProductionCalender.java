@@ -84,9 +84,11 @@ public class ProductionCalender {
      * @param endTime
      * @param tenantId
      */
-    public ProductionCalender(Long startTime,Long endTime,UUID tenantId) {
+    public ProductionCalender(Long startTime,Long endTime,UUID factoryId ,UUID workshopId,UUID tenantId) {
         this.startTime = startTime;
         this.endTime = endTime;
+        this.factoryId = factoryId;
+        this.workshopId = workshopId;
         this.tenantId = tenantId;
     }
 

@@ -1,0 +1,9 @@
+<nz-range-picker
+  nzFormat="yyyy/MM/dd HH:mm"
+  nzSize="large"
+  [nzShowTime]="{ nzFormat: 'HH:mm' }"
+  [nzDisabledDate]="disabledDate"
+  [nzAllowClear]="false"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+  (ngModelChange)="onTimeChange()"
+></nz-range-picker>

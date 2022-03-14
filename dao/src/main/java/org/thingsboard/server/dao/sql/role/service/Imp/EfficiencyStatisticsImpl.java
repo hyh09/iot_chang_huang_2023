@@ -225,7 +225,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         queryTsKvVo.setKeys(keys1);
         Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink));
         List<Map> list = page.getContent();
-        log.info("查询当前角色下的用户绑定数据list{}",list);
+        log.debug("查询当前角色下的用户绑定数据list{}",list);
         List<CapacityHistoryVo> mapList =   translateTitleCap02(list, deviceName,mapNameToVo);
         return new PageData<CapacityHistoryVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
@@ -331,7 +331,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      */
     @Override
     public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws Exception {
-        log.info("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
+        log.debug("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
         List<OutRunningStateVo>  resultVo = new ArrayList<>();
         List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
 //         if( CollectionUtils.isEmpty(runningStateVoList))
@@ -341,9 +341,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 //         }
          Map<String,DictDeviceGraphVO> chartIdToKeyNameMap = new HashMap<>();
          List<String>  keyNames = getKeyNameByVoList(runningStateVoList,tenantId,chartIdToKeyNameMap);
-       log.info("查询到的当前设备{}的配置的keyNames属性:{}",parameterVo.getDeviceId(),keyNames);
+       log.debug("查询到的当前设备{}的配置的keyNames属性:{}",parameterVo.getDeviceId(),keyNames);
         List<TsKvDictionary> kvDictionaries= dictionaryRepository.findAllByKeyIn(keyNames);
-        log.info("查询到的当前设备id{}的配置的kvDictionaries属性:{}",parameterVo.getDeviceId(),kvDictionaries);
+        log.debug("查询到的当前设备id{}的配置的kvDictionaries属性:{}",parameterVo.getDeviceId(),kvDictionaries);
         List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
         Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
         List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
@@ -440,7 +440,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                map.put(str,getDefaultValue(translateMap,str));
            }
         });
-      log.debug("查询到的当前的数据:{}",map);
+       log.debug("查询到的当前的数据:{}",map);
         log.debug("查询到的当前设备{}的配置的keyNames属性:{}",vo.getDeviceId(),keyNames);
 
         return map;
@@ -460,7 +460,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         }
         List<DictDeviceGraphVO>  graphVOS =  this.dictDeviceService.listDictDeviceGraphs(tenantId, deviceInfo.getDictDeviceId());
-        log.info("【app运行状态参数列表】查询的数据结果graphVOS：{}",graphVOS);
+//        log.debug("【app运行状态参数列表】查询的数据结果graphVOS：{}",graphVOS);
         List<DictDeviceDataVo>  chartDataList =  conversionOfChartObjects(graphVOS);
         List<DictDeviceDataVo>  chartShowList= chartDataList.stream().filter(s1->s1.getEnable()).collect(Collectors.toList());
         Map<String,List<DictDeviceDataVo>> map  = new HashMap<>();
@@ -498,9 +498,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             throw  new ThingsboardException("查询不到此设备!", ThingsboardErrorCode.FAIL_VIOLATION);
         }
         List<DictDeviceGraphVO>  graphVOS =  this.dictDeviceService.listDictDeviceGraphs(tenantId, deviceInfo.getDictDeviceId());
-        log.info("查询的数据结果graphVOS：{}",graphVOS);
+//        log.debug("查询的数据结果graphVOS：{}",graphVOS);
         List<DictDeviceDataVo> dictDeviceDataVos = deviceDictPropertiesSvc.findGroupNameAndName(deviceInfo.getDictDeviceId());
-        log.info("查询到的结果dictDeviceDataVos：{}",dictDeviceDataVos);
+//        log.debug("查询到的结果dictDeviceDataVos：{}",dictDeviceDataVos);
         if(CollectionUtils.isEmpty(dictDeviceDataVos))
         {
             return deviceDictionaryPropertiesVos;
@@ -596,8 +596,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo) {
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryTodayEffceency(vo);
-        log.info("打印查询的入参{}",vo);
-        log.info("打印查询的结果{}",entities);
+//        log.info("打印查询的入参{}",vo);
+//        log.info("打印查询的结果{}",entities);
       return    dataVoToResultEnergyTopTenVo(entities,vo);
 
     }
@@ -1098,7 +1098,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
                     } catch (ThingsboardException e) {
                         e.printStackTrace();
-                        log.info("图表id查询的属性异常:{}",e);
+                        log.error("图表id查询的属性异常:{}",e);
                     }
             }else{
                 keyNames.add(m1.getName());
@@ -1113,7 +1113,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     /**
      *
      * @param tsKvEntries
-     * @param parameterVo
+     * @param parameterVo   入参的对象
      * @param keyNames
      * @param chartIdToKeyNameMap 图表id 对应的 属性keyName
      * @return
@@ -1124,7 +1124,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                                                                Map<String,DictDeviceGraphVO>  chartIdToKeyNameMap )
     {
         List<OutRunningStateVo>  outRunningStateVos = new ArrayList<>();
-        log.info("封装返回数据");
+        log.debug("封装返回数据");
         List<ResultRunStatusByDeviceVo>  voList = new ArrayList<>();
         voList =  tsKvEntries.stream().map(TsKvEntry ->{
             ResultRunStatusByDeviceVo byDeviceVo= new ResultRunStatusByDeviceVo();
@@ -1134,13 +1134,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             return     byDeviceVo;
         }).collect(Collectors.toList());
         Map<String,List<ResultRunStatusByDeviceVo>> map = voList.stream().collect(Collectors.groupingBy(ResultRunStatusByDeviceVo::getKeyName));
-        log.info("查询到的当前的数据:{}",map);
+        log.debug("查询到的当前的数据:{}",map);
         Map<String,List<ResultRunStatusByDeviceVo>>   map1 =   keyNameNotFound(keyNames,map);
 
         List<RunningStateVo>   runningStateVoList =   parameterVo.getAttributeParameterList();//入参
         runningStateVoList.stream().forEach(m1 ->{
             OutRunningStateVo  outRunningStateVo = new OutRunningStateVo();
             outRunningStateVo.setTableName(m1.getTitle());//如果是属性就是属性的名称
+            outRunningStateVo.setKeyName(m1.getName());
             List<OutOperationStatusChartDataVo> properties = new ArrayList<>();
                 //代表属性
                 if(StringUtils.isBlank(m1.getChartId())) {
@@ -1296,7 +1297,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.info("打印【"+str+"】数据结果:"+json);
+            log.debug("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

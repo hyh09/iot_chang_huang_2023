@@ -226,6 +226,13 @@ public class CommonUtil {
     }
 
     /**
+     * 获得明天天零点的时间
+     */
+    public static Long getTomorrowStartTime() {
+        return LocalDate.now().atStartOfDay().plusDays(1).toInstant(ZoneOffset.of("+8")).toEpochMilli();
+    }
+
+    /**
      * 获得昨天零点的时间
      */
     public static Long getYesterdayStartTime() {

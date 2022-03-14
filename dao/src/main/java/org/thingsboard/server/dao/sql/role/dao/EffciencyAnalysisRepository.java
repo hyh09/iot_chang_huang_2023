@@ -213,12 +213,10 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
         StringBuffer  sonSql01 = new StringBuffer();
         Map<String, Object> param = new HashMap<>();
-        log.info("queryHistoricalTelemetryData打印的入参:{}",vo);
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
         if(isCap) {
             sonSql01.append(" and  d1.flg = true");
         }
-        log.info("queryHistoricalTelemetryData打印的sonSql01:{}",sonSql01);
         StringBuffer  sql = new StringBuffer();
         sql.append("select  d1.id as entity_id  from  device d1 where  1=1 ");
         sql.append(sonSql01);

@@ -285,5 +285,5 @@ public interface DeviceMonitorService {
      * @param deviceId 设备Id
      * @return 设备关键参数
      */
-    DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId);
+    DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) throws ThingsboardException;
 }
