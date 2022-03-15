@@ -163,7 +163,7 @@ export class AppComponent implements OnInit {
   }
   //初始化ui信息
   initUiInfo(){
-    this.store.pipe(select(selectIsAuthenticated)).subscribe( isAuthed => {
+    this.store.pipe(select(selectIsAuthenticated)).subscribe(isAuthed => {
       if(isAuthed){
         if(getCurrentAuthUser(this.store).authority === Authority.TENANT_ADMIN){
           this.dashboardService.getTenantUIInfo().subscribe(ui => {

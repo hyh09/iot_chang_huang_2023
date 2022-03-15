@@ -56,7 +56,10 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
 
   buildForm() {
     const planDevices = this.data.planDevices;
-    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, maintainStartTime, maintainEndTime } = (planDevices || {});
+    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, maintainStartTime, maintainEndTime, deviceId } = (planDevices || {});
+    if (deviceId) {
+      this.existDeviceIds = this.existDeviceIds.filter(id => (id !== deviceId));
+    }
     this.orderDeviceForm = this.fb.group({
       id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : '', Validators.required],

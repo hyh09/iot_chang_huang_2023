@@ -128,6 +128,7 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
         }
       }
       this.factoryMngService.getOnlineStatus().subscribe(_res => {
+        // 初始化设备在线状态
         const deviceIdList = Object.keys(_res || {});
         const treeMap: {[id: string]: FactoryTreeNodeOptions} = {};
         treeArr.forEach(item => {
@@ -136,16 +137,42 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
         deviceIdList.forEach(id => {
           treeMap[id].isOnLine = _res[id];
         });
-        this.realTimeMonitorService.switchDevices(deviceIdList, true);
-        this.realTimeMonitorService.subscribe(deviceIdList, ({ deviceId, isActive }) => {
-          if (deviceId === undefined || isActive === undefined) {
-            return;
-          }
-          const target = treeArr.filter(item => (['factory', 'device'].includes(item.rowType) && item.id === deviceId));
-          if (target.length > 0 && target[0].isOnLine !== !!isActive) {
-            target[0].isOnLine = !!isActive;
-          }
-        }, true);
+        this.factoryMngService.getFactoryOnlineStatus().subscribe(factory => {
+          // 初始化工厂网关整体在线状态
+          const factoryIdList = Object.keys(factory || {});
+          factoryIdList.forEach(id => {
+            treeMap[id].isOnLine = factory[id];
+          });
+          // 获取工厂下的所有网关id
+          this.factoryMngService.getFactoryGatewayIds().subscribe(gateway => {
+            const gatewayIds = [];
+            const gatewayFactoryMap = {};
+            (gateway || []).forEach(item => {
+              gatewayIds.push(...(item.gatewayDeviceIds || []));
+              (item.gatewayDeviceIds || []).forEach(gatewayId => {
+                gatewayFactoryMap[gatewayId] = item.factoryId;
+              })
+            });
+            // 订阅设备和网关状态变更
+            this.realTimeMonitorService.switchDevices([...deviceIdList, ...gatewayIds], true);
+            this.realTimeMonitorService.subscribe([...deviceIdList, ...gatewayIds], ({ deviceId, isActive }) => {
+              if (deviceId === undefined || isActive === undefined) {
+                return;
+              }
+              if (gatewayIds.includes(deviceId)) {
+                const targetFactoryId = gatewayFactoryMap[deviceId]
+                this.factoryMngService.getFactoryOnlineStatus(targetFactoryId).subscribe(_factory => {
+                  treeMap[targetFactoryId].isOnLine = (_factory || {})[targetFactoryId];
+                });
+              } else {
+                const target = treeArr.filter(item => (item.rowType === 'device' && item.id === deviceId));
+                if (target.length > 0 && target[0].isOnLine !== !!isActive) {
+                  target[0].isOnLine = !!isActive;
+                }
+              }
+            }, true);
+          });
+        });
       });
     });
   }

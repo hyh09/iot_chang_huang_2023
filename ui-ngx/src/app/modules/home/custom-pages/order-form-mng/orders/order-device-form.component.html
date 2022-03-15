@@ -15,7 +15,7 @@
             *ngFor="let device of devices"
             [nzLabel]="device.name"
             [nzValue]="device.id"
-            [nzDisabled]="device.id !== orderDeviceForm.get('deviceId').value && existDeviceIds.indexOf(device.id) > -1"
+            [nzDisabled]="existDeviceIds.indexOf(device.id) > -1"
           ></nz-option>
         </nz-select>
         <mat-error *ngIf="orderDeviceForm.dirty && orderDeviceForm.get('deviceId').hasError('required')">

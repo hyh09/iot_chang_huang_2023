@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +34,7 @@ import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.deviceoeeeveryhour.DeviceOeeEveryHourService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
+import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.InitEntity;
@@ -146,8 +148,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     // ProductionCalenderRepository
     ProductionCalenderRepository calenderRepository;
 
-    // StatisticOeeService
-    DeviceOeeEveryHourService statisticOeeService;
+    // DeviceOeeEveryHourService
+    DeviceOeeEveryHourService deviceOeeEveryHourService;
+
+    // FactoryDao
+    FactoryDao factoryDao;
 
     /**
      * 查询用户
@@ -214,7 +219,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         } else {
             predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
         }
-        query.orderBy(cb.desc(root.get("createdTime")));
+        query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
         query.where(predicates.toArray(new Predicate[0]));
 
         return DaoUtil.convertDataList(entityManager.createQuery(query).getResultList());
@@ -808,7 +813,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
             }
 
-            query.orderBy(cb.desc(root.get("createdTime")));
+            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
             return query.where(predicates.toArray(new Predicate[0])).getRestriction();
         };
     }
@@ -851,7 +856,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public List<DeviceKeyParamShiftResult> listDeviceShirtTimes(TenantId tenantId, UUID deviceId, Long startTime, Long endTime) {
         return this.calenderRepository.findAllCross(tenantId.getId(), deviceId, startTime, endTime)
-                .thenApplyAsync(calenders -> calenders.stream().map(ProductionCalenderEntity::toData)
+                .thenApplyAsync(calenders ->
+                        calenders.stream().map(ProductionCalenderEntity::toData)
                         .map(v -> DeviceKeyParamShiftResult.builder()
                                 .startTime(v.getStartTime() < startTime ? startTime : v.getStartTime())
                                 .endTime(v.getEndTime() > endTime ? endTime : v.getEndTime())
@@ -888,6 +894,64 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 查询单个工厂是否在线
+     *
+     * @param factoryId 工厂Id
+     */
+    @Override
+    public Boolean isFactoryOnline(UUID factoryId) {
+        try {
+            return factoryDao.checkoutFactoryStatus(factoryId);
+        } catch (ThingsboardException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    /**
+     * 根据当前登录人查询所在工厂在线状态
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return map
+     */
+    @Override
+    public Map<String, Boolean> getFactoryOnlineStatusMap(TenantId tenantId, UUID factoryId) throws ThingsboardException {
+        return listFactoryGatewayDevices(tenantId, factoryId).stream()
+                .map(v -> CompletableFuture.supplyAsync(() -> {
+                    var result = v.getGatewayDeviceIds().stream()
+                            .map(i -> CompletableFuture.supplyAsync(() -> this.getDeviceOnlineStatus(DeviceId.fromString(i.toString()))))
+                            .map(CompletableFuture::join)
+                            .filter(Boolean.FALSE::equals)
+                            .findAny();
+                    if (result.isPresent())
+                        return ImmutablePair.of(v.getFactoryId(), Boolean.FALSE);
+                    else
+                        return ImmutablePair.of(v.getFactoryId(), Boolean.TRUE);
+                })).map(CompletableFuture::join).collect(Collectors.toMap(v -> v.getLeft().toString(), ImmutablePair::getRight));
+    }
+
+    /**
+     * 根据当前登录人查询所在工厂下的网关设备
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 设备列表
+     */
+    @Override
+    public List<FactoryGatewayDevicesResult> listFactoryGatewayDevices(TenantId tenantId, UUID factoryId) {
+        if (factoryId == null)
+            return this.factoryRepository.findAllByTenantId(tenantId.getId())
+                    .thenCombineAsync(this.deviceRepository.findAllByTenantId(tenantId.getId()).thenApplyAsync(g -> DaoUtil.convertDataList(g).stream()
+                                    .filter(v -> v.getFactoryId() != null)
+                                    .filter(e -> e.getAdditionalInfo() != null && e.getAdditionalInfo().get("gateway") != null && "true".equals(e.getAdditionalInfo().get("gateway").asText()))
+                                    .collect(Collectors.groupingBy(Device::getFactoryId))
+                            ), (factories, map) -> factories.stream().map(FactoryEntity::toData).map(v -> new FactoryGatewayDevicesResult(v.getId(), Optional.ofNullable(map.get(v.getId())).map(j -> j.stream().map(f -> f.getId().getId()).collect(Collectors.toList())).orElse(Lists.newArrayList()))).collect(Collectors.toList())
+                    ).join();
+        else
+            return Lists.newArrayList(new FactoryGatewayDevicesResult(factoryId, DaoUtil.convertDataList(this.deviceRepository.findAllByTenantIdAndFactoryId(tenantId.getId(), factoryId).join()).stream().filter(e -> e.getAdditionalInfo() != null && e.getAdditionalInfo().get("gateway") != null && "true".equals(e.getAdditionalInfo().get("gateway").asText())).map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())));
+    }
+
+    /**
      * 查询设备oee
      *
      * @param tenantId    租户Id
@@ -896,7 +960,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      */
     @Override
     public Double getDeviceOEE(TenantId tenantId, UUID deviceId, Long currentTime) {
-        return this.formatDoubleData(this.statisticOeeService.getStatisticOeeDeviceByCurrentDay(deviceId));
+        return this.formatDoubleData(Optional.ofNullable(this.deviceOeeEveryHourService.getStatisticOeeDeviceByCurrentDay(deviceId)).orElse(BigDecimal.ZERO));
     }
 
     /**
@@ -1134,7 +1198,12 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     @Autowired
-    public void setStatisticOeeService(DeviceOeeEveryHourService statisticOeeService) {
-        this.statisticOeeService = statisticOeeService;
+    public void setDeviceOeeEveryHourService(DeviceOeeEveryHourService deviceOeeEveryHourService) {
+        this.deviceOeeEveryHourService = deviceOeeEveryHourService;
+    }
+
+    @Autowired
+    public void setFactoryDao(FactoryDao factoryDao) {
+        this.factoryDao = factoryDao;
     }
 }

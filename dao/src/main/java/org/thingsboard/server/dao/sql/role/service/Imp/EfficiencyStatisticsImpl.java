@@ -131,6 +131,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         List<DictDeviceGroupPropertyVO>    capList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.CAPACITY_001.getgName());
         capList.stream().forEach(dataVo->{
+            dataVo.setTitle(KeyTitleEnums.key_capacity.getAbbreviationName());
             strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
 
         });
@@ -596,11 +597,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo) {
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryTodayEffceency(vo);
-//        log.info("打印查询的入参{}",vo);
-//        log.info("打印查询的结果{}",entities);
-      return    dataVoToResultEnergyTopTenVo(entities,vo);
-
+        List<ResultEnergyTopTenVo>  resultEnergyTopTenVoList=   dataVoToResultEnergyTopTenVo(entities,vo);
+        return  ResultEnergyTopTenVo.compareToMaxToMin(resultEnergyTopTenVoList);
     }
+
+
 
 
 
@@ -827,6 +828,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),StringUtilToll.roundUp(vo.getWaterAddedValue()));//耗水量 (T)
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),StringUtilToll.roundUp(vo.getElectricAddedValue()));//耗电量 (KWH)
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),StringUtilToll.roundUp(vo.getGasAddedValue()));//耗气量 (T)
+
+
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_capacity,true),StringUtilToll.roundUp(vo.getCapacityAddedValue()));//耗气量 (T)
 
             String   capacityValue =vo.getCapacityAddedValue();
@@ -853,7 +856,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  String setKeyTitle(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,KeyTitleEnums  enums,Boolean  type)
     {
         DictDeviceGroupPropertyVO  groupPropertyVO =   mapNameToVo.get(enums.getgName());
-        if(type )
+        if(enums == KeyTitleEnums.key_capacity)
+        {
+            groupPropertyVO.setTitle(enums.getAbbreviationName());
+        }
+       if(type )
         {
           return   getHomeKeyNameOnlyUtilNeW(groupPropertyVO);
         }
@@ -875,7 +882,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      {
          firstTime =0L;
      }
-        Long t3 = (lastTime - firstTime) / 60000;
+       // Long t3 = (lastTime - firstTime) / 60000;
+        Long t3=1L;
         String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
         return  aDouble;
     }
@@ -1138,6 +1146,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         Map<String,List<ResultRunStatusByDeviceVo>>   map1 =   keyNameNotFound(keyNames,map);
 
         List<RunningStateVo>   runningStateVoList =   parameterVo.getAttributeParameterList();//入参
+        logInfoJson("打印【runningStateVoList】",runningStateVoList);
         runningStateVoList.stream().forEach(m1 ->{
             OutRunningStateVo  outRunningStateVo = new OutRunningStateVo();
             outRunningStateVo.setTableName(m1.getTitle());//如果是属性就是属性的名称
@@ -1146,13 +1155,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 //代表属性
                 if(StringUtils.isBlank(m1.getChartId())) {
                     OutOperationStatusChartDataVo  vo = new  OutOperationStatusChartDataVo();
+                    vo.setTitle(m1.getTitle());
+                    vo.setUnit(m1.getUnit());
                     List<OutOperationStatusChartTsKvDataVo> tsKvs = new ArrayList<>();
                     List<ResultRunStatusByDeviceVo> runStatusByDeviceVos = map1.get(m1.getName());
                     tsKvs = runStatusByDeviceVos.stream().map(m2 -> {
                         outRunningStateVo.setKeyName(m2.getKeyName());
                         vo.setName(m2.getKeyName());
-                        vo.setTitle(m1.getTitle());
-                        vo.setUnit(m1.getUnit());
                         OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
                         tsKvDataVo.setTs(m2.getTime());
                         tsKvDataVo.setValue(m2.getValue());

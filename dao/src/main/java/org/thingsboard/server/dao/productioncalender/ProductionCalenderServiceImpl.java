@@ -176,10 +176,11 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 BigDecimal time = new BigDecimal(0);
                 //生产日历时间
                 List<ProductionCalender> historyList = productionCalenderDao.getHistoryByDeviceId(deviceId);
+                Map<String, Long> mapTime = null;
                 if (!CollectionUtils.isEmpty(historyList)) {
                     for (ProductionCalender pc : historyList) {
-                        Map<String, Long> mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
-                        time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
+                        mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
+                        time = time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
                     }
                 }
                 //单个设备 预计产量
@@ -189,7 +190,7 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 if(deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0){
                     resultProductionCalender.setYearAchieve("0");
                 }else {
-                    resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict).toString());
+                    resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict,2, BigDecimal.ROUND_HALF_UP).toString());
                 }
 
                 //4.生产状态

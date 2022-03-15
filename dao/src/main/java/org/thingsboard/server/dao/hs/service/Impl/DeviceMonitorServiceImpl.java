@@ -1138,7 +1138,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                                     total += (f.getLeft().getEndTime() - cTime);
                                                 return DeviceTimeBO.builder().startingUpTime((f.getLeft().getEndTime() - f.getLeft().getStartTime()) - total).shutdownTime(total).build();
                                             }
-                                        })).map(CompletableFuture::join).reduce(new DeviceTimeBO(), (r, e) -> {
+                                        })).map(CompletableFuture::join).reduce(DeviceTimeBO.builder().shutdownTime(0L).startingUpTime(0L).build(), (r, e) -> {
                                             r.setStartingUpTime(r.getStartingUpTime() + e.getStartingUpTime());
                                             r.setShutdownTime(r.getShutdownTime() + e.getShutdownTime());
                                             return r;

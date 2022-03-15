@@ -10,7 +10,7 @@ public enum KeyTitleEnums {
     key_water("水","耗水量","1","1"), //水
     key_gas("气","耗气量","2","3"),//气
     key_cable("电","耗电量","3","2"),//电
-   key_capacity("总产量","总产量","0",""),//总产能
+   key_capacity("产量","总产量","0",""),//总产能
 
 
 
