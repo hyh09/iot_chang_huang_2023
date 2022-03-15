@@ -531,7 +531,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery) {
-        return this.orderPlanRepository.findAllByTenantIdAndActualStartTimeLessThanEqualAndActualEndTimeGreaterThanEqual(tenantId.getId(), timeQuery.getStartTime(), timeQuery.getEndTime())
+        return this.orderPlanRepository.findAllByTenantIdAndActualStartTimeGreaterThanEqualAndActualEndTimeLessThanEqual(tenantId.getId(), timeQuery.getStartTime(), timeQuery.getEndTime())
                 .thenApplyAsync(plans -> plans.stream().map(OrderPlanEntity::getOrderId).collect(Collectors.toSet()))
                 .thenApplyAsync(ids -> {
                     if (factoryId != null) {
