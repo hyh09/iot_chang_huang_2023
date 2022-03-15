@@ -131,6 +131,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
         List<DictDeviceGroupPropertyVO>    capList= deviceDictPropertiesSvc.findAllDictDeviceGroupVO(EfficiencyEnums.CAPACITY_001.getgName());
         capList.stream().forEach(dataVo->{
+            dataVo.setTitle(KeyTitleEnums.key_capacity.getAbbreviationName());
             strings.add(getHomeKeyNameOnlyUtilNeW(dataVo));
 
         });
@@ -827,6 +828,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_water,true),StringUtilToll.roundUp(vo.getWaterAddedValue()));//耗水量 (T)
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_cable,true),StringUtilToll.roundUp(vo.getElectricAddedValue()));//耗电量 (KWH)
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_gas,true),StringUtilToll.roundUp(vo.getGasAddedValue()));//耗气量 (T)
+
+
             map.put(setKeyTitle(mapNameToVo,KeyTitleEnums.key_capacity,true),StringUtilToll.roundUp(vo.getCapacityAddedValue()));//耗气量 (T)
 
             String   capacityValue =vo.getCapacityAddedValue();
@@ -853,7 +856,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  String setKeyTitle(Map<String,DictDeviceGroupPropertyVO>  mapNameToVo,KeyTitleEnums  enums,Boolean  type)
     {
         DictDeviceGroupPropertyVO  groupPropertyVO =   mapNameToVo.get(enums.getgName());
-        if(type )
+        if(enums == KeyTitleEnums.key_capacity)
+        {
+            groupPropertyVO.setTitle(enums.getAbbreviationName());
+        }
+       if(type )
         {
           return   getHomeKeyNameOnlyUtilNeW(groupPropertyVO);
         }
@@ -875,7 +882,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      {
          firstTime =0L;
      }
-        Long t3 = (lastTime - firstTime) / 60000;
+       // Long t3 = (lastTime - firstTime) / 60000;
+        Long t3=1L;
         String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
         return  aDouble;
     }
@@ -1298,7 +1306,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.info("打印【"+str+"】数据结果:"+json);
+            log.debug("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
