@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
+import org.thingsboard.server.dao.sql.tskv.service.EnergyHistoryHourService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
 import org.thingsboard.server.dao.timeseries.TimeseriesLatestDao;
 import org.thingsboard.server.dao.util.JsonUtils;
@@ -36,6 +37,8 @@ public class KafkaConsumerListener {
     private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
     @Autowired
     private TimeseriesLatestDao timeseriesLatestDao;
+    @Autowired
+    private EnergyHistoryHourService energyHistoryHourService;
 
     @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
     public void kafkaListener(String message) {
@@ -52,6 +55,7 @@ public class KafkaConsumerListener {
             statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
 //            energyHistoryMinuteSvc.saveByMinute( entityId,dataBodayVo,title);
             energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
+            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
 
             Long endTime = System.currentTimeMillis();
             Long tempTime = (endTime - startTime);

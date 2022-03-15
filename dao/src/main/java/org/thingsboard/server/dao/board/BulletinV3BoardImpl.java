@@ -2,7 +2,7 @@ package org.thingsboard.server.dao.board;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
@@ -29,10 +29,7 @@ import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -103,6 +100,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
     public TrendChart02Vo trendChart(TrendParameterVo vo, TenantId tenantId) {
         TrendChart02Vo  trendVo = new TrendChart02Vo();
         List<EnergyChartOfBoardEntity> solidLineData = boardTrendChartRepositoryNewMethon.getSolidTrendLine(vo);
+        print("打印日志solidLineData:{} ",solidLineData);
         Map<String, DictDeviceGroupPropertyVO>  map = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
         String namekey = map.get(KeyTitleEnums.getNameByCode(vo.getKey())).getName();
         List<String> name = new ArrayList<String>();
@@ -117,7 +115,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
     {
         DashboardV3Vo  vo1 = new DashboardV3Vo();
         DictDeviceGroupPropertyVO  dictVo =  map.get(enums.getgName());
-        vo1.setName(enums.getgName());
+        vo1.setName(enums.getAbbreviationName());
         vo1.setStandardValue(stringStringMap.get(dictVo.getName()));
         vo1.setActualValue(actulValue);
         vo1.setUnit(dictVo.getUnit());
@@ -167,49 +165,11 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
      */
     private List<TrendLineVo> getSolidLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData)
     {
-        Map<Long,List<EnergyChartOfBoardEntity> >  longListMap = new HashMap<>();
-        List<TrendLineVo>  trendLineVos = new ArrayList<>();
-
-        print("打印查询的数据", solidLineData);
-         solidLineData.stream().forEach(m1->{
-             Long hours=  CommonUtils.getConversionHours(m1.getTs());
-             List<EnergyChartOfBoardEntity>   list= new ArrayList<>() ;
-             List<EnergyChartOfBoardEntity>  ofBoardEntities =  longListMap.get(hours);
-             if(CollectionUtils.isNotEmpty(ofBoardEntities))
-             {
-                 list.addAll(ofBoardEntities);
-             }
-             list.add(m1);
-             longListMap.put(hours,list);
-         });
-
-         //每小时的运算
-        longListMap.forEach((k1,v2)->{
-            TrendLineVo  trendLineVo = new  TrendLineVo();
-            trendLineVo.setTime(k1);
-            List<EnergyChartOfBoardEntity>  list1=   v2;
-                //每小时的产能加起来
-                String capValue =  StringUtilToll.accumulator(list1.stream().map(EnergyChartOfBoardEntity::getCapacityAddedValue).collect(Collectors.toList()));
-                //每小时的水加起来
-                String value =  StringUtilToll.accumulator(list1.stream().map(m1->{
-                if(KeyTitleEnums.getEnumsByCode(vo.getKey() )== KeyTitleEnums.key_water)
-                {
-                    return m1.getWaterAddedValue();
-                }else if(KeyTitleEnums.getEnumsByCode(vo.getKey() )== KeyTitleEnums.key_gas) {
-                    return m1.getGasAddedValue();
-                }
-                return m1.getElectricAddedValue();
-                }).collect(Collectors.toList()));
-                //每小时的水 除以  每小时的产能 =单位能耗
-                trendLineVo.setValue(StringUtilToll.div(value,capValue));
-            trendLineVos.add(trendLineVo);
-
-        });
-
-
-
-         return  trendLineVos;
-
+        List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime(), Calendar.HOUR,1);
+        Map<Long, List<EnergyChartOfBoardEntity>> map = solidLineData.stream().collect(Collectors.groupingBy(EnergyChartOfBoardEntity::getTs));
+        Map<Long, String> longStringMap = solid(map, vo.getKey());
+        print("longStringMap打印的===>",longStringMap);
+        return   fillReturnData(longs,longStringMap);
     }
 
 
@@ -218,11 +178,65 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         try {
             ObjectMapper mapper=new ObjectMapper();
             String jsonStr=mapper.writeValueAsString(obj);
-            log.info("[json]"+str+jsonStr);
+            log.debug("[json]"+str+jsonStr);
         }catch (Exception e)
         {
             log.info(str+obj);
         }
+    }
+
+
+
+    /**
+     * 处理实线的数据
+     * @param map
+     * @param key
+     * @return
+     */
+    private  Map<Long,String> solid(Map<Long,List<EnergyChartOfBoardEntity>> map, String  key)
+    {
+        KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(key);
+        Map<Long,String> mapValue = new HashMap<>();
+        map.forEach((k1,v2)->{
+            mapValue.put(k1,getTotalValue(v2,enums));
+
+        });
+        return  mapValue;
+
+    }
+
+
+
+    /**
+     * 计算值 实线的数据
+     * @param pageList
+     * @param enums
+     * @return
+     */
+    public String getTotalValue(List<EnergyChartOfBoardEntity> pageList, KeyTitleEnums enums) {
+
+        String capValue =  StringUtilToll.accumulator(pageList.stream().map(EnergyChartOfBoardEntity::getCapacityAddedValue).collect(Collectors.toList()));
+        String value =  StringUtilToll.accumulator(pageList.stream().map(m1->{
+            if(enums== KeyTitleEnums.key_water)
+            {
+                return m1.getWaterAddedValue();
+            }else if(enums == KeyTitleEnums.key_gas) {
+                return m1.getGasAddedValue();
+            }
+            return m1.getElectricAddedValue();
+        }).collect(Collectors.toList()));
+        return  StringUtilToll.div(value,capValue);
+    }
+
+    private   List<TrendLineVo> fillReturnData(List<Long> longs,Map<Long, String> longStringMap ){
+        List<TrendLineVo> trendLineVos = longs.stream().map(ts -> {
+            TrendLineVo trendLineVo = new TrendLineVo();
+            trendLineVo.setTime(ts);
+            String value = longStringMap.get(ts);
+            trendLineVo.setValue(StringUtils.isEmpty(value) ? "0" : value);
+            return trendLineVo;
+        }).collect(Collectors.toList());
+        return  trendLineVos;
     }
 
 

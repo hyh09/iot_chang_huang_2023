@@ -1,10 +1,12 @@
-package org.thingsboard.server.dao.statisticoee;
+package org.thingsboard.server.dao.deviceoeeeveryhour;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.deviceoeeeveryhour.DeviceOeeEveryHour;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
@@ -24,7 +26,7 @@ import java.util.*;
  */
 @Service
 @Slf4j
-public class StatisticOeeServiceImpl implements StatisticOeeService {
+public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService {
 
     @Autowired
     private BulletinBoardSvc bulletinBoardSvc;
@@ -34,8 +36,62 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
 
     @Autowired
     private DeviceDao deviceDao;
+
     @Autowired
     private ProductionCalenderDao productionCalenderDao;
+
+    @Autowired
+    private DeviceOeeEveryHourDao deviceOeeEveryHourDao;
+
+
+    /**
+     * 定时任务
+     * 定时每天晚上24点
+     * 执行统计当天设备每个小时OEE
+     */
+    @Scheduled(cron = "59 59 23 * * ?")
+    public void statisticOeeByTimedTask() {
+        log.info("[statisticOeeByTimedTask]统计前一天每个设备每个小时OEE的定时任务执行啦！！！");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long cu = System.currentTimeMillis();//当前时间毫秒数
+        long startTime = cu / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+        long endTime = startTime + 24 * 60 * 60 * 1000 - 1;//今天23点59分59秒的毫秒数
+        log.info("当前任务开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(cu)))));
+        log.info("OEE开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(startTime)))));
+        log.info("OEE结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(endTime)))));
+        this.statisticOeeByTimedTask(startTime,endTime);
+        log.info("[statisticOeeByTimedTask]统计前一天每个设备每个小时OEE的定时任务执行完成 !!!：" );
+        log.info("当前任务结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis())))));
+    }
+
+    /**
+     * 统计所有设备
+     * @param startTime
+     * @param endTime
+     */
+    public void statisticOeeByTimedTask(Long startTime,Long endTime){
+        Device device = new Device();
+        device.setFilterGatewayFlag(true);
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
+        if (!CollectionUtils.isEmpty(deviceListByCdn)) {
+            //按小时拆分时间区间
+            List<Long> dateList = this.cutDate(startTime, endTime);
+            for (Device deviceIter:deviceListByCdn) {
+                List<StatisticOee> statisticOees = this.statisticOeeDeviceEveryHour(dateList, deviceIter.getId().getId());
+                if(!CollectionUtils.isEmpty(statisticOees)){
+                    for (StatisticOee o :statisticOees) {
+                        try {
+                            deviceOeeEveryHourDao.save(new DeviceOeeEveryHour(deviceIter.getId().getId(),o.getStartTime(),o.getOeeValue(),device.getTenantId().getId()));
+                        } catch (ThingsboardException e) {
+                            log.error("保存OEE报错！",e);
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 
 
     /**
@@ -49,14 +105,14 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
     public BigDecimal getStatisticOeeDeviceByCurrentDay(UUID deviceId) {
         BigDecimal oeeValue = new BigDecimal(0);
         //获取当天时间戳
-        long cu=System.currentTimeMillis();//当前时间毫秒数
-        long zero=cu/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-        long twelve=zero+24*60*60*1000-1;//今天23点59分59秒的毫秒数
-        long yesterday=System.currentTimeMillis()-24*60*60*1000;//昨天的这一时间的毫秒数
+        long cu = System.currentTimeMillis();//当前时间毫秒数
+        long zero = cu / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+        long twelve = zero + 24 * 60 * 60 * 1000 - 1;//今天23点59分59秒的毫秒数
+        long yesterday = System.currentTimeMillis() - 24 * 60 * 60 * 1000;//昨天的这一时间的毫秒数
         if (deviceId != null) {
             //1.判断设备当天班次是否结束
 
-            List<ProductionCalender> deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId,zero,twelve);
+            List<ProductionCalender> deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId, zero, twelve);
             if (!CollectionUtils.isEmpty(deviceByCurrentDay)) {
                 if (cu >= deviceByCurrentDay.get(0).getEndTime()) {
                     for (int i = 0; i < deviceByCurrentDay.size(); i++) {
@@ -64,7 +120,7 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
                     }
                 } else {
                     //取昨天
-                    deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId,yesterday,zero);
+                    deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId, yesterday, zero);
                     if (cu >= deviceByCurrentDay.get(0).getEndTime()) {
                         for (int i = 0; i < deviceByCurrentDay.size(); i++) {
                             oeeValue.add(this.getDeviceOeeValue(deviceId, deviceByCurrentDay.get(i).getStartTime(), deviceByCurrentDay.get(i).getEndTime()));
@@ -79,14 +135,32 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
 
 
     /**
-     * OEE计算，返回每小时的值
-     *
+     * 查询OEE计算历史，返回每小时的值
      * @param statisticOee
      * @return
      * @throws ThingsboardException
      */
     @Override
     public List<StatisticOee> getStatisticOeeEveryHourList(StatisticOee statisticOee) throws ThingsboardException {
+        List<StatisticOee> statisticOeeList = new ArrayList<>();
+        List<DeviceOeeEveryHour> deviceOeeEveryHours = deviceOeeEveryHourDao.findAllByCdn(new DeviceOeeEveryHour(statisticOee), "ts", "ASC");
+        if(!CollectionUtils.isEmpty(deviceOeeEveryHours)){
+            for (DeviceOeeEveryHour iter:deviceOeeEveryHours ) {
+                statisticOeeList.add(new StatisticOee(iter.getTs(),iter.getOeeValue()));
+            }
+        }
+        return statisticOeeList;
+    }
+
+
+    /**
+     * 查询OEE实时数据，返回每小时的值
+     * @param statisticOee
+     * @return
+     * @throws ThingsboardException
+     */
+    @Override
+    public List<StatisticOee> getStatisticOeeListByRealTime(StatisticOee statisticOee) throws ThingsboardException {
         List<StatisticOee> result = new ArrayList<>();
         //按小时拆分时间区间
         List<Long> dateList = this.cutDate(statisticOee.getStartTime(), statisticOee.getEndTime());
@@ -99,6 +173,7 @@ public class StatisticOeeServiceImpl implements StatisticOeeService {
         }
         return result;
     }
+
 
     /**
      * 查设备

@@ -687,22 +687,30 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
 
     @Override
     public String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime) {
-        BigDecimal sumActual = new BigDecimal(0);
+        BigDecimal intended = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByDeviceId(deviceId,startTime,endTime);
         if(!CollectionUtils.isEmpty(orderPlanEntityList)){
-            orderPlanEntityList.forEach(i->{
-                String actualCapacity = i.getActualCapacity();
-                if(StringUtils.isNotEmpty(actualCapacity)){
-                    sumActual.add(new BigDecimal(actualCapacity));
+            for(OrderPlanEntity o : orderPlanEntityList){
+                if(StringUtils.isNotEmpty(o.getIntendedCapacity())){
+                    intended = intended.add(new BigDecimal(o.getIntendedCapacity()));
                 }
-            });
+            };
         }
-        return sumActual.toString();
+       return intended.toString();
     }
 
     @Override
     public String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime) {
-       return null;
+        BigDecimal actual = new BigDecimal(0);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByDeviceId(deviceId,startTime,endTime);
+        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+            for(OrderPlanEntity o : orderPlanEntityList){
+                if(StringUtils.isNotEmpty(o.getActualCapacity())){
+                    actual = actual.add(new BigDecimal(o.getActualCapacity()));
+                }
+            };
+        }
+        return actual.toString();
     }
 
 
