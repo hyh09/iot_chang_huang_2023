@@ -245,6 +245,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         StringBuffer  sql = new StringBuffer();
         StringBuffer  sonSql01 = new StringBuffer();
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
+        StringBuffer  orderSql  = new StringBuffer();
         sql.append(" select h1.date,h1.entity_id,d1.name,h1.water_added_value,h1.gas_added_value,h1.electric_added_value,h1.capacity_added_value  ")
                 .append(" from  hs_statistical_data h1 ,device d1")
                 .append("  where h1.entity_id =d1.id  ")
@@ -253,20 +254,36 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         if(vo.getType().equals("0")){
             sql.append(" and  d1.flg = true");
             sql.append(" ORDER BY to_number(h1.capacity_added_value,'99999999999999999999999999.9999') DESC ");
+            orderSql.append(" ORDER BY t2.capacity_added_value ");
         }else {
             KeyTitleEnums enums = KeyTitleEnums.getEnumsByPCCode(vo.getKeyNum());
             if (enums == KeyTitleEnums.key_water) {
                 sql.append(" ORDER BY to_number(h1.water_added_value,'99999999999999999999999999.9999') DESC ");
+                orderSql.append(" ORDER BY t2.water_added_value ");
             }
             if (enums == KeyTitleEnums.key_cable) {
                 sql.append(" ORDER BY to_number(h1.electric_added_value,'99999999999999999999999999.9999') DESC ");
+                orderSql.append(" ORDER BY t2.electric_added_value ");
+
             }
             if (enums == KeyTitleEnums.key_gas) {
                 sql.append(" ORDER BY to_number(h1.gas_added_value,'99999999999999999999999999.9999') DESC ");
+                orderSql.append(" ORDER BY t2.gas_added_value ");
+
             }
         }
         sql.append("  LIMIT 10 ");
-        List<CensusSqlByDayEntity>   list  = querySql(sql.toString(),param, "censusSqlByDayEntity_02");
+        StringBuffer  sqlAll = new StringBuffer();
+        sqlAll.append(" with table01 as (").append(sql).append(")")
+               .append(" select d1.id as entity_id ,d1.name ,t2.date,t2.water_added_value,t2.gas_added_value,t2.electric_added_value,t2.capacity_added_value")
+               .append(" from device d1 left JOIN table01 t2  on d1.id=t2.entity_id where 1=1 ");
+        sqlAll.append(sonSql01);
+        if(vo.getType().equals("0"))
+        {
+            sqlAll.append(" and   d1.flg = true");
+        }
+        sqlAll.append(orderSql).append(" limit 10");
+        List<CensusSqlByDayEntity>   list  = querySql(sqlAll.toString(),param, "censusSqlByDayEntity_02");
         return  list;
     }
 
