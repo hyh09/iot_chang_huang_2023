@@ -23,16 +23,33 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
 
     Optional<OrderPlanEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
-    @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.maintainStartTime is not null and p.maintainEndTime is not null and (p.maintainEndTime >= :startTime or p.maintainStartTime <= :endTime)")
-    List<OrderPlanEntity> findAllByIntendedTimeIn(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
-
     @Async
-    @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.maintainStartTime is not null and p.maintainEndTime is not null and (p.maintainEndTime >= :startTime or p.maintainStartTime <= :endTime)")
+    @Query("select p2 " +
+            "from OrderPlanEntity p2 " +
+            "where p2.tenantId = :tenantId and " +
+            "p2.deviceId = :deviceId and " +
+            "p2.maintainStartTime is not null and " +
+            "p2.maintainEndTime is not null and " +
+            "p2.id not in ( select p1.id from OrderPlanEntity p1 where " +
+            "p1.tenantId = :tenantId and " +
+            "p1.deviceId = :deviceId and " +
+            "p1.maintainStartTime is not null and " +
+            "p1.maintainEndTime is not null and (p1.maintainEndTime < :startTime or p1.maintainStartTime > :endTime))")
     CompletableFuture<List<OrderPlanEntity>> findAllMaintainTimeCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
 
 
     @Async
-    @Query("select p from OrderPlanEntity p where p.tenantId = :tenantId and p.deviceId = :deviceId and p.actualStartTime is not null and p.actualEndTime is not null and (p.actualEndTime >= :startTime or p.actualStartTime <= :endTime)")
+    @Query("select p2 " +
+            "from OrderPlanEntity p2 " +
+            "where p2.tenantId = :tenantId and " +
+            "p2.deviceId = :deviceId and " +
+            "p2.actualStartTime is not null and " +
+            "p2.actualEndTime is not null and " +
+            "p2.id not in ( select p1.id from OrderPlanEntity p1 where " +
+            "p1.tenantId = :tenantId and " +
+            "p1.deviceId = :deviceId and " +
+            "p1.actualStartTime is not null and " +
+            "p1.actualEndTime is not null and (p1.actualEndTime < :startTime or p1.actualStartTime > :endTime))")
     CompletableFuture<List<OrderPlanEntity>> findAllActualTimeCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
 
     @Async

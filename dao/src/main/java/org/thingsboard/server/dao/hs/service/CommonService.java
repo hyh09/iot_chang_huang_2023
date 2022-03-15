@@ -40,7 +40,7 @@ public interface CommonService {
      * 毫秒转换成小时
      */
     default double toDoubleHour(Long time) {
-        if (time == null || time == 0)
+        if (time == null || time == 0L)
             return 0d;
         return BigDecimal.valueOf(time / (1000 * 60 * 60.0d)).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().doubleValue();
     }
@@ -49,7 +49,7 @@ public interface CommonService {
      * 毫秒转换成小时
      */
     default BigDecimal toDecimalHour(Long time) {
-        if (time == null || time == 0)
+        if (time == null || time == 0L)
             return BigDecimal.ZERO;
         return BigDecimal.valueOf(time / (1000 * 60 * 60.0d));
     }

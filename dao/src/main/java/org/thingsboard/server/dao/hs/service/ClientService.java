@@ -398,4 +398,29 @@ public interface ClientService {
      * @param endTime   结束时间
      */
     List<ProductionCalender> listProductionCalenders(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * 查询单个工厂是否在线
+     *
+     * @param factoryId 工厂Id
+     */
+    Boolean isFactoryOnline(UUID factoryId);
+
+    /**
+     * 根据当前登录人查询所在工厂在线状态
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return map
+     */
+    Map<String, Boolean> getFactoryOnlineStatusMap(TenantId tenantId, UUID factoryId) throws ThingsboardException;
+
+    /**
+     * 根据当前登录人查询所在工厂下的网关设备
+     *
+     * @param tenantId  租户Id
+     * @param factoryId 工厂Id
+     * @return 设备列表
+     */
+    List<FactoryGatewayDevicesResult> listFactoryGatewayDevices(TenantId tenantId, UUID factoryId);
 }
