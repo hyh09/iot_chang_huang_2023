@@ -42,7 +42,7 @@ public class JpaDeviceOeeEveryHourDao implements DeviceOeeEveryHourDao {
             entity.setCreatedTime(Uuids.unixTimestamp(uuid));
         }
         if (deviceOeeEveryHour.getFactoryId() == null) {
-            Device deviceInfo = deviceDao.getDeviceInfo(deviceOeeEveryHour.getDeviceId());
+            Device deviceInfo = deviceDao.findById(deviceOeeEveryHour.getDeviceId());
             entity.setFactoryAndWorkshopAndProductionLine(deviceInfo.getFactoryId(), deviceInfo.getWorkshopId(), deviceInfo.getProductionLineId());
         }
         //查询设备当前时间是否已存在数据，存在则覆盖
