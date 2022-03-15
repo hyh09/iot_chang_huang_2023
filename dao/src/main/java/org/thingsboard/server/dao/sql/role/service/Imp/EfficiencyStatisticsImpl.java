@@ -1138,6 +1138,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         Map<String,List<ResultRunStatusByDeviceVo>>   map1 =   keyNameNotFound(keyNames,map);
 
         List<RunningStateVo>   runningStateVoList =   parameterVo.getAttributeParameterList();//入参
+        logInfoJson("打印【runningStateVoList】",runningStateVoList);
         runningStateVoList.stream().forEach(m1 ->{
             OutRunningStateVo  outRunningStateVo = new OutRunningStateVo();
             outRunningStateVo.setTableName(m1.getTitle());//如果是属性就是属性的名称
@@ -1146,13 +1147,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 //代表属性
                 if(StringUtils.isBlank(m1.getChartId())) {
                     OutOperationStatusChartDataVo  vo = new  OutOperationStatusChartDataVo();
+                    vo.setTitle(m1.getTitle());
+                    vo.setUnit(m1.getUnit());
                     List<OutOperationStatusChartTsKvDataVo> tsKvs = new ArrayList<>();
                     List<ResultRunStatusByDeviceVo> runStatusByDeviceVos = map1.get(m1.getName());
                     tsKvs = runStatusByDeviceVos.stream().map(m2 -> {
                         outRunningStateVo.setKeyName(m2.getKeyName());
                         vo.setName(m2.getKeyName());
-                        vo.setTitle(m1.getTitle());
-                        vo.setUnit(m1.getUnit());
                         OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
                         tsKvDataVo.setTs(m2.getTime());
                         tsKvDataVo.setValue(m2.getValue());
@@ -1297,7 +1298,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.debug("打印【"+str+"】数据结果:"+json);
+            log.info("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
