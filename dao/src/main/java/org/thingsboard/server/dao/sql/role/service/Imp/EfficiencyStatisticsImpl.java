@@ -597,11 +597,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Override
     public List<ResultEnergyTopTenVo> queryPcResultEnergyTopTenVo(PcTodayEnergyRaningVo vo) {
         List<CensusSqlByDayEntity>  entities =  effciencyAnalysisRepository.queryTodayEffceency(vo);
-//        log.info("打印查询的入参{}",vo);
-//        log.info("打印查询的结果{}",entities);
-      return    dataVoToResultEnergyTopTenVo(entities,vo);
-
+        List<ResultEnergyTopTenVo>  resultEnergyTopTenVoList=   dataVoToResultEnergyTopTenVo(entities,vo);
+        return  ResultEnergyTopTenVo.compareToMaxToMin(resultEnergyTopTenVoList);
     }
+
+
 
 
 
