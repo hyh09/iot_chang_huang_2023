@@ -3,12 +3,9 @@ package org.thingsboard.server.dao.hs.service.Impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.nimbusds.openid.connect.sdk.federation.entities.EntityID;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,6 +31,7 @@ import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesService;
+import org.thingsboard.server.dao.deviceoeeeveryhour.DeviceOeeEveryHourService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.factory.FactoryService;
 import org.thingsboard.server.dao.hs.HSConstants;
@@ -67,7 +65,6 @@ import org.thingsboard.server.dao.sql.workshop.WorkshopRepository;
 import org.thingsboard.server.dao.sqlts.dictionary.TsKvDictionaryRepository;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
-import org.thingsboard.server.dao.statisticoee.StatisticOeeService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.persistence.EntityManager;
@@ -150,7 +147,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     ProductionCalenderRepository calenderRepository;
 
     // StatisticOeeService
-    StatisticOeeService statisticOeeService;
+    DeviceOeeEveryHourService statisticOeeService;
 
     /**
      * 查询用户
@@ -1137,7 +1134,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     @Autowired
-    public void setStatisticOeeService(StatisticOeeService statisticOeeService) {
+    public void setStatisticOeeService(DeviceOeeEveryHourService statisticOeeService) {
         this.statisticOeeService = statisticOeeService;
     }
 }

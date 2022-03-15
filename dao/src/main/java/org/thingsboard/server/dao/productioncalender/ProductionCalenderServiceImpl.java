@@ -142,6 +142,7 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
         deviceParam.setTenantId(new TenantId(tenantId));
         deviceParam.setFactoryId(factoryId);
         deviceParam.setWorkshopId(workshopId);
+        deviceParam.setFilterGatewayFlag(true);
         List<Device> deviceList = deviceService.findDeviceListByCdn(deviceParam);
 
         if (!CollectionUtils.isEmpty(deviceList)) {
@@ -199,7 +200,9 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
             });
         }
 
-        resultProductionCalenders.stream().sorted(Comparator.comparing(ProductionCalender::getAchieveOrPlan).reversed()).collect(Collectors.toList());
+        //resultProductionCalenders.stream().sorted(Comparator.comparing(ProductionCalender::getAchieveOrPlan).reversed()).collect(Collectors.toList());
+        resultProductionCalenders.stream().sorted(Comparator.comparing(ProductionCalender::getProductionState)
+                .thenComparing(ProductionCalender::getAchieveOrPlan,Comparator.reverseOrder()));
         return resultProductionCalenders;
     }
 

@@ -2388,7 +2388,9 @@
       "numeric": "数字",
       "string": "字符串",
       "value-type": "值类型"
-    }
+    },
+    "inherit-owner": "从所属者继承",
+    "source-attribute-not-set": "如果源属性未设置"
   },
   "firmware": {
     "add": "添加固件",

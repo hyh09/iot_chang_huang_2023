@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,14 +19,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Api(value = "计算OEEController", tags = {"OEE计算"})
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/statisticoee")
-public class StatisticOeeController extends BaseController {
+public class DeviceOeeEveryHourController extends BaseController {
 
-    @ApiOperation("OEE计算，返回每小时的值")
+    @ApiOperation("查询OEE计算历史，返回每小时的值")
     //@ApiImplicitParam(name = "dto", value = "入参", dataType = "StatisticOeeQry", paramType = "query")
     @RequestMapping(value = "/dp/getStatisticOeeList", method = RequestMethod.GET)
     @ResponseBody
@@ -33,7 +35,7 @@ public class StatisticOeeController extends BaseController {
         List<StatisticOeeVo> result = new ArrayList<>();
         checkParameterChinees("startTime",dto.getStartTime());
         checkParameterChinees("endTime",dto.getEndTime());
-        List<StatisticOee> statisticOees = statisticOeeService.getStatisticOeeEveryHourList(dto.toStatisticOee(getCurrentUser().getTenantId().getId()));
+        List<StatisticOee> statisticOees = deviceOeeEveryHourService.getStatisticOeeEveryHourList(dto.toStatisticOee(getCurrentUser().getTenantId().getId()));
         if (!org.springframework.util.CollectionUtils.isEmpty(statisticOees)) {
             for (StatisticOee oee : statisticOees) {
                 result.add(new StatisticOeeVo(oee));
@@ -41,6 +43,26 @@ public class StatisticOeeController extends BaseController {
         }
         return result;
     }
+
+
+    @ApiOperation("实时查询OEE计算，返回每小时的值")
+    //@ApiImplicitParam(name = "dto", value = "入参", dataType = "StatisticOeeQry", paramType = "query")
+    @RequestMapping(value = "/dp/getStatisticOeeListByRealTime", method = RequestMethod.GET)
+    @ResponseBody
+    public List<StatisticOeeVo> getStatisticOeeListByRealTime(StatisticOeeQry dto) throws ThingsboardException {
+        List<StatisticOeeVo> result = new ArrayList<>();
+        checkParameterChinees("startTime",dto.getStartTime());
+        checkParameterChinees("endTime",dto.getEndTime());
+        List<StatisticOee> statisticOees = deviceOeeEveryHourService.getStatisticOeeListByRealTime(dto.toStatisticOee(getCurrentUser().getTenantId().getId()));
+        if (!org.springframework.util.CollectionUtils.isEmpty(statisticOees)) {
+            for (StatisticOee oee : statisticOees) {
+                result.add(new StatisticOeeVo(oee));
+            }
+        }
+        return result;
+    }
+
+
     /**
      * 查询设备当天OEE
      * 设备当天OEE需班次时间结束后运算，当天班次未结束取前一天的值
@@ -53,7 +75,17 @@ public class StatisticOeeController extends BaseController {
     @RequestMapping(value = "/dp/getStatisticOeeDeviceByCurrentDay", method = RequestMethod.GET)
     @ResponseBody
     public BigDecimal getStatisticOeeDeviceByCurrentDay(String deviceId) {
-        return statisticOeeService.getStatisticOeeDeviceByCurrentDay(toUUID(deviceId));
+        return deviceOeeEveryHourService.getStatisticOeeDeviceByCurrentDay(toUUID(deviceId));
+    }
+
+    /**
+     * 手动执行当天所有设备每小时OEE同步
+     */
+    @ApiOperation("手动执行当天所有设备每小时OEE同步")
+    @RequestMapping(value = "/dp/statisticOeeByTimedTask", method = RequestMethod.GET)
+    @ResponseBody
+    public void statisticOeeByTimedTask(){
+        deviceOeeEveryHourService.statisticOeeByTimedTask();
     }
 
 }
