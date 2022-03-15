@@ -109,6 +109,7 @@ export interface DevicePropGroup {
 export interface AssociatedPropItem extends ChartProp {
   content?: string;
   associatedId?: string;
+  createdTime?: number;
 }
 
 export interface AssociatedProp {
