@@ -782,13 +782,27 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Device device = entity.toData();
         if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
             ProductionLine productionLine = productionLineDao.findById(device.getProductionLineId());
-            if(device != null){
+            if(productionLine != null){
                 device.setFactoryName(productionLine.getFactoryName());
                 device.setWorkshopName(productionLine.getWorkshopName());
                 device.setProductionLineName(productionLine.getName());
             }
         }
         return device;
+    }
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    @Override
+    public Device findById(UUID id){
+        DeviceEntity entity = deviceRepository.findById(id).get();
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
     }
 
     /**

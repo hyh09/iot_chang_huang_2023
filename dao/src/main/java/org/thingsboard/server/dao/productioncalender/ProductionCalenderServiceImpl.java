@@ -280,7 +280,7 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                     resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict).toString());
                 }
 
-                //3.生产状态:工厂下网关的在线、离线状态。在线视为正常，有一个离线视为异常
+                //3.生产状态:工厂下网关的在线、离线状态。有一个在线视为正常，全部离线视为异常
                 try {
                     resultProductionCalender.setProductionState(factoryDao.checkoutFactoryStatus(factory.getId()));
                 } catch (ThingsboardException e) {
