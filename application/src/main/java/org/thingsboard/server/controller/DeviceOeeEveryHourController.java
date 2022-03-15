@@ -75,17 +75,46 @@ public class DeviceOeeEveryHourController extends BaseController {
     @RequestMapping(value = "/dp/getStatisticOeeDeviceByCurrentDay", method = RequestMethod.GET)
     @ResponseBody
     public BigDecimal getStatisticOeeDeviceByCurrentDay(String deviceId) {
-        return deviceOeeEveryHourService.getStatisticOeeDeviceByCurrentDay(toUUID(deviceId));
+        BigDecimal result = new BigDecimal(0);
+        try {
+            result =  deviceOeeEveryHourService.getStatisticOeeDeviceByCurrentDay(toUUID(deviceId));
+        } catch (Exception e) {
+            log.error("手动执行当天所有设备每小时OEE同步失败",e);
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
-     * 手动执行当天所有设备每小时OEE同步
+     * 手动执行当天所有设备每小时OEE统计
      */
-    @ApiOperation("手动执行当天所有设备每小时OEE同步")
+    @ApiOperation("手动执行当天所有设备每小时OEE统计(定时任务手动执行)")
     @RequestMapping(value = "/dp/statisticOeeByTimedTask", method = RequestMethod.GET)
     @ResponseBody
     public void statisticOeeByTimedTask(){
-        deviceOeeEveryHourService.statisticOeeByTimedTask();
+        try {
+            deviceOeeEveryHourService.statisticOeeByTimedTask();
+        } catch (Exception e) {
+            log.error("手动执行当天所有设备每小时OEE同步失败",e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 执行（指定时间区间）所有设备每小时OEE统计
+     */
+    @ApiOperation("执行（指定时间区间）所有设备每小时OEE统计")
+    @RequestMapping(value = "/dp/statisticOeeByAnyTime", method = RequestMethod.GET)
+    @ResponseBody
+    public void statisticOeeByAnyTime(StatisticOeeQry dto){
+        try {
+            checkParameterChinees("startTime",dto.getStartTime());
+            checkParameterChinees("endTime",dto.getEndTime());
+            deviceOeeEveryHourService.statisticOeeByAnyTime(dto.toStatisticOee(getCurrentUser().getTenantId().getId()));
+        } catch (Exception e) {
+            log.error("执行（指定时间区间）所有设备每小时OEE同步",e);
+            e.printStackTrace();
+        }
     }
 
 }

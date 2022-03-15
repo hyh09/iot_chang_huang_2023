@@ -515,11 +515,13 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
 
     /**
      * 校验工厂是否在线，有一个不在线视为不在线
+     * 全部离线视为离线，否则为在线
      * @param factoryId
-     * @return
+     * @return  true-在线  false-离线
      */
     @Override
     public Boolean checkoutFactoryStatus(UUID factoryId) throws ThingsboardException{
+        Boolean result = false;
         List<UUID> list = new ArrayList<>();
         list.add(factoryId);
         List<Device> gatewayListVersionByFactory = deviceDao.findGatewayListVersionByFactory(list);
@@ -527,14 +529,14 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             List<AttributeKvEntity> allByEntityIds = attributesDao.findAllByEntityIds(gatewayListVersionByFactory.stream().map(m -> m.getId().getId()).collect(Collectors.toList()), DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
             if(CollectionUtils.isNotEmpty(allByEntityIds)){
                 for (AttributeKvEntity attributeKvEntity:allByEntityIds){
-                    if(! attributeKvEntity.getBooleanValue()){
-                        return false;
+                    if(attributeKvEntity.getBooleanValue()){
+                        return true;
                     }
                 }
-                return true;
+                return result;
             }
         }
-        return false;
+        return result;
     }
 
 }

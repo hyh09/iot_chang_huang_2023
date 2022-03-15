@@ -35,4 +35,13 @@ public interface DeviceOeeEveryHourService {
      * 手动执行当天所有设备每小时OEE同步
      */
     void statisticOeeByTimedTask();
+
+    /**
+     * 执行（指定时间区间）所有设备每小时OEE同步
+     * @param statisticOee
+     * @return
+     * @throws ThingsboardException
+     */
+    void statisticOeeByAnyTime(StatisticOee statisticOee) throws ThingsboardException;
+
 }
