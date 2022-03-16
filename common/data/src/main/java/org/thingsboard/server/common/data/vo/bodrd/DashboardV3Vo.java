@@ -19,6 +19,7 @@ public class DashboardV3Vo {
     private  String name;
     /**
      * 标准值
+     * 直接取字典的额定值就可以
      */
     private String standardValue;
     /**
