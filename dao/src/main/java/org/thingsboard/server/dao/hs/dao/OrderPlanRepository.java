@@ -94,7 +94,11 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      * @param endTime
      * @return
      */
-    @Query("select t from OrderPlanEntity t where t.factoryId = :factoryId and ( t.actualStartTime > :endTime or t.actualEndTime < :startTime )")
+    @Query("select t1 from OrderPlanEntity t1 where t1.factoryId = :factoryId and ( " +
+            "( t1.actualStartTime >= :startTime and t1.actualEndTime <= :endTime ) or" +
+            "( t1.actualStartTime >= :startTime and t1.actualStartTime <= :endTime and t1.actualEndTime >= :endTime) or" +
+            "( t1.actualEndTime >= :startTime and t1.actualEndTime <= :endTime and t1.actualStartTime <= :startTime) " +
+            ")")
     List<OrderPlanEntity> findActualByFactoryIds(@Param("factoryId") UUID factoryId,@Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
 

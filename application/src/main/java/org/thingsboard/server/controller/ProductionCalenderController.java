@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Api(value="生产管理Controller",tags={"生产管理接口"})
 @RequiredArgsConstructor
 @RestController
@@ -56,6 +58,7 @@ public class ProductionCalenderController extends BaseController{
             productionCalender.setTenantId(currentUser.getTenantId().getId());
             productionCalenderService.saveProductionCalender(productionCalender);
         } catch (Exception e) {
+            log.info("/api/productionCalender/save保存设备生产日历报错：",e);
             throw handleException(e);
         }
     }
@@ -83,6 +86,7 @@ public class ProductionCalenderController extends BaseController{
             voPageData = new PageData<>(calenderPageListVos,productionCalenderPageData.getTotalPages(),productionCalenderPageData.getTotalElements(),productionCalenderPageData.hasNext());
             return voPageData;
         } catch (Exception e) {
+            log.info("/api/productionCalender/getPageList 生产日历分页查询报错：",e);
             throw handleException(e);
         }
     }
@@ -108,6 +112,7 @@ public class ProductionCalenderController extends BaseController{
             }
             return new PageData<>(result,calenderPageData.getTotalPages(),calenderPageData.getTotalElements(),calenderPageData.hasNext());
         } catch (Exception e) {
+            log.info("/api/productionCalender/getHistoryPageByDeviceId设备生产日历历史记录分页列表报错：",e);
             throw handleException(e);
         }
     }
@@ -129,6 +134,7 @@ public class ProductionCalenderController extends BaseController{
             }
             return result;
         } catch (Exception e) {
+            log.info("/api/productionCalender/getHistoryByDeviceId设备生产日历历史记录列表报错：",e);
             throw handleException(e);
         }
     }
@@ -149,6 +155,7 @@ public class ProductionCalenderController extends BaseController{
             checkParameter("id",id);
             return new ProductionCalenderHisListVo(productionCalenderService.findById(toUUID(id)));
         } catch (Exception e) {
+            log.info("/api/productionCalenderfindById查询生产日历详情报错：",e);
             throw handleException(e);
         }
     }
@@ -168,6 +175,7 @@ public class ProductionCalenderController extends BaseController{
             checkParameter("id",id);
             productionCalenderService.delProductionCalender(toUUID(id));
         } catch (Exception e) {
+            log.info("/api/productionCalender/deleteById删除生产日历报错：",e);
             throw handleException(e);
         }
     }
@@ -187,6 +195,7 @@ public class ProductionCalenderController extends BaseController{
             }
             return result;
         } catch (Exception e) {
+            log.info("/api/productionCalender/dp/getProductionMonitorTenantList看板大屏生产监控报错：",e);
             throw handleException(e);
         }
     }
