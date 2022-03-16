@@ -49,6 +49,11 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
 
     @Async
     @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+            "t.deviceProfileId = :deviceProfileId ")
+    CompletableFuture<List<DeviceEntity>> findAllByDeviceProfileId(@Param("deviceProfileId") UUID deviceProfileId);
+
+    @Async
+    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
             "t.tenantId = :tenantId " +
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllByTenantId(@Param("tenantId") UUID tenantId);
