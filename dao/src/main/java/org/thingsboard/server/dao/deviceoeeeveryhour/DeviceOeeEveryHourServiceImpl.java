@@ -169,8 +169,18 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         List<StatisticOee> statisticOeeList = new ArrayList<>();
         List<DeviceOeeEveryHour> deviceOeeEveryHours = deviceOeeEveryHourDao.findAllByCdn(new DeviceOeeEveryHour(statisticOee), "ts", "ASC");
         if(!CollectionUtils.isEmpty(deviceOeeEveryHours)){
+            //如果是工厂和车间需要合并成每个小时的
+            Map<Long,BigDecimal> map = new LinkedHashMap<>();
             for (DeviceOeeEveryHour iter:deviceOeeEveryHours ) {
-                statisticOeeList.add(new StatisticOee(iter.getTs(),iter.getOeeValue()));
+                if (map != null && map.containsKey(iter.getTs())) {
+                    map.put(iter.getTs(),map.get(iter.getTs()).add(iter.getOeeValue()));
+                }else {
+                    map.put(iter.getTs(),iter.getOeeValue());
+                }
+            }
+            //把整理后
+            for(Map.Entry<Long,BigDecimal> entry : map.entrySet()){
+                statisticOeeList.add(new StatisticOee(entry.getKey(),entry.getValue()));
             }
         }
         return statisticOeeList;

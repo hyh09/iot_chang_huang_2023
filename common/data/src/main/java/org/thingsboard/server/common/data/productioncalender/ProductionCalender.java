@@ -2,6 +2,7 @@ package org.thingsboard.server.common.data.productioncalender;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.thingsboard.server.common.data.StringUtils;
 
 import java.util.UUID;
 
@@ -74,7 +75,9 @@ public class ProductionCalender {
     public ProductionCalender(String deviceName,String achieveOrPlan, String yearAchieve, Boolean productionState) {
         this.deviceName = deviceName;
         this.achieveOrPlan = achieveOrPlan;
-        this.yearAchieve = yearAchieve;
+        if (StringUtils.isNotEmpty(yearAchieve)){
+            this.yearAchieve = (Integer.parseInt(yearAchieve) * 100) + "";
+        }
         this.productionState = productionState;
     }
 
