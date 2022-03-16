@@ -28,6 +28,7 @@ import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -240,13 +241,14 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 BigDecimal deviceOutputReality = new BigDecimal(0);
                 //每个（设备标准产能 * 设备日历中的时间）的总和   （预计总产量）
                 BigDecimal deviceOutputPredict = new BigDecimal(0);
-
+                //查询订单计划实际时间与查询时间存在交集的设备
                 List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factory.getId(), startTime, endTime);
                 if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
                     //每个设备
                     for (OrderPlanEntity orderPlanEntity : orderPlanEntityList) {
                         UUID deviceId = orderPlanEntity.getDeviceId();
                         List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
+                        //计算时间交集
                         Map<String, Long> mapTime = this.intersectionTime(orderPlanEntity.getActualStartTime(), orderPlanEntity.getActualEndTime(), startTime, endTime);
                         deviceCapacityVoList.add(new DeviceCapacityVo(deviceId, mapTime.get("startTime"), mapTime.get("endTime")));
                         //每个设备的产能
@@ -332,6 +334,11 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
      * @return
      */
     public Map<String, Long> intersectionTime(Long actualStartTime, Long actualEndTime, Long startTimeQry, Long endTimeQry) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log.info("actualStartTime:" + sdf.format(new Date(Long.parseLong(String.valueOf(actualStartTime)))));
+        log.info("actualEndTime:" + sdf.format(new Date(Long.parseLong(String.valueOf(actualEndTime)))));
+        log.info("startTimeQry:" + sdf.format(new Date(Long.parseLong(String.valueOf(startTimeQry)))));
+        log.info("endTimeQry:" + sdf.format(new Date(Long.parseLong(String.valueOf(endTimeQry)))));
         Map<String, Long> map = new HashMap<>();
         map.put("startTime", new Long(0));
         map.put("endTime", new Long(0));
@@ -340,19 +347,19 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
         Long endTime = new Long(0);
 
         //时间要取交叉时间
-        if (startTimeQry < actualStartTime && actualEndTime < endTimeQry) {
+        if (startTimeQry <= actualStartTime && actualEndTime <= endTimeQry) {
             startTime = actualStartTime;
             endTime = actualEndTime;
         }
-        if (startTimeQry < actualStartTime && actualStartTime < endTimeQry && endTimeQry < actualEndTime) {
+        if (startTimeQry <= actualStartTime && actualStartTime <= endTimeQry && endTimeQry <= actualEndTime) {
             startTime = actualStartTime;
             endTime = endTimeQry;
         }
-        if (actualStartTime < startTimeQry && startTimeQry < actualEndTime && actualEndTime < endTimeQry) {
+        if (actualStartTime <= startTimeQry && startTimeQry <= actualEndTime && actualEndTime <= endTimeQry) {
             startTime = startTimeQry;
             endTime = actualEndTime;
         }
-        if (actualStartTime < startTimeQry && endTimeQry < actualStartTime) {
+        if (actualStartTime <= startTimeQry && endTimeQry <= actualStartTime) {
             startTime = startTimeQry;
             endTime = endTimeQry;
         }

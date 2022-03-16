@@ -651,13 +651,14 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     public String findActualByFactoryIds(UUID factoryIds, Long startTime, Long endTime) {
         BigDecimal sumActual = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factoryIds, startTime, endTime);
+        String actualCapacity = null;
         if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-            orderPlanEntityList.forEach(i -> {
-                String actualCapacity = i.getActualCapacity();
+            for(OrderPlanEntity i:orderPlanEntityList){
+                actualCapacity = i.getActualCapacity();
                 if (StringUtils.isNotEmpty(actualCapacity)) {
-                    sumActual.add(new BigDecimal(actualCapacity));
+                    sumActual = sumActual.add(new BigDecimal(actualCapacity));
                 }
-            });
+            }
         }
         return sumActual.toString();
     }
@@ -674,13 +675,14 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     public String findIntendedByFactoryIds(UUID factoryIds, Long startTime, Long endTime) {
         BigDecimal sumActual = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByFactoryIds(factoryIds, startTime, endTime);
+        String actualCapacity = null;
         if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-            orderPlanEntityList.forEach(i -> {
-                String actualCapacity = i.getActualCapacity();
+            for(OrderPlanEntity i:orderPlanEntityList){
+                actualCapacity = i.getActualCapacity();
                 if (StringUtils.isNotEmpty(actualCapacity)) {
                     sumActual.add(new BigDecimal(actualCapacity));
                 }
-            });
+            }
         }
         return sumActual.toString();
     }
