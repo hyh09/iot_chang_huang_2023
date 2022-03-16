@@ -105,7 +105,7 @@
                           (click)="fetchPropHistoryData(data.firstPropName || data.name, null, true)"
                           [class.active]="(data.firstPropName || data.name) === currPropName"
                         >
-                          <td width="40%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
+                          <td width="44%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
                           <td width="30%">
                             <span *ngIf="data.firstPropName"><span *ngFor="let prop of data.properties || []">{{ prop.content }}{{ prop.unit }}{{ prop.suffix }}</span></span>
                             <span *ngIf="!data.firstPropName">{{data.content}}{{data.unit}}</span>
