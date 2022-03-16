@@ -1170,8 +1170,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                 } catch (Exception ignore) {
                                 }
 
-                                var shirtActualCapacityTotal = shirtTimes.stream().map(v -> CompletableFuture.supplyAsync(() -> this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, v.getStartTime(), v.getEndTime())))
-                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacities(f))).map(CompletableFuture::join).reduce(BigDecimal.ZERO, BigDecimal::add, (a, b) -> null);
+                                var shirtActualCapacityTotal = shirtTimes.stream()
+                                        .map(v -> CompletableFuture.supplyAsync(() -> this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, v.getStartTime(), v.getEndTime())))
+                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacities(f)))
+                                        .map(CompletableFuture::join)
+                                        .reduce(BigDecimal.ZERO, BigDecimal::add, (a, b) -> null);
 
                                 result.setOutput(this.formatDoubleData(shirtActualCapacityTotal));
                                 if (shirtActualCapacityTotal.compareTo(BigDecimal.ZERO) > 0)
