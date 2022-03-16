@@ -332,7 +332,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         for (OrderPlanDeviceVO plan : orderVO.getPlanDevices()) {
             if (plan.getIntendedStartTime() != null && plan.getIntendedEndTime() !=null) {
                 if (this.clientService.listProductionCalenders(tenantId, toUUID(plan.getDeviceId()), plan.getIntendedStartTime(), plan.getIntendedEndTime()).isEmpty())
-                    throw new ThingsboardException("生产计划不在班次时间内：开始时间 " + plan.getIntendedStartTime() + "~ 结束时间" + plan.getIntendedEndTime(), ThingsboardErrorCode.GENERAL);
+                    throw new ThingsboardException(plan.getDeviceName() + "生产计划时间超出班次时间", ThingsboardErrorCode.GENERAL);
             }
         }
 
@@ -531,7 +531,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
      */
     @Override
     public List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery) {
-        return this.orderPlanRepository.findAllByTenantIdAndActualStartTimeGreaterThanEqualAndActualEndTimeLessThanEqual(tenantId.getId(), timeQuery.getStartTime(), timeQuery.getEndTime())
+        return this.orderPlanRepository.findAllActualTimeCross(tenantId.getId(), timeQuery.getStartTime(), timeQuery.getEndTime())
                 .thenApplyAsync(plans -> plans.stream().map(OrderPlanEntity::getOrderId).collect(Collectors.toSet()))
                 .thenApplyAsync(ids -> {
                     if (factoryId != null) {
@@ -556,7 +556,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                                             .isOvertime((v.getIntendedTime() != null && v.getIntendedTime() > CommonUtil.getTodayCurrentTime()) & (completedCapacities.compareTo(v.getTotal()) < 0))
                                             .build();
                                 }
-                        ).filter(v -> v.getCompletedCapacities().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
+                        ).filter(v -> v.getCompleteness().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
     }
 
     /**
@@ -651,13 +651,14 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     public String findActualByFactoryIds(UUID factoryIds, Long startTime, Long endTime) {
         BigDecimal sumActual = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factoryIds, startTime, endTime);
+        String actualCapacity = null;
         if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-            orderPlanEntityList.forEach(i -> {
-                String actualCapacity = i.getActualCapacity();
+            for(OrderPlanEntity i:orderPlanEntityList){
+                actualCapacity = i.getActualCapacity();
                 if (StringUtils.isNotEmpty(actualCapacity)) {
-                    sumActual.add(new BigDecimal(actualCapacity));
+                    sumActual = sumActual.add(new BigDecimal(actualCapacity));
                 }
-            });
+            }
         }
         return sumActual.toString();
     }
@@ -674,13 +675,14 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     public String findIntendedByFactoryIds(UUID factoryIds, Long startTime, Long endTime) {
         BigDecimal sumActual = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByFactoryIds(factoryIds, startTime, endTime);
+        String actualCapacity = null;
         if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-            orderPlanEntityList.forEach(i -> {
-                String actualCapacity = i.getActualCapacity();
+            for(OrderPlanEntity i:orderPlanEntityList){
+                actualCapacity = i.getActualCapacity();
                 if (StringUtils.isNotEmpty(actualCapacity)) {
                     sumActual.add(new BigDecimal(actualCapacity));
                 }
-            });
+            }
         }
         return sumActual.toString();
     }
