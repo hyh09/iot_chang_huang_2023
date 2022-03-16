@@ -53,6 +53,18 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     CompletableFuture<List<OrderPlanEntity>> findAllActualTimeCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
 
     @Async
+    @Query("select p2 " +
+            "from OrderPlanEntity p2 " +
+            "where p2.tenantId = :tenantId and " +
+            "p2.actualStartTime is not null and " +
+            "p2.actualEndTime is not null and " +
+            "p2.id not in ( select p1.id from OrderPlanEntity p1 where " +
+            "p1.tenantId = :tenantId and " +
+            "p1.actualStartTime is not null and " +
+            "p1.actualEndTime is not null and (p1.actualEndTime < :startTime or p1.actualStartTime > :endTime))")
+    CompletableFuture<List<OrderPlanEntity>> findAllActualTimeCross(@Param("tenantId") UUID tenantId, @Param("startTime") Long startTime,@Param("endTime") Long endTime);
+
+    @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByTenantIdAndOrderIdOrderBySortAsc(UUID tenantId, UUID orderId);
 
     void deleteAllByOrderId(UUID orderId);
@@ -62,9 +74,6 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
 
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByOrderId(UUID orderId);
-
-    @Async
-    CompletableFuture<List<OrderPlanEntity>> findAllByTenantIdAndActualStartTimeGreaterThanEqualAndActualEndTimeLessThanEqual(UUID tenantId, Long startTime, Long endTime);
 
     @Query("select t2 from OrderPlanEntity t2 " +
             "where t2.id not in(" +
