@@ -884,7 +884,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      }
        // Long t3 = (lastTime - firstTime) / 60000;
         Long t3=1L;
-        String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
+//        String aDouble = StringUtilToll.div(capacityValue, value1, t3.toString());
+        String aDouble = StringUtilToll.div(value1, capacityValue, t3.toString());
+
         return  aDouble;
     }
 

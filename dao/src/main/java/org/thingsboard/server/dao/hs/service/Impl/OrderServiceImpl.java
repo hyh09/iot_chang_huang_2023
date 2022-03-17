@@ -553,7 +553,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
                                             .total(v.getTotal())
                                             .completedCapacities(completedCapacities)
                                             .completeness(this.calculateCompleteness(completedCapacities, v.getTotal()))
-                                            .isOvertime((v.getIntendedTime() != null && v.getIntendedTime() > CommonUtil.getTodayCurrentTime()) & (completedCapacities.compareTo(v.getTotal()) < 0))
+                                            .isOvertime((v.getIntendedTime() != null && v.getIntendedTime() < CommonUtil.getTodayCurrentTime()) & (completedCapacities.compareTo(v.getTotal()) < 0))
                                             .build();
                                 }
                         ).filter(v -> v.getCompleteness().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
