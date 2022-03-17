@@ -347,4 +347,8 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
     List<Device> findDeviceFilterGatewayByTenantId(UUID tenantId);
 
 
+    long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
+
+
+
 }
