@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
@@ -15,6 +16,8 @@ import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
+import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
@@ -46,6 +49,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
     @Autowired private ProductionLineRepository productionLineRepository;
     @Autowired private   DictDeviceRepository dictDeviceRepository;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired  private DictDeviceStandardPropertyRepository dictDeviceStandardPropertyRepository;
 
 
 
@@ -102,18 +106,21 @@ public class DataToConversionImpl implements DataToConversionSvc {
     }
 
     @Override
-    public ConsumptionTodayVo todayUntiEnergyByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId) {
+    public ConsumptionTodayVo todayUntiEnergyByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId, QueryTsKvVo vo) {
         ConsumptionTodayVo  resultVo = new ConsumptionTodayVo();
         List<TkTodayVo> waterList = new ArrayList<>();
         List<TkTodayVo> electricList = new ArrayList<>();
         List<TkTodayVo> gasList = new ArrayList<>();
+         String waterValue=   this.queryStandardEnergyValue(vo.getDictDeviceId(),KeyTitleEnums.key_water);
+        String gasValue=   this.queryStandardEnergyValue(vo.getDictDeviceId(),KeyTitleEnums.key_gas);
+        String  cableValue=   this.queryStandardEnergyValue(vo.getDictDeviceId(),KeyTitleEnums.key_cable);
 
         Map<UUID,String> mapFactoryCache = new HashMap<>();
         entityList.stream().forEach(m1->{
 
-            waterList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getWaterAddedValue(),m1.getWaterValue()));
-            electricList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue()));
-            gasList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getGasAddedValue(),m1.getGasValue()));
+            waterList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getWaterAddedValue(),m1.getWaterValue() ,waterValue));
+            electricList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue(),gasValue));
+            gasList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getGasAddedValue(),m1.getGasValue(),cableValue));
 
         });
 
@@ -212,6 +219,16 @@ public class DataToConversionImpl implements DataToConversionSvc {
 
         return mapList;
 
+    }
+
+    @Override
+    public String queryStandardEnergyValue(UUID dictDeviceId, KeyTitleEnums enums) {
+        Map<String, DictDeviceGroupPropertyVO>  map = deviceDictPropertiesSvc.getMapPropertyVoByTitle();
+        String namekey = map.get(enums.getgName()).getName();
+        List<String> name = new ArrayList<String>();
+        name.add(namekey);
+        List<DictDeviceStandardPropertyEntity>   entityList= dictDeviceStandardPropertyRepository.findAllByInContentAndDictDataId(dictDeviceId,name);
+        return  (entityList.stream().findFirst().orElse(new DictDeviceStandardPropertyEntity()).getContent());
     }
 
     /**
@@ -335,7 +352,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
     /**
      * 单位能耗的计算
      */
-    private  TkTodayVo  toDayreturnTheData(EnergyEffciencyNewEntity m1, Map<UUID,String> mapFactoryCache,String  value,String historyValue )
+    private  TkTodayVo  toDayreturnTheData(EnergyEffciencyNewEntity m1, Map<UUID,String> mapFactoryCache,String  value,String historyValue,String pipValue )
     {
         TkTodayVo  todayVo = new TkTodayVo();
         todayVo.setDeviceId(m1.getEntityId().toString());
@@ -344,6 +361,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
         todayVo.setFactoryName(getFactoryNameById(m1.getFactoryId(),mapFactoryCache));
         String  value1 = StringUtilToll.div(value,m1.getCapacityAddedValue());
         todayVo.setValue(filterEmpty(value1));
+        todayVo.setFlg(StringUtilToll.compareTo(value1,pipValue));
         todayVo.setTotalValue(filterEmpty(historyValue));
         return  todayVo;
 

@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.sql.role.dao.tool;
 
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
@@ -10,6 +12,7 @@ import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryMinuteEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @program: thingsboard
@@ -32,7 +35,7 @@ public interface DataToConversionSvc {
      */
     ConsumptionTodayVo   resultProcessByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId);
 
-    ConsumptionTodayVo   todayUntiEnergyByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId);
+    ConsumptionTodayVo   todayUntiEnergyByEntityList(List<EnergyEffciencyNewEntity> entityList, TenantId tenantId, QueryTsKvVo vo);
 
 
     /**
@@ -62,5 +65,12 @@ public interface DataToConversionSvc {
      * @return
      */
     List<Map> resultProcessByEnergyHistoryMinuteEntity(List<EnergyHistoryMinuteEntity> energyHistoryMinuteEntities,String name);
+
+
+    /**
+     * 获取标准能耗的数据
+     * @return
+     */
+    public String queryStandardEnergyValue(UUID dictDeviceId, KeyTitleEnums enums);
 
 }
