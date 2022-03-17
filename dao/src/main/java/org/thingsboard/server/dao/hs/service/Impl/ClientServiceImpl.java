@@ -20,6 +20,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.kv.*;
@@ -858,10 +859,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         return this.calenderRepository.findAllCross(tenantId.getId(), deviceId, startTime, endTime)
                 .thenApplyAsync(calenders ->
                         calenders.stream().map(ProductionCalenderEntity::toData)
-                        .map(v -> DeviceKeyParamShiftResult.builder()
-                                .startTime(v.getStartTime() < startTime ? startTime : v.getStartTime())
-                                .endTime(v.getEndTime() > endTime ? endTime : v.getEndTime())
-                                .build()).collect(Collectors.toList())).join();
+                                .map(v -> DeviceKeyParamShiftResult.builder()
+                                        .startTime(v.getStartTime() < startTime ? startTime : v.getStartTime())
+                                        .endTime(v.getEndTime() > endTime ? endTime : v.getEndTime())
+                                        .build()).collect(Collectors.toList())).join();
     }
 
     /**
@@ -928,6 +929,16 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                     else
                         return ImmutablePair.of(v.getFactoryId(), Boolean.TRUE);
                 })).map(CompletableFuture::join).collect(Collectors.toMap(v -> v.getLeft().toString(), ImmutablePair::getRight));
+    }
+
+    /**
+     * 根据设备配置Id查询简易设备列表
+     *
+     * @param profileId 设备配置Id
+     */
+    @Override
+    public List<Device> listDevicesByProfileId(DeviceProfileId profileId) {
+        return this.deviceRepository.findAllByDeviceProfileId(profileId.getId()).thenApplyAsync(DaoUtil::convertDataList).join();
     }
 
     /**

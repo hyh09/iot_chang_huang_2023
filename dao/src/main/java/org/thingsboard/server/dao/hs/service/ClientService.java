@@ -5,6 +5,7 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
@@ -423,4 +424,11 @@ public interface ClientService {
      * @return 设备列表
      */
     List<FactoryGatewayDevicesResult> listFactoryGatewayDevices(TenantId tenantId, UUID factoryId);
+
+    /**
+     * 根据设备配置Id查询简易设备列表
+     *
+     * @param profileId 设备配置Id
+     */
+    List<Device> listDevicesByProfileId(DeviceProfileId profileId);
 }

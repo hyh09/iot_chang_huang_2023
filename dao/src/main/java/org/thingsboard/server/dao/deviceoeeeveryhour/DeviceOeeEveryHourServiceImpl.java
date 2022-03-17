@@ -64,7 +64,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
             log.info("当前服务器节点未竞争到锁，不执行statisticOeeByTimedTask");
             return;
         }*/
-        log.info("[statisticOeeByTimedTask]统计前一天每个设备每个小时OEE的定时任务执行啦！！！");
+        log.info("[statisticOeeByTimedTask]统计当天时间00:00:00到23:59:59之间每个设备每个小时OEE的定时任务执行啦！！！");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long cu = System.currentTimeMillis();//当前时间毫秒数
         long startTime = cu / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
@@ -73,7 +73,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         log.info("OEE开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(startTime)))));
         log.info("OEE结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(endTime)))));
         this.statisticOeeByTimedTask(startTime,endTime);
-        log.info("[statisticOeeByTimedTask]统计前一天每个设备每个小时OEE的定时任务执行完成 !!!：" );
+        log.info("[statisticOeeByTimedTask]统计当天时间00:00:00到23:59:59之间每个设备每个小时OEE的定时任务执行完成 !!!：" );
         log.info("当前任务结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis())))));
     }
 
@@ -132,23 +132,20 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         long cu = System.currentTimeMillis();//当前时间毫秒数
         long zero = cu / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
         long twelve = zero + 24 * 60 * 60 * 1000 - 1;//今天23点59分59秒的毫秒数
-        long yesterday = System.currentTimeMillis() - 24 * 60 * 60 * 1000;//昨天的这一时间的毫秒数
+        long yesterdayZero = System.currentTimeMillis() - 24 * 60 * 60 * 1000;//昨天0点的毫秒数
+        long yesterdayTwelve = System.currentTimeMillis() - 24 * 60 * 60 * 1000;//昨天23:59:59点的毫秒数
         if (deviceId != null) {
             //1.判断设备当天班次是否结束
-
+            //查询时间段生产日历
             List<ProductionCalender> deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId, zero, twelve);
             if (!CollectionUtils.isEmpty(deviceByCurrentDay)) {
                 if (cu >= deviceByCurrentDay.get(0).getEndTime()) {
-                    for (int i = 0; i < deviceByCurrentDay.size(); i++) {
-                        oeeValue.add(this.getDeviceOeeValue(deviceId, deviceByCurrentDay.get(i).getStartTime(), deviceByCurrentDay.get(i).getEndTime()));
-                    }
+                    oeeValue = oeeValue.add(this.getDeviceOeeValue(deviceId, zero, twelve));
                 } else {
                     //取昨天
-                    deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId, yesterday, zero);
+                    deviceByCurrentDay = productionCalenderDao.getDeviceByTimenterval(deviceId, yesterdayZero, yesterdayTwelve);
                     if (!CollectionUtils.isEmpty(deviceByCurrentDay)) {
-                        for (int i = 0; i < deviceByCurrentDay.size(); i++) {
-                            oeeValue.add(this.getDeviceOeeValue(deviceId, deviceByCurrentDay.get(i).getStartTime(), deviceByCurrentDay.get(i).getEndTime()));
-                        }
+                        oeeValue = oeeValue.add(this.getDeviceOeeValue(deviceId, yesterdayZero, yesterdayTwelve));
                     }
                 }
             }
@@ -249,12 +246,12 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
                 BigDecimal oeeValue = new BigDecimal(0);
 
                 for (Device deviceCdn : deviceListByCdn) {
-                    oeeValue.add(this.getDeviceOeeValue(deviceCdn.getId().getId(), dateList.get(i), dateList.get(i + 1)));
+                    oeeValue = oeeValue.add(this.getDeviceOeeValue(deviceCdn.getId().getId(), dateList.get(i), dateList.get(i + 1)));
                 }
 
                 StatisticOee statisticOee = new StatisticOee();
 
-                statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size())));
+                statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size()),2, BigDecimal.ROUND_HALF_UP));
                 statisticOee.setTimeHours(dateList.get(i));
                 result.add(statisticOee);
             }
@@ -303,19 +300,19 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         //1.良品数：订单计划里面的实际产量值总和
         BigDecimal deviceOutputReality = this.getDeviceOutput(startTime, endTime, deviceId);
         //2.(设备标准产能 * 设备日历中的时间）
-        BigDecimal deviceOutputPredict = getStandardCapacity(startTime, endTime, deviceId);
+        BigDecimal deviceOutputPredict = this.getStandardCapacity(startTime, endTime, deviceId);
         //3.设备OEE
         if (deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0) {
             return deviceOeeValue;
         } else {
-            deviceOeeValue = deviceOutputReality.divide(deviceOutputPredict);
+            deviceOeeValue = deviceOutputReality.divide(deviceOutputPredict,2, BigDecimal.ROUND_HALF_UP);
         }
         return deviceOeeValue;
     }
 
 
     /**
-     * 计算时间区间内设备的标准产量
+     * 计算时间区间内设备的 设备标准产能 * 设备日历中的时间
      *
      * @param startTime
      * @param endTime
@@ -337,15 +334,15 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
             BigDecimal time = new BigDecimal(0);
 
             //生产日历时间
-            List<ProductionCalender> historyList = productionCalenderDao.getHistoryByDeviceId(deviceId);
+            List<ProductionCalender> historyList = productionCalenderDao.getDeviceByTimenterval(deviceId, startTime, endTime);
             if (!CollectionUtils.isEmpty(historyList)) {
                 for (ProductionCalender pc : historyList) {
                     Map<String, Long> mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
-                    time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
+                    time = time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
                 }
             }
             //单个设备 预计产量
-            deviceOutputPredict.add(ratedCapacity.multiply(time));
+            deviceOutputPredict = deviceOutputPredict.add(ratedCapacity.multiply(time));
         }
         return deviceOutputPredict;
     }
@@ -363,7 +360,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
         deviceCapacityVoList.add(new DeviceCapacityVo(deviceId, startTime, endTime));
         Map<UUID, String> map = bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
-        deviceOutputReality.add(new BigDecimal(map.get(deviceId)));
+        deviceOutputReality = deviceOutputReality.add(new BigDecimal(map.get(deviceId)));
         return deviceOutputReality;
     }
 
