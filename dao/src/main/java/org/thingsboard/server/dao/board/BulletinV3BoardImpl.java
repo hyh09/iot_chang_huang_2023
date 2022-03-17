@@ -165,9 +165,11 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
      */
     private List<TrendLineVo> getSolidLineData(TrendParameterVo vo, List<EnergyChartOfBoardEntity> solidLineData)
     {
+        long  deviceCount = deviceService.countAllByDictDeviceIdAndTenantId(vo.getDictDeviceId(),vo.getTenantId());
+        log.info("查询到的设备总数{}",deviceCount);
         List<Long> longs = CommonUtils.getTwoTimePeriods(vo.getStartTime(), vo.getEndTime(), Calendar.HOUR,1);
         Map<Long, List<EnergyChartOfBoardEntity>> map = solidLineData.stream().collect(Collectors.groupingBy(EnergyChartOfBoardEntity::getTs));
-        Map<Long, String> longStringMap = solid(map, vo.getKey());
+        Map<Long, String> longStringMap = solid(map, vo.getKey(),deviceCount);
         print("longStringMap打印的===>",longStringMap);
         return   fillReturnData(longs,longStringMap);
     }
@@ -187,18 +189,20 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
 
 
 
+
     /**
      * 处理实线的数据
      * @param map
      * @param key
-     * @return
+     * @param deviceCount 设备数
+     * @return  时间 和 单位能耗
      */
-    private  Map<Long,String> solid(Map<Long,List<EnergyChartOfBoardEntity>> map, String  key)
+    private  Map<Long,String> solid(Map<Long,List<EnergyChartOfBoardEntity>> map, String  key, long  deviceCount)
     {
         KeyTitleEnums enums = KeyTitleEnums.getEnumsByCode(key);
         Map<Long,String> mapValue = new HashMap<>();
         map.forEach((k1,v2)->{
-            mapValue.put(k1,getTotalValue(v2,enums));
+            mapValue.put(k1,getTotalValue(v2,enums,deviceCount));
 
         });
         return  mapValue;
@@ -208,24 +212,25 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
 
 
     /**
-     * 计算值 实线的数据
-     * @param pageList
+     * 计算值 各个设备的能耗 /各个设备的产能
      * @param enums
+     *  @param deviceCount
      * @return
      */
-    public String getTotalValue(List<EnergyChartOfBoardEntity> pageList, KeyTitleEnums enums) {
+    public String getTotalValue(List<EnergyChartOfBoardEntity> pageList, KeyTitleEnums enums,long deviceCount) {
 
-        String capValue =  StringUtilToll.accumulator(pageList.stream().map(EnergyChartOfBoardEntity::getCapacityAddedValue).collect(Collectors.toList()));
+//        String capValue =  StringUtilToll.accumulator(pageList.stream().map(EnergyChartOfBoardEntity::getCapacityAddedValue).collect(Collectors.toList()));
         String value =  StringUtilToll.accumulator(pageList.stream().map(m1->{
             if(enums== KeyTitleEnums.key_water)
             {
-                return m1.getWaterAddedValue();
+                return StringUtilToll.div(m1.getWaterAddedValue(),m1.getCapacityAddedValue());//m1.getWaterAddedValue();
             }else if(enums == KeyTitleEnums.key_gas) {
-                return m1.getGasAddedValue();
+                return StringUtilToll.div(m1.getGasAddedValue(),m1.getCapacityAddedValue());
             }
-            return m1.getElectricAddedValue();
+            return StringUtilToll.div(m1.getElectricAddedValue(),m1.getCapacityAddedValue());
         }).collect(Collectors.toList()));
-        return  StringUtilToll.div(value,capValue);
+        String deviceCountStr=String.valueOf(deviceCount);
+        return  StringUtilToll.div(value,deviceCountStr);
     }
 
     private   List<TrendLineVo> fillReturnData(List<Long> longs,Map<Long, String> longStringMap ){
