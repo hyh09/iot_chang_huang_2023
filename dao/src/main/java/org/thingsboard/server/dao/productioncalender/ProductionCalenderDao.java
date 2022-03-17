@@ -66,4 +66,13 @@ public interface ProductionCalenderDao {
      * @return
      */
     List<ProductionCalender> getDeviceByTimenterval(UUID deviceId,long startTime,long endTime);
+
+    /**
+     * 查询时间范围有交集的实生产日历
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<ProductionCalender> findAllByDeviceIdAndStartTimeAndEndTime(UUID deviceId,long startTime,long endTime);
 }
