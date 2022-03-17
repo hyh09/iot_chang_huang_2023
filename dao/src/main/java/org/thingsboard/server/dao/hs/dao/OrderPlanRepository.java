@@ -97,7 +97,8 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     @Query("select t1 from OrderPlanEntity t1 where t1.factoryId = :factoryId and ( " +
             "( t1.actualStartTime >= :startTime and t1.actualEndTime <= :endTime ) or" +
             "( t1.actualStartTime >= :startTime and t1.actualStartTime <= :endTime and t1.actualEndTime >= :endTime) or" +
-            "( t1.actualEndTime >= :startTime and t1.actualEndTime <= :endTime and t1.actualStartTime <= :startTime) " +
+            "( t1.actualEndTime >= :startTime and t1.actualEndTime <= :endTime and t1.actualStartTime <= :startTime) or" +
+            "( t1.actualStartTime <= :startTime and t1.actualEndTime >= :endTime ) " +
             ")")
     List<OrderPlanEntity> findActualByFactoryIds(@Param("factoryId") UUID factoryId,@Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
@@ -109,7 +110,12 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      * @param endTime
      * @return
      */
-    @Query("select t from OrderPlanEntity t where t.factoryId = :factoryId and ( t.intendedStartTime > :endTime or t.intendedEndTime < :startTime )")
+    @Query("select t1 from OrderPlanEntity t1 where t1.factoryId = :factoryId and ( " +
+            "( t1.intendedStartTime >= :startTime and t1.intendedEndTime <= :endTime ) or" +
+            "( t1.intendedStartTime >= :startTime and t1.actualStartTime <= :endTime and t1.intendedEndTime >= :endTime) or" +
+            "( t1.intendedEndTime >= :startTime and t1.intendedEndTime <= :endTime and t1.intendedStartTime <= :startTime) or" +
+            "( t1.intendedStartTime <= :startTime and t1.intendedEndTime >= :endTime ) " +
+            ")")
     List<OrderPlanEntity> findIntendedByFactoryIds(@Param("factoryId") UUID factoryId,@Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
     /**
@@ -123,7 +129,7 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     List<OrderPlanEntity> findIntendedByDeviceId(@Param("deviceId")UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
     /**
-     * 查询设备时间范围内的计划产量
+     * 查询设备时间范围内的实际产量
      * @param deviceId
      * @param startTime
      * @param endTime

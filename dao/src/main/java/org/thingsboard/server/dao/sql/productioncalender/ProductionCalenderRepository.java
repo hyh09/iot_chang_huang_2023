@@ -29,4 +29,19 @@ public interface ProductionCalenderRepository extends PagingAndSortingRepository
             "p1.startTime is not null and " +
             "p1.endTime is not null and (p1.endTime < :startTime or p1.startTime > :endTime))")
     CompletableFuture<List<ProductionCalenderEntity>> findAllCross(@Param("tenantId") UUID tenantId, @Param("deviceId") UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
+
+    /**
+     * 查询时间范围有交集的实生产日历
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Query("select t1 from ProductionCalenderEntity t1 where t1.deviceId = :deviceId and ( " +
+            "( t1.startTime >= :startTime and t1.endTime <= :endTime ) or" +
+            "( t1.startTime >= :startTime and t1.startTime <= :endTime and t1.endTime >= :endTime) or" +
+            "( t1.endTime >= :startTime and t1.endTime <= :endTime and t1.startTime <= :startTime) or" +
+            "( t1.startTime <= :startTime and t1.endTime >= :endTime ) " +
+            ")")
+    List<ProductionCalenderEntity> findAllByDeviceIdAndStartTimeAndEndTime(@Param("deviceId") UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 }
