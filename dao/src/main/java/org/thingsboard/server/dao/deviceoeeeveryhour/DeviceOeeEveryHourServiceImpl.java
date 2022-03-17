@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.deviceoeeeveryhour.DeviceOeeEveryHour;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -13,6 +14,8 @@ import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.common.data.statisticoee.StatisticOee;
 import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.dao.device.DeviceDao;
+import org.thingsboard.server.dao.hs.dao.OrderPlanEntity;
+import org.thingsboard.server.dao.hs.dao.OrderPlanRepository;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.productioncalender.ProductionCalenderDao;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
@@ -43,6 +46,10 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
     @Autowired
     private DeviceOeeEveryHourDao deviceOeeEveryHourDao;
+
+    @Autowired
+    private OrderPlanRepository orderPlanRepository;
+
 /*
     //@Resource(name ="redisLockCommon")
     private RedisLockCommon redisLock;
@@ -72,31 +79,32 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         log.info("当前任务开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(cu)))));
         log.info("OEE开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(startTime)))));
         log.info("OEE结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(endTime)))));
-        this.statisticOeeByTimedTask(startTime,endTime);
-        log.info("[statisticOeeByTimedTask]统计当天时间00:00:00到23:59:59之间每个设备每个小时OEE的定时任务执行完成 !!!：" );
+        this.statisticOeeByTimedTask(startTime, endTime);
+        log.info("[statisticOeeByTimedTask]统计当天时间00:00:00到23:59:59之间每个设备每个小时OEE的定时任务执行完成 !!!：");
         log.info("当前任务结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis())))));
     }
 
     /**
      * 统计所有设备
+     *
      * @param startTime
      * @param endTime
      */
-    public void statisticOeeByTimedTask(Long startTime,Long endTime){
+    public void statisticOeeByTimedTask(Long startTime, Long endTime) {
         Device device = new Device();
         device.setFilterGatewayFlag(true);
         List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
         if (!CollectionUtils.isEmpty(deviceListByCdn)) {
             //按小时拆分时间区间
             List<Long> dateList = this.cutDate(startTime, endTime);
-            for (Device deviceIter:deviceListByCdn) {
+            for (Device deviceIter : deviceListByCdn) {
                 List<StatisticOee> statisticOees = this.statisticOeeDeviceEveryHour(dateList, deviceIter.getId().getId());
-                if(!CollectionUtils.isEmpty(statisticOees)){
-                    for (StatisticOee o :statisticOees) {
+                if (!CollectionUtils.isEmpty(statisticOees)) {
+                    for (StatisticOee o : statisticOees) {
                         try {
-                            deviceOeeEveryHourDao.save(new DeviceOeeEveryHour(deviceIter.getId().getId(),o.getTimeHours(),o.getOeeValue(),deviceIter.getTenantId().getId()));
+                            deviceOeeEveryHourDao.save(new DeviceOeeEveryHour(deviceIter.getId().getId(), o.getTimeHours(), o.getOeeValue(), deviceIter.getTenantId().getId()));
                         } catch (ThingsboardException e) {
-                            log.error("保存OEE报错！",e);
+                            log.error("保存OEE报错！", e);
                             e.printStackTrace();
                         }
                     }
@@ -108,13 +116,14 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
     /**
      * 执行（指定时间区间）所有设备每小时OEE同步
+     *
      * @param statisticOee
      * @return
      * @throws ThingsboardException
      */
     @Override
-    public void statisticOeeByAnyTime(StatisticOee statisticOee) throws ThingsboardException{
-        this.statisticOeeByTimedTask(statisticOee.getStartTime(),statisticOee.getEndTime());
+    public void statisticOeeByAnyTime(StatisticOee statisticOee) throws ThingsboardException {
+        this.statisticOeeByTimedTask(statisticOee.getStartTime(), statisticOee.getEndTime());
     }
 
 
@@ -150,13 +159,14 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
                 }
             }
         }
-        return oeeValue;
+        return oeeValue.multiply(new BigDecimal(100));
 
     }
 
 
     /**
      * 查询OEE计算历史，返回每小时的值
+     *
      * @param statisticOee
      * @return
      * @throws ThingsboardException
@@ -165,19 +175,19 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
     public List<StatisticOee> getStatisticOeeEveryHourList(StatisticOee statisticOee) throws ThingsboardException {
         List<StatisticOee> statisticOeeList = new ArrayList<>();
         List<DeviceOeeEveryHour> deviceOeeEveryHours = deviceOeeEveryHourDao.findAllByCdn(new DeviceOeeEveryHour(statisticOee), "ts", "ASC");
-        if(!CollectionUtils.isEmpty(deviceOeeEveryHours)){
+        if (!CollectionUtils.isEmpty(deviceOeeEveryHours)) {
             //如果是工厂和车间需要合并成每个小时的
-            Map<Long,BigDecimal> map = new LinkedHashMap<>();
-            for (DeviceOeeEveryHour iter:deviceOeeEveryHours ) {
+            Map<Long, BigDecimal> map = new LinkedHashMap<>();
+            for (DeviceOeeEveryHour iter : deviceOeeEveryHours) {
                 if (map != null && map.containsKey(iter.getTs())) {
-                    map.put(iter.getTs(),map.get(iter.getTs()).add(iter.getOeeValue()));
-                }else {
-                    map.put(iter.getTs(),iter.getOeeValue());
+                    map.put(iter.getTs(), map.get(iter.getTs()).add(iter.getOeeValue()));
+                } else {
+                    map.put(iter.getTs(), iter.getOeeValue());
                 }
             }
             //把整理后
-            for(Map.Entry<Long,BigDecimal> entry : map.entrySet()){
-                statisticOeeList.add(new StatisticOee(entry.getKey(),entry.getValue()));
+            for (Map.Entry<Long, BigDecimal> entry : map.entrySet()) {
+                statisticOeeList.add(new StatisticOee(entry.getKey(), entry.getValue()));
             }
         }
         return statisticOeeList;
@@ -186,6 +196,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
     /**
      * 查询OEE实时数据，返回每小时的值
+     *
      * @param statisticOee
      * @return
      * @throws ThingsboardException
@@ -251,7 +262,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
                 StatisticOee statisticOee = new StatisticOee();
 
-                statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size()),2, BigDecimal.ROUND_HALF_UP));
+                statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size()), 2, BigDecimal.ROUND_HALF_UP));
                 statisticOee.setTimeHours(dateList.get(i));
                 result.add(statisticOee);
             }
@@ -296,16 +307,23 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
      */
     public BigDecimal getDeviceOeeValue(UUID deviceId, Long startTime, Long endTime) {
         BigDecimal deviceOeeValue = new BigDecimal(0);
-
-        //1.良品数：订单计划里面的实际产量值总和
-        BigDecimal deviceOutputReality = this.getDeviceOutput(startTime, endTime, deviceId);
+        //1.良品数：订单计划里面填的实际产量值总和
+        BigDecimal deviceOutputReality = new BigDecimal(0);
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByDeviceId(deviceId, startTime, endTime);
+        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+            for (OrderPlanEntity i :orderPlanEntityList) {
+                if(StringUtils.isNotEmpty(i.getActualCapacity())){
+                    deviceOutputReality = deviceOutputReality.add(new BigDecimal(i.getActualCapacity()));
+                }
+            }
+        }
         //2.(设备标准产能 * 设备日历中的时间）
         BigDecimal deviceOutputPredict = this.getStandardCapacity(startTime, endTime, deviceId);
         //3.设备OEE
         if (deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0) {
             return deviceOeeValue;
         } else {
-            deviceOeeValue = deviceOutputReality.divide(deviceOutputPredict,2, BigDecimal.ROUND_HALF_UP);
+            deviceOeeValue = deviceOutputReality.divide(deviceOutputPredict, 2, BigDecimal.ROUND_HALF_UP);
         }
         return deviceOeeValue;
     }
@@ -334,7 +352,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
             BigDecimal time = new BigDecimal(0);
 
             //生产日历时间
-            List<ProductionCalender> historyList = productionCalenderDao.getDeviceByTimenterval(deviceId, startTime, endTime);
+            List<ProductionCalender> historyList = productionCalenderDao.findAllByDeviceIdAndStartTimeAndEndTime(deviceId, startTime, endTime);
             if (!CollectionUtils.isEmpty(historyList)) {
                 for (ProductionCalender pc : historyList) {
                     Map<String, Long> mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
@@ -348,7 +366,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
     }
 
     /**
-     * 查询时间区间内设备产能
+     * 查询时间区间内设备实际产能
      *
      * @param startTime
      * @param endTime
@@ -489,6 +507,11 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
      * @return
      */
     public Map<String, Long> intersectionTime(Long actualStartTime, Long actualEndTime, Long startTimeQry, Long endTimeQry) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log.info("actualStartTime:" + sdf.format(new Date(Long.parseLong(String.valueOf(actualStartTime)))));
+        log.info("actualEndTime:" + sdf.format(new Date(Long.parseLong(String.valueOf(actualEndTime)))));
+        log.info("startTimeQry:" + sdf.format(new Date(Long.parseLong(String.valueOf(startTimeQry)))));
+        log.info("endTimeQry:" + sdf.format(new Date(Long.parseLong(String.valueOf(endTimeQry)))));
         Map<String, Long> map = new HashMap<>();
         map.put("startTime", new Long(0));
         map.put("endTime", new Long(0));
@@ -497,19 +520,23 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         Long endTime = new Long(0);
 
         //时间要取交叉时间
+        //1.完全包含
         if (startTimeQry < actualStartTime && actualEndTime < endTimeQry) {
             startTime = actualStartTime;
             endTime = actualEndTime;
         }
+        //2.包含头不包含尾
         if (startTimeQry < actualStartTime && actualStartTime < endTimeQry && endTimeQry < actualEndTime) {
             startTime = actualStartTime;
             endTime = endTimeQry;
         }
+        //包含尾不包含头
         if (actualStartTime < startTimeQry && startTimeQry < actualEndTime && actualEndTime < endTimeQry) {
             startTime = startTimeQry;
             endTime = actualEndTime;
         }
-        if (actualStartTime < startTimeQry && endTimeQry < actualStartTime) {
+        //被包含
+        if (actualStartTime < startTimeQry && endTimeQry < actualEndTime) {
             startTime = startTimeQry;
             endTime = endTimeQry;
         }
@@ -527,10 +554,12 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
      * @return
      */
     public BigDecimal timeDifferenceForHours(Long startTime, Long endTime) {
+        BigDecimal result = new BigDecimal(0);
         Long timeDifference = endTime - startTime;
-        Long day = timeDifference / (24 * 60 * 60 * 1000);
-        Long hour = (timeDifference / (60 * 60 * 1000) - day * 24);
-        return new BigDecimal(hour);
+        //毫秒转化为小时的换算率
+        BigDecimal conversionRatio  =  new BigDecimal(1000 * 60 * 60);
+        result = new BigDecimal(timeDifference).divide(conversionRatio,10, BigDecimal.ROUND_HALF_UP);
+        return result;
     }
 
 
