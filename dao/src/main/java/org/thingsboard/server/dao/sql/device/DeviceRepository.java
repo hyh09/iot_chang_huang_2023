@@ -325,4 +325,7 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> findDeviceFilterGatewayByTenantId(UUID tenantId );
 
 
+    long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
+
+
 }

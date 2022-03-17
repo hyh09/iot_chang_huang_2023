@@ -904,6 +904,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return this.getFactoryByList(resultList);
     }
 
+
+    @Override
+    public long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId) {
+        return this.deviceRepository.countAllByDictDeviceIdAndTenantId(dictDeviceId,tenantId);
+    }
+
     /**
      * 查工厂名称
      * @param deviceList
