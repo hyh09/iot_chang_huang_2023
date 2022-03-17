@@ -25,5 +25,5 @@ import javax.persistence.Table;
 public class EnergyHistoryHourEntity extends AbstractStatisticalDataEntity {
 
 
-    
+
 }
