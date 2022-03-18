@@ -77,8 +77,8 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         long startTime = cu / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
         long endTime = startTime + 24 * 60 * 60 * 1000 - 1;//今天23点59分59秒的毫秒数
         log.info("当前任务开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(cu)))));
-        log.info("OEE开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(startTime)))));
-        log.info("OEE结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(endTime)))));
+        log.info("OEE待计算开始时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(startTime)))));
+        log.info("OEE待计算结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(endTime)))));
         this.statisticOeeByTimedTask(startTime, endTime);
         log.info("[statisticOeeByTimedTask]统计当天时间00:00:00到23:59:59之间每个设备每个小时OEE的定时任务执行完成 !!!：");
         log.info("当前任务结束时间：" + sdf.format(new Date(Long.parseLong(String.valueOf(System.currentTimeMillis())))));
