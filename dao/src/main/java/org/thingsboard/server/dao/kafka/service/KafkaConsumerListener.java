@@ -53,12 +53,11 @@ public class KafkaConsumerListener {
                 dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
             }
             statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
-//            energyHistoryMinuteSvc.saveByMinute( entityId,dataBodayVo,title);
-            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
-            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
+//            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
+//            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
 
-            Long endTime = System.currentTimeMillis();
-            Long tempTime = (endTime - startTime);
+//            Long endTime = System.currentTimeMillis();
+//            Long tempTime = (endTime - startTime);
 //            log.info("消费端的花费时间："+
 //                    (((tempTime/86400000)>0)?((tempTime/86400000)+"d"):"")+
 //                    ((((tempTime/86400000)>0)||((tempTime%86400000/3600000)>0))?((tempTime%86400000/3600000)+"h"):(""))+
@@ -69,6 +68,48 @@ public class KafkaConsumerListener {
         }
 
     }
+
+
+    @KafkaListener(topics = {"hs_energy_chart_kafka"}, groupId = "group2", containerFactory = "kafkaListenerContainerFactory01")
+    public void kafkaListenerChart(String message) {
+        if (StringUtils.isNotEmpty(message)) {
+            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+            String title = dataBodayVo.getTitle();
+            UUID entityId = dataBodayVo.getEntityId();
+            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
+                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+            }
+
+            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
+
+
+        }
+
+    }
+
+
+    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
+    public void kafkaListenerhour(String message) {
+        if (StringUtils.isNotEmpty(message)) {
+            Long startTime = System.currentTimeMillis();
+
+            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+            String title = dataBodayVo.getTitle();
+            UUID entityId = dataBodayVo.getEntityId();
+            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
+                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+            }
+
+            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
+
+
+
+        }
+
+    }
+
+
+
 
     private String  setPreviousByZero(DataBodayVo dataBodayVo)
     {
