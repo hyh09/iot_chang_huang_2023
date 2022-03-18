@@ -45,6 +45,41 @@ public class KafkaConsumerConfig {
     }
 
 
+    @Bean
+    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory01() {
+        ConcurrentKafkaListenerContainerFactory<String, String>
+                factory = new ConcurrentKafkaListenerContainerFactory<>();
+        // 设置消费者工厂
+        factory.setConsumerFactory(consumerFactory());
+        // 消费者组中线程数量
+        factory.setConcurrency(1);
+        // 拉取超时时间
+        factory.getContainerProperties().setPollTimeout(3000);
+        // 当使用批量监听器时需要设置为true
+        factory.setBatchListener(false);
+
+        return factory;
+    }
+
+
+    @Bean
+    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory02() {
+        ConcurrentKafkaListenerContainerFactory<String, String>
+                factory = new ConcurrentKafkaListenerContainerFactory<>();
+        // 设置消费者工厂
+        factory.setConsumerFactory(consumerFactory());
+        // 消费者组中线程数量
+        factory.setConcurrency(1);
+        // 拉取超时时间
+        factory.getContainerProperties().setPollTimeout(3000);
+        // 当使用批量监听器时需要设置为true
+        factory.setBatchListener(false);
+
+        return factory;
+    }
+
+
+
     public ConsumerFactory<String, String> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
