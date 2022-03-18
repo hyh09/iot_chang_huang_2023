@@ -68,8 +68,9 @@ public class TenantMenuController extends BaseController {
         List<TenantMenu> tenantMenuList = saveTenantMenuDto.toTenantMenuListBySave(saveTenantMenuDto.getPcList(),saveTenantMenuDto.getAppList(),getCurrentUser().getId().getId(), null,saveTenantMenuDto.getTenantId());
 
         var ids = tenantMenuList.stream().filter(v->v.getIsNew() == null || !v.getIsNew()).map(TenantMenu::getId).collect(Collectors.toSet());
-        var deletedIds = tenantMenuService.getTenantMenuList(TenantMenu.builder().tenantId(getTenantId().getId()).build()).stream().map(TenantMenu::getId)
+        var deletedIds = tenantMenuService.getTenantMenuList(TenantMenu.builder().tenantId(saveTenantMenuDto.getTenantId()).build()).stream().map(TenantMenu::getId)
                 .filter(v->!ids.contains(v)).collect(Collectors.toList());
+        
         for (UUID id: deletedIds) {
             tenantMenuService.delTenantMenu(id.toString(), getTenantId().toString());
         }
