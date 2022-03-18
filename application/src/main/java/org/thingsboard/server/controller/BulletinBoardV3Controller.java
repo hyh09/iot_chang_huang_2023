@@ -94,8 +94,8 @@ public class BulletinBoardV3Controller   extends BaseController {
     }
 
 
-
-
+     // startTime
+    //endTime
     @ApiOperation(value = "【看板设备今日耗能量】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query")
@@ -103,11 +103,19 @@ public class BulletinBoardV3Controller   extends BaseController {
     @RequestMapping(value = "/energyConsumptionToday", method = RequestMethod.GET)
     @ResponseBody
     public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "dictDeviceId")  String dictDeviceId,
-                                                     @RequestParam(required = false ,value = "factoryId")  String factoryId) throws ThingsboardException {
+                                                     @RequestParam(required = false ,value = "factoryId")  String factoryId,
+                                                     @RequestParam(required = false ,value = "startTime")  Long startTime,
+                                                     @RequestParam(required = false ,value = "endTime")  Long endTime
+                                                     ) throws ThingsboardException {
         try {
             QueryTsKvVo vo =  new  QueryTsKvVo();
-            vo.setStartTime(CommonUtils.getZero());
-            vo.setEndTime(CommonUtils.getNowTime());
+            if(startTime == null || endTime == null) {
+                vo.setStartTime(CommonUtils.getZero());
+                vo.setEndTime(CommonUtils.getNowTime());
+            }else {
+                vo.setStartTime(startTime);
+                vo.setEndTime(endTime);
+            }
             if(StringUtils.isNotEmpty(dictDeviceId))
             {
                 vo.setDictDeviceId(UUID.fromString(dictDeviceId));
