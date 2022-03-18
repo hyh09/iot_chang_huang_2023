@@ -109,6 +109,7 @@ export interface DevicePropGroup {
 export interface AssociatedPropItem extends ChartProp {
   content?: string;
   associatedId?: string;
+  createdTime?: number;
 }
 
 export interface AssociatedProp {
@@ -126,4 +127,18 @@ export interface DeviceDetails extends DeviceBaseInfo {
   resultUngrouped?: DevicePropGroup; // 设备属性
   componentList?: DeviceComp[]; // 设备部件
   dictDeviceGraphs?: AssociatedProp[]; // 关联的属性
+}
+
+export interface RelatedParams {
+  createdTime: number;
+  enable: boolean;
+  id: string;
+  name: string;
+  properties: ChartProp[];
+}
+
+export interface DevcieHistoryHeader {
+  name: string;
+  title?: string;
+  properties?: ChartProp[];
 }

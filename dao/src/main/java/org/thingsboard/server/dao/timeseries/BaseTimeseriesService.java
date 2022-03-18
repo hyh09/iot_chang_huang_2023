@@ -41,7 +41,6 @@ import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.kafka.service.KafkaProducerService;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.service.Validator;
-import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
@@ -96,7 +95,6 @@ public class BaseTimeseriesService implements TimeseriesService  {
     private EntityViewService entityViewService;
     @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     @Autowired private EneryTimeGapService eneryTimeGapService;
-    @Autowired private StatisticalDataService statisticalDataService;
     @Autowired private EnergyChartService energyChartService;
     @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
     @Autowired  private KafkaProducerService kafkaProducerService;
@@ -236,7 +234,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
          String  title =    dataInitMap.get(tsKvEntry.getKey());
         if(StringUtils.isNotBlank(title))
         {
-            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(entityId,tsKvEntry,title);
+            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(tenantId,entityId,tsKvEntry,title);
             try {
 //                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
                 kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));

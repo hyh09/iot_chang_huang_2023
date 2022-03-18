@@ -103,7 +103,9 @@ import java.util.UUID;
                                         //气
                                         @ColumnResult(name = "gas_added_value",type = String.class),
                                         @ColumnResult(name = "gas_value",type = String.class),
-                                         @ColumnResult(name = "ts",type = Long.class),
+
+                                        @ColumnResult(name = "capacity_added_value",type = String.class),
+                                        @ColumnResult(name = "ts",type = Long.class),
 
 
                                 }
@@ -218,7 +220,7 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
             UUID entityId,UUID dictDeviceId, String deviceName, String picture, UUID factoryId, UUID workshopId, UUID productionLineId
             ,String waterAddedValue,String waterValue,
             String electricAddedValue,String electricValue,
-            String gasAddedValue,String gasValue,
+            String gasAddedValue,String gasValue,String capacityAddedValue,
             Long ts
     ) {
         this.entityId = entityId;
@@ -234,6 +236,7 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
         this.electricValue = electricValue;
         this.gasAddedValue = gasAddedValue;
         this.gasValue  = gasValue;
+        this.capacityAddedValue =capacityAddedValue;
         this.ts= (ts != null?ts:0);
     }
 }

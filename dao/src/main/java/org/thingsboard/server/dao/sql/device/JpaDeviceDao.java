@@ -782,13 +782,27 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Device device = entity.toData();
         if(device.getProductionLineId() != null && StringUtils.isNotEmpty(device.getProductionLineId().toString())){
             ProductionLine productionLine = productionLineDao.findById(device.getProductionLineId());
-            if(device != null){
+            if(productionLine != null){
                 device.setFactoryName(productionLine.getFactoryName());
                 device.setWorkshopName(productionLine.getWorkshopName());
                 device.setProductionLineName(productionLine.getName());
             }
         }
         return device;
+    }
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    @Override
+    public Device findById(UUID id){
+        DeviceEntity entity = deviceRepository.findById(id).get();
+        if(entity != null){
+            return entity.toData();
+        }
+        return null;
     }
 
     /**
@@ -872,6 +886,53 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public List<Device> queryAllByTenantIdAndName(TenantId tenantId, String name) {
         return DaoUtil.convertDataList(deviceRepository.queryAllByTenantIdAndName(tenantId.getId(),name));
     }
+
+    /**
+     * 查询设备排除网关，返回工厂名
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Device> findDeviceFilterGatewayByTenantId(UUID tenantId) {
+        List<Device> resultList = new ArrayList<>();
+        List<DeviceEntity> deviceFilterGatewayByTenantId = deviceRepository.findDeviceFilterGatewayByTenantId(tenantId);
+        if(CollectionUtils.isNotEmpty(deviceFilterGatewayByTenantId)){
+            deviceFilterGatewayByTenantId.forEach(i->{
+                resultList.add(i.toData());
+            });
+        }
+        return this.getFactoryByList(resultList);
+    }
+
+
+    @Override
+    public long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId) {
+        return this.deviceRepository.countAllByDictDeviceIdAndTenantId(dictDeviceId,tenantId);
+    }
+
+    /**
+     * 查工厂名称
+     * @param deviceList
+     * @return
+     */
+    public List<Device> getFactoryByList(List<Device> deviceList){
+        if(CollectionUtils.isNotEmpty(deviceList)){
+            //查询产线名称
+            List<UUID> factoryIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<Factory> resultFactory = factoryDao.getFactoryByIdList(factoryIds);
+            deviceList.forEach(i->{
+                if(CollectionUtils.isNotEmpty(resultFactory)){
+                    resultFactory.forEach(j->{
+                        if(i.getFactoryId() != null && i.getFactoryId().toString().equals(j.getId().toString())){
+                            i.setFactoryName(j.getName());
+                        }
+                    });
+                }
+            });
+        }
+        return deviceList;
+    }
+
 
     /**
      * 获取父级名称

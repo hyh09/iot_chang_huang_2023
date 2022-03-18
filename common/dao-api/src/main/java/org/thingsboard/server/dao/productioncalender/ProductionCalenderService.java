@@ -40,11 +40,24 @@ public interface ProductionCalenderService {
     PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink);
 
     /**
-     * 查询设备历史生产日历记录列表
+     * 设备生产日历历史记录分页列表
      * @param deviceId
      * @return
      */
-    List<ProductionCalender> getHistoryById(UUID deviceId);
+    PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink);
+
+    /**
+     * 设备生产日历历史记录列表
+     * @param deviceId
+     * @return
+     */
+    List<ProductionCalender> getHistoryByDeviceId(UUID deviceId);
+
+    /**
+     * 查询看板设备监控统计
+     * @return
+     */
+    List<ProductionCalender> getProductionMonitorList(ProductionCalender productionCalender) throws ThingsboardException;
 
 
 }

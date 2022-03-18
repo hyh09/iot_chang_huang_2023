@@ -494,8 +494,10 @@ spring:
     database-platform: "${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}"
   datasource:
     driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver}"
-#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.10.10.56:5432/thingsboard}"
-    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/hsiotdb}"
+#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.4.80.151:30685/hsiotdb}"
+#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.10.10.56:5432/test-prod1}"
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/hsiotdb}"
+#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/hsiotdb}"
     username: "${SPRING_DATASOURCE_USERNAME:postgres}"
     password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
     hikari:

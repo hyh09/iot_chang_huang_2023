@@ -14,19 +14,22 @@ public enum UserLeveEnums {
      * 3为租户管理员角色
      * 4为 用户系统管理员
      */
-   DEFAULT_VALUE(0,"默认的数据"),//普通用户
-   FACTORY_ADMIN(1,"工厂管理员"),
-  TENANT_ADMIN(3,"租户管理员"),
-  USER_SYSTEM_ADMIN(4,"用户系统管理员"),//目前实际交付出去的账号
+   DEFAULT_VALUE(0,"默认的数据",true),//普通用户
+   FACTORY_ADMIN(1,"工厂管理员",false),
+  TENANT_ADMIN(3,"租户管理员",false),
+  USER_SYSTEM_ADMIN(4,"用户系统管理员",true),//目前实际交付出去的账号
     ;
 
     private  int code;
 
     private  String name;
 
-    UserLeveEnums(int code, String name) {
+    private  Boolean enableCan;
+
+    UserLeveEnums(int code, String name,Boolean enableCan) {
         this.code = code;
         this.name = name;
+        this.enableCan =enableCan;
     }
 
     public int getCode() {
@@ -44,4 +47,28 @@ public enum UserLeveEnums {
     public void setName(String name) {
         this.name = name;
     }
+
+
+    public Boolean getEnableCan() {
+        return enableCan;
+    }
+
+    public void setEnableCan(Boolean enableCan) {
+        this.enableCan = enableCan;
+    }
+
+
+    public  static  Boolean  getEnableCanByCode(Integer code)
+    {
+        for(UserLeveEnums enums:UserLeveEnums.values())
+        {
+            if(code ==enums.getCode())
+            {
+                return  enums.getEnableCan();
+            }
+        }
+        return  false;
+    }
+
+
 }

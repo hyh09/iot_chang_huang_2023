@@ -314,11 +314,18 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
     PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
 
     /**
-     * 获取设备详情
+     * 获取设备详情（同时关联返回工厂、车间、产线名称）
      * @param id
      * @return
      */
     Device getDeviceInfo(UUID id);
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    Device findById(UUID id);
 
     /**
      * 批量查询
@@ -342,6 +349,13 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
 
     List<Device> queryAllByTenantIdAndName(TenantId tenantId,String name);
+
+    //查询租户下所有设备，包含工厂名称。过滤网关
+    List<Device> findDeviceFilterGatewayByTenantId(UUID tenantId);
+
+
+    long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
+
 
 
 }

@@ -275,6 +275,7 @@
     "clear-alarms-title": "Clear { count, plural, 1 {1 alarm} other {# alarms} }",
     "clear-time": "Cleared time",
     "created-time": "Created time",
+    "updated-time": "Updated time",
     "details": "Details",
     "display-status": {
       "ACTIVE_ACK": "Active Acknowledged",
@@ -2087,6 +2088,7 @@
     "list-of-data-dics": "{ count, plural, 1 {One data dictionary} other {List of # data dictionaries} }",
     "list-of-device-dics": "{ count, plural, 1 {One device dictionary} other {List of # device dictionaries} }",
     "list-of-menus": "{ count, plural, 1 {One menu} other {List of # menus} }",
+    "list-of-prod-calendars": "{ count, plural, 1 {One production calendar} other {List of # production calendars} }",
     "list-of-role": "{ count, plural, 1 {One role} other {List of # roles} }",
     "type-order": "Order",
     "type-orders": "Orders",
@@ -2096,9 +2098,12 @@
     "type-device-dics": "Device dictionaries",
     "type-menu": "Menu",
     "type-menus": "Menus",
+    "type-prod-calendar": "Production calendar",
+    "type-prod-calendars": "Production calendars",
     "type-role": "Role",
     "type-roles": "Roles",
     "order-name-starts-with": "Order whose names start width '{{prefix}}'",
+    "prod-calendar-name-starts-with": "Production calendar whose names start width '{{prefix}}'",
     "chart-name-starts-with": "Chart whose names start width '{{prefix}}'",
     "list-of-charts": "{ count, plural, 1 {One chart} other {List of # charts} }"
   },
@@ -3620,6 +3625,7 @@
     "little-endian-required": "Small end in front is required.",
     "send-driver-config-success": "Send configuration is required.",
     "factory-mng": "Factory management",
+    "dashboard-bg": "Dashboard background image",
     "prod-capactity-settings": "Yield operation configuration",
     "in-calculation": "Involve in yield operation",
     "delete-factory": "Delete factory",
@@ -3779,7 +3785,20 @@
     "add-associated-param-tip": "Please click the '+' sign in the upper right corner to add associated parameter.",
     "associated-param-empty": "No associated parameter",
     "device-param-required": "Device parameter is required.",
-    "associated-data": "Associated data"
+    "associated-data": "Associated data",
+    "prod-mng": "Production management",
+    "mng-calendars": "Manage calendars",
+    "prod-calendar-details": "Production calendar details",
+    "add-prod-calendar": "Add production calendar",
+    "selected-prod-calendars": "{ count, plural, 1 {1 production calendar} other {# production calendars} } selected",
+    "device-schedual": "Shift time",
+    "device-schedual-required": "Shift time is required.",
+    "shift-date": "Shift date",
+    "shift-date-required": "Shift date is required.",
+    "start-time-required": "Start time is required.",
+    "end-time-required": "End time is required.",
+    "delete-prod-calendar-title": "Are you sure you want to delete this shift?",
+    "delete-prod-calendar-titles": "Are you sure you want to delete {{count}} shifts?"
   },
   "menu-mng": {
     "menu-mng": "Menu management",
@@ -3991,8 +4010,8 @@
     "download-template": "Download template",
     "drop-order": "Drop an excel or click to select a file to upload.",
     "import-template-name": "Order import template.xlsx",
-    "intended-capacity": "Intended capacity",
-    "actual-capacity": "Actual capacity",
+    "intended-capacity": "Intended yield",
+    "actual-capacity": "Actual yield",
     "maintain-time": "Maintenance time"
   }
 }

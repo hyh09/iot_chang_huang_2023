@@ -8,6 +8,7 @@ import { OrderCapacity } from '@app/shared/models/custom/order-form-mng.models';
 import { OrderFormComponent } from '../orders/order-form.component';
 import { OrdersFiltersComponent } from '../orders/orders-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
+import { isUndefinedOrNull } from "@app/core/utils";
 
 @Injectable()
 export class OrderCapacityTableConfigResolver implements Resolve<EntityTableConfig<OrderCapacity>> {
@@ -38,8 +39,8 @@ export class OrderCapacityTableConfigResolver implements Resolve<EntityTableConf
       new EntityTableColumn<OrderCapacity>('totalAmount', 'order.total-amount', '80px'),
       new DateEntityTableColumn<OrderCapacity>('intendedTime', 'order.intended-complete-date', this.datePipe, '120px', 'yyyy-MM-dd'),
       new EntityTableColumn<OrderCapacity>('total', 'order.total-count', '80px'),
-      new EntityTableColumn<OrderCapacity>('capacities', 'order.capacities', '80px', (entity) => ((entity.capacities || '') + ''), () => ({}), false),
-      new EntityTableColumn<OrderCapacity>('completeness', 'order.completeness', '80px', (entity) => ((entity.completeness || '') + ''), () => ({}), false),
+      new EntityTableColumn<OrderCapacity>('capacities', 'order.capacities', '80px', (entity) => (isUndefinedOrNull(entity.capacities) ? '' : entity.capacities + ''), () => ({}), false),
+      new EntityTableColumn<OrderCapacity>('completeness', 'order.completeness', '80px', (entity) => (isUndefinedOrNull(entity.completeness) ? '' : entity.completeness + ''), () => ({}), false),
       new EntityTableColumn<OrderCapacity>('creator', 'common.creator', '80px', (entity) => (entity.creator || ''), () => ({}), false),
       new DateEntityTableColumn<OrderCapacity>('createdTime', 'common.created-time', this.datePipe, '120px')
     );

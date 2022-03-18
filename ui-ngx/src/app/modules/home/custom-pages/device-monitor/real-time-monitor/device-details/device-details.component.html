@@ -38,30 +38,6 @@
         </button>
       </div>
       <div fxFlex fxLayout="column" fxLayoutGap="16px" class="real-time-data-content">
-        <!-- <div *ngIf="associatedProps.length > 0" class="real-time-data-item">
-          <div class="title">{{ 'device-mng.associated-data' | translate }}</div>
-          <nz-table
-            #associatedDataTable
-            [nzData]="associatedProps"
-            [nzShowPagination]="false"
-            [nzFrontPagination]="false"
-            nzNoResult="{{ 'common.data-empty' | translate }}"
-          >
-            <tbody>
-              <tr
-                *ngFor="let data of associatedDataTable.data"
-                (click)="fetchPropHistoryData(data.firstPropName, null, true)"
-                [class.active]="data.firstPropName === currPropName"
-              >
-                <td width="44%">{{data.name}}</td>
-                <td width="30%">
-                  <span *ngFor="let prop of data.properties || []">{{ prop.content }}{{ prop.unit }}{{ prop.suffix }}</span>
-                </td>
-                <td width="26%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-              </tr>
-            </tbody>
-          </nz-table>
-        </div> -->
         <div *ngFor="let group of deviceData" class="real-time-data-item">
           <div class="title">{{ group.name }}</div>
           <nz-table
@@ -82,7 +58,7 @@
                   <span *ngIf="data.firstPropName"><span *ngFor="let prop of data.properties || []">{{ prop.content }}{{ prop.unit }}{{ prop.suffix }}</span></span>
                   <span *ngIf="!data.firstPropName">{{data.content}}{{data.unit}}</span>
                 </td>
-                <td width="26%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td width="26%">{{(data.firstPropName ? getAssociatedPropLatestTime(data) : data.createdTime) | date:'yyyy-MM-dd HH:mm:ss'}}</td>
               </tr>
             </tbody>
           </nz-table>
@@ -129,12 +105,12 @@
                           (click)="fetchPropHistoryData(data.firstPropName || data.name, null, true)"
                           [class.active]="(data.firstPropName || data.name) === currPropName"
                         >
-                          <td width="40%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
+                          <td width="44%" [nzIndentSize]="item.level! * 5">{{data.title || data.name}}</td>
                           <td width="30%">
                             <span *ngIf="data.firstPropName"><span *ngFor="let prop of data.properties || []">{{ prop.content }}{{ prop.unit }}{{ prop.suffix }}</span></span>
                             <span *ngIf="!data.firstPropName">{{data.content}}{{data.unit}}</span>
                           </td>
-                          <td width="26%">{{data.createdTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                          <td width="26%">{{(data.firstPropName ? getAssociatedPropLatestTime(data) : data.createdTime) | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                         </tr>
                       </tbody>  
                     </nz-table>

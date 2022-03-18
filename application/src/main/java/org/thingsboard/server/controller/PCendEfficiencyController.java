@@ -149,7 +149,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
             Long lo2 = System.currentTimeMillis();
             Long t3 = lo2-lo1;
-            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
+//            log.info("--queryEntityByKeys查询的耗时时间--：{}毫秒",t3);
             return  obj;
 
         }catch (Exception e)
@@ -185,6 +185,50 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
 
 
+
+
+
+//    @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+//            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+//            @ApiImplicitParam(name = "deviceId", value = "设备id")
+//    })
+//    @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
+//    @ApiResponses({
+//            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+//    })
+//    @ResponseBody
+//    public Object queryEnergyHistory(
+//            @RequestParam int pageSize,
+//            @RequestParam int page,
+//            @RequestParam(required = false) String textSearch,
+//            @RequestParam(required = false) String sortProperty,
+//            @RequestParam(required = false) String sortOrder,
+//            @RequestParam(required = false) Long startTime,
+//            @RequestParam(required = false) Long endTime,
+//            @RequestParam(required = false) UUID deviceId
+//    ) throws ThingsboardException {
+//        try {
+//            if ( startTime == null  || endTime == null) {
+//                startTime=(CommonUtils.getZero());
+//                endTime=(CommonUtils.getNowTime());
+//            }
+//
+//            QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
+//            queryTsKvVo.setDeviceId(deviceId);
+//            queryTsKvVo.setStartTime(startTime);
+//            queryTsKvVo.setEndTime(endTime);
+//            queryTsKvVo.setSortOrder(sortOrder);
+//            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+//
+//            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
+//        }catch (Exception e)
+//        {
+//            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
+//            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+//        }
+//    }
 
 
 

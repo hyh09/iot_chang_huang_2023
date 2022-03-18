@@ -2,6 +2,7 @@ package org.thingsboard.server.common.data.productioncalender;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.thingsboard.server.common.data.StringUtils;
 
 import java.util.UUID;
 
@@ -32,18 +33,66 @@ public class ProductionCalender {
     @ApiModelProperty("修改人")
     public UUID updatedUser;
 
+    /*****************************************************非数据库字段****************************************************************/
+
+    @ApiModelProperty(value = "查询类型（1.集团看板 2.工厂看板，3.车间看板）")
+    private Integer qryType;
+
+    @ApiModelProperty("完成量/计划量")
+    private String achieveOrPlan;
+
+    @ApiModelProperty("年产能达成率")
+    private String yearAchieve;
+
+    @ApiModelProperty("生产状态(true正常  false异常)")
+    private Boolean productionState;
+
+    @ApiModelProperty("车间id")
+    private UUID workshopId;
+
+
+    /*********************************************************************************************************************/
+
     public ProductionCalender(){}
 
-    public ProductionCalender(String deviceName, UUID factoryId, Long startTime, Long endTime) {
+    public ProductionCalender(String deviceName,String factoryName,UUID tenantId) {
         this.deviceName = deviceName;
-        this.factoryId = factoryId;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.factoryName = factoryName;
+        this.tenantId = tenantId;
     }
 
     public ProductionCalender(UUID deviceId){
         this.deviceId = deviceId;
     }
 
+    /**
+     * 看板生产监控数据反参
+     * @param deviceName
+     * @param achieveOrPlan
+     * @param yearAchieve
+     * @param productionState
+     */
+    public ProductionCalender(String deviceName,String achieveOrPlan, String yearAchieve, Boolean productionState) {
+        this.deviceName = deviceName;
+        this.achieveOrPlan = achieveOrPlan;
+        if (StringUtils.isNotEmpty(yearAchieve)){
+            this.yearAchieve = (Integer.parseInt(yearAchieve) * 100) + "";
+        }
+        this.productionState = productionState;
+    }
+
+    /**
+     * 看板生产监控数据入参
+     * @param startTime
+     * @param endTime
+     * @param tenantId
+     */
+    public ProductionCalender(Long startTime,Long endTime,UUID factoryId ,UUID workshopId,UUID tenantId) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.factoryId = factoryId;
+        this.workshopId = workshopId;
+        this.tenantId = tenantId;
+    }
 
 }

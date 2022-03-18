@@ -35,7 +35,7 @@ public class CapacityHistoryVo {
      * 上报时间
      */
     @ApiModelProperty("上报时间 支持排序 ")
-    private  Long  createdTime;
+    private  String  createdTime;
 
 
 }

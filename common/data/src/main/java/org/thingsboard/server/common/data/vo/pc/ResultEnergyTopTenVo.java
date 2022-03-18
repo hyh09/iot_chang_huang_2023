@@ -5,7 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @program: thingsboard
@@ -31,4 +34,10 @@ public class ResultEnergyTopTenVo {
 
     @ApiModelProperty("值 ")
     private  String value="0";
+
+
+    /**大到小*/
+    public static List<ResultEnergyTopTenVo> compareToMaxToMin(List<ResultEnergyTopTenVo> list){
+        return list.stream().sorted((s1, s2) -> new BigDecimal(s2.getValue()).compareTo(new BigDecimal(s1.getValue()))).collect(Collectors.toList());
+    }
 }

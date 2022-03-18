@@ -37,6 +37,11 @@ public interface BulletinBoardSvc {
      */
     ConsumptionTodayVo energyConsumptionToday(QueryTsKvVo vo, TenantId tenantId );
 
+    /**
+     * 今日能耗量列表  待优化的部分
+     *
+     */
+    ConsumptionTodayVo todayUnitEnergy(QueryTsKvVo vo, TenantId tenantId );
 
     /**
      *

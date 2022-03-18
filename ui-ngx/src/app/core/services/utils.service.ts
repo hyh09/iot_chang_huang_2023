@@ -86,6 +86,7 @@ const commonMaterialIcons: Array<string> = ['more_horiz', 'more_vert', 'open_in_
 export interface TreeNodeOptions extends NzTreeNodeOptions {
   id: string;
   parentId: string;
+  isNew?: boolean;
 }
 
 export interface TableTreeNodeOptions {

@@ -7,16 +7,19 @@ package org.thingsboard.server.common.data.vo.enums;
  * @create: 2021-12-08 16:18
  **/
 public enum KeyTitleEnums {
-    key_water("耗水量","1","1"), //水
-    key_gas("耗气量","2","3"),//气
-    key_cable("耗电量","3","2"),//电
-
-
-    key_capacity("总产量","0",""),//总产能
+    key_water("水","耗水量","1","1"), //水
+    key_gas("气","耗气量","2","3"),//气
+    key_cable("电","耗电量","3","2"),//电
+   key_capacity("产量","总产量","0",""),//总产能
 
 
 
     ;
+
+    /**
+     * 简称
+     */
+    private  String abbreviationName;
 
     /**
      * 分组的名称
@@ -30,7 +33,8 @@ public enum KeyTitleEnums {
      */
     private  String pcCode;
 
-    KeyTitleEnums(String gName, String code,String pcCode) {
+    KeyTitleEnums(String  abbreviationName,String gName, String code,String pcCode) {
+        this.abbreviationName =abbreviationName;
         this.gName = gName;
         this.code = code;
         this.pcCode=pcCode;
@@ -68,7 +72,11 @@ public enum KeyTitleEnums {
     }
 
 
-    /******
+
+
+
+
+    /********************************
      * 为了兼容Pc端
      * pc端的入参 前端传的 不按KeyTitleEnums code来
      * @param pcCode
@@ -114,5 +122,13 @@ public enum KeyTitleEnums {
 
     public void setPcCode(String pcCode) {
         this.pcCode = pcCode;
+    }
+
+    public String getAbbreviationName() {
+        return abbreviationName;
+    }
+
+    public void setAbbreviationName(String abbreviationName) {
+        this.abbreviationName = abbreviationName;
     }
 }

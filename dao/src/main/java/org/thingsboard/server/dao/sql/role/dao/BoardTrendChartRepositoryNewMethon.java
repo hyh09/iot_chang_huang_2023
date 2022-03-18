@@ -24,8 +24,12 @@ import java.util.stream.Collectors;
 public class BoardTrendChartRepositoryNewMethon extends JpaSqlTool {
 
     private  String  SQL_FRAGMENT_MAIN_TABLE="select t1.entity_id,t1.ts,t1.water_added_value ,t1.water_first_time,t1.water_last_time," +
-            "  t1.electric_added_value,t1.electric_first_time,t1.electric_last_time,t1.gas_added_value,t1.gas_first_time,t1.gas_last_time " +
-            "  from  hs_energy_chart t1 WHERE t1.ts>= :startTime and t1.ts<= :endTime ";
+            "  t1.electric_added_value,t1.electric_first_time,t1.electric_last_time,t1.gas_added_value,t1.gas_first_time,t1.gas_last_time,t1.capacity_added_value  " +
+            "  from  hs_energy_hour t1 WHERE t1.ts>= :startTime and t1.ts<= :endTime ";
+
+//    private  String  SQL_FRAGMENT_MAIN_TABLE="select t1.entity_id,t1.ts,t1.water_added_value ,t1.water_first_time,t1.water_last_time," +
+//            "  t1.electric_added_value,t1.electric_first_time,t1.electric_last_time,t1.gas_added_value,t1.gas_first_time,t1.gas_last_time,t1.capacity_added_value  " +
+//            "  from  hs_energy_chart t1 WHERE t1.ts>= :startTime and t1.ts<= :endTime ";
 
 
 
@@ -37,7 +41,7 @@ public class BoardTrendChartRepositoryNewMethon extends JpaSqlTool {
         StringBuffer  sonSql01 = new StringBuffer();
         sqlPartOnDevice(queryVo.toQueryTsKvVo(),sonSql01,param);
         StringBuffer  sql = new StringBuffer();
-        sql.append(SQL_FRAGMENT_MAIN_TABLE).append(" and t1.ENTITY_ID IN (  select  d1.id  from  device  d1 where 1= 1 ").append(sonSql01).append(") ");
+        sql.append(SQL_FRAGMENT_MAIN_TABLE).append(" and t1.ENTITY_ID IN (  select  d1.id  from  device  d1 where 1= 1 ").append(sonSql01).append(") order by  ts ");
         List<EnergyChartOfBoardEntity>   list  = querySql(sql.toString(),param, "energyChartOfBoardEntityMap");
         return  list;
 

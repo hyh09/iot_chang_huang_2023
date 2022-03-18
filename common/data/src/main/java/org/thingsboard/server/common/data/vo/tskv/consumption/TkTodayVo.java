@@ -28,4 +28,6 @@ public class TkTodayVo {
     private  String totalValue;
 
     private  Long ts;
+
+    private Boolean flg;
 }

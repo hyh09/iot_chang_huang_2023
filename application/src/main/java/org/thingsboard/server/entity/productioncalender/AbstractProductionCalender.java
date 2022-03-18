@@ -43,6 +43,7 @@ public abstract class AbstractProductionCalender {
             this.deviceId = productionCalender.getDeviceId();
             this.deviceName = productionCalender.getDeviceName();
             this.factoryId = productionCalender.getFactoryId();
+            this.factoryName = productionCalender.getFactoryName();
             this.startTime = productionCalender.getStartTime();
             this.endTime = productionCalender.getEndTime();
             this.tenantId = productionCalender.getTenantId();
@@ -56,12 +57,11 @@ public abstract class AbstractProductionCalender {
     public ProductionCalender toProductionCalender(){
         ProductionCalender productionCalender = new ProductionCalender();
         if(productionCalender != null){
-            if(productionCalender.getId() != null){
-                this.id = productionCalender.getId();
-            }
+            productionCalender.setId(this.id);
             productionCalender.setDeviceId(this.deviceId);
             productionCalender.setDeviceName(this.deviceName);
             productionCalender.setFactoryId(this.factoryId);
+            productionCalender.setFactoryName(this.factoryName);
             productionCalender.setStartTime(this.startTime);
             productionCalender.setEndTime(this.endTime);
             productionCalender.setTenantId(this.tenantId);

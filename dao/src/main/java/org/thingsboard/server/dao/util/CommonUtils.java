@@ -406,6 +406,33 @@ public class CommonUtils {
     }
 
 
+    /**
+     * 获取两个时间段的整点时间
+     * 目前入参： 0:00:00 -> 23:59:59
+     */
+    public  static  List<Long> getTwoTimePeriods(long startTs ,long  endTs,int type,int value)
+    {
+        List<Long> resultTimeList = new ArrayList<>();
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+        Date startTime1 = new Date(startTs);
+        Date endTime1 = new Date(endTs);
+        Calendar tempStart = Calendar.getInstance();
+        tempStart.setTime(startTime1);
+        while (startTime1.getTime() <= endTime1.getTime()) {
+//            System.out.println(format2.format(startTime1));
+            startTime1 = tempStart.getTime();
+            tempStart.add(type, value);
+            resultTimeList.add(startTime1.getTime());
+//            System.out.println("====>"+format2.format(startTime1));
+        }
+        return resultTimeList;
+
+
+    }
+
+
+
 
     /*
      * 将时间戳转换为时间
@@ -419,6 +446,36 @@ public class CommonUtils {
         return res;
     }
 
+
+    /**
+     *
+     * @param ts
+     * @return 小时
+     */
+    public  static Long getConversionHours(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+
+
+        if(hour>=23)
+        {
+            hour=-1;
+        }
+
+        if(minute==0) {
+            localDateTime1 = LocalDateTime.of(year, month, day, hour, 0, 0, 0);
+        }else if(minute>0  ) {
+
+            localDateTime1 = LocalDateTime.of(year, month, day, hour+1, 0, 0, 0);
+        }
+        return getTimestampOfDateTime(localDateTime1);
+    }
 
 
 

@@ -1,6 +1,5 @@
 package org.thingsboard.server.dao.sql.role.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -132,6 +131,12 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
         return  dataToConversionSvc.resultProcessByEntityList(entityList,tenantId);
     }
 
+    @Override
+    public ConsumptionTodayVo todayUnitEnergy(QueryTsKvVo vo, TenantId tenantId) {
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(vo);
+        print("看板的今日能耗数据",entityList);
+        return  dataToConversionSvc.todayUntiEnergyByEntityList(entityList,tenantId,vo);
+    }
 
     @Override
     public  Map<UUID,String> queryCapacityValueByDeviceIdAndTime(List<DeviceCapacityVo> deviceCapacityVoList) {
