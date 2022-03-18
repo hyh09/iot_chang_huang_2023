@@ -21,7 +21,7 @@ import java.util.Map;
 @Repository
 public class BoardV3DeviceDictionaryReposutory extends JpaSqlTool {
 
-    private  String  HS_DICT_DEVICE_SQL="select h1.id,h1.code,h1.name  from  hs_dict_device h1 where  1=1 ";
+    private  String  HS_DICT_DEVICE_SQL="select h1.id,h1.code,h1.name  from  hs_dict_device h1 where  1=1 and h1.is_core =true ";
 
 
 
