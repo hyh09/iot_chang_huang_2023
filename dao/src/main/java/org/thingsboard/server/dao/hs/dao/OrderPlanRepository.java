@@ -125,7 +125,7 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      * @param endTime
      * @return
      */
-    @Query("select t from OrderPlanEntity t where t.deviceId = :deviceId and ( (t.intendedStartTime > :startTime  and t.intendedStartTime < :endTime) or (t.intendedStartTime >= :startTime and t.intendedEndTime <= :endTime ) or (t.intendedEndTime > :startTime and t.intendedEndTime < :endTime ))")
+    @Query("select t from OrderPlanEntity t where t.deviceId = :deviceId and ( (t.intendedStartTime >= :startTime  and t.intendedStartTime <= :endTime) or (t.intendedStartTime >= :startTime and t.intendedEndTime <= :endTime ) or (t.intendedEndTime >= :startTime and t.intendedEndTime <= :endTime ))")
     List<OrderPlanEntity> findIntendedByDeviceId(@Param("deviceId")UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 
     /**
@@ -135,6 +135,6 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      * @param endTime
      * @return
      */
-    @Query("select t from OrderPlanEntity t where t.deviceId = :deviceId and ((t.actualStartTime > :startTime  and t.actualStartTime < :endTime) or (t.actualStartTime >= :startTime and t.actualEndTime <= :endTime ) or (t.actualEndTime > :startTime and t.actualEndTime < :endTime ))")
+    @Query("select t from OrderPlanEntity t where t.deviceId = :deviceId and ((t.actualStartTime >= :startTime  and t.actualStartTime <= :endTime) or (t.actualStartTime >= :startTime and t.actualEndTime <= :endTime ) or (t.actualEndTime >= :startTime and t.actualEndTime <= :endTime ))")
     List<OrderPlanEntity> findActualByDeviceId(@Param("deviceId")UUID deviceId, @Param("startTime") Long startTime, @Param("endTime") Long endTime);
 }
