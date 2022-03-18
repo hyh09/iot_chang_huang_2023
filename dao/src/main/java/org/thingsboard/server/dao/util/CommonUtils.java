@@ -420,11 +420,11 @@ public class CommonUtils {
         Calendar tempStart = Calendar.getInstance();
         tempStart.setTime(startTime1);
         while (startTime1.getTime() <= endTime1.getTime()) {
-            System.out.println(format2.format(startTime1));
+//            System.out.println(format2.format(startTime1));
             startTime1 = tempStart.getTime();
             tempStart.add(type, value);
             resultTimeList.add(startTime1.getTime());
-            System.out.println("====>"+format2.format(startTime1));
+//            System.out.println("====>"+format2.format(startTime1));
         }
         return resultTimeList;
 
@@ -461,12 +461,19 @@ public class CommonUtils {
         int day =  localDateTime.getDayOfMonth();
         int hour =  localDateTime.getHour();
         int minute = localDateTime.getMinute();
-//        if(minute >0)
-//        {
-//            localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
-//        }else {
+
+
+        if(hour>=23)
+        {
+            hour=-1;
+        }
+
+        if(minute==0) {
             localDateTime1 = LocalDateTime.of(year, month, day, hour, 0, 0, 0);
-//        }
+        }else if(minute>0  ) {
+
+            localDateTime1 = LocalDateTime.of(year, month, day, hour+1, 0, 0, 0);
+        }
         return getTimestampOfDateTime(localDateTime1);
     }
 

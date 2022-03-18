@@ -1315,6 +1315,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
         return deviceDao.getDeviceByIdList(deviceIdList);
     }
 
+    @Override
+    public long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId) {
+        return this.deviceDao.countAllByDictDeviceIdAndTenantId(dictDeviceId,tenantId);
+    }
 
     private final String Yes="已匹配";
 

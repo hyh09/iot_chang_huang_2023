@@ -2,8 +2,10 @@ package org.thingsboard.server.common.data.vo.tskv.parameter;
 
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.validation.CheckV3queryChartGroup;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.UUID;
 
 /**
@@ -32,6 +34,7 @@ public class TrendParameterVo {
 
     private  Long  endTime;
 
+    @NotEmpty(message = "入参key不能为空,",groups = CheckV3queryChartGroup.class)
     private  String key;
 
 

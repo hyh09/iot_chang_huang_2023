@@ -193,6 +193,33 @@ public class StringUtilToll {
         return  value03;
     }
 
+    /**
+     *str < str
+     * @return 判断 Stri是否大于 str2
+     */
+    public  static  Boolean compareTo(String str1,String str2){
+        String zero ="0";
+        if(StringUtils.isEmpty(str1)  )
+        {
+            str1= zero;
+        }
+        if(StringUtils.isEmpty(str2)  )
+        {
+            str2= zero;
+        }
+        BigDecimal b1 = new BigDecimal(str1);
+        BigDecimal b2 = new BigDecimal(str2);
+       int flg= b1.compareTo(b2);
+       if(flg>0)
+       {
+           return  true;
+       }
+
+       return  false;
+
+
+    }
+
 
 
 
