@@ -238,6 +238,9 @@ public class BaseTimeseriesService implements TimeseriesService  {
             try {
 //                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
                 kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
+                kafkaProducerService.sendMessageSync("hs_energy_chart_kafka", JsonUtils.objectToJson(dataBodayVo));
+                kafkaProducerService.sendMessageSync("hs_energy_hour_kafka", JsonUtils.objectToJson(dataBodayVo));
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
