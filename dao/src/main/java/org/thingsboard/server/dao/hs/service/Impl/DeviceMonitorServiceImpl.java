@@ -1121,7 +1121,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
                     CompletableFuture.allOf(
                             CompletableFuture.runAsync(() -> {
-                                var deviceTimeBO = shirtTimes.stream().map(v -> CompletableFuture.supplyAsync(() -> ImmutablePair.of(v, this.clientService.listDeviceTss(tenantId, deviceId, todayStartTime, tomorrowStartTime))))
+                                var deviceTimeBO = shirtTimes.stream().map(v -> CompletableFuture.supplyAsync(() -> ImmutablePair.of(v, this.clientService.listDeviceTss(tenantId, deviceId, v.getStartTime(), v.getEndTime()))))
                                         .map(v -> v.thenApplyAsync(f -> {
                                             if (f.getRight().isEmpty())
                                                 return DeviceTimeBO.builder().startingUpTime(0L).shutdownTime(f.getLeft().getEndTime() - f.getLeft().getStartTime()).build();

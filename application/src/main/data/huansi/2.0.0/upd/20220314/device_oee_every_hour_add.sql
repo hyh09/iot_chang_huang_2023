@@ -21,3 +21,6 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.hs_device_oee_every_hour
     OWNER to postgres;
+
+CREATE INDEX hs_device_oee_every_hour_device_id_ts
+ON hs_device_oee_every_hour (device_id, ts);

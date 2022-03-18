@@ -1,12 +1,17 @@
 package org.thingsboard.server.common.data.tenantmenu;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.thingsboard.server.common.data.id.tenantmenu.TenantMenuId;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
 
 import java.util.UUID;
 
 @Data
+@Builder
+@AllArgsConstructor
 public class TenantMenu{
 
     private UUID id;
@@ -42,6 +47,8 @@ public class TenantMenu{
     private  String name;
 
     private  Boolean checked=false;
+
+    private Boolean isNew;
 
     public TenantMenu() {
     }

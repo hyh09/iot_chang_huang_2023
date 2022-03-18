@@ -240,5 +240,24 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
         return result;
     }
 
+    /**
+     * 查询时间范围有交集的实生产日历
+     * @param deviceId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @Override
+    public List<ProductionCalender> findAllByDeviceIdAndStartTimeAndEndTime(UUID deviceId,long startTime,long endTime){
+        List<ProductionCalender> result = new ArrayList<>();
+        List<ProductionCalenderEntity> entityList = productionCalenderRepository.findAllByDeviceIdAndStartTimeAndEndTime(deviceId, startTime, endTime);
+        if (CollectionUtils.isNotEmpty(entityList)) {
+            entityList.forEach(s -> {
+                result.add(s.toData());
+            });
+        }
+        return result;
+    }
+
 
 }

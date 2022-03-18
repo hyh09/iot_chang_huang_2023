@@ -66,11 +66,18 @@ public class TenantMenuController extends BaseController {
         checkNotNull(saveTenantMenuDto);
         checkParameter("租户id不能为空",saveTenantMenuDto.getTenantId());
         List<TenantMenu> tenantMenuList = saveTenantMenuDto.toTenantMenuListBySave(saveTenantMenuDto.getPcList(),saveTenantMenuDto.getAppList(),getCurrentUser().getId().getId(), null,saveTenantMenuDto.getTenantId());
+
+        var ids = tenantMenuList.stream().filter(v->v.getIsNew() == null || !v.getIsNew()).map(TenantMenu::getId).collect(Collectors.toSet());
+        var deletedIds = tenantMenuService.getTenantMenuList(TenantMenu.builder().tenantId(saveTenantMenuDto.getTenantId()).build()).stream().map(TenantMenu::getId)
+                .filter(v->!ids.contains(v)).collect(Collectors.toList());
+        
+        for (UUID id: deletedIds) {
+            tenantMenuService.delTenantMenu(id.toString(), getTenantId().toString());
+        }
         tenantMenuService.saveOrUpdTenantMenu(tenantMenuList,saveTenantMenuDto.getTenantId());
         //批量删除角色菜单接口
-        List<UUID> collect = tenantMenuList.stream().filter(s -> s.getCreatedUser() != null).map(TenantMenu::getId).collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(collect)){
-            roleMenuSvc.deleteMenuIdByIds(collect);
+        if(CollectionUtils.isNotEmpty(deletedIds)){
+            roleMenuSvc.deleteMenuIdByIds(deletedIds);
         }
     }
 

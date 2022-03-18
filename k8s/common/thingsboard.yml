@@ -100,6 +100,8 @@ spec:
           value: "10000"
         - name: TB_KAFKA_SERVERS
           value: "tb-kafka:9092"
+        - name: REDIS_HOST
+          value: "tb-redis"
         volumeMounts:
           - mountPath: /config
             name: tb-mqtt-transport-config

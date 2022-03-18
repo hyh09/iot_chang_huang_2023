@@ -16,6 +16,7 @@ import org.thingsboard.server.dao.sql.productioncalender.ProductionCalenderRepos
 
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,7 @@ public class JpaDeviceOeeEveryHourDao implements DeviceOeeEveryHourDao {
         if (CollectionUtils.isNotEmpty(byCdn)) {
             entity.setId(byCdn.get(0).getId());
         }
+        entity.setOeeValue(entity.getOeeValue().multiply(new BigDecimal(100)));
         deviceOeeEveryHourRepository.save(entity);
     }
 
