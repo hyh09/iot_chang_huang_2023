@@ -7,9 +7,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.validation.CheckV3queryChartGroup;
 import org.thingsboard.server.common.data.vo.BoardV3DeviceDictionaryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
@@ -92,8 +94,8 @@ public class BulletinBoardV3Controller   extends BaseController {
     }
 
 
-
-
+     // startTime
+    //endTime
     @ApiOperation(value = "【看板设备今日耗能量】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryId",value = "工厂标识{如果传表示是工厂下的看板}",dataType = "string",paramType = "query")
@@ -101,11 +103,19 @@ public class BulletinBoardV3Controller   extends BaseController {
     @RequestMapping(value = "/energyConsumptionToday", method = RequestMethod.GET)
     @ResponseBody
     public ConsumptionTodayVo energyConsumptionToday(@RequestParam(required = false ,value = "dictDeviceId")  String dictDeviceId,
-                                                     @RequestParam(required = false ,value = "factoryId")  String factoryId) throws ThingsboardException {
+                                                     @RequestParam(required = false ,value = "factoryId")  String factoryId,
+                                                     @RequestParam(required = false ,value = "startTime")  Long startTime,
+                                                     @RequestParam(required = false ,value = "endTime")  Long endTime
+                                                     ) throws ThingsboardException {
         try {
             QueryTsKvVo vo =  new  QueryTsKvVo();
-            vo.setStartTime(CommonUtils.getZero());
-            vo.setEndTime(CommonUtils.getNowTime());
+            if(startTime == null || endTime == null) {
+                vo.setStartTime(CommonUtils.getZero());
+                vo.setEndTime(CommonUtils.getNowTime());
+            }else {
+                vo.setStartTime(startTime);
+                vo.setEndTime(endTime);
+            }
             if(StringUtils.isNotEmpty(dictDeviceId))
             {
                 vo.setDictDeviceId(UUID.fromString(dictDeviceId));
@@ -132,14 +142,14 @@ public class BulletinBoardV3Controller   extends BaseController {
     @ApiOperation(value = "【3.新增设备单位能耗/标准单位能耗趋势图】")
     @PostMapping("/queryChart")
     @ResponseBody
-    public TrendChart02Vo trendChart(@RequestBody TrendParameterVo vo) throws ThingsboardException {
+    public TrendChart02Vo trendChart(@Validated(CheckV3queryChartGroup.class) @RequestBody TrendParameterVo vo) throws ThingsboardException {
         try {
             log.info("3.新增设备单位能耗/标准单位能耗趋势图:{}",vo);
-           vo.setTenantId(getTenantId().getId());
+             vo.setTenantId(getTenantId().getId());
             return bulletinV3BoardVsSvc.trendChart(vo,getTenantId());
         }catch (Exception  e)
         {
-            log.error("新增设备单位能耗/标准单位能耗趋势图:{}",e);
+            log.error("[异常]新增设备单位能耗/标准单位能耗趋势图:{}",e);
             return  new TrendChart02Vo();
         }
     }
