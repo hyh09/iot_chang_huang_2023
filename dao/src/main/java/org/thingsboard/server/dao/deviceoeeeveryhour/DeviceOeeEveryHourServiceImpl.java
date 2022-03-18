@@ -177,7 +177,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         List<StatisticOee> statisticOeeList = new ArrayList<>();
         List<DeviceOeeEveryHour> deviceOeeEveryHours = deviceOeeEveryHourDao.findAllByCdn(new DeviceOeeEveryHour(statisticOee), "ts", "ASC");
         if (!CollectionUtils.isEmpty(deviceOeeEveryHours)) {
-            //如果是工厂和车间需要合并成每个小时的
+            //如果是集团工厂和车间需要合并成每个小时的
             Map<Long, BigDecimal> map = new LinkedHashMap<>();
             for (DeviceOeeEveryHour iter : deviceOeeEveryHours) {
                 if (map != null && map.containsKey(iter.getTs())) {
@@ -186,9 +186,20 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
                     map.put(iter.getTs(), iter.getOeeValue());
                 }
             }
-            //把整理后
-            for (Map.Entry<Long, BigDecimal> entry : map.entrySet()) {
-                statisticOeeList.add(new StatisticOee(entry.getKey(), entry.getValue()));
+            if (map != null) {
+                if (statisticOee.getDeviceId() == null) {
+                    //不是设备，那就是租户、工厂、车间。需要除以设备数
+                    List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(statisticOee.getTenantId(), statisticOee.getFactoryId(), statisticOee.getWorkshopId(), true));
+                    BigDecimal deviceCount = new BigDecimal(1);
+                    if (!CollectionUtils.isEmpty(deviceListByCdn)) {
+                        deviceCount = new BigDecimal(deviceListByCdn.size());
+                    }
+                    for (Map.Entry<Long, BigDecimal> entry : map.entrySet()) {
+                        BigDecimal oeeValue = entry.getValue().divide(deviceCount,4,BigDecimal.ROUND_HALF_UP);
+                        statisticOeeList.add(new StatisticOee(entry.getKey(), oeeValue));
+                    }
+                }
+
             }
         }
         return statisticOeeList;
