@@ -42,7 +42,7 @@ public class StatisticOee {
      */
     public StatisticOee(Long timeHours, BigDecimal oeeValue) {
         this.timeHours = timeHours;
-        this.oeeValue = oeeValue.multiply(new BigDecimal(100));
+        this.oeeValue = oeeValue;
     }
 
     /**
