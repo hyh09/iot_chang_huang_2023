@@ -111,6 +111,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
                 }
             }
+
         }
     }
 
@@ -262,7 +263,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
                 StatisticOee statisticOee = new StatisticOee();
 
-                statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size()), 2, BigDecimal.ROUND_HALF_UP));
+                statisticOee.setOeeValue(oeeValue.divide(new BigDecimal(deviceListByCdn.size()), 4, BigDecimal.ROUND_HALF_UP));
                 statisticOee.setTimeHours(dateList.get(i));
                 result.add(statisticOee);
             }
@@ -310,9 +311,9 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         //1.良品数：订单计划里面填的实际产量值总和
         BigDecimal deviceOutputReality = new BigDecimal(0);
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByDeviceId(deviceId, startTime, endTime);
-        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
-            for (OrderPlanEntity i :orderPlanEntityList) {
-                if(StringUtils.isNotEmpty(i.getActualCapacity())){
+        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+            for (OrderPlanEntity i : orderPlanEntityList) {
+                if (StringUtils.isNotEmpty(i.getActualCapacity())) {
                     deviceOutputReality = deviceOutputReality.add(new BigDecimal(i.getActualCapacity()));
                 }
             }
@@ -323,7 +324,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         if (deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0) {
             return deviceOeeValue;
         } else {
-            deviceOeeValue = deviceOutputReality.divide(deviceOutputPredict, 2, BigDecimal.ROUND_HALF_UP);
+            deviceOeeValue = deviceOutputReality.divide(deviceOutputPredict, 4, BigDecimal.ROUND_HALF_UP);
         }
         return deviceOeeValue;
     }
@@ -521,22 +522,22 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
 
         //时间要取交叉时间
         //1.完全包含
-        if (startTimeQry < actualStartTime && actualEndTime < endTimeQry) {
+        if (startTimeQry <= actualStartTime && actualEndTime <= endTimeQry) {
             startTime = actualStartTime;
             endTime = actualEndTime;
         }
         //2.包含头不包含尾
-        if (startTimeQry < actualStartTime && actualStartTime < endTimeQry && endTimeQry < actualEndTime) {
+        if (startTimeQry <= actualStartTime && actualStartTime <= endTimeQry && endTimeQry <= actualEndTime) {
             startTime = actualStartTime;
             endTime = endTimeQry;
         }
         //包含尾不包含头
-        if (actualStartTime < startTimeQry && startTimeQry < actualEndTime && actualEndTime < endTimeQry) {
+        if (actualStartTime <= startTimeQry && startTimeQry <= actualEndTime && actualEndTime <= endTimeQry) {
             startTime = startTimeQry;
             endTime = actualEndTime;
         }
         //被包含
-        if (actualStartTime < startTimeQry && endTimeQry < actualEndTime) {
+        if (actualStartTime <= startTimeQry && endTimeQry <= actualEndTime) {
             startTime = startTimeQry;
             endTime = endTimeQry;
         }
@@ -557,8 +558,8 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         BigDecimal result = new BigDecimal(0);
         Long timeDifference = endTime - startTime;
         //毫秒转化为小时的换算率
-        BigDecimal conversionRatio  =  new BigDecimal(1000 * 60 * 60);
-        result = new BigDecimal(timeDifference).divide(conversionRatio,10, BigDecimal.ROUND_HALF_UP);
+        BigDecimal conversionRatio = new BigDecimal(1000 * 60 * 60);
+        result = new BigDecimal(timeDifference).divide(conversionRatio, 10, BigDecimal.ROUND_HALF_UP);
         return result;
     }
 
