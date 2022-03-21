@@ -34,6 +34,7 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     @Override
     public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList, UUID tenantId){
         //删除所有租户菜单
+
 //        if(tenantId != null){
 //            tenantMenuDao.deletedByTenant(tenantId);
 //        }
@@ -101,7 +102,7 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
                         if(rearList.get(ONE).getSort() - byFrondId.getSort() > ONE){
                             break;
                         }else {
-                           continue;
+                            continue;
                         }
                     }else {
                         rearList.get(i).setSort(rearList.get(i).getSort() + ONE);
@@ -127,6 +128,8 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     public List<TenantMenu> delTenantMenu(String id,String tenantId){
         log.trace("Executing delTenantMenu [{}]",id, tenantId);
         tenantMenuDao.removeById(new TenantId(UUID.fromString(tenantId)), UUID.fromString(id));
+        //删按钮
+        tenantMenuDao.delButtonByTenantMenuId(UUID.fromString(id),UUID.fromString(tenantId));
         //查询调整后的菜单列表
         List<TenantMenu> tenantMenus = tenantMenuDao.find(new TenantId(UUID.fromString(tenantId)));
         return tenantMenus;
