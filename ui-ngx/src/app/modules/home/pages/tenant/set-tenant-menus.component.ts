@@ -140,6 +140,12 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
         } else {
           options.isNew = !this.appTenantOriginMenuIds.includes(options.id);
         }
+        if (options.tenantMenuId) {
+          options.id = options.tenantMenuId;
+        }
+        if (options.tenantMenuParentId) {
+          options.parentId = options.tenantMenuParentId;
+        }
         options.checked = false;
         options.disabled = false;
         options.sysMenuId = options.id;
@@ -188,6 +194,10 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
         const sysNode = (this[sysTree] as NzTreeComponent).getTreeNodeByKey(_node.origin.sysMenuId);
         if (sysNode) {
           sysNode.isDisabled = false;
+          sysNode.origin.tenantMenuId = _node.key;
+          if (_node.parentNode) {
+            sysNode.origin.tenantMenuParentId = _node.parentNode.key;
+          }
         }
       })
     });

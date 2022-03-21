@@ -222,7 +222,6 @@ export class HomeComponent extends PageComponent implements AfterViewInit, OnIni
   private initCustomUi(){
     //构造方法内添加下面代码
     this.store.pipe(select(selectTenantUI)).subscribe(ui => {
-      console.log(ui)
       if(ui){
         this.logo = ui.logoImageUrl ? this.sanitizer.bypassSecurityTrustUrl(ui.logoImageUrl) : 'assets/logo_title_black.svg'
         this.logoHeight = ui.logoImageHeight ? Number(ui.logoImageHeight) : 36
