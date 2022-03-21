@@ -34,7 +34,6 @@ public class TenantMenuServiceImpl extends AbstractEntityService implements Tena
     @Override
     public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList, UUID tenantId){
         //删除所有租户菜单
-
 //        if(tenantId != null){
 //            tenantMenuDao.deletedByTenant(tenantId);
 //        }

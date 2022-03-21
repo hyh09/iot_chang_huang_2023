@@ -267,6 +267,10 @@ export class GlobalHttpInterceptor implements HttpInterceptor {
 
   private showError(error: string, timeout: number = 0) {
     setTimeout(() => {
+      if (error) {
+        // 临时代码
+        error = error.replace(/org.thingsboard.server.common.data.exception.ThingsboardException: /g, '');
+      }
       this.store.dispatch(new ActionNotificationShow({message: error, type: 'error'}));
     }, timeout);
   }
