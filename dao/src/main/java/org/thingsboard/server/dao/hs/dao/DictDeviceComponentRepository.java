@@ -23,6 +23,10 @@ public interface DictDeviceComponentRepository extends PagingAndSortingRepositor
     @Query("delete from DictDeviceComponentEntity d where d.dictDeviceId = :dictDeviceId")
     void deleteByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 
+    @Modifying
+    @Query("delete from DictDeviceComponentEntity d where d.dictDeviceId = :dictDeviceId and d.id not in :ids")
+    void deleteByDictDeviceAndIdsNotIn(@Param("dictDeviceId") UUID dictDeviceId, @Param("ids") List<UUID> ids);
+
     @Query("select t from DictDeviceComponentEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
     List<DictDeviceComponentEntity> findAllByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 }

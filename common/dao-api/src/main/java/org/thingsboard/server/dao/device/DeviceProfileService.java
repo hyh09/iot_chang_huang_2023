@@ -23,9 +23,19 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 
+import java.util.List;
+import java.util.UUID;
+
 public interface DeviceProfileService {
 
     DeviceProfile findDeviceProfileById(TenantId tenantId, DeviceProfileId deviceProfileId);
+
+    /**
+     * 批量查询设备配置
+     * @param deviceProfileIds
+     * @return
+     */
+    List<DeviceProfile>  findDeviceProfileByIds(List<UUID> deviceProfileIds);
 
     DeviceProfile findDeviceProfileByName(TenantId tenantId, String profileName);
 

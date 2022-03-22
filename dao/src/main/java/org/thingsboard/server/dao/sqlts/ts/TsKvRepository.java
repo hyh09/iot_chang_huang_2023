@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.sqlts.ts;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,19 +27,37 @@ import org.thingsboard.server.dao.model.sqlts.ts.TsKvCompositeKey;
 import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvCompositeKey> {
 
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs  order by  tskv.ts asc ")
+    List<TsKvEntity> findAllByKeysAndEntityIdAndStartTimeAndEndTime(@Param("entityId") UUID entityId,
+                                                     @Param("entityKeys") List<Integer> key,
+                                      @Param("startTs") long startTs,
+                                      @Param("endTs") long endTs
+    );
+
+
+//    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+//            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs  order by  tskv.ts asc ")
+//    List<TsKvEntity> findAllByKeysAndEntityIdAndStartTimeAndEndTimePage(@Param("entityId") UUID entityId,
+//                                                                    @Param("entityKeys") List<Integer> key,
+//                                                                    @Param("startTs") long startTs,
+//                                                                    @Param("endTs") long endTs,
+//                                                                    Pageable pageable
+//    );
 
 
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
-            "AND tskv.key in (:entityKeys)  AND tskv.ts >= :startTs AND tskv.ts < :endTs")
+            "AND tskv.key in (:entityKeys)  ")
     List<TsKvEntity> findAllByKeysAndEntityIdAndTime(@Param("entityId") UUID entityId,
-                                      @Param("entityKeys") List<Integer> key,
-                                      @Param("startTs") long startTs,
-                                      @Param("endTs") long endTs
+                                      @Param("entityKeys") List<Integer> key
+//                                      @Param("startTs") long startTs,
+//                                      @Param("endTs") long endTs
                                       );
 
 
@@ -138,5 +157,62 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
                                           @Param("entityKey") int entityKey,
                                           @Param("startTs") long startTs,
                                           @Param("endTs") long endTs);
+
+    @Query("SELECT distinct tskv.ts FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs order by tskv.ts asc")
+    List<Long> findTss(@Param("entityId") UUID entityId,
+                       @Param("entityKeys") Set<Integer> keys,
+                       @Param("startTs") long startTs,
+                       @Param("endTs") long endTs);
+
+    @Query("SELECT distinct tskv.ts FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs ")
+    Page<Long> findTss(@Param("entityId") UUID entityId,
+                       @Param("entityKeys") Set<Integer> keys,
+                       @Param("startTs") long startTs,
+                       @Param("endTs") long endTs, Pageable pageable);
+
+    @Query("SELECT distinct tskv.ts FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key = :key AND tskv.ts >= :startTs AND tskv.ts < :endTs ")
+    Page<Long> findTss(@Param("entityId") UUID entityId,
+                       @Param("key") Integer key,
+                       @Param("startTs") long startTs,
+                       @Param("endTs") long endTs, Pageable pageable);
+
+    @Query(value = "SELECT distinct tskv.ts FROM ts_kv tskv WHERE tskv.entity_id = :entityId " +
+            "AND tskv.key = :key AND tskv.ts >= :startTs AND tskv.ts < :endTs order by tskv.ts desc limit :limitSize offset :offsetSize", nativeQuery = true)
+    List<Long> findTss(@Param("entityId") UUID entityId,
+                       @Param("key") Integer key,
+                       @Param("startTs") long startTs,
+                       @Param("endTs") long endTs, @Param("limitSize") long limitSize, @Param("offsetSize") long offsetSize);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs")
+    List<TsKvEntity> findAllByStartTsAndEndTs(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts asc")
+    List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsAsc(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts desc")
+    List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsDesc(@Param("entityId") UUID entityId,
+                                              @Param("entityKeys") Set<Integer> keys,
+                                              @Param("startTs") long startTs,
+                                              @Param("endTs") long endTs);
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key = :entityKey AND tskv.ts >= :startTs AND tskv.ts < :endTs")
+    Page<TsKvEntity> findAll(@Param("entityId") UUID entityId,
+                             @Param("entityKey") int key,
+                             @Param("startTs") long startTs,
+                             @Param("endTs") long endTs,
+                             Pageable pageable);
 
 }

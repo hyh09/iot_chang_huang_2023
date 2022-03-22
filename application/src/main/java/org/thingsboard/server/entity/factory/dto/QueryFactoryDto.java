@@ -23,9 +23,9 @@ public class QueryFactoryDto{
     public String workshopName;
 
     @ApiModelProperty(name = "产线名称")
-    public String productionlineName;
+    public String productionLineName;
 
-    @ApiModelProperty(name = "产线名称")
+    @ApiModelProperty(name = "设备名称")
     public String deviceName;
 
     public QueryFactoryDto(){}
@@ -35,7 +35,7 @@ public class QueryFactoryDto{
         factory.setTenantId(this.tenantId);
         factory.setName(this.name);
         factory.setWorkshopName(this.workshopName);
-        factory.setProductionlineName(this.productionlineName);
+        factory.setProductionLineName(this.productionLineName);
         factory.setDeviceName(deviceName);
         return factory;
     }
@@ -50,7 +50,7 @@ public class QueryFactoryDto{
     public ProductionLine toProductionLine(){
         ProductionLine productionLine = new ProductionLine();
         productionLine.setTenantId(this.tenantId);
-        productionLine.setName(this.productionlineName);
+        productionLine.setName(this.productionLineName);
         return productionLine;
     }
 

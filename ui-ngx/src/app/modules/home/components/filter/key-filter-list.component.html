@@ -37,10 +37,10 @@
         <div fxLayout="row" fxLayoutAlign="start center" style="max-height: 40px;"
              formArrayName="keyFilters"
              *ngFor="let keyFilterControl of keyFiltersFormArray().controls; let $index = index">
-          <div fxFlex="8" class="filters-operation">
+          <div fxFlex="5" class="filters-operation">
             <span *ngIf="$index > 0" translate>filter.operation.and</span>
           </div>
-          <div fxLayout="column" fxFlex="92">
+          <div fxLayout="column" fxFlex="95">
             <div fxLayout="row" fxLayoutAlign="start center">
               <div fxFlex>{{ keyFilterControl.value.key.key }}</div>
               <div fxFlex translate>{{ entityKeyTypeTranslations.get(keyFilterControl.value.key.type) }}</div>

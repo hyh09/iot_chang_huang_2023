@@ -143,6 +143,7 @@ public class JpaDeviceDaoTest extends AbstractJpaDaoTest {
     private Device getDevice(UUID tenantId, UUID customerID, UUID deviceId) {
         Device device = new Device();
         device.setId(new DeviceId(deviceId));
+        device.setCode(deviceId.toString());
         device.setTenantId(new TenantId(tenantId));
         device.setCustomerId(new CustomerId(customerID));
         device.setName("SEARCH_TEXT");

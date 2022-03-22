@@ -36,10 +36,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -140,9 +137,12 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
             content.forEach(i->{
                 Menu resultMenu = i.toData();
                 if(i.getParentId() != null){
-                    MenuEntity perentEntity = menuRepository.findById(i.getParentId()).get();
-                    if(perentEntity != null && StringUtils.isNotBlank(perentEntity.getName())){
-                        resultMenu.setParentName(perentEntity.getName());
+                    Optional<MenuEntity> optional = menuRepository.findById(i.getParentId());
+                    if(!optional.isEmpty()){
+                        MenuEntity perentEntity = optional.get();
+                        if(perentEntity != null && StringUtils.isNotBlank(perentEntity.getName())){
+                            resultMenu.setParentName(perentEntity.getName());
+                        }
                     }
                 }
                 resultMenuList.add(resultMenu);
@@ -180,6 +180,9 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
                 }
                 if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(menu.getMenuType())){
                     predicates.add(cb.equal(root.get("menuType"),menu.getMenuType()));
+                }
+                if(menu.getParentId() != null){
+                    predicates.add(cb.equal(root.get("parentId"),menu.getParentId()));
                 }
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
@@ -294,7 +297,12 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
 
     @Override
     public Menu getMenuById(UUID id){
-        return menuRepository.findById(id).get().toData();
+        Optional<MenuEntity> optional = menuRepository.findById(id);
+        if(!optional.isEmpty()){
+            MenuEntity entity = optional.get();
+            return entity.toData();
+        }
+        return null;
     }
 
 

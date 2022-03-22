@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.dao;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -66,6 +67,13 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
     @Column(name = HsModelConstants.GENERAL_SORT)
     private Integer sort;
 
+    /**
+     * 数据字典Id
+     */
+    @Column(name = HsModelConstants.DICT_DATA_ID, columnDefinition = "uuid")
+    @Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID dictDataId;
+
     public DictDeviceGroupPropertyEntity() {
     }
 
@@ -81,6 +89,10 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
         this.content = common.getContent();
         this.title = common.getTitle();
         this.sort = common.getSort();
+
+        if (common.getDictDataId() != null && !StringUtils.isBlank(common.getDictDataId()))
+            this.dictDataId = UUID.fromString(common.getDictDataId());
+
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -101,6 +113,9 @@ public class DictDeviceGroupPropertyEntity extends BasePgEntity<DictDeviceGroupP
         common.setContent(content);
         common.setTitle(title);
         common.setSort(sort);
+        if (dictDataId != null) {
+            common.setDictDataId(dictDataId.toString());
+        }
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

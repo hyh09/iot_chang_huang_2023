@@ -24,10 +24,24 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
     void delByMenuId(UUID menuId);
 
     /**
+     * 删除菜单下按钮
+     * @param tenantMenuId
+     * @param tenantId
+     */
+    void delButtonByTenantMenuId(UUID tenantMenuId,UUID tenantId);
+
+    /**
      *新增/修改租户菜单
      * @param tenantMenuList
      */
     void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList);
+
+    /**
+     * 系统菜单变更，触发租户菜单更新
+     * （新增按钮、按钮名称、lang_key、path、icon修改，变更租户菜单按钮）
+     * @param tenantMenuList
+     */
+    void saveFromSysMenu(List<TenantMenu> tenantMenuList);
 
 
     PageData<TenantMenu> findTenantMenusByRegion(TenantMenuId tenantMenuId, String region, PageLink pageLink);

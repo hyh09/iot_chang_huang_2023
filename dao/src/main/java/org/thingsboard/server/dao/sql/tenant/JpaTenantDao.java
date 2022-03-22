@@ -80,4 +80,9 @@ public class JpaTenantDao extends JpaAbstractSearchTextDao<TenantEntity, Tenant>
         return DaoUtil.pageToPageData(tenantRepository.findTenantsIds(DaoUtil.toPageable(pageLink))).mapData(TenantId::new);
     }
 
+
+    @Override
+    public void updateTenantSetLatitudeAndLongitude(String x, String y, UUID tenantId) {
+        tenantRepository.updateTenantSetLatitudeAndLongitude(x,y,tenantId);
+    }
 }

@@ -25,6 +25,7 @@ export interface Factory extends BaseData<FactoryId>, CommonData {
   address?: string;
   postalCode?: string;
   logoImages?: string;
+  logoIcon?: string;
   rowType?: FactoryRowType;
   latitude?: string | number;
   longitude?: string | number;
@@ -68,6 +69,8 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   model?: string,
   version?: string,
   warrantyPeriod?: string,
+  ratedCapacity?: string,
+  isCore?: boolean,
   picture?: string,
   fileName?: string,
   icon?: string,

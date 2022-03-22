@@ -15,7 +15,6 @@
  */
 package org.thingsboard.server.dao.user;
 
-import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,10 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Customer;
@@ -48,6 +45,7 @@ import org.thingsboard.server.common.data.security.UserCredentials;
 import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEvent;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import org.thingsboard.server.common.data.vo.PasswordVo;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
@@ -64,9 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.thingsboard.server.dao.service.Validator.validateId;
-import static org.thingsboard.server.dao.service.Validator.validatePageLink;
-import static org.thingsboard.server.dao.service.Validator.validateString;
+import static org.thingsboard.server.dao.service.Validator.*;
 
 @Service
 @Slf4j
@@ -166,8 +162,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         log.info("【用户管理.用户添加的接口添加】"+user);
 
 
-            user.setAuthority(Authority.CUSTOMER_USER);
-
+            user.setAuthority(Authority.TENANT_ADMIN);
         User savedUser = userDao.save(user.getTenantId(), user);
         if (user.getId() == null) {
             UserCredentials userCredentials = new UserCredentials();
@@ -183,6 +178,18 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public int update(User user) {
          return userDao.update( user);
+    }
+
+    @Override
+    public UpdateOperationVo updateOperationType(UpdateOperationVo vo) {
+         userDao.updateOperationType(vo.getId(),vo.getOperationType());
+         return  vo;
+    }
+
+    @Override
+    public int updateLevel(UUID userId, Integer level) {
+//        return userDao.updateLevel(userId,level);
+        return 1;//啥都不做
     }
 
     @Override
@@ -302,6 +309,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     }
 
     @Override
+    public PageData<User> findFactoryAdmins(TenantId tenantId, UUID factoryId, String userCode, String userName, PageLink pageLink) {
+        return userDao.findFactoryAdmins(tenantId.getId(), factoryId,userCode,userName,pageLink);
+    }
+
+    @Override
     public void deleteTenantAdmins(TenantId tenantId) {
         log.trace("Executing deleteTenantAdmins, tenantId [{}]", tenantId);
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
@@ -389,7 +401,7 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
     }
     @Override
-    public Object findAll(Map<String, Object> queryParam, PageLink pageLink) {
+    public PageData<User>   findAll(Map<String, Object> queryParam, PageLink pageLink) {
         return userDao.findAll(queryParam,pageLink);
     }
 
@@ -402,6 +414,12 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
     @Override
     public Object changeOthersPassword(PasswordVo vo) {
         return (userCredentialsDao.updatePassword(UUID.fromString(vo.getUserId()), vo.getPassword())>0?"success":"fail");
+    }
+
+    @Override
+    public int updateEnableByUserId(UUID userId, boolean enabled)
+    {
+        return userCredentialsDao.updateEnableByUserId(userId,enabled);
     }
 
     private int increaseFailedLoginAttempts(User user) {
@@ -510,8 +528,8 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 //                            }
                             break;
                         case CUSTOMER_USER:
-                            log.info("====>打印当前的数据:{}",tenantId.getId());
-                            log.info("====>打印当前的数据ModelConstants.NULL_UUID:{}",ModelConstants.NULL_UUID);
+//                            log.info("====>打印当前的数据:{}",tenantId.getId());
+//                            log.info("====>打印当前的数据ModelConstants.NULL_UUID:{}",ModelConstants.NULL_UUID);
 
 //                            if (tenantId.getId().equals(ModelConstants.NULL_UUID)) {
 //                                throw new DataValidationException("Customer user should be assigned to customer!");
@@ -523,13 +541,13 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
 
                     User existentUserWithEmail = findUserByEmail(tenantId, user.getEmail());
                     if (existentUserWithEmail != null && !isSameData(existentUserWithEmail, user)) {
-                        throw new DataValidationException("User with email '" + user.getEmail() + "' "
-                                + " already present in database!");
+                        throw new DataValidationException("这个邮箱 '" + user.getEmail() + "' "
+                                + " 已经被占用!");
                     }
                     if (!tenantId.getId().equals(ModelConstants.NULL_UUID)) {
                         Tenant tenant = tenantDao.findById(tenantId, user.getTenantId().getId());
                         if (tenant == null) {
-                            throw new DataValidationException("User is referencing to non-existent tenant!");
+                            throw new DataValidationException("用户正在引用不存在的租户!");
                         }
                     }
                     if (!customerId.getId().equals(ModelConstants.NULL_UUID)) {

@@ -4,8 +4,10 @@ import { ChartId } from "../id/custom/chart-id.models";
 export interface ChartProp {
   id: string;
   name: string;
-  propertyType: string;
-  title: string;
+  propertyType: 'DEVICE' | 'COMPONENT';
+  title?: string;
+  suffix?: string;
+  unit: string;
 }
 
 export interface Chart extends BaseData<ChartId> {

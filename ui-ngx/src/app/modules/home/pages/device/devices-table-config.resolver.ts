@@ -317,36 +317,36 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
 
   configureGroupActions(deviceScope: string): Array<GroupActionDescriptor<DeviceInfo>> {
     const actions: Array<GroupActionDescriptor<DeviceInfo>> = [];
-    if (deviceScope === 'tenant') {
-      actions.push(
-        {
-          name: this.translate.instant('device.assign-devices'),
-          icon: 'assignment_ind',
-          isEnabled: true,
-          onAction: ($event, entities) => this.assignToCustomer($event, entities.map((entity) => entity.id))
-        }
-      );
-    }
-    if (deviceScope === 'customer') {
-      actions.push(
-        {
-          name: this.translate.instant('device.unassign-devices'),
-          icon: 'assignment_return',
-          isEnabled: true,
-          onAction: ($event, entities) => this.unassignDevicesFromCustomer($event, entities)
-        }
-      );
-    }
-    if (deviceScope === 'edge') {
-      actions.push(
-        {
-          name: this.translate.instant('device.unassign-devices-from-edge'),
-          icon: 'assignment_return',
-          isEnabled: true,
-          onAction: ($event, entities) => this.unassignDevicesFromEdge($event, entities)
-        }
-      );
-    }
+    // if (deviceScope === 'tenant') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('device.assign-devices'),
+    //       icon: 'assignment_ind',
+    //       isEnabled: true,
+    //       onAction: ($event, entities) => this.assignToCustomer($event, entities.map((entity) => entity.id))
+    //     }
+    //   );
+    // }
+    // if (deviceScope === 'customer') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('device.unassign-devices'),
+    //       icon: 'assignment_return',
+    //       isEnabled: true,
+    //       onAction: ($event, entities) => this.unassignDevicesFromCustomer($event, entities)
+    //     }
+    //   );
+    // }
+    // if (deviceScope === 'edge') {
+    //   actions.push(
+    //     {
+    //       name: this.translate.instant('device.unassign-devices-from-edge'),
+    //       icon: 'assignment_return',
+    //       isEnabled: true,
+    //       onAction: ($event, entities) => this.unassignDevicesFromEdge($event, entities)
+    //     }
+    //   );
+    // }
     return actions;
   }
 

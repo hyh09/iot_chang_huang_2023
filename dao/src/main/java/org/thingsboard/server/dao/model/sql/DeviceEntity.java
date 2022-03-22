@@ -15,6 +15,9 @@
  */
 package org.thingsboard.server.dao.model.sql;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.TypeDef;
@@ -25,8 +28,7 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.util.mapping.JsonBinaryType;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.UUID;
 
 @Data
@@ -39,6 +41,8 @@ import java.util.UUID;
 @Table(name = ModelConstants.DEVICE_COLUMN_FAMILY_NAME)
 public class DeviceEntity extends AbstractDeviceEntity<Device> {
 
+
+
     public DeviceEntity() {
         super();
     }
@@ -49,6 +53,24 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
     public DeviceEntity (Factory factory){
         this.setName(factory.getWorkshopName());
         this.setTenantId(factory.getTenantId());
+    }
+
+    public DeviceEntity (UUID id, String name){
+        super();
+        this.id = id;
+        this.setName(name);
+    }
+
+    public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setFactoryId(factoryId);
+        this.setWorkshopId(workshopId);
+        this.setProductionLineId(productionLineId);
+        try {
+            this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
+        } catch (Exception ignore){}
     }
 
     public DeviceEntity (UUID tenantId){

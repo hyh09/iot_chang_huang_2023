@@ -124,6 +124,9 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     @Column(name = "updated_user")
     private UUID updatedUser;
 
+    @Column(name = "flg")
+    private Boolean deviceFlg=false;
+
     public AbstractDeviceEntity() {
         super();
     }
@@ -163,6 +166,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.dictDeviceId = device.getDictDeviceId();
         this.comment = device.getComment();
         this.deviceNo = device.getDeviceNo();
+        this.deviceFlg = device.getDeviceFlg();
     }
 
     public AbstractDeviceEntity(DeviceEntity deviceEntity) {
@@ -191,6 +195,8 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.dictDeviceId = deviceEntity.getDictDeviceId();
         this.comment = deviceEntity.getComment();
         this.deviceNo = deviceEntity.getDeviceNo();
+        this.deviceFlg = deviceEntity.getDeviceFlg();
+
     }
 
     @Override
@@ -236,6 +242,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         device.setDictDeviceId(dictDeviceId);
         device.setComment(this.comment);
         device.setDeviceNo(this.deviceNo);
+        device.setDeviceFlg(this.deviceFlg);
         return device;
     }
 

@@ -52,6 +52,7 @@ export class ChartsTableConfigResolver implements Resolve<EntityTableConfig<Char
 
     this.config.tableTitle = `${this.translate.instant('device-mng.bind-chart')}: ${deviceDictName}`;
     this.config.searchEnabled = false;
+    this.config.displayPagination = false;
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('action.add');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');

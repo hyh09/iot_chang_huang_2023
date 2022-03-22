@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,30 +16,25 @@
 package org.thingsboard.server.service.state;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.api.client.util.Lists;
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.common.util.ThingsBoardThreadFactory;
+import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.kv.AttributeKvEntry;
-import org.thingsboard.server.common.data.kv.BasicTsKvEntry;
-import org.thingsboard.server.common.data.kv.BooleanDataEntry;
-import org.thingsboard.server.common.data.kv.KvEntry;
-import org.thingsboard.server.common.data.kv.LongDataEntry;
-import org.thingsboard.server.common.data.kv.TsKvEntry;
+import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.msg.TbMsg;
@@ -50,43 +45,28 @@ import org.thingsboard.server.common.msg.queue.TbCallback;
 import org.thingsboard.server.common.msg.queue.TopicPartitionInfo;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.device.DeviceService;
+import org.thingsboard.server.dao.model.sql.AbstractTsKvEntity;
+import org.thingsboard.server.dao.model.sqlts.latest.TsKvLatestEntity;
+import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
+import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
-import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.gen.transport.TransportProtos;
-import org.thingsboard.server.queue.discovery.event.PartitionChangeEvent;
 import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.discovery.TbApplicationEventListener;
+import org.thingsboard.server.queue.discovery.event.PartitionChangeEvent;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
-import static org.thingsboard.server.common.data.DataConstants.ACTIVITY_EVENT;
-import static org.thingsboard.server.common.data.DataConstants.CONNECT_EVENT;
-import static org.thingsboard.server.common.data.DataConstants.DISCONNECT_EVENT;
-import static org.thingsboard.server.common.data.DataConstants.INACTIVITY_EVENT;
-import static org.thingsboard.server.common.data.DataConstants.SERVER_SCOPE;
+import static org.thingsboard.server.common.data.DataConstants.*;
 
 /**
  * Created by ashvayka on 01.05.18.
@@ -113,6 +93,12 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     private final TbClusterService clusterService;
     private final PartitionService partitionService;
 
+    @Autowired
+    private AttributeKvRepository attributeKvRepository;
+
+    @Autowired
+    private TsKvLatestRepository tsKvLatestRepository;
+
     private TelemetrySubscriptionService tsSubService;
 
     @Value("${state.defaultInactivityTimeoutInSec}")
@@ -133,6 +119,9 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     private ListeningScheduledExecutorService scheduledExecutor;
     private ExecutorService deviceStateExecutor;
+
+    private ListeningScheduledExecutorService scheduledFixedExecutor;
+
     private final ConcurrentMap<TopicPartitionInfo, Set<DeviceId>> partitionedDevices = new ConcurrentHashMap<>();
     final ConcurrentMap<DeviceId, DeviceStateData> deviceStates = new ConcurrentHashMap<>();
 
@@ -161,6 +150,10 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         // Should be always single threaded due to absence of locks.
         scheduledExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("device-state-scheduled")));
         scheduledExecutor.scheduleAtFixedRate(this::updateInactivityStateIfExpired, new Random().nextInt(defaultStateCheckIntervalInSec), defaultStateCheckIntervalInSec, TimeUnit.SECONDS);
+
+        // 暂时新增设备active和ts_lasted遍历，修改active值
+//        scheduledFixedExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(ThingsBoardThreadFactory.forName("device-state-fixed-scheduled")));
+//        scheduledFixedExecutor.scheduleAtFixedRate(this::fixedAllDeviceState, new Random().nextInt(Math.max(defaultStateCheckIntervalInSec * 6, 120)), Math.max(defaultStateCheckIntervalInSec * 6, 120), TimeUnit.SECONDS);
     }
 
     @PreDestroy
@@ -170,6 +163,9 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         }
         if (scheduledExecutor != null) {
             scheduledExecutor.shutdownNow();
+        }
+        if (scheduledFixedExecutor != null) {
+            scheduledFixedExecutor.shutdownNow();
         }
     }
 
@@ -453,6 +449,32 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 updateInactivityStateIfExpired(ts, deviceId);
             }
         });
+    }
+
+    void fixedAllDeviceState() {
+        final long time1 = System.currentTimeMillis();
+        List<DeviceId> deviceIds = Lists.newArrayList();
+        List<UUID> activeDeviceUIds = Lists.newArrayList();
+        partitionedDevices.forEach((tpi, ids) -> deviceIds.addAll(ids));
+        if (!deviceIds.isEmpty()) {
+            var timeout = TimeUnit.SECONDS.toMillis(defaultInactivityTimeoutInSec);
+            var deviceUIds = deviceIds.stream().map(DeviceId::getId).collect(Collectors.toList());
+            var tsKvLatestEntities = this.tsKvLatestRepository.findAllLatestByEntityIds(deviceUIds);
+            var map = tsKvLatestEntities.stream().collect(Collectors.toMap(AbstractTsKvEntity::getEntityId, AbstractTsKvEntity::getTs));
+            activeDeviceUIds = tsKvLatestEntities.stream().map(TsKvLatestEntity::getEntityId).collect(Collectors.toList());
+            var attributeKvEntities = this.attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, activeDeviceUIds, ACTIVITY_STATE);
+            attributeKvEntities.forEach(v -> Optional.ofNullable(map.get(v.getId().getEntityId())).ifPresent(b -> {
+                boolean isActive = (b + timeout) > time1;
+                if (!v.getBooleanValue().equals(isActive)) {
+                    try {
+                        this.attributeKvRepository.updateActiveByEntityId(v.getId().getEntityId(), isActive);
+//                        log.info("设备在线状态校正：" + v.getId().getEntityId() + " 修改为：" + isActive);
+                    } catch (Exception ignore) {
+                    }
+                }
+            }));
+        }
+//        log.info("设备在线状态校正总耗时：" + (System.currentTimeMillis() - time1) + " 共：" + deviceIds.size() + " 处理:" + activeDeviceUIds.size());
     }
 
     void updateInactivityStateIfExpired(long ts, DeviceId deviceId) {

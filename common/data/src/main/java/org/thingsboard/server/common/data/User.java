@@ -73,6 +73,34 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     private String userCreator;
 
+    /**
+     * 创建者的类别 :租户类别  工厂类别
+     */
+    @ApiModelProperty(value = "如果是工厂管理员新增字段【必传写死 FACTORY_MANAGEMENT】 #不用传了;此值后端赋值")
+    private  String type="";
+
+    /**
+     * 0为默认
+     * 1为工厂管理员角色
+     * 3为租户管理员角色
+     * 4为 用户系统管理员
+     */
+    private  int userLevel=0;
+
+    /**
+     * 工厂id
+     */
+    @ApiModelProperty(value = "如果是工厂管理员新增字段【必传】")
+    private UUID  factoryId;
+
+    /**
+     * 0是可编辑
+     * 1是不可编辑
+     */
+    private  Integer operationType=0;
+
+
+
     //用户角色id
     @ApiModelProperty(value = "用户所需要绑定的角色【角色di】 更新的时候为空会清理此角色")
     private  List<UUID> roleIds;
@@ -83,6 +111,10 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     private String firstName;
     @NoXss
     private String lastName;
+
+    private  String tenantTitle;
+    private  String factoryName;
+
 
     public User() {
         super();
@@ -102,6 +134,10 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
         this.userCode = user.getUserCode();
         this.userName = user.getUserName();
         this.userCreator=user.getUserCreator();
+        this.type = user.getType();
+        this.factoryId = user.getFactoryId();
+        this.userLevel = user.getUserLevel();
+        this.operationType =user.getOperationType();
         this.authority = user.getAuthority();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
@@ -175,6 +211,15 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+
+    public int getUserLevel() {
+        return userLevel;
+    }
+
+    public void setUserLevel(int userLevel) {
+        this.userLevel = userLevel;
     }
 
     @Override

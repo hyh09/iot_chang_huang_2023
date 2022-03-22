@@ -31,6 +31,7 @@ data:
       export JAVA_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError"
       export LOG_FILENAME=thingsboard.out
       export LOADER_PATH=/usr/share/thingsboard/conf,/usr/share/thingsboard/extensions
+      export HS_FILE_LOCATION=/upload
   logback: |
       <!DOCTYPE configuration>
       <configuration scan="true" scanPeriod="10 seconds">

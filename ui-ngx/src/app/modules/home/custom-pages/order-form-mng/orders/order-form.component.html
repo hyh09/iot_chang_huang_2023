@@ -1,36 +1,36 @@
 <div class="mat-padding" fxLayout="column" style="min-width: 900px;">
   <form [formGroup]="entityForm">
-    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
-      <mat-expansion-panel expanded style="margin-top: 0;">
-        <mat-expansion-panel-header>
-          <mat-panel-title>{{ 'order.basic-info' | translate }}</mat-panel-title>
-        </mat-expansion-panel-header>
-        <div fxLayout="row" fxLayoutGap="10px">
-          <mat-form-field fxFlex class="mat-block">
-            <mat-label translate>device-mng.factory</mat-label>
-            <mat-select formControlName="factoryId" required (selectionChange)="onFactoryChange()">
-              <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
-              <mat-option *ngFor="let factory of factoryList" [value]="factory.id">{{ factory.name }}</mat-option>
-            </mat-select>
-            <mat-error *ngIf="entityForm.get('factoryId').hasError('required')">
-              {{ 'device-mng.factory-required' | translate }}
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field fxFlex class="mat-block">
-            <mat-label translate>device-mng.work-shop</mat-label>
-            <mat-select formControlName="workshopId" (selectionChange)="onWorkshopChange()">
-              <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
-              <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field fxFlex class="mat-block">
-            <mat-label translate>device-mng.prod-line</mat-label>
-            <mat-select formControlName="productionLineId" (selectionChange)="onProductionLineChange()">
-              <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
-              <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+    <mat-expansion-panel expanded style="margin-top: 0;">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'order.basic-info' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div fxLayout="row" fxLayoutGap="10px">
+        <mat-form-field fxFlex class="mat-block">
+          <mat-label translate>device-mng.factory</mat-label>
+          <mat-select formControlName="factoryId" [disabled]="orderDeviceFormArray().length > 0" required (selectionChange)="onFactoryChange()">
+            <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
+            <mat-option *ngFor="let factory of factoryList" [value]="factory.id">{{ factory.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="entityForm.get('factoryId').hasError('required')">
+            {{ 'device-mng.factory-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field fxFlex class="mat-block">
+          <mat-label translate>device-mng.work-shop</mat-label>
+          <mat-select formControlName="workshopId" [disabled]="orderDeviceFormArray().length > 0" (selectionChange)="onWorkshopChange()">
+            <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
+            <mat-option *ngFor="let workShop of workShopList" [value]="workShop.id">{{ workShop.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field fxFlex class="mat-block">
+          <mat-label translate>device-mng.prod-line</mat-label>
+          <mat-select formControlName="productionLineId" [disabled]="orderDeviceFormArray().length > 0" (selectionChange)="onProductionLineChange()">
+            <mat-option *ngIf="isEdit" value="">{{ 'common.no-selection' | translate }}</mat-option>
+            <mat-option *ngFor="let prodLine of prodLineList" [value]="prodLine.id">{{ prodLine.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <fieldset [disabled]="(isLoading$ | async) || !isEdit">
         <div fxLayout="row" fxLayoutGap="10px">
           <fieldset fxFlex [disabled]="!!entityForm.get('id').value">
             <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
@@ -175,80 +175,90 @@
           <mat-label translate>order.remarks</mat-label>
           <textarea matInput formControlName="comment"></textarea>
         </mat-form-field>
-      </mat-expansion-panel>
-      <mat-expansion-panel [fxShow]="!!entityForm.get('factoryId').value" [expanded]="prodPlanExpanded">
-        <mat-expansion-panel-header>
-          <mat-panel-title>{{ (isCapacity ? 'order.order-potency' : 'order.production-plan') | translate }}</mat-panel-title>
-          <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
-            <span *ngIf="isCapacity">
-              {{ 'order.completeness-with-value' | translate:{completeness: entityForm.get('completeness').value || 0} }}
-            </span>
-            <mat-icon
-              *ngIf="!isCapacity && !(isLoading$ | async) && isEdit && prodPlanExpanded"
-              class="material-icons"
-              matTooltip="{{ 'device-mng.add-device' | translate }}"
-              matTooltipPosition="above"
-              (click)="addOrderDevice($event)"
-            >add</mat-icon>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <nz-table
-          #deviceTable
-          [nzData]="orderDeviceFormArray().value"
-          [nzShowPagination]="false"
-          [nzFrontPagination]="false"
-          [nzNoResult]="'order.no-device' | translate"
-          [nzScroll]="{ x: '100%', y: '500px' }"
-        >
-          <thead>
-            <tr>
-              <th nzWidth="210px" nzLeft>{{ 'device.device' | translate }}</th>
-              <th nzWidth="250px">{{ 'order.intended-time' | translate }}</th>
-              <th nzWidth="250px">{{ 'order.actual-time' | translate }}</th>
-              <th *ngIf="isCapacity" nzWidth="110px">{{ 'potency.capacity' | translate }}</th>
-              <th *ngIf="!isCapacity" nzWidth="100px" nzAlign="center">{{ 'device-mng.in-calculation' | translate }}</th>
-              <th *ngIf="isEdit" nzWidth="104px" nzRight></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let data of deviceTable.data; let $index = index">
-              <td>{{ data.deviceName || '' }}</td>
-              <td>
-                <ng-container *ngIf="data.intendedStartTime && data.intendedEndTime">
-                  {{ data.intendedStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.intendedEndTime | date:'yyyy-MM-dd HH:mm' }}
-                </ng-container>
-              </td>
-              <td>
-                <ng-container *ngIf="data.actualStartTime && data.actualEndTime">
-                  {{ data.actualStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.actualEndTime | date:'yyyy-MM-dd HH:mm' }}
-                </ng-container>
-              </td>
-              <td *ngIf="isCapacity">{{ data.capacities || '' }}</td>
-              <td *ngIf="!isCapacity" nzAlign="center">{{ (data.enabled ? 'action.yes' : 'action.no') | translate }}</td>
-              <td *ngIf="isEdit" nzAlign="right" nzRight>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="{{ 'action.edit' | translate }}"
-                  matTooltipPosition="above"
-                  (click)="editOrderDevice($event, $index)"
-                >
-                  <mat-icon class="material-icons" >edit</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  type="button"
-                  matTooltip="{{ 'action.delete' | translate }}"
-                  matTooltipPosition="above"
-                  (click)="orderDeviceFormArray().removeAt($index)"
-                >
-                  <mat-icon class="material-icons" >delete</mat-icon>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </nz-table>
-      </mat-expansion-panel>
-    </fieldset>
+      </fieldset>
+    </mat-expansion-panel>
+    <mat-expansion-panel [fxShow]="!!entityForm.get('factoryId').value" [expanded]="prodPlanExpanded">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ (isCapacity ? 'order.order-potency' : 'order.production-plan') | translate }}</mat-panel-title>
+        <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+          <span *ngIf="isCapacity">
+            {{ 'order.completeness-with-value' | translate:{completeness: entityForm.get('completeness').value || 0} }}
+          </span>
+          <mat-icon
+            *ngIf="!isCapacity && !(isLoading$ | async) && isEdit && prodPlanExpanded"
+            class="material-icons"
+            matTooltip="{{ 'device-mng.add-device' | translate }}"
+            matTooltipPosition="above"
+            (click)="addOrderDevice($event)"
+          >add</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <nz-table
+        #deviceTable
+        [nzData]="orderDeviceFormArray().value"
+        [nzShowPagination]="false"
+        [nzFrontPagination]="false"
+        [nzNoResult]="'order.no-device' | translate"
+        [nzScroll]="{ x: '100%', y: '500px' }"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="210px" nzLeft>{{ 'device.device' | translate }}</th>
+            <th nzWidth="120px">{{ 'order.intended-capacity' | translate }}</th>
+            <th nzWidth="120px">{{ 'order.actual-capacity' | translate }}</th>
+            <th nzWidth="250px">{{ 'order.intended-time' | translate }}</th>
+            <th nzWidth="250px">{{ 'order.actual-time' | translate }}</th>
+            <th nzWidth="250px">{{ 'order.maintain-time' | translate }}</th>
+            <th *ngIf="isCapacity" nzWidth="110px">{{ 'potency.capacity' | translate }}</th>
+            <th *ngIf="!isCapacity" nzWidth="100px" nzAlign="center">{{ 'device-mng.in-calculation' | translate }}</th>
+            <th *ngIf="isEdit" nzWidth="104px" nzRight></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of deviceTable.data; let $index = index">
+            <td nzLeft>{{ data.deviceName || '' }}</td>
+            <td>{{ data.intendedCapacity === undefined || data.intendedCapacity === null ? '' : data.intendedCapacity }}</td>
+            <td>{{ data.actualCapacity === undefined || data.actualCapacity === null ? '' : data.actualCapacity }}</td>
+            <td>
+              <ng-container *ngIf="data.intendedStartTime && data.intendedEndTime">
+                {{ data.intendedStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.intendedEndTime | date:'yyyy-MM-dd HH:mm' }}
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="data.actualStartTime && data.actualEndTime">
+                {{ data.actualStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.actualEndTime | date:'yyyy-MM-dd HH:mm' }}
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf="data.maintainStartTime && data.maintainEndTime">
+                {{ data.maintainStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.maintainEndTime | date:'yyyy-MM-dd HH:mm' }}
+              </ng-container>
+            </td>
+            <td *ngIf="isCapacity">{{ data.capacities === undefined || data.capacities === null ? '' : data.capacities }}</td>
+            <td *ngIf="!isCapacity" nzAlign="center">{{ (data.enabled ? 'action.yes' : 'action.no') | translate }}</td>
+            <td *ngIf="isEdit" nzAlign="right" nzRight>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="{{ 'action.edit' | translate }}"
+                matTooltipPosition="above"
+                (click)="editOrderDevice($event, $index)"
+              >
+                <mat-icon class="material-icons" >edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="{{ 'action.delete' | translate }}"
+                matTooltipPosition="above"
+                (click)="orderDeviceFormArray().removeAt($index)"
+              >
+                <mat-icon class="material-icons" >delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </mat-expansion-panel>
   </form>
 </div>

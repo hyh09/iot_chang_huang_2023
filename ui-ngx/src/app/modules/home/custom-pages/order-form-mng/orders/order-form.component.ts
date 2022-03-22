@@ -116,13 +116,18 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
 
   createOrderDeviceControl(planDevices?: OrderDevice): AbstractControl {
     return this.fb.group({
+      id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : ''],
       deviceName: [planDevices ? planDevices.deviceName : ''],
       enabled: [planDevices ? planDevices.enabled : false],
+      intendedCapacity: [planDevices ? planDevices.intendedCapacity : ''],
+      actualCapacity: [planDevices ? planDevices.actualCapacity : ''],
       intendedStartTime: [planDevices ? planDevices.intendedStartTime : ''],
       intendedEndTime: [planDevices ? planDevices.intendedEndTime : ''],
       actualStartTime: [planDevices ? planDevices.actualStartTime : ''],
       actualEndTime: [planDevices ? planDevices.actualEndTime : ''],
+      maintainStartTime: [planDevices ? planDevices.maintainStartTime : ''],
+      maintainEndTime: [planDevices ? planDevices.maintainEndTime : ''],
       capacities: [planDevices ? planDevices.capacities : 0]
     });
   }
@@ -155,6 +160,11 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     }
     this.entityForm.controls.planDevices = this.fb.array(orderDeviceControls);
     this.entityForm.updateValueAndValidity();
+    if (this.orderDeviceFormArray().length > 0) {
+      this.entityForm.get('factoryId').disable();
+      this.entityForm.get('workshopId').disable();
+      this.entityForm.get('productionLineId').disable();
+    }
   }
 
   fetchData() {
@@ -176,7 +186,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
   addOrderDevice(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    const { factoryId, workshopId, productionLineId } = this.entityForm.value;
+    const { factoryId, workshopId, productionLineId } = this.entityForm.getRawValue();
     this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,
@@ -200,7 +210,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     event.stopPropagation();
     if (index < 0) return;
     const target = this.orderDeviceFormArray().controls[index];
-    const { factoryId, workshopId, productionLineId } = this.entityForm.value;
+    const { factoryId, workshopId, productionLineId } = this.entityForm.getRawValue();
     this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,
@@ -212,6 +222,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
         }
       }).afterClosed().subscribe(res => {
         if (res) {
+          console.log(res)
           target.patchValue(res);
           this.cd.markForCheck();
           this.cd.detectChanges();

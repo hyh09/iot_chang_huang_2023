@@ -57,6 +57,8 @@ import org.thingsboard.server.common.data.device.profile.DisabledDeviceProfilePr
 import org.thingsboard.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.ProtoTransportPayloadConfiguration;
 import org.thingsboard.server.common.data.device.profile.TransportPayloadTypeConfiguration;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -66,6 +68,7 @@ import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
+import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.ota.OtaPackageService;
 import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.dao.service.DataValidator;
@@ -73,11 +76,7 @@ import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.tenant.TenantDao;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -128,6 +127,9 @@ public class DeviceProfileServiceImpl extends AbstractEntityService implements D
     @Autowired
     private DashboardService dashboardService;
 
+    @Autowired
+    private ClientService clientService;
+
     private final Lock findOrCreateLock = new ReentrantLock();
 
     @Cacheable(cacheNames = DEVICE_PROFILE_CACHE, key = "{#deviceProfileId.id}")
@@ -136,6 +138,17 @@ public class DeviceProfileServiceImpl extends AbstractEntityService implements D
         log.trace("Executing findDeviceProfileById [{}]", deviceProfileId);
         Validator.validateId(deviceProfileId, INCORRECT_DEVICE_PROFILE_ID + deviceProfileId);
         return deviceProfileDao.findById(tenantId, deviceProfileId.getId());
+    }
+
+    /**
+     * 批量查询
+     * @param deviceProfileIds
+     * @return
+     */
+    @Override
+    public List<DeviceProfile>  findDeviceProfileByIds(List<UUID> deviceProfileIds) {
+        log.trace("Executing findDeviceProfileByIds [{}]", deviceProfileIds);
+        return deviceProfileDao.findDeviceProfileByIds(deviceProfileIds);
     }
 
     @Override
@@ -211,14 +224,12 @@ public class DeviceProfileServiceImpl extends AbstractEntityService implements D
     private void removeDeviceProfile(TenantId tenantId, DeviceProfile deviceProfile) {
         DeviceProfileId deviceProfileId = deviceProfile.getId();
         try {
+            var devices = this.clientService.listDevicesByProfileId(deviceProfileId);
+            if (!devices.isEmpty())
+                throw new ThingsboardException("该设备配置已被设备使用，无法删除！引用设备如下：" + devices.stream().map(Device::getName).collect(Collectors.joining(", ")), ThingsboardErrorCode.GENERAL);
             deviceProfileDao.removeById(tenantId, deviceProfileId.getId());
         } catch (Exception t) {
-            ConstraintViolationException e = extractConstraintViolationException(t).orElse(null);
-            if (e != null && e.getConstraintName() != null && e.getConstraintName().equalsIgnoreCase("fk_device_profile")) {
-                throw new DataValidationException("The device profile referenced by the devices cannot be deleted!");
-            } else {
-                throw t;
-            }
+            throw new RuntimeException(t);
         }
         deleteEntityRelations(tenantId, deviceProfileId);
         Cache cache = cacheManager.getCache(DEVICE_PROFILE_CACHE);

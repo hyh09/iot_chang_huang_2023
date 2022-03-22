@@ -82,6 +82,16 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
         //删除菜单角色
         tenantMenuRoleDao.deleteByMenuIds(Lists.newArrayList(sysMenuId));
     }
+
+    /**
+     * 删除菜单下按钮
+     * @param tenantMenuId
+     * @param tenantId
+     */
+    @Override
+    public void delButtonByTenantMenuId(UUID tenantMenuId,UUID tenantId){
+        tenantMenuRepository.delButtonByTenantMenuId(tenantMenuId,tenantId);
+    }
     /**
      *新增/修改租户菜单
      * @param tenantMenuList
@@ -90,31 +100,69 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
     public void saveOrUpdTenantMenu(List<TenantMenu> tenantMenuList){
         List<TenantMenuEntity> saveTenantMenuEntityList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(tenantMenuList)){
-            tenantMenuList.forEach(i->{
-                saveTenantMenuEntityList.add(new TenantMenuEntity(i));
-            });
-            List<TenantMenuEntity> entityList = saveTenantMenuEntityList.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
+
+            List<TenantMenu> entityList = tenantMenuList.stream().filter(e -> e.getSysMenuId() != null).collect(Collectors.toList());
+            //新增的按钮
             List<TenantMenuEntity> collectButton = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(entityList)){
-                List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenuEntity::getSysMenuId).collect(Collectors.toList()));
+                List<Menu> buttons = menuDao.getButtonListByIds(entityList.stream().map(TenantMenu::getSysMenuId).collect(Collectors.toList()));
                 if(CollectionUtils.isNotEmpty(buttons)) {
-                    for (TenantMenuEntity entity:saveTenantMenuEntityList){
-                        for (Menu button:buttons) {
-                            if (entity.getSysMenuId() != null && entity.getSysMenuId().toString().equals(button.getParentId().toString())) {
-                                TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(button, entity.getLevel() + 1, button.getCreatedUser(),entity.getId());
-                                tenantMenuEntity.setTenantId(entity.getTenantId());
-                                collectButton.add(tenantMenuEntity);
-                                System.out.println(tenantMenuEntity.getTenantMenuName());
+                    for (TenantMenu entity:tenantMenuList){
+                        //对新增的菜单要查询其下面的按钮
+                        if("add".equals(entity.getOperationType())){
+                            //查询该系统菜单下的按钮
+                            Menu menu = new Menu();
+                            menu.setParentId(entity.getSysMenuId());
+                            menu.setIsButton(true);
+                            List<Menu> menuListByCdn = menuDao.getMenuListByCdn(menu);
+                            if(CollectionUtils.isNotEmpty(menuListByCdn)){
+                                for (Menu menuButton : menuListByCdn){
+                                    TenantMenuEntity tenantMenuEntity = new TenantMenuEntity(menuButton, entity.getLevel() + 1, menuButton.getCreatedUser(),entity.getId());
+                                    tenantMenuEntity.setTenantId(entity.getTenantId());
+                                    collectButton.add(tenantMenuEntity);
+                                }
                             }
+
                         }
                     }
                 }
             }
+            tenantMenuList.forEach(i->{
+                saveTenantMenuEntityList.add(new TenantMenuEntity(i));
+            });
             if(CollectionUtils.isNotEmpty(collectButton)){
                 saveTenantMenuEntityList.addAll(collectButton);
             }
         }
         tenantMenuRepository.saveAll(saveTenantMenuEntityList);
+    }
+
+    /**
+     * 系统菜单变更，触发租户菜单更新
+     * （新增按钮、按钮名称、lang_key、path、icon修改，变更租户菜单按钮）
+     * @param tenantMenuList
+     */
+    @Override
+    public void saveFromSysMenu(List<TenantMenu> tenantMenuList){
+        List<TenantMenuEntity> tenantMenuEntityList = new ArrayList<>();
+        tenantMenuList.forEach(i->{
+            TenantMenuEntity entity = new TenantMenuEntity(i);
+            if(i.getId()==null){
+                //排序、编码、主键
+                UUID uuid = Uuids.timeBased();
+                entity.setUuid(uuid);
+                entity.setCreatedTime(Uuids.unixTimestamp(uuid));
+                if(i.getIsButton()){
+                    entity.setTenantMenuCode("ZHAN"+String.valueOf(System.currentTimeMillis()));
+                }else {
+                    entity.setTenantMenuCode("ZHCD"+String.valueOf(System.currentTimeMillis()));
+                }
+                //查询相同父级下最大排序值
+                entity.setSort(getMaxSortByParentId(i.getParentId()));
+            }
+            tenantMenuEntityList.add(entity);
+        });
+        tenantMenuRepository.saveAll(tenantMenuEntityList);
     }
 
 
@@ -148,7 +196,8 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      * @return
      */
     public Integer getMaxSortByParentId(UUID parentId){
-        return tenantMenuRepository.getMaxSortByParentId(parentId);
+        Integer maxSortByParentId = tenantMenuRepository.getMaxSortByParentId(parentId);
+        return maxSortByParentId == null ? 0:maxSortByParentId;
     }
 
     /**
@@ -217,9 +266,12 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
      */
     @Override
     public TenantMenu getMenuById(UUID id){
-        TenantMenuEntity entity = tenantMenuRepository.findById(id).get();
-        if(entity != null){
-            return entity.toData();
+        Optional<TenantMenuEntity> optional = tenantMenuRepository.findById(id);
+        if(!optional.isEmpty()){
+            TenantMenuEntity entity = optional.get();
+            if(entity != null){
+                return entity.toData();
+            }
         }
         return null;
     }

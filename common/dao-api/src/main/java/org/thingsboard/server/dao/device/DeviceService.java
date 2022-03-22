@@ -15,6 +15,8 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.datastax.oss.driver.api.core.paging.OffsetPager;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceInfo;
@@ -32,6 +34,8 @@ import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.vo.device.AppCapacityDeviceVo;
+import org.thingsboard.server.common.data.vo.device.CapacityDeviceVo;
 import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.dao.device.provision.ProvisionRequest;
 
@@ -44,6 +48,8 @@ public interface DeviceService {
 
     Device findDeviceById(TenantId tenantId, DeviceId deviceId);
 
+    List<Device> getYunDeviceList(Device device);
+
     ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId);
 
     Device findDeviceByTenantIdAndName(TenantId tenantId, String name);
@@ -52,7 +58,7 @@ public interface DeviceService {
 
     Device saveDevice(Device device);
 
-    Device saveDeviceWithAccessToken(Device device, String accessToken);
+    Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException;
 
     Device saveDeviceWithCredentials(Device device, DeviceCredentials deviceCredentials);
 
@@ -136,6 +142,11 @@ public interface DeviceService {
     void distributionDevice(Device device) throws ThingsboardException;
 
     /**
+     * 建立设备产线实体关系
+     * @param device
+     */
+    void createRelationDeviceFromProductionLine(Device device);
+    /**
      * 移除产线设备
      * @param device
      * @throws ThingsboardException
@@ -148,6 +159,13 @@ public interface DeviceService {
      * @return
      */
     List<Device> findGatewayNewVersionByFactory(List<UUID> factoryId) throws ThingsboardException;
+
+    /**
+     * 查询工厂下所有网关设备
+     * @param factoryIds
+     * @return
+     */
+    List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
 
     /**
      *平台设备列表查询
@@ -163,5 +181,42 @@ public interface DeviceService {
     Device getDeviceInfo(UUID id);
 
     PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
+
+    /**
+     * 查询租户下未分配设备
+     * @param tenantId
+     * @return
+     */
+    List<Device> getNotDistributionDevice(TenantId tenantId);
+
+    /**
+     * 多条件查询设备
+     * @param device
+     * @return
+     */
+    List<Device> findDeviceListByCdn(Device device);
+
+    PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
+
+    PageData<AppCapacityDeviceVo> appQueryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
+
+    void updateFlgById(Boolean deviceFlg, UUID id);
+
+    /**
+     * 查询设备字典下发的设备列表
+     * @param device
+     * @return
+     */
+    List<Device> findDeviceIssueListByCdn(Device device);
+
+    /**
+     * 设备ID批量查询
+     * @param deviceIdList
+     * @return
+     */
+    List<Device> findDevicesByIds(List<UUID> deviceIdList);
+
+    long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
+
 
 }

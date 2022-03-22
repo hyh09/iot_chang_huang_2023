@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -30,8 +31,10 @@ import org.thingsboard.server.common.data.factory.FactoryListVo;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.vo.JudgeUserVo;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
@@ -41,6 +44,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -51,6 +55,9 @@ import java.util.stream.Collectors;
 @Component
 public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Factory> implements FactoryDao {
 
+    //在线状态
+    public static final String ATTRIBUTE_ACTIVE = "active";
+
     @Autowired
     private FactoryRepository factoryRepository;
     @Autowired
@@ -59,6 +66,8 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     private ProductionLineDao productionLineDao;
     @Autowired
     private DeviceDao deviceDao;
+    @Autowired
+    private AttributesDao attributesDao;
 
     @Override
     protected Class<FactoryEntity> getEntityClass() {
@@ -74,20 +83,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     @Override
     public Factory saveFactory(Factory factory)throws ThingsboardException {
         Boolean create = factory.getId() == null;
-        //校验名称重复
-        Factory check = new Factory();
-        check.setName(factory.getName());
-        check.setTenantId(factory.getTenantId());
-        List<Factory> factoryList = this.commonCondition(check);
-        if(CollectionUtils.isNotEmpty(factoryList)){
-            if (create) {
-                throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-            }else {
-                if(!factoryList.get(0).getId().toString().equals(factory.getId().toString())) {
-                    throw new ThingsboardException("名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
-                }
-            }
-        }
         FactoryEntity factoryEntity = new FactoryEntity(factory);
         if (create) {
             UUID uuid = Uuids.timeBased();
@@ -97,6 +92,20 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             factoryRepository.deleteById(factoryEntity.getUuid());
             factoryEntity.setUpdatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
+        //获取经纬度
+        /*String address = factoryEntity.getCountry() + factoryEntity.getProvince() + factoryEntity.getCity() + factoryEntity.getArea() + factoryEntity.getAddress();
+        if(StringUtils.isNotBlank(address)){
+            Map<String, String> coordinate = BaiduMaps.getCoordinate(address);
+            if(coordinate != null){
+                if(StringUtils.isNotBlank(coordinate.get("longitude"))){
+                    factoryEntity.setLongitude(coordinate.get("longitude"));
+                }
+                if(StringUtils.isNotBlank(coordinate.get("latitude"))){
+                    factoryEntity.setLatitude(coordinate.get("latitude"));
+                }
+            }
+        }*/
+
         FactoryEntity entity = factoryRepository.save(factoryEntity);
         if(entity != null){
             return entity.toData();
@@ -138,25 +147,20 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      * @param id
      */
     @Override
-    public void delFactory(UUID id){
-
-        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))){
+    public void delFactory(UUID id)throws ThingsboardException {
+        Device device = new Device();
+        device.setFactoryId(id);
+        if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))
+                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
            /* 逻辑删除暂时不用
             FactoryEntity factoryEntity = factoryRepository.findById(id).get();
             factoryEntity.setDelFlag("D");
             factoryRepository.save(factoryEntity);*/
             factoryRepository.deleteById(id);
+        }else {
+            throw new ThingsboardException("工厂下有车间/或网关设备不能删除！",ThingsboardErrorCode.GENERAL);
         }
     }
-
-
-    /**
-     * 根据工厂管理员查询
-     * @param factoryAdminId
-     * @return
-     */
-    @Override
-    public Factory findFactoryByAdmin(UUID factoryAdminId){return factoryRepository.findFactoryByAdmin(factoryAdminId);}
 
     /**
      * 根据租户查询
@@ -191,7 +195,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
             boolean notBlankWorkshopName = StringUtils.isNotBlank(factory.getWorkshopName());
-            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionlineName());
+            boolean notBlankProductionlineName = StringUtils.isNotBlank(factory.getProductionLineName());
             boolean notBlankDeviceName = StringUtils.isNotBlank(factory.getDeviceName());
 
             /**1.先根据条件查询出所有的 工厂、车间、产线、设备**/
@@ -205,7 +209,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 }
                 if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
                     //工厂管理员/工厂用户，拥有该工厂数据权限
-                    predicates.add(cb.equal(root.get("adminUserId"), judgeUserVo.getUserId()));
+                    if(judgeUserVo.getUser() != null && judgeUserVo.getUser().getFactoryId() != null){
+                        predicates.add(cb.equal(root.get("id"), judgeUserVo.getUser().getFactoryId()));
+                    }
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -222,7 +228,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     if(CollectionUtils.isNotEmpty(productionLineList)){
                         List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
                         //查询设备,过滤掉网关
-                        deviceList = deviceDao.findDeviceListBuyCdn(new Device(factory,productionLineIds));
+                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds));
                     }
                 }
             }
@@ -459,10 +465,14 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
      */
     @Override
     public Factory findById(UUID id){
-        FactoryEntity entity = factoryRepository.findById(id).get();
-        if(entity != null){
-            return entity.toData();
+        Optional<FactoryEntity> optional = factoryRepository.findById(id);
+        if(!optional.isEmpty()){
+            FactoryEntity entity = optional.get();
+            if(entity != null){
+                return entity.toData();
+            }
         }
+
         return null;
     }
 
@@ -502,5 +512,32 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
     public List<Factory> findAllByCdn(Factory factory){
         return this.commonCondition(factory);
     }
+
+    /**
+     * 校验工厂是否在线，有一个不在线视为不在线
+     * 全部离线视为离线，否则为在线
+     * @param factoryId
+     * @return  true-在线  false-离线
+     */
+    @Override
+    public Boolean checkoutFactoryStatus(UUID factoryId) throws ThingsboardException{
+        Boolean result = false;
+        List<UUID> list = new ArrayList<>();
+        list.add(factoryId);
+        List<Device> gatewayListVersionByFactory = deviceDao.findGatewayListVersionByFactory(list);
+        if (CollectionUtils.isNotEmpty(gatewayListVersionByFactory)){
+            List<AttributeKvEntity> allByEntityIds = attributesDao.findAllByEntityIds(gatewayListVersionByFactory.stream().map(m -> m.getId().getId()).collect(Collectors.toList()), DataConstants.SERVER_SCOPE, this.ATTRIBUTE_ACTIVE);
+            if(CollectionUtils.isNotEmpty(allByEntityIds)){
+                for (AttributeKvEntity attributeKvEntity:allByEntityIds){
+                    if(attributeKvEntity.getBooleanValue()){
+                        return true;
+                    }
+                }
+                return result;
+            }
+        }
+        return result;
+    }
+
 }
 

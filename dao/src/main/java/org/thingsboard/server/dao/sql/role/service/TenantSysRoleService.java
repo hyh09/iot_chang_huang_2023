@@ -5,6 +5,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
 import org.thingsboard.server.dao.util.sql.jpa.BaseSQLServiceImpl;
 import org.thingsboard.server.dao.sql.role.dao.TenantSysRoleDao;
 import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;	
@@ -105,10 +106,32 @@ public class TenantSysRoleService  extends BaseSQLServiceImpl<TenantSysRoleEntit
     /**
      * 查询用户编码的
      */
-    public  TenantSysRoleEntity  queryEntityBy(String roleCode)
+    public  TenantSysRoleEntity  queryEntityBy(String roleCode,UUID tenantId)
     {
-       return   this.dao.queryAllByRoleCode(roleCode);
+       return   this.dao.queryAllByRoleCode(roleCode,tenantId);
     }
+
+
+
+    /**
+     * 查询用户编码的
+     */
+    public  TenantSysRoleEntity  queryAllByFactoryId(String roleCode,UUID tenantId,UUID factoryId)
+    {
+        return   this.dao.queryAllByFactoryId(roleCode,tenantId,factoryId);
+    }
+
+
+    /**
+     * 更新角色的系统开关
+     * @param vo
+     */
+    public UpdateOperationVo  updateOperationType(UpdateOperationVo  vo)
+    {
+        dao.updateOperationType(vo.getId(),vo.getOperationType());
+        return  vo;
+    }
+
 
 
 

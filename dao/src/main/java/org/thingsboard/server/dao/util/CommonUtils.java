@@ -8,6 +8,7 @@ import org.thingsboard.server.common.data.vo.home.EachMonthStartEndVo;
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -231,8 +232,6 @@ public class CommonUtils {
         // 获取本月第一天的时间戳
         Date zero = c.getTime();
         String s = format1.format(zero);
-        System.out.println("==获取本月第一天的时间戳====>"+s);
-        System.out.println(c.getTimeInMillis());
         vo.setStartTime(zero.getTime());
         vo.setStrStartTime(s);
 
@@ -249,10 +248,8 @@ public class CommonUtils {
         //将毫秒至0
         ca.set(Calendar.MILLISECOND, 59);
         // 获取本月最后一天的时间戳
-        System.out.println(ca.getTimeInMillis());
         Date zero2 = ca.getTime();
         String s2 = format1.format(zero2);
-        System.out.println("==获取本月第最后天的时间戳====>"+s2);
         vo.setEndTime(zero2.getTime());
         vo.setStrEndTime(s2);
 
@@ -260,6 +257,227 @@ public class CommonUtils {
         return  vo;
 
     }
+
+
+    //判断是否是当天的时间
+    //判断是否是当天的时间
+    public static Boolean  isItToday(long  time)
+    {
+        long    todayZero =  getZero();
+        long  now =getNowTime();
+        if(time>=todayZero &&  time <=now)
+        {
+            return true;
+        }
+
+        return  false;
+
+    }
+
+
+    /**
+     * 判断是不是今天的数据
+     * @param localDate
+     * @return
+     */
+    public  static   Boolean  itIsToday(LocalDate localDate)
+    {
+        LocalDate  nowDate = LocalDate.now();// 今天
+        int i =  nowDate.compareTo(localDate);
+        if(i == 0 )
+        {
+            return  true;
+        }
+        return  false;
+
+    }
+
+
+    /**
+     *  获取所在时间所在时间片段
+     *   每隔30分钟统计一次
+     * @param ts
+     * @return
+     */
+    public  static  Long  getTimeClip(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        int second =localDateTime.getSecond();
+        if(minute >30)
+        {
+            if(hour>=23){
+                hour =-1;
+            }
+            localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
+        }else  if(minute == 30 && second>0){
+            if(hour>=23){
+                hour =-1;
+            }
+            localDateTime1  =  LocalDateTime.of(year,month,day,hour+1,0,0,0);
+        }
+        else  if(minute == 0 && second== 0){
+            localDateTime1  =LocalDateTime.of(year,month,day,hour,0,0,0);
+        }else {
+            localDateTime1  =  LocalDateTime.of(year,month,day,hour,30,0,0);
+
+        }
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+    /**
+     *  Conversion minutes
+     * @param ts
+     * @return 转换分钟
+     */
+    public  static Long getConversionMinutes(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        int second =localDateTime.getSecond();
+        localDateTime1  =  LocalDateTime.of(year,month,day,hour,minute,0,0);
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+    /**
+     * localDateTime转long
+     * @param localDateTime
+     * @return
+     */
+    public static long getTimestampOfDateTime(LocalDateTime localDateTime) {
+        ZoneId zone = ZoneId.systemDefault();
+        Instant instant = localDateTime.atZone(zone).toInstant();
+        return instant.toEpochMilli();
+    }
+
+
+    /**
+     * long 转 LocalDateTime
+     * @param l
+     * @return
+     */
+    public static LocalDateTime longToDateTime(long l){
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault());
+    }
+
+    /**
+     * long 转 LocalTime
+     * @param l
+     * @return
+     */
+    public static LocalTime longToLocalTime(long l){
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault()).toLocalTime();
+    }
+
+
+    /**
+     * 获取两个时间段的整点时间
+     * 目前入参： 0:00:00 -> 23:59:59
+     */
+    public  static  List<Long> getTwoTimePeriods(long startTs ,long  endTs)
+    {
+        List<Long> resultTimeList = new ArrayList<>();
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+            Date startTime1 = new Date(startTs);
+            Date endTime1 = new Date(endTs);
+            Calendar tempStart = Calendar.getInstance();
+            tempStart.setTime(startTime1);
+            while (startTime1.getTime() <= endTime1.getTime()) {
+                startTime1 = tempStart.getTime();
+                tempStart.add(Calendar.MINUTE, 30);//30分钟前的时间
+                resultTimeList.add(startTime1.getTime());
+            }
+            return resultTimeList;
+
+
+    }
+
+
+    /**
+     * 获取两个时间段的整点时间
+     * 目前入参： 0:00:00 -> 23:59:59
+     */
+    public  static  List<Long> getTwoTimePeriods(long startTs ,long  endTs,int type,int value)
+    {
+        List<Long> resultTimeList = new ArrayList<>();
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+        Date startTime1 = new Date(startTs);
+        Date endTime1 = new Date(endTs);
+        Calendar tempStart = Calendar.getInstance();
+        tempStart.setTime(startTime1);
+        while (startTime1.getTime() <= endTime1.getTime()) {
+//            System.out.println(format2.format(startTime1));
+            startTime1 = tempStart.getTime();
+            tempStart.add(type, value);
+            resultTimeList.add(startTime1.getTime());
+//            System.out.println("====>"+format2.format(startTime1));
+        }
+        return resultTimeList;
+
+
+    }
+
+
+
+
+    /*
+     * 将时间戳转换为时间
+     */
+    public static String stampToDate(String s){
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long lt = new Long(s);
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+
+
+    /**
+     *
+     * @param ts
+     * @return 小时
+     */
+    public  static Long getConversionHours(long  ts)
+    {
+        LocalDateTime localDateTime1 = null;
+        LocalDateTime localDateTime =longToDateTime(ts);
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+
+
+        if(hour>=23)
+        {
+            hour=-1;
+        }
+
+        if(minute==0) {
+            localDateTime1 = LocalDateTime.of(year, month, day, hour, 0, 0, 0);
+        }else if(minute>0  ) {
+
+            localDateTime1 = LocalDateTime.of(year, month, day, hour+1, 0, 0, 0);
+        }
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
+
 
 
 

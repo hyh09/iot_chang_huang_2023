@@ -23,6 +23,13 @@ public class WorkshopEntity extends AbstractWorkshopEntity<Workshop>  {
         super();
     }
 
+    public WorkshopEntity(UUID id, String name, UUID factoryId) {
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setFactoryId(factoryId);
+    }
+
     public WorkshopEntity (Factory factory){
         this.setName(factory.getWorkshopName());
         this.setTenantId(factory.getTenantId());

@@ -1,16 +1,13 @@
 package org.thingsboard.server.dao.sql.role.dao;	
 	
-import org.springframework.data.domain.Pageable;
-import org.thingsboard.server.dao.model.sql.AlarmEntity;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;
 import org.thingsboard.server.dao.util.sql.BaseSqlDao;
-import org.thingsboard.server.dao.sql.role.entity.TenantSysRoleEntity;	
-import org.springframework.data.jpa.repository.Modifying;	
-import org.springframework.data.jpa.repository.Query;	
-import org.springframework.data.repository.query.Param;	
-	
-import javax.transaction.Transactional;	
-import java.util.Collection;	
-import java.util.List;	
+
+import javax.transaction.Transactional;
+import java.util.List;
 import java.util.UUID;	
 	
 	
@@ -29,10 +26,17 @@ public interface TenantSysRoleDao extends BaseSqlDao<TenantSysRoleEntity,UUID> {
     @Query("select d.roleCode  from TenantSysRoleEntity d where  d.tenantId =:tenantId ")
     List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 
+    @Query("SELECT a FROM TenantSysRoleEntity a  where  a.roleCode=:roleCode and a.tenantId = :tenantId ")
+    TenantSysRoleEntity  queryAllByRoleCode(@Param("roleCode") String roleCode,@Param("tenantId") UUID tenantId);
 
-    TenantSysRoleEntity  queryAllByRoleCode(String roleCode);
+    @Query("SELECT a FROM TenantSysRoleEntity a  where  a.roleCode=:roleCode and a.tenantId = :tenantId and a.factoryId=:factoryId ")
+    TenantSysRoleEntity  queryAllByFactoryId(@Param("roleCode") String roleCode,@Param("tenantId") UUID tenantId,@Param("factoryId") UUID factoryId);
 
 
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "update TenantSysRoleEntity  d set d.operationType= :operationType where d.id= :roleId")
+    int updateOperationType(@Param("roleId") UUID  userId,@Param("operationType") Integer  operationType);
 	
 	
 }	

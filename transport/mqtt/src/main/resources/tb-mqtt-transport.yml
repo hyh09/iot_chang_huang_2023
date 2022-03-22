@@ -15,9 +15,9 @@
 #
 
 # If you enabled process metrics you should also enable 'web-environment'.
-spring.main.web-environment: "${WEB_APPLICATION_ENABLE:false}"
+spring.main.web-environment: "${WEB_APPLICATION_ENABLE:true}"
 # If you enabled process metrics you should set 'web-application-type' to 'servlet' value.
-spring.main.web-application-type: "${WEB_APPLICATION_TYPE:none}"
+spring.main.web-application-type: "${WEB_APPLICATION_TYPE:servlet}"
 
 server:
   # Server bind address (has no effect if web-environment is disabled).
@@ -136,7 +136,7 @@ queue:
     acks: "${TB_KAFKA_ACKS:all}"
     retries: "${TB_KAFKA_RETRIES:1}"
     batch.size: "${TB_KAFKA_BATCH_SIZE:16384}"
-    linger.ms: "${TB_KAFKA_LINGER_MS:1}"
+    linger.ms: "${TB_KAFKA_LINGER_MS:5}"
     max.request.size: "${TB_KAFKA_MAX_REQUEST_SIZE:1048576}"
     max.in.flight.requests.per.connection: "${TB_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION:5}"
     buffer.memory: "${TB_BUFFER_MEMORY:33554432}"

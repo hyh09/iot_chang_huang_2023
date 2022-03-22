@@ -15,12 +15,15 @@
  */
 package org.thingsboard.server.service.subscription;
 
+import com.google.api.client.util.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.ThingsBoardExecutors;
+import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.discovery.event.ClusterTopologyChangeEvent;
 import org.thingsboard.server.queue.discovery.event.PartitionChangeEvent;
@@ -36,10 +39,7 @@ import org.thingsboard.server.service.telemetry.sub.TelemetrySubscriptionUpdate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -150,6 +150,15 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
                 case ATTRIBUTES:
                     TbAttributeSubscription attrSub = (TbAttributeSubscription) subscription;
                     update.getLatestValues().forEach((key, value) -> attrSub.getKeyStates().put(key, value));
+                    List<Object> objectList = Lists.newArrayList();
+                    Object[] value = new Object[2];
+                    value[0] = CommonUtil.getTodayCurrentTime();
+                    value[1] = attrSub.getEntityId().toString();
+                    objectList.add(value);
+                    Optional.ofNullable(update.getData()).ifPresentOrElse(f -> f.put(HSConstants.ATTR_DEVICE_ID, objectList), ()->{
+                        update.setData(new HashMap<>());
+                        update.getData().put(HSConstants.ATTR_DEVICE_ID, objectList);
+                    });
                     break;
             }
             subscriptionUpdateExecutor.submit(() -> subscription.getUpdateConsumer().accept(sessionId, update));

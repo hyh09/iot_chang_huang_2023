@@ -17,7 +17,6 @@ package org.thingsboard.server.dao.sql.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -49,6 +48,20 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
                                           @Param("authority") Authority authority,
                                           Pageable pageable);
 
+    @Query(value = "select t.*  from  tb_user t  where    t.id  in (select  user_id  from  tb_user_menu_role rr  ,tb_tenant_sys_role re\n" +
+            "                                              where  rr.tenant_sys_role_id  = re.id  and  re.tenant_id= :tenantId " +
+            "                                                and re.role_code=:roleCode " +
+            ") and  t.tenant_id= :tenantId  and (lower(t.search_text) like lower(( :searchText ||'%')) )",nativeQuery = true)
+    Page<UserEntity> findTenantAdmins(@Param("tenantId") UUID tenantId,@Param("searchText") String searchText,@Param("roleCode") String roleCode,Pageable pageable);
+
+
+    @Query(value = "select t.*  from  tb_user t  where    t.id  in (select  user_id  from  tb_user_menu_role rr  ,tb_tenant_sys_role re\n" +
+            "                                              where  rr.tenant_sys_role_id  = re.id  and  re.tenant_id= :tenantId " +
+            "                                                and re.role_code=:roleCode  and re.factory_id= :factoryId" +
+            ") and  t.tenant_id= :tenantId  and t.factory_id = :factoryId  and ((t.user_code) like (( :userCode ||'%')) )  and ((t.user_name) like (( :userName ||'%')) )",nativeQuery = true)
+    Page<UserEntity> findFactoryAdmins(@Param("tenantId") UUID tenantId,@Param("factoryId") UUID factoryId,@Param("userCode") String userCode,@Param("userName") String userName,@Param("roleCode") String roleCode,Pageable pageable);
+
+
     @Query("SELECT u FROM UserEntity u WHERE u.tenantId = :tenantId " +
             "AND LOWER(u.searchText) LIKE LOWER(CONCAT(:searchText, '%'))")
     Page<UserEntity> findByTenantId(@Param("tenantId") UUID tenantId,
@@ -76,5 +89,17 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
 
 
 
+    @Query("select d  from UserEntity d where d.tenantId = :tenantId and d.userLevel=3")
+    List<UserEntity> queyrTenantManagement(@Param("tenantId") UUID tenantId);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "update UserEntity  d set d.operationType= :operationType where d.id= :userId")
+    int updateOperationType(@Param("userId") UUID  userId,@Param("operationType") Integer  operationType);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "update UserEntity  d set d.userLevel = :userLevel where d.id= :userId")
+    int updateLevel(@Param("userId") UUID  userId,@Param("userLevel") Integer  userLevel);
 
 }

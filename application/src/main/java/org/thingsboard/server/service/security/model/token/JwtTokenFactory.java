@@ -58,6 +58,9 @@ public class JwtTokenFactory {
     private static final String IS_PUBLIC = "isPublic";
     private static final String TENANT_ID = "tenantId";
     private static final String CUSTOMER_ID = "customerId";
+    private static  final  String TYPE="type";
+    private static  final String  FACTORY_ID="factoryId";
+    private static  final String  USER_LEVEL="userLevel";
 
     private final JwtSettings settings;
 
@@ -85,12 +88,19 @@ public class JwtTokenFactory {
         claims.put(LAST_NAME, securityUser.getLastName());
         claims.put(ENABLED, securityUser.isEnabled());
         claims.put(IS_PUBLIC, principal.getType() == UserPrincipal.Type.PUBLIC_ID);
+        claims.put(TYPE,securityUser.getType());
         if (securityUser.getTenantId() != null) {
             claims.put(TENANT_ID, securityUser.getTenantId().getId().toString());
         }
         if (securityUser.getCustomerId() != null) {
             claims.put(CUSTOMER_ID, securityUser.getCustomerId().getId().toString());
         }
+        if (securityUser.getFactoryId() != null) {
+            claims.put(FACTORY_ID, securityUser.getFactoryId().toString());
+        }
+        claims.put(USER_LEVEL, securityUser.getUserLevel()+"");
+
+
 
         ZonedDateTime currentTime = ZonedDateTime.now();
 
@@ -121,6 +131,8 @@ public class JwtTokenFactory {
         securityUser.setFirstName(claims.get(FIRST_NAME, String.class));
         securityUser.setLastName(claims.get(LAST_NAME, String.class));
         securityUser.setEnabled(claims.get(ENABLED, Boolean.class));
+        securityUser.setType(claims.get(TYPE,String.class));
+
         boolean isPublic = claims.get(IS_PUBLIC, Boolean.class);
         UserPrincipal principal = new UserPrincipal(isPublic ? UserPrincipal.Type.PUBLIC_ID : UserPrincipal.Type.USER_NAME, subject);
         securityUser.setUserPrincipal(principal);
@@ -132,6 +144,12 @@ public class JwtTokenFactory {
         if (customerId != null) {
             securityUser.setCustomerId(new CustomerId(UUID.fromString(customerId)));
         }
+        String factoryId = claims.get(FACTORY_ID, String.class);
+        securityUser.setFactoryId(StringUtils.isBlank(factoryId)?null:UUID.fromString(factoryId));
+
+        String userLevel = claims.get(USER_LEVEL, String.class);
+        securityUser.setUserLevel(StringUtils.isBlank(userLevel) ? 0:Integer.valueOf(userLevel));
+
 
         return securityUser;
     }

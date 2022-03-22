@@ -566,7 +566,7 @@
                 <version>${os-maven-plugin.version}</version>
             </extension>
         </extensions>
-        <defaultGoal>compile</defaultGoal>
+
         <pluginManagement>
             <plugins>
                 <plugin>

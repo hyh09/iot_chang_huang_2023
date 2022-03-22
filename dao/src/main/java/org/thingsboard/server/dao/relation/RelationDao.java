@@ -25,6 +25,7 @@ import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ashvayka on 25.04.17.
@@ -62,5 +63,14 @@ public interface RelationDao {
     boolean deleteOutboundRelations(TenantId tenantId, EntityId entity);
 
     ListenableFuture<Boolean> deleteOutboundRelationsAsync(TenantId tenantId, EntityId entity);
+
+    /**
+     * 批量查询来源数据
+     * @param fromIds
+     * @param typeGroup
+     * @return
+     */
+    List<EntityRelation> findByFromIds(List<UUID> fromIds, RelationTypeGroup typeGroup);
+
 
 }

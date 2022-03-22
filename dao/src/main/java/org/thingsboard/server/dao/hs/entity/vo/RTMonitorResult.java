@@ -32,6 +32,12 @@ public class RTMonitorResult {
     private PageData<RTMonitorDeviceResult> devicePageData;
 
     /**
+     * 全部设备id列表
+     */
+    @ApiModelProperty("全部设备id列表")
+    private List<String> deviceIdList;
+
+    /**
      * 在线设备数量
      */
     @ApiModelProperty("在线设备数量")
@@ -54,4 +60,5 @@ public class RTMonitorResult {
      */
     @ApiModelProperty("预警次数列表，从远及近")
     private List<AlarmTimesResult> alarmTimesList;
+
 }

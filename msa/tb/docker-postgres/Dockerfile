@@ -24,6 +24,8 @@ ENV PG_MAJOR 12
 RUN apt-get update
 RUN apt-get install -y postgresql-12
 RUN update-rc.d postgresql disable
+#设置时区
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 
 COPY logback.xml ${pkg.name}.conf start-db.sh stop-db.sh start-tb.sh upgrade-tb.sh install-tb.sh ${pkg.name}.deb /tmp/
 

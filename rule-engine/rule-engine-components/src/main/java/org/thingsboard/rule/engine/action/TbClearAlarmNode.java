@@ -85,7 +85,8 @@ public class TbClearAlarmNode extends TbAbstractAlarmNode<TbClearAlarmNodeConfig
                         alarm.setEndTs(savedAlarm.getEndTs());
                         alarm.setClearTs(savedAlarm.getClearTs());
                     }
-                    alarm.setStatus(alarm.getStatus().isAck() ? AlarmStatus.CLEARED_ACK : AlarmStatus.CLEARED_UNACK);
+//                    alarm.setStatus(alarm.getStatus().isAck() ? AlarmStatus.CLEARED_ACK : AlarmStatus.CLEARED_UNACK);
+                    alarm.setStatus(alarm.getStatus().isAck() ? AlarmStatus.CLEARED_ACK : AlarmStatus.CLEARED_ACK);
                     return Futures.immediateFuture(new TbAlarmResult(false, false, true, alarm));
                 }, ctx.getDbCallbackExecutor());
             }, ctx.getDbCallbackExecutor());

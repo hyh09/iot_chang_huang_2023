@@ -406,6 +406,7 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
         checkAndPutAdditionalInfo(additionalInfo, "logoImageUrl", params);
         checkAndPutAdditionalInfo(additionalInfo, "logoImageHeight", params);
         checkAndPutAdditionalInfo(additionalInfo, "platformMainColor", params);
+        checkAndPutAdditionalInfo(additionalInfo, "platformSecondColor", params);
         checkAndPutAdditionalInfo(additionalInfo, "platformButtonColor", params);
         checkAndPutAdditionalInfo(additionalInfo, "showNameVersion", params);
         checkAndPutAdditionalInfo(additionalInfo, "platformName", params);
@@ -449,6 +450,7 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
         String logoImageUrl = additionalInfo.get("logoImageUrl") != null ? additionalInfo.get("logoImageUrl").asText() : null;
         String logoImageHeight = additionalInfo.get("logoImageHeight") != null ? additionalInfo.get("logoImageHeight").asText() : null;
         String platformMainColor = additionalInfo.get("platformMainColor") != null ? additionalInfo.get("platformMainColor").asText() : null;
+        String platformSecondColor = additionalInfo.get("platformSecondColor") != null ? additionalInfo.get("platformSecondColor").asText() : null;
         String platformTextMainColor = additionalInfo.get("platformTextMainColor") != null ? additionalInfo.get("platformTextMainColor").asText() : null;
         String platformButtonColor = additionalInfo.get("platformButtonColor") != null ? additionalInfo.get("platformButtonColor").asText() : null;
         String platformMenuColorActive = additionalInfo.get("platformMenuColorActive") != null ? additionalInfo.get("platformMenuColorActive").asText() : null;
@@ -461,6 +463,7 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
         map.put("logoImageUrl", logoImageUrl);
         map.put("logoImageHeight", logoImageHeight);
         map.put("platformMainColor", platformMainColor);
+        map.put("platformSecondColor", platformSecondColor);
         map.put("platformTextMainColor", platformTextMainColor);
         map.put("platformButtonColor", platformButtonColor);
         map.put("platformMenuColorActive", platformMenuColorActive);

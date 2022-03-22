@@ -1,16 +1,14 @@
 package org.thingsboard.server.dao.hs.service;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
+import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupVO;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceListQuery;
-import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +28,7 @@ public interface DictDeviceService {
      * @param dictDeviceVO 设备字典入参
      * @param tenantId     租户Id
      */
-    void updateOrSaveDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException;
+    DictDeviceVO saveOrUpdateDictDevice(DictDeviceVO dictDeviceVO, TenantId tenantId) throws ThingsboardException;
 
     /**
      * 获得当前可用设备字典编码
@@ -48,7 +46,7 @@ public interface DictDeviceService {
      * @param pageLink            分页参数
      * @return 设备字典列表
      */
-    PageData<DictDevice> listDictDeviceByQuery(DictDeviceListQuery dictDeviceListQuery, TenantId tenantId, PageLink pageLink);
+    PageData<DictDevice> listPageDictDevicesByQuery(DictDeviceListQuery dictDeviceListQuery, TenantId tenantId, PageLink pageLink);
 
     /**
      * 获得设备字典详情
@@ -65,56 +63,40 @@ public interface DictDeviceService {
      * @param id       设备字典id
      * @param tenantId 租户Id
      */
-    void deleteDictDevice(String id, TenantId tenantId) throws ThingsboardException;
-
-    /**
-     * 获得未配置设备配置的设备字典列表
-     *
-     * @param tenantId 租户Id
-     */
-    List<DictDevice> listDictDeviceUnused(TenantId tenantId);
+    void deleteDictDeviceById(String id, TenantId tenantId) throws ThingsboardException;
 
     /**
      * 获得设备字典分组及分组属性
      *
      * @param dictDeviceId 设备字典Id
      */
-    List<DictDeviceGroupVO> listDictDeviceGroup(UUID dictDeviceId);
+    List<DictDeviceGroupVO> listDictDeviceGroups(UUID dictDeviceId);
+
+    /**
+     * 获得设备字典部件
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceComponentVO> listDictDeviceComponents(UUID dictDeviceId);
 
     /**
      * 获得设备字典分组属性，不包含分组
      *
      * @param dictDeviceId 设备字典Id
      */
-    List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperty(UUID dictDeviceId);
+    List<DictDeviceGroupPropertyVO> listDictDeviceGroupProperties(UUID dictDeviceId);
 
     /**
-     * 批量获得设备字典绑定的设备配置Id
-     *
-     * @param dictDeviceIdList 设备字典Id列表
-     */
-    Map<UUID, DeviceProfileId> listDeviceProfileIdsByDictDeviceIdList(List<UUID> dictDeviceIdList);
-
-    /**
-     * 获得设备字典绑定的设备配置Id
+     * 获得设备字典部件属性
      *
      * @param dictDeviceId 设备字典Id
      */
-    DeviceProfileId getDeviceProfileIdByDictDeviceId(UUID dictDeviceId);
+    List<DictDeviceComponentPropertyVO> listDictDeviceComponentProperties(UUID dictDeviceId);
 
     /**
      * 获得当前默认初始化的分组及分组属性
      */
-    List<DictDeviceGroupVO> getGroupInitData();
-
-    /**
-     * @param dictDeviceId
-     * @param name
-     * @return map: key-name  ,value-name
-     */
-    List<String> findAllByName(UUID dictDeviceId, String name);
-
-    List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);
+    List<DictDeviceGroupVO> getDictDeviceGroupInitData();
 
     /**
      * 【不分页】获得设备字典列表
@@ -122,5 +104,138 @@ public interface DictDeviceService {
      * @param tenantId 租户Id
      * @return 设备字典列表
      */
-    List<DictDevice> listAllDictDevice(TenantId tenantId);
+    List<DictDevice> listDictDevices(TenantId tenantId);
+
+    /**
+     * 获得全部设备字典属性(包括部件)-描述 Map
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    Map<String, String> getDictDeviceNameToTitleMap(UUID dictDeviceId);
+
+    /**
+     * 获得全部设备字典属性(包括部件)-数据字典Id Map
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    Map<String, String> getNameToDictDataIdMap(UUID dictDeviceId);
+
+    /**
+     * 获得全部设备字典属性(包括部件)-数据字典 Map
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     */
+    Map<String, DictData> getNameToDictDataMap(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 【不分页】获得设备字典绑定的部件，平铺
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 部件列表
+     */
+    List<DictDeviceComponent> listDictDeviceTileComponents(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 获得默认的设备字典Id
+     *
+     * @param tenantId 租户Id
+     */
+    UUID getDefaultDictDeviceId(TenantId tenantId);
+
+    /**
+     * 设置默认设备字典
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     */
+    void updateDictDeviceDefault(TenantId tenantId, UUID dictDeviceId) throws ThingsboardException;
+
+    /**
+     * 获得截止时间之后新增的设备字典
+     *
+     * @param tenantId  租户Id
+     * @param startTime 设备字典Id
+     */
+    List<DictDevice> listDictDevicesByStartTime(TenantId tenantId, long startTime);
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 遥测属性列表
+     */
+    List<DictDeviceTsPropertyResult> listDictDeviceIssueProperties(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 设备字典-图表-列表
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 设备字典-图表-列表
+     */
+    List<DictDeviceGraphVO> listDictDeviceGraphs(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 设备字典-图表-详情
+     *
+     * @param tenantId 租户Id
+     * @param graphId  设备字典图表Id
+     * @return 设备字典-图表-详情
+     */
+    DictDeviceGraphVO getDictDeviceGraphDetail(TenantId tenantId, UUID graphId) throws ThingsboardException;
+
+    /**
+     * 设备字典-图表-新增或修改
+     *
+     * @param tenantId          租户Id
+     * @param dictDeviceId      设备字典Id
+     * @param dictDeviceGraphVO 图表
+     * @return 图表
+     */
+    UUID updateOrSaveDictDeviceGraph(TenantId tenantId, UUID dictDeviceId, DictDeviceGraphVO dictDeviceGraphVO) throws ThingsboardException;
+
+    /**
+     * 设备字典-图表-删除
+     *
+     * @param tenantId 租户Id
+     * @param graphId  设备字典图表Id
+     */
+    void deleteDictDeviceGraph(TenantId tenantId, UUID graphId);
+
+    /**
+     * 设备字典-遥测属性查询
+     *
+     * @param propertyId   属性Id
+     * @param propertyType 属性类型
+     * @return 遥测属性
+     */
+    DictDeviceTsPropertyVO getTsPropertyByIdAndType(UUID propertyId, DictDevicePropertyTypeEnum propertyType);
+
+    /**
+     * 设备字典-遥测属性查询
+     *
+     * @param dictDeviceId   设备字典Id
+     * @param tsPropertyName 遥测属性名
+     * @return 遥测属性
+     */
+    DictDeviceTsPropertyVO getTsPropertyByPropertyName(UUID dictDeviceId, String tsPropertyName);
+
+    /**
+     * 【不分页】获得设备字典全部遥测属性
+     *
+     * @param tenantId     租户Id
+     * @param dictDeviceId 设备字典Id
+     * @return 全部遥测属性
+     */
+    List<DictDeviceTsPropertyVO> listDictDeviceProperties(TenantId tenantId, UUID dictDeviceId);
+
+    /**
+     * 根据设备字典id查询设备字典信息
+     * @param dictDeviceId
+     * @return
+     */
+    DictDevice findById(UUID dictDeviceId);
 }

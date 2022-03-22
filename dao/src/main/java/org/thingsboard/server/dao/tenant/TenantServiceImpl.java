@@ -27,6 +27,7 @@ import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.svc.tenant.GeographicalSvc;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
@@ -100,6 +101,10 @@ public class TenantServiceImpl extends AbstractEntityService implements TenantSe
     @Autowired
     private RpcService rpcService;
 
+    @Autowired
+    private GeographicalSvc geographicalSvc;
+
+
     @Override
     public Tenant findTenantById(TenantId tenantId) {
         log.trace("Executing findTenantById [{}]", tenantId);
@@ -131,6 +136,8 @@ public class TenantServiceImpl extends AbstractEntityService implements TenantSe
         }
         tenantValidator.validate(tenant, Tenant::getId);
         Tenant savedTenant = tenantDao.save(tenant.getId(), tenant);
+//        geographicalSvc.saveCoordinate(savedTenant);
+
         if (tenant.getId() == null) {
             deviceProfileService.createDefaultDeviceProfile(savedTenant.getId());
             apiUsageStateService.createDefaultApiUsageState(savedTenant.getId(), null);

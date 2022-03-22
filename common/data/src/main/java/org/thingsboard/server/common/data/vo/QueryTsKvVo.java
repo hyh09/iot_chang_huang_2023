@@ -38,6 +38,10 @@ public class QueryTsKvVo {
     @ApiModelProperty("工厂id  UUID类型")
     private UUID factoryId;
 
+    @ApiModelProperty("设备字典id  UUID类型")
+    private UUID  dictDeviceId;
+
+
     @ApiModelProperty("当前要传的属性 数组类型  ###不需要前端传了")
     private String key;
 
@@ -45,10 +49,19 @@ public class QueryTsKvVo {
     private List<String> keys;
 
 
+
+
     @ApiModelProperty("分页参数大小 不传默认是2")
     private  int pageSize=2;
     @ApiModelProperty("起始页  不传默认是0")
     private  int page=0;
+
+    private UUID tenantId;
+
+
+    //是否获取第一个工厂逻辑
+    private  Boolean filterFirstFactory=true;
+
 
 
     public QueryTsKvVo() {

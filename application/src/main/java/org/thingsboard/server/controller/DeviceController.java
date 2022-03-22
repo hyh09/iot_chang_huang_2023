@@ -15,14 +15,21 @@
  */
 package org.thingsboard.server.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.gson.Gson;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,15 +56,18 @@ import org.thingsboard.server.common.data.vo.device.DeviceDataVo;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.config.RedisMessagePublish;
 import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
-import org.thingsboard.server.entity.device.dto.AddDeviceDto;
-import org.thingsboard.server.entity.device.dto.DeviceQry;
-import org.thingsboard.server.entity.device.dto.DistributionDeviceDto;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.dao.util.ReflectionUtils;
+import org.thingsboard.server.entity.device.dto.*;
+import org.thingsboard.server.entity.device.enums.ReadWriteEnum;
+import org.thingsboard.server.entity.device.vo.DeviceIssueVo;
 import org.thingsboard.server.entity.device.vo.DeviceVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
@@ -65,25 +75,65 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
 import javax.annotation.Nullable;
+import javax.persistence.Column;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
-
+@Slf4j
 @Api(value="设备管理Controller",tags={"设备管理口"})
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
 public class DeviceController extends BaseController {
 
+    private static final String DEVICE = "DEVICE";
+    private static final String SHARED_SCOPE = "SHARED_SCOPE";
     private static final String DEVICE_ID = "deviceId";
     private static final String DEVICE_NAME = "deviceName";
     private static final String TENANT_ID = "tenantId";
     public static final String SAVE_TYPE_ADD = "add ";
     public static final String SAVE_TYPE_ADD_UPDATE = "update ";
+    public static final String GATEWAY = "gateway";
+
+    @Autowired
+    private TelemetryController telemetryController;
+
+    @Autowired
+    private RedisMessagePublish pub;
+
+
+    @ApiOperation("云对接查设备详情")
+    @ApiImplicitParam(name = "deviceId",value = "当前id",dataType = "String",paramType="path",required = true)
+    @RequestMapping(value = "/yun/device/{deviceId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Device getYunDeviceById(@PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
+        checkParameter(DEVICE_ID, strDeviceId);
+        try {
+            return deviceService.getDeviceInfo(toUUID(strDeviceId));
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
+    @ApiOperation("云对接查设备列表")
+    @ApiImplicitParam(name = "device",value = "入参实体",dataType = "YunDeviceDto",paramType="query")
+    @RequestMapping(value = "/yun/devices", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Device> getYunDeviceList(YunDeviceDto device) throws ThingsboardException {
+        try {
+            Device deviceQry = device.toDevice();
+            if(StringUtils.isNotEmpty(device.getTenantId())){
+                deviceQry.setTenantId(new TenantId(toUUID(device.getTenantId())));
+            }
+            return deviceService.getYunDeviceList(deviceQry);
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
 
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.GET)
@@ -111,6 +161,7 @@ public class DeviceController extends BaseController {
         }
     }
 
+    @ApiOperation("系统原生平台设备添加接口")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/device", method = RequestMethod.POST)
     @ResponseBody
@@ -134,7 +185,8 @@ public class DeviceController extends BaseController {
             logEntityAction(savedDevice.getId(), savedDevice,
                     savedDevice.getCustomerId(),
                     created ? ActionType.ADDED : ActionType.UPDATED, null);
-
+            //初始化网关版本
+            this.saveAttributesInit(savedDevice);
             return savedDevice;
         } catch (Exception e) {
             logEntityAction(emptyId(EntityType.DEVICE), device,
@@ -143,6 +195,19 @@ public class DeviceController extends BaseController {
         }
 
     }
+    /**
+     * 初始化属性
+     * @param device
+     */
+    private void saveAttributesInit(Device device) throws ThingsboardException, JsonProcessingException {
+        //网关共享属性version
+        if(device.getAdditionalInfo() != null && device.getAdditionalInfo().get(GATEWAY).asBoolean()){
+            String json = "{\"version\":\"0.0.1\"}";
+            JsonNode request = new ObjectMapper().readTree(json);
+            telemetryController.saveEntityAttributesV1(DEVICE,device.getId().getId().toString(),SHARED_SCOPE,request);
+        }
+    }
+
 
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/device/{deviceId}", method = RequestMethod.DELETE)
@@ -350,36 +415,6 @@ public class DeviceController extends BaseController {
             } else {
                 return checkNotNull(deviceService.findDeviceInfosByTenantId(tenantId, pageLink));
             }
-        } catch (Exception e) {
-            throw handleException(e);
-        }
-    }
-
-    @ApiOperation("平台设备列表查询（重写原来的列表查询）")
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query"),
-            @ApiImplicitParam(name = "sortProperty",value = "排序字段",dataType = "string",paramType = "query",required = true),
-            @ApiImplicitParam(name = "sortOrder",value = "排序方式（DESC/ASC）",dataType = "string",paramType = "query")})
-    @ResponseBody
-    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize,@RequestParam int page,DeviceQry deviceQry) throws ThingsboardException {
-        try {
-            PageData<DeviceInfo> resultPage = new PageData<>();
-            List<DeviceInfo> resultDevices = new ArrayList<>();
-            TenantId tenantId = getCurrentUser().getTenantId();
-            PageLink pageLink = createPageLink(pageSize, page, deviceQry.getSearchText(), deviceQry.getSortProperty(), deviceQry.getSortOrder());
-            Device device = deviceQry.toDevice();
-            device.setTenantId(tenantId);
-            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
-            List<Device> deviceList = menuPageData.getData();
-            if(!CollectionUtils.isEmpty(deviceList)){
-                deviceList.forEach(i->{
-                    resultDevices.add(new DeviceInfo(i));
-                });
-            }
-            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
-            return resultPage;
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -806,6 +841,34 @@ public class DeviceController extends BaseController {
     /*******************************************新增业务接口*******************************************/
     /*******************************************新增业务接口*******************************************/
 
+
+    @ApiOperation("平台设备列表查询（重写平台原来的列表查询）")
+    @RequestMapping(value = "/tenant/deviceInfoList", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ApiImplicitParam(name = "deviceQry",value = "多条件入参",dataType = "DeviceQry",paramType = "query")
+    @ResponseBody
+    public PageData<DeviceInfo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page, DeviceListQry deviceListQry) throws ThingsboardException {
+        try {
+            PageData<DeviceInfo> resultPage = new PageData<>();
+            List<DeviceInfo> resultDevices = new ArrayList<>();
+            TenantId tenantId = getCurrentUser().getTenantId();
+            PageLink pageLink = createPageLink(pageSize, page, deviceListQry.getSearchText(), deviceListQry.getSortProperty(), deviceListQry.getSortOrder());
+            Device device = deviceListQry.toDevice();
+            device.setTenantId(tenantId);
+            //查询设备
+            PageData<Device> menuPageData = deviceService.getTenantDeviceInfoList(device, pageLink);
+            List<Device> deviceList = menuPageData.getData();
+            if(!CollectionUtils.isEmpty(deviceList)){
+                deviceList.forEach(i->{
+                    resultDevices.add(new DeviceInfo(i));
+                });
+            }
+            resultPage = new PageData<>(resultDevices,menuPageData.getTotalPages(),menuPageData.getTotalElements(),menuPageData.hasNext());
+            return resultPage;
+        } catch (Exception e) {
+            throw handleException(e);
+        }
+    }
+
     /**
      * 新增/更新设备
      * @param addDeviceDto
@@ -816,7 +879,7 @@ public class DeviceController extends BaseController {
     @ApiImplicitParam(name = "addDeviceDto",value = "入参实体",dataType = "AddDeviceDto",paramType="body")
     @RequestMapping(value = "/saveOrUpdDevice", method = RequestMethod.POST)
     @ResponseBody
-    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto,@RequestParam(name = "accessToken", required = false)String accessToken)throws ThingsboardException {
+    public DeviceVo saveOrUpdDevice(@RequestBody AddDeviceDto addDeviceDto)throws ThingsboardException {
         try {
             checkNotNull(addDeviceDto);
             boolean created = addDeviceDto.getId() == null;
@@ -824,22 +887,36 @@ public class DeviceController extends BaseController {
             device.setTenantId(getCurrentUser().getTenantId());
             Device oldDevice = null;
             String saveType = null;
+            //TransportMqttClient.TYPE yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_ADD;
             if (!created) {
                 oldDevice = checkDeviceId(device.getId(), Operation.WRITE);
                 saveType = SAVE_TYPE_ADD_UPDATE;
+                //yunMqttTopic = TransportMqttClient.TYPE.POST_DEVICE_UPDATE;
             } else {
                 checkEntity(null, device, Resource.DEVICE);
                 saveType = SAVE_TYPE_ADD;
             }
-            //生成设备凭证
+            //保存设备，生成设备凭证
             Device savedDevice = checkNotNull(deviceService.saveDeviceWithAccessToken(device, null));
+            //设备配置
             tbClusterService.onDeviceUpdated(savedDevice, oldDevice);
             logEntityAction(savedDevice.getId(), savedDevice,
                     savedDevice.getCustomerId(),
                     created ? ActionType.ADDED : ActionType.UPDATED, null);
             //保存或修改设备构成
             deviceService.saveOrUpdDeviceComponentList(device,savedDevice.getId().getId(),saveType);
-            return new DeviceVo(device);
+            if(savedDevice.getProductionLineId() != null){
+                //建立实体关系
+                deviceService.createRelationDeviceFromProductionLine(savedDevice);
+            }
+            //云云对接,过滤网关
+            /*if(addDeviceDto.getAdditionalInfo() != null && addDeviceDto.getAdditionalInfo().get(GATEWAY) != null && !addDeviceDto.getAdditionalInfo().get(GATEWAY).booleanValue()){
+                transportService.publishDevice(device.getTenantId(),savedDevice.getId(), yunMqttTopic);
+            }*/
+            savedDevice.setFactoryName(addDeviceDto.getFactoryName());
+            savedDevice.setWorkshopName(addDeviceDto.getWorkshopName());
+            savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());
+            return new DeviceVo(savedDevice);
         } catch (Exception e) {
             throw handleException(e);
         }
@@ -909,6 +986,16 @@ public class DeviceController extends BaseController {
                 //查询设备字典
                 DictDeviceVO dictDeviceVO = dictDeviceService.getDictDeviceDetail(resultDeviceVo.getDictDeviceId().toString(),getCurrentUser().getTenantId());
                 resultDeviceVo.setDictDeviceVO(dictDeviceVO);
+                //如果设备picture、icon、comment为空，则使用数据字典的。
+                if(StringUtils.isEmpty(resultDeviceVo.getPicture())){
+                    resultDeviceVo.setPicture(dictDeviceVO.getPicture());
+                }
+                if(StringUtils.isEmpty(resultDeviceVo.getIcon())){
+                    resultDeviceVo.setIcon(dictDeviceVO.getIcon());
+                }
+                if(StringUtils.isEmpty(resultDeviceVo.getComment())){
+                    resultDeviceVo.setComment(dictDeviceVO.getComment());
+                }
             }
             return resultDeviceVo;
         } catch (Exception e) {
@@ -927,8 +1014,8 @@ public class DeviceController extends BaseController {
             @ApiImplicitParam(name = "page", value = "起始页默认0开始"),
     })
    @RequestMapping(value = "app/device/queryAllByNameLike", params = {"pageSize", "page"}, method = RequestMethod.GET)
-   public  PageData<DeviceDataVo>  queryAllByNameLike(@RequestParam("factoryId") UUID factoryId,
-                                                      @RequestParam("name") String  name,
+   public  PageData<DeviceDataVo>  queryAllByNameLike(@RequestParam(value = "factoryId",required = false) UUID factoryId,
+                                                      @RequestParam(value = "name",required = false) String  name,
                                                       @RequestParam int pageSize,
                                                       @RequestParam int page,
                                                       @RequestParam(required = false) String textSearch,
@@ -936,7 +1023,15 @@ public class DeviceController extends BaseController {
                                                       @RequestParam(required = false) String sortOrder  )
     {
         try {
-            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            if(StringUtils.isEmpty(sortProperty))
+            {
+                sortProperty="createdTime";
+                sortOrder="";
+            }
+            Field field=  ReflectionUtils.getAccessibleField(new DeviceEntity(),sortProperty);
+            Column annotation = field.getAnnotation(Column.class);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, annotation.name(),sortOrder);
+
           return   deviceService.queryAllByNameLike(factoryId,name,pageLink);
 
         } catch (ThingsboardException e) {
@@ -944,6 +1039,106 @@ public class DeviceController extends BaseController {
             throw  new CustomException("501","获取当前数据异常");
         }
 
+    }
+
+    @ApiOperation("自定义条件查询设备列表")
+    @ApiImplicitParam(name = "deviceQry",value = "入参实体",dataType = "DeviceQry",paramType="body")
+    @RequestMapping(value = "/findDeviceListByCdn", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
+        List<DeviceVo> result = new ArrayList<>();
+        deviceQry.setTenantId(getCurrentUser().getTenantId().getId());
+        List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice());
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            deviceListByCdn.forEach(i->{
+                result.add(new DeviceVo(i));
+            });
+        }
+        return result;
+    }
+
+    @ApiOperation("查询设备字典下发的设备列表")
+    @ApiImplicitParam(name = "deviceQry" ,value = "入参实体",dataType = "DeviceIssueQry",paramType="query")
+    @RequestMapping(value = "/findDeviceIssueListByCdn", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DeviceIssueVo> findDeviceIssueListByCdn(DeviceIssueQry deviceQry) throws ThingsboardException{
+        List<DeviceIssueVo> result = new ArrayList<>();
+        Device device = deviceQry.toDevice();
+        device.setTenantId(new TenantId(getCurrentUser().getTenantId().getId()));
+        List<Device> deviceListByCdn = deviceService.findDeviceIssueListByCdn(device);
+        if(!CollectionUtils.isEmpty(deviceListByCdn)){
+            deviceListByCdn.forEach(i->{
+                result.add(new DeviceIssueVo(i));
+            });
+        }
+        return result;
+
+    }
+
+
+    @ApiOperation("设备配置下发")
+    @ApiImplicitParam(name = "deviceIssueDto" ,value = "入参实体",dataType = "DeviceIssueDto",paramType="body")
+    @RequestMapping(value = "/deviceIssue", method = RequestMethod.PUT)
+    @ResponseBody
+    public String deviceIssue(@RequestBody DeviceIssueDto deviceIssueDto) throws ThingsboardException, ExecutionException, InterruptedException {
+        log.info("/deviceIssue设备字典下发"+ new Gson().toJson(deviceIssueDto));
+        //下发入参
+        Map mapIssue = new HashMap();
+        //设备信息
+        List listIssueDevice = new ArrayList();
+        //分组
+        Map<String,List<Map<String,String>>> groupMap = new HashMap<>();
+
+        mapIssue.put("DEVICE",listIssueDevice);
+        mapIssue.put("DRIVER_CONFIG",groupMap);
+
+        if(!CollectionUtils.isEmpty(deviceIssueDto.getDriverConfigList())){
+            //协议类型
+            mapIssue.put("PROTOCOL_TYPE",deviceIssueDto.getType());
+            //驱动版本号
+            mapIssue.put("DRIVER_VERSION",deviceIssueDto.getDriverVersion());
+            for (DeviceIssueDto.DriveConig driveConig : deviceIssueDto.getDriverConfigList()){
+                String codeByDesc = ReadWriteEnum.getCodeByDesc(driveConig.getReadWrite());
+                //校验
+                if(StringUtils.isEmpty(codeByDesc)){
+                    throw new ThingsboardException("读写方向的值不符合规范！",ThingsboardErrorCode.FAIL_VIOLATION);
+                }else {
+                    driveConig.setReadWrite(codeByDesc);
+                }
+                //点位(点位详细信息的集合，一条就是一个点位)
+                List<Map<String,String>> pointList = new ArrayList<>();
+                //点位详细信息
+                Map<String,String> map = driveConig.savePointMap();
+                pointList.add(map);
+                //保存点位分组
+                if(StringUtils.isNotEmpty(driveConig.getCategory())){
+                    if(groupMap.get(driveConig.getCategory()) != null){
+                        //相同类型的点位，归到同一个分组内
+                        pointList.addAll(groupMap.get(driveConig.getCategory()));
+                    }
+                    groupMap.put(driveConig.getCategory(),pointList);
+                }else {
+                    groupMap.put("custom",pointList);
+                }
+            }
+            //设备信息
+            if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
+                listIssueDevice.addAll(deviceIssueDto.getDeviceList().stream().map(s->s.getDeviceName()).collect(Collectors.toList()));
+            }
+            mapIssue.put("DEVICE",listIssueDevice);
+            mapIssue.put("DRIVER_CONFIG",groupMap);
+            //下发网关
+            if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
+                List<String> gatewayIds = deviceIssueDto.getDeviceList().stream().distinct().map(e -> e.getGatewayId()).collect(Collectors.toList());
+                if(!CollectionUtils.isEmpty(gatewayIds)){
+                    Map publishRedisMap = new HashMap<>();
+                    publishRedisMap.put("body",mapIssue);
+                    publishRedisMap.put("topic",gatewayIds);
+                    pub.sendMessage("dictIssue", JSONObjectUtils.toJSONString(publishRedisMap));
+                }
+            }
+        }
+        return mapIssue != null ?JSONObjectUtils.toJSONString(mapIssue) : null;
     }
 
 

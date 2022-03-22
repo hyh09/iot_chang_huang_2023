@@ -200,7 +200,8 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     }
 
     public AbstractTenantMenuEntity(Menu menu,int level,UUID createdUser,UUID parentId) {
-        this.id = Uuids.timeBased();
+        if (this.id == null)
+            this.id = Uuids.timeBased();
         this.tenantId = menu.getTenantId();
         this.sysMenuId = menu.getId();
         this.region = menu.getRegion();

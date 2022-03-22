@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.DeviceProfile;
@@ -15,7 +16,6 @@ import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
-import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DeviceProfileVO;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
@@ -23,7 +23,6 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
-import java.util.List;
 import java.util.Objects;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -47,15 +46,6 @@ public class AlarmRuleController extends BaseController {
     DeviceMonitorService deviceMonitorService;
 
     /**
-     * 获得未配置设备配置的设备字典列表，默认按创建时间倒排
-     */
-    @ApiOperation(value = "获得未配置设备配置的设备字典列表")
-    @GetMapping(value = "/dictDevice/unused")
-    public List<DictDevice> listDictDeviceUnused() throws ThingsboardException {
-        return this.dictDeviceService.listDictDeviceUnused(getTenantId());
-    }
-
-    /**
      * 获得设备配置列表
      *
      * @see DeviceProfileController#getDeviceProfiles
@@ -75,7 +65,7 @@ public class AlarmRuleController extends BaseController {
                                                      @RequestParam(required = false, defaultValue = "desc") String sortOrder) throws ThingsboardException {
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
-        return deviceMonitorService.listDeviceProfile(getTenantId(), name, pageLink);
+        return deviceMonitorService.listPageDeviceProfiles(getTenantId(), name, pageLink);
     }
 
     /**
@@ -96,8 +86,6 @@ public class AlarmRuleController extends BaseController {
 
     /**
      * 新增或修改设备配置,包括报警规则
-     * <p>
-     * 修改项：增加了设备字典的保存
      *
      * @param deviceProfileVO 设备配置
      * @see DeviceProfileController#saveDeviceProfile(DeviceProfile)
@@ -106,7 +94,8 @@ public class AlarmRuleController extends BaseController {
     @PostMapping(value = "/device/profile")
     @SuppressWarnings("Duplicates")
     public DeviceProfileVO saveDeviceProfile(@RequestBody DeviceProfileVO deviceProfileVO) throws ThingsboardException {
-        DeviceProfile deviceProfile = deviceProfileVO.getDeviceProfile();
+        DeviceProfile deviceProfile = new DeviceProfile();
+        BeanUtils.copyProperties(deviceProfileVO, deviceProfile);
         try {
             boolean created = deviceProfile.getId() == null;
             deviceProfile.setTenantId(getTenantId());
@@ -138,9 +127,6 @@ public class AlarmRuleController extends BaseController {
 
             otaPackageStateService.update(savedDeviceProfile, isFirmwareChanged, isSoftwareChanged);
 
-            // 增加设备字典的绑定
-            this.deviceMonitorService.bindDictDeviceToDeviceProfile(deviceProfileVO.getDictDeviceList(), savedDeviceProfile.getId());
-
             sendEntityNotificationMsg(getTenantId(), savedDeviceProfile.getId(),
                     deviceProfile.getId() == null ? EdgeEventActionType.ADDED : EdgeEventActionType.UPDATED);
             return deviceProfileVO;
@@ -153,8 +139,6 @@ public class AlarmRuleController extends BaseController {
 
     /**
      * 删除设备配置
-     * <p>
-     * 修改项：移除绑定的设备字典
      *
      * @param id 设备配置id
      * @see DeviceProfileController#deleteDeviceProfile(String)
@@ -172,9 +156,6 @@ public class AlarmRuleController extends BaseController {
 
             tbClusterService.onDeviceProfileDelete(deviceProfile, null);
             tbClusterService.broadcastEntityStateChangeEvent(deviceProfile.getTenantId(), deviceProfile.getId(), ComponentLifecycleEvent.DELETED);
-
-            // 删除绑定的设备字典
-            this.deviceMonitorService.deleteBindDictDevice(deviceProfileId);
 
             logEntityAction(deviceProfileId, deviceProfile,
                     null,

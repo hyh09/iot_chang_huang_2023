@@ -33,9 +33,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
 import org.thingsboard.server.common.msg.tools.TbRateLimitsException;
 import org.thingsboard.server.service.security.exception.AuthMethodNotSupportedException;
 import org.thingsboard.server.service.security.exception.JwtExpiredTokenException;
+import org.thingsboard.server.service.security.exception.UserDoesNotExistException;
 import org.thingsboard.server.service.security.exception.UserPasswordExpiredException;
 
 import javax.servlet.ServletException;
@@ -156,13 +158,16 @@ public class ThingsboardErrorResponseHandler extends ResponseEntityExceptionHand
     private void handleAuthenticationException(AuthenticationException authenticationException, HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         if (authenticationException instanceof BadCredentialsException || authenticationException instanceof UsernameNotFoundException) {
-            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of("Invalid username or password", ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
-        } else if (authenticationException instanceof DisabledException) {
-            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of("User account is not active", ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("9"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+        }else  if(authenticationException instanceof UserDoesNotExistException){
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("12"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+        }
+        else if (authenticationException instanceof DisabledException) {
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("10"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         } else if (authenticationException instanceof LockedException) {
-            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of("User account is locked due to security policy", ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("8"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         } else if (authenticationException instanceof JwtExpiredTokenException) {
-            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of("Token has expired", ThingsboardErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("7"), ThingsboardErrorCode.JWT_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED));
         } else if (authenticationException instanceof AuthMethodNotSupportedException) {
             mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(authenticationException.getMessage(), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         } else if (authenticationException instanceof UserPasswordExpiredException) {
@@ -170,7 +175,7 @@ public class ThingsboardErrorResponseHandler extends ResponseEntityExceptionHand
             String resetToken = expiredException.getResetToken();
             mapper.writeValue(response.getWriter(), ThingsboardCredentialsExpiredResponse.of(expiredException.getMessage(), resetToken));
         } else {
-            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of("Authentication failed", ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
+            mapper.writeValue(response.getWriter(), ThingsboardErrorResponse.of(ErrorMessageEnums.getLanguage("6"), ThingsboardErrorCode.AUTHENTICATION, HttpStatus.UNAUTHORIZED));
         }
     }
 

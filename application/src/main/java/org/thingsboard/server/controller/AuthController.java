@@ -18,6 +18,7 @@ package org.thingsboard.server.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -157,6 +158,7 @@ public class AuthController extends BaseController {
         return new ResponseEntity<>(headers, responseStatus);
     }
 
+    @ApiOperation(value = "邮箱重置密码")
     @RequestMapping(value = "/noauth/resetPasswordByEmail", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
     public void requestResetPasswordByEmail(
@@ -221,7 +223,7 @@ public class AuthController extends BaseController {
 
             if (sendActivationMail) {
                 try {
-                    mailService.sendAccountActivatedEmail(loginUrl, email);
+                    mailService.sendAccountActivatedEmail(loginUrl, email,user.getAdditionalInfo());
                 } catch (Exception e) {
                     log.info("Unable to send account activation email [{}]", e.getMessage());
                 }
@@ -255,7 +257,7 @@ public class AuthController extends BaseController {
             if (userCredentials != null) {
                 systemSecurityService.validatePassword(TenantId.SYS_TENANT_ID, password, userCredentials);
                 if (passwordEncoder.matches(password, userCredentials.getPassword())) {
-                    throw new ThingsboardException("New password should be different from existing!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+                    throw new ThingsboardException(" 新密码应与原有密码不同！ ", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
                 }
                 String encodedPassword = passwordEncoder.encode(password);
                 userCredentials.setPassword(encodedPassword);
@@ -267,7 +269,7 @@ public class AuthController extends BaseController {
                 String baseUrl = systemSecurityService.getBaseUrl(user.getTenantId(), user.getCustomerId(), request);
                 String loginUrl = String.format("%s/login", baseUrl);
                 String email = user.getEmail();
-                mailService.sendPasswordWasResetEmail(loginUrl, email);
+                mailService.sendPasswordWasResetEmail(loginUrl, email,user.getAdditionalInfo());
 
                 eventPublisher.publishEvent(new UserAuthDataChangedEvent(securityUser.getId()));
                 JwtToken accessToken = tokenFactory.createAccessJwtToken(securityUser);

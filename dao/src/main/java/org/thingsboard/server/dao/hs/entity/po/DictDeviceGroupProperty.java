@@ -50,4 +50,9 @@ public class DictDeviceGroupProperty extends BasePO {
      * 排序
      */
     private Integer sort;
+
+    /**
+     * 数据字典Id
+     */
+    private String dictDataId;
 }

@@ -20,7 +20,7 @@ metadata:
   name: tb-js-executor
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-js-executor
@@ -58,7 +58,7 @@ metadata:
   name: tb-mqtt-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-mqtt-transport
@@ -100,6 +100,8 @@ spec:
           value: "10000"
         - name: TB_KAFKA_SERVERS
           value: "tb-kafka:9092"
+        - name: REDIS_HOST
+          value: "tb-redis"
         volumeMounts:
           - mountPath: /config
             name: tb-mqtt-transport-config
@@ -120,12 +122,14 @@ metadata:
   name: tb-mqtt-transport
   namespace: hsyl-iot
 spec:
-  type: LoadBalancer
+#  type: LoadBalancer
+  type: NodePort
   selector:
     app: tb-mqtt-transport
   ports:
   - port: 1883
     targetPort: 1883
+    nodePort: 30997
     name: mqtt
 ---
 apiVersion: apps/v1
@@ -134,7 +138,7 @@ metadata:
   name: tb-http-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-http-transport
@@ -209,7 +213,7 @@ metadata:
   name: tb-coap-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-coap-transport
@@ -263,7 +267,8 @@ metadata:
   name: tb-coap-transport
   namespace: hsyl-iot
 spec:
-  type: LoadBalancer
+#  type: LoadBalancer
+  type: NodePort
   selector:
     app: tb-coap-transport
   ports:
@@ -277,7 +282,7 @@ metadata:
   name: tb-lwm2m-transport
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-lwm2m-transport
@@ -331,7 +336,8 @@ metadata:
   name: tb-lwm2m-transport
   namespace: hsyl-iot
 spec:
-  type: LoadBalancer
+#  type: LoadBalancer
+  type: NodePort
   selector:
     app: tb-lwm2m-transport
   ports:
@@ -345,7 +351,7 @@ metadata:
   name: tb-web-ui
   namespace: hsyl-iot
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: tb-web-ui

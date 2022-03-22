@@ -46,6 +46,9 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
   appSysSearch: string = '';
   appTenantSearch: string = '';
 
+  pcTenantOriginMenuIds: string[] = [];
+  appTenantOriginMenuIds: string[] = [];
+
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
@@ -59,6 +62,8 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
   }
 
   ngOnInit() {
+    this.pcTenantOriginMenuIds = [];
+    this.appTenantOriginMenuIds = [];
     this.getMenuList(MenuType.PC);
     this.getMenuList(MenuType.APP);
   }
@@ -82,14 +87,18 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     });
     this.tenantMenuService.getTenantMenuList(menuType, this.tenantInfo.id.id).subscribe(menus => {
       if (menus) {
+        const sysMenuIds: string[] = [];
         menus.forEach(menu => {
           menu.title = menuType === MenuType.PC ? (menu.langKey ? this.translate.instant(menu.langKey) : menu.tenantMenuName) : menu.tenantMenuName;
           menu.key = menu.id;
           menu.selectable = false;
+          sysMenuIds.push(menu.sysMenuId);
         });
         if (menuType === MenuType.PC) {
+          this.pcTenantOriginMenuIds = sysMenuIds;
           this.pcTenantMenus = this.utils.formatTree(menus);
         } else {
+          this.appTenantOriginMenuIds = sysMenuIds;
           this.appTenantMenus = this.utils.formatTree(menus);
         }
       }
@@ -126,6 +135,17 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
       const nodeOptions = this.utils.deepClone(node.origin);
       const checkedNodeOptions = this.utils.expandTreeNodeOptions(nodeOptions).filter(options => (checkedNodeIds.includes(options.key)));
       checkedNodeOptions.forEach(options => {
+        if (menuType === MenuType.PC) {
+          options.isNew = !this.pcTenantOriginMenuIds.includes(options.id);
+        } else {
+          options.isNew = !this.appTenantOriginMenuIds.includes(options.id);
+        }
+        if (options.tenantMenuId) {
+          options.id = options.tenantMenuId;
+        }
+        if (options.tenantMenuParentId) {
+          options.parentId = options.tenantMenuParentId;
+        }
         options.checked = false;
         options.disabled = false;
         options.sysMenuId = options.id;
@@ -174,6 +194,10 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
         const sysNode = (this[sysTree] as NzTreeComponent).getTreeNodeByKey(_node.origin.sysMenuId);
         if (sysNode) {
           sysNode.isDisabled = false;
+          sysNode.origin.tenantMenuId = _node.key;
+          if (_node.parentNode) {
+            sysNode.origin.tenantMenuParentId = _node.parentNode.key;
+          }
         }
       })
     });

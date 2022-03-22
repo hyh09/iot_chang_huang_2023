@@ -26,7 +26,7 @@ public interface DictDataService {
      * @param pageLink          分页条件
      * @return 数据字典列表
      */
-    PageData<DictData> listDictDataByQuery(TenantId tenantId, DictDataListQuery dictDataListQuery, PageLink pageLink);
+    PageData<DictData> listPageDictDataByQuery(TenantId tenantId, DictDataListQuery dictDataListQuery, PageLink pageLink);
 
     /**
      * 更新或保存数据字典
@@ -34,7 +34,7 @@ public interface DictDataService {
      * @param tenantId      租户Id
      * @param dictDataQuery 数据字典参数
      */
-    DictDataQuery updateOrSaveDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException;
+    DictDataQuery saveOrUpdateDictData(DictDataQuery dictDataQuery, TenantId tenantId) throws ThingsboardException;
 
     /**
      * 获得数据字典详情
@@ -66,14 +66,22 @@ public interface DictDataService {
      * @param tenantId 租户Id
      * @return 全部数据字典
      */
-    List<DictData> listAllDictData(TenantId tenantId);
+    List<DictData> listDictData(TenantId tenantId);
+
+    /**
+     * 查询全部数据字典
+     *
+     * @param tenantId 租户Id
+     * @return 全部数据字典map
+     */
+    Map<String, DictData> getIdToDictDataMap(TenantId tenantId);
 
     /**
      * 按keys查询全部数据字典
      *
      * @param tenantId 租户Id
-     * @param keys key列表
+     * @param keys     key列表
      * @return 数据字典map
      */
-    Map<String, DictData> listDictDataByKeys(TenantId tenantId, List<String> keys);
+    Map<String, DictData> getKeyToDictDataMap(TenantId tenantId, List<String> keys);
 }

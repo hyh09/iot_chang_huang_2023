@@ -194,9 +194,19 @@ export class DashboardService {
    * @param config
    */
   public getTenantUIInfo(config?: RequestConfig): Observable<UIInfo> {
-    return this.http.get<UIInfo>(`/api/tenant/ui/info`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<UIInfo>(`/api/tenant/ui/info`, defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+      // 缓存网站标题和网站图标到本地
+      localStorage.setItem('hs_applicationTitle', res.applicationTitle || '');
+      localStorage.setItem('hs_iconImageUrl', res.iconImageUrl || '');
+      return res;
+    }));
   }
   public saveTenantUIInfo(uiInfo: UIInfo, config?: RequestConfig) {
-    return this.http.post<UIInfo>('/api/tenant/ui/info', uiInfo, defaultHttpOptionsFromConfig(config));
+    return this.http.post<UIInfo>('/api/tenant/ui/info', uiInfo, defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+      // 缓存网站标题和网站图标到本地
+      localStorage.setItem('hs_applicationTitle', res.applicationTitle || '');
+      localStorage.setItem('hs_iconImageUrl', res.iconImageUrl || '');
+      return res;
+    }));;
   }
 }

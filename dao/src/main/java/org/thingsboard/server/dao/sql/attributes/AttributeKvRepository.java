@@ -67,6 +67,18 @@ public interface AttributeKvRepository extends CrudRepository<AttributeKvEntity,
                                                         @Param("entityIds") List<UUID> entityIds,
                                                         @Param("attributeKey") String key);
 
+    @Query ("SELECT a FROM AttributeKvEntity a WHERE a.id.entityType = :entityType " +
+            "AND a.id.entityId = :entityId " +
+            "AND a.id.attributeKey = :attributeKey ")
+    AttributeKvEntity findOneKeyByEntityId(@Param("entityType") EntityType entityType,
+                                                        @Param("entityId") UUID entityId,
+                                                        @Param("attributeKey") String key);
+
+    @Transactional
+    @Modifying
+    @Query(value = "update attribute_kv set bool_v = :value where entity_id = :entityId and attribute_key = 'active' ", nativeQuery = true)
+    void updateActiveByEntityId(@Param("entityId") UUID entityId, @Param("value") boolean value);
+
     /**
      * 根据设备标识以及属性类型查询属性
      * @param entityIds

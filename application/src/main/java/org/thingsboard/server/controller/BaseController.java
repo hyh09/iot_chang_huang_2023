@@ -16,6 +16,7 @@
 package org.thingsboard.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
@@ -56,8 +57,11 @@ import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleChainType;
 import org.thingsboard.server.common.data.rule.RuleNode;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
+import org.thingsboard.server.common.data.vo.enums.ErrorMessageEnums;
+import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
 import org.thingsboard.server.common.data.widget.WidgetTypeDetails;
 import org.thingsboard.server.common.data.widget.WidgetsBundle;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.audit.AuditLogService;
@@ -72,24 +76,29 @@ import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.factory.FactoryService;
+import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
 import org.thingsboard.server.dao.oauth2.OAuth2Service;
 import org.thingsboard.server.dao.ota.OtaPackageService;
+import org.thingsboard.server.dao.productioncalender.ProductionCalenderService;
 import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
-import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
-import org.thingsboard.server.dao.sql.role.service.TenantMenuRoleService;
-import org.thingsboard.server.dao.sql.role.service.UserMenuRoleService;
-import org.thingsboard.server.dao.sql.role.service.CheckSvc;
+import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
+import org.thingsboard.server.dao.sql.role.service.*;
+import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
+import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
+import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
+import org.thingsboard.server.dao.deviceoeeeveryhour.DeviceOeeEveryHourService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
+import org.thingsboard.server.dao.tool.UserLanguageSvc;
 import org.thingsboard.server.dao.user.UserService;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
@@ -115,13 +124,14 @@ import org.thingsboard.server.service.security.permission.Resource;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.telemetry.AlarmSubscriptionService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
-import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
+
+//import org.thingsboard.server.service.userrole.RoleMenuSvc;
 
 @Slf4j
 @TbCoreComponent
@@ -275,6 +285,24 @@ public abstract class BaseController {
     @Autowired
     protected DictDeviceService dictDeviceService;
 
+    @Autowired
+    protected DefaultTransportService transportService;
+
+    @Autowired
+    protected EnergyChartService energyChartService;
+
+    @Autowired
+    protected ProductionCalenderService productionCalenderService;
+
+    @Autowired
+    protected DeviceOeeEveryHourService deviceOeeEveryHourService;
+
+/*
+
+    @Autowired
+    protected MqttClient mqttClient;
+*/
+
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
     private boolean logControllerErrorStackTrace;
@@ -287,6 +315,13 @@ public abstract class BaseController {
     @Autowired protected UserMenuRoleService userMenuRoleService;
     @Autowired protected TenantMenuRoleService tenantMenuRoleService;
     @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+    @Autowired  protected TenantSysRoleService tenantSysRoleService;
+    @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired  protected UserLanguageSvc userLanguageSvc;
+    @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
+    @Autowired  protected EffciencyAnalysisRepository effciencyAnalysisRepository;
+
 
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {
@@ -345,8 +380,17 @@ public abstract class BaseController {
 
         }
     }
+    void checkParameterChinees(String name, String param) throws ThingsboardException {
+        if (StringUtils.isEmpty(param)) {
+            throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
+        }
+    }
+    void checkParameterChinees(String name, Object param) throws ThingsboardException {
+        if(param == null || StringUtils.isBlank(param.toString())){
+            throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
 
-
+        }
+    }
 
     void checkArrayParameter(String name, String[] params) throws ThingsboardException {
         if (params == null || params.length == 0) {
@@ -451,7 +495,7 @@ public abstract class BaseController {
             validateId(userId, "Incorrect userId " + userId);
             User user = userService.findUserById(getCurrentUser().getTenantId(), userId);
             checkNotNull(user);
-            accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
+//            accessControlService.checkPermission(getCurrentUser(), Resource.USER, operation, userId, user);
             return user;
         } catch (Exception e) {
             throw handleException(e, false);
@@ -597,6 +641,12 @@ public abstract class BaseController {
                     return;
                 case OTA_PACKAGE:
                     checkOtaPackageId(new OtaPackageId(entityId.getId()), operation);
+                    return;
+                case FACTORY:  //忽略权限校验
+                    return;
+                case WORKSHOP://忽略权限校验
+                    return;
+                case PRODUCTION_LINE://忽略权限校验
                     return;
                 default:
                     throw new IllegalArgumentException("Unsupported entity type: " + entityId.getEntityType());
@@ -1009,6 +1059,17 @@ public abstract class BaseController {
     }
 
     /**
+     * 获得当前登录用户的语言环境，默认zh_cn
+     */
+    public String getUserLanguage() {
+        try {
+            return Optional.ofNullable(getCurrentUser().getAdditionalInfo()).map(v -> v.get("lang")).map(JsonNode::asText).orElse("zh_cn");
+        } catch (Exception ignore) {
+        }
+        return "zh_cn";
+    }
+
+    /**
      * 校验同层级下系统菜单/按钮名称是否重复
      * @return
      */
@@ -1028,15 +1089,82 @@ public abstract class BaseController {
         List<Factory> byName = factoryService.findByName(name, this.getCurrentUser().getTenantId().getId());
         if(org.apache.commons.collections.CollectionUtils.isNotEmpty(byName)){
             if(id == null){
-                log.warn("名称重复");
-                throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                log.warn("工厂名称重复");
+                throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
             }else {
                 if(!byName.get(0).getId().toString().equals(id.toString())){
-                    log.warn("名称重复");
-                    throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
+                    log.warn("工厂名称重复");
+                    throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
                 }
             }
         }
+    }
+
+
+    /**
+     * 获取当前登录人的提示信息
+     * @param enums
+     * @return
+     * @throws ThingsboardException
+     */
+    public  String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
+         String message=   userLanguageSvc.getLanguageByUserLang(enums,getCurrentUser().getTenantId(),new UserId(getCurrentUser().getUuidId()));
+        return  message;
+    }
+
+    /***
+     * 设置参数
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public  void setParametersByUserLevel (Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()
+                || securityUser.getUserLevel() == UserLeveEnums.USER_SYSTEM_ADMIN.getCode()
+                || securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()
+        )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+            queryParam.put("userLevelIn",userLeve);
+        }
+    }
+
+
+    /***
+     * 设置参数 普通用户看不到
+     *   租户管理员创建的角色
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public  void setParametersByRoleLevel (Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+            queryParam.put("userLevelList",userLeve);
+        }
+    }
+
+    /***
+     * 设置参数 普通用户看不到
+     *   租户管理员创建的角色
+     * @param queryParam
+     * @throws ThingsboardException
+     */
+    public   List<Integer>  setParametersByRoleLevel () throws ThingsboardException {
+        SecurityUser  securityUser=   getCurrentUser();
+        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
+        {   //租户管理员：
+            List<Integer> userLeve= new ArrayList<>();
+            userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
+            userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
+           return  userLeve;
+        }
+        return  null;
     }
 
 }

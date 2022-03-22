@@ -46,10 +46,14 @@ export interface OrderDevice {
   deviceId?: string;
   deviceName?: string;
   enabled?: boolean;
+  intendedCapacity?: string;
+  actualCapacity?: string;
   intendedStartTime?: number;
   intendedEndTime?: number;
   actualStartTime?: number;
   actualEndTime?: number;
+  maintainStartTime?: number;
+  maintainEndTime?: number;
   capacities?: number;
 }
 

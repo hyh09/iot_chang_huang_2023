@@ -4,6 +4,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.thingsboard.server.dao.hs.dao.HsModelConstants;
+
+import javax.persistence.Column;
+import java.math.BigDecimal;
 
 /**
  * 设备字典
@@ -92,4 +96,22 @@ public class DictDevice extends BasePO {
      */
     @ApiModelProperty(value = "图片")
     private String picture;
+
+    /**
+     * 是否默认
+     */
+    @ApiModelProperty(value = "是否默认")
+    private Boolean isDefault;
+
+    /**
+     * 是否核心
+     */
+    @ApiModelProperty(value = "是否核心")
+    private Boolean isCore;
+
+    /**
+     * 额定产能
+     */
+    @ApiModelProperty(value = "额定产能")
+    private BigDecimal ratedCapacity;
 }

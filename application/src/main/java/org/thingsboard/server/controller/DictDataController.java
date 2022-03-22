@@ -1,6 +1,5 @@
 package org.thingsboard.server.controller;
 
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -8,20 +7,21 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.dao.hs.HSConstants;
-import org.thingsboard.server.dao.hs.entity.po.DictData;
-import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
-import org.thingsboard.server.dao.hs.entity.vo.DictDataResource;
-import org.thingsboard.server.dao.hs.entity.enums.DictDataDataTypeEnum;
-import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.HSConstants;
+import org.thingsboard.server.dao.hs.entity.enums.DictDataDataTypeEnum;
+import org.thingsboard.server.dao.hs.entity.po.DictData;
+import org.thingsboard.server.dao.hs.entity.vo.DictDataListQuery;
+import org.thingsboard.server.dao.hs.entity.vo.DictDataQuery;
+import org.thingsboard.server.dao.hs.entity.vo.DictDataResource;
 import org.thingsboard.server.dao.hs.service.DictDataService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
+import java.util.List;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -100,7 +100,7 @@ public class DictDataController extends BaseController {
         validatePageLink(pageLink);
 
         // 查询数据字典列表
-        return this.dictDataService.listDictDataByQuery(getTenantId(), dictDataListQuery, pageLink);
+        return this.dictDataService.listPageDictDataByQuery(getTenantId(), dictDataListQuery, pageLink);
     }
 
     /**
@@ -112,7 +112,8 @@ public class DictDataController extends BaseController {
     @PostMapping(value = "/dict/data")
     public DictDataQuery updateOrSaveDictData(@RequestBody @Valid DictDataQuery dictDataQuery) throws ThingsboardException {
         CommonUtil.checkCode(dictDataQuery.getCode(), HSConstants.CODE_PREFIX_DICT_DATA);
-        return this.dictDataService.updateOrSaveDictData(dictDataQuery, getTenantId());
+        CommonUtil.checkImageUpload(dictDataQuery);
+        return this.dictDataService.saveOrUpdateDictData(dictDataQuery, getTenantId());
     }
 
     /**
@@ -141,5 +142,14 @@ public class DictDataController extends BaseController {
     public void deleteDictData(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
         this.dictDataService.deleteDictDataById(id, getTenantId());
+    }
+
+    /**
+     * 【不分页】获得数据字典列表
+     */
+    @ApiOperation(value = "获得数据字典列表")
+    @GetMapping("/dict/data/all")
+    public List<DictData> listDictDataAll() throws ThingsboardException {
+        return this.dictDataService.listDictData(getTenantId());
     }
 }
