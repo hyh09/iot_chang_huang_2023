@@ -4,8 +4,8 @@ import { TenantUIActions, TenantUIActionTypes } from '@core/custom/tenant-ui.act
 import {environment as env} from '@env/environment.prod';
 
 export const initialState: TenantUIState = {
-  applicationTitle: localStorage.getItem('applicationTitle') || '环思物联',
-  iconImageUrl: localStorage.getItem('iconImageUrl') || null,
+  applicationTitle: localStorage.getItem('hs_applicationTitle') || '环思物联',
+  iconImageUrl: localStorage.getItem('hs_iconImageUrl') || null,
   logoImageUrl: null,
   logoImageHeight: null,
   platformMainColor: null,

@@ -307,6 +307,8 @@ export const inheritModeForDynamicValueSourceType = [
 export interface DynamicValue<T> {
   sourceType: DynamicValueSourceType;
   sourceAttribute: string;
+  perator: string;
+  value: string;
   inherit?: boolean;
 }
 
