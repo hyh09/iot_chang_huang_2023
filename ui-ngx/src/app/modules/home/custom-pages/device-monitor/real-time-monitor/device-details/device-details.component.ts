@@ -256,4 +256,17 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  getAssociatedPropLatestTime(associatedProp: AssociatedProp) {
+    if (!associatedProp) {
+      return '';
+    }
+    let time = associatedProp.createdTime || 0;
+    (associatedProp.properties || []).forEach(prop => {
+      if (prop.createdTime && prop.createdTime > time) {
+        time = prop.createdTime;
+      }
+    });
+    return time;
+  }
+
 }

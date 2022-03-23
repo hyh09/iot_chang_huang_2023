@@ -22,7 +22,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.dao.model.sql.TenantMenuEntity;
 
 import javax.transaction.Transactional;
@@ -84,6 +83,16 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
     void deletedByTenant(@Param("tenantId")UUID tenantId);
 
     /**
+     * s删除菜单下所有按钮
+     * @param parentId
+     * @param tenantId
+     */
+    @Modifying
+    @Transactional
+    @Query("delete from TenantMenuEntity t WHERE t.parentId = :parentId AND t.tenantId = :tenantId AND t.isButton = 'true'")
+    void delButtonByTenantMenuId(@Param("parentId")UUID parentId, @Param("tenantId")UUID tenantId);
+
+    /**
      * 根据系统菜单删除菜单
      * @param sysMenuId
      */
@@ -94,5 +103,14 @@ public interface TenantMenuRepository extends PagingAndSortingRepository<TenantM
 
     @Query("SELECT t FROM TenantMenuEntity t WHERE t.menuType = :menuType AND t.tenantId = :tenantId AND t.id in (:ids) ORDER BY  t.level, t.sort ASC")
     List<TenantMenuEntity> getTenantMenuListByIds(@Param("menuType")String menuType, @Param("tenantId")UUID tenantId, @Param("ids") List<UUID> ids);
+
+    /**
+     * 查询菜单下所有按钮
+     * @param tenantId
+     * @param parentId
+     * @return
+     */
+    @Query("SELECT t FROM TenantMenuEntity t WHERE t.isButton = 'true' AND t.tenantId = :tenantId AND t.parentId =:parentId")
+    List<TenantMenuEntity> getButtonByParentId(@Param("tenantId")UUID tenantId, @Param("parentId") UUID parentId);
 
 }

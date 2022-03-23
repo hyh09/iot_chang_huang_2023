@@ -188,6 +188,11 @@ public class ModelConstants {
      * 生产日历
      */
     public static final String PRODUCTION_CALENDAR_COLUMN_FAMILY_NAME = "hs_production_calendar";
+
+    /**
+     * 设备每小时OEE统计值
+     */
+    public static final String DEVICE_OEE_EVERY_HOUR_COLUMN_FAMILY_NAME = "hs_device_oee_every_hour";
     /**
      * Cassandra device constants.
      */

@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller;
 
+import com.github.xiaoymin.knife4j.annotations.ApiSort;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
@@ -71,6 +72,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 根据当前登录人获得工厂层级-通用
      */
+    @Deprecated
     @ApiOperation(value = "根据当前登录人获得工厂层级-通用")
     @GetMapping("/rtMonitor/factory/hierarchy/common")
     public FactoryHierarchyResult getFactoryHierarchyCommon() throws ThingsboardException {
@@ -98,6 +100,42 @@ public class RTMonitorController extends BaseController {
                 return Maps.newHashMap();
         }
         return this.clientService.getDeviceOnlineStatusMap(getTenantId(), factoryId);
+    }
+
+    /**
+     * 根据当前登录人查询所在工厂在线状态
+     */
+    @ApiOperation(value = "根据当前登录人查询所在工厂在线状态", notes = "默认查全部，传工厂Id则查单个工厂")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+    })
+    @GetMapping("/rtMonitor/factory/onlineStatus")
+    public Map<String, Boolean> getFactoryOnlineStatus(@RequestParam(value = "factoryId", required = false) UUID factoryId) throws ThingsboardException {
+        if (factoryId == null) {
+            var user = getCurrentUser();
+            if (CreatorTypeEnum.FACTORY_MANAGEMENT.getCode().equalsIgnoreCase(user.getType())) {
+                factoryId = user.getFactoryId();
+                if (factoryId == null)
+                    return Maps.newHashMap();
+            }
+        }
+        return this.clientService.getFactoryOnlineStatusMap(getTenantId(), factoryId);
+    }
+
+    /**
+     * 根据当前登录人查询所在工厂下的网关设备
+     */
+    @ApiOperation(value = "根据当前登录人查询所在工厂下的网关设备")
+    @GetMapping("/rtMonitor/factory/gateway/devices")
+    public List<FactoryGatewayDevicesResult> getFactoryGatewayDevicesResult() throws ThingsboardException {
+        var user = getCurrentUser();
+        UUID factoryId = null;
+        if (CreatorTypeEnum.FACTORY_MANAGEMENT.getCode().equalsIgnoreCase(user.getType())) {
+            factoryId = user.getFactoryId();
+            if (factoryId == null)
+                return Lists.newArrayList();
+        }
+        return this.clientService.listFactoryGatewayDevices(getTenantId(), factoryId);
     }
 
     /**

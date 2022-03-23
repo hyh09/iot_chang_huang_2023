@@ -2388,7 +2388,9 @@
       "numeric": "数字",
       "string": "字符串",
       "value-type": "值类型"
-    }
+    },
+    "inherit-owner": "从所属者继承",
+    "source-attribute-not-set": "如果源属性未设置"
   },
   "firmware": {
     "add": "添加固件",
@@ -3520,6 +3522,7 @@
     "little-endian-required": "小端在前必填",
     "send-driver-config-success": "配置下发成功",
     "factory-mng": "工厂管理",
+    "dashboard-bg": "看板背景",
     "prod-capactity-settings": "产量运算配置",
     "in-calculation": "参与产量运算",
     "delete-factory": "删除工厂",

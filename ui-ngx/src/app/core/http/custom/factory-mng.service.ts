@@ -163,9 +163,20 @@ export class FactoryMngService {
     return this.http.get<string[]>(`/api/factory/getEntityAttributeList?entity=${entity}`, defaultHttpOptionsFromConfig(config));
   }
 
-  // 根据当前登录人获取全部设备（含网关）的在线状态
+  // 根据当前登录人获取全部设备（不含网关）的在线状态
   public getOnlineStatus(config?: RequestConfig): Observable<{[id: string]: boolean}> {
     return this.http.get<{[id: string]: boolean}>(`/api/deviceMonitor/rtMonitor/device/onlineStatus/all`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 根据当前登录人获取工厂网关的整体在线状态
+  public getFactoryOnlineStatus(factoryId: string = '', config?: RequestConfig): Observable<{[id: string]: boolean}> {
+    return this.http.get<{[id: string]: boolean}>(`/api/deviceMonitor/rtMonitor/factory/onlineStatus?factoryId=${factoryId}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 根据当前登录人获取所有工厂下的网关id
+  public getFactoryGatewayIds(config?: RequestConfig): Observable<{factoryId: string; gatewayDeviceIds: string[]}[]> {
+    return this.http.get<{factoryId: string; gatewayDeviceIds: string[]}[]>(
+      `/api/deviceMonitor/rtMonitor/factory/gateway/devices`, defaultHttpOptionsFromConfig(config));
   }
 
 }

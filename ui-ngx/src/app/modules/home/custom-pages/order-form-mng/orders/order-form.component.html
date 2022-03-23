@@ -204,8 +204,11 @@
         <thead>
           <tr>
             <th nzWidth="210px" nzLeft>{{ 'device.device' | translate }}</th>
+            <th nzWidth="120px">{{ 'order.intended-capacity' | translate }}</th>
+            <th nzWidth="120px">{{ 'order.actual-capacity' | translate }}</th>
             <th nzWidth="250px">{{ 'order.intended-time' | translate }}</th>
             <th nzWidth="250px">{{ 'order.actual-time' | translate }}</th>
+            <th nzWidth="250px">{{ 'order.maintain-time' | translate }}</th>
             <th *ngIf="isCapacity" nzWidth="110px">{{ 'potency.capacity' | translate }}</th>
             <th *ngIf="!isCapacity" nzWidth="100px" nzAlign="center">{{ 'device-mng.in-calculation' | translate }}</th>
             <th *ngIf="isEdit" nzWidth="104px" nzRight></th>
@@ -213,7 +216,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let data of deviceTable.data; let $index = index">
-            <td>{{ data.deviceName || '' }}</td>
+            <td nzLeft>{{ data.deviceName || '' }}</td>
+            <td>{{ data.intendedCapacity === undefined || data.intendedCapacity === null ? '' : data.intendedCapacity }}</td>
+            <td>{{ data.actualCapacity === undefined || data.actualCapacity === null ? '' : data.actualCapacity }}</td>
             <td>
               <ng-container *ngIf="data.intendedStartTime && data.intendedEndTime">
                 {{ data.intendedStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.intendedEndTime | date:'yyyy-MM-dd HH:mm' }}
@@ -224,7 +229,12 @@
                 {{ data.actualStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.actualEndTime | date:'yyyy-MM-dd HH:mm' }}
               </ng-container>
             </td>
-            <td *ngIf="isCapacity">{{ data.capacities || '' }}</td>
+            <td>
+              <ng-container *ngIf="data.maintainStartTime && data.maintainEndTime">
+                {{ data.maintainStartTime | date:'yyyy-MM-dd HH:mm' }} ~ {{ data.maintainEndTime | date:'yyyy-MM-dd HH:mm' }}
+              </ng-container>
+            </td>
+            <td *ngIf="isCapacity">{{ data.capacities === undefined || data.capacities === null ? '' : data.capacities }}</td>
             <td *ngIf="!isCapacity" nzAlign="center">{{ (data.enabled ? 'action.yes' : 'action.no') | translate }}</td>
             <td *ngIf="isEdit" nzAlign="right" nzRight>
               <button

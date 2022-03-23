@@ -56,7 +56,10 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
 
   buildForm() {
     const planDevices = this.data.planDevices;
-    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, maintainStartTime, maintainEndTime } = (planDevices || {});
+    const { intendedStartTime, intendedEndTime, actualStartTime, actualEndTime, maintainStartTime, maintainEndTime, deviceId } = (planDevices || {});
+    if (deviceId) {
+      this.existDeviceIds = this.existDeviceIds.filter(id => (id !== deviceId));
+    }
     this.orderDeviceForm = this.fb.group({
       id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : '', Validators.required],
@@ -75,6 +78,12 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
     });
     this.orderDeviceForm.get('intendedTime').valueChanges.subscribe(res => {
       const hasVal = res && res.length === 2;
+      if (hasVal) {
+        (res[0] as Date).setSeconds(0);
+        (res[0] as Date).setMilliseconds(0);
+        (res[1] as Date).setSeconds(0);
+        (res[1] as Date).setMilliseconds(0);
+      }
       this.orderDeviceForm.patchValue({
         intendedStartTime: hasVal ? res[0] : null,
         intendedEndTime: hasVal ? res[1] : null
@@ -82,6 +91,12 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
     });
     this.orderDeviceForm.get('actualTime').valueChanges.subscribe(res => {
       const hasVal = res && res.length === 2;
+      if (hasVal) {
+        (res[0] as Date).setSeconds(0);
+        (res[0] as Date).setMilliseconds(0);
+        (res[1] as Date).setSeconds(0);
+        (res[1] as Date).setMilliseconds(0);
+      }
       this.orderDeviceForm.patchValue({
         actualStartTime: hasVal ? res[0] : null,
         actualEndTime: hasVal ? res[1] : null
@@ -89,6 +104,12 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
     });
     this.orderDeviceForm.get('maintainTime').valueChanges.subscribe(res => {
       const hasVal = res && res.length === 2;
+      if (hasVal) {
+        (res[0] as Date).setSeconds(0);
+        (res[0] as Date).setMilliseconds(0);
+        (res[1] as Date).setSeconds(0);
+        (res[1] as Date).setMilliseconds(0);
+      }
       this.orderDeviceForm.patchValue({
         maintainStartTime: hasVal ? res[0] : null,
         maintainEndTime: hasVal ? res[1] : null
@@ -204,7 +225,7 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
       const {
         id, deviceId, intendedCapacity, actualCapacity, intendedStartTime,
         intendedEndTime, actualStartTime, actualEndTime, enabled, maintainStartTime, maintainEndTime
-      } = this.orderDeviceForm.value
+      } = this.orderDeviceForm.getRawValue();
       this.dialogRef.close({
         ...(this.data.planDevices || {}),
         id,

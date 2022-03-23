@@ -210,7 +210,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     event.stopPropagation();
     if (index < 0) return;
     const target = this.orderDeviceFormArray().controls[index];
-    const { factoryId, workshopId, productionLineId } = this.entityForm.value;
+    const { factoryId, workshopId, productionLineId } = this.entityForm.getRawValue();
     this.factoryMngService.getDevices({ factoryId, workshopId, productionLineId, filterGatewayFlag: true }).subscribe(res => {
       this.dialog.open<OrderDeviceFormComponent, OrderDeviceDialogData, OrderDevice>(OrderDeviceFormComponent, {
         disableClose: true,

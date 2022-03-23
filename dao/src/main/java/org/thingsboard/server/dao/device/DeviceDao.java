@@ -314,11 +314,18 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
     PageData<DeviceDataVo> queryAllByNameLike(UUID factoryId, String name, PageLink pageLink);
 
     /**
-     * 获取设备详情
+     * 获取设备详情（同时关联返回工厂、车间、产线名称）
      * @param id
      * @return
      */
     Device getDeviceInfo(UUID id);
+
+    /**
+     * 获取设备详情
+     * @param id
+     * @return
+     */
+    Device findById(UUID id);
 
     /**
      * 批量查询
