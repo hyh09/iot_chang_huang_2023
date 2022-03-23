@@ -64,12 +64,12 @@ public class RoleMenuImpl implements RoleMenuSvc {
             throw new ThingsboardException(" Role ID does not exist !", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         tenantMenuRoleService.deleteByTenantSysRoleId(vo.getRoleId());
-        binding(vo.getRoleId(),vo.getMenuVoList(),MenuCheckEnum.SELECT_ALL);
-        binding(vo.getRoleId(),vo.getSemiSelectList(),MenuCheckEnum.SEMI_SELECTION);
+        binding(vo.getRoleId(),vo.getMenuVoList(),MenuCheckEnum.SELECT_ALL,vo.getTenantId());
+        binding(vo.getRoleId(),vo.getSemiSelectList(),MenuCheckEnum.SEMI_SELECTION,vo.getTenantId());
     }
 
 
-    public void  binding( UUID  roleId,List<UUID> ids,MenuCheckEnum checkEnum) {
+    public void  binding( UUID  roleId,List<UUID> ids,MenuCheckEnum checkEnum,UUID  tenantId) {
         log.info("开始剔除库里面不存在得菜单id");
         List<TenantMenu>  menus =  menuService.findByIdIn(ids);
         if(CollectionUtils.isEmpty(menus))
@@ -80,7 +80,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
         //能查询到就用查询到的id来
         List<UUID> idsNew = menus.stream().map(TenantMenu::getId).collect(Collectors.toList());
         log.info("在系统中存在的ids条数:{} 传入的条数{}",idsNew.size(),ids.size());
-         bindingData(roleId,idsNew,checkEnum);
+         bindingData(roleId,idsNew,checkEnum,tenantId);
     }
 
 
@@ -181,7 +181,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
 
     //具体的绑定的入库
     @Transactional
-    public void bindingData(UUID roleId, List<UUID> voList, MenuCheckEnum checkEnum) {
+    public void bindingData(UUID roleId, List<UUID> voList, MenuCheckEnum checkEnum,UUID  tenantId) {
         if(CollectionUtils.isEmpty(voList)){
             return ;
 
@@ -191,6 +191,7 @@ public class RoleMenuImpl implements RoleMenuSvc {
             entity.setTenantSysRoleId(roleId);
             entity.setTenantMenuId(id);
             entity.setFlg(checkEnum.getRoleCode());
+            entity.setTenantId(tenantId);
             tenantMenuRoleService.saveEntity(entity);
 
         });

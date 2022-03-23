@@ -512,7 +512,7 @@ public class UserController extends BaseController  {
            log.info("【用户管理模块.用户添加接口】入参{}", user);
             String  encodePassword =   passwordEncoder.encode(DataConstants.DEFAULT_PASSWORD);
             User savedUser = checkNotNull(userService.save(user,encodePassword));
-            userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId());
+            userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId(),getTenantId());
             savedUser.setRoleIds(user.getRoleIds());
             return  savedUser;
         }
@@ -591,7 +591,7 @@ public class UserController extends BaseController  {
         log.info("user.getFactoryId():工厂管理员个人角色那个是空的;所以不更新:{}",user.getFactoryId() );
            if(count>0  && UserLeveEnums.getEnableCanByCode(user.getUserLevel()))
            {
-               userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId());
+               userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId(),getTenantId());
            }
         user.setRoleIds(user.getRoleIds());
         return  user;
@@ -753,6 +753,7 @@ public class UserController extends BaseController  {
              UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
              entityRR.setUserId(user.getUuidId());
              entityRR.setTenantSysRoleId(rmEntity.getId());
+             entityRR.setTenantId(user.getTenantId().getId());
              userMenuRoleService.saveEntity(entityRR);
              return;
          }
@@ -761,6 +762,7 @@ public class UserController extends BaseController  {
         UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
         entityRR.setUserId(user.getUuidId());
         entityRR.setTenantSysRoleId(entityBy.getId());
+        entityRR.setTenantId(user.getTenantId().getId());
         userMenuRoleService.saveEntity(entityRR);
 
     }
