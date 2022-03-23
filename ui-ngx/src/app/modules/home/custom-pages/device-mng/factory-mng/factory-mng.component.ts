@@ -103,6 +103,7 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
         device.parentId = device.productionLineId;
         device.rowType = 'device';
         device.key = device.id + '';
+        device.logoImages = device.icon;
       });
       res.notDistributionList.forEach(device => {
         device.parentId = '-1';

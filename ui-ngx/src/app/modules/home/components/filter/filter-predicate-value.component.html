@@ -47,7 +47,7 @@
   </div>
   <div fxFlex fxLayout="column" [fxShow]="dynamicMode || onlyUserDynamicSource">
     <div formGroupName="dynamicValue" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="8px">
-      <div fxFlex="35" fxLayout="column">
+      <div fxFlex="23" fxLayout="column">
         <mat-form-field floatLabel="always" hideRequiredMarker class="mat-block">
           <mat-label></mat-label>
           <mat-select formControlName="sourceType" placeholder="{{'filter.dynamic-source-type' | translate}}">
@@ -67,6 +67,28 @@
           <input matInput formControlName="sourceAttribute" placeholder="{{'filter.source-attribute' | translate}}">
         </mat-form-field>
         <div class="tb-hint" translate>filter.source-attribute</div>
+      </div>
+      <div *ngIf="showOperator" fxFlex fxLayout="column">
+        <mat-form-field floatLabel="always" hideRequiredMarker class="mat-block">
+          <mat-label></mat-label>
+          <mat-select formControlName="perator" placeholder="{{'filter.operator' | translate}}">
+            <mat-option [value]="null">
+              {{'filter.no-operator' | translate}}
+            </mat-option>
+            <mat-option value="add">+</mat-option>
+            <mat-option value="subtract">-</mat-option>
+            <mat-option value="multiply">*</mat-option>
+            <mat-option value="divide">/</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="tb-hint" translate>filter.operator</div>
+      </div>
+      <div *ngIf="showOperator" fxFlex fxLayout="column">
+        <mat-form-field floatLabel="always" hideRequiredMarker class="mat-block">
+          <mat-label></mat-label>
+          <input matInput formControlName="value" placeholder="{{'filter.operation-value' | translate}}">
+        </mat-form-field>
+        <div class="tb-hint" translate>filter.operation-value</div>
       </div>
       <div *ngIf="!allow && inheritMode"
            fxLayout="column"

@@ -66,7 +66,7 @@ export class MngCalendarTableConfigResolver implements Resolve<EntityTableConfig
       _date.setMinutes(end.getMinutes());
       const endTime = _date.getTime();
       return this.prodMngService.saveProdCalendar({
-        ...calendar, factoryId, deviceId, startTime, endTime
+        ...calendar, factoryId, deviceId, deviceName: decodeURIComponent(deviceName), startTime, endTime
       });
     }
     this.config.loadEntity = id => this.prodMngService.getProdCalendar(id);
