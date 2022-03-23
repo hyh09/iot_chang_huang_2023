@@ -18,7 +18,7 @@ import { DeviceDataGroupNameComponent } from './device-dictionary/device-data-gr
 import { ProdCapacitySettingsFiltersComponent } from './prod-capacity-settings/prod-capacity-settings-filters.component';
 import { DistributeConfigComponent } from './device-dictionary/distribute-config.component';
 import { DictDeviceTableFilterComponent } from './device-dictionary/dict-device-table-filter.component';
-import { DeviceConfigFormComponent } from './device-dictionary/driver-config-form.componen';
+import { DeviceConfigFormComponent } from './device-dictionary/driver-config-form.component';
 import { ChartSettingsFiltersComponent } from './chart-settings/chart-settings-filters.component';
 import { ChartsComponent } from './chart-settings/charts.component';
 import { ProdMngFiltersComponent } from './prod-mng/prod-mng-filters.component';

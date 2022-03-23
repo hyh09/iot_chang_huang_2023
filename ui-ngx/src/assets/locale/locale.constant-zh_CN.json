@@ -3565,6 +3565,7 @@
     "version": "版本号",
     "guarantee": "保修期（天）",
     "rated-capacity": "额定产能（米/小时）",
+    "rated-capacity-required": "额定产能必填",
     "is-core-device": "是否核心设备",
     "picture": "设备图片",
     "device-model": "设备模型",
