@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -143,9 +143,9 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
             "AND d.firmwareId = null " +
             "AND LOWER(d.searchText) LIKE LOWER(CONCAT(:textSearch, '%'))")
     Page<DeviceEntity> findByTenantIdAndTypeAndFirmwareIdIsNull(@Param("tenantId") UUID tenantId,
-                                             @Param("deviceProfileId") UUID deviceProfileId,
-                                             @Param("textSearch") String textSearch,
-                                             Pageable pageable);
+                                                                @Param("deviceProfileId") UUID deviceProfileId,
+                                                                @Param("textSearch") String textSearch,
+                                                                Pageable pageable);
 
     @Query("SELECT d FROM DeviceEntity d WHERE d.tenantId = :tenantId " +
             "AND d.deviceProfileId = :deviceProfileId " +
@@ -288,19 +288,18 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> queryAllByIds(@Param("ids") List<UUID> ids);
 
 
-
     @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceDataVo(t.id,t.name,t.code,f1.id,f1.name,t.workshopId,w1.name,t.productionLineId,p1.name,t.picture) " +
             "from DeviceEntity  t LEFT  JOIN  FactoryEntity f1  on  t.factoryId = f1.id" +
-              " LEFT JOIN  WorkshopEntity  w1  ON  w1.id = t.workshopId     LEFT JOIN ProductionLineEntity  p1  ON  p1.id = t.productionLineId  "+
+            " LEFT JOIN  WorkshopEntity  w1  ON  w1.id = t.workshopId     LEFT JOIN ProductionLineEntity  p1  ON  p1.id = t.productionLineId  " +
             "  where  t.factoryId=?1 and t.name like  %?2%    ")
     Page<DeviceDataVo> queryAllByNameLike(UUID factoryId, String Name, Pageable pageable);
 
 
-    @Query(nativeQuery = true,value = "select cast(t.id as VARCHAR ), t.name,t.code, cast(f1.id as VARCHAR ) as factoryId, f1.name  as factoryName," +
+    @Query(nativeQuery = true, value = "select cast(t.id as VARCHAR ), t.name,t.code, cast(f1.id as VARCHAR ) as factoryId, f1.name  as factoryName," +
             " cast(t.workshop_id as VARCHAR )  as workshopId , w1.name as workshopName," +
             " cast(t.production_line_id as VARCHAR )   as productionLineId ,p1.name as productionLineName, t.picture " +
             "from device  t LEFT  JOIN  hs_factory f1  on  t.factory_id = f1.id" +
-            " LEFT JOIN  hs_workshop  w1  ON  w1.id = t.workshop_id     LEFT JOIN hs_production_line  p1  ON  p1.id = t.production_line_id  "+
+            " LEFT JOIN  hs_workshop  w1  ON  w1.id = t.workshop_id     LEFT JOIN hs_production_line  p1  ON  p1.id = t.production_line_id  " +
             "  where  t.factory_id=?1 and t.name like  %?2%  and  position('\"gateway\":true' in t.additional_info)=0")
     Page<DeviceDataSvc> queryAllByNameLikeNativeQuery(UUID factoryId, String Name, Pageable pageable);
 
@@ -311,21 +310,28 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceRatingValueVo> queryDeviceIdAndValue(@Param("ids") List<UUID> ids, @Param("name") String name);
 
 
-
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("update DeviceEntity d set  d.deviceFlg= :deviceFlg   where    d.id =:id")
-   void  updateFlgById(@Param("deviceFlg") Boolean deviceFlg,@Param("id") UUID id);
+    void updateFlgById(@Param("deviceFlg") Boolean deviceFlg, @Param("id") UUID id);
 
 
     @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.name =:name ")
-    List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId,@Param("name") String name );
+    List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId, @Param("name") String name);
 
-    @Query(nativeQuery = true,value = "select * from device d  where d.tenant_id = ?1 and position('\"gateway\":true' in d.additional_info)=0")
-    List<DeviceEntity> findDeviceFilterGatewayByTenantId(UUID tenantId );
+    @Query(nativeQuery = true, value = "select * from device d  where d.tenant_id = ?1 and position('\"gateway\":true' in d.additional_info)=0")
+    List<DeviceEntity> findDeviceFilterGatewayByTenantId(UUID tenantId);
 
 
-    long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
+    long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId);
+
+    /**
+     * 查询工厂下网关
+     * @param factoryId
+     * @return
+     */
+    @Query(nativeQuery = true, value = "select * from device d  where d.factory_id = ?1 and position('\"gateway\":true' in d.additional_info)!=0")
+    List<DeviceEntity> findGatewayByFactoryId(UUID factoryId);
 
 
 }
