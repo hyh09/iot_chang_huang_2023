@@ -2349,6 +2349,7 @@
     "name": "筛选器名称",
     "name-required": "筛选器名称必填",
     "no-dynamic-value": "无动态值",
+    "no-operator": "无运算符",
     "no-filter-matching": "找不到“{{filter}}”。",
     "no-filter-text": "未指定筛选器",
     "no-filters": "未配置筛选器",
@@ -2369,6 +2370,8 @@
       "or": "或",
       "starts-with": "开始于"
     },
+    "operator": "运算符",
+    "operation-value": "运算值",
     "order-priority": "字段顺序优先级",
     "preview": "筛选器预览",
     "remove-filter": "删除筛选器",

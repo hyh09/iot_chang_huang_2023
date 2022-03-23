@@ -18,3 +18,11 @@ ALTER TABLE "public"."hs_order_plan" ADD COLUMN "maintain_start_time" int8;
 COMMENT ON COLUMN "public"."hs_order_plan"."maintain_start_time" IS '维护开始时间';
 ALTER TABLE "public"."hs_order_plan" ADD COLUMN "maintain_end_time" int8;
 COMMENT ON COLUMN "public"."hs_order_plan"."maintain_end_time" IS '维护结束时间';
+
+-- March 18, 2022 18:38:23 GMT+8
+ALTER TABLE "public"."hs_order_plan" ADD COLUMN "factory_id" uuid;
+COMMENT ON COLUMN "public"."hs_order_plan"."factory_id" IS '工厂Id';
+ALTER TABLE "public"."hs_order_plan" ADD COLUMN "production_line_id" uuid;
+COMMENT ON COLUMN "public"."hs_order_plan"."production_line_id" IS '产线Id';
+ALTER TABLE "public"."hs_order_plan" ADD COLUMN "workshop_id" uuid;
+COMMENT ON COLUMN "public"."hs_order_plan"."workshop_id" IS '车间Id';

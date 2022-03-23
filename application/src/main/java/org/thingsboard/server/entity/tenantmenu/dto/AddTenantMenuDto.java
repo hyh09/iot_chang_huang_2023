@@ -59,7 +59,7 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         }else {
             tenantMenu.setHasChildren(hasChildren);
         }
-        if(tenantMenu.getId() == null || tenantMenu.getId() == null ){
+        if(this.id == null ){
             tenantMenu.setCreatedUser(id);
             tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }
@@ -103,7 +103,8 @@ public class AddTenantMenuDto extends AbstractTenantMenu {
         }else {
             tenantMenu.setHasChildren(hasChildren);
         }
-        if(tenantMenu.getId() != null && tenantMenu.getId() != null ){
+        if(this.id != null && StringUtils.isNotEmpty(this.id.toString()) ){
+            tenantMenu.setId(this.id);
             tenantMenu.setCreatedUser(loginUserId);
             tenantMenu.setCreatedTime(Uuids.unixTimestamp(Uuids.timeBased()));
         }else {
