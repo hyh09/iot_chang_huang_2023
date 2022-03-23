@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.User;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -69,6 +70,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
                 return ResultVo.getFail("当前传入得角色id[tenantSysRoleId]错误,请检查!");
             }
             UserMenuRoleEntity userMenuRoleEntity = JsonUtils.beanToBean(vo, UserMenuRoleEntity.class);
+            userMenuRoleEntity.setTenantId(user.getTenantId().getId());
             List<UserMenuRoleEntity> list =  userMenuRoleService.queryByRoleIdAndUserId(userMenuRoleEntity);
             if (CollectionUtils.isNotEmpty(list)) {
                 return ResultVo.getFail("当前的用户已经绑定了该角色!");
@@ -91,7 +93,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
      * @return
      */
     @Override
-    public Object relationUserAndRole(RoleBindUserVo vo) {
+    public Object relationUserAndRole(RoleBindUserVo vo, TenantId tenantId  ) {
         TenantSysRoleEntity roleEntity = roleService.findById(vo.getTenantSysRoleId());
         if (roleEntity == null) {
             return ResultVo.getFail("当前传入得角色id[tenantSysRoleId]错误,请检查!");
@@ -103,7 +105,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
         }
        List<UUID> userIdInDB= userIdS.stream().map(User::getUuidId).collect(Collectors.toList());
-        relationUserBachByRole(userIdInDB,roleEntity);
+        relationUserBachByRole(userIdInDB,roleEntity,  tenantId);
 
         return   ResultVo.getSuccessFul(null);
 
@@ -128,7 +130,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
      */
     @Override
     @Transactional
-    public void  relationUserBach(List<UUID> rId, UUID uuid) {
+    public void  relationUserBach(List<UUID> rId, UUID uuid, TenantId  tenantId) {
         if(CollectionUtils.isEmpty(rId)){
             return ;
         }
@@ -138,6 +140,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
                 UserMenuRoleEntity entity = new UserMenuRoleEntity();
                 entity.setUserId(uuid);
                 entity.setTenantSysRoleId(item);
+                entity.setTenantId(tenantId.getId());
                 userMenuRoleService.saveEntity(entity);
                 if(roleEntity.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode())
                 {
@@ -156,7 +159,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
      * 批量绑定 一个角色
      */
     @Transactional
-    public void  relationUserBachByRole(List<UUID> userIds, TenantSysRoleEntity roleEntity) {
+    public void  relationUserBachByRole(List<UUID> userIds, TenantSysRoleEntity roleEntity, TenantId  tenantId) {
         if(CollectionUtils.isEmpty(userIds)){
             return ;
         }
@@ -164,6 +167,7 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
             UserMenuRoleEntity entity = new UserMenuRoleEntity();
             entity.setUserId(item);
             entity.setTenantSysRoleId(roleEntity.getId());
+            entity.setTenantId(tenantId.getId());
             userMenuRoleService.saveEntity(entity);
             if(roleEntity.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode())
             {
@@ -183,10 +187,10 @@ public class UserRoleMemuImpl implements UserRoleMemuSvc {
 
     @Override
     @Transactional
-    public void updateRoleByUserId(List<UUID> rId, UUID uuid) {
+    public void updateRoleByUserId(List<UUID> rId, UUID uuid,TenantId tenantId) {
        log.info("删除此用户绑定的之前数据:{}",uuid);
         deleteRoleByUserId(uuid);
-        relationUserBach(rId,uuid);
+        relationUserBach(rId,uuid,tenantId);
     }
 
     @Override
