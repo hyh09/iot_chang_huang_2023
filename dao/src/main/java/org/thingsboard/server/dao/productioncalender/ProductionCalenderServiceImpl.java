@@ -218,8 +218,8 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
         Long startTime = productionCalender.getStartTime();
         Long endTime = productionCalender.getEndTime();
         //集团看板生产监控查询
-        ///查询租户下所有工厂
-        List<Factory> factoryList = factoryDao.findFactoryByTenantId(productionCalender.getTenantId());
+        ///查询租户下所有有网关的工厂
+        List<Factory> factoryList = this.getFactoriesFilterNoGateway(productionCalender.getTenantId());
         if (!CollectionUtils.isEmpty(factoryList)) {
             factoryList.forEach(factory -> {
                 ProductionCalender resultProductionCalender = new ProductionCalender();
@@ -294,6 +294,26 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
             });
         }
         return resultProductionCalenders;
+    }
+
+    /**
+     * 查询租户下所有有网关的工厂
+     * @param tenantId
+     * @return
+     */
+    private List<Factory> getFactoriesFilterNoGateway(UUID tenantId) {
+        List<Factory> factoryList = factoryDao.findFactoryByTenantId(tenantId);
+        if (!CollectionUtils.isEmpty(factoryList)) {
+            Iterator<Factory> iterator = factoryList.iterator();
+            while (iterator.hasNext()){
+                List<Device> gatewayByFactoryId = deviceDao.findGatewayByFactoryId(iterator.next().getId());
+                if(CollectionUtils.isEmpty(gatewayByFactoryId)){
+                    //过滤无网关的的工厂数据
+                    iterator.remove();
+                }
+            }
+        }
+        return factoryList;
     }
 
 
