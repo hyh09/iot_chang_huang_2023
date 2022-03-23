@@ -3668,6 +3668,7 @@
     "version": "Version",
     "guarantee": "guarantee (days)",
     "rated-capacity": "Rated capacity (m/h)",
+    "rated-capacity-required": "Rated capacity is required.",
     "is-core-device": "Core device",
     "picture": "Device picture",
     "device-model": "Device model",
