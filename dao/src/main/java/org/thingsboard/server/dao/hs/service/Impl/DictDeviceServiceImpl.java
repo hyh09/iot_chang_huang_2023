@@ -926,7 +926,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         this.groupRepository.deleteByDictDeviceId(dictDeviceId);
         this.groupPropertyRepository.deleteByDictDeviceId(dictDeviceId);
         this.standardPropertyRepository.deleteAllByDictDeviceId(dictDeviceId);
-        this.graphRepository.deleteById(dictDeviceId);
+        this.graphRepository.deleteAllByDictDeviceId(dictDeviceId);
         this.graphItemRepository.deleteAllByDictDeviceId(dictDeviceId);
     }
 
