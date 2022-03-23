@@ -202,14 +202,13 @@ public class UserRoleController extends BaseController{
      */
     @ApiOperation(value = "角色用户绑定")
     @RequestMapping(value = "/relationUser", method = RequestMethod.POST)
-    public Object  relationUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result)
-    {
+    public Object  relationUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result) throws ThingsboardException {
         if (result.hasErrors()) {
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
 
-      return   userRoleMemuSvc.relationUserAndRole(vo);
+      return   userRoleMemuSvc.relationUserAndRole(vo, getTenantId());
     }
 
 

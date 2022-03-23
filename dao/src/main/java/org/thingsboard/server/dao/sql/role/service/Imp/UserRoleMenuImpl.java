@@ -204,6 +204,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
             UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
             entityRR.setUserId(rmUser.getUuidId());
             entityRR.setTenantSysRoleId(entityBy.getId());
+            entityRR.setTenantId(rmUser.getTenantId().getId());
             userMenuRoleService.saveEntity(entityRR);
             return rmUser;
         }
@@ -226,6 +227,7 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
         UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
         entityRR.setUserId(rmUser.getUuidId());
         entityRR.setTenantSysRoleId(rmEntity.getId());
+        entityRR.setTenantId(rmUser.getTenantId().getId());
         userMenuRoleService.saveEntity(entityRR);
         return rmUser;
     }
