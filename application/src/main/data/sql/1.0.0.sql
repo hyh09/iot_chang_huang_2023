@@ -1,3 +1,29 @@
+-- Table: public.component_descriptor
+
+-- DROP TABLE IF EXISTS public.component_descriptor;
+
+CREATE TABLE IF NOT EXISTS public.component_descriptor
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    actions character varying(255) COLLATE pg_catalog."default",
+    clazz character varying COLLATE pg_catalog."default",
+    configuration_descriptor character varying COLLATE pg_catalog."default",
+    name character varying(255) COLLATE pg_catalog."default",
+    scope character varying(255) COLLATE pg_catalog."default",
+    search_text character varying(255) COLLATE pg_catalog."default",
+    type character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT component_descriptor_pkey PRIMARY KEY (id),
+    CONSTRAINT component_descriptor_clazz_key UNIQUE (clazz)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.component_descriptor
+    OWNER to postgres;
+
+
+-- Table: public.hs_device_component
 
 -- DROP TABLE IF EXISTS public.hs_device_component;
 
@@ -30,7 +56,42 @@ ALTER TABLE IF EXISTS public.hs_device_component
 
 
 
---- Table: public.hs_dict_data
+
+-- Table: public.hs_device_oee_every_hour
+
+-- DROP TABLE IF EXISTS public.hs_device_oee_every_hour;
+
+CREATE TABLE IF NOT EXISTS public.hs_device_oee_every_hour
+(
+    id uuid NOT NULL,
+    device_id uuid NOT NULL,
+    ts bigint NOT NULL,
+    oee_value numeric NOT NULL,
+    created_time bigint NOT NULL,
+    tenant_id uuid NOT NULL,
+    factory_id uuid,
+    workshop_id uuid,
+    production_line_id uuid,
+    CONSTRAINT hs_device_oee_every_hour_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_device_oee_every_hour
+    OWNER to postgres;
+-- Index: hs_device_oee_every_hour_device_id_ts
+
+-- DROP INDEX IF EXISTS public.hs_device_oee_every_hour_device_id_ts;
+
+CREATE INDEX IF NOT EXISTS hs_device_oee_every_hour_device_id_ts
+    ON public.hs_device_oee_every_hour USING btree
+    (device_id ASC NULLS LAST, ts ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+
+
+-- Table: public.hs_dict_data
 
 -- DROP TABLE IF EXISTS public.hs_dict_data;
 
@@ -102,6 +163,7 @@ COMMENT ON COLUMN public.hs_dict_data.tenant_id
 
 
 
+
 -- Table: public.hs_dict_device
 
 -- DROP TABLE IF EXISTS public.hs_dict_device;
@@ -125,6 +187,8 @@ CREATE TABLE IF NOT EXISTS public.hs_dict_device
     tenant_id uuid,
     comment character varying(255) COLLATE pg_catalog."default",
     is_default boolean NOT NULL DEFAULT false,
+    is_core boolean NOT NULL DEFAULT false,
+    rated_capacity character varying(255) COLLATE pg_catalog."default" DEFAULT '0'::character varying,
     CONSTRAINT dict_device_pkey PRIMARY KEY (id),
     CONSTRAINT uk_code_and_tenant_id_2 UNIQUE (code, tenant_id)
 )
@@ -187,6 +251,12 @@ COMMENT ON COLUMN public.hs_dict_device.comment
 
 COMMENT ON COLUMN public.hs_dict_device.is_default
     IS '是否默认';
+
+COMMENT ON COLUMN public.hs_dict_device.is_core
+    IS '是否核心';
+
+COMMENT ON COLUMN public.hs_dict_device.rated_capacity
+    IS '额定产能';
 
 
 
@@ -304,6 +374,7 @@ CREATE INDEX IF NOT EXISTS idx_dict_device_id_2
 
 
 
+
 -- Table: public.hs_dict_device_component_property
 
 -- DROP TABLE IF EXISTS public.hs_dict_device_component_property;
@@ -311,17 +382,17 @@ CREATE INDEX IF NOT EXISTS idx_dict_device_id_2
 CREATE TABLE IF NOT EXISTS public.hs_dict_device_component_property
 (
     id uuid NOT NULL,
-    component_id uuid,
-    content character varying(255) COLLATE pg_catalog."default",
-    name character varying(255) COLLATE pg_catalog."default",
     created_time bigint NOT NULL,
     created_user character varying(255) COLLATE pg_catalog."default",
     updated_time bigint,
     updated_user character varying(255) COLLATE pg_catalog."default",
-    dict_device_id uuid,
-    title character varying(255) COLLATE pg_catalog."default",
-    sort bigint,
+    component_id uuid,
+    content character varying(255) COLLATE pg_catalog."default",
     dict_data_id uuid,
+    dict_device_id uuid,
+    name character varying(255) COLLATE pg_catalog."default",
+    sort bigint,
+    title character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT hs_dict_device_component_property_pkey PRIMARY KEY (id)
 )
 
@@ -336,15 +407,6 @@ COMMENT ON TABLE public.hs_dict_device_component_property
 COMMENT ON COLUMN public.hs_dict_device_component_property.id
     IS 'Id';
 
-COMMENT ON COLUMN public.hs_dict_device_component_property.component_id
-    IS '部件Id';
-
-COMMENT ON COLUMN public.hs_dict_device_component_property.content
-    IS '内容';
-
-COMMENT ON COLUMN public.hs_dict_device_component_property.name
-    IS '属性名称';
-
 COMMENT ON COLUMN public.hs_dict_device_component_property.created_time
     IS '创建时间';
 
@@ -357,18 +419,158 @@ COMMENT ON COLUMN public.hs_dict_device_component_property.updated_time
 COMMENT ON COLUMN public.hs_dict_device_component_property.updated_user
     IS '更新人';
 
-COMMENT ON COLUMN public.hs_dict_device_component_property.dict_device_id
-    IS '设备字典Id';
+COMMENT ON COLUMN public.hs_dict_device_component_property.component_id
+    IS '部件Id';
 
-COMMENT ON COLUMN public.hs_dict_device_component_property.title
-    IS '标题';
-
-COMMENT ON COLUMN public.hs_dict_device_component_property.sort
-    IS '排序字段';
+COMMENT ON COLUMN public.hs_dict_device_component_property.content
+    IS '内容';
 
 COMMENT ON COLUMN public.hs_dict_device_component_property.dict_data_id
     IS '数据字典Id';
 
+COMMENT ON COLUMN public.hs_dict_device_component_property.dict_device_id
+    IS '设备字典Id';
+
+COMMENT ON COLUMN public.hs_dict_device_component_property.name
+    IS '属性名称';
+
+COMMENT ON COLUMN public.hs_dict_device_component_property.sort
+    IS '排序字段';
+
+COMMENT ON COLUMN public.hs_dict_device_component_property.title
+    IS '标题';
+
+
+
+
+-- Table: public.hs_dict_device_graph
+
+-- DROP TABLE IF EXISTS public.hs_dict_device_graph;
+
+CREATE TABLE IF NOT EXISTS public.hs_dict_device_graph
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    dict_device_id uuid,
+    name character varying(255) COLLATE pg_catalog."default",
+    enable boolean NOT NULL DEFAULT false,
+    CONSTRAINT hs_dict_device_graph_item_copy1_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_dict_device_graph
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_dict_device_graph
+    IS '设备字典';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.id
+    IS 'Id';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.dict_device_id
+    IS '设备字典Id';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.name
+    IS '名称';
+
+COMMENT ON COLUMN public.hs_dict_device_graph.enable
+    IS '是否显示';
+
+
+
+-- Table: public.hs_dict_device_graph_item
+
+-- DROP TABLE IF EXISTS public.hs_dict_device_graph_item;
+
+CREATE TABLE IF NOT EXISTS public.hs_dict_device_graph_item
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    dict_device_id uuid,
+    property_id uuid,
+    property_type character varying(255) COLLATE pg_catalog."default",
+    graph_id uuid,
+    sort integer,
+    suffix character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_dict_device_copy1_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_graph_item UNIQUE (dict_device_id, property_id, property_type)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_dict_device_graph_item
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_dict_device_graph_item
+    IS '设备字典';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.id
+    IS 'Id';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.dict_device_id
+    IS '设备字典Id';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.property_id
+    IS '属性id';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.property_type
+    IS '属性类型';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.graph_id
+    IS '图表Id';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.sort
+    IS '排序';
+
+COMMENT ON COLUMN public.hs_dict_device_graph_item.suffix
+    IS '后缀';
+-- Index: idx_graph_item
+
+-- DROP INDEX IF EXISTS public.idx_graph_item;
+
+CREATE INDEX IF NOT EXISTS idx_graph_item
+    ON public.hs_dict_device_graph_item USING btree
+    (dict_device_id ASC NULLS LAST, property_id ASC NULLS LAST, property_type COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_graph_item_graph_id
+
+-- DROP INDEX IF EXISTS public.idx_graph_item_graph_id;
+
+CREATE INDEX IF NOT EXISTS idx_graph_item_graph_id
+    ON public.hs_dict_device_graph_item USING btree
+    (graph_id ASC NULLS LAST)
+    TABLESPACE pg_default;
 
 
 
@@ -380,12 +582,12 @@ COMMENT ON COLUMN public.hs_dict_device_component_property.dict_data_id
 CREATE TABLE IF NOT EXISTS public.hs_dict_device_group
 (
     id uuid NOT NULL,
-    dict_device_id uuid,
-    name character varying(255) COLLATE pg_catalog."default",
     created_time bigint NOT NULL,
     created_user character varying(255) COLLATE pg_catalog."default",
     updated_time bigint,
     updated_user character varying(255) COLLATE pg_catalog."default",
+    dict_device_id uuid,
+    name character varying(255) COLLATE pg_catalog."default",
     sort bigint,
     CONSTRAINT dict_device_group_pkey PRIMARY KEY (id)
 )
@@ -401,12 +603,6 @@ COMMENT ON TABLE public.hs_dict_device_group
 COMMENT ON COLUMN public.hs_dict_device_group.id
     IS 'Id';
 
-COMMENT ON COLUMN public.hs_dict_device_group.dict_device_id
-    IS '设备字典Id';
-
-COMMENT ON COLUMN public.hs_dict_device_group.name
-    IS '分组名称';
-
 COMMENT ON COLUMN public.hs_dict_device_group.created_time
     IS '创建时间';
 
@@ -419,8 +615,15 @@ COMMENT ON COLUMN public.hs_dict_device_group.updated_time
 COMMENT ON COLUMN public.hs_dict_device_group.updated_user
     IS '更新人';
 
+COMMENT ON COLUMN public.hs_dict_device_group.dict_device_id
+    IS '设备字典Id';
+
+COMMENT ON COLUMN public.hs_dict_device_group.name
+    IS '分组名称';
+
 COMMENT ON COLUMN public.hs_dict_device_group.sort
     IS '排序字段';
+
 
 
 
@@ -432,17 +635,17 @@ COMMENT ON COLUMN public.hs_dict_device_group.sort
 CREATE TABLE IF NOT EXISTS public.hs_dict_device_group_property
 (
     id uuid NOT NULL,
-    dict_device_group_id uuid,
-    content character varying(255) COLLATE pg_catalog."default",
-    name character varying(255) COLLATE pg_catalog."default",
     created_time bigint NOT NULL,
     created_user character varying(255) COLLATE pg_catalog."default",
     updated_time bigint,
     updated_user character varying(255) COLLATE pg_catalog."default",
-    dict_device_id uuid,
-    title character varying(255) COLLATE pg_catalog."default",
-    sort bigint,
+    content character varying(255) COLLATE pg_catalog."default",
     dict_data_id uuid,
+    dict_device_group_id uuid,
+    dict_device_id uuid,
+    name character varying(255) COLLATE pg_catalog."default",
+    sort bigint,
+    title character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT hs_dict_device_group_property_pkey PRIMARY KEY (id)
 )
 
@@ -457,15 +660,6 @@ COMMENT ON TABLE public.hs_dict_device_group_property
 COMMENT ON COLUMN public.hs_dict_device_group_property.id
     IS 'Id';
 
-COMMENT ON COLUMN public.hs_dict_device_group_property.dict_device_group_id
-    IS '设备字典分组Id';
-
-COMMENT ON COLUMN public.hs_dict_device_group_property.content
-    IS '内容';
-
-COMMENT ON COLUMN public.hs_dict_device_group_property.name
-    IS '属性名称';
-
 COMMENT ON COLUMN public.hs_dict_device_group_property.created_time
     IS '创建时间';
 
@@ -478,17 +672,28 @@ COMMENT ON COLUMN public.hs_dict_device_group_property.updated_time
 COMMENT ON COLUMN public.hs_dict_device_group_property.updated_user
     IS '更新人';
 
+COMMENT ON COLUMN public.hs_dict_device_group_property.content
+    IS '内容';
+
+COMMENT ON COLUMN public.hs_dict_device_group_property.dict_data_id
+    IS '数据字典Id';
+
+COMMENT ON COLUMN public.hs_dict_device_group_property.dict_device_group_id
+    IS '设备字典分组Id';
+
 COMMENT ON COLUMN public.hs_dict_device_group_property.dict_device_id
     IS '设备字典Id';
 
-COMMENT ON COLUMN public.hs_dict_device_group_property.title
-    IS '标题';
+COMMENT ON COLUMN public.hs_dict_device_group_property.name
+    IS '属性名称';
 
 COMMENT ON COLUMN public.hs_dict_device_group_property.sort
     IS '排序字段';
 
-COMMENT ON COLUMN public.hs_dict_device_group_property.dict_data_id
-    IS '数据字典Id';
+COMMENT ON COLUMN public.hs_dict_device_group_property.title
+    IS '标题';
+
+
 
 
 -- Table: public.hs_dict_device_property
@@ -498,13 +703,13 @@ COMMENT ON COLUMN public.hs_dict_device_group_property.dict_data_id
 CREATE TABLE IF NOT EXISTS public.hs_dict_device_property
 (
     id uuid NOT NULL,
-    dict_device_id uuid,
-    name character varying(255) COLLATE pg_catalog."default",
-    content character varying(255) COLLATE pg_catalog."default",
     created_time bigint NOT NULL,
     created_user character varying(255) COLLATE pg_catalog."default",
     updated_time bigint,
     updated_user character varying(255) COLLATE pg_catalog."default",
+    content character varying(255) COLLATE pg_catalog."default",
+    dict_device_id uuid,
+    name character varying(255) COLLATE pg_catalog."default",
     sort bigint,
     CONSTRAINT "dict_device_ property_pkey" PRIMARY KEY (id)
 )
@@ -520,15 +725,6 @@ COMMENT ON TABLE public.hs_dict_device_property
 COMMENT ON COLUMN public.hs_dict_device_property.id
     IS 'Id';
 
-COMMENT ON COLUMN public.hs_dict_device_property.dict_device_id
-    IS '设备字典Id';
-
-COMMENT ON COLUMN public.hs_dict_device_property.name
-    IS '属性名称';
-
-COMMENT ON COLUMN public.hs_dict_device_property.content
-    IS '属性内容';
-
 COMMENT ON COLUMN public.hs_dict_device_property.created_time
     IS '创建时间';
 
@@ -540,6 +736,15 @@ COMMENT ON COLUMN public.hs_dict_device_property.updated_time
 
 COMMENT ON COLUMN public.hs_dict_device_property.updated_user
     IS '更新人';
+
+COMMENT ON COLUMN public.hs_dict_device_property.content
+    IS '属性内容';
+
+COMMENT ON COLUMN public.hs_dict_device_property.dict_device_id
+    IS '设备字典Id';
+
+COMMENT ON COLUMN public.hs_dict_device_property.name
+    IS '属性名称';
 
 COMMENT ON COLUMN public.hs_dict_device_property.sort
     IS '排序字段';
@@ -561,16 +766,16 @@ CREATE INDEX IF NOT EXISTS idx_dict_device_id
 CREATE TABLE IF NOT EXISTS public.hs_dict_device_standard_property
 (
     id uuid NOT NULL,
-    content character varying(255) COLLATE pg_catalog."default",
-    name character varying(255) COLLATE pg_catalog."default",
     created_time bigint NOT NULL,
     created_user character varying(255) COLLATE pg_catalog."default",
     updated_time bigint,
     updated_user character varying(255) COLLATE pg_catalog."default",
-    dict_device_id uuid,
-    title character varying(255) COLLATE pg_catalog."default",
-    sort bigint,
+    content character varying(255) COLLATE pg_catalog."default",
     dict_data_id uuid,
+    dict_device_id uuid,
+    name character varying(255) COLLATE pg_catalog."default",
+    sort bigint,
+    title character varying(255) COLLATE pg_catalog."default",
     CONSTRAINT hs_dict_device_group_property_copy1_pkey PRIMARY KEY (id)
 )
 
@@ -585,12 +790,6 @@ COMMENT ON TABLE public.hs_dict_device_standard_property
 COMMENT ON COLUMN public.hs_dict_device_standard_property.id
     IS 'Id';
 
-COMMENT ON COLUMN public.hs_dict_device_standard_property.content
-    IS '内容';
-
-COMMENT ON COLUMN public.hs_dict_device_standard_property.name
-    IS '属性名称';
-
 COMMENT ON COLUMN public.hs_dict_device_standard_property.created_time
     IS '创建时间';
 
@@ -603,401 +802,24 @@ COMMENT ON COLUMN public.hs_dict_device_standard_property.updated_time
 COMMENT ON COLUMN public.hs_dict_device_standard_property.updated_user
     IS '更新人';
 
-COMMENT ON COLUMN public.hs_dict_device_standard_property.dict_device_id
-    IS '设备字典Id';
-
-COMMENT ON COLUMN public.hs_dict_device_standard_property.title
-    IS '标题';
-
-COMMENT ON COLUMN public.hs_dict_device_standard_property.sort
-    IS '排序字段';
+COMMENT ON COLUMN public.hs_dict_device_standard_property.content
+    IS '内容';
 
 COMMENT ON COLUMN public.hs_dict_device_standard_property.dict_data_id
     IS '数据字典Id';
 
+COMMENT ON COLUMN public.hs_dict_device_standard_property.dict_device_id
+    IS '设备字典Id';
 
+COMMENT ON COLUMN public.hs_dict_device_standard_property.name
+    IS '属性名称';
 
+COMMENT ON COLUMN public.hs_dict_device_standard_property.sort
+    IS '排序字段';
 
+COMMENT ON COLUMN public.hs_dict_device_standard_property.title
+    IS '标题';
 
-
--- Table: public.hs_factory
-
--- DROP TABLE IF EXISTS public.hs_factory;
-
-CREATE TABLE IF NOT EXISTS public.hs_factory
-(
-    id uuid NOT NULL,
-    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(255) COLLATE pg_catalog."default",
-    logo_icon character varying(255) COLLATE pg_catalog."default",
-    logo_images character varying(1000000) COLLATE pg_catalog."default",
-    address character varying(1000) COLLATE pg_catalog."default",
-    longitude character varying(255) COLLATE pg_catalog."default",
-    latitude character varying(255) COLLATE pg_catalog."default",
-    postal_code character varying(255) COLLATE pg_catalog."default",
-    mobile character varying(255) COLLATE pg_catalog."default",
-    email character varying(255) COLLATE pg_catalog."default",
-    admin_user_id uuid,
-    admin_user_name character varying(255) COLLATE pg_catalog."default",
-    remark character varying(1000) COLLATE pg_catalog."default",
-    tenant_id uuid NOT NULL,
-    created_time bigint NOT NULL,
-    created_user uuid,
-    updated_time character varying(255) COLLATE pg_catalog."default",
-    updated_user uuid,
-    del_flag character varying(255) COLLATE pg_catalog."default",
-    province character varying(1000) COLLATE pg_catalog."default",
-    city character varying(1000) COLLATE pg_catalog."default",
-    area character varying(1000) COLLATE pg_catalog."default",
-    country character varying(255) COLLATE pg_catalog."default",
-    additional_info character varying COLLATE pg_catalog."default",
-    CONSTRAINT tb_factory_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.hs_factory
-    OWNER to postgres;
-
-COMMENT ON COLUMN public.hs_factory.province
-    IS '省';
-
-COMMENT ON COLUMN public.hs_factory.city
-    IS '市';
-
-COMMENT ON COLUMN public.hs_factory.area
-    IS '区';
-
-
-
-
--- Table Definition
-CREATE TABLE IF NOT EXISTS "public"."hs_file" (
-  "id" uuid NOT NULL,
-  "created_time" int8 NOT NULL,
-  "created_user" varchar(255),
-    "updated_time" int8,
-    "updated_user" varchar(255),
-    "tenant_id" uuid,
-    "file_name" varchar(255),
-    "check_sum" varchar(5000),
-    "content_type" varchar(255),
-    "checksum_algorithm" varchar(32),
-    "data_size" int8,
-    "additional_info" varchar,
-    "scope" varchar(255),
-    "entity_id" uuid,
-    "location" varchar(1000),
-    PRIMARY KEY ("id")
-    );
-
--- Column Comment
-COMMENT ON COLUMN "public"."hs_file"."id" IS 'id';
-COMMENT ON COLUMN "public"."hs_file"."created_time" IS '创建时间';
-COMMENT ON COLUMN "public"."hs_file"."created_user" IS '创建人';
-COMMENT ON COLUMN "public"."hs_file"."updated_time" IS '更新时间';
-COMMENT ON COLUMN "public"."hs_file"."updated_user" IS '更新人';
-COMMENT ON COLUMN "public"."hs_file"."tenant_id" IS '租户Id';
-COMMENT ON COLUMN "public"."hs_file"."file_name" IS '文件名';
-COMMENT ON COLUMN "public"."hs_file"."check_sum" IS '校验和';
-COMMENT ON COLUMN "public"."hs_file"."content_type" IS '类型';
-COMMENT ON COLUMN "public"."hs_file"."checksum_algorithm" IS '校验和算法';
-COMMENT ON COLUMN "public"."hs_file"."data_size" IS '大小';
-COMMENT ON COLUMN "public"."hs_file"."additional_info" IS '附加信息';
-COMMENT ON COLUMN "public"."hs_file"."scope" IS '范围';
-COMMENT ON COLUMN "public"."hs_file"."entity_id" IS '实体Id';
-COMMENT ON COLUMN "public"."hs_file"."location" IS '存储位置';
-
-
-
-
--- Table: public.hs_init
-
--- DROP TABLE IF EXISTS public.hs_init;
-
-CREATE TABLE IF NOT EXISTS public.hs_init
-(
-    id uuid NOT NULL,
-    init_data jsonb,
-    scope character varying(255) COLLATE pg_catalog."default",
-    created_time bigint,
-    created_user character varying(255) COLLATE pg_catalog."default",
-    updated_time bigint,
-    updated_user character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT hs_dict_data_copy1_pkey PRIMARY KEY (id),
-    CONSTRAINT uk_init_scope UNIQUE (scope)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.hs_init
-    OWNER to postgres;
-
-COMMENT ON TABLE public.hs_init
-    IS '初始化';
-
-COMMENT ON COLUMN public.hs_init.id
-    IS 'Id';
-
-COMMENT ON COLUMN public.hs_init.init_data
-    IS '初始化数据';
-
-COMMENT ON COLUMN public.hs_init.scope
-    IS '范围';
-
-COMMENT ON COLUMN public.hs_init.created_time
-    IS '创建时间';
-
-COMMENT ON COLUMN public.hs_init.created_user
-    IS '创建人';
-
-COMMENT ON COLUMN public.hs_init.updated_time
-    IS '更新时间';
-
-COMMENT ON COLUMN public.hs_init.updated_user
-    IS '更新人';
-
-
-
--- Table: public.hs_production_line
-
--- DROP TABLE IF EXISTS public.hs_production_line;
-
-CREATE TABLE IF NOT EXISTS public.hs_production_line
-(
-    id uuid NOT NULL,
-    workshop_id uuid NOT NULL,
-    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(255) COLLATE pg_catalog."default",
-    logo_icon character varying(255) COLLATE pg_catalog."default",
-    logo_images character varying(1000000) COLLATE pg_catalog."default",
-    remark character varying(1000) COLLATE pg_catalog."default",
-    tenant_id uuid NOT NULL,
-    created_time bigint NOT NULL,
-    created_user uuid,
-    updated_time character varying(255) COLLATE pg_catalog."default",
-    updated_user uuid,
-    del_flag character varying(255) COLLATE pg_catalog."default",
-    mobile character varying(255) COLLATE pg_catalog."default",
-    factory_id uuid,
-    bg_images character varying(100000) COLLATE pg_catalog."default",
-    CONSTRAINT tb_production_line_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.hs_production_line
-    OWNER to postgres;
-
-
-
-
-
---创建系统版本表
-CREATE TABLE IF NOT EXISTS public.hs_system_version
-(
-    id uuid NOT NULL,
-    version character varying(225) COLLATE pg_catalog."default" NOT NULL DEFAULT '0.0.1'::character varying,
-    publish_time bigint NOT NULL,
-    comment character varying(255) COLLATE pg_catalog."default",
-    tenant_id uuid NOT NULL,
-    created_user uuid,
-    created_time bigint NOT NULL,
-    updated_user uuid,
-    updated_time character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT hs_system_version_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.hs_system_version
-    OWNER to postgres;
-
-COMMENT ON TABLE public.hs_system_version
-    IS '系统版本表';
-
-
-
-
--- Table: public.hs_workshop
-
--- DROP TABLE IF EXISTS public.hs_workshop;
-
-CREATE TABLE IF NOT EXISTS public.hs_workshop
-(
-    id uuid NOT NULL,
-    factory_id uuid NOT NULL,
-    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(255) COLLATE pg_catalog."default",
-    logo_icon character varying(255) COLLATE pg_catalog."default",
-    logo_images character varying(1000000) COLLATE pg_catalog."default",
-    remark character varying(1000) COLLATE pg_catalog."default",
-    tenant_id uuid NOT NULL,
-    created_time bigint NOT NULL,
-    created_user uuid,
-    updated_time character varying(255) COLLATE pg_catalog."default",
-    updated_user uuid,
-    del_flag character varying(255) COLLATE pg_catalog."default",
-    bg_images character varying(1000000) COLLATE pg_catalog."default",
-    CONSTRAINT tb_workshop_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.hs_workshop
-    OWNER to postgres;
-
-
-
--- Table: public.tb_menu
-
--- DROP TABLE IF EXISTS public.tb_menu;
-
-CREATE TABLE IF NOT EXISTS public.tb_menu
-(
-    id uuid NOT NULL,
-    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(255) COLLATE pg_catalog."default",
-    level bigint NOT NULL,
-    sort bigint NOT NULL,
-    url character varying(1000) COLLATE pg_catalog."default",
-    parent_id uuid,
-    menu_icon character varying(255) COLLATE pg_catalog."default",
-    menu_images character varying(1000) COLLATE pg_catalog."default",
-    region character varying(255) COLLATE pg_catalog."default",
-    created_time bigint NOT NULL,
-    created_user uuid,
-    updated_time character varying(255) COLLATE pg_catalog."default",
-    updated_user uuid,
-    menu_type character varying(255) COLLATE pg_catalog."default",
-    path character varying(255) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
-    is_button boolean DEFAULT false,
-    lang_key character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT tb_menu_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.tb_menu
-    OWNER to postgres;
-
-
--- Table: public.tb_tenant_menu
-
--- DROP TABLE IF EXISTS public.tb_tenant_menu;
-
-CREATE TABLE IF NOT EXISTS public.tb_tenant_menu
-(
-    id uuid NOT NULL,
-    tenant_id uuid NOT NULL,
-    sys_menu_id uuid,
-    sys_menu_code character varying(255) COLLATE pg_catalog."default",
-    sys_menu_name character varying(255) COLLATE pg_catalog."default",
-    tenant_menu_name character varying(255) COLLATE pg_catalog."default",
-    tenant_menu_code character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    level bigint NOT NULL,
-    sort bigint NOT NULL,
-    url character varying(1000) COLLATE pg_catalog."default",
-    parent_id uuid,
-    tenant_menu_icon character varying(255) COLLATE pg_catalog."default",
-    tenant_menu_images character varying(1000) COLLATE pg_catalog."default",
-    region character varying(255) COLLATE pg_catalog."default",
-    created_time bigint NOT NULL,
-    created_user uuid,
-    updated_time character varying(255) COLLATE pg_catalog."default",
-    updated_user uuid,
-    menu_type character varying(255) COLLATE pg_catalog."default",
-    path character varying(255) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
-    is_button boolean DEFAULT false,
-    lang_key character varying(255) COLLATE pg_catalog."default",
-    has_children boolean DEFAULT false,
-    CONSTRAINT tb_tenant_menu_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.tb_tenant_menu
-    OWNER to postgres;
-
-
-
-
--- Table: public.tb_tenant_menu_role
-
--- DROP TABLE IF EXISTS public.tb_tenant_menu_role;
-
-CREATE TABLE IF NOT EXISTS public.tb_tenant_menu_role
-(
-    id uuid NOT NULL,
-    created_time bigint,
-    created_user uuid,
-    tenant_id uuid,
-    updated_time bigint,
-    updated_user uuid,
-    remark character varying(255) COLLATE pg_catalog."default",
-    tenant_menu_id uuid,
-    tenant_sys_role_id uuid,
-    flg character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT tb_tenant_menu_role_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.tb_tenant_menu_role
-    OWNER to postgres;
-
-
-
--- Table: public.tb_tenant_sys_role
-
--- DROP TABLE IF EXISTS public.tb_tenant_sys_role;
-
-CREATE TABLE IF NOT EXISTS public.tb_tenant_sys_role
-(
-    id uuid NOT NULL,
-    created_time bigint,
-    created_user uuid,
-    tenant_id uuid,
-    updated_time bigint,
-    updated_user uuid,
-    role_code character varying(255) COLLATE pg_catalog."default",
-    role_desc character varying(255) COLLATE pg_catalog."default",
-    role_name character varying(255) COLLATE pg_catalog."default",
-    factory_id uuid,
-    system_tab character varying(255) COLLATE pg_catalog."default",
-    type character varying(255) COLLATE pg_catalog."default",
-    CONSTRAINT tb_tenant_sys_role_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.tb_tenant_sys_role
-    OWNER to postgres;
-
-
-
--- Table: public.tb_user_menu_role
-
--- DROP TABLE IF EXISTS public.tb_user_menu_role;
-
-CREATE TABLE IF NOT EXISTS public.tb_user_menu_role
-(
-    id uuid NOT NULL,
-    created_time bigint,
-    created_user uuid,
-    updated_time bigint,
-    updated_user uuid,
-    remark character varying(255) COLLATE pg_catalog."default",
-    tenant_sys_role_id uuid,
-    user_id uuid,
-    tenant_id uuid,
-    CONSTRAINT tb_user_menu_role_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.tb_user_menu_role
-    OWNER to postgres;
 
 
 
@@ -1049,7 +871,97 @@ ALTER TABLE IF EXISTS public.hs_energy_chart
 
 
 
-----新增表用于趋势图的统计时间差
+-- Table: public.hs_energy_hour
+
+-- DROP TABLE IF EXISTS public.hs_energy_hour;
+
+CREATE TABLE IF NOT EXISTS public.hs_energy_hour
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    capacity_added_value character varying(255) COLLATE pg_catalog."default",
+    capacity_first_time bigint,
+    capacity_first_value character varying(255) COLLATE pg_catalog."default",
+    capacity_last_time bigint,
+    capacity_value character varying(255) COLLATE pg_catalog."default",
+    date date,
+    electric_added_value character varying(255) COLLATE pg_catalog."default",
+    electric_first_time bigint,
+    electric_first_value character varying(255) COLLATE pg_catalog."default",
+    electric_last_time bigint,
+    electric_value character varying(255) COLLATE pg_catalog."default",
+    entity_id uuid,
+    gas_added_value character varying(255) COLLATE pg_catalog."default",
+    gas_first_time bigint,
+    gas_first_value character varying(255) COLLATE pg_catalog."default",
+    gas_last_time bigint,
+    gas_value character varying(255) COLLATE pg_catalog."default",
+    ts bigint,
+    water_added_value character varying(255) COLLATE pg_catalog."default",
+    water_first_time bigint,
+    water_first_value character varying(255) COLLATE pg_catalog."default",
+    water_last_time bigint,
+    water_value character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_energy_hour_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_energy_hour
+    OWNER to postgres;
+
+
+
+
+-- Table: public.hs_energy_minute
+
+-- DROP TABLE IF EXISTS public.hs_energy_minute;
+
+CREATE TABLE IF NOT EXISTS public.hs_energy_minute
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    capacity_added_value character varying(255) COLLATE pg_catalog."default",
+    capacity_first_time bigint,
+    capacity_first_value character varying(255) COLLATE pg_catalog."default",
+    capacity_last_time bigint,
+    capacity_value character varying(255) COLLATE pg_catalog."default",
+    date date,
+    electric_added_value character varying(255) COLLATE pg_catalog."default",
+    electric_first_time bigint,
+    electric_first_value character varying(255) COLLATE pg_catalog."default",
+    electric_last_time bigint,
+    electric_value character varying(255) COLLATE pg_catalog."default",
+    entity_id uuid,
+    gas_added_value character varying(255) COLLATE pg_catalog."default",
+    gas_first_time bigint,
+    gas_first_value character varying(255) COLLATE pg_catalog."default",
+    gas_last_time bigint,
+    gas_value character varying(255) COLLATE pg_catalog."default",
+    ts bigint,
+    water_added_value character varying(255) COLLATE pg_catalog."default",
+    water_first_time bigint,
+    water_first_value character varying(255) COLLATE pg_catalog."default",
+    water_last_time bigint,
+    water_value character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_energy_minute_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_energy_minute
+    OWNER to postgres;
+
+
+
 -- Table: public.hs_enery_time_gap
 
 -- DROP TABLE IF EXISTS public.hs_enery_time_gap;
@@ -1074,6 +986,606 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.hs_enery_time_gap
     OWNER to postgres;
+
+
+
+
+-- Table: public.hs_factory
+
+-- DROP TABLE IF EXISTS public.hs_factory;
+
+CREATE TABLE IF NOT EXISTS public.hs_factory
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    address character varying(1000) COLLATE pg_catalog."default",
+    area character varying(1000) COLLATE pg_catalog."default",
+    city character varying(1000) COLLATE pg_catalog."default",
+    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    country character varying(255) COLLATE pg_catalog."default",
+    created_user uuid,
+    del_flag character varying(255) COLLATE pg_catalog."default",
+    email character varying(255) COLLATE pg_catalog."default",
+    latitude character varying(255) COLLATE pg_catalog."default",
+    logo_icon character varying(2000000) COLLATE pg_catalog."default",
+    logo_images character varying(1000000) COLLATE pg_catalog."default",
+    longitude character varying(255) COLLATE pg_catalog."default",
+    mobile character varying(255) COLLATE pg_catalog."default",
+    name character varying(255) COLLATE pg_catalog."default",
+    postal_code character varying(255) COLLATE pg_catalog."default",
+    province character varying(1000) COLLATE pg_catalog."default",
+    remark character varying(1000) COLLATE pg_catalog."default",
+    tenant_id uuid NOT NULL,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    updated_user uuid,
+    admin_user_id uuid,
+    admin_user_name character varying(255) COLLATE pg_catalog."default",
+    additional_info character varying COLLATE pg_catalog."default",
+    CONSTRAINT tb_factory_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_factory
+    OWNER to postgres;
+
+COMMENT ON COLUMN public.hs_factory.area
+    IS '区';
+
+COMMENT ON COLUMN public.hs_factory.city
+    IS '市';
+
+COMMENT ON COLUMN public.hs_factory.province
+    IS '省';
+
+
+
+
+
+
+-- Table: public.hs_factory_url_app_table
+
+-- DROP TABLE IF EXISTS public.hs_factory_url_app_table;
+
+CREATE TABLE IF NOT EXISTS public.hs_factory_url_app_table
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    app_url character varying(255) COLLATE pg_catalog."default",
+    factory_id character varying(255) COLLATE pg_catalog."default",
+    notes character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_factory_url_app_table_pkey PRIMARY KEY (id),
+    CONSTRAINT app_url_index UNIQUE (app_url)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_factory_url_app_table
+    OWNER to postgres;
+
+
+
+
+
+
+-- Table: public.hs_file
+
+-- DROP TABLE IF EXISTS public.hs_file;
+
+CREATE TABLE IF NOT EXISTS public.hs_file
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    tenant_id uuid,
+    file_name character varying(255) COLLATE pg_catalog."default",
+    check_sum character varying(5000) COLLATE pg_catalog."default",
+    content_type character varying(255) COLLATE pg_catalog."default",
+    checksum_algorithm character varying(32) COLLATE pg_catalog."default",
+    data_size bigint,
+    additional_info character varying COLLATE pg_catalog."default",
+    scope character varying(255) COLLATE pg_catalog."default",
+    entity_id uuid,
+    location character varying(1000) COLLATE pg_catalog."default",
+    CONSTRAINT hs_file_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_file
+    OWNER to postgres;
+
+COMMENT ON COLUMN public.hs_file.id
+    IS 'id';
+
+COMMENT ON COLUMN public.hs_file.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_file.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_file.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_file.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_file.tenant_id
+    IS '租户Id';
+
+COMMENT ON COLUMN public.hs_file.file_name
+    IS '文件名';
+
+COMMENT ON COLUMN public.hs_file.check_sum
+    IS '校验和';
+
+COMMENT ON COLUMN public.hs_file.content_type
+    IS '类型';
+
+COMMENT ON COLUMN public.hs_file.checksum_algorithm
+    IS '校验和算法';
+
+COMMENT ON COLUMN public.hs_file.data_size
+    IS '大小';
+
+COMMENT ON COLUMN public.hs_file.additional_info
+    IS '附加信息';
+
+COMMENT ON COLUMN public.hs_file.scope
+    IS '范围';
+
+COMMENT ON COLUMN public.hs_file.entity_id
+    IS '实体Id';
+
+COMMENT ON COLUMN public.hs_file.location
+    IS '存储位置';
+
+
+
+
+-- Table: public.hs_init
+
+-- DROP TABLE IF EXISTS public.hs_init;
+
+CREATE TABLE IF NOT EXISTS public.hs_init
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    init_data jsonb,
+    scope character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_init_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_init
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_init
+    IS '初始化';
+
+COMMENT ON COLUMN public.hs_init.id
+    IS 'Id';
+
+COMMENT ON COLUMN public.hs_init.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_init.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_init.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_init.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_init.init_data
+    IS '初始化数据';
+
+COMMENT ON COLUMN public.hs_init.scope
+    IS '范围';
+
+
+
+
+
+
+-- Table: public.hs_order
+
+-- DROP TABLE IF EXISTS public.hs_order;
+
+CREATE TABLE IF NOT EXISTS public.hs_order
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    additional_amount numeric(16,2),
+    biz_practice character varying(255) COLLATE pg_catalog."default",
+    comment character varying(255) COLLATE pg_catalog."default",
+    contract_no character varying(255) COLLATE pg_catalog."default",
+    currency character varying(255) COLLATE pg_catalog."default",
+    customer character varying(255) COLLATE pg_catalog."default",
+    customer_order_no character varying(255) COLLATE pg_catalog."default",
+    emergency_degree character varying(255) COLLATE pg_catalog."default",
+    exchange_rate character varying(255) COLLATE pg_catalog."default",
+    factory_id uuid,
+    intended_time bigint,
+    merchandiser character varying(255) COLLATE pg_catalog."default",
+    num numeric(64,2),
+    order_no character varying(255) COLLATE pg_catalog."default",
+    over_shipment character varying(255) COLLATE pg_catalog."default",
+    payment_method character varying(255) COLLATE pg_catalog."default",
+    production_line_id uuid,
+    ref_order_no character varying(255) COLLATE pg_catalog."default",
+    salesman character varying(255) COLLATE pg_catalog."default",
+    season character varying(255) COLLATE pg_catalog."default",
+    short_shipment character varying(255) COLLATE pg_catalog."default",
+    standard_available_time numeric(64,2),
+    take_time bigint,
+    tax_rate character varying(255) COLLATE pg_catalog."default",
+    taxes character varying(255) COLLATE pg_catalog."default",
+    technological_requirements character varying(255) COLLATE pg_catalog."default",
+    tenant_id uuid,
+    total numeric(64,2),
+    total_amount numeric(16,2),
+    type character varying(255) COLLATE pg_catalog."default",
+    unit character varying(255) COLLATE pg_catalog."default",
+    unit_price_type character varying(255) COLLATE pg_catalog."default",
+    workshop_id uuid,
+    CONSTRAINT hs_dict_data_copy1_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_hs_order_no UNIQUE (tenant_id, order_no)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_order
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_order
+    IS '订单';
+
+COMMENT ON COLUMN public.hs_order.id
+    IS 'Id';
+
+COMMENT ON COLUMN public.hs_order.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_order.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_order.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_order.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_order.additional_amount
+    IS '附加金额';
+
+COMMENT ON COLUMN public.hs_order.biz_practice
+    IS '经营方式';
+
+COMMENT ON COLUMN public.hs_order.comment
+    IS '备注';
+
+COMMENT ON COLUMN public.hs_order.contract_no
+    IS '合同号';
+
+COMMENT ON COLUMN public.hs_order.currency
+    IS '币种';
+
+COMMENT ON COLUMN public.hs_order.customer
+    IS '客户';
+
+COMMENT ON COLUMN public.hs_order.customer_order_no
+    IS '客户订单号';
+
+COMMENT ON COLUMN public.hs_order.emergency_degree
+    IS '紧急程度';
+
+COMMENT ON COLUMN public.hs_order.exchange_rate
+    IS '汇率';
+
+COMMENT ON COLUMN public.hs_order.factory_id
+    IS '工厂id';
+
+COMMENT ON COLUMN public.hs_order.intended_time
+    IS '计划完工时间';
+
+COMMENT ON COLUMN public.hs_order.merchandiser
+    IS '跟单员';
+
+COMMENT ON COLUMN public.hs_order.num
+    IS '数量';
+
+COMMENT ON COLUMN public.hs_order.order_no
+    IS '订单号';
+
+COMMENT ON COLUMN public.hs_order.over_shipment
+    IS '溢装';
+
+COMMENT ON COLUMN public.hs_order.payment_method
+    IS '付款方式';
+
+COMMENT ON COLUMN public.hs_order.production_line_id
+    IS '产线id';
+
+COMMENT ON COLUMN public.hs_order.ref_order_no
+    IS '参考合同号';
+
+COMMENT ON COLUMN public.hs_order.salesman
+    IS '销售员';
+
+COMMENT ON COLUMN public.hs_order.season
+    IS '季节';
+
+COMMENT ON COLUMN public.hs_order.short_shipment
+    IS '短装';
+
+COMMENT ON COLUMN public.hs_order.standard_available_time
+    IS '标准可用时间';
+
+COMMENT ON COLUMN public.hs_order.take_time
+    IS '接单日期';
+
+COMMENT ON COLUMN public.hs_order.tax_rate
+    IS '税率';
+
+COMMENT ON COLUMN public.hs_order.taxes
+    IS '税种';
+
+COMMENT ON COLUMN public.hs_order.technological_requirements
+    IS '工艺要求';
+
+COMMENT ON COLUMN public.hs_order.tenant_id
+    IS '租户Id';
+
+COMMENT ON COLUMN public.hs_order.total
+    IS '总数量';
+
+COMMENT ON COLUMN public.hs_order.total_amount
+    IS '总金额';
+
+COMMENT ON COLUMN public.hs_order.type
+    IS '订单类型';
+
+COMMENT ON COLUMN public.hs_order.unit
+    IS '单位';
+
+COMMENT ON COLUMN public.hs_order.unit_price_type
+    IS '单价类型';
+
+COMMENT ON COLUMN public.hs_order.workshop_id
+    IS '车间Id';
+-- Index: hs_order_tenant_id
+
+-- DROP INDEX IF EXISTS public.hs_order_tenant_id;
+
+CREATE INDEX IF NOT EXISTS hs_order_tenant_id
+    ON public.hs_order USING btree
+    (tenant_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+
+
+
+-- Table: public.hs_order_plan
+
+-- DROP TABLE IF EXISTS public.hs_order_plan;
+
+CREATE TABLE IF NOT EXISTS public.hs_order_plan
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    actual_end_time bigint,
+    actual_start_time bigint,
+    device_id uuid NOT NULL,
+    enabled boolean NOT NULL DEFAULT false,
+    intended_end_time bigint,
+    intended_start_time bigint,
+    order_id uuid NOT NULL,
+    sort integer DEFAULT 0,
+    tenant_id uuid NOT NULL,
+    actual_capacity character varying(255) COLLATE pg_catalog."default",
+    intended_capacity character varying(255) COLLATE pg_catalog."default",
+    maintain_start_time bigint,
+    maintain_end_time bigint,
+    factory_id uuid,
+    production_line_id uuid,
+    workshop_id uuid,
+    CONSTRAINT hs_order_copy1_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_order_plan
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_order_plan
+    IS '订单-设备关联表';
+
+COMMENT ON COLUMN public.hs_order_plan.id
+    IS 'Id';
+
+COMMENT ON COLUMN public.hs_order_plan.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_order_plan.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_order_plan.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_order_plan.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_order_plan.actual_end_time
+    IS '实际结束时间';
+
+COMMENT ON COLUMN public.hs_order_plan.actual_start_time
+    IS '实际开始时间';
+
+COMMENT ON COLUMN public.hs_order_plan.device_id
+    IS '设备Id';
+
+COMMENT ON COLUMN public.hs_order_plan.enabled
+    IS '是否参与运算';
+
+COMMENT ON COLUMN public.hs_order_plan.intended_end_time
+    IS '计划结束时间';
+
+COMMENT ON COLUMN public.hs_order_plan.intended_start_time
+    IS '计划开始时间';
+
+COMMENT ON COLUMN public.hs_order_plan.order_id
+    IS '订单Id';
+
+COMMENT ON COLUMN public.hs_order_plan.sort
+    IS '排序';
+
+COMMENT ON COLUMN public.hs_order_plan.tenant_id
+    IS '租户Id';
+
+COMMENT ON COLUMN public.hs_order_plan.actual_capacity
+    IS '实际产量';
+
+COMMENT ON COLUMN public.hs_order_plan.intended_capacity
+    IS '计划产量';
+
+COMMENT ON COLUMN public.hs_order_plan.maintain_start_time
+    IS '维护开始时间';
+
+COMMENT ON COLUMN public.hs_order_plan.maintain_end_time
+    IS '维护结束时间';
+
+COMMENT ON COLUMN public.hs_order_plan.factory_id
+    IS '工厂Id';
+
+COMMENT ON COLUMN public.hs_order_plan.production_line_id
+    IS '产线Id';
+
+COMMENT ON COLUMN public.hs_order_plan.workshop_id
+    IS '车间Id';
+-- Index: hs_order_device_tenant_id
+
+-- DROP INDEX IF EXISTS public.hs_order_device_tenant_id;
+
+CREATE INDEX IF NOT EXISTS hs_order_device_tenant_id
+    ON public.hs_order_plan USING btree
+    (tenant_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+
+
+
+-- Table: public.hs_production_calendar
+
+-- DROP TABLE IF EXISTS public.hs_production_calendar;
+
+CREATE TABLE IF NOT EXISTS public.hs_production_calendar
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    created_user character varying(255) COLLATE pg_catalog."default",
+    updated_time bigint,
+    updated_user character varying(255) COLLATE pg_catalog."default",
+    tenant_id uuid,
+    device_id uuid NOT NULL,
+    start_time bigint,
+    end_time bigint,
+    factory_id uuid,
+    device_name character varying(255) COLLATE pg_catalog."default",
+    factory_name character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT hs_dict_device_copy1_pkey1 PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_production_calendar
+    OWNER to postgres;
+
+COMMENT ON TABLE public.hs_production_calendar
+    IS '设备字典';
+
+COMMENT ON COLUMN public.hs_production_calendar.id
+    IS 'Id';
+
+COMMENT ON COLUMN public.hs_production_calendar.created_time
+    IS '创建时间';
+
+COMMENT ON COLUMN public.hs_production_calendar.created_user
+    IS '创建人';
+
+COMMENT ON COLUMN public.hs_production_calendar.updated_time
+    IS '更新时间';
+
+COMMENT ON COLUMN public.hs_production_calendar.updated_user
+    IS '更新人';
+
+COMMENT ON COLUMN public.hs_production_calendar.tenant_id
+    IS '租户Id';
+
+COMMENT ON COLUMN public.hs_production_calendar.device_id
+    IS '设备Id';
+
+COMMENT ON COLUMN public.hs_production_calendar.start_time
+    IS '开始时间';
+
+COMMENT ON COLUMN public.hs_production_calendar.end_time
+    IS '结束时间';
+
+
+
+
+
+
+-- Table: public.hs_production_line
+
+-- DROP TABLE IF EXISTS public.hs_production_line;
+
+CREATE TABLE IF NOT EXISTS public.hs_production_line
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    bg_images character varying(100000) COLLATE pg_catalog."default",
+    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    created_user uuid,
+    del_flag character varying(255) COLLATE pg_catalog."default",
+    factory_id uuid NOT NULL,
+    logo_icon character varying(255) COLLATE pg_catalog."default",
+    logo_images character varying(1000000) COLLATE pg_catalog."default",
+    name character varying(255) COLLATE pg_catalog."default",
+    remark character varying(1000) COLLATE pg_catalog."default",
+    tenant_id uuid NOT NULL,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    updated_user uuid,
+    workshop_id uuid NOT NULL,
+    additional_info character varying COLLATE pg_catalog."default",
+    CONSTRAINT tb_production_line_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_production_line
+    OWNER to postgres;
+
+
 
 
 
@@ -1125,6 +1637,330 @@ ALTER TABLE IF EXISTS public.hs_statistical_data
 
 
 
+
+
+ -- Table: public.hs_system_version
+
+ -- DROP TABLE IF EXISTS public.hs_system_version;
+
+ CREATE TABLE IF NOT EXISTS public.hs_system_version
+ (
+     id uuid NOT NULL,
+     created_time bigint NOT NULL,
+     comment character varying(255) COLLATE pg_catalog."default",
+     created_user uuid,
+     publish_time bigint NOT NULL,
+     tenant_id uuid NOT NULL,
+     updated_time character varying(255) COLLATE pg_catalog."default",
+     updated_user uuid,
+     version character varying(225) COLLATE pg_catalog."default" NOT NULL DEFAULT '0.0.1'::character varying,
+     CONSTRAINT hs_system_version_pkey PRIMARY KEY (id)
+ )
+
+ TABLESPACE pg_default;
+
+ ALTER TABLE IF EXISTS public.hs_system_version
+     OWNER to postgres;
+
+ COMMENT ON TABLE public.hs_system_version
+     IS '系统版本表';
+
+
+
+
+
+
+
+
+-- Table: public.hs_workshop
+
+-- DROP TABLE IF EXISTS public.hs_workshop;
+
+CREATE TABLE IF NOT EXISTS public.hs_workshop
+(
+    id uuid NOT NULL,
+    created_time bigint NOT NULL,
+    bg_images character varying(1000000) COLLATE pg_catalog."default",
+    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    created_user uuid,
+    del_flag character varying(255) COLLATE pg_catalog."default",
+    factory_id uuid NOT NULL,
+    logo_icon character varying(255) COLLATE pg_catalog."default",
+    logo_images character varying(1000000) COLLATE pg_catalog."default",
+    name character varying(255) COLLATE pg_catalog."default",
+    remark character varying(1000) COLLATE pg_catalog."default",
+    tenant_id uuid NOT NULL,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    updated_user uuid,
+    additional_info character varying COLLATE pg_catalog."default",
+    CONSTRAINT tb_workshop_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_workshop
+    OWNER to postgres;
+
+
+
+
+
+-- Table: public.tb_energy_chart
+
+-- DROP TABLE IF EXISTS public.tb_energy_chart;
+
+CREATE TABLE IF NOT EXISTS public.tb_energy_chart
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    capacity_added_value character varying(255) COLLATE pg_catalog."default",
+    capacity_first_time bigint,
+    capacity_first_value character varying(255) COLLATE pg_catalog."default",
+    capacity_last_time bigint,
+    capacity_value character varying(255) COLLATE pg_catalog."default",
+    date date,
+    electric_added_value character varying(255) COLLATE pg_catalog."default",
+    electric_first_time bigint,
+    electric_first_value character varying(255) COLLATE pg_catalog."default",
+    electric_last_time bigint,
+    electric_value character varying(255) COLLATE pg_catalog."default",
+    entity_id uuid,
+    gas_added_value character varying(255) COLLATE pg_catalog."default",
+    gas_first_time bigint,
+    gas_first_value character varying(255) COLLATE pg_catalog."default",
+    gas_last_time bigint,
+    gas_value character varying(255) COLLATE pg_catalog."default",
+    ts bigint,
+    water_added_value character varying(255) COLLATE pg_catalog."default",
+    water_first_time bigint,
+    water_first_value character varying(255) COLLATE pg_catalog."default",
+    water_last_time bigint,
+    water_value character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT tb_energy_chart_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_energy_chart
+    OWNER to postgres;
+
+
+
+
+
+
+-- Table: public.tb_enery_time_gap
+
+-- DROP TABLE IF EXISTS public.tb_enery_time_gap;
+
+CREATE TABLE IF NOT EXISTS public.tb_enery_time_gap
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    entity_id uuid,
+    key_name character varying(255) COLLATE pg_catalog."default",
+    time_gap bigint,
+    ts bigint,
+    value character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT tb_enery_time_gap_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_enery_time_gap
+    OWNER to postgres;
+
+
+
+
+
+-- Table: public.tb_menu
+
+-- DROP TABLE IF EXISTS public.tb_menu;
+
+CREATE TABLE IF NOT EXISTS public.tb_menu
+(
+    id uuid NOT NULL,
+    code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(255) COLLATE pg_catalog."default",
+    level bigint NOT NULL,
+    sort bigint NOT NULL,
+    url character varying(1000) COLLATE pg_catalog."default",
+    parent_id uuid,
+    menu_icon character varying(255) COLLATE pg_catalog."default",
+    menu_images character varying(1000) COLLATE pg_catalog."default",
+    region character varying(255) COLLATE pg_catalog."default",
+    created_time bigint NOT NULL,
+    created_user uuid,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    updated_user uuid,
+    menu_type character varying(255) COLLATE pg_catalog."default",
+    path character varying(255) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
+    is_button boolean DEFAULT false,
+    lang_key character varying(255) COLLATE pg_catalog."default"
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_menu
+    OWNER to postgres;
+
+
+
+
+
+
+-- Table: public.tb_tenant_menu
+
+-- DROP TABLE IF EXISTS public.tb_tenant_menu;
+
+CREATE TABLE IF NOT EXISTS public.tb_tenant_menu
+(
+    id uuid NOT NULL,
+    tenant_id uuid NOT NULL,
+    sys_menu_id uuid,
+    sys_menu_code character varying(255) COLLATE pg_catalog."default",
+    sys_menu_name character varying(255) COLLATE pg_catalog."default",
+    tenant_menu_name character varying(255) COLLATE pg_catalog."default",
+    tenant_menu_code character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    level bigint NOT NULL,
+    sort bigint NOT NULL,
+    url character varying(1000) COLLATE pg_catalog."default",
+    parent_id uuid,
+    tenant_menu_icon character varying(255) COLLATE pg_catalog."default",
+    tenant_menu_images character varying(1000) COLLATE pg_catalog."default",
+    region character varying(255) COLLATE pg_catalog."default",
+    created_time bigint NOT NULL,
+    created_user uuid,
+    updated_time character varying(255) COLLATE pg_catalog."default",
+    updated_user uuid,
+    menu_type character varying(255) COLLATE pg_catalog."default",
+    path character varying(255) COLLATE pg_catalog."default" DEFAULT NULL::character varying,
+    is_button boolean DEFAULT false,
+    lang_key character varying(255) COLLATE pg_catalog."default",
+    has_children boolean DEFAULT false,
+    CONSTRAINT tb_tenant_menu_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_tenant_menu
+    OWNER to postgres;
+
+
+
+
+
+
+
+
+-- Table: public.tb_tenant_menu_role
+
+-- DROP TABLE IF EXISTS public.tb_tenant_menu_role;
+
+CREATE TABLE IF NOT EXISTS public.tb_tenant_menu_role
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    remark character varying(255) COLLATE pg_catalog."default",
+    tenant_menu_id uuid,
+    tenant_sys_role_id uuid,
+    flg character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT tb_tenant_menu_role_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_tenant_menu_role
+    OWNER to postgres;
+
+
+
+
+
+
+
+-- Table: public.tb_tenant_sys_role
+
+-- DROP TABLE IF EXISTS public.tb_tenant_sys_role;
+
+CREATE TABLE IF NOT EXISTS public.tb_tenant_sys_role
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    tenant_id uuid,
+    updated_time bigint,
+    updated_user uuid,
+    role_code character varying(255) COLLATE pg_catalog."default",
+    role_desc character varying(255) COLLATE pg_catalog."default",
+    role_name character varying(255) COLLATE pg_catalog."default",
+    factory_id uuid,
+    system_tab character varying(255) COLLATE pg_catalog."default",
+    type character varying(255) COLLATE pg_catalog."default",
+    operation_type integer DEFAULT 0,
+    user_level integer DEFAULT 0,
+    CONSTRAINT tb_tenant_sys_role_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_tenant_sys_role
+    OWNER to postgres;
+
+
+
+
+
+
+
+
+
+-- Table: public.tb_user_menu_role
+
+-- DROP TABLE IF EXISTS public.tb_user_menu_role;
+
+CREATE TABLE IF NOT EXISTS public.tb_user_menu_role
+(
+    id uuid NOT NULL,
+    created_time bigint,
+    created_user uuid,
+    updated_time bigint,
+    updated_user uuid,
+    remark character varying(255) COLLATE pg_catalog."default",
+    tenant_sys_role_id uuid,
+    user_id uuid,
+    tenant_id uuid,
+    CONSTRAINT tb_user_menu_role_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.tb_user_menu_role
+    OWNER to postgres;
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------thingsboard原生表的扩展--------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 --设备表新增字段
 ALTER TABLE public.device ADD COLUMN production_line_id uuid;
 ALTER TABLE public.device ADD COLUMN workshop_id uuid;
@@ -1156,25 +1992,33 @@ ALTER TABLE public.tb_user
     ADD COLUMN phone_number character varying(255) COLLATE pg_catalog."default";
 ALTER TABLE public.tb_user
     ADD COLUMN active_status character varying(255) COLLATE pg_catalog."default";
-
---2021-11-22新增2个字段
 ALTER TABLE public.tb_user
     ADD COLUMN type character varying(255) COLLATE pg_catalog."default";
 ALTER TABLE public.tb_user
     ADD COLUMN factory_id uuid;
+ALTER TABLE tb_user
+    ADD COLUMN user_level integer DEFAULT 0;
+ALTER TABLE tb_user
+    ADD COLUMN operation_type integer DEFAULT 0;
 
 
-----修改表结构得 v1.2需 涉及到需求
-ALTER TABLE tb_user add COLUMN user_level integer DEFAULT 0;
+-----租户表
+alter table tenant add county_level varchar(255);
+alter table tenant add longitude varchar(255);
+alter table tenant add latitude varchar(255);
 
 
 
-alter table tenant
-    add county_level varchar(255);
-alter table tenant
-    add longitude varchar(255);
-alter table tenant
-    add latitude varchar(255);
+
+
+
+
+
+
+
+--设备字典属性初始数据
+INSERT INTO "public"."hs_init"("id", "init_data", "scope", "created_time", "created_user", "updated_time", "updated_user") VALUES ('a6bcd176-7538-402c-9035-5b966888faa0', '[{"id": null, "name": "能耗", "groupPropertyList": [{"id": null, "name": "water", "unit": "T", "title": "耗水量", "content": "0", "createdTime": null}, {"id": null, "name": "electric", "unit": "KWH", "title": "耗电量", "content": "0", "createdTime": null}, {"id": null, "name": "gas", "unit": "T", "title": "耗气量", "content": "0", "createdTime": null}]}, {"id": null, "name": "产能", "groupPropertyList": [{"id": null, "name": "capacities", "unit": "", "title": "总产能", "content": "0", "createdTime": null}]}]', 'DICT_DEVICE_GROUP', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9');
+
 
 
 
@@ -1252,9 +2096,54 @@ INSERT INTO "public"."tb_menu" ("id", "code", "name", "level", "sort", "url", "p
 ('6d9dff30-46c7-11ec-9d4c-d5cce199ce69', 'XTCD1637058289313', '工厂管理 - 删除工厂', 1, 1, NULL, '4ecf6b00-412e-11ec-8ed3-dda66ae3bde5', NULL, NULL, 'Global', 1640050431742, 'fc4b0e50-0c5a-11ec-bdcf-83a250730c01', '1640050431742', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', NULL, 't', 'device-mng.delete-factory'),
 ('1d8055a0-61fe-11ec-8332-7b8df1e64f2d', 'XTCD1640050458615', '工厂管理 - 删除车间', 1, 1, NULL, '4ecf6b00-412e-11ec-8ed3-dda66ae3bde5', NULL, NULL, 'Global', 1640050458619, '265dd610-40a8-11ec-afb6-7fee9c405457', '1640050458619', NULL, 'PC', NULL, 't', 'device-mng.delete-work-shop'),
 ('2f16e5e0-61fe-11ec-8332-7b8df1e64f2d', 'XTCD1640050488125', '工厂管理 - 删除产线', 1, 1, NULL, '4ecf6b00-412e-11ec-8ed3-dda66ae3bde5', NULL, NULL, 'Global', 1640050488127, '265dd610-40a8-11ec-afb6-7fee9c405457', '1640050488127', NULL, 'PC', NULL, 't', 'device-mng.delete-prod-line'),
-('43a07760-61fe-11ec-8332-7b8df1e64f2d', 'XTCD1640050522581', '工厂管理 - 删除设备', 1, 1, NULL, '4ecf6b00-412e-11ec-8ed3-dda66ae3bde5', NULL, NULL, 'Global', 1640050522582, '265dd610-40a8-11ec-afb6-7fee9c405457', '1640050522582', NULL, 'PC', NULL, 't', 'device-mng.delete-device');
+('43a07760-61fe-11ec-8332-7b8df1e64f2d', 'XTCD1640050522581', '工厂管理 - 删除设备', 1, 1, NULL, '4ecf6b00-412e-11ec-8ed3-dda66ae3bde5', NULL, NULL, 'Global', 1640050522582, '265dd610-40a8-11ec-afb6-7fee9c405457', '1640050522582', NULL, 'PC', NULL, 't', 'device-mng.delete-device'),
+('4bb5f1a0-9dd6-11ec-a79b-07ce2c030081', 'XTCD1646630426041', '生产管理 - 管理日历', 0, 1, NULL, NULL, NULL, NULL, 'Global', 1647833476427, '265dd610-40a8-11ec-afb6-7fee9c405457', '1647833476427', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', NULL, 't', 'device-mng.mng-calendars'),
+('2e0c8f60-9dd6-11ec-9386-9d079fb5289f', 'XTCD1646630376277', '生产管理', 0, 1, NULL, NULL, 'mdi:prod-mng', NULL, 'Global', 1647833556149, '265dd610-40a8-11ec-afb6-7fee9c405457', '1647833556149', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', '/deviceManagement/prodManagement', 'f', 'device-mng.prod-mng'),
+('1346b330-6eb1-11ec-9772-d79aa7bd0c88', 'XTCD1641446735331', '角色管理 - 查看', 1, 1, NULL, 'c84605b0-3e0a-11ec-866a-059202e55853', NULL, NULL, 'Global', 1641448524178, '825fafb0-694d-11ec-b4a8-134013dcacfd', '1641448524178', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('df6720e0-6eb0-11ec-9772-d79aa7bd0c88', 'XTCD1641446648301', '用户管理 - 查看', 1, 1, NULL, 'aa2af5e0-3e0a-11ec-866a-059202e55853', NULL, NULL, 'Global', 1641448539990, '825fafb0-694d-11ec-b4a8-134013dcacfd', '1641448539990', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('b680da40-6eb0-11ec-9772-d79aa7bd0c88', 'XTCD1641446579683', '报警规则 - 查看', 1, 1, NULL, '763c6cb0-4750-11ec-bee8-51118663de80', NULL, NULL, 'Global', 1641448560803, '825fafb0-694d-11ec-b4a8-134013dcacfd', '1641448560803', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('ab0b80c0-6eb0-11ec-9772-d79aa7bd0c88', 'XTCD1641446560460', '报警记录 - 查看', 1, 1, NULL, '32db2320-3e0a-11ec-866a-059202e55853', NULL, NULL, 'Global', 1641448578095, '825fafb0-694d-11ec-b4a8-134013dcacfd', '1641448578095', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('719ce590-6eb0-11ec-9772-d79aa7bd0c88', 'XTCD1641446464104', '工厂管理 - 查看', 1, 1, NULL, '4ecf6b00-412e-11ec-8ed3-dda66ae3bde5', NULL, NULL, 'Global', 1641448590223, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641448590223', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('459561c0-6eb0-11ec-9772-d79aa7bd0c88', 'XTCD1641446390236', '设备字典 - 查看', 1, 1, NULL, 'c3b93c80-3e08-11ec-866a-059202e55853', NULL, NULL, 'Global', 1641448603623, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641448603623', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('e95bc340-6eaf-11ec-9772-d79aa7bd0c88', 'XTCD1641446235507', '数据字典 - 查看', 1, 1, NULL, '2df216f0-3d49-11ec-9809-df813b08b61b', NULL, NULL, 'Global', 1641448615681, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641448615681', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', NULL),
+('92c431b0-6eb5-11ec-9772-d79aa7bd0c88', 'XTCD1641448667211', '报警规则 - 添加', 1, 1, NULL, '763c6cb0-4750-11ec-bee8-51118663de80', NULL, NULL, 'Global', 1641449905099, '50570d90-6eae-11ec-9772-d79aa7bd0c88', '1641449905099', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', 'device-monitor.add-alarm-rule'),
+('dfd5f601-6eb5-11ec-9772-d79aa7bd0c88', 'XTCD1641448796512', '报警规则 - 删除', 1, 1, NULL, '763c6cb0-4750-11ec-bee8-51118663de80', NULL, NULL, 'Global', 1641449935238, '50570d90-6eae-11ec-9772-d79aa7bd0c88', '1641449935238', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', 'action.delete'),
+('b0c9e4c0-6eb5-11ec-9772-d79aa7bd0c88', 'XTCD1641448717579', '报警规则 - 编辑', 1, 1, NULL, '763c6cb0-4750-11ec-bee8-51118663de80', NULL, NULL, 'Global', 1641449956341, '50570d90-6eae-11ec-9772-d79aa7bd0c88', '1641449956341', '50570d90-6eae-11ec-9772-d79aa7bd0c88', 'PC', NULL, 't', 'action.edit'),
+('34ca7f50-71b8-11ec-b62f-bd99beea2ad2', 'XTCD1641779651509', '订单列表 - 删除', 1, 1, NULL, '2e5837d0-71b7-11ec-b62f-bd99beea2ad2', NULL, NULL, 'Global', 1641779651544, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641779651544', NULL, 'PC', NULL, 't', 'action.delete'),
+('f0b7bd50-71b7-11ec-b62f-bd99beea2ad2', 'XTCD1641779537308', '订单列表 - 编辑', 1, 1, NULL, '2e5837d0-71b7-11ec-b62f-bd99beea2ad2', NULL, NULL, 'Global', 1641779537328, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641779537328', NULL, 'PC', NULL, 't', 'action.edit'),
+('de594930-71b7-11ec-b62f-bd99beea2ad2', 'XTCD1641779506484', '订单列表 - 添加订单', 1, 1, NULL, '2e5837d0-71b7-11ec-b62f-bd99beea2ad2', NULL, NULL, 'Global', 1641779506516, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641779506516', NULL, 'PC', NULL, 't', 'order.add-order'),
+('badcd030-71b7-11ec-b62f-bd99beea2ad2', 'XTCD1641779446942', '订单管理 - 订单产能监控', 1, 1, NULL, 'd296d690-71b6-11ec-b62f-bd99beea2ad2', 'mdi:order-capacity', NULL, 'Global', 1641779446985, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641779446985', NULL, 'PC', '/orderFormManagement/orderCapacity', 'f', 'order.order-capacity'),
+('2e5837d0-71b7-11ec-b62f-bd99beea2ad2', 'XTCD1641779211199', '订单管理 - 订单列表', 1, 1, NULL, 'd296d690-71b6-11ec-b62f-bd99beea2ad2', 'mdi:order', NULL, 'Global', 1641779211233, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641779211233', NULL, 'PC', '/orderFormManagement/orders', 'f', 'order.orders'),
+('d296d690-71b6-11ec-b62f-bd99beea2ad2', 'XTCD1641779057244', '订单管理', 0, 1, NULL, NULL, 'mdi:order-mng', NULL, 'Global', 1641779091264, '265dd610-40a8-11ec-afb6-7fee9c405457', '1641779091264', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', NULL, 'f', 'order.order-form-mng'),
+('13796970-7437-11ec-b80f-7b335e68957e', 'XTCD1642054044037', '订单管理', 0, 1, NULL, NULL, NULL, NULL, 'Global', 1642154780041, '265dd610-40a8-11ec-afb6-7fee9c405457', '1642154780041', '265dd610-40a8-11ec-afb6-7fee9c405457', 'APP', NULL, 'f', NULL),
+('9aa35850-9ba8-11ec-96ee-613d9bcc5d10', 'XTCD1646390899284', '数据关联', 1, 1, NULL, 'eccb2a40-3d48-11ec-9809-df813b08b61b', 'mdi:chart-timeline-variant', NULL, 'Global', 1646624291529, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646624291529', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', '/deviceManagement/chartSettings', 'f', 'device-mng.chart-settings'),
+('e3017fa0-9ba8-11ec-8347-6366c0cb66a6', 'XTCD1646391020697', '数据关联 - 删除', 1, 1, NULL, '9aa35850-9ba8-11ec-96ee-613d9bcc5d10', NULL, NULL, 'Global', 1646624299556, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646624299556', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', NULL, 't', 'action.delete'),
+('cf171450-9ba8-11ec-96ee-613d9bcc5d10', 'XTCD1646390987284', '数据关联 - 编辑', 1, 1, NULL, '9aa35850-9ba8-11ec-96ee-613d9bcc5d10', NULL, NULL, 'Global', 1646624306969, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646624306969', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', NULL, 't', 'action.edit'),
+('b831b880-9ba8-11ec-8347-6366c0cb66a6', 'XTCD1646390948871', '数据关联 - 添加', 1, 1, NULL, '9aa35850-9ba8-11ec-96ee-613d9bcc5d10', NULL, NULL, 'Global', 1646624315774, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646624315774', '265dd610-40a8-11ec-afb6-7fee9c405457', 'PC', NULL, 't', 'action.add'),
+('60b4b320-9dd6-11ec-9386-9d079fb5289f', 'XTCD1646630461266', '生产管理 - 管理日历 - 添加', 1, 1, NULL, '2e0c8f60-9dd6-11ec-9386-9d079fb5289f', NULL, NULL, 'Global', 1646630461267, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646630461267', NULL, 'PC', NULL, 't', 'action.add'),
+('74608ed0-9dd6-11ec-a79b-07ce2c030081', 'XTCD1646630494268', '生产管理 - 管理日历 - 编辑', 1, 1, NULL, '2e0c8f60-9dd6-11ec-9386-9d079fb5289f', NULL, NULL, 'Global', 1646630494269, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646630494269', NULL, 'PC', NULL, 't', 'action.edit'),
+('89e52220-9dd6-11ec-9386-9d079fb5289f', 'XTCD1646630530370', '生产管理 - 管理日历 - 删除', 1, 1, NULL, '2e0c8f60-9dd6-11ec-9386-9d079fb5289f', NULL, NULL, 'Global', 1646630530371, '265dd610-40a8-11ec-afb6-7fee9c405457', '1646630530371', NULL, 'PC', NULL, 't', 'action.delete');
 
 
 
---设备字典属性初始数据
-INSERT INTO "public"."hs_init"("id", "init_data", "scope", "created_time", "created_user", "updated_time", "updated_user") VALUES ('a6bcd176-7538-402c-9035-5b966888faa0', '[{"id": null, "name": "能耗", "groupPropertyList": [{"id": null, "name": "water", "unit": "T", "title": "耗水量", "content": "0", "createdTime": null}, {"id": null, "name": "electric", "unit": "KWH", "title": "耗电量", "content": "0", "createdTime": null}, {"id": null, "name": "gas", "unit": "T", "title": "耗气量", "content": "0", "createdTime": null}]}, {"id": null, "name": "产能", "groupPropertyList": [{"id": null, "name": "capacities", "unit": "", "title": "总产能", "content": "0", "createdTime": null}]}]', 'DICT_DEVICE_GROUP', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
