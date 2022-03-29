@@ -12,7 +12,7 @@ import { DialogComponent, EntityType, entityTypeResources, entityTypeTranslation
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { DictDeviceTableFilterComponent } from './dict-device-table-filter.component';
-import { DeviceConfigFormComponent, DriverConfigDialogData } from './driver-config-form.componen';
+import { DeviceConfigFormComponent, DriverConfigDialogData } from './driver-config-form.component';
 
 export interface DistributeConfigDialogData {
   deviceDictId: string;

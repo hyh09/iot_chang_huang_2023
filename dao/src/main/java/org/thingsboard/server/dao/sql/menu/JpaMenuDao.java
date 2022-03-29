@@ -181,6 +181,9 @@ public class JpaMenuDao extends JpaAbstractSearchTextDao<MenuEntity, Menu> imple
                 if(org.thingsboard.server.common.data.StringUtils.isNotEmpty(menu.getMenuType())){
                     predicates.add(cb.equal(root.get("menuType"),menu.getMenuType()));
                 }
+                if(menu.getParentId() != null){
+                    predicates.add(cb.equal(root.get("parentId"),menu.getParentId()));
+                }
             }
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };

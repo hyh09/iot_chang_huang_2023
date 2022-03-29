@@ -188,15 +188,15 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
       new EntityTableColumn<DeviceInfo>('productionLineName', 'device-mng.prod-line', '20%', (entity) => (entity.productionLineName || ''), () => ({}), false)
       // new EntityTableColumn<DeviceInfo>('label', 'device.label', '25%')
     ];
-    if (deviceScope === 'tenant') {
-      columns.push(
-        // new EntityTableColumn<DeviceInfo>('customerTitle', 'customer.customer', '25%'),
-        new EntityTableColumn<DeviceInfo>('customerIsPublic', 'device.public', '60px',
-          entity => {
-            return checkBoxCell(entity.customerIsPublic);
-          }, () => ({}), false),
-      );
-    }
+    // if (deviceScope === 'tenant') {
+    //   columns.push(
+    //     new EntityTableColumn<DeviceInfo>('customerTitle', 'customer.customer', '25%'),
+    //     new EntityTableColumn<DeviceInfo>('customerIsPublic', 'device.public', '60px',
+    //       entity => {
+    //         return checkBoxCell(entity.customerIsPublic);
+    //       }, () => ({}), false),
+    //   );
+    // }
     columns.push(
       new EntityTableColumn<DeviceInfo>('gateway', 'device.is-gateway', '60px',
         entity => {

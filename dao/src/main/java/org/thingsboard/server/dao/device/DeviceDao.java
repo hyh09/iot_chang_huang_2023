@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -276,7 +276,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @param deviceIdList
      * @throws ThingsboardException
      */
-    void removeProductionLine(List<UUID> deviceIdList,UUID updatedUser) throws ThingsboardException;
+    void removeProductionLine(List<UUID> deviceIdList, UUID updatedUser) throws ThingsboardException;
 
     /**
      * 分配产线设备
@@ -290,7 +290,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @param factoryIds 工厂标识
      * @return
      */
-   List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException ;
+    List<Device> findGatewayNewVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
 
     /**
      * 查询工厂下所有网关设备
@@ -300,7 +300,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
     List<Device> findGatewayListVersionByFactory(List<UUID> factoryIds) throws ThingsboardException;
 
 
-    List<DeviceEntity>  queryAllByIds(List<UUID> ids);
+    List<DeviceEntity> queryAllByIds(List<UUID> ids);
 
     /**
      *平台设备列表查询
@@ -345,17 +345,22 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
     PageData<Device> queryPage(CapacityDeviceVo vo, PageLink pageLink) throws JsonProcessingException;
 
 
-    void   updateFlgById(Boolean deviceFlg, UUID id);
+    void updateFlgById(Boolean deviceFlg, UUID id);
 
 
-    List<Device> queryAllByTenantIdAndName(TenantId tenantId,String name);
+    List<Device> queryAllByTenantIdAndName(TenantId tenantId, String name);
 
     //查询租户下所有设备，包含工厂名称。过滤网关
     List<Device> findDeviceFilterGatewayByTenantId(UUID tenantId);
 
 
-    long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
+    long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId);
 
-
+    /**
+     * 查询工厂下网关
+     * @param factoryIds
+     * @return
+     */
+    List<Device> findGatewayByFactoryId(UUID factoryIds);
 
 }
