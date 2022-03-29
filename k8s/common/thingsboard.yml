@@ -404,6 +404,67 @@ spec:
   ports:
   - port: 8080
     name: http
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-web-ui-edge
+  namespace: hsyl-iot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tb-web-ui-edge
+  template:
+    metadata:
+      labels:
+        app: tb-web-ui-edge
+    spec:
+      imagePullSecrets:
+        - name: zhowsregcred
+      containers:
+        - name: server
+          imagePullPolicy: Always
+          image: 47.110.145.204:8084/huansiyl/thingsboard/tb-web-ui:xinxiang
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: HTTP_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: HTTP_BIND_PORT
+              value: "8080"
+            - name: TB_ENABLE_PROXY
+              value: "false"
+            - name: LOGGER_LEVEL
+              value: "info"
+            - name: LOG_FOLDER
+              value: "logs"
+            - name: LOGGER_FILENAME
+              value: "tb-web-ui-%DATE%.log"
+            - name: DOCKER_MODE
+              value: "true"
+          livenessProbe:
+            httpGet:
+              path: /index.html
+              port: http
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-web-ui-edge
+  namespace: hsyl-iot
+spec:
+  type: ClusterIP
+  selector:
+    app: tb-web-ui-edge
+  ports:
+    - port: 8080
+      name: http
 ---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -460,3 +521,58 @@ spec:
           serviceName: tb-web-ui
           servicePort: 8080
 ---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: tb-ingress-edge
+  namespace: hsyl-iot
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+spec:
+  rules:
+    - host: iot.edge.textile-saas.huansi.net
+      http:
+        paths:
+          - path: /api/v1/.*
+            backend:
+              serviceName: tb-http-transport
+              servicePort: 8080
+          - path: /api/.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /swagger.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /webjars.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /v2/.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /static/rulenode/.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /oauth2/.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /login/oauth2/.*
+            backend:
+              serviceName: tb-node
+              servicePort: 8080
+          - path: /
+            backend:
+              serviceName: tb-web-ui-edge
+              servicePort: 8080
+          - path: /.*
+            backend:
+              serviceName: tb-web-ui-edge
+              servicePort: 8080
