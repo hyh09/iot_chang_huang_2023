@@ -24,6 +24,13 @@ public interface TenantMenuDao extends Dao<TenantMenu>{
     void delByMenuId(UUID menuId);
 
     /**
+     * 删除菜单下按钮
+     * @param tenantMenuId
+     * @param tenantId
+     */
+    void delButtonByTenantMenuId(UUID tenantMenuId,UUID tenantId);
+
+    /**
      *新增/修改租户菜单
      * @param tenantMenuList
      */

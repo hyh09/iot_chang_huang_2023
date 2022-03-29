@@ -64,21 +64,22 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   dictDeviceId?: string;
   deviceNo?: string;
   rowType?: FactoryRowType;
-  type?: string,
-  supplier?: string,
-  model?: string,
-  version?: string,
-  warrantyPeriod?: string,
-  ratedCapacity?: string,
-  isCore?: boolean,
-  picture?: string,
-  fileName?: string,
-  icon?: string,
-  comment?: string,
+  type?: string;
+  supplier?: string;
+  model?: string;
+  version?: string;
+  warrantyPeriod?: string;
+  ratedCapacity?: string;
+  isCore?: boolean;
+  picture?: string;
+  fileName?: string;
+  icon?: string;
+  logoImages?: string;
+  comment?: string;
   standardPropertyList: Array<DeviceData>;
-  propertyList?: Array<DeviceProperty>,
-  groupList?: Array<DeviceDataGroup>,
-  componentList?: Array<DeviceComp>
+  propertyList?: Array<DeviceProperty>;
+  groupList?: Array<DeviceDataGroup>;
+  componentList?: Array<DeviceComp>;
 }
 
 export interface NotDistributedDevice extends CommonData {

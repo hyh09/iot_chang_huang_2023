@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.page.PageData;
@@ -77,7 +78,14 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
      */
     @Override
     public void saveProductionCalender(ProductionCalender productionCalender) throws ThingsboardException {
+        if (productionCalender.getDeviceId() != null) {
+            List<ProductionCalenderEntity> allByDeviceIdAndStartTimeAndEndTime = productionCalenderRepository.findAllByDeviceIdAndStartTimeAndEndTime(productionCalender.getDeviceId(), productionCalender.getStartTime(), productionCalender.getEndTime());
+            if(CollectionUtils.isNotEmpty(allByDeviceIdAndStartTimeAndEndTime)){
+                throw new ThingsboardException("设备【"+productionCalender.getDeviceName()+"】日历时间有重叠！", ThingsboardErrorCode.GENERAL);
+            }
+        }
         ProductionCalenderEntity productionCalenderEntity = new ProductionCalenderEntity(productionCalender);
+        //校验，同一个设备的生产日历时间不允许存在交叉
         if (productionCalenderEntity.getId() == null) {
             UUID uuid = Uuids.timeBased();
             productionCalenderEntity.setId(uuid);

@@ -52,7 +52,10 @@
         </mat-form-field>
         <mat-form-field class="mat-block">
           <mat-label translate>device-mng.rated-capacity</mat-label>
-          <input matInput formControlName="ratedCapacity">
+          <input matInput formControlName="ratedCapacity" required>
+          <mat-error *ngIf="entityForm.get('ratedCapacity').hasError('required')">
+            {{ 'device-mng.rated-capacity-required' | translate }}
+          </mat-error>
         </mat-form-field>
         <mat-form-field class="mat-block">
           <mat-label translate>device-mng.comment</mat-label>
