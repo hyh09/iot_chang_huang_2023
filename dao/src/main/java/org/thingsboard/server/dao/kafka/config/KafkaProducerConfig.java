@@ -8,6 +8,7 @@ package org.thingsboard.server.dao.kafka.config;
  **/
 
 
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,6 +82,21 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG,"none");
         return props;
     }
+
+
+    @Bean    public NewTopic topic1() {
+      return new NewTopic("hs_statistical_data_kafka", 1, (short) 1);
+    }
+    @Bean    public NewTopic topic2() {
+        return new NewTopic("hs_energy_chart_kafka", 1, (short) 1);
+    }
+    @Bean    public NewTopic topic3() {
+        return new NewTopic("hs_energy_hour_kafka", 1, (short) 1);
+    }
+
+
+
+
 
 
 
