@@ -221,6 +221,19 @@ public class StringUtilToll {
     }
 
 
+    public  static  String  getMaxSum(List<String> finalValueList)
+    {
+        String maxValue=   finalValueList.stream().max((x,y)->{
+            if(compareTo(x,y))
+                return 1;
+            else
+                return -1;
+        }).get();
+        return  maxValue;
+
+    }
+
+
 
 
 
