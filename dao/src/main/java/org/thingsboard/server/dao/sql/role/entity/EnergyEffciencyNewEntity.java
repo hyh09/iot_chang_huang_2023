@@ -239,4 +239,8 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
         this.capacityAddedValue =capacityAddedValue;
         this.ts= (ts != null?ts:0);
     }
+
+
+    public EnergyEffciencyNewEntity() {
+    }
 }
