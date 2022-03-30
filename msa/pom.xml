@@ -31,7 +31,7 @@
 
     <properties>
         <main.dir>${basedir}/..</main.dir>
-        <docker.repo>registry.cn-hangzhou.aliyuncs.com/huansi_yl</docker.repo>
+        <docker.repo>47.110.145.204:8084/huansiyl/thingsboard</docker.repo>
         <dockerfile.skip>true</dockerfile.skip>
         <blackBoxTests.skip>true</blackBoxTests.skip>
         <dockerfile-maven.version>1.4.13</dockerfile-maven.version>
