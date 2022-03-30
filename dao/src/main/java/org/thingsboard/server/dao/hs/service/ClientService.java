@@ -359,7 +359,7 @@ public interface ClientService {
      * @param endTime    结束时间
      * @param properties 属性
      */
-    Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties);
+    Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备班次时间列表

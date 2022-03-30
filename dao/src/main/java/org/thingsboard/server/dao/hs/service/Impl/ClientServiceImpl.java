@@ -984,20 +984,30 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param properties 属性
      */
     @Override
-    public Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) {
-        // TODO consider cassandra
-        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
-        if (keyIds.isEmpty())
-            return Maps.newHashMap();
-        var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIn(properties).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey));
-        var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
-        Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
+    public Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) throws ExecutionException, InterruptedException {
+        if (this.commonComponent.isPersistToCassandra()) {
+            List<ReadTsKvQuery> queries = properties.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, Integer.MAX_VALUE, Aggregation.NONE, "desc"))
+                    .collect(Collectors.toList());
+            Map<String, List<HistoryGraphPropertyTsKvVO>> map = new HashMap<>();
+            this.tsService.findAll(tenantId, DeviceId.fromString(deviceId.toString()), queries).get()
+                    .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed())
+                    .collect(Collectors.toList()).forEach(v -> map.computeIfAbsent(v.getKey(), f -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder().ts(v.getTs()).value(this.formatKvEntryValue(v)).build()));
+            return map;
+        } else {
+            var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+            if (keyIds.isEmpty())
+                return Maps.newHashMap();
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIn(properties).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey));
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+            Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
 
-        kvEntityResult.forEach(v -> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
-                .ts(v.getTs())
-                .value(this.formatKvEntryValue(v.toData()))
-                .build()));
-        return map;
+            kvEntityResult.forEach(v -> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
+                    .ts(v.getTs())
+                    .value(this.formatKvEntryValue(v.toData()))
+                    .build()));
+            return map;
+        }
+
     }
 
     /**

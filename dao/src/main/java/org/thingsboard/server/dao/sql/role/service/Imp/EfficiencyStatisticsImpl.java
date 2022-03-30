@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -14,6 +15,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
+import org.thingsboard.server.common.data.page.PageDataWithNextPage;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.*;
 import org.thingsboard.server.common.data.vo.bodrd.TodaySectionHistoryVo;
@@ -202,7 +204,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public  PageData<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+    public PageDataWithNextPage<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
 //        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
 //        if(deviceInfo == null)
 //        {
@@ -228,9 +230,20 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<Map> list = page.getContent();
         log.debug("查询当前角色下的用户绑定数据list{}",list);
         List<CapacityHistoryVo> mapList =   translateTitleCap02(list, deviceName,mapNameToVo);
-        return new PageData<CapacityHistoryVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+        if(page.hasNext())
+        {
+            Pageable  pageable =  DaoUtil.toPageable(pageLink.nextPageLink());
+            Page<Map>  pageNext=  effectHistoryKvRepository.queryEntity(queryTsKvVo, pageable);
+            List<Map> list1Next = pageNext.getContent();
+            List<CapacityHistoryVo> mapListNext =   translateTitleCap02(list1Next, deviceName,mapNameToVo);
+            CapacityHistoryVo  vo=    mapListNext.stream().findFirst().orElse(null);
+            return new PageDataWithNextPage<CapacityHistoryVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),vo);
+        }
+        return new PageDataWithNextPage<CapacityHistoryVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
     }
 
+
+    
 
 
     /**
