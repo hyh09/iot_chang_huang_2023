@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
+import org.thingsboard.server.common.data.page.PageDataWithNextPage;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryTsKvHisttoryVo;
@@ -288,7 +288,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @ApiResponse(code = 200, message =queryEnergyHistory_messg),
     })
     @ResponseBody
-    public PageData<CapacityHistoryVo> queryCapacityHistory(
+    public PageDataWithNextPage<CapacityHistoryVo> queryCapacityHistory(
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,
