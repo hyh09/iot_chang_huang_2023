@@ -13,7 +13,6 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
-import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageDataWithNextPage;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -190,10 +189,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.debug("查询当前角色下的用户绑定数据list{}",list);
          if(CollectionUtils.isEmpty(list))
          {
-             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+             return new PageDataWithNextPage<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
          }
         List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
-        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+         if(page.hasNext())
+         {
+             Page<Map>  page1=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink.nextPageLink()));
+             List<Map> mapList1 = page1.getContent();
+             List<Map> mapList2 =   translateTitle(mapList1, deviceName,mapNameToVo);
+             Map  map=  mapList2.stream().findFirst().orElse(null);
+             return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),map);
+         }
+        return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
     }
 
     /**
