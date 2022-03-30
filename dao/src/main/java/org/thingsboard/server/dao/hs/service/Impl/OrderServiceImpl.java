@@ -319,6 +319,13 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Transactional
     public OrderVO updateOrSaveOrder(TenantId tenantId, OrderVO orderVO) throws ThingsboardException {
         Order order = new Order();
+        for (OrderPlanDeviceVO plan : orderVO.getPlanDevices()) {
+            if (plan.getIntendedStartTime() != null && plan.getIntendedEndTime() !=null) {
+                if (this.clientService.listProductionCalenders(tenantId, toUUID(plan.getDeviceId()), plan.getIntendedStartTime(), plan.getIntendedEndTime()).isEmpty())
+                    throw new ThingsboardException(plan.getDeviceName() + "生产计划时间超出班次时间", ThingsboardErrorCode.GENERAL);
+            }
+        }
+
         if (StringUtils.isNotBlank(orderVO.getId())) {
             order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), toUUID(orderVO.getId())).map(OrderEntity::toData)
                     .orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
@@ -327,13 +334,6 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         } else {
             BeanUtils.copyProperties(orderVO, order);
             order.setTenantId(tenantId.toString());
-        }
-
-        for (OrderPlanDeviceVO plan : orderVO.getPlanDevices()) {
-            if (plan.getIntendedStartTime() != null && plan.getIntendedEndTime() !=null) {
-                if (this.clientService.listProductionCalenders(tenantId, toUUID(plan.getDeviceId()), plan.getIntendedStartTime(), plan.getIntendedEndTime()).isEmpty())
-                    throw new ThingsboardException(plan.getDeviceName() + "生产计划时间超出班次时间", ThingsboardErrorCode.GENERAL);
-            }
         }
 
         OrderEntity orderEntity = new OrderEntity(order);
