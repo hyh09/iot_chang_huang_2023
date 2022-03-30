@@ -8,15 +8,22 @@ package org.thingsboard.server.dao.kafka.config;
  **/
 
 
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +36,8 @@ public class KafkaProducerConfig {
 
     @Value("${queue.kafka.bootstrap.servers}")
     private String servers;
+
+
 
     /**
      * Producer Template 配置
@@ -81,6 +90,35 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG,"none");
         return props;
     }
+
+    @Bean("kafkaAdminPro")
+    public KafkaAdmin kafkaAdmin() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
+        KafkaAdmin admin = new KafkaAdmin(props);
+        return admin;
+    }
+
+    @Bean  //kafka客户端，在spring中创建这个bean之后可以注入并且创建topic,用于集群环境，创建对个副本
+    public AdminClient adminClient() {
+        return AdminClient.create(kafkaAdmin().getConfigurationProperties());
+    }
+
+
+    @PostConstruct
+    @Order(1)
+    public  void init()
+    {
+        NewTopic topic = new NewTopic("hs_statistical_data_kafka", 10, (short) 1);
+        NewTopic topic01 = new NewTopic("hs_energy_chart_kafka", 10, (short) 1);
+        NewTopic topic02 = new NewTopic("hs_energy_hour_kafka", 10, (short) 1);
+
+        adminClient().createTopics(Arrays.asList(topic,topic01,topic02));
+    }
+
+
+
+
 
 
 
