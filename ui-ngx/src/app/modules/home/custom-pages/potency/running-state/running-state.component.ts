@@ -23,7 +23,9 @@ export class RunningStateComponent {
 
   constructor(private potencyService: PotencyService) {
     const now = new Date();
-    this.rangeTime = [new Date(now), new Date(now.setHours(now.getHours() - 1))];
+    let endTime = new Date(now);
+    let startTime = new Date(now.setHours(now.getHours() - 1));
+    this.rangeTime = [startTime, endTime];
   }
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
@@ -52,7 +54,7 @@ export class RunningStateComponent {
 
   private getRunningStateData() {
     this.runningStateData = {};
-    let startTime, endTime;
+    let startTime: number, endTime: number;
     if (this.rangeTime && this.rangeTime.length === 2) {
       startTime = this.rangeTime[0].getTime();
       endTime = this.rangeTime[1].getTime();
