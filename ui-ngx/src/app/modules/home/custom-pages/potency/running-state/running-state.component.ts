@@ -19,13 +19,11 @@ export class RunningStateComponent {
   runningStateData: { [key: string]: RunningState } = {};
   displayedProps: string[] = [];
   pageLink: PageLink = new PageLink(2, 0, null, null);
-  startTime: Date;
-  endTime: Date;
+  rangeTime: Date[] = [];
 
   constructor(private potencyService: PotencyService) {
     const now = new Date();
-    this.endTime = new Date(now);
-    this.startTime = new Date(now.setHours(now.getHours() - 1));
+    this.rangeTime = [new Date(now), new Date(now.setHours(now.getHours() - 1))];
   }
 
   fetchData(factoryInfo?: FactoryTreeNodeIds) {
@@ -54,11 +52,16 @@ export class RunningStateComponent {
 
   private getRunningStateData() {
     this.runningStateData = {};
+    let startTime, endTime;
+    if (this.rangeTime && this.rangeTime.length === 2) {
+      startTime = this.rangeTime[0].getTime();
+      endTime = this.rangeTime[1].getTime();
+    }
     this.potencyService.getDeviceRunningState({
       deviceId: this.deviceId,
       attributeParameterList: this.displayedProps.map(prop => (this.propertyMap[prop])),
-      startTime: this.startTime.getTime(),
-      endTime: this.endTime.getTime()
+      startTime,
+      endTime
     }).subscribe(res => {
       (res || []).forEach(item => {
         this.runningStateData[item.chartId || item.keyName] = item;
@@ -76,39 +79,6 @@ export class RunningStateComponent {
     this.pageLink.page = pageIndex;
     this.displayedProps = this.selectedProps.slice(pageIndex * 2, pageIndex * 2 + 2);
     this.fetchData();
-  }
-
-  onTimeChange() {
-    this.endTime.setSeconds(0);
-    this.endTime.setMilliseconds(0);
-    const date = new Date(this.endTime);
-    this.startTime = new Date(date.setHours(this.endTime.getHours() - 1));
-    this.fetchData();
-  }
-
-  disabledHours(): number[] {
-    const arr = [0];
-    const currHour = new Date().getHours();
-    for (let i = 1; i <= 23; i++) {
-      if (i > currHour) {
-        arr.push(i);
-      }
-    }
-    return arr;
-  }
-
-  disabledMinutes(hour: number): number[] {
-    const arr = [];
-    const currHour = new Date().getHours();
-    if (hour === currHour) {
-      const currMinute = new Date().getMinutes();
-      for (let i = 0; i <= 59; i++) {
-        if (i > currMinute) {
-          arr.push(i);
-        }
-      }
-    }
-    return arr;
   }
 
 }
