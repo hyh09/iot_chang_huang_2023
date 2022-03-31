@@ -124,9 +124,9 @@ public class DataToConversionImpl implements DataToConversionSvc {
 
         });
 
-        resultVo.setWaterList(compareToMaxToMin(waterList));
-        resultVo.setElectricList(compareToMaxToMin(electricList));
-        resultVo.setGasList(compareToMaxToMin(gasList));
+        resultVo.setWaterList(compareToMinToMax(waterList));
+        resultVo.setElectricList(compareToMinToMax(electricList));
+        resultVo.setGasList(compareToMinToMax(gasList));
         return resultVo;
     }
 
@@ -367,6 +367,10 @@ public class DataToConversionImpl implements DataToConversionSvc {
     /**大到小*/
     public static List<TkTodayVo> compareToMaxToMin(List<TkTodayVo> list){
         return list.stream().sorted((s1, s2) -> new BigDecimal(s2.getValue()).compareTo(new BigDecimal(s1.getValue()))).collect(Collectors.toList());
+    }
+
+    public static List<TkTodayVo> compareToMinToMax(List<TkTodayVo> list){
+        return list.stream().sorted((s1, s2) -> new BigDecimal(s1.getValue()).compareTo(new BigDecimal(s2.getValue()))).collect(Collectors.toList());
     }
 
 
