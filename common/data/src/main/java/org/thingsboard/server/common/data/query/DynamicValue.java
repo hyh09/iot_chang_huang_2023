@@ -33,11 +33,23 @@ public class DynamicValue<T> implements Serializable {
     @NoXss
     private final String sourceAttribute;
     private final boolean inherit;
+    private final String operator;
+    private final Double value;
 
     public DynamicValue(DynamicValueSourceType sourceType, String sourceAttribute) {
         this.sourceAttribute = sourceAttribute;
         this.sourceType = sourceType;
         this.inherit = false;
+        this.operator = null;
+        this.value = 0d;
+    }
+
+    public DynamicValue(DynamicValueSourceType sourceType, String sourceAttribute, boolean inherit) {
+        this.sourceAttribute = sourceAttribute;
+        this.sourceType = sourceType;
+        this.inherit = inherit;
+        this.operator = null;
+        this.value = 0d;
     }
 
 }

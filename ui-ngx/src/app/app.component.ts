@@ -211,7 +211,7 @@ export class AppComponent implements OnInit {
 
   //改变应用标题
   changeTitle(title: string) {
-    env.appTitle = title || '环思物联';
+    env.appTitle = title || 'NTX工业物联网';
     this.titleService.setTitle(
       this.router.routerState.snapshot.root,
       this.translate

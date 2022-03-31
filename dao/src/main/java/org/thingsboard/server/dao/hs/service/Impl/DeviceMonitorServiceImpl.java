@@ -263,7 +263,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
                 CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
                         .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
-                                    var uuidList = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+                                    var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
                                     if (uuidList.isEmpty())
                                         return new HashMap<String, DictDevice>();
                                     else
@@ -896,7 +896,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
         return CompletableFuture.supplyAsync(() -> {
-            var dictDeviceIds = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+            var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
             if (dictDeviceIds.isEmpty())
                 return new HashMap<String, DictDevice>();
             else

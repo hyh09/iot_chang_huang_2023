@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package org.thingsboard.rule.engine.profile;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.thingsboard.rule.engine.profile.state.PersistedAlarmRuleState;
 import org.thingsboard.server.common.data.alarm.AlarmSeverity;
 import org.thingsboard.server.common.data.device.profile.AlarmCondition;
@@ -229,7 +230,7 @@ class AlarmRuleState {
         long repeatingTimes = 0;
         AlarmConditionSpec alarmConditionSpec = getSpec();
         AlarmConditionSpecType specType = alarmConditionSpec.getType();
-        if(specType.equals(AlarmConditionSpecType.REPEATING)) {
+        if (specType.equals(AlarmConditionSpecType.REPEATING)) {
             RepeatingAlarmConditionSpec repeating = (RepeatingAlarmConditionSpec) spec;
 
             repeatingTimes = repeating.getPredicate().getDefaultValue();
@@ -249,7 +250,7 @@ class AlarmRuleState {
         long durationTimeInMs = 0;
         AlarmConditionSpec alarmConditionSpec = getSpec();
         AlarmConditionSpecType specType = alarmConditionSpec.getType();
-        if(specType.equals(AlarmConditionSpecType.DURATION)) {
+        if (specType.equals(AlarmConditionSpecType.DURATION)) {
             DurationAlarmConditionSpec duration = (DurationAlarmConditionSpec) spec;
             TimeUnit timeUnit = duration.getUnit();
 
@@ -393,21 +394,23 @@ class AlarmRuleState {
         if (predicateValue == null) {
             return false;
         }
-        switch (predicate.getOperation()) {
-            case NOT_EQUAL:
-                return !val.equals(predicateValue);
-            case EQUAL:
-                return val.equals(predicateValue);
-            case GREATER:
-                return val > predicateValue;
-            case GREATER_OR_EQUAL:
-                return val >= predicateValue;
-            case LESS:
-                return val < predicateValue;
-            case LESS_OR_EQUAL:
-                return val <= predicateValue;
-            default:
-                throw new RuntimeException("Operation not supported: " + predicate.getOperation());
+        // 暂时不考虑精度问题
+        var op = predicate.getValue().getDynamicValue().getOperator();
+        var value = predicate.getValue().getDynamicValue().getValue();
+        if (StringUtils.isNotBlank(op)) {
+            if ("add".equalsIgnoreCase(op)) {
+                return judge(val, predicateValue + value, predicate.getOperation());
+            } else if ("subtract".equalsIgnoreCase(op)) {
+                return judge(val, predicateValue - value, predicate.getOperation());
+            } else if ("multiply".equalsIgnoreCase(op)) {
+                return judge(val, predicateValue * value, predicate.getOperation());
+            } else if ("divide".equalsIgnoreCase(op)) {
+                return judge(val, predicateValue / value, predicate.getOperation());
+            } else {
+                throw new RuntimeException("Operation not supported: " + op);
+            }
+        } else {
+            return judge(val, predicateValue, predicate.getOperation());
         }
     }
 
@@ -545,4 +548,22 @@ class AlarmRuleState {
         }
     }
 
+    private boolean judge(Double val, Double predicateValue, NumericFilterPredicate.NumericOperation numericOperation) {
+        switch (numericOperation) {
+            case NOT_EQUAL:
+                return !val.equals(predicateValue);
+            case EQUAL:
+                return val.equals(predicateValue);
+            case GREATER:
+                return val > predicateValue;
+            case GREATER_OR_EQUAL:
+                return val >= predicateValue;
+            case LESS:
+                return val < predicateValue;
+            case LESS_OR_EQUAL:
+                return val <= predicateValue;
+            default:
+                throw new RuntimeException("Operation not supported: " + numericOperation);
+        }
+    }
 }

@@ -67,7 +67,42 @@ ALTER TABLE IF EXISTS public.hs_device_component
 
 
 
---- Table: public.hs_dict_data
+
+-- Table: public.hs_device_oee_every_hour
+
+-- DROP TABLE IF EXISTS public.hs_device_oee_every_hour;
+
+CREATE TABLE IF NOT EXISTS public.hs_device_oee_every_hour
+(
+    id uuid NOT NULL,
+    device_id uuid NOT NULL,
+    ts bigint NOT NULL,
+    oee_value numeric NOT NULL,
+    created_time bigint NOT NULL,
+    tenant_id uuid NOT NULL,
+    factory_id uuid,
+    workshop_id uuid,
+    production_line_id uuid,
+    CONSTRAINT hs_device_oee_every_hour_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.hs_device_oee_every_hour
+    OWNER to postgres;
+-- Index: hs_device_oee_every_hour_device_id_ts
+
+-- DROP INDEX IF EXISTS public.hs_device_oee_every_hour_device_id_ts;
+
+CREATE INDEX IF NOT EXISTS hs_device_oee_every_hour_device_id_ts
+    ON public.hs_device_oee_every_hour USING btree
+    (device_id ASC NULLS LAST, ts ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+
+
+
+-- Table: public.hs_dict_data
 
 -- DROP TABLE IF EXISTS public.hs_dict_data;
 
@@ -136,6 +171,7 @@ COMMENT ON COLUMN public.hs_dict_data.picture
 
 COMMENT ON COLUMN public.hs_dict_data.tenant_id
     IS '租户Id';
+
 
 
 
@@ -224,6 +260,12 @@ COMMENT ON COLUMN public.hs_dict_device.comment
 
 COMMENT ON COLUMN public.hs_dict_device.is_default
     IS '是否默认';
+
+COMMENT ON COLUMN public.hs_dict_device.is_core
+    IS '是否核心';
+
+COMMENT ON COLUMN public.hs_dict_device.rated_capacity
+    IS '额定产能';
 
 
 
@@ -337,6 +379,7 @@ CREATE INDEX IF NOT EXISTS idx_dict_device_id_2
     ON public.hs_dict_device_component USING btree
     (dict_device_id ASC NULLS LAST)
     TABLESPACE pg_default;
+
 
 
 
@@ -793,6 +836,21 @@ COMMENT ON COLUMN public.hs_init.updated_time
 
 COMMENT ON COLUMN public.hs_init.updated_user
     IS '更新人';
+
+COMMENT ON COLUMN public.hs_production_calendar.tenant_id
+    IS '租户Id';
+
+COMMENT ON COLUMN public.hs_production_calendar.device_id
+    IS '设备Id';
+
+COMMENT ON COLUMN public.hs_production_calendar.start_time
+    IS '开始时间';
+
+COMMENT ON COLUMN public.hs_production_calendar.end_time
+    IS '结束时间';
+
+
+
 
 
 
