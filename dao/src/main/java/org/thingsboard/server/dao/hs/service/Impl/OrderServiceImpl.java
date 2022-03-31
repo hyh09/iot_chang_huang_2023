@@ -680,7 +680,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
             for(OrderPlanEntity i:orderPlanEntityList){
                 actualCapacity = i.getActualCapacity();
                 if (StringUtils.isNotEmpty(actualCapacity)) {
-                    sumActual.add(new BigDecimal(actualCapacity));
+                    sumActual = sumActual.add(new BigDecimal(actualCapacity));
                 }
             }
         }
