@@ -145,6 +145,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
             ev.setEntityId(k1);
             if(!CollectionUtils.isEmpty(v1))
             {
+
                 EnergyEffciencyNewEntity  entity=   v1.stream().findFirst().orElse(new EnergyEffciencyNewEntity());
                 ev.setDictDeviceId(entity.getDictDeviceId());
                 ev.setDeviceName(entity.getDeviceName());
@@ -152,11 +153,11 @@ public class DataToConversionImpl implements DataToConversionSvc {
                 ev.setWaterAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).collect(Collectors.toList())));
                 ev.setWaterValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getWaterValue).collect(Collectors.toList())));
                 ev.setGasAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).collect(Collectors.toList())));
-                ev.setGasValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getWaterValue).collect(Collectors.toList())));
+                ev.setGasValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getGasValue).collect(Collectors.toList())));
                 ev.setElectricAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).collect(Collectors.toList())));
-                ev.setElectricValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getElectricValue).collect(Collectors.toList())));
+                ev.setElectricValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getElectricValue).collect(Collectors.toList())));
                 ev.setCapacityAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getCapacityAddedValue).collect(Collectors.toList())));
-                ev.setCapacityValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getCapacityValue).collect(Collectors.toList())));
+                ev.setCapacityValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getCapacityValue).collect(Collectors.toList())));
                 entityList1.add(ev);
            }
 

@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.util.regex.Pattern;
  * @author: HU.YUNHUI
  * @create: 2021-11-08 13:26
  **/
-
+@Slf4j
 public class StringUtilToll {
 
     private final static String zero ="0";
@@ -247,12 +248,13 @@ public class StringUtilToll {
 
     public  static  String  getMaxSum(List<String> finalValueList)
     {
-        String maxValue=   finalValueList.stream().max((x,y)->{
+
+        String maxValue=   finalValueList.stream().filter(s->StringUtils.isNotEmpty(s)).max((x,y)->{
             if(compareTo(x,y))
                 return 1;
             else
                 return -1;
-        }).get();
+        }).orElse("0");
         return  maxValue;
 
     }
