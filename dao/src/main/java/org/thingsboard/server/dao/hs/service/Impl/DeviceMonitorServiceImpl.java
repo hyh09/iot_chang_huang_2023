@@ -263,7 +263,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
                 CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
                         .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
-                                    var uuidList = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+                                    var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
                                     if (uuidList.isEmpty())
                                         return new HashMap<String, DictDevice>();
                                     else
@@ -279,7 +279,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                         return RTMonitorDeviceResult.builder()
                                                 .id(idStr)
                                                 .name(e.getName())
-                                                .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                                                .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                                                 .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                                                 .build();
                                     }).collect(Collectors.toList());
@@ -359,7 +359,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return DeviceDetailResult.builder()
                 .id(device.getId().toString())
                 .name(device.getName())
-                .picture(Optional.ofNullable(device.getPicture()).orElse(dictDevice.getPicture()))
+                .picture(Optional.ofNullable(dictDevice.getPicture()).orElse(null))
                 .isOnLine(calculateValueInMap(this.clientService.listDevicesOnlineStatus(List.of(device.getId().getId())), device.getId().toString()))
                 .factoryName(Optional.ofNullable(deviceBaseDTO.getFactory()).map(Factory::getName).orElse(null))
                 .workShopName(Optional.ofNullable(deviceBaseDTO.getWorkshop()).map(Workshop::getName).orElse(null))
@@ -896,7 +896,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
         return CompletableFuture.supplyAsync(() -> {
-            var dictDeviceIds = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+            var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
             if (dictDeviceIds.isEmpty())
                 return new HashMap<String, DictDevice>();
             else

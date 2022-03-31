@@ -27,6 +27,7 @@ import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
 import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -588,6 +589,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 return standardPropertyVO;
             }).collect(Collectors.toList()));
             dictDeviceVO.setComponentList(Lists.newArrayList()).setPropertyList(Lists.newArrayList());
+            dictDeviceVO.setIsCore(Boolean.TRUE);
+            dictDeviceVO.setRatedCapacity(BigDecimal.ZERO);
             try {
                 var result = this.saveOrUpdateDictDevice(dictDeviceVO, tenantId);
                 updateDictDeviceDefault(tenantId, toUUID(result.getId()));
