@@ -368,8 +368,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
         Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
         List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
+        logInfoJson("entities打印当前的json{}",entities);
+        List<TsKvEntity>  entities1=  getExcludeZero(entities);
         List<TsKvEntry> tsKvEntries  = new ArrayList<>();
-        entities.stream().forEach(tsKvEntity -> {
+        entities1.stream().forEach(tsKvEntity -> {
             tsKvEntity.setStrKey(mapDict.get(tsKvEntity.getKey()));
             tsKvEntries.add(tsKvEntity.toData());
         });
@@ -1328,7 +1330,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.debug("打印【"+str+"】数据结果:"+json);
+            log.info("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -1432,6 +1434,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<String> nameList = entities.stream().map(CensusSqlByDayEntity::getIncrementCapacity).collect(Collectors.toList());
         return  StringUtilToll.accumulator(nameList);
+    }
+
+
+    private List<TsKvEntity> getExcludeZero( List<TsKvEntity> entities)
+    {
+      return   entities.stream().filter(s1 ->{
+            if(StringUtils.isNotEmpty(s1.getStrValue()))
+            {
+                return StringUtilToll.isNotZero(s1.getStrValue());
+            }
+            if((s1.getDoubleValue()) != null)
+            {
+                return StringUtilToll.isNotZero(s1.getDoubleValue().toString());
+            }
+            if((s1.getLongValue()) != null)
+            {
+                return StringUtilToll.isNotZero(s1.getLongValue().toString());
+            }
+            return  false;
+        }).collect(Collectors.toList());
     }
 
 
