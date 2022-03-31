@@ -124,9 +124,9 @@ public class DataToConversionImpl implements DataToConversionSvc {
 
         });
 
-        resultVo.setWaterList(compareToMaxToMin(waterList));
-        resultVo.setElectricList(compareToMaxToMin(electricList));
-        resultVo.setGasList(compareToMaxToMin(gasList));
+        resultVo.setWaterList(compareToMinToMax(waterList));
+        resultVo.setElectricList(compareToMinToMax(electricList));
+        resultVo.setGasList(compareToMinToMax(gasList));
         return resultVo;
     }
 
@@ -145,6 +145,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
             ev.setEntityId(k1);
             if(!CollectionUtils.isEmpty(v1))
             {
+
                 EnergyEffciencyNewEntity  entity=   v1.stream().findFirst().orElse(new EnergyEffciencyNewEntity());
                 ev.setDictDeviceId(entity.getDictDeviceId());
                 ev.setDeviceName(entity.getDeviceName());
@@ -152,11 +153,11 @@ public class DataToConversionImpl implements DataToConversionSvc {
                 ev.setWaterAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).collect(Collectors.toList())));
                 ev.setWaterValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getWaterValue).collect(Collectors.toList())));
                 ev.setGasAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).collect(Collectors.toList())));
-                ev.setGasValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getWaterValue).collect(Collectors.toList())));
+                ev.setGasValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getGasValue).collect(Collectors.toList())));
                 ev.setElectricAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).collect(Collectors.toList())));
-                ev.setElectricValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getElectricValue).collect(Collectors.toList())));
+                ev.setElectricValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getElectricValue).collect(Collectors.toList())));
                 ev.setCapacityAddedValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getCapacityAddedValue).collect(Collectors.toList())));
-                ev.setCapacityValue(StringUtilToll.accumulator(v1.stream().map(EnergyEffciencyNewEntity::getCapacityValue).collect(Collectors.toList())));
+                ev.setCapacityValue(StringUtilToll.getMaxSum(v1.stream().map(EnergyEffciencyNewEntity::getCapacityValue).collect(Collectors.toList())));
                 entityList1.add(ev);
            }
 
@@ -367,6 +368,10 @@ public class DataToConversionImpl implements DataToConversionSvc {
     /**大到小*/
     public static List<TkTodayVo> compareToMaxToMin(List<TkTodayVo> list){
         return list.stream().sorted((s1, s2) -> new BigDecimal(s2.getValue()).compareTo(new BigDecimal(s1.getValue()))).collect(Collectors.toList());
+    }
+
+    public static List<TkTodayVo> compareToMinToMax(List<TkTodayVo> list){
+        return list.stream().sorted((s1, s2) -> new BigDecimal(s1.getValue()).compareTo(new BigDecimal(s2.getValue()))).collect(Collectors.toList());
     }
 
 

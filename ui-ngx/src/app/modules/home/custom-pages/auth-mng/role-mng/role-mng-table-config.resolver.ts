@@ -86,7 +86,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
     this.config.tableTitle = this.translate.instant('auth-mng.role-mng');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
-    this.config.deleteEnabled = entity => this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0);
+    this.config.deleteEnabled = entity => this.userLevel === 3 || this.userLevel === 1 || ((this.userLevel === 4 || this.userLevel === 0) && entity && entity.operationType === 0);
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('auth-mng.add-role');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
@@ -125,7 +125,7 @@ export class RoleMngTableConfigResolver implements Resolve<EntityTableConfig<Rol
       actions.push({
         name: this.translate.instant('auth-mng.set-permissions'),
         mdiIcon: 'mdi:config',
-        isEnabled: (entity) => (!!(entity && entity.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
+        isEnabled: (entity) => (!!(entity && entity.id) && (this.userLevel === 3 || this.userLevel === 1 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.setPermissions($event, entity.id)
       });
     }
