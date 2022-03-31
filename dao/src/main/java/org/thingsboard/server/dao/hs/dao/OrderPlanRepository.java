@@ -112,7 +112,7 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      */
     @Query("select t1 from OrderPlanEntity t1 where t1.factoryId = :factoryId and ( " +
             "( t1.intendedStartTime >= :startTime and t1.intendedEndTime <= :endTime ) or" +
-            "( t1.intendedStartTime >= :startTime and t1.actualStartTime <= :endTime and t1.intendedEndTime >= :endTime) or" +
+            "( t1.intendedStartTime >= :startTime and t1.intendedStartTime <= :endTime and t1.intendedEndTime >= :endTime) or" +
             "( t1.intendedEndTime >= :startTime and t1.intendedEndTime <= :endTime and t1.intendedStartTime <= :startTime) or" +
             "( t1.intendedStartTime <= :startTime and t1.intendedEndTime >= :endTime ) " +
             ")")
