@@ -195,7 +195,11 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 if (deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0) {
                     resultProductionCalender.setYearAchieve(ONESTR);
                 } else {
-                    resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict, 4, BigDecimal.ROUND_HALF_UP).toString());
+                    if (deviceOutputReality.compareTo(BigDecimal.ZERO) == 0) {
+                        resultProductionCalender.setYearAchieve("0.00");
+                    }else {
+                        resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict, 4, BigDecimal.ROUND_HALF_UP).toString());
+                    }
                 }
 
                 //4.生产状态
@@ -287,7 +291,11 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 if (deviceOutputPredict.compareTo(BigDecimal.ZERO) == ZERO) {
                     resultProductionCalender.setYearAchieve(ONESTR);
                 } else {
-                    resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict, 4, BigDecimal.ROUND_HALF_UP).toString());
+                    if (deviceOutputReality.compareTo(BigDecimal.ZERO) == 0) {
+                        resultProductionCalender.setYearAchieve("0.00");
+                    }else {
+                        resultProductionCalender.setYearAchieve(deviceOutputReality.divide(deviceOutputPredict, 4, BigDecimal.ROUND_HALF_UP).toString());
+                    }
                 }
 
                 //3.生产状态:工厂下网关的在线、离线状态。有一个在线视为正常，全部离线视为异常
