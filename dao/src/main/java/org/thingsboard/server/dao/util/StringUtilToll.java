@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.util.regex.Pattern;
  * @author: HU.YUNHUI
  * @create: 2021-11-08 13:26
  **/
-
+@Slf4j
 public class StringUtilToll {
 
     private final static String zero ="0";
@@ -155,6 +156,11 @@ public class StringUtilToll {
     }
 
 
+    /**
+     * 是否是 0
+     * @param v2
+     * @return
+     */
     public  static  Boolean isZero(String v2)
     {
         BigDecimal b2 = new BigDecimal(v2);
@@ -163,6 +169,25 @@ public class StringUtilToll {
             return true;
         }
         return  false;
+
+    }
+
+
+
+
+    /**
+     * 是否是 0
+     * @param v2
+     * @return
+     */
+    public  static  Boolean isNotZero(String v2)
+    {
+        BigDecimal b2 = new BigDecimal(v2);
+        if(b2.compareTo(BigDecimal.ZERO)==0)
+        {
+            return false;
+        }
+        return  true;
 
     }
 
@@ -223,12 +248,13 @@ public class StringUtilToll {
 
     public  static  String  getMaxSum(List<String> finalValueList)
     {
-        String maxValue=   finalValueList.stream().max((x,y)->{
+
+        String maxValue=   finalValueList.stream().filter(s->StringUtils.isNotEmpty(s)).max((x,y)->{
             if(compareTo(x,y))
                 return 1;
             else
                 return -1;
-        }).get();
+        }).orElse("0");
         return  maxValue;
 
     }
