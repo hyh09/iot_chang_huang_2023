@@ -1,19 +1,19 @@
 package org.thingsboard.server.dao.kafka.service;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
+import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.service.EnergyHistoryHourService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
+import org.thingsboard.server.dao.sqlts.BaseAbstractSqlTimeseriesDao;
+import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesLatestDao;
 import org.thingsboard.server.dao.util.JsonUtils;
 
@@ -27,7 +27,7 @@ import java.util.UUID;
  **/
 @Slf4j
 @Component
-public class KafkaConsumerListener {
+public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
 
     @Autowired
     private StatisticalDataService statisticalDataService;
@@ -39,6 +39,7 @@ public class KafkaConsumerListener {
     private TimeseriesLatestDao timeseriesLatestDao;
     @Autowired
     private EnergyHistoryHourService energyHistoryHourService;
+    @Autowired  private TsKvRepository tsKvRepository;
 
     @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
     public void kafkaListener(String message) {
@@ -113,16 +114,34 @@ public class KafkaConsumerListener {
 
     private String  setPreviousByZero(DataBodayVo dataBodayVo)
     {
-        TenantId tenantId = new TenantId(dataBodayVo.getTenantId());
-        DeviceId deviceId = new DeviceId(dataBodayVo.getEntityId());
-        ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, deviceId, dataBodayVo.getKey());
-        try {
-            TsKvEntry tsKvEntry1 = tsKvEntryListenableFuture.get();
-            return  (tsKvEntry1.getValue() != null ? tsKvEntry1.getValue().toString() : dataBodayVo.getValue());
-        } catch (Exception e) {
-            e.printStackTrace();
+       UUID  entityId=dataBodayVo.getEntityId();
+       long time=dataBodayVo.getTs();
+        Integer  key=   getOrSaveKeyId(dataBodayVo.getKey());
+        Long longTime =    tsKvRepository.findAllMaxTime(entityId,key,time);
+        if(longTime  == null )
+        {
+            return "0";
         }
-        return dataBodayVo.getValue();
+        TsKvEntity tsKvEntity =    tsKvRepository.findAllByTsAndEntityIdAndKey(entityId,key,longTime);
+        TsKvEntry  entry=   tsKvEntity.toData();
+        Object o =entry.getValue();
+        if(o == null)
+        {
+            return  "0";
+        }
+        return  o.toString();
+
+
+//        TenantId tenantId = new TenantId(dataBodayVo.getTenantId());
+//        DeviceId deviceId = new DeviceId(dataBodayVo.getEntityId());
+//        ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, deviceId, dataBodayVo.getKey());
+//        try {
+//            TsKvEntry tsKvEntry1 = tsKvEntryListenableFuture.get();
+//            return  (tsKvEntry1.getValue() != null ? tsKvEntry1.getValue().toString() : dataBodayVo.getValue());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return dataBodayVo.getValue();
     }
 
 }

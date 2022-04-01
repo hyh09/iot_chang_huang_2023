@@ -215,4 +215,21 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
                              @Param("endTs") long endTs,
                              Pageable pageable);
 
+
+    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key = :entityKey  AND tskv.ts = :time ")
+    TsKvEntity findAllByTsAndEntityIdAndKey(@Param("entityId") UUID entityId,
+                                                          @Param("entityKey") int entityKey,
+                                                          @Param("time") long time
+                                                         );
+
+
+    @Query(value = "select  max(ts) from  ts_kv  where  ts< :time and  entity_id= :entityId and key= :entityKey " +
+            " and  concat(long_v,dbl_v,str_v) <>'0'",nativeQuery = true)
+    Long findAllMaxTime(@Param("entityId") UUID entityId,
+                                                    @Param("entityKey") int entityKey,
+                                                    @Param("time") long time
+    );
+
+
 }
