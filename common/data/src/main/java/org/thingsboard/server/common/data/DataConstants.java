@@ -119,4 +119,7 @@ public class DataConstants {
     //         1000*60
     public  static  final  Long  ENERGY_TIME_GAP=1800000L;
 
+
+    public  static  final  Long  MAX_QUERY_COUNT=600000L;
+
 }

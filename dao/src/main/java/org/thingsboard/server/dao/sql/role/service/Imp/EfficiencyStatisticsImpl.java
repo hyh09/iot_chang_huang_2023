@@ -9,11 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
-import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageDataWithNextPage;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -190,10 +190,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.debug("查询当前角色下的用户绑定数据list{}",list);
          if(CollectionUtils.isEmpty(list))
          {
-             return new PageData<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext());
+             return new PageDataWithNextPage<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
          }
         List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
-        return new PageData<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+         if(page.hasNext())
+         {
+             Page<Map>  page1=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink.nextPageLink()));
+             List<Map> mapList1 = page1.getContent();
+             List<Map> mapList2 =   translateTitle(mapList1, deviceName,mapNameToVo);
+             Map  map=  mapList2.stream().findFirst().orElse(null);
+             return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),map);
+         }
+        return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
     }
 
     /**
@@ -344,7 +352,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws Exception {
+    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
         List<OutRunningStateVo>  resultVo = new ArrayList<>();
         List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
@@ -360,9 +368,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.debug("查询到的当前设备id{}的配置的kvDictionaries属性:{}",parameterVo.getDeviceId(),kvDictionaries);
         List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
         Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
+        long cout = tsKvRepository.countByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
+         if(cout> DataConstants.MAX_QUERY_COUNT)
+         {
+             throw  new CustomException(ActivityException.MAX_QUERY_ERROR.getCode(),ActivityException.MAX_QUERY_ERROR.getMessage());
+         }
         List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
+        logInfoJson("entities打印当前的json{}",entities);
+        List<TsKvEntity>  entities1=  getExcludeZero(entities);
         List<TsKvEntry> tsKvEntries  = new ArrayList<>();
-        entities.stream().forEach(tsKvEntity -> {
+        entities1.stream().forEach(tsKvEntity -> {
             tsKvEntity.setStrKey(mapDict.get(tsKvEntity.getKey()));
             tsKvEntries.add(tsKvEntity.toData());
         });
@@ -1321,7 +1336,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.debug("打印【"+str+"】数据结果:"+json);
+//            log.info("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -1425,6 +1440,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         }
         List<String> nameList = entities.stream().map(CensusSqlByDayEntity::getIncrementCapacity).collect(Collectors.toList());
         return  StringUtilToll.accumulator(nameList);
+    }
+
+
+    private List<TsKvEntity> getExcludeZero( List<TsKvEntity> entities)
+    {
+      return   entities.stream().filter(s1 ->{
+            if(StringUtils.isNotEmpty(s1.getStrValue()))
+            {
+                return StringUtilToll.isNotZero(s1.getStrValue());
+            }
+            if((s1.getDoubleValue()) != null)
+            {
+                return StringUtilToll.isNotZero(s1.getDoubleValue().toString());
+            }
+            if((s1.getLongValue()) != null)
+            {
+                return StringUtilToll.isNotZero(s1.getLongValue().toString());
+            }
+            return  false;
+        }).collect(Collectors.toList());
     }
 
 
