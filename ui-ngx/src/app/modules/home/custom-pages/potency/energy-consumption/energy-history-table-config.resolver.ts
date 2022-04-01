@@ -58,7 +58,7 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
             this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col] || ''), () => ({}), false));
           }
         });
-        this.config.columns.push(new DateEntityTableColumn<any>('createdTime', 'potency.created-time', this.datePipe, '150px'));
+        this.config.columns.push(new DateEntityTableColumn<any>('createdTime', 'potency.created-time', this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false));
 
         this.config.entitiesFetchFunction = pageLink => {
           let startTime: number, endTime: number;
