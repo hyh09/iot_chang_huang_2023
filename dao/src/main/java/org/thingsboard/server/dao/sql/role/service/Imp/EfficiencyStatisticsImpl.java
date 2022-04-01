@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -351,7 +352,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws Exception {
+    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
         List<OutRunningStateVo>  resultVo = new ArrayList<>();
         List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
@@ -367,6 +368,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.debug("查询到的当前设备id{}的配置的kvDictionaries属性:{}",parameterVo.getDeviceId(),kvDictionaries);
         List<Integer> keys=   kvDictionaries.stream().map(TsKvDictionary::getKeyId).collect(Collectors.toList());
         Map<Integer, String> mapDict  = kvDictionaries.stream().collect(Collectors.toMap(TsKvDictionary::getKeyId,TsKvDictionary::getKey));
+        long cout = tsKvRepository.countByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
+         if(cout> DataConstants.MAX_QUERY_COUNT)
+         {
+             throw  new CustomException(ActivityException.MAX_QUERY_ERROR.getCode(),ActivityException.MAX_QUERY_ERROR.getMessage());
+         }
         List<TsKvEntity> entities= tsKvRepository.findAllByKeysAndEntityIdAndStartTimeAndEndTime(parameterVo.getDeviceId(),keys,parameterVo.getStartTime(),parameterVo.getEndTime());
         logInfoJson("entities打印当前的json{}",entities);
         List<TsKvEntity>  entities1=  getExcludeZero(entities);
@@ -1330,7 +1336,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.info("打印【"+str+"】数据结果:"+json);
+//            log.info("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

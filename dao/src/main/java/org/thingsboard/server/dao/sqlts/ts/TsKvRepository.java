@@ -41,6 +41,14 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
                                       @Param("endTs") long endTs
     );
 
+    @Query("SELECT count(1) FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
+            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs   ")
+    long  countByKeysAndEntityIdAndStartTimeAndEndTime(@Param("entityId") UUID entityId,
+                                                                    @Param("entityKeys") List<Integer> key,
+                                                                    @Param("startTs") long startTs,
+                                                                    @Param("endTs") long endTs
+    );
+
 
 //    @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
 //            "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs  order by  tskv.ts asc ")
