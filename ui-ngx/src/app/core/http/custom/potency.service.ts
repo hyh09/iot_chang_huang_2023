@@ -37,21 +37,27 @@ export class PotencyService {
 
   // 查询设备产量历史列表
   public getDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<DeviceCapacityList> {
-    return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<DeviceCapacityList>(
+      `/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
+      defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+        if (res && res.data) {
+          res.data.forEach((item, index) => {
+            const nextItem = res.data[index + 1];
+            let value: number;
+            if (nextItem) {
+              value = Number(item.value || 0) - Number(nextItem.value || 0);
+            } else if (res.nextData) {
+              value = Number(item.value || 0) - Number(res.nextData.value || 0);
+            }
+            if (value < 0 || index === res.data.length - 1) {
+              value = 0;
+            }
+            item.value = value + '';
+          });
+        }
+        return res;
+      }));
   }
-
-  // public getDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<DeviceCapacityList> {
-  //   return this.http.get<DeviceCapacityList>(
-  //     `/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
-  //     defaultHttpOptionsFromConfig(config)).pipe(map(res => {
-  //       if (res && res.data) {
-  //         res.data.forEach((item, index) => {
-  //           item.value
-  //         });
-  //       }
-  //       return res;
-  //     }));
-  // }
 
   // 获取能耗分析表头
   public getEnergyConsumptionTableHeader(config?: RequestConfig): Observable<string[]> {
@@ -82,7 +88,7 @@ export class PotencyService {
     return this.http.get<PageData<object>>(
       `/api/pc/efficiency/queryEnergyHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)
-    );
+    )
   }
 
   // 获取设备的参数
