@@ -45,7 +45,7 @@ export class PotencyService {
             const nextItem = res.data[index + 1] || res.nextData;
             let value: number;
             if (nextItem) {
-              value = Number(item.value || 0) - Number(nextItem.value || 0);
+              value = (parseFloat(item.value || '0') * 100 - parseFloat(nextItem.value || '0') * 100) / 100;
               if (value < 0) {
                 value = 0;
               }
@@ -109,7 +109,7 @@ export class PotencyService {
             let value: { [name: string]: number | string } = {};
             if (nextItem) {
               valueKeys.forEach(key => {
-                value[key] = Number(item[key] || 0) - Number(nextItem[key] || 0);
+                value[key] = (parseFloat(item[key] || '0') * 100 - parseFloat(nextItem[key] || '0') * 100) / 100;
                 if (value[key] < 0) {
                   value[key] = 0;
                 }
