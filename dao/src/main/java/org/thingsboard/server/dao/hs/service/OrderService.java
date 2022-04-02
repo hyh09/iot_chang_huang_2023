@@ -14,6 +14,7 @@ import org.thingsboard.server.dao.hs.entity.po.OrderPlan;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -167,7 +168,7 @@ public interface OrderService {
      * @param endTime
      * @return
      */
-    String findActualByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+    BigDecimal findActualByFactoryIds(UUID factoryIds, Long startTime, Long endTime);
 
     /**
      * 查询时间范围内的计划产量
@@ -176,7 +177,7 @@ public interface OrderService {
      * @param endTime
      * @return
      */
-    String findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
+    BigDecimal findIntendedByFactoryIds(UUID factoryIds,Long startTime, Long endTime);
 
     /**
      * 查询订单-生产计划-单个设备在一个时间段内的维护时间列表

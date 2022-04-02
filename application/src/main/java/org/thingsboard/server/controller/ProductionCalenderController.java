@@ -21,6 +21,7 @@ import org.thingsboard.server.entity.productioncalender.vo.ProductionMonitorList
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -190,7 +191,9 @@ public class ProductionCalenderController extends BaseController{
             List<ProductionCalender> calenderList = productionCalenderService.getProductionMonitorList(dto.toProductionCalender(getCurrentUser().getTenantId().getId()));
             if(!org.springframework.util.CollectionUtils.isEmpty(calenderList)){
                 for (ProductionCalender productionCalender :calenderList){
-                    result.add(new ProductionMonitorListVo(productionCalender));
+                    ProductionMonitorListVo productionMonitorListVo = new ProductionMonitorListVo(productionCalender);
+                    productionMonitorListVo.setYearAchieve(new BigDecimal(productionMonitorListVo.getYearAchieve()).multiply(new BigDecimal(100)).toString());
+                    result.add(productionMonitorListVo);
                 }
             }
             return result;
