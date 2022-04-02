@@ -138,7 +138,7 @@ export class UserMngTableConfigResolver implements Resolve<EntityTableConfig<Use
       actions.push({
         name: this.translate.instant('auth-mng.change-pwd'),
         mdiIcon: 'mdi:pwd-key',
-        isEnabled: (entity) => (!!this.factoryId || !!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
+        isEnabled: (entity) => (!!this.factoryId || !!(entity && entity.id && entity.id.id) && (this.userLevel === 3 || this.userLevel === 1 || ((this.userLevel === 4 || this.userLevel === 0) && entity.operationType === 0))),
         onAction: ($event, entity) => this.changePwd($event, entity.id.id)
       });
     }
