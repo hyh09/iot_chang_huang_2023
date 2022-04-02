@@ -37,7 +37,26 @@ export class PotencyService {
 
   // 查询设备产量历史列表
   public getDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<DeviceCapacityList> {
-    return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<DeviceCapacityList>(
+      `/api/pc/efficiency/queryCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
+      defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+        if (res && res.data && res.data.length > 0) {
+          res.data.forEach((item, index) => {
+            const nextItem = res.data[index + 1] || res.nextData;
+            let value: number;
+            if (nextItem) {
+              value = Number(item.value || 0) - Number(nextItem.value || 0);
+              if (value < 0) {
+                value = 0;
+              }
+            } else {
+              value = 0;
+            }
+            item.value = value + '';
+          });
+        }
+        return res;
+      }));
   }
 
   // public getDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<DeviceCapacityList> {
@@ -81,8 +100,31 @@ export class PotencyService {
   public getEnergyHistoryDatas(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
     return this.http.get<PageData<object>>(
       `/api/pc/efficiency/queryEnergyHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
-      defaultHttpOptionsFromConfig(config)
-    );
+      defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+        if (res && res.data && res.data.length > 0) {
+          const othersKeys = ['createdTime', '设备名称'];
+          const valueKeys = Object.keys(res.data[0]).filter(key => !othersKeys.includes(key));
+          res.data.forEach((item, index) => {
+            const nextItem = res.data[index + 1] || res.nextData;
+            let value: { [name: string]: number | string } = {};
+            if (nextItem) {
+              valueKeys.forEach(key => {
+                value[key] = Number(item[key] || 0) - Number(nextItem[key] || 0);
+                if (value[key] < 0) {
+                  value[key] = 0;
+                }
+                value[key] += '';
+              });
+            } else {
+              valueKeys.forEach(key => {
+                value[key] = '0';
+              });
+            }
+            Object.assign(item, value);
+          });
+        }
+        return res;
+      }));
   }
 
   // 获取设备的参数

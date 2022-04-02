@@ -12,6 +12,7 @@ export interface DeviceCapacityList {
   data: DeviceCapacity[];
   totalValue: number;
   hasNext: boolean;
+  nextData: DeviceCapacity;
   totalElements: number;
   totalPages: number;
 }
