@@ -47,7 +47,7 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
     this.config.componentsData.deviceIdLoaded$.next(this.deviceId);
 
     const now = new Date();
-    this.config.componentsData.dateRange = [now, now];
+    this.config.componentsData.dateRange = [getTheStartOfDay(now, false), getTheEndOfDay(now, false)];
 
     this.config.tableTitle = this.translate.instant('potency.device-capacity-history');
     this.config.addEnabled = false;
@@ -60,8 +60,8 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
     this.config.entitiesFetchFunction = pageLink => {
       let startTime: number, endTime: number;
       if (this.config.componentsData.dateRange) {
-        startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
-        endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+        startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
+        endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
