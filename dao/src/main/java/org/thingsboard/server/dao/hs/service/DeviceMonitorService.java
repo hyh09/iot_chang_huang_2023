@@ -114,7 +114,7 @@ public interface DeviceMonitorService {
      * @param isShowAttributes 是否显示属性
      * @return 查询设备历史-表头，包含时间
      */
-    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes);
+    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) throws ExecutionException, InterruptedException;
 
     /**
      * 【APP】获得实时监控列表数据

@@ -133,7 +133,7 @@ export class FilterPredicateValueComponent implements ControlValueAccessor, Vali
         {
           sourceType: [null],
           sourceAttribute: [null],
-          perator: [null],
+          operator: [null],
           value: [null],
           inherit: [false]
         }
@@ -144,7 +144,7 @@ export class FilterPredicateValueComponent implements ControlValueAccessor, Vali
         this.showOperator = sourceType === DynamicValueSourceType.CURRENT_DEVICE;
         if (!sourceType) {
           this.filterPredicateValueFormGroup.get('dynamicValue').get('sourceAttribute').patchValue(null, {emitEvent: false});
-          this.filterPredicateValueFormGroup.get('dynamicValue').get('perator').patchValue(null, {emitEvent: false});
+          this.filterPredicateValueFormGroup.get('dynamicValue').get('operator').patchValue(null, {emitEvent: false});
           this.filterPredicateValueFormGroup.get('dynamicValue').get('value').patchValue(null, {emitEvent: false});
         }
         this.updateShowInheritMode(sourceType);
@@ -190,10 +190,11 @@ export class FilterPredicateValueComponent implements ControlValueAccessor, Vali
     this.filterPredicateValueFormGroup.get('dynamicValue').patchValue({
       sourceType: predicateValue.dynamicValue ? predicateValue.dynamicValue.sourceType : null,
       sourceAttribute: predicateValue.dynamicValue ? predicateValue.dynamicValue.sourceAttribute : null,
-      perator: predicateValue.dynamicValue ? predicateValue.dynamicValue.perator : null,
+      operator: predicateValue.dynamicValue ? predicateValue.dynamicValue.operator : null,
       value: predicateValue.dynamicValue ? predicateValue.dynamicValue.value : null,
       inherit: predicateValue.dynamicValue ? predicateValue.dynamicValue.inherit : false
     }, {emitEvent: this.onlyUserDynamicSource});
+    this.dynamicMode = !!(predicateValue && predicateValue.dynamicValue);
     this.updateShowInheritMode(predicateValue?.dynamicValue?.sourceType);
   }
 
@@ -218,6 +219,7 @@ export class FilterPredicateValueComponent implements ControlValueAccessor, Vali
       this.filterPredicateValueFormGroup.get('dynamicValue.inherit').patchValue(false, {emitEvent: false});
       this.inheritMode = false;
     }
+    this.showOperator = sourceType === DynamicValueSourceType.CURRENT_DEVICE;
   }
 
   private updateValidationDynamicMode() {

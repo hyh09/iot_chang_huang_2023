@@ -18,7 +18,6 @@
 <div fxLayout="row" fxLayoutAlign="start center" [formGroup]="alarmRuleConditionFormGroup" style="min-width: 0;">
   <div class="tb-alarm-rule-condition" fxFlex fxLayout="column" fxLayoutAlign="center" (click)="openFilterDialog($event)">
     <tb-filter-text formControlName="condition"
-                    [nowrap]="true"
                     required
                     addFilterPrompt="{{'device-profile.enter-alarm-rule-condition-prompt' | translate}}">
     </tb-filter-text>
