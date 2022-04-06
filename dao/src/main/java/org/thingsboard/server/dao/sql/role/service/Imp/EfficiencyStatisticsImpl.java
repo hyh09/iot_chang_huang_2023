@@ -767,7 +767,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
                 DictDeviceGroupPropertyVO dictVO=  mapNameToVo.get(k);
                 if(dictVO != null) {
-                    vo1.setValue(v.toString());
+                    vo1.setValue(v!=null?v.toString():"");
                 }
             });
             mapList.add(vo1);
