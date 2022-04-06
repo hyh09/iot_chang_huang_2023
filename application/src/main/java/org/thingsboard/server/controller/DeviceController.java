@@ -1048,7 +1048,7 @@ public class DeviceController extends BaseController {
     public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
         List<DeviceVo> result = new ArrayList<>();
         deviceQry.setTenantId(getCurrentUser().getTenantId().getId());
-        List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice());
+        List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice(),null,null);
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             deviceListByCdn.forEach(i->{
                 result.add(new DeviceVo(i));

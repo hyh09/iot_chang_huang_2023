@@ -59,6 +59,7 @@ import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,6 +75,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public static final String ATTRIBUTE_VERSION = "version";
     //在线状态
     public static final String ATTRIBUTE_ACTIVE = "active";
+    //倒序
+    public static final String DESC = "DESC";
+    //升序
+    public static final String ASC = "ASC";
+    public static final String SORT = "sort";
 
     @Autowired
     private DeviceRepository deviceRepository;
@@ -359,7 +365,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     @Override
-    public List<Device> findDeviceListByCdn(Device device) {
+    public List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc) {
         List<Device> resultList = new ArrayList<>();
         if (device != null) {
             Specification<DeviceEntity> specification = (root, query, cb) -> {
@@ -388,6 +394,16 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     CriteriaBuilder.In<UUID> in = cb.in(root.get("productionLineId"));
                     device.getProductionLineIds().forEach(in::value);
                     predicates.add(in);
+                }
+                //排序
+                if(StringUtils.isNotEmpty(orderValue) && StringUtils.isNotEmpty(descOrAsc)){
+                    Order order = null;
+                    if(descOrAsc.equals(DESC)){
+                        order = cb.desc(root.get(orderValue));
+                    }else {
+                        order = cb.asc(root.get(orderValue));
+                    }
+                    return query.orderBy(order).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
                 }
                 return cb.and(predicates.toArray(new Predicate[predicates.size()]));
             };
@@ -986,6 +1002,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     /**
      * 构造查询条件,需要家条件在这里面加
      * @param device
+     * @param pageLink
      * @return
      */
     private Specification<DeviceEntity> queryCondition(Device device, PageLink pageLink) {

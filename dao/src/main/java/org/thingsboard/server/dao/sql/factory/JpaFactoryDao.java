@@ -57,6 +57,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
 
     //在线状态
     public static final String ATTRIBUTE_ACTIVE = "active";
+    //升序
+    public static final String ASC = "ASC";
+    public static final String SORT = "sort";
 
     @Autowired
     private FactoryRepository factoryRepository;
@@ -151,7 +154,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         Device device = new Device();
         device.setFactoryId(id);
         if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))
-                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
+                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device,null,null))){
            /* 逻辑删除暂时不用
             FactoryEntity factoryEntity = factoryRepository.findById(id).get();
             factoryEntity.setDelFlag("D");
@@ -228,7 +231,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                     if(CollectionUtils.isNotEmpty(productionLineList)){
                         List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
                         //查询设备,过滤掉网关
-                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds));
+                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds),SORT,ASC);
                     }
                 }
             }
