@@ -79,6 +79,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private String comment;
     @ApiModelProperty("设备机台编号")
     private String deviceNo;
+    @ApiModelProperty("排序值")
+    private Integer sort;
     public long createdTime;
 
     public UUID createdUser;

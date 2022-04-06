@@ -168,7 +168,9 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 DeviceCapacityVo dcv = new DeviceCapacityVo(deviceId, startTime, endTime);
                 deviceCapacityVoList.add(dcv);
                 var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
-                deviceOutputReality = new BigDecimal(dataMap.get(deviceId));
+                if(dataMap != null && dataMap.containsKey(deviceId) && dataMap.get(deviceId) != null){
+                    deviceOutputReality = new BigDecimal(dataMap.get(deviceId));
+                }
                 //2.2 订单关联的设备的标准产能【设备字典的额定产能】* 设备日历中的时间【生产日历-取交叉-取小时】总和
                 BigDecimal deviceOutputPredict = new BigDecimal(0);
                 //设备标准产能
@@ -261,7 +263,9 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                         deviceCapacityVoList.add(new DeviceCapacityVo(deviceId, mapTime.get("startTime"), mapTime.get("endTime")));
                         //每个设备的产能
                         Map<UUID, String> map = bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
-                        deviceOutputReality = deviceOutputReality.add(new BigDecimal(map.get(deviceId)));
+                        if(map != null && map.containsKey(deviceId) && map.get(deviceId) != null){
+                            deviceOutputReality = deviceOutputReality.add(new BigDecimal(map.get(deviceId)));
+                        }
                     }
 
                     //2.2 每个"订单关联的设备的标准产能*设备日历中的时间总和"相加    注意：只取交叉时间值（单位小时）
