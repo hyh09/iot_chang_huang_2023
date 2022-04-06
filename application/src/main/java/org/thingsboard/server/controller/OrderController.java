@@ -298,6 +298,7 @@ public class OrderController extends BaseController {
     /**
      * App-订单-订单监控-生产计划-更新实际时间
      */
+    @Deprecated
     @ApiOperation(value = "App-订单-订单监控-生产计划-更新实际时间")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "planId", value = "设备计划Id", paramType = "path", required = true),

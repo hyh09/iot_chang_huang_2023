@@ -320,9 +320,15 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     public OrderVO updateOrSaveOrder(TenantId tenantId, OrderVO orderVO) throws ThingsboardException {
         Order order = new Order();
         for (OrderPlanDeviceVO plan : orderVO.getPlanDevices()) {
-            if (plan.getIntendedStartTime() != null && plan.getIntendedEndTime() !=null) {
+            if (plan.getIntendedStartTime() != null && plan.getIntendedEndTime() != null) {
                 if (this.clientService.listProductionCalenders(tenantId, toUUID(plan.getDeviceId()), plan.getIntendedStartTime(), plan.getIntendedEndTime()).isEmpty())
                     throw new ThingsboardException(plan.getDeviceName() + "生产计划时间超出班次时间", ThingsboardErrorCode.GENERAL);
+            }
+        }
+
+        if (!orderVO.getPlanDevices().isEmpty()) {
+            if (orderVO.getPlanDevices().stream().noneMatch(OrderPlanDeviceVO::getEnabled)) {
+                throw new ThingsboardException("至少一道工序需要参与运算！", ThingsboardErrorCode.GENERAL);
             }
         }
 
@@ -653,7 +659,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByFactoryIds(factoryIds, startTime, endTime);
         String actualCapacity = null;
         if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-            for(OrderPlanEntity i:orderPlanEntityList){
+            for (OrderPlanEntity i : orderPlanEntityList) {
                 actualCapacity = i.getActualCapacity();
                 if (StringUtils.isNotEmpty(actualCapacity)) {
                     sumActual = sumActual.add(new BigDecimal(actualCapacity));
@@ -677,7 +683,7 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
         List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByFactoryIds(factoryIds, startTime, endTime);
         String intendedCapacity = null;
         if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
-            for(OrderPlanEntity i:orderPlanEntityList){
+            for (OrderPlanEntity i : orderPlanEntityList) {
                 intendedCapacity = i.getIntendedCapacity();
                 if (StringUtils.isNotEmpty(intendedCapacity)) {
                     sumActual = sumActual.add(new BigDecimal(intendedCapacity));
@@ -690,27 +696,29 @@ public class OrderServiceImpl extends AbstractEntityService implements OrderServ
     @Override
     public String findIntendedByDeviceId(UUID deviceId, Long startTime, Long endTime) {
         BigDecimal intended = new BigDecimal(0);
-        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByDeviceId(deviceId,startTime,endTime);
-        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
-            for(OrderPlanEntity o : orderPlanEntityList){
-                if(StringUtils.isNotEmpty(o.getIntendedCapacity())){
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findIntendedByDeviceId(deviceId, startTime, endTime);
+        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+            for (OrderPlanEntity o : orderPlanEntityList) {
+                if (StringUtils.isNotEmpty(o.getIntendedCapacity())) {
                     intended = intended.add(new BigDecimal(o.getIntendedCapacity()));
                 }
-            };
+            }
+            ;
         }
-       return intended.toString();
+        return intended.toString();
     }
 
     @Override
     public String findActualByDeviceId(UUID deviceId, Long startTime, Long endTime) {
         BigDecimal actual = new BigDecimal(0);
-        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByDeviceId(deviceId,startTime,endTime);
-        if(!CollectionUtils.isEmpty(orderPlanEntityList)){
-            for(OrderPlanEntity o : orderPlanEntityList){
-                if(StringUtils.isNotEmpty(o.getActualCapacity())){
+        List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByDeviceId(deviceId, startTime, endTime);
+        if (!CollectionUtils.isEmpty(orderPlanEntityList)) {
+            for (OrderPlanEntity o : orderPlanEntityList) {
+                if (StringUtils.isNotEmpty(o.getActualCapacity())) {
                     actual = actual.add(new BigDecimal(o.getActualCapacity()));
                 }
-            };
+            }
+            ;
         }
         return actual.toString();
     }
