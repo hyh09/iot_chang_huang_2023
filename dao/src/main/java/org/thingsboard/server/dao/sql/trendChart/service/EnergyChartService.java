@@ -3,17 +3,18 @@ package org.thingsboard.server.dao.sql.trendChart.service;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.id.EntityId;
-import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceHoursVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.trendChart.dao.EnergyChartDao;
 import org.thingsboard.server.dao.sql.trendChart.entity.EnergyChartEntity;
+import org.thingsboard.server.dao.sql.tskv.dao.EnergyHistoryHourDao;
+import org.thingsboard.server.dao.sql.tskv.entity.EnergyHistoryHourEntity;
 import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
@@ -39,6 +40,8 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
     private final String THREE="3";
     private final Double ZERO_DOUBLE= 0.0;
 
+    @Autowired
+    private EnergyHistoryHourDao energyHistoryHourDao;
 
 
     @Transactional
@@ -261,10 +264,10 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
      */
     public List<CapacityDeviceHoursVo> getDeviceCapacity(UUID deviceId, long startTime, long endTime,String type,String keyNum){
         List<CapacityDeviceHoursVo> resultList = new ArrayList<>();
-        List<EnergyChartEntity> energyChartEntityList = dao.queryAllByEntityIdAndBetweenDate(deviceId, startTime, endTime);
+        List<EnergyHistoryHourEntity> energyChartEntityList = energyHistoryHourDao.queryAllByEntityIdAndBetweenDate(deviceId, startTime, endTime);
         LinkedHashMap<String, Double> map = new LinkedHashMap<>();
         if (!CollectionUtils.isEmpty(energyChartEntityList)){
-            for (EnergyChartEntity entity:energyChartEntityList) {
+            for (EnergyHistoryHourEntity entity:energyChartEntityList) {
                 //时间
                 String dateAndHours = getDateAndHours(entity.getTs());
                 //产能/能耗
@@ -290,13 +293,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
                             break;
                     }
                 }
-                if(map.containsKey(dateAndHours)){
-                    //取出相同时间区间的产能
-                    Double capacityAddedValueFromMap = map.get(dateAndHours);
-                    map.put(dateAndHours,capacityAddedValueFromMap + capacityOrEnergy);
-                }else {
-                    map.put(dateAndHours,capacityOrEnergy);
-                }
+                map.put(dateAndHours,capacityOrEnergy);
             }
         }
         if(map != null){
