@@ -121,7 +121,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     DictDeviceGraphItemRepository graphItemRepository;
 
     // 订单Service
-    OrderService orderService;
+    OrderRtService orderService;
 
     /**
      * 获得设备配置列表
@@ -1295,7 +1295,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     @Autowired
-    public void setOrderService(OrderService orderService) {
+    public void setOrderService(OrderRtService orderService) {
         this.orderService = orderService;
     }
 }

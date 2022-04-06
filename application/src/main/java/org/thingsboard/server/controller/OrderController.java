@@ -16,7 +16,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
-import org.thingsboard.server.dao.hs.service.OrderService;
+import org.thingsboard.server.dao.hs.service.OrderRtService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -46,7 +46,7 @@ import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 public class OrderController extends BaseController {
 
     @Autowired
-    OrderService orderService;
+    OrderRtService orderService;
 
     @Autowired
     ClientService clientService;
