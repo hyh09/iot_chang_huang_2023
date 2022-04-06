@@ -163,6 +163,10 @@ public class StringUtilToll {
      */
     public  static  Boolean isZero(String v2)
     {
+        if(v2 == null)
+        {
+            return  false;
+        }
         BigDecimal b2 = new BigDecimal(v2);
         if(b2.compareTo(BigDecimal.ZERO)==0)
         {
