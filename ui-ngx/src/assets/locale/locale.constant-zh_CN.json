@@ -3869,6 +3869,7 @@
     "merchandiser": "跟单员",
     "salesman": "销售员",
     "intended-complete-date": "计划完工日期",
+    "intended-complete-date-required": "计划完工日期必填",
     "order-type": "订单类型",
     "intended-time": "计划时间",
     "actual-time": "实际时间",
