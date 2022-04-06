@@ -59,26 +59,23 @@ push:
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
 
 # 部署到测试环境
-deployK8s:
+deploy:
   stage: deploy
   retry: 1
   image: roffe/kubectl
   tags:
-    # - hz-k8s-iot-test
-    - k8s.test.hangzhou
+    - hz-k8s-iot-test
   before_script:
     - mkdir -p /root/.kube
     - echo ${HS_CONFIG} | base64 -d > /root/.kube/config
     - export KUBECONFIG=/root/.kube/config
   script:
     - echo "部署到k8s"
-    - kubectl get pod --all-namespaces
     - cd ./k8s
-    - bash ./k8s-install-tb.sh --loadDemo
     - bash ./k8s-deploy-thirdparty.sh
     - bash ./k8s-deploy-resources.sh
   only:
-    - k8s-test
+    - dev
   after_script:
     - echo "k8s部署完成，立即生效执行阿里云k8s触发器。"
     - kubectl get pods -l app=tb-node

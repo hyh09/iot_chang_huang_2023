@@ -30,6 +30,7 @@ function installTb() {
 
 function installPostgres() {
 
+    kubectl apply -f common/tb-persistent-volume.yml
     kubectl apply -f common/postgres.yml
     kubectl apply -f common/tb-node-postgres-configmap.yml
 
@@ -38,6 +39,7 @@ function installPostgres() {
 
 function installHybrid() {
 
+    kubectl apply -f common/tb-persistent-volume.yml
     kubectl apply -f common/postgres.yml
     kubectl apply -f common/cassandra.yml
     kubectl apply -f common/tb-node-hybrid-configmap.yml
