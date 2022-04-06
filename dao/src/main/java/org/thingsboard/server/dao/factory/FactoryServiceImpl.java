@@ -310,7 +310,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         Device device = new Device();
         device.setFactoryId(UUID.fromString(factoryId));
         device.setOnlyGatewayFlag(true);
-        if(CollectionUtils.isNotEmpty(deviceService.findDeviceListByCdn(device))){
+        if(CollectionUtils.isNotEmpty(deviceService.findDeviceListByCdn(device,null,null))){
             return true;
         }
         return false;

@@ -185,7 +185,7 @@ public interface DeviceService {
      * @param device
      * @return
      */
-    List<Device> findDeviceListByCdn(Device device);
+    List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc);
 
     PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 

@@ -1068,8 +1068,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      * @return
      */
     @Override
-    public List<Device> findDeviceListByCdn(Device device){
-        return deviceDao.findDeviceListByCdn(device,null,null);
+    public List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc){
+        return deviceDao.findDeviceListByCdn(device,orderValue,descOrAsc);
     }
 
 
