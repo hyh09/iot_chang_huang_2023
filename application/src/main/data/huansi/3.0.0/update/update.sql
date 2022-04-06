@@ -48,3 +48,5 @@ ALTER TABLE tb_user
 alter table tenant add county_level varchar(255);
 alter table tenant add longitude varchar(255);
 alter table tenant add latitude varchar(255);
+--设置租户表主键
+alter table tenant add primary key(id);
