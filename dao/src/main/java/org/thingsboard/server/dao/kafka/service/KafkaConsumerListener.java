@@ -16,6 +16,7 @@ import org.thingsboard.server.dao.sqlts.BaseAbstractSqlTimeseriesDao;
 import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesLatestDao;
 import org.thingsboard.server.dao.util.JsonUtils;
+import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
             DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
             String title = dataBodayVo.getTitle();
             UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
+            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue())) {
                 dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
             }
             statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
@@ -77,7 +78,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
             DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
             String title = dataBodayVo.getTitle();
             UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
+            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue()) ) {
                 dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
             }
 
@@ -97,14 +98,10 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
             DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
             String title = dataBodayVo.getTitle();
             UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
+            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue()) ) {
                 dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
             }
-
             energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
-
-
-
         }
 
     }

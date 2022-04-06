@@ -119,8 +119,8 @@ public class DataToConversionImpl implements DataToConversionSvc {
         entityList.stream().forEach(m1->{
 
             waterList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getWaterAddedValue(),m1.getWaterValue() ,waterValue));
-            electricList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue(),gasValue));
-            gasList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getGasAddedValue(),m1.getGasValue(),cableValue));
+            electricList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue(),cableValue));
+            gasList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getGasAddedValue(),m1.getGasValue(),gasValue));
 
         });
 
