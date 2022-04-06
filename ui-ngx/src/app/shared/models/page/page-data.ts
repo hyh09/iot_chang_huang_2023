@@ -19,6 +19,7 @@ export interface PageData<T> {
   totalPages: number;
   totalElements: number;
   hasNext: boolean;
+  nextData?: T;
 }
 
 export function emptyPageData<T>(): PageData<T> {

@@ -15,7 +15,8 @@
   </div>
 </div>
 <nz-range-picker
-  nzFormat="yyyy/MM/dd"
+  [nzFormat]="isHistory ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd'"
+  [nzShowTime]="isHistory"
   nzSize="large"
   [nzDisabledDate]="disabledDate"
   [nzAllowClear]="false"
