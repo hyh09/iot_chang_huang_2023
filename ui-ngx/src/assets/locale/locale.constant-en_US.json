@@ -3970,6 +3970,7 @@
     "merchandiser": "Merchandiser",
     "salesman": "Salesman",
     "intended-complete-date": "Intended completion date",
+    "intended-complete-date-required": "Intended completion date is required.",
     "order-type": "Order type",
     "intended-time": "Scheduled time",
     "actual-time": "Actual time",
