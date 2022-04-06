@@ -62,7 +62,7 @@
         </section>
         <mat-form-field [fxFlex]="isConstantKeyType ? 20 : 30" class="mat-block">
           <mat-label translate>filter.value-type.value-type</mat-label>
-          <mat-select formControlName="valueType">
+          <mat-select formControlName="valueType" required>
             <mat-select-trigger>
               <mat-icon class="tb-mat-18" svgIcon="{{ entityKeyValueTypes.get(keyFilterFormGroup.get('valueType').value)?.icon }}"></mat-icon>
               <span>{{ entityKeyValueTypes.get(keyFilterFormGroup.get('valueType').value)?.name | translate }}</span>
