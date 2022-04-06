@@ -2356,7 +2356,7 @@
     "no-filters-found": "找不到筛选器。",
     "no-key-filters": "未配置键名筛选器",
     "operation": {
-      "and": "和",
+      "and": "并且",
       "contains": "包含",
       "ends-with": "结束于",
       "equal": "等于",

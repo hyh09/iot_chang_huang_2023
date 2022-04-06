@@ -203,13 +203,12 @@ export function createDefaultFilterPredicate(valueType: EntityKeyValueType, comp
 }
 
 export function getDynamicSourcesForAllowUser(allow: boolean): DynamicValueSourceType[] {
-  const dynamicValueSourceTypes = [DynamicValueSourceType.CURRENT_TENANT,
-    DynamicValueSourceType.CURRENT_CUSTOMER];
-  if (allow) {
-    dynamicValueSourceTypes.push(DynamicValueSourceType.CURRENT_USER);
-  } else {
+  const dynamicValueSourceTypes = []; //[DynamicValueSourceType.CURRENT_TENANT, DynamicValueSourceType.CURRENT_CUSTOMER];
+  // if (allow) {
+  //   dynamicValueSourceTypes.push(DynamicValueSourceType.CURRENT_USER);
+  // } else {
     dynamicValueSourceTypes.push(DynamicValueSourceType.CURRENT_DEVICE);
-  }
+  // }
   return dynamicValueSourceTypes;
 }
 
@@ -307,8 +306,8 @@ export const inheritModeForDynamicValueSourceType = [
 export interface DynamicValue<T> {
   sourceType: DynamicValueSourceType;
   sourceAttribute: string;
-  perator: string;
-  value: string;
+  operator: 'add' | 'subtract' | 'multiply' | 'divide';
+  value: T;
   inherit?: boolean;
 }
 
@@ -396,7 +395,7 @@ export function keyFiltersToText(translate: TranslateService, datePipe: DatePipe
   let result: string;
   if (filtersText.length > 1) {
     const andText = translate.instant('filter.operation.and');
-    result = filtersText.join(' <span class="tb-filter-complex-operation">' + andText + '</span> ');
+    result = filtersText.join('<span class="tb-filter-complex-operation">' + andText + '</span>');
   } else {
     result = filtersText[0];
   }
@@ -448,7 +447,13 @@ function simpleKeyFilterPredicateToText(translate: TranslateService,
   if (dynamicValue) {
     value = '<span class="tb-filter-dynamic-value"><span class="tb-filter-dynamic-source">' +
     translate.instant(dynamicValueSourceTypeTranslationMap.get(val.dynamicValue.sourceType)) + '</span>';
-    value += '.<span class="tb-filter-value">' + val.dynamicValue.sourceAttribute + '</span></span>';
+    value += ' - <span class="tb-filter-value">' + val.dynamicValue.sourceAttribute;
+    const { sourceType, operator, value: _value } = val.dynamicValue;
+    if (sourceType === DynamicValueSourceType.CURRENT_DEVICE && operator && (_value || _value === 0)) {
+      value += ` ${getOperator(operator)} ${_value}</span>`;
+    } else {
+      value += '</span></span>';
+    }
   }
   switch (keyFilterPredicate.type) {
     case FilterPredicateType.STRING:
@@ -481,6 +486,16 @@ function simpleKeyFilterPredicateToText(translate: TranslateService,
     value = `<span class="tb-filter-value">${value}</span>`;
   }
   return `<span class="tb-filter-predicate"><span class="tb-filter-entity-key">${key}</span> <span class="tb-filter-simple-operation">${operation}</span> ${value}</span>`;
+}
+
+function getOperator(operator: 'add' | 'subtract' | 'multiply' | 'divide'): string {
+  switch (operator) {
+    case 'add': return '+';
+    case 'subtract': return '-';
+    case 'multiply': return '*';
+    case 'divide': return '/';
+    default: return '';
+  }
 }
 
 export function keyFilterInfosToKeyFilters(keyFilterInfos: Array<KeyFilterInfo>): Array<KeyFilter> {
