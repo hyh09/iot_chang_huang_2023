@@ -17,6 +17,7 @@ package org.thingsboard.server.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -60,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -775,6 +777,7 @@ public class DashboardController extends BaseController {
             TenantId tenantId = getTenantId();
             dashboardService.saveUIByTenantId(tenantId,params);
         } catch (Exception e) {
+            log.error("保存租户自定义Ui异常【tenant/ui/info】",e);
             throw handleException(e);
         }
     }
