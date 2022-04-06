@@ -112,6 +112,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public static final String GATEWAY = "gateway";
 
 
+
     @Autowired
     private DeviceDao deviceDao;
 
@@ -1068,7 +1069,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      */
     @Override
     public List<Device> findDeviceListByCdn(Device device){
-        return deviceDao.findDeviceListByCdn(device);
+        return deviceDao.findDeviceListByCdn(device,null,null);
     }
 
 
@@ -1150,7 +1151,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public List<Device> findDeviceIssueListByCdn(Device device){
         List<Device> result = new ArrayList<>();
         //查询所有设备
-        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device,null,null);
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             //只要网关创建的设备
             result = this.filterDeviceFromGateway(deviceListByCdn);
@@ -1199,7 +1200,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             Device qryGateway = new Device();
             qryGateway.setTenantId(deviceList.get(0).getTenantId());
             qryGateway.setOnlyGatewayFlag(true);
-            List<Device> gatewayListByTenant = deviceDao.findDeviceListByCdn(qryGateway);
+            List<Device> gatewayListByTenant = deviceDao.findDeviceListByCdn(qryGateway,null,null);
             if(!CollectionUtils.isEmpty(gatewayListByTenant)){
                 gateways = gatewayListByTenant.stream().distinct().collect(Collectors.toList());
             }
