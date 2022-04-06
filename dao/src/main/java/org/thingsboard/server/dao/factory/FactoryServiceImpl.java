@@ -35,6 +35,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
     public static final String INCORRECT_FACTORY_ID = "不正确的 factoryId ";
     private static final String PREFIX_ENCODING_GC = "GC";
 
+
     private final FactoryDao factoryDao;
     private final UserRoleMenuSvc userRoleMenuSvc;
     private final DeviceService deviceService;
@@ -309,7 +310,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         Device device = new Device();
         device.setFactoryId(UUID.fromString(factoryId));
         device.setOnlyGatewayFlag(true);
-        if(CollectionUtils.isNotEmpty(deviceService.findDeviceListByCdn(device))){
+        if(CollectionUtils.isNotEmpty(deviceService.findDeviceListByCdn(device,null,null))){
             return true;
         }
         return false;

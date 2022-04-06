@@ -39,6 +39,8 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
 
     private final int ZERO = 0;
     private final String ONESTR = "1";
+    private final String SORT = "sort";
+    private final String ASC = "ASC";
 
     private final ProductionCalenderDao productionCalenderDao;
     private final DeviceDao deviceDao;
@@ -148,7 +150,7 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
         deviceParam.setFactoryId(factoryId);
         deviceParam.setWorkshopId(workshopId);
         deviceParam.setFilterGatewayFlag(true);
-        List<Device> deviceList = deviceService.findDeviceListByCdn(deviceParam);
+        List<Device> deviceList = deviceService.findDeviceListByCdn(deviceParam,SORT,ASC);
 
         if (!CollectionUtils.isEmpty(deviceList)) {
             deviceList.forEach(device -> {
