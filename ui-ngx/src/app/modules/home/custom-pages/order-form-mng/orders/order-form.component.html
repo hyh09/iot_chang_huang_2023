@@ -162,7 +162,10 @@
           </mat-form-field>
           <mat-form-field fxFlex class="mat-block">
             <mat-label translate>order.intended-complete-date</mat-label>
-            <input autocomplete="off" matInput formControlName="intendedTime" [matDatepicker]="picker2" (click)="picker2.open()">
+            <input autocomplete="off" matInput required formControlName="intendedTime" [matDatepicker]="picker2" (click)="picker2.open()">
+            <mat-error *ngIf="entityForm.get('intendedTime').hasError('required')">
+              {{ 'order.intended-complete-date-required' | translate }}
+            </mat-error>
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
             <mat-datepicker #picker2></mat-datepicker>
           </mat-form-field>
