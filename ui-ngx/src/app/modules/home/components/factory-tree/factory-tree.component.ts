@@ -74,6 +74,12 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
       });
       res.devices.forEach(device => {
         device.parentId = device.productionLineId;
+        if (!device.sort) {
+          device.sort = 0;
+        }
+      });
+      res.devices.sort((curr, next) => {
+        return curr.sort - next.sort;
       });
       res.undistributedDevices.forEach(device => {
         device.parentId = '-1';

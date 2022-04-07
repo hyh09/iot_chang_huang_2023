@@ -34,6 +34,7 @@ import org.thingsboard.server.dao.timeseries.PsqlPartition;
 import org.thingsboard.server.dao.timeseries.SqlTsPartitionDate;
 import org.thingsboard.server.dao.util.PsqlDao;
 import org.thingsboard.server.dao.util.SqlTsDao;
+import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -92,6 +93,21 @@ public class JpaPsqlTimeseriesDao extends AbstractChunkedAggregationTimeseriesDa
         entity.setStrValue(tsKvEntry.getStrValue().orElse(null));
         entity.setDoubleValue(tsKvEntry.getDoubleValue().orElse(null));
         entity.setLongValue(tsKvEntry.getLongValue().orElse(null));
+
+        if(StringUtilToll.isZero(tsKvEntry.getStrValue().orElse(null)))
+        {
+            entity.setStrKey("0");
+        }
+        Double aDouble =  tsKvEntry.getDoubleValue().orElse(null);
+        if(aDouble == null ){
+            entity.setDoubleValue(null);
+        }else  if(StringUtilToll.isZero(aDouble.toString()))
+        {
+            entity.setDoubleValue(null);
+            entity.setLongValue(0L);
+        }else {
+            entity.setDoubleValue(aDouble);
+        }
         entity.setBooleanValue(tsKvEntry.getBooleanValue().orElse(null));
         entity.setJsonValue(tsKvEntry.getJsonValue().orElse(null));
         log.trace("Saving entity: {}", entity);

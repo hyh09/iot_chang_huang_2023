@@ -127,6 +127,9 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     @Column(name = "flg")
     private Boolean deviceFlg=false;
 
+    @Column(name = "sort")
+    private Integer sort;
+
     public AbstractDeviceEntity() {
         super();
     }

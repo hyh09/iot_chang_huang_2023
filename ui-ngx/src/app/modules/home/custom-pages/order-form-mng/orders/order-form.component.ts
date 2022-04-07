@@ -81,7 +81,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
       salesman: [entity ? entity.salesman : ''],
       shortShipment: [entity ? entity.shortShipment : ''],
       overShipment: [entity ? entity.overShipment : ''],
-      intendedTime: [entity && entity.intendedTime ? new Date(entity.intendedTime) : null],
+      intendedTime: [entity && entity.intendedTime ? new Date(entity.intendedTime) : null, Validators.required],
       standardAvailableTime: [entity ? entity.standardAvailableTime : ''],
       comment: [entity ? entity.comment : ''],
       planDevices: this.fb.array(orderDeviceControls)

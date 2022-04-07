@@ -230,7 +230,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "isShowAttributes", value = "是否显示属性", paramType = "query", defaultValue = "false")
     })
     @GetMapping("/rtMonitor/device/history/header")
-    public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId, @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes) throws ThingsboardException {
+    public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId, @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
         return this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId, isShowAttributes);
     }

@@ -93,7 +93,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
     public void statisticOeeByTimedTask(Long startTime, Long endTime) {
         Device device = new Device();
         device.setFilterGatewayFlag(true);
-        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device,null,null);
         if (!CollectionUtils.isEmpty(deviceListByCdn)) {
             //按小时拆分时间区间
             List<Long> dateList = this.cutDate(startTime, endTime);
@@ -189,7 +189,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
             if (map != null) {
                 if (statisticOee.getDeviceId() == null) {
                     //不是设备，那就是租户、工厂、车间。需要除以设备数
-                    List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(statisticOee.getTenantId(), statisticOee.getFactoryId(), statisticOee.getWorkshopId(), true));
+                    List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(statisticOee.getTenantId(), statisticOee.getFactoryId(), statisticOee.getWorkshopId(), true),null,null);
                     BigDecimal deviceCount = new BigDecimal(1);
                     if (!CollectionUtils.isEmpty(deviceListByCdn)) {
                         deviceCount = new BigDecimal(deviceListByCdn.size());
@@ -241,7 +241,7 @@ public class DeviceOeeEveryHourServiceImpl implements DeviceOeeEveryHourService 
         device.setFactoryId(statisticOee.getFactoryId());
         device.setWorkshopId(statisticOee.getWorkshopId());
         device.setFilterGatewayFlag(true);
-        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device,null,null);
         return deviceListByCdn;
     }
 

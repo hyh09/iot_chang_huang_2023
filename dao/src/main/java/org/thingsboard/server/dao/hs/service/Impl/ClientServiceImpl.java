@@ -389,7 +389,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
         long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            var keyList = this.tsService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
             if (keyList.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
@@ -1039,7 +1039,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @SuppressWarnings("all")
     public List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
         if (this.commonComponent.isPersistToCassandra()) {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            var keyList = this.tsService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
             if (keyList.isEmpty())
                 return Lists.newArrayList();
 

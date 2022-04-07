@@ -121,7 +121,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     DictDeviceGraphItemRepository graphItemRepository;
 
     // 订单Service
-    OrderService orderService;
+    OrderRtService orderService;
 
     /**
      * 获得设备配置列表
@@ -452,13 +452,13 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) {
+    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) throws ExecutionException, InterruptedException {
         List<DictDeviceGroupPropertyVO> propertyVOList = new ArrayList<>() {{
             add(DictDeviceGroupPropertyVO.builder()
                     .name(HSConstants.CREATED_TIME).title(HSConstants.CREATED_TIME).build());
         }};
 
-        var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
+        var keyList = this.timeseriesService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
         if (isShowAttributes)
             keyList.addAll(this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().map(AttributeKvEntry::getKey).collect(Collectors.toList()));
         if (keyList.isEmpty())
@@ -1295,7 +1295,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     @Autowired
-    public void setOrderService(OrderService orderService) {
+    public void setOrderService(OrderRtService orderService) {
         this.orderService = orderService;
     }
 }

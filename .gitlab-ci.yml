@@ -39,7 +39,7 @@ package:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
     - echo "删除无用镜像"
-    - docker rmi `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
+    - docker rmi -f `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
     
 # 打包并构建镜像
 push:
@@ -49,7 +49,6 @@ push:
     - hz-k8s-iot-test
   script:
     - echo "推送镜像"
-    - docker info
     - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
     - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
   only:
@@ -59,26 +58,27 @@ push:
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
 
 # 部署到测试环境
-deployK8s:
+deploy:
   stage: deploy
   retry: 1
-  image: roffe/kubectl
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
   tags:
-    # - hz-k8s-iot-test
-    - k8s.test.hangzhou
+    - hz-k8s-iot-test
   before_script:
-    - mkdir -p /root/.kube
-    - echo ${HS_CONFIG} | base64 -d > /root/.kube/config
-    - export KUBECONFIG=/root/.kube/config
+    - echo ${HS_CONFIG} | base64 -d > /.kube/config
+    - export KUBECONFIG=/.kube/config
   script:
-    - echo "部署到k8s"
-    - kubectl get pod --all-namespaces
+    - echo "重启deployment"
     - cd ./k8s
-    - bash ./k8s-install-tb.sh --loadDemo
     - bash ./k8s-deploy-thirdparty.sh
     - bash ./k8s-deploy-resources.sh
+    - kubectl version
+    - kubectl rollout restart deployment tb-web-ui
+    - kubectl rollout restart deployment tb-node
   only:
-    - k8s-test
+    - dev
   after_script:
-    - echo "k8s部署完成，立即生效执行阿里云k8s触发器。"
     - kubectl get pods -l app=tb-node
+    - kubectl get pods -l app=tb-web-ui
