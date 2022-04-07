@@ -62,7 +62,9 @@ push:
 deploy:
   stage: deploy
   retry: 1
-  image: roffe/kubectl
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
   tags:
     - hz-k8s-iot-test
   before_script:
