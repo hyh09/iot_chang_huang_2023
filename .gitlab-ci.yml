@@ -67,9 +67,8 @@ deploy:
   tags:
     - hz-k8s-iot-test
   before_script:
-    - mkdir -p /root/.kube
-    - echo ${HS_CONFIG} | base64 -d > /root/.kube/config
-    - export KUBECONFIG=/root/.kube/config
+    - echo ${HS_CONFIG} | base64 -d > /.kube/config
+    - export KUBECONFIG=/.kube/config
   script:
     - echo "重启deployment"
     - cd ./k8s
