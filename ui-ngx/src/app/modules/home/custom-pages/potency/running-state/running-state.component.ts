@@ -39,7 +39,7 @@ export class RunningStateComponent {
       this.displayedProps = [];
       this.potencyService.getDeviceProps(this.deviceId).subscribe(properties => {
         this.properties = properties || [];
-        this.selectedProps = this.properties.map(prop => (prop.name || prop.chartId));
+        this.selectedProps = [this.properties[0]?.name || this.properties[0]?.chartId]; // this.properties.map(prop => (prop.name || prop.chartId));
         this.displayedProps = this.selectedProps.slice(0, 2);
         this.propertyMap = {};
         this.properties.forEach(prop => {
