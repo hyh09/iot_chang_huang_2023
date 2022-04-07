@@ -70,12 +70,14 @@ deploy:
     - echo ${HS_CONFIG} | base64 -d > /root/.kube/config
     - export KUBECONFIG=/root/.kube/config
   script:
-    - echo "部署到k8s"
+    - echo "重启deployment"
     - cd ./k8s
     - bash ./k8s-deploy-thirdparty.sh
     - bash ./k8s-deploy-resources.sh
+    - kubectl rollout restart deployment tb-web-ui
+    - kubectl rollout restart deployment tb-node
   only:
     - dev
   after_script:
-    - echo "k8s部署完成，立即生效执行阿里云k8s触发器。"
     - kubectl get pods -l app=tb-node
+    - kubectl get pods -l app=tb-web-ui
