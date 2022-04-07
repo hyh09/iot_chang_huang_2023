@@ -137,6 +137,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(sqlpre);
         sql.append(SELECT_START_DEVICE_02).append(SELECT_TS_CAP_02).append(FROM_QUERY_CAP_02);
         sql.append(sonSql01);
+        sql.append( " ORDER BY  d1.sort ");
         List<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param,"energyEffciencyNewEntity_02");
         return  page;
     }
