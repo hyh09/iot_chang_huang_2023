@@ -76,6 +76,7 @@ export interface ProdDevice extends BaseData<DeviceId>, CommonData {
   icon?: string;
   logoImages?: string;
   comment?: string;
+  sort?: number;
   standardPropertyList: Array<DeviceData>;
   propertyList?: Array<DeviceProperty>;
   groupList?: Array<DeviceDataGroup>;

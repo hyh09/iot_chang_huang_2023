@@ -68,10 +68,10 @@
         </mat-form-field>
         <div class="tb-hint" translate>filter.source-attribute</div>
       </div>
-      <div *ngIf="showOperator" fxFlex fxLayout="column">
+      <div *ngIf="valueType === valueTypeEnum.NUMERIC && showOperator" fxFlex fxLayout="column">
         <mat-form-field floatLabel="always" hideRequiredMarker class="mat-block">
           <mat-label></mat-label>
-          <mat-select formControlName="perator" placeholder="{{'filter.operator' | translate}}">
+          <mat-select formControlName="operator" placeholder="{{'filter.operator' | translate}}">
             <mat-option [value]="null">
               {{'filter.no-operator' | translate}}
             </mat-option>
@@ -83,7 +83,7 @@
         </mat-form-field>
         <div class="tb-hint" translate>filter.operator</div>
       </div>
-      <div *ngIf="showOperator" fxFlex fxLayout="column">
+      <div *ngIf="valueType === valueTypeEnum.NUMERIC && showOperator" fxFlex fxLayout="column">
         <mat-form-field floatLabel="always" hideRequiredMarker class="mat-block">
           <mat-label></mat-label>
           <input matInput formControlName="value" placeholder="{{'filter.operation-value' | translate}}">

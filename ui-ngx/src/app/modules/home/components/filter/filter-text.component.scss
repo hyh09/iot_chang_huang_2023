@@ -39,8 +39,8 @@
       line-height: 1.4em;
     }
     .tb-filter-predicate {
-      padding-right: 4px;
-      padding-left: 4px;
+      // padding-right: 4px;
+      // padding-left: 4px;
     }
     .tb-filter-entity-key, .tb-filter-value, .tb-filter-dynamic-source {
       font-weight: bold;
@@ -59,6 +59,7 @@
     }
     .tb-filter-entity-key {
       color: #36476c;
+      margin: 2px 0;
     }
     .tb-filter-value {
       color: #ff5722;
@@ -68,8 +69,10 @@
     }
     .tb-filter-complex-operation {
       font-weight: bold;
+      padding: 0 4px;
     }
     .tb-filter-dynamic-value {
+      margin: 2px 0;
       .tb-filter-dynamic-source, .tb-filter-value {
         color: #0c959c;
       }

@@ -239,6 +239,18 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 分页查询设备列表-按设备排序值排序
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     * @param pageLink 分页参数
+     */
+    @Override
+    public <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQueryOrderBySort(TenantId tenantId, T t, PageLink pageLink) {
+        return DaoUtil.toPageData(this.deviceRepository.findAll(this.getDeviceQuerySpecificationOrderBySort(tenantId, t), DaoUtil.toPageable(pageLink)));
+    }
+
+    /**
      * 查询全部设备的在线情况
      *
      * @param allDeviceIdList 设备的UUID列表
@@ -389,7 +401,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
         long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            var keyList = this.tsService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
             if (keyList.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
@@ -788,38 +800,6 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
-     * 组装设备请求 specification
-     *
-     * @param tenantId 租户Id
-     * @param t        extends FactoryDeviceQuery
-     */
-    @SuppressWarnings("all")
-    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
-            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
-
-            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
-                // do nothing
-            } else if (!StringUtils.isBlank(t.getDeviceId())) {
-                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
-            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
-                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
-            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
-                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
-            } else if (!StringUtils.isBlank(t.getFactoryId())) {
-                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
-            } else {
-                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
-            }
-
-            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
-            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
-        };
-    }
-
-    /**
      * 根据当前登录人获得全部设备的在线状态
      *
      * @param tenantId  租户Id
@@ -1039,7 +1019,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @SuppressWarnings("all")
     public List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
         if (this.commonComponent.isPersistToCassandra()) {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            var keyList = this.tsService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
             if (keyList.isEmpty())
                 return Lists.newArrayList();
 
@@ -1131,6 +1111,70 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 组装设备请求 specification
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @SuppressWarnings("all")
+    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+
+            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+                // do nothing
+            } else if (!StringUtils.isBlank(t.getDeviceId())) {
+                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+            } else if (!StringUtils.isBlank(t.getFactoryId())) {
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+            } else {
+                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+            }
+
+            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        };
+    }
+
+    /**
+     * 组装设备请求 specification
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @SuppressWarnings("all")
+    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecificationOrderBySort(TenantId tenantId, T t) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+
+            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+                // do nothing
+            } else if (!StringUtils.isBlank(t.getDeviceId())) {
+                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+            } else if (!StringUtils.isBlank(t.getFactoryId())) {
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+            } else {
+                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+            }
+
+            query.orderBy(cb.asc(root.get("sort"))).orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        };
     }
 
     @Autowired
