@@ -1218,7 +1218,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     }
 
-
+    /**
+     * 补齐数据
+     *
+     * @param graphVO
+     * @param map1
+     * @return
+     */
     private   List<OutOperationStatusChartDataVo> getTheDataOfTheChart( DictDeviceGraphVO graphVO, Map<String,List<ResultRunStatusByDeviceVo>>   map1)
     {
         List<OutOperationStatusChartDataVo>  resultList = new ArrayList<>();
@@ -1227,6 +1233,15 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         logInfoJson("获取该图表下的属性",dictDeviceGraphPropertyVOS);
         logInfoJson("获取该图表下的属性Map<String,List<ResultRunStatusByDeviceVo>>",map1);
 
+        List<Long> timeAll = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(map1))
+        {
+            map1.forEach((k1,v1)->{
+                timeAll.addAll( v1.stream().map(ResultRunStatusByDeviceVo::getTime).distinct().collect(Collectors.toList()) );
+            });
+        }
+        List<Long>  timeAllsort=  timeAll.stream().sorted().collect(Collectors.toList());
+
         if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
             {
             dictDeviceGraphPropertyVOS.stream().forEach(m1->{
@@ -1234,13 +1249,27 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
                 List<ResultRunStatusByDeviceVo>  resultRunStatusByDeviceVos =    map1.get(m1.getName());
                 logInfoJson("获取该图表下的属性MapresultRunStatusByDeviceVos",resultRunStatusByDeviceVos);
+               Map<Long,String> mapTimeValue=
+                       resultRunStatusByDeviceVos.stream().collect(Collectors.toMap(ResultRunStatusByDeviceVo::getTime,ResultRunStatusByDeviceVo::getValue));
 
-                List<OutOperationStatusChartTsKvDataVo> list3=    resultRunStatusByDeviceVos.stream().map(m2 -> {
+                List<OutOperationStatusChartTsKvDataVo> list3=    timeAllsort.stream().map(m2 -> {
                     OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
-                    tsKvDataVo.setTs(m2.getTime());
-                    tsKvDataVo.setValue(m2.getValue());
+                    tsKvDataVo.setTs(m2);
+                    String  localValue= mapTimeValue.get(m2);
+                    if(StringUtils.isEmpty(localValue))
+                    {
+                        List<Long> tsTime=   resultRunStatusByDeviceVos
+                                             .stream()
+                                             .filter(entity01->entity01.getTime()<m2)
+                                             .map(ResultRunStatusByDeviceVo::getTime).collect(Collectors.toList());
+                        Long maxTime =   StringUtilToll.getMaxByLong(tsTime);
+                        localValue= mapTimeValue.get(maxTime);
+                    }
+                    tsKvDataVo.setValue(localValue);
                     return tsKvDataVo;
                 }).collect(Collectors.toList());
+
+
                 v2.setTitle(m1.getTitle());
                 v2.setName(m1.getName());
                 v2.setUnit(m1.getUnit());
