@@ -89,4 +89,10 @@ public class SimpleFactoryHierarchyResult {
 //     */
 //    @ApiModelProperty("产线名称")
 //    private String productionLineName;
+
+    /**
+     * 排序值
+     */
+    @ApiModelProperty("排序值")
+    private Integer sort;
 }

@@ -261,7 +261,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         result.setDeviceIdList(uuids.stream().map(UUID::toString).collect(Collectors.toList()));
         CompletableFuture.allOf(
                 CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
-                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
+                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQueryOrderBySort(tenantId, query, pageLink))
                         .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
                                     var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
                                     if (uuidList.isEmpty())

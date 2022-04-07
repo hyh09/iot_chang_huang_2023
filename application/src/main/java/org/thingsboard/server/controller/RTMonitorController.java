@@ -72,7 +72,6 @@ public class RTMonitorController extends BaseController {
     /**
      * 根据当前登录人获得工厂层级-通用
      */
-    @Deprecated
     @ApiOperation(value = "根据当前登录人获得工厂层级-通用")
     @GetMapping("/rtMonitor/factory/hierarchy/common")
     public FactoryHierarchyResult getFactoryHierarchyCommon() throws ThingsboardException {
@@ -163,7 +162,7 @@ public class RTMonitorController extends BaseController {
             @RequestParam(required = false) String productionLineId,
             @RequestParam(required = false) String deviceId
     ) throws ThingsboardException {
-        PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
+        PageLink pageLink = createPageLink(pageSize, page, "", null, null);
         validatePageLink(pageLink);
         FactoryDeviceQuery query;
         query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);

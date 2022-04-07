@@ -76,6 +76,15 @@ public interface ClientService {
     <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQuery(TenantId tenantId, T t, PageLink pageLink);
 
     /**
+     * 分页查询设备列表-按设备排序值排序
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     * @param pageLink 分页参数
+     */
+    <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQueryOrderBySort(TenantId tenantId, T t, PageLink pageLink);
+
+    /**
      * 查询全部设备的在线情况
      *
      * @param allDeviceIdList 设备的UUID列表
