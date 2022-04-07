@@ -74,6 +74,7 @@ deploy:
     - cd ./k8s
     - bash ./k8s-deploy-thirdparty.sh
     - bash ./k8s-deploy-resources.sh
+    - kubectl version
     - kubectl rollout restart deployment tb-web-ui
     - kubectl rollout restart deployment tb-node
   only:
