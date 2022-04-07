@@ -401,7 +401,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
              //首次加载的时候
             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
-            propertiesVos =   propertiesVos.stream().limit(3).collect(Collectors.toList());
+            propertiesVos =   propertiesVos.stream().limit(1).collect(Collectors.toList());
             runningSateVo.setAttributeParameterList(propertiesVos);
         }
         if(CollectionUtils.isEmpty(runningSateVo.getAttributeParameterList()))
