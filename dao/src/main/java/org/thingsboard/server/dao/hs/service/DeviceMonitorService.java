@@ -286,4 +286,14 @@ public interface DeviceMonitorService {
      * @return 设备关键参数
      */
     DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) throws ThingsboardException;
+
+    /**
+     * 查询设备部件名称
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param componentId 部件Id
+     * @return 部件名称
+     */
+    String getRtMonitorDeviceComponentName(TenantId tenantId, UUID deviceId, UUID componentId);
 }
