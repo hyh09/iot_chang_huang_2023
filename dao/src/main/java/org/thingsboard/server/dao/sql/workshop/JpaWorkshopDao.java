@@ -229,7 +229,10 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             List<WorkshopEntity> all = workshopRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
                 //查询工厂名称
-                List<UUID> factoryIds = all.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+                List<UUID> factoryIds = all.stream().map(s -> s.getFactoryId()).collect(Collectors.toList());
+                if(!org.springframework.util.CollectionUtils.isEmpty(factoryIds)){
+                    factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+                }
                 List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
                 all.forEach(i->{
                     Workshop workshop = i.toWorkshop();
@@ -255,7 +258,10 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
     public List<Workshop> getParentNameByList(List<Workshop> workshopList){
         if(CollectionUtils.isNotEmpty(workshopList)){
             //查询工厂名称
-            List<UUID> factoryIds = workshopList.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            List<UUID> factoryIds = workshopList.stream().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(factoryIds)){
+                factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+            }
             List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
             workshopList.forEach(i->{
                 if(CollectionUtils.isNotEmpty(factoryByIdList)){
