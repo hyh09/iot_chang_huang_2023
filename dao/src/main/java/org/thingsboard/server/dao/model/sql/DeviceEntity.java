@@ -73,6 +73,19 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         } catch (Exception ignore){}
     }
 
+    public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo, Integer sort) throws JsonProcessingException {
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setFactoryId(factoryId);
+        this.setWorkshopId(workshopId);
+        this.setProductionLineId(productionLineId);
+        this.setSort(sort);
+        try {
+            this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
+        } catch (Exception ignore){}
+    }
+
     public DeviceEntity (UUID tenantId){
         this.setTenantId(tenantId);
     }

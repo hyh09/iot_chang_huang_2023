@@ -842,7 +842,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             List<DeviceEntity> all = deviceRepository.findAll(specification);
             if (CollectionUtils.isNotEmpty(all)) {
                 //查询产线名称
-                List<UUID> productionLineIds = all.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+                List<UUID> productionLineIds = all.stream().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+                if(!org.springframework.util.CollectionUtils.isEmpty(productionLineIds)){
+                    productionLineIds = productionLineIds.stream().distinct().collect(Collectors.toList());
+                }
                 List<ProductionLine> productionLineList = productionLineDao.getProductionLineByIdList(productionLineIds);
                 all.forEach(i -> {
                     Device device = i.toData();
@@ -949,7 +952,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public List<Device> getFactoryByList(List<Device> deviceList) {
         if (CollectionUtils.isNotEmpty(deviceList)) {
             //查询产线名称
-            List<UUID> factoryIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<UUID> factoryIds = deviceList.stream().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(factoryIds)){
+                factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+            }
             List<Factory> resultFactory = factoryDao.getFactoryByIdList(factoryIds);
             deviceList.forEach(i -> {
                 if (CollectionUtils.isNotEmpty(resultFactory)) {
@@ -973,7 +979,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public List<Device> getParentNameByList(List<Device> deviceList) {
         if (CollectionUtils.isNotEmpty(deviceList)) {
             //查询产线名称
-            List<UUID> productionLineIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<UUID> productionLineIds = deviceList.stream().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(productionLineIds)){
+                productionLineIds = productionLineIds.stream().distinct().collect(Collectors.toList());
+            }
             List<ProductionLine> productionLineList = productionLineDao.getProductionLineByIdList(productionLineIds);
             deviceList.forEach(i -> {
                 if (CollectionUtils.isNotEmpty(productionLineList)) {

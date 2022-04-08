@@ -40,6 +40,7 @@ import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
@@ -122,6 +123,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
     // 订单Service
     OrderRtService orderService;
+
+    // 部件componentRepository
+    DictDeviceComponentRepository componentRepository;
 
     /**
      * 获得设备配置列表
@@ -261,7 +265,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         result.setDeviceIdList(uuids.stream().map(UUID::toString).collect(Collectors.toList()));
         CompletableFuture.allOf(
                 CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
-                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
+                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQueryOrderBySort(tenantId, query, pageLink))
                         .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
                                     var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
                                     if (uuidList.isEmpty())
@@ -1189,6 +1193,19 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     /**
+     * 查询设备部件名称
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param componentId 部件Id
+     * @return 部件名称
+     */
+    @Override
+    public String getRtMonitorDeviceComponentName(TenantId tenantId, UUID deviceId, UUID componentId) {
+        return this.componentRepository.findById(componentId).map(DictDeviceComponentEntity::toData).map(DictDeviceComponent::getName).orElse("");
+    }
+
+    /**
      * 获得遥测时序数据
      *
      * @param tenantId  租户Id
@@ -1297,5 +1314,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Autowired
     public void setOrderService(OrderRtService orderService) {
         this.orderService = orderService;
+    }
+
+    @Autowired
+    public void setComponentRepository(DictDeviceComponentRepository componentRepository) {
+        this.componentRepository = componentRepository;
     }
 }
