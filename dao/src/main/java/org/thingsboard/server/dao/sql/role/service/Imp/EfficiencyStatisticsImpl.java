@@ -352,15 +352,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException {
+    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException, ThingsboardException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
         List<OutRunningStateVo>  resultVo = new ArrayList<>();
         List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
-//         if( CollectionUtils.isEmpty(runningStateVoList))
-//         {
-//             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
-//             runningStateVoList =   propertiesVos.stream().limit(3).collect(Collectors.toList());
-//         }
+         if( CollectionUtils.isEmpty(runningStateVoList))
+         {
+             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
+             runningStateVoList =   propertiesVos.stream().limit(1).collect(Collectors.toList());
+             parameterVo.setAttributeParameterList(runningStateVoList);
+         }
          Map<String,DictDeviceGraphVO> chartIdToKeyNameMap = new HashMap<>();
          List<String>  keyNames = getKeyNameByVoList(runningStateVoList,tenantId,chartIdToKeyNameMap);
        log.debug("查询到的当前设备{}的配置的keyNames属性:{}",parameterVo.getDeviceId(),keyNames);
@@ -381,6 +382,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             tsKvEntity.setStrKey(mapDict.get(tsKvEntity.getKey()));
             tsKvEntries.add(tsKvEntity.toData());
         });
+        logInfoJson("entities打印当前的jsontsKvEntries{}",tsKvEntries);
         return  getRunningStatusResults(tsKvEntries,parameterVo,keyNames,chartIdToKeyNameMap);
     }
 
@@ -394,7 +396,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @throws Exception
      */
     @Override
-    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink) throws Exception {
+    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink1) throws Exception {
         //1.优化将app端的入参转换pc端入参;
         InputRunningSateVo  runningSateVo =   new  InputRunningSateVo().toInputRunningSateVoByAppQuery(parameterVo);
         if(CollectionUtils.isEmpty(parameterVo.getAttributes()))
@@ -1365,7 +1367,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-//            log.info("打印【"+str+"】数据结果:"+json);
+            log.info("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
