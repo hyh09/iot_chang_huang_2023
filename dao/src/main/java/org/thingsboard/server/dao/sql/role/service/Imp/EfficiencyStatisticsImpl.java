@@ -396,7 +396,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @throws Exception
      */
     @Override
-    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink1) throws Exception {
+    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink) throws Exception {
         //1.优化将app端的入参转换pc端入参;
         InputRunningSateVo  runningSateVo =   new  InputRunningSateVo().toInputRunningSateVoByAppQuery(parameterVo);
         if(CollectionUtils.isEmpty(parameterVo.getAttributes()))
@@ -1242,7 +1242,9 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 timeAll.addAll( v1.stream().map(ResultRunStatusByDeviceVo::getTime).distinct().collect(Collectors.toList()) );
             });
         }
-        List<Long>  timeAllsort=  timeAll.stream().sorted().collect(Collectors.toList());
+        List<Long>  timeAllsort = timeAll.stream().filter(s1->s1 !=null).distinct().sorted().collect(Collectors.toList());
+
+        logInfoJson("timeAllsort",timeAllsort);
 
         if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
             {
@@ -1367,7 +1369,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(obj);
-            log.info("打印【"+str+"】数据结果:"+json);
+//            log.info("打印【"+str+"】数据结果:"+json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
