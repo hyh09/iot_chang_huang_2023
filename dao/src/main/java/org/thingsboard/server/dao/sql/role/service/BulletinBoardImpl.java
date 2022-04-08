@@ -136,8 +136,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     public ConsumptionTodayVo todayUnitEnergy(QueryTsKvVo vo, TenantId tenantId) {
         List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(vo);
         print("看板的今日能耗数据",entityList);
-        List<EnergyEffciencyNewEntity>  entityList1 =  dataToConversionSvc.groupEntityIdSum(entityList);
-        return  dataToConversionSvc.todayUntiEnergyByEntityList(entityList1,tenantId,vo);
+//        List<EnergyEffciencyNewEntity>  entityList1 =  dataToConversionSvc.groupEntityIdSum(entityList);
+        return  dataToConversionSvc.todayUntiEnergyByEntityList(entityList,tenantId,vo);
     }
 
     @Override
