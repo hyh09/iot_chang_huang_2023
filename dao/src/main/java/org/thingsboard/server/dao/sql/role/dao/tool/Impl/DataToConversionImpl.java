@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.dao.tool.Impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.tskv.ConsumptionTodayVo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TkTodayVo;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.DictDeviceRepository;
 import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyEntity;
@@ -21,6 +23,7 @@ import org.thingsboard.server.dao.hs.dao.DictDeviceStandardPropertyRepository;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.ProductionLineEntity;
 import org.thingsboard.server.dao.model.sql.WorkshopEntity;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
@@ -44,6 +47,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DataToConversionImpl implements DataToConversionSvc {
 
+    @Autowired private DeviceDao deviceDao;
     @Autowired private FactoryDao factoryDao;
     @Autowired private WorkshopRepository workshopRepository;
     @Autowired private ProductionLineRepository productionLineRepository;
@@ -90,6 +94,8 @@ public class DataToConversionImpl implements DataToConversionSvc {
         List<TkTodayVo> electricList = new ArrayList<>();
         List<TkTodayVo> gasList = new ArrayList<>();
 
+
+
         Map<UUID,String> mapFactoryCache = new HashMap<>();
         entityList.stream().forEach(m1->{
 
@@ -115,8 +121,18 @@ public class DataToConversionImpl implements DataToConversionSvc {
         String gasValue=   this.queryStandardEnergyValue(vo.getDictDeviceId(),KeyTitleEnums.key_gas);
         String  cableValue=   this.queryStandardEnergyValue(vo.getDictDeviceId(),KeyTitleEnums.key_cable);
 
+        List<UUID> ids= entityList.stream().map(EnergyEffciencyNewEntity::getEntityId).collect(Collectors.toList());
+
+        List<DeviceEntity>  deviceEntities =  deviceDao.queryAllByIds(ids);
+        print("deviceEntities",deviceEntities);
+
+
         Map<UUID,String> mapFactoryCache = new HashMap<>();
         entityList.stream().forEach(m1->{
+            DeviceEntity  deviceEntity=   deviceEntities.stream().filter(d1->d1.getId().equals(m1.getEntityId())).findFirst().orElse(new DeviceEntity());
+            m1.setDeviceName(deviceEntity.getName());
+            m1.setFactoryId(deviceEntity.getFactoryId());
+            print("deviceEntities-m1",m1);
 
             waterList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getWaterAddedValue(),m1.getWaterValue() ,waterValue));
             electricList.add(toDayreturnTheData(m1,mapFactoryCache,m1.getElectricAddedValue(),m1.getElectricValue(),cableValue));
@@ -419,6 +435,18 @@ public class DataToConversionImpl implements DataToConversionSvc {
         DictDeviceGroupPropertyVO  dataVo= mapNameToVo.get(enums.getgName());
         String title =StringUtils.isBlank(dataVo.getTitle())?dataVo.getName():dataVo.getTitle();
         return ""+title+" ("+dataVo.getUnit()+")";
+    }
+
+
+    private  void print(String str,Object   obj)  {
+        try {
+            ObjectMapper mapper=new ObjectMapper();
+            String jsonStr=mapper.writeValueAsString(obj);
+            log.debug("[json]"+str+jsonStr);
+        }catch (Exception e)
+        {
+            log.info(str+obj);
+        }
     }
 
 
