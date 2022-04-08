@@ -272,7 +272,10 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
 
                     //2.2 每个"订单关联的设备的标准产能*设备日历中的时间总和"相加    注意：只取交叉时间值（单位小时）
 
-                    List<UUID> deviceIds = orderPlanEntityList.stream().distinct().map(m -> m.getDeviceId()).collect(Collectors.toList());
+                    List<UUID> deviceIds = orderPlanEntityList.stream().map(m -> m.getDeviceId()).collect(Collectors.toList());
+                    if(!CollectionUtils.isEmpty(deviceIds)){
+                        deviceIds = deviceIds.stream().distinct().collect(Collectors.toList());
+                    }
                     if (!CollectionUtils.isEmpty(deviceIds)) {
                         for (UUID deviceId : deviceIds) {
                             //设备标准产能
