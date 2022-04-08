@@ -98,6 +98,7 @@ public class FactoryDetailBO {
                             .factoryId(v.getFactoryId())
                             .workshopId(v.getWorkshopId())
                             .productionLineId(v.getProductionLineId())
+                            .sort(v.getSort())
                             .build()).collect(Collectors.toList()))),
                     CompletableFuture.runAsync(() -> result.setUndistributedDevices(devices.stream().filter(v -> v.getProductionLineId() == null).map(v -> SimpleFactoryHierarchyResult.builder()
                             .id(v.getId().getId())
@@ -107,6 +108,7 @@ public class FactoryDetailBO {
                             .factoryId(v.getFactoryId())
                             .workshopId(v.getWorkshopId())
                             .productionLineId(v.getProductionLineId())
+                            .sort(v.getSort())
                             .build()).collect(Collectors.toList())))
             ).join();
         } else {
@@ -118,6 +120,7 @@ public class FactoryDetailBO {
                     .factoryId(v.getFactoryId())
                     .workshopId(v.getWorkshopId())
                     .productionLineId(v.getProductionLineId())
+                    .sort(v.getSort())
                     .build()).collect(Collectors.toList()));
         }
         return result;

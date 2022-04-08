@@ -1129,7 +1129,10 @@ public class DeviceController extends BaseController {
             mapIssue.put("DRIVER_CONFIG",groupMap);
             //下发网关
             if(!CollectionUtils.isEmpty(deviceIssueDto.getDeviceList())){
-                List<String> gatewayIds = deviceIssueDto.getDeviceList().stream().distinct().map(e -> e.getGatewayId()).collect(Collectors.toList());
+                List<String> gatewayIds = deviceIssueDto.getDeviceList().stream().map(e -> e.getGatewayId()).collect(Collectors.toList());
+                if(!CollectionUtils.isEmpty(gatewayIds)){
+                    gatewayIds = gatewayIds.stream().distinct().collect(Collectors.toList());
+                }
                 if(!CollectionUtils.isEmpty(gatewayIds)){
                     Map publishRedisMap = new HashMap<>();
                     publishRedisMap.put("body",mapIssue);

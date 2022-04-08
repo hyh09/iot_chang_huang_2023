@@ -158,6 +158,23 @@ public class RTMonitorBoardController extends BaseController {
     }
 
     /**
+     * 查询设备部件名称
+     */
+    @ApiOperation("查询设备部件名称")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "componentId", value = "设备字典部件Id", paramType = "query", required = true),
+    })
+    @GetMapping("/rtMonitor/component/name")
+    public String getRtMonitorDeviceComponentName(
+            @RequestParam("deviceId") String deviceId,
+            @RequestParam("componentId") String componentId) throws ThingsboardException, ExecutionException, InterruptedException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("componentId", componentId);
+        return this.deviceMonitorService.getRtMonitorDeviceComponentName(getTenantId(), toUUID(deviceId), toUUID(componentId));
+    }
+
+    /**
      * 全部设备的在线状态
      */
     @ApiOperation(value = "全部设备的在线状态")

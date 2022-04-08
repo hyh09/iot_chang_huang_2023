@@ -137,6 +137,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append(sqlpre);
         sql.append(SELECT_START_DEVICE_02).append(SELECT_TS_CAP_02).append(FROM_QUERY_CAP_02);
         sql.append(sonSql01);
+        sql.append( " ORDER BY  d1.sort ");
         List<EnergyEffciencyNewEntity>   page = querySql(sql.toString(),param,"energyEffciencyNewEntity_02");
         return  page;
     }
@@ -161,9 +162,20 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
 
         StringBuffer  sql = new StringBuffer();
 //        sql.append(SELECT_START_DEVICE_02).append(",").append(TODAY_SQL_02).append(FROM_SQL_02);
-        sql.append(SELECT_START_DEVICE_02).append(",tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value,tb.capacity_added_value,tb.ts ").append(FROM_SQL_02);
+//        sql.append(SELECT_START_DEVICE_02).append(",tb.water_value,tb.water_added_value,tb.electric_added_value,tb.electric_value,tb.gas_added_value,tb.gas_value,tb.capacity_added_value,tb.ts ").append(FROM_SQL_02);
+//
+//        sql.append(sonSql01);
 
+
+        sql.append("  select ")
+                .append(" d1.id as entity_id,sum(to_number(tb.water_added_value,'99999999999999999999999999.9999')) as water_added_value,")
+                .append(" sum(to_number(tb.electric_added_value,'99999999999999999999999999.9999')) as electric_added_value, ")
+                .append(" sum(to_number(tb.gas_added_value,'99999999999999999999999999.9999')) as gas_added_value, ")
+                .append(" sum(to_number(tb.capacity_added_value,'99999999999999999999999999.9999')) as capacity_added_value, ")
+                .append("  max(tb.ts) as  ts  ")
+                .append(FROM_SQL_02);
         sql.append(sonSql01);
+        sql.append(" GROUP BY  d1.id ");
         List<EnergyEffciencyNewEntity>   entityList = querySql(sql.toString(),param,"energyEffciencyNewEntity_03");
         return  entityList;
     }

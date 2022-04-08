@@ -252,6 +252,21 @@ public class StringUtilToll {
     }
 
 
+
+    public  static  Long  getMaxByLong(List<Long> finalValueList)
+    {
+
+        Long maxValue=   finalValueList.stream().filter(f -> f != null).max((x,y)->{
+            if(compareTo(x.toString(),y.toString()))
+                return 1;
+            else
+                return -1;
+        }).orElse(0L);
+        return  maxValue;
+
+    }
+
+
     public  static  String  getMaxSum(List<String> finalValueList)
     {
 

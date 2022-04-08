@@ -352,15 +352,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException {
+    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException, ThingsboardException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}",parameterVo,tenantId.getId());
         List<OutRunningStateVo>  resultVo = new ArrayList<>();
         List<RunningStateVo>  runningStateVoList =  parameterVo.getAttributeParameterList();
-//         if( CollectionUtils.isEmpty(runningStateVoList))
-//         {
-//             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
-//             runningStateVoList =   propertiesVos.stream().limit(3).collect(Collectors.toList());
-//         }
+         if( CollectionUtils.isEmpty(runningStateVoList))
+         {
+             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
+             runningStateVoList =   propertiesVos.stream().limit(1).collect(Collectors.toList());
+             parameterVo.setAttributeParameterList(runningStateVoList);
+         }
          Map<String,DictDeviceGraphVO> chartIdToKeyNameMap = new HashMap<>();
          List<String>  keyNames = getKeyNameByVoList(runningStateVoList,tenantId,chartIdToKeyNameMap);
        log.debug("查询到的当前设备{}的配置的keyNames属性:{}",parameterVo.getDeviceId(),keyNames);
@@ -381,6 +382,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             tsKvEntity.setStrKey(mapDict.get(tsKvEntity.getKey()));
             tsKvEntries.add(tsKvEntity.toData());
         });
+        logInfoJson("entities打印当前的jsontsKvEntries{}",tsKvEntries);
         return  getRunningStatusResults(tsKvEntries,parameterVo,keyNames,chartIdToKeyNameMap);
     }
 
@@ -401,7 +403,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
              //首次加载的时候
             List<RunningStateVo>  propertiesVos=   queryDictDevice(parameterVo.getDeviceId(),tenantId);
-            propertiesVos =   propertiesVos.stream().limit(3).collect(Collectors.toList());
+            propertiesVos =   propertiesVos.stream().limit(1).collect(Collectors.toList());
             runningSateVo.setAttributeParameterList(propertiesVos);
         }
         if(CollectionUtils.isEmpty(runningSateVo.getAttributeParameterList()))
@@ -1218,7 +1220,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     }
 
-
+    /**
+     * 补齐数据
+     *
+     * @param graphVO
+     * @param map1
+     * @return
+     */
     private   List<OutOperationStatusChartDataVo> getTheDataOfTheChart( DictDeviceGraphVO graphVO, Map<String,List<ResultRunStatusByDeviceVo>>   map1)
     {
         List<OutOperationStatusChartDataVo>  resultList = new ArrayList<>();
@@ -1227,6 +1235,17 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         logInfoJson("获取该图表下的属性",dictDeviceGraphPropertyVOS);
         logInfoJson("获取该图表下的属性Map<String,List<ResultRunStatusByDeviceVo>>",map1);
 
+        List<Long> timeAll = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(map1))
+        {
+            map1.forEach((k1,v1)->{
+                timeAll.addAll( v1.stream().map(ResultRunStatusByDeviceVo::getTime).distinct().collect(Collectors.toList()) );
+            });
+        }
+        List<Long>  timeAllsort = timeAll.stream().filter(s1->s1 !=null).distinct().sorted().collect(Collectors.toList());
+
+        logInfoJson("timeAllsort",timeAllsort);
+
         if(!CollectionUtils.isEmpty(dictDeviceGraphPropertyVOS))
             {
             dictDeviceGraphPropertyVOS.stream().forEach(m1->{
@@ -1234,13 +1253,27 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
                 List<ResultRunStatusByDeviceVo>  resultRunStatusByDeviceVos =    map1.get(m1.getName());
                 logInfoJson("获取该图表下的属性MapresultRunStatusByDeviceVos",resultRunStatusByDeviceVos);
+               Map<Long,String> mapTimeValue=
+                       resultRunStatusByDeviceVos.stream().collect(Collectors.toMap(ResultRunStatusByDeviceVo::getTime,ResultRunStatusByDeviceVo::getValue));
 
-                List<OutOperationStatusChartTsKvDataVo> list3=    resultRunStatusByDeviceVos.stream().map(m2 -> {
+                List<OutOperationStatusChartTsKvDataVo> list3=    timeAllsort.stream().map(m2 -> {
                     OutOperationStatusChartTsKvDataVo tsKvDataVo = new OutOperationStatusChartTsKvDataVo();
-                    tsKvDataVo.setTs(m2.getTime());
-                    tsKvDataVo.setValue(m2.getValue());
+                    tsKvDataVo.setTs(m2);
+                    String  localValue= mapTimeValue.get(m2);
+                    if(StringUtils.isEmpty(localValue))
+                    {
+                        List<Long> tsTime=   resultRunStatusByDeviceVos
+                                             .stream()
+                                             .filter(entity01->entity01.getTime()<m2)
+                                             .map(ResultRunStatusByDeviceVo::getTime).collect(Collectors.toList());
+                        Long maxTime =   StringUtilToll.getMaxByLong(tsTime);
+                        localValue= mapTimeValue.get(maxTime);
+                    }
+                    tsKvDataVo.setValue(localValue);
                     return tsKvDataVo;
                 }).collect(Collectors.toList());
+
+
                 v2.setTitle(m1.getTitle());
                 v2.setName(m1.getName());
                 v2.setUnit(m1.getUnit());

@@ -166,34 +166,46 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 //2.产能达成率 = 选择设备实际时间范围内（默认当天）参与产能运算的设备实际计算产量总和【调云辉提供的接口】/（订单关联的设备的标准产能【设备字典的额定产能】*设备日历中的时间【生产日历-取交叉-取小时】总和）
                 //2.1 时间范围内设备实际产能总和
                 BigDecimal deviceOutputReality = new BigDecimal(0);
-                List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
-                DeviceCapacityVo dcv = new DeviceCapacityVo(deviceId, startTime, endTime);
-                deviceCapacityVoList.add(dcv);
-                var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
-                if(dataMap != null && dataMap.containsKey(deviceId) && dataMap.get(deviceId) != null){
-                    deviceOutputReality = new BigDecimal(dataMap.get(deviceId));
-                }
-                //2.2 订单关联的设备的标准产能【设备字典的额定产能】* 设备日历中的时间【生产日历-取交叉-取小时】总和
+                //订单关联的设备的标准产能【设备字典的额定产能】* 设备日历中的时间【生产日历-取交叉-取小时】总和
                 BigDecimal deviceOutputPredict = new BigDecimal(0);
-                //设备标准产能
-                UUID dictDiviceId = deviceDao.getDeviceInfo(deviceId).getDictDeviceId();
-                BigDecimal ratedCapacity = new BigDecimal(0);
-                if (dictDiviceId != null) {
-                    ratedCapacity = dictDeviceService.findById(dictDiviceId).getRatedCapacity();
-                }
-                //单个设备生产日历总时间
-                BigDecimal time = new BigDecimal(0);
-                //生产日历时间
-                List<ProductionCalender> historyList = productionCalenderDao.getHistoryByDeviceId(deviceId);
-                Map<String, Long> mapTime = null;
-                if (!CollectionUtils.isEmpty(historyList)) {
-                    for (ProductionCalender pc : historyList) {
-                        mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
-                        time = time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
+
+                //查询订单，要根据订单的实际时间去查产量
+                List<OrderPlanEntity> orderPlanEntityList = orderPlanRepository.findActualByDeviceId(deviceId, startTime, endTime);
+                if(!CollectionUtils.isEmpty(orderPlanEntityList)){
+                    for (OrderPlanEntity orderPlanEntity:orderPlanEntityList) {
+                        List<DeviceCapacityVo> deviceCapacityVoList = new ArrayList<>();
+                        //计算时间交集
+                        Map<String, Long> mapTime = this.intersectionTime(orderPlanEntity.getActualStartTime(), orderPlanEntity.getActualEndTime(), startTime, endTime);
+                        deviceCapacityVoList.add(new DeviceCapacityVo(deviceId, mapTime.get("startTime"), mapTime.get("endTime")));
+                        //设备的产能
+                        var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
+                        if(dataMap != null && dataMap.containsKey(deviceId) && dataMap.get(deviceId) != null){
+                            deviceOutputReality = deviceOutputReality.add(new BigDecimal(dataMap.get(deviceId)));
+                        }
                     }
+
+                    //2.2 订单关联的设备的标准产能【设备字典的额定产能】* 设备日历中的时间【生产日历-取交叉-取小时】总和
+                    //设备标准产能
+                    UUID dictDiviceId = deviceDao.getDeviceInfo(deviceId).getDictDeviceId();
+                    BigDecimal ratedCapacity = new BigDecimal(0);
+                    if (dictDiviceId != null) {
+                        ratedCapacity = dictDeviceService.findById(dictDiviceId).getRatedCapacity();
+                    }
+                    //单个设备生产日历总时间
+                    BigDecimal time = new BigDecimal(0);
+                    //生产日历时间
+                    List<ProductionCalender> historyList = productionCalenderDao.getHistoryByDeviceId(deviceId);
+                    Map<String, Long> mapTime = null;
+                    if (!CollectionUtils.isEmpty(historyList)) {
+                        for (ProductionCalender pc : historyList) {
+                            mapTime = this.intersectionTime(pc.getStartTime(), pc.getEndTime(), startTime, endTime);
+                            time = time.add(this.timeDifferenceForHours(mapTime.get("startTime"), mapTime.get("endTime")));
+                        }
+                    }
+                    //单个设备 预计产量
+                    deviceOutputPredict = ratedCapacity.multiply(time);
                 }
-                //单个设备 预计产量
-                deviceOutputPredict = ratedCapacity.multiply(time);
+
 
                 //3.达成率
                 if (deviceOutputPredict.compareTo(BigDecimal.ZERO) == 0) {
@@ -272,7 +284,10 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
 
                     //2.2 每个"订单关联的设备的标准产能*设备日历中的时间总和"相加    注意：只取交叉时间值（单位小时）
 
-                    List<UUID> deviceIds = orderPlanEntityList.stream().distinct().map(m -> m.getDeviceId()).collect(Collectors.toList());
+                    List<UUID> deviceIds = orderPlanEntityList.stream().map(m -> m.getDeviceId()).collect(Collectors.toList());
+                    if(!CollectionUtils.isEmpty(deviceIds)){
+                        deviceIds = deviceIds.stream().distinct().collect(Collectors.toList());
+                    }
                     if (!CollectionUtils.isEmpty(deviceIds)) {
                         for (UUID deviceId : deviceIds) {
                             //设备标准产能
