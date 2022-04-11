@@ -93,8 +93,8 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
      * @return
      */
     @Override
-    public PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink) {
-        return productionCalenderDao.getHistoryPageByDeviceId(deviceId, pageLink);
+    public PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink,String sortProperty,String sortOrder) {
+        return productionCalenderDao.getHistoryPageByDeviceId(deviceId, pageLink,sortProperty,sortOrder);
     }
 
     /**

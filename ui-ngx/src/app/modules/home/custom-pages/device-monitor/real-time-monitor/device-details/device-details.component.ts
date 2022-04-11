@@ -77,7 +77,7 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         const insertedAssociationIds = [];
 
         this.deviceData = res.resultList || [];
-        this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
+        // this.deviceData.push(res.resultUngrouped || { groupPropertyList: [] });
         this.devcieComp = res.componentList || [];
         this.deviceData.forEach(group => {
           const sameIds = [];
