@@ -246,6 +246,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         device.setComment(this.comment);
         device.setDeviceNo(this.deviceNo);
         device.setDeviceFlg(this.deviceFlg);
+        device.setSort(this.sort);
         return device;
     }
 
