@@ -35,7 +35,7 @@ export class MngCalendarTableConfigResolver implements Resolve<EntityTableConfig
     this.config.columns.push(
       new EntityTableColumn<ProdCalendar>('startTime', 'device-mng.device-schedual', '50%', (entity) => (
         `${this.datePipe.transform(entity.startTime, 'yyyy-MM-dd HH:mm')} ~ ${this.datePipe.transform(entity.endTime, 'yyyy-MM-dd HH:mm')}`
-      )),
+      ), () => ({}), false),
       new DateEntityTableColumn<ProdCalendar>('createdTime', 'common.created-time', this.datePipe, '25%'),
       new DateEntityTableColumn<ProdCalendar>('updatedTime', 'common.updated-time', this.datePipe, '25%')
     );
