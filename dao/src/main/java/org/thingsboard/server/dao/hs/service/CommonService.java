@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.DataType;
 import org.thingsboard.server.common.data.kv.KvEntry;
@@ -26,6 +27,19 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+    /**
+     * 获得用户名
+     */
+    default String getUserName(User user) {
+        try {
+            if (user.getUserLevel() == 3)
+                return (Optional.ofNullable(user.getFirstName()).map(String::trim).orElse("") + Optional.ofNullable(user.getLastName()).map(String::trim).orElse("")).trim();
+            else
+                return Optional.ofNullable(user.getUserName()).map(String::trim).orElse("");
+        } catch (Exception ignore) {
+            return "";
+        }
+    }
 
     /**
      * 统计时间
