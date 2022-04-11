@@ -71,13 +71,13 @@ public class ProductionCalenderController extends BaseController{
             @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query")
     })
     @ResponseBody
-    public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,
+    public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,@RequestParam(required = false) String sortProperty,@RequestParam(required = false)  String sortOrder,
                                                                           @RequestParam String factoryName, @RequestParam String deviceName) throws ThingsboardException {
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             List<ProductionCalenderPageListVo> calenderPageListVos = new ArrayList<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,getCurrentUser().getTenantId().getId()),pageLink);
+            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,getCurrentUser().getTenantId().getId(),sortProperty,sortOrder),pageLink);
             List<ProductionCalender> productionCalenderList = productionCalenderPageData.getData();
             if(!CollectionUtils.isEmpty(productionCalenderList)){
                 for (ProductionCalender productionCalender : productionCalenderList) {
@@ -96,13 +96,14 @@ public class ProductionCalenderController extends BaseController{
     @ApiImplicitParam(name = "deviceId",value = "设备标识",dataType = "String",paramType="query",required = true)
     @RequestMapping(value = "/getHistoryPageByDeviceId", method = RequestMethod.GET)
     @ResponseBody
-    public PageData<ProductionCalenderHisListVo> getHistoryPageByDeviceId(@RequestParam int pageSize, @RequestParam int page,@RequestParam("deviceId") String deviceId)throws ThingsboardException{
+    public PageData<ProductionCalenderHisListVo> getHistoryPageByDeviceId(@RequestParam int pageSize, @RequestParam int page,@RequestParam(required = false) String sortProperty,@RequestParam(required = false)  String sortOrder,
+            @RequestParam("deviceId") String deviceId)throws ThingsboardException{
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
             List<ProductionCalenderHisListVo> result = new ArrayList<>();
             checkParameterChinees("deviceId",deviceId);
-            PageData<ProductionCalender> calenderPageData = productionCalenderService.getHistoryPageByDeviceId(toUUID(deviceId),pageLink);
+            PageData<ProductionCalender> calenderPageData = productionCalenderService.getHistoryPageByDeviceId(toUUID(deviceId),pageLink,sortProperty,sortOrder);
 
             List<ProductionCalender> productionCalenderList = calenderPageData.getData();
             if(!org.springframework.util.CollectionUtils.isEmpty(productionCalenderList)){

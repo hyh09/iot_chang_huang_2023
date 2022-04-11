@@ -50,19 +50,41 @@ public class ProductionCalender {
     @ApiModelProperty("车间id")
     private UUID workshopId;
 
+    @ApiModelProperty("排序字段")
+    String sortProperty;
+
+    @ApiModelProperty("排序值（DESC/ASC）")
+    String sortOrder;
+
 
     /*********************************************************************************************************************/
 
     public ProductionCalender(){}
 
-    public ProductionCalender(String deviceName,String factoryName,UUID tenantId) {
+    /**
+     * 生产日历分页查询入参
+     * @param deviceName
+     * @param factoryName
+     * @param tenantId
+     * @param sortProperty
+     * @param sortOrder
+     */
+    public ProductionCalender(String deviceName,String factoryName,UUID tenantId,String sortProperty,String sortOrder) {
         this.deviceName = deviceName;
         this.factoryName = factoryName;
         this.tenantId = tenantId;
+        this.sortProperty = sortProperty;
+        this.sortOrder = sortOrder;
     }
 
     public ProductionCalender(UUID deviceId){
         this.deviceId = deviceId;
+    }
+
+    public ProductionCalender(UUID deviceId,String sortProperty,String sortOrder){
+        this.deviceId = deviceId;
+        this.sortProperty = sortProperty;
+        this.sortOrder = sortOrder;
     }
 
     /**
