@@ -50,7 +50,7 @@ public interface ProductionCalenderDao {
      * @param pageLink
      * @return
      */
-    PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink);
+    PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink,String sortProperty,String sortOrder);
 
     /**
      * 设备生产日历历史记录列表
