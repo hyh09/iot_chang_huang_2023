@@ -9,6 +9,7 @@ import { UtilsService } from "@app/core/public-api";
 import { ProdMng } from "@app/shared/models/custom/device-mng.models";
 import { ProdMngFiltersComponent } from "./prod-mng-filters.component";
 import { ProdMngService } from "@app/core/http/custom/prod-mng.service";
+import { Direction } from '@shared/models/page/sort-order';
 
 @Injectable()
 export class ProdMngTableConfigResolver implements Resolve<EntityTableConfig<ProdMng>> {
@@ -40,6 +41,9 @@ export class ProdMngTableConfigResolver implements Resolve<EntityTableConfig<Pro
       new DateEntityTableColumn<ProdMng>('startTime', 'datetime.time-from', this.datePipe, '150px'),
       new DateEntityTableColumn<ProdMng>('endTime', 'datetime.time-to', this.datePipe, '150px')
     ];
+
+    this.config.defaultSortOrder.property = 'endTime';
+    this.config.defaultSortOrder.direction = Direction.DESC;
 
     this.config.componentsData = {
       factoryName: '',
