@@ -259,7 +259,7 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
                         .id(e.getId())
                         .createdTime(e.getCreatedTime())
                         .creator(
-                                Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
+                                Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(this::getUserName).orElse(null))
                         .emergencyDegree(e.getEmergencyDegree())
                         .factoryName(
                                 Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
