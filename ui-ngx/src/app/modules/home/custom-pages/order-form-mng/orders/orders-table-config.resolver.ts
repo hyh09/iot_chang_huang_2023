@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig, HeaderActionDescriptor } from "@app/modules/home/models/entity/entities-table-config.models";
+import { CellActionDescriptor, DateEntityTableColumn, EntityTableColumn, EntityTableConfig, HeaderActionDescriptor } from "@app/modules/home/models/entity/entities-table-config.models";
 import { BaseData, EntityType, entityTypeResources, entityTypeTranslations, HasId } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { deepClone, UtilsService } from '@app/core/public-api';
+import { deepClone, DialogService, UtilsService } from '@app/core/public-api';
 import { OrderForm } from '@app/shared/models/custom/order-form-mng.models';
 import { OrderFormComponent } from './order-form.component';
 import { OrdersFiltersComponent } from './orders-filters.component';
@@ -25,7 +25,8 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     private datePipe: DatePipe,
     private utils: UtilsService,
     private orderFormService: OrderFormService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private dialogService: DialogService
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
     this.config.entityComponent = OrderFormComponent;
@@ -75,15 +76,20 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.afterResolved = () => {
       this.config.addEnabled = this.utils.hasPermission('order.add-order');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = () => (!this.utils.hasPermission('action.edit'));
+      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || entity?.isDone);
     }
+    this.config.cellActionDescriptors = this.configureCellActions();
 
     this.config.entitiesFetchFunction = pageLink => this.orderFormService.getOrders(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.orderFormService.getOrderForm(id);
     this.config.saveEntity = orderForm => {
       const form = deepClone(orderForm);
       if (form.takeTime) form.takeTime = new Date(form.takeTime).getTime();
-      if (form.intendedTime) form.intendedTime = new Date(form.intendedTime).getTime();
+      if (form.intendedTime) {
+        const date = new Date(form.intendedTime);
+        date.setDate(date.getDate() + 1);
+        form.intendedTime = date.getTime() - 1;
+      }
       return this.orderFormService.saveOrderForm(form);
     };
     this.config.entityAdded = () => {
@@ -118,6 +124,19 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     return actions;
   }
 
+  configureCellActions(): Array<CellActionDescriptor<OrderForm>> {
+    const actions: Array<CellActionDescriptor<OrderForm>> = [];
+    if (this.utils.hasPermission('order.finish-order')) {
+      actions.push({
+        name: this.translate.instant('order.finish-order'),
+        icon: 'check_circle',
+        isEnabled: (entity) => !!(entity && entity.id && !entity.isDone),
+        onAction: ($event, entity) => this.finishOrder($event, entity)
+      });
+    }
+    return actions;
+  }
+
   createOrder() {
     this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>, BaseData<HasId>>(AddEntityDialogComponent, {
       disableClose: true,
@@ -141,6 +160,26 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
         this.config.table.updateData();
       }
     });
+  }
+
+  finishOrder($event: Event, order: OrderForm): void {
+    if ($event) {
+      $event.stopPropagation();
+    }
+    this.dialogService.confirm(
+      this.translate.instant('order.finish-order-title', {orderNo: order.orderNo || ''}),
+      this.translate.instant('order.finish-order-text'),
+      this.translate.instant('action.no'),
+      this.translate.instant('action.yes'),
+      true
+    ).subscribe((res) => {
+        if (res) {
+          this.orderFormService.finishOrder(order.id).subscribe(() => {
+            this.config.table.updateData();
+          });
+        }
+      }
+    );
   }
 
   setAvailableOrderNo(): void {
