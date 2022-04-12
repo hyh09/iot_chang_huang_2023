@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
@@ -10,6 +12,7 @@ import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
 import org.thingsboard.server.dao.hs.entity.bo.KeyParamTime;
 import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
@@ -27,6 +30,7 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
     /**
      * 获得用户名
      */

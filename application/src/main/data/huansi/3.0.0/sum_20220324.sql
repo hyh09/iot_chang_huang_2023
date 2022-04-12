@@ -1380,6 +1380,7 @@ CREATE TABLE IF NOT EXISTS public.hs_order
     unit character varying(255) COLLATE pg_catalog."default",
     unit_price_type character varying(255) COLLATE pg_catalog."default",
     workshop_id uuid,
+    is_done bool NOT NULL DEFAULT false,
     CONSTRAINT hs_dict_data_copy1_pkey PRIMARY KEY (id),
     CONSTRAINT uk_hs_order_no UNIQUE (tenant_id, order_no)
 )

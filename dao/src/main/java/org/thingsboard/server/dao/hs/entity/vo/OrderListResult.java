@@ -62,4 +62,7 @@ public class OrderListResult {
     @ApiModelProperty(value = "完成度", notes = "产能监控显示字段")
     private BigDecimal completeness;
 
+    @ApiModelProperty(value = "是否完成")
+    private Boolean isDone;
+
 }
