@@ -90,4 +90,9 @@ export class OrderFormService {
     return this.http.post(`/api/order/import`, formData, { responseType: 'text' });
   }
 
+  // 完成订单
+  public finishOrder(orderId: HasUUID, config?: RequestConfig) {
+    return this.http.post(`/api/order/${orderId}/done`, {}, defaultHttpOptionsFromConfig(config));
+  }
+
 }
