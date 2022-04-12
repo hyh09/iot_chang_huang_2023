@@ -171,6 +171,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceConnect(TenantId tenantId, DeviceId deviceId) {
+        log.info("设备【"+deviceId+"]建立连接！");
         log.trace("on Device Connect [{}]", deviceId.getId());
         DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
         long ts = System.currentTimeMillis();
@@ -198,6 +199,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             DeviceState state = stateData.getState();
             state.setLastActivityTime(lastReportedActivity);
             if (!state.isActive()) {
+                log.info("设备【"+deviceId+"]上线了！");
                 state.setActive(true);
                 save(deviceId, ACTIVITY_STATE, true);
                 pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
@@ -210,6 +212,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceDisconnect(TenantId tenantId, DeviceId deviceId) {
+        log.info("设备【"+deviceId+"]断开连接！");
         DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
         long ts = System.currentTimeMillis();
         stateData.getState().setLastDisconnectTime(ts);
@@ -487,6 +490,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         if (stateData != null) {
             DeviceState state = stateData.getState();
             if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
+                log.info("设备【"+deviceId+"]离线了！");
                 state.setActive(false);
                 state.setLastInactivityAlarmTime(ts);
                 save(deviceId, INACTIVITY_ALARM_TIME, ts);
