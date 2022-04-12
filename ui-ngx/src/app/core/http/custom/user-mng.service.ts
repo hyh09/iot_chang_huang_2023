@@ -28,7 +28,7 @@ export class UserMngService {
   // 获取用户列表
   public getUsers(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<UserInfo>> {
     return this.http.get<PageData<UserInfo>>(
-      `/api/user/findAll${pageLink.toQuery()}&userCode=${filterParams.userCode}&userName=${filterParams.userName}`,
+      `/api/user/findAll${pageLink.toQuery()}&userCode=${filterParams.userCode}&userName=${encodeURIComponent(filterParams.userName || '')}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
