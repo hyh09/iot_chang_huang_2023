@@ -20,6 +20,8 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
 
   private readonly config: EntityTableConfig<OrderForm> = new EntityTableConfig<OrderForm>();
 
+  private lastFinishedOrder: OrderForm;
+
   constructor(
     private translate: TranslateService,
     private datePipe: DatePipe,
@@ -77,7 +79,9 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
       this.config.cellActionDescriptors = this.configureCellActions();
       this.config.addEnabled = this.utils.hasPermission('order.add-order');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || entity?.isDone);
+      this.config.detailsReadonly = entity => {
+        return !this.utils.hasPermission('action.edit') || (this.lastFinishedOrder && this.lastFinishedOrder.id === entity?.id ? this.lastFinishedOrder.isDone : entity?.isDone)
+      };
     }
 
     this.config.entitiesFetchFunction = pageLink => this.orderFormService.getOrders(pageLink, this.config.componentsData);
@@ -92,9 +96,6 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
       }
       return this.orderFormService.saveOrderForm(form);
     };
-    this.config.entityAdded = () => {
-      this.setAvailableOrderNo();
-    }
     this.config.deleteEntity = id => {
       return this.orderFormService.deleteOrder(id).pipe(map(result => {
         this.setAvailableOrderNo();
@@ -146,6 +147,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
       }
     }).afterClosed().subscribe(res => {
       if (res) {
+        this.setAvailableOrderNo();
         this.config.table.updateData();
       }
     });
@@ -157,6 +159,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
     }).afterClosed().subscribe(res => {
       if (res) {
+        this.setAvailableOrderNo();
         this.config.table.updateData();
       }
     });
@@ -175,6 +178,8 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     ).subscribe((res) => {
         if (res) {
           this.orderFormService.finishOrder(order.id).subscribe(() => {
+            order.isDone = true;
+            this.lastFinishedOrder = order;
             this.config.table.updateData();
           });
         }
