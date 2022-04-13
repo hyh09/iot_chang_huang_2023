@@ -106,6 +106,25 @@ public class JpaSqlTool {
 
 
 
+    public  Long  countLong(String sql, Map<String, Object> param)
+    {
+        Query query = null;
+
+        query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        if(param!= null){
+            for(Map.Entry<String, ?> entry : param.entrySet()){
+                if(sql.indexOf(":" + entry.getKey()) > -1 ){
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        Object  object= query.getSingleResult();
+        return  Long.parseLong(object != null ?object.toString():"0");
+    }
+
+
+
+
     /**
      * sql片段  设备的
      * @param queryTsKvVo
