@@ -344,6 +344,7 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
         } else {
             BeanUtils.copyProperties(orderVO, order, "isDone");
             order.setTenantId(tenantId.toString());
+            order.setIsDone(false);
         }
 
         OrderEntity orderEntity = new OrderEntity(order);
