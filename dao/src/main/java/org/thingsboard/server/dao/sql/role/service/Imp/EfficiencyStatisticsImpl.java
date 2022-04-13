@@ -54,6 +54,7 @@ import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.FactoryEntity;
 import org.thingsboard.server.dao.model.sqlts.dictionary.TsKvDictionary;
 import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
+import org.thingsboard.server.dao.repository.KanbanInervalCapacityRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
@@ -106,6 +107,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     @Autowired private EffciencyAnalysisRepository effciencyAnalysisRepository;
     @Autowired private DataToConversionSvc  dataToConversionSvc;
     @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
+    @Autowired  private KanbanInervalCapacityRepository kanbanInervalCapacityRepository;
 
 
 
@@ -576,11 +578,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Override
     public TodaySectionHistoryVo todaySectionHistory(TsSqlDayVo vo) {
-        TodaySectionHistoryVo  resultVO = new TodaySectionHistoryVo();
-        resultVO.setTodayValue(todayValueOfOutput(vo));
-        resultVO.setSectionValue(sectionValueOfOutput(vo));
-        resultVO.setHistoryValue(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
-        return resultVO;
+//        TodaySectionHistoryVo  resultVO = new TodaySectionHistoryVo();
+//        resultVO.setTodayValue(todayValueOfOutput(vo));
+//        resultVO.setSectionValue(sectionValueOfOutput(vo));
+//        resultVO.setHistoryValue(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
+//        return resultVO;
+        TodaySectionHistoryVo  resultVo = new TodaySectionHistoryVo();
+        resultVo.setSectionValue( kanbanInervalCapacityRepository.capacitySumValue(vo,vo.getStartTime(),vo.getEndTime()));
+        resultVo.setTodayValue(kanbanInervalCapacityRepository.capacitySumValue(vo,CommonUtils.getZero(),CommonUtils.getNowTime()));
+        resultVo.setHistoryValue(kanbanInervalCapacityRepository.capacitySumValue(vo,1L,CommonUtils.getNowTime()));
+        return resultVo;
     }
 
     /**
