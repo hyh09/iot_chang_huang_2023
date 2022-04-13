@@ -74,11 +74,11 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.refreshEnabled = false;
     this.config.addActionDescriptors = this.configureAddActions();
     this.config.afterResolved = () => {
+      this.config.cellActionDescriptors = this.configureCellActions();
       this.config.addEnabled = this.utils.hasPermission('order.add-order');
       this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
       this.config.detailsReadonly = entity => (!this.utils.hasPermission('action.edit') || entity?.isDone);
     }
-    this.config.cellActionDescriptors = this.configureCellActions();
 
     this.config.entitiesFetchFunction = pageLink => this.orderFormService.getOrders(pageLink, this.config.componentsData);
     this.config.loadEntity = id => this.orderFormService.getOrderForm(id);
