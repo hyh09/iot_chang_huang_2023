@@ -143,10 +143,10 @@ public interface OrderRtService {
     /**
      * 看板-订单监控
      *
-     * @param tenantId 租户Id
-     * @param factoryId 工厂Id
+     * @param tenantId   租户Id
+     * @param factoryId  工厂Id
      * @param workshopId 车间Id
-     * @param timeQuery 时间参数
+     * @param timeQuery  时间参数
      * @return 订单
      */
     List<OrderCustomCapacityResult> listBoardCapacityMonitorOrders(TenantId tenantId, UUID factoryId, UUID workshopId, TimeQuery timeQuery);
@@ -172,4 +172,12 @@ public interface OrderRtService {
      * @return 生产计划列表
      */
     List<OrderPlan> listDeviceOrderPlansInActualTimeField(TenantId tenantId, UUID deviceId, Long startTime, Long endTime);
+
+    /**
+     * Pc-订单-报工完成
+     *
+     * @param tenantId 租户Id
+     * @param orderId  订单Id
+     */
+    void updateOrderDone(TenantId tenantId, UUID orderId) throws ThingsboardException;
 }

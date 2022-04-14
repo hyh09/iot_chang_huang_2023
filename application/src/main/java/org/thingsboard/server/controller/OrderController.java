@@ -162,6 +162,19 @@ public class OrderController extends BaseController {
     }
 
     /**
+     * Pc-订单-报工完成
+     */
+    @ApiOperation(value = "Pc-订单-报工完成")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "订单Id", paramType = "path", required = true)
+    })
+    @PostMapping("/order/{id}/done")
+    public void updateOrderDone(@PathVariable("id") String orderId) throws ThingsboardException {
+        checkParameter("orderId", orderId);
+        this.orderService.updateOrderDone(getTenantId(), toUUID(orderId));
+    }
+
+    /**
      * Pc-订单产能监控-列表查询
      */
     @ApiOperation(value = "Pc-订单产能监控-列表查询")
