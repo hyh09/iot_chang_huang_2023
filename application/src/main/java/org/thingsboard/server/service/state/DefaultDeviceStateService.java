@@ -233,6 +233,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             } else {
                 log.info("设备在线判断2未通过！【" + deviceId + "】");
                 log.info("判断设备在线的前提条件2是：!state.isActive()");
+                log.info("stateData.getState()"+state.toString());
             }
         } else {
             log.debug("updateActivityState - fetched state IN NULL for device {}, lastReportedActivity {}", deviceId, lastReportedActivity);
@@ -527,7 +528,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         if (stateData != null) {
             DeviceState state = stateData.getState();
             if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
-                log.info("设备【" + deviceId + "]离线了！");
+                log.info("设备【" + deviceId + "】离线了！");
                 state.setActive(false);
                 state.setLastInactivityAlarmTime(ts);
                 save(deviceId, INACTIVITY_ALARM_TIME, ts);
@@ -539,6 +540,9 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 log.info("判断设备离线的三个为TRUE的条件【if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】");
                 if (isActive(ts, state)) {
                     log.info("第1个不满足true条件【!isActive(ts, state)】结果为：" + !isActive(ts, state));
+                    log.info("ts < state.getLastActivityTime() + state.getInactivityTimeout()的值为：");
+                    log.info("ts的值为:"+sf.format(new Date(ts)));
+                    log.info("state.getLastActivityTime()+ state.getInactivityTimeout()的值为:"+sf.format(new Date(state.getLastActivityTime()))+"+"+sf.format(new Date(state.getInactivityTimeout()))+"="+sf.format(new Date(state.getLastActivityTime()+ state.getInactivityTimeout())));
                 }
                 if (!(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())) {
                     log.info("第2个不满足true条件【(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())】结果为：" + (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()));
@@ -813,8 +817,6 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                     save(device, INACTIVITY_ALARM_TIME, ts);
                     save(device, ACTIVITY_STATE, false);
                     pushRuleEngineMessage(stateData, INACTIVITY_EVENT);
-                } else {
-
                 }
             }
         }
