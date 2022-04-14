@@ -7,7 +7,7 @@ select * from tenant where title like '%上海长胜集团%';
 select * from hs_factory where name like '%上海%' and tenant_id='34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17';
 select * from hs_factory where name like '%新乡%' and tenant_id='34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17';
 
---上海：单进单出冷转移印刷机-低给液机-卫星式转移印花机-蒸化机-水洗烘干机
+--上海：单进单出冷转移印刷机-低给液机-卫星式转移印花机-1#蒸化机-水洗烘干机
 update device set sort = 1
 where factory_id = 'e7fd0750-589a-11ec-afcd-2bd77acada1c'
 and name='单进单出冷转移印刷机';
@@ -19,7 +19,7 @@ where factory_id = 'e7fd0750-589a-11ec-afcd-2bd77acada1c'
 and name='卫星式转移印花机';
 update device set sort = 4
 where factory_id = 'e7fd0750-589a-11ec-afcd-2bd77acada1c'
-and name='蒸化机';
+and name='1#蒸化机';
 update device set sort = 5
 where factory_id = 'e7fd0750-589a-11ec-afcd-2bd77acada1c'
 and name='水洗烘干机';
@@ -51,10 +51,10 @@ where factory_id = '24d0aa00-589c-11ec-afcd-2bd77acada1c'
 and name='1#冷转移印花机2';
 update device set sort = 8
 where factory_id = '24d0aa00-589c-11ec-afcd-2bd77acada1c'
-and name='2#冷转移印花机-1';
+and name='2#冷转移印花机';
 update device set sort = 9
 where factory_id = '24d0aa00-589c-11ec-afcd-2bd77acada1c'
-and name='1#冷转移染色机-2';
+and name='1#冷转移染色机';
 update device set sort = 10
 where factory_id = '24d0aa00-589c-11ec-afcd-2bd77acada1c'
 and name='2#冷转移染色机';
