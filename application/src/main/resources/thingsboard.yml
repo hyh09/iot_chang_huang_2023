@@ -549,6 +549,7 @@ state:
   defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:32}"
   defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:10}"
   persistToTelemetry: "${PERSIST_STATE_TO_TELEMETRY:false}"
+  defaultGatewayTimeout: "${DEFAULT_GATEWAY_TIMEOUT:300}"
 
 js:
   evaluator: "${JS_EVALUATOR:local}" # local/remote
