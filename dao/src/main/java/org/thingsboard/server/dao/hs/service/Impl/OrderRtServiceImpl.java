@@ -259,7 +259,7 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
                         .id(e.getId())
                         .createdTime(e.getCreatedTime())
                         .creator(
-                                Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(User::getUserName).orElse(null))
+                                Optional.ofNullable(e.getCreatedUser()).map(this::toUUID).map(userMap::get).map(this::getUserName).orElse(null))
                         .emergencyDegree(e.getEmergencyDegree())
                         .factoryName(
                                 Optional.ofNullable(e.getFactoryId()).map(this::toUUID).map(factoryMap::get).map(Factory::getName).orElse(null))
@@ -268,6 +268,7 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
                         .salesman(e.getSalesman())
                         .totalAmount(e.getTotalAmount())
                         .total(e.getTotal())
+                        .isDone(e.getIsDone())
                         .build()).collect(Collectors.toList()),
                         temp.getTotalPages(), temp.getTotalElements(), temp.hasNext())).join();
     }
@@ -336,11 +337,14 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
         if (StringUtils.isNotBlank(orderVO.getId())) {
             order = this.orderRepository.findByTenantIdAndId(tenantId.getId(), toUUID(orderVO.getId())).map(OrderEntity::toData)
                     .orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
-            BeanUtils.copyProperties(orderVO, order, "id", "code");
+            if (order.getIsDone())
+                throw new ThingsboardException("订单已完成，不能更改！", ThingsboardErrorCode.GENERAL);
+            BeanUtils.copyProperties(orderVO, order, "id", "code", "isDone");
             deleteOrderPlan(toUUID(orderVO.getId()));
         } else {
-            BeanUtils.copyProperties(orderVO, order);
+            BeanUtils.copyProperties(orderVO, order, "isDone");
             order.setTenantId(tenantId.toString());
+            order.setIsDone(false);
         }
 
         OrderEntity orderEntity = new OrderEntity(order);
@@ -381,6 +385,20 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
         this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
         this.orderRepository.deleteById(orderId);
         this.deleteOrderPlan(orderId);
+    }
+
+    /**
+     * Pc-订单-报工完成
+     *
+     * @param tenantId 租户Id
+     * @param orderId  订单Id
+     */
+    @Override
+    @Transactional
+    public void updateOrderDone(TenantId tenantId, UUID orderId) throws ThingsboardException {
+        var orderEntity = this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
+        orderEntity.setIsDone(true);
+        this.orderRepository.save(orderEntity);
     }
 
     /**
@@ -560,10 +578,11 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
                                             .total(v.getTotal())
                                             .completedCapacities(completedCapacities)
                                             .completeness(this.calculateCompleteness(completedCapacities, v.getTotal()))
-                                            .isOvertime((v.getIntendedTime() != null && v.getIntendedTime() < CommonUtil.getTodayCurrentTime()) & (completedCapacities.compareTo(v.getTotal()) < 0))
+                                            .isOvertime(v.getIntendedTime() != null && v.getIntendedTime() < CommonUtil.getTodayCurrentTime())
+                                            .isDone(v.getIsDone())
                                             .build();
                                 }
-                        ).filter(v -> v.getCompleteness().compareTo(new BigDecimal("100")) < 0).collect(Collectors.toList())).join()).join();
+                        ).filter(v -> !v.getIsDone()).collect(Collectors.toList())).join()).join();
     }
 
     /**

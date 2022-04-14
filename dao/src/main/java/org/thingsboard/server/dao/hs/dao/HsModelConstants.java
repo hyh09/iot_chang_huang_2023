@@ -150,6 +150,8 @@ public class HsModelConstants {
     public static final String ORDER_COMMENT = "comment";
     public static final String ORDER_INTENDED_TIME = "intended_time";
     public static final String ORDER_STANDARD_AVAILABLE_TIME = "standard_available_time";
+    public static final String ORDER_IS_DONE = "is_done";
+
 
     /**
      * 订单设备

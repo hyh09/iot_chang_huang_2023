@@ -144,6 +144,9 @@ public class OrderVO {
     @ApiModelProperty(value = "完成度", notes = "仅用于显示")
     private BigDecimal completeness;
 
+    @ApiModelProperty(value = "是否完成")
+    private Boolean isDone;
+
     @Valid
     @ApiModelProperty(value = "生产计划设备列表", required = true)
     private List<OrderPlanDeviceVO> planDevices;

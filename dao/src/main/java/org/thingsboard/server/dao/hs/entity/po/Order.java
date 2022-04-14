@@ -123,4 +123,7 @@ public class Order extends BasePO {
 
     @ApiModelProperty(value = "标准可用时间")
     private BigDecimal standardAvailableTime;
+
+    @ApiModelProperty(value = "是否完成")
+    private Boolean isDone;
 }

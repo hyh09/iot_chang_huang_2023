@@ -39,6 +39,7 @@ export interface OrderForm extends OrderCapacity {
   unitPriceType: string;
   workshopId: string;
   workshopName: string;
+  isDone: boolean;
 }
 
 export interface OrderDevice {

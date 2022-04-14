@@ -42,4 +42,7 @@ public class OrderCustomCapacityResult {
 
     @ApiModelProperty(value = "是否超时")
     private Boolean isOvertime;
+
+    @ApiModelProperty(value = "是否完成")
+    private Boolean isDone;
 }
