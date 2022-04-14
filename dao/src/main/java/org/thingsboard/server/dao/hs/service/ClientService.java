@@ -218,6 +218,21 @@ public interface ClientService {
     Map<UUID, User> mapIdToUser(List<UUID> userIds);
 
     /**
+     * 查询订单产能-通过遥测数据
+     *
+     * @param plans 生产计划列表
+     */
+    BigDecimal getOrderCapacitiesByTs(List<OrderPlan> plans);
+
+    /**
+     * 查询订单产能-通过遥测数据
+     *
+     * @param plans   生产计划列表
+     * @param orderId 订单Id
+     */
+    OrderCapacityBO getOrderCapacitiesByTs(List<OrderPlan> plans, UUID orderId);
+
+    /**
      * 查询订单产能
      *
      * @param plans 生产计划列表
@@ -231,13 +246,6 @@ public interface ClientService {
      * @param orderId 订单Id
      */
     OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId);
-
-    /**
-     * 查询订单设备产能
-     *
-     * @param plans 生产计划列表
-     */
-    Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans);
 
     /**
      * 根据工厂名称精确查询
