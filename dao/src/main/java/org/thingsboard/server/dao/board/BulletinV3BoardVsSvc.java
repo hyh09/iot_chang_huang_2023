@@ -30,7 +30,7 @@ public interface BulletinV3BoardVsSvc {
      * @param vo
      * @return
      */
-   List<DashboardV3Vo>  queryDashboardValue(BoardV3DeviceDictionaryVo vo);
+   List<DashboardV3Vo>  queryDashboardValue(BoardV3DeviceDictionaryVo vo,TenantId tenantId);
 
 
     TrendChart02Vo trendChart(TrendParameterVo vo, TenantId tenantId );
