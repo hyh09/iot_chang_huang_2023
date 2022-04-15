@@ -88,6 +88,7 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.settings.AdminSettingsService;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
@@ -296,6 +297,8 @@ public abstract class BaseController {
 
     @Autowired
     protected DeviceOeeEveryHourService deviceOeeEveryHourService;
+    @Autowired
+    protected AdminSettingsService  adminSettingsService;
 
 /*
 

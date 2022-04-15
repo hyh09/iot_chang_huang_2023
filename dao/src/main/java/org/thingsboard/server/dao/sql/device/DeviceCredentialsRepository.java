@@ -15,9 +15,11 @@
  */
 package org.thingsboard.server.dao.sql.device;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.thingsboard.server.dao.model.sql.DeviceCredentialsEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -28,4 +30,9 @@ public interface DeviceCredentialsRepository extends CrudRepository<DeviceCreden
     DeviceCredentialsEntity findByDeviceId(UUID deviceId);
 
     DeviceCredentialsEntity findByCredentialsId(String credentialsId);
+
+    @Query(nativeQuery = true, value = "select a.* from device_credentials a where a.device_id in(" +
+            " select d.id from device d  where position('\"gateway\":true' in d.additional_info)!=0 " +
+            ")")
+    List<DeviceCredentialsEntity> findGatewayCredentialsList();
 }

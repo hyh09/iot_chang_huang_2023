@@ -1169,14 +1169,14 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
                                 try {
                                     var ratedCapacity = this.dictDeviceService.getDictDeviceDetail(device.getDictDeviceId().toString(), tenantId).getRatedCapacity();
-                                    var trueCapacityTotal = this.clientService.getOrderCapacities(plans);
+                                    var trueCapacityTotal = this.clientService.getOrderCapacitiesByTs(plans);
                                     result.setCapacityEfficiency(this.formatDoubleData(trueCapacityTotal.multiply(new BigDecimal(100)).divide(ratedCapacity.multiply(this.toDecimalHour(shirtTimeL)), 2, RoundingMode.HALF_UP)));
                                 } catch (Exception ignore) {
                                 }
 
                                 var shirtActualCapacityTotal = shirtTimes.stream()
                                         .map(v -> CompletableFuture.supplyAsync(() -> this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, v.getStartTime(), v.getEndTime())))
-                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacities(f)))
+                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacitiesByTs(f)))
                                         .map(CompletableFuture::join)
                                         .reduce(BigDecimal.ZERO, BigDecimal::add, (a, b) -> null);
 

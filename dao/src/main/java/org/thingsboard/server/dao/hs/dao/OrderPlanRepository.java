@@ -75,6 +75,8 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByOrderId(UUID orderId);
 
+    List<OrderPlanEntity> findAllPlansByOrderId(UUID orderId);
+
     @Query("select t2 from OrderPlanEntity t2 " +
             "where t2.id not in(" +
             "   select t1.id from OrderPlanEntity t1 " +

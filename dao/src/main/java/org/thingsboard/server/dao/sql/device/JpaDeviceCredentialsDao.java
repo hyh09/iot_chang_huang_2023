@@ -18,6 +18,7 @@ package org.thingsboard.server.dao.sql.device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.dao.DaoUtil;
@@ -25,6 +26,8 @@ import org.thingsboard.server.dao.device.DeviceCredentialsDao;
 import org.thingsboard.server.dao.model.sql.DeviceCredentialsEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractDao;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -54,5 +57,17 @@ public class JpaDeviceCredentialsDao extends JpaAbstractDao<DeviceCredentialsEnt
     @Override
     public DeviceCredentials findByCredentialsId(TenantId tenantId, String credentialsId) {
         return DaoUtil.getData(deviceCredentialsRepository.findByCredentialsId(credentialsId));
+    }
+
+    @Override
+    public List<DeviceCredentials> findGatewayCredentialsList() {
+        List<DeviceCredentials> resultList = new ArrayList<>();
+        List<DeviceCredentialsEntity> gatewayCredentialsList = deviceCredentialsRepository.findGatewayCredentialsList();
+        if(!CollectionUtils.isEmpty(gatewayCredentialsList)){
+            gatewayCredentialsList.forEach(i->{
+                resultList.add(DaoUtil.getData(i));
+            });
+        }
+        return resultList;
     }
 }

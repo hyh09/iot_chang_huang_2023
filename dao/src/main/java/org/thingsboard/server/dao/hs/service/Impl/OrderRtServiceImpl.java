@@ -397,6 +397,14 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
     @Transactional
     public void updateOrderDone(TenantId tenantId, UUID orderId) throws ThingsboardException {
         var orderEntity = this.orderRepository.findByTenantIdAndId(tenantId.getId(), orderId).orElseThrow(() -> new ThingsboardException("订单不存在", ThingsboardErrorCode.GENERAL));
+        if (orderEntity.getIsDone())
+            throw new ThingsboardException("订单已完成，不能更改！", ThingsboardErrorCode.GENERAL);
+        var plans = DaoUtil.convertDataList(this.orderPlanRepository.findAllPlansByOrderId(orderId));
+        if (this.clientService.getOrderCapacitiesByTs(plans).compareTo(this.clientService.getOrderCapacities(plans)) < 0)
+            throw new ThingsboardException("未达到完成条件，订单无法完成！", ThingsboardErrorCode.GENERAL);
+        if (this.clientService.getOrderCapacities(plans).compareTo(orderEntity.getTotal()) < 0)
+            throw new ThingsboardException("未达到完成条件，订单无法完成！", ThingsboardErrorCode.GENERAL);
+
         orderEntity.setIsDone(true);
         this.orderRepository.save(orderEntity);
     }
