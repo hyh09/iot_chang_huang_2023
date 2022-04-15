@@ -234,13 +234,35 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
     }
 
     private   List<TrendLineVo> fillReturnData(List<Long> longs,Map<Long, String> longStringMap ){
+        HashMap<String,String> stringHashMap = new HashMap<>();
+        stringHashMap.put("firstValue","0");
+
         List<TrendLineVo> trendLineVos = longs.stream().map(ts -> {
             TrendLineVo trendLineVo = new TrendLineVo();
             trendLineVo.setTime(ts);
             String value = longStringMap.get(ts);
-            trendLineVo.setValue(StringUtils.isEmpty(value) ? "0" : value);
+          String nowValue =  StringUtils.isEmpty(value) ? "0" : value;
+          if(StringUtilToll.isNotZero(nowValue))
+          {
+              if(StringUtils.isEmpty(stringHashMap.get("firstData")))
+              {
+                  stringHashMap.put("firstData",nowValue);
+              }
+              stringHashMap.put("firstValue",nowValue);
+              trendLineVo.setValue(nowValue);
+          }else {
+              trendLineVo.setValue(stringHashMap.get("firstValue"));
+          }
             return trendLineVo;
         }).collect(Collectors.toList());
+        trendLineVos.stream().forEach(m1->{
+            if(StringUtilToll.isZero(m1.getValue()))
+            {
+                m1.setValue(StringUtils.isNotEmpty(stringHashMap.get("firstData"))?stringHashMap.get("firstData"):"0");
+            }
+        });
+
+        print("打印map",stringHashMap);
         return  trendLineVos;
     }
 
