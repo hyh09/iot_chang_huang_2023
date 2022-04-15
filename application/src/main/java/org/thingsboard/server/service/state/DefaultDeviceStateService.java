@@ -204,17 +204,21 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         if (lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()) {
             updateActivityState(deviceId, stateData, lastReportedActivity);
         } else {
-            log.info("判断设备在线的前提条件1是：lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()");
-            if (!(lastReportedActivity > 0)) {
-                log.info("第1个不满足true条件【lastReportedActivity > 0】结果为：" + sf.format(new Date(lastReportedActivity)));
+            if(gatewayStates.containsKey(deviceId.getId())){
+                //输出网关状态不成立日志
+                log.info("判断设备在线的前提条件1是：lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()");
+                if (!(lastReportedActivity > 0)) {
+                    log.info("第1个不满足true条件【lastReportedActivity > 0】结果为：" + sf.format(new Date(lastReportedActivity)));
+                }
+                if (!(lastReportedActivity > stateData.getState().getLastActivityTime())) {
+                    log.info("设备在线判断1未通过！【" + deviceId + "】");
+                    log.info("第2个不满足true条件【lastReportedActivity > stateData.getState().getLastActivityTime()】结果为：" + (lastReportedActivity > stateData.getState().getLastActivityTime()));
+                    log.info("【lastReportedActivity】结果为：" + sf.format(new Date(lastReportedActivity)));
+                    log.info("【stateData.getState().getLastActivityTime()】结果为：" + sf.format(new Date(stateData.getState().getLastActivityTime())));
+                    //this.updateGatewayState(deviceId, stateData, true, System.currentTimeMillis());
+                }
             }
-            if (!(lastReportedActivity > stateData.getState().getLastActivityTime())) {
-                log.info("设备在线判断1未通过！【" + deviceId + "】");
-                log.info("第2个不满足true条件【lastReportedActivity > stateData.getState().getLastActivityTime()】结果为：" + (lastReportedActivity > stateData.getState().getLastActivityTime()));
-                log.info("【lastReportedActivity】结果为：" + sf.format(new Date(lastReportedActivity)));
-                log.info("【stateData.getState().getLastActivityTime()】结果为：" + sf.format(new Date(stateData.getState().getLastActivityTime())));
-                //this.updateGatewayState(deviceId, stateData, true, System.currentTimeMillis());
-            }
+
         }
         cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
     }
@@ -231,9 +235,11 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 save(deviceId, ACTIVITY_STATE, true);
                 pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
             } else {
-                log.info("设备在线判断2未通过！【" + deviceId + "】");
-                log.info("判断设备在线的前提条件2是：!state.isActive()");
-                log.info("stateData.getState()"+state.toString());
+                if(gatewayStates.containsKey(deviceId.getId())){
+                    log.info("设备在线判断2未通过！【" + deviceId + "】");
+                    log.info("判断设备在线的前提条件2是：!state.isActive()");
+                    log.info("stateData.getState()"+state.toString());
+                }
             }
         } else {
             log.debug("updateActivityState - fetched state IN NULL for device {}, lastReportedActivity {}", deviceId, lastReportedActivity);
@@ -536,27 +542,30 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 save(deviceId, ACTIVITY_STATE, false);
                 pushRuleEngineMessage(stateData, INACTIVITY_EVENT);
             } else {
-                //输出条件未成立的结果
-                log.info("设备离线判断未通过！【" + deviceId + "】");
-                log.info("判断设备离线的三个为TRUE的条件【if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】");
-                if (isActive(ts, state)) {
-                    log.info("第1个不满足true条件【!isActive(ts, state)】结果为：" + !isActive(ts, state));
-                    log.info("ts < state.getLastActivityTime() + state.getInactivityTimeout()的值为：");
-                    log.info("ts的值为:"+sf.format(new Date(ts)));
-                    log.info("state.getLastActivityTime()+ state.getInactivityTimeout()的值为:"+sf.format(new Date(state.getLastActivityTime()))+"+"+sf.format(new Date(state.getInactivityTimeout()))+"="+sf.format(new Date(state.getLastActivityTime()+ state.getInactivityTimeout())));
+                if(gatewayStates.containsKey(deviceId.getId())){
+                    //输出条件未成立的结果
+                    log.info("设备离线判断未通过！【" + deviceId + "】");
+                    log.info("判断设备离线的三个为TRUE的条件【if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】");
+                    if (isActive(ts, state)) {
+                        log.info("第1个不满足true条件【!isActive(ts, state)】结果为：" + !isActive(ts, state));
+                        log.info("ts < state.getLastActivityTime() + state.getInactivityTimeout()的值为：");
+                        log.info("ts的值为:"+sf.format(new Date(ts)));
+                        log.info("state.getLastActivityTime()+ state.getInactivityTimeout()的值为:"+sf.format(new Date(state.getLastActivityTime()))+"+"+sf.format(new Date(state.getInactivityTimeout()))+"="+sf.format(new Date(state.getLastActivityTime()+ state.getInactivityTimeout())));
+                    }
+                    if (!(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())) {
+                        log.info("第2个不满足true条件【(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())】结果为：" + (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()));
+                        log.info("state.getLastInactivityAlarmTime()的值为：" + sf.format(new Date(state.getLastInactivityAlarmTime())));
+                        log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
+                    }
+                    if (!(stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)) {
+                        log.info("第3个不满足true条件【(stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】结果为：" + (stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts));
+                        log.info("stateData.getDeviceCreationTime() + state.getInactivityTimeout() 的值为：" + sf.format(new Date(stateData.getDeviceCreationTime() + state.getInactivityTimeout())));
+                        log.info("stateData.getDeviceCreationTime()的值为：" + sf.format(new Date(stateData.getDeviceCreationTime())));
+                        log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
+                        log.info("ts的值为：" + sf.format(new Date(ts)));
+                    }
                 }
-                if (!(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())) {
-                    log.info("第2个不满足true条件【(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())】结果为：" + (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()));
-                    log.info("state.getLastInactivityAlarmTime()的值为：" + sf.format(new Date(state.getLastInactivityAlarmTime())));
-                    log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
-                }
-                if (!(stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)) {
-                    log.info("第3个不满足true条件【(stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】结果为：" + (stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts));
-                    log.info("stateData.getDeviceCreationTime() + state.getInactivityTimeout() 的值为：" + sf.format(new Date(stateData.getDeviceCreationTime() + state.getInactivityTimeout())));
-                    log.info("stateData.getDeviceCreationTime()的值为：" + sf.format(new Date(stateData.getDeviceCreationTime())));
-                    log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
-                    log.info("ts的值为：" + sf.format(new Date(ts)));
-                }
+
                 //网关状态更新补偿
                 //this.updateGatewayState(deviceId, stateData, false, ts);
             }
