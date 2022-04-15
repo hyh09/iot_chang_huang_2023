@@ -14,6 +14,7 @@ import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.config.RedisMessagePublish;
 import org.thingsboard.server.dao.device.DeviceCredentialsDao;
 import org.thingsboard.server.dao.sql.attributes.JpaAttributeDao;
+import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,6 +33,9 @@ public class GatewayTimeTask {
     private DeviceCredentialsDao deviceCredentialsDao;
 
     @Autowired
+    private DeviceRepository deviceRepository;
+
+    @Autowired
     private RedisMessagePublish pub;
 
     @Autowired
@@ -43,25 +47,29 @@ public class GatewayTimeTask {
         //pub.setWithExpire("fAtHNfi4kCRPkEr7V6aw",String.valueOf(System.currentTimeMillis()),1l, TimeUnit.HOURS);
         log.info("定时任务-定时更新网关状态执行了！");
         //获取所有网关令牌
-        List<DeviceCredentials> deviceCredentialsList = deviceCredentialsDao.find(null);
+        List<DeviceCredentials> deviceCredentialsList = deviceCredentialsDao.findGatewayCredentialsList();
         if (!CollectionUtils.isNullOrEmpty(deviceCredentialsList)) {
             for (DeviceCredentials deviceCredentials : deviceCredentialsList) {
+                long currentTime = System.currentTimeMillis();
                 if (pub.hasKey(deviceCredentials.getCredentialsId())) {
                     //在线
                     //String result = (String)pub.get(deviceCredentials.getCredentialsId());
                     //long ts = Long.parseLong(result);
                     long ts = (long)pub.get(deviceCredentials.getCredentialsId());
-                    log.info("定时更新网关在线，网关id=" + deviceCredentials.getDeviceId().getId() + ";网关令牌=" + deviceCredentials.getCredentialsId() + "；更新时间=" + sdf.format(new Date(ts)));
-                    if (ts + (this.defaultGatewayTimeout * 1000) > System.currentTimeMillis()) {
+                    String currentTimeStr = sdf.format(new Date(currentTime));
+
+                    if (ts + (this.defaultGatewayTimeout * 1000) > currentTime) {
+                        log.info("定时更新网关在线，网关id=" + deviceCredentials.getDeviceId().getId() + ";网关令牌=" + deviceCredentials.getCredentialsId() + "；更新时间=" + sdf.format(new Date(ts)));
                         jpaAttributeDao.save(null, deviceCredentials.getDeviceId(), DataConstants.SERVER_SCOPE, new BaseAttributeKvEntry(new BooleanDataEntry("active", true), ts));
                     }else {
+                        log.info("系统当前时间: "+currentTimeStr);
                         log.info("定时更新网关离线（超时离线），网关id=" + deviceCredentials.getDeviceId().getId() + ";网关令牌=" + deviceCredentials.getCredentialsId() + "；更新时间=" + sdf.format(new Date(ts)));
                         jpaAttributeDao.save(null, deviceCredentials.getDeviceId(), DataConstants.SERVER_SCOPE, new BaseAttributeKvEntry(new BooleanDataEntry("active", false), System.currentTimeMillis()));
                     }
                 } else {
                     //离线
-                    //log.info("定时更新网关离线，网关id=" + deviceCredentials.getDeviceId().getId() + ";网关令牌=" + deviceCredentials.getCredentialsId());
-                    jpaAttributeDao.save(null, deviceCredentials.getDeviceId(), DataConstants.SERVER_SCOPE, new BaseAttributeKvEntry(new BooleanDataEntry("active", false), System.currentTimeMillis()));
+                    log.info("定时更新网关离线(心跳不存在)，网关id=" + deviceCredentials.getDeviceId().getId() + ";网关令牌=" + deviceCredentials.getCredentialsId());
+                    jpaAttributeDao.save(null, deviceCredentials.getDeviceId(), DataConstants.SERVER_SCOPE, new BaseAttributeKvEntry(new BooleanDataEntry("active", false), currentTime));
                 }
             }
         }
