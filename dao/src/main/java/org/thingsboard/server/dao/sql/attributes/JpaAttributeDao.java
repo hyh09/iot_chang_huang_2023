@@ -126,6 +126,11 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
 
     @Override
     public ListenableFuture<List<AttributeKvEntry>> findAll(TenantId tenantId, EntityId entityId, String attributeType) {
+        EntityType entityType = entityId.getEntityType();
+        List<AttributeKvEntity> allByEntityTypeAndEntityIdAndAttributeType = attributeKvRepository.findAllByEntityTypeAndEntityIdAndAttributeType(
+                entityId.getEntityType(),
+                entityId.getId(),
+                attributeType);
         return Futures.immediateFuture(
                 DaoUtil.convertDataList(Lists.newArrayList(
                         attributeKvRepository.findAllByEntityTypeAndEntityIdAndAttributeType(
