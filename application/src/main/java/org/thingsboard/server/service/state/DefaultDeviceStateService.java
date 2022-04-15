@@ -211,11 +211,12 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                     log.info("第1个不满足true条件【lastReportedActivity > 0】结果为：" + sf.format(new Date(lastReportedActivity)));
                 }
                 if (!(lastReportedActivity > stateData.getState().getLastActivityTime())) {
-                    log.info("设备在线判断1未通过！【" + deviceId + "】");
+                    log.info("网关设备在线判断1未通过！【" + deviceId + "】");
                     log.info("第2个不满足true条件【lastReportedActivity > stateData.getState().getLastActivityTime()】结果为：" + (lastReportedActivity > stateData.getState().getLastActivityTime()));
                     log.info("【lastReportedActivity】结果为：" + sf.format(new Date(lastReportedActivity)));
                     log.info("【stateData.getState().getLastActivityTime()】结果为：" + sf.format(new Date(stateData.getState().getLastActivityTime())));
-                    //this.updateGatewayState(deviceId, stateData, true, System.currentTimeMillis());
+                    log.info("干预网关在线");
+                    this.updateGatewayStateTrue(deviceId,stateData);
                 }
             }
 
@@ -236,9 +237,11 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
             } else {
                 if(gatewayStates.containsKey(deviceId.getId())){
-                    log.info("设备在线判断2未通过！【" + deviceId + "】");
+                    log.info("网关设备在线判断2未通过！【" + deviceId + "】");
                     log.info("判断设备在线的前提条件2是：!state.isActive()");
                     log.info("stateData.getState()"+state.toString());
+                    log.info("干预网关在线");
+                    this.updateGatewayStateTrue(deviceId,stateData);
                 }
             }
         } else {
@@ -544,8 +547,8 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             } else {
                 if(gatewayStates.containsKey(deviceId.getId())){
                     //输出条件未成立的结果
-                    log.info("设备离线判断未通过！【" + deviceId + "】");
-                    log.info("判断设备离线的三个为TRUE的条件【if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】");
+                    log.info("网关离线判断未通过！【" + deviceId + "】");
+                    log.info("判断网关设备离线的三个为TRUE的条件【if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】");
                     if (isActive(ts, state)) {
                         log.info("第1个不满足true条件【!isActive(ts, state)】结果为：" + !isActive(ts, state));
                         log.info("ts < state.getLastActivityTime() + state.getInactivityTimeout()的值为：");
@@ -564,6 +567,8 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                         log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
                         log.info("ts的值为：" + sf.format(new Date(ts)));
                     }
+                    log.info("干预网关在线");
+                    this.updateGatewayStateTrue(deviceId,stateData);
                 }
 
                 //网关状态更新补偿
