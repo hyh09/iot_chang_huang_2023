@@ -213,7 +213,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 log.info("第2个不满足true条件【lastReportedActivity > stateData.getState().getLastActivityTime()】结果为：" + (lastReportedActivity > stateData.getState().getLastActivityTime()));
                 log.info("【lastReportedActivity】结果为：" + sf.format(new Date(lastReportedActivity)));
                 log.info("【stateData.getState().getLastActivityTime()】结果为：" + sf.format(new Date(stateData.getState().getLastActivityTime())));
-                this.updateGatewayState(deviceId, stateData, true, System.currentTimeMillis());
+                //this.updateGatewayState(deviceId, stateData, true, System.currentTimeMillis());
             }
         }
         cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
@@ -439,6 +439,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 log.debug("[{}][{}] Device doesn't belong to current partition. tpi [{}]", device.getName(), device.getId(), tpi);
             }
         }
+        log.info("已缓存网关："+gatewayStates.toString());
 
         Futures.addCallback(Futures.successfulAsList(fetchFutures), new FutureCallback<List<Void>>() {
             @Override
@@ -557,7 +558,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                     log.info("ts的值为：" + sf.format(new Date(ts)));
                 }
                 //网关状态更新补偿
-                this.updateGatewayState(deviceId, stateData, false, ts);
+                //this.updateGatewayState(deviceId, stateData, false, ts);
             }
         } else {
             log.debug("[{}] Device that belongs to other server is detected and removed.", deviceId);
@@ -780,7 +781,6 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             JsonNode gateway = device.getAdditionalInfo().get("gateway");
             if (gateway != null && gateway.asBoolean()) {
                 gatewayStates.put(device.getId().getId(), device.getName());
-                log.info("【" + device.getName() + "】网关缓存了");
             }
         }
     }
@@ -812,7 +812,6 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                     log.info("网关【" + gatewayStates.get(deviceId) + "】离线了！");
                     DeviceState state = stateData.getState();
                     state.setActive(false);
-                    state.setLastActivityTime(ts);
                     state.setLastInactivityAlarmTime(ts);
                     save(device, INACTIVITY_ALARM_TIME, ts);
                     save(device, ACTIVITY_STATE, false);
