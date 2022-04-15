@@ -11,6 +11,7 @@ import org.thingsboard.server.common.data.vo.BoardV3DeviceDictionaryVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.TsSqlDayVo;
 import org.thingsboard.server.common.data.vo.bodrd.DashboardV3Vo;
+import org.thingsboard.server.common.data.vo.bodrd.UnitEnergyVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
 import org.thingsboard.server.common.data.vo.tskv.TrendChart02Vo;
 import org.thingsboard.server.common.data.vo.tskv.consumption.TrendLineVo;
@@ -70,7 +71,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
     }
 
     @Override
-    public List<DashboardV3Vo> queryDashboardValue(BoardV3DeviceDictionaryVo vo) {
+    public List<DashboardV3Vo> queryDashboardValue(BoardV3DeviceDictionaryVo vo,TenantId  tenantId) {
         List<DashboardV3Vo>  dashboardV3Vos  = new ArrayList<>();
 
         log.info("方法:BulletinV3BoardImpl.queryDashboardValue的入参:{}",vo);
@@ -81,7 +82,7 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         List<DictDeviceStandardPropertyEntity>   dictDeviceStandardPropertyEntities= dictDeviceStandardPropertyRepository.findAllByInContentAndDictDataId(vo.getId(),keyName);
         Map<String,String> stringStringMap= dictDeviceStandardPropertyEntities.stream().collect(Collectors.toMap(DictDeviceStandardPropertyEntity::getName,DictDeviceStandardPropertyEntity::getContent));
         log.info("方法:BulletinV3BoardImpl.queryDashboardValue的查询到的stringStringMap出参:{}",dictDeviceStandardPropertyRepository);
-        TotalCalculationVo  totalCalculationVo=   totalCalculation(vo);
+        TotalCalculationVo  totalCalculationVo=   totalCalculation(vo,tenantId);
         dashboardV3Vos.add(getResultList(stringStringMap,KeyTitleEnums.key_water,map,totalCalculationVo.getWater()));
         dashboardV3Vos.add(getResultList(stringStringMap,KeyTitleEnums.key_cable,map,totalCalculationVo.getElectric()));
         dashboardV3Vos.add(getResultList(stringStringMap,KeyTitleEnums.key_gas,map,totalCalculationVo.getGas()));
@@ -133,8 +134,10 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
      * @param vo
      * @return
      */
-    private  TotalCalculationVo  totalCalculation(BoardV3DeviceDictionaryVo vo)
+    private  TotalCalculationVo  totalCalculation(BoardV3DeviceDictionaryVo vo,TenantId tenantId)
     {
+        long  deviceCount = deviceService.countAllByDictDeviceIdAndTenantId(vo.getId(),tenantId.getId());
+
         TotalCalculationVo  resultVo = new  TotalCalculationVo();
         QueryTsKvVo  queryTsKvVo = new QueryTsKvVo();
         queryTsKvVo.setStartTime(vo.getStartTime());
@@ -142,14 +145,25 @@ public class BulletinV3BoardImpl implements  BulletinV3BoardVsSvc{
         queryTsKvVo.setDictDeviceId(vo.getId());
         queryTsKvVo.setFactoryId(vo.getFactoryId());
         List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(queryTsKvVo);
-        String  gasValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).collect(Collectors.toList())) ;
-        String  waterValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).collect(Collectors.toList())) ;
-        String  electriValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).collect(Collectors.toList())) ;
-        String  value=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getCapacityAddedValue).collect(Collectors.toList())) ;
+      List<UnitEnergyVo>  unitEnergyVos=   entityList.stream().map(e->{
+            UnitEnergyVo  vo1  = new UnitEnergyVo();
+            vo1.setWaterUnit(StringUtilToll.div(e.getWaterAddedValue(),e.getCapacityAddedValue()));
+            vo1.setElectricUnit(StringUtilToll.div(e.getElectricAddedValue(),e.getCapacityAddedValue()));
+            vo1.setGasUnit(StringUtilToll.div(e.getGasAddedValue(),e.getCapacityAddedValue()));
+            return  vo1;
+        }).collect(Collectors.toList());
 
-        resultVo.setWater(StringUtilToll.div(waterValue,value));
-        resultVo.setElectric(StringUtilToll.div(electriValue,value));
-        resultVo.setGas(StringUtilToll.div(gasValue,value));
+
+
+//        String  gasValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getGasAddedValue).collect(Collectors.toList())) ;
+//        String  waterValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getWaterAddedValue).collect(Collectors.toList())) ;
+//        String  electriValue=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getElectricAddedValue).collect(Collectors.toList())) ;
+//        String  value=  StringUtilToll.accumulator(entityList.stream().map(EnergyEffciencyNewEntity::getCapacityAddedValue).collect(Collectors.toList())) ;
+
+          String  value = String.valueOf(deviceCount);
+        resultVo.setWater(StringUtilToll.div( StringUtilToll.accumulator(unitEnergyVos.stream().map(UnitEnergyVo::getWaterUnit).collect(Collectors.toList())),value));
+        resultVo.setElectric(StringUtilToll.div(StringUtilToll.accumulator(unitEnergyVos.stream().map(UnitEnergyVo::getElectricUnit).collect(Collectors.toList())),value));
+        resultVo.setGas(StringUtilToll.div(StringUtilToll.accumulator(unitEnergyVos.stream().map(UnitEnergyVo::getGasUnit).collect(Collectors.toList())),value));
         log.info("打印的输出的结果:{}",resultVo);
         return  resultVo;
     }
