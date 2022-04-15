@@ -19,6 +19,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.dao.Dao;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -50,5 +51,11 @@ public interface DeviceCredentialsDao extends Dao<DeviceCredentials> {
      * @return the device credentials object
      */
     DeviceCredentials findByCredentialsId(TenantId tenantId, String credentialsId);
+
+    /**
+     * 查询所有网关令牌
+     * @return
+     */
+    List<DeviceCredentials> findGatewayCredentialsList();
 
 }
