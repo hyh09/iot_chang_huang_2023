@@ -612,8 +612,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param plans 生产计划列表
      */
     @Override
-    public BigDecimal getOrderCapacities(List<OrderPlan> plans) {
-        return this.getOrderCapacities(plans, null).getCapacities();
+    public BigDecimal getOrderCapacitiesByTs(List<OrderPlan> plans) {
+        return this.getOrderCapacitiesByTs(plans, null).getCapacities();
     }
 
     /**
@@ -623,7 +623,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param orderId 订单Id
      */
     @Override
-    public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
+    public OrderCapacityBO getOrderCapacitiesByTs(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
             log.trace("查询设备指定时间段产能：" + "empty");
             return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
@@ -649,15 +649,33 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param plans 生产计划列表
      */
     @Override
-    public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
+    public BigDecimal getOrderCapacities(List<OrderPlan> plans) {
+        return this.getOrderCapacities(plans, null).getCapacities();
+    }
+
+    /**
+     * 查询订单产能
+     *
+     * @param plans   生产计划列表
+     * @param orderId 订单Id
+     */
+    @Override
+    public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
             log.trace("查询设备指定时间段产能：" + "empty");
-            return Maps.newHashMap();
+            return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList())).entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new BigDecimal(v.getValue())));
-            log.trace("查询设备指定时间段产能：" + dataMap);
-            return dataMap;
+            return OrderCapacityBO.builder()
+                    .orderId(orderId)
+                    .deviceCapacities(
+                            plans.stream().map(v -> OrderDeviceCapacityBO.builder()
+                                .planId(toUUID(v.getId()))
+                                .enabled(v.getEnabled())
+                                .capacities(Optional.ofNullable(v.getActualCapacity()).orElse(BigDecimal.ZERO))
+                                .build()).collect(Collectors.toList())
+                    )
+                    .capacities(plans.stream().filter(OrderPlan::getEnabled).map(OrderPlan::getActualCapacity).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add))
+                    .build();
         }
     }
 

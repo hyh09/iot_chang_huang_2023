@@ -133,8 +133,8 @@ public class UserController extends BaseController  {
             user.setFactoryName(factory!=null?factory.getName():"");
 
         }
-
-        return  user;
+        user.setSystemUser(configureRoles(user));
+    return  user;
     }
 
 
@@ -765,6 +765,35 @@ public class UserController extends BaseController  {
         entityRR.setTenantId(user.getTenantId().getId());
         userMenuRoleService.saveEntity(entityRR);
 
+    }
+
+
+
+
+    private  Boolean  configureRoles(User user) throws ThingsboardException {
+        List<UUID> rolesId =user.getRoleIds();
+        if(CollectionUtils.isEmpty(rolesId))
+        {
+            return false;
+        }
+
+        AdminSettings  settings =  adminSettingsService.findAdminSettingsByKey(getTenantId(),getTenantId().getId().toString());
+        if(settings == null)
+        {
+            return  false;
+        }
+
+         JsonNode jsonConfig = settings.getJsonValue();
+        String  systemRoleId = jsonConfig.get("systemRoleId").asText();
+        log.info("打印systemRoleId：{}",systemRoleId);
+        log.info("打印rolesId：{}",rolesId);
+
+     Long  count=   rolesId.stream().filter(id-> id.toString().equals(systemRoleId)).count();
+     if(count>0)
+     {
+         return  true;
+     }
+     return false;
     }
 
 
