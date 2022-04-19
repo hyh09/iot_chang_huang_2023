@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.factory.FactoryListVo;
@@ -239,16 +240,54 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         JudgeUserVo judgeUserVo = userRoleMenuSvc.decideUser(new UserId(userId));
         if (judgeUserVo != null && judgeUserVo.getTenantFlag() != null &&judgeUserVo.getTenantFlag()) {
             //租户管理员/租户有菜单权限的用户，拥有全部数据权限
-            resultFactory = factoryDao.findFactoryByTenantId(tenantId);
+            resultFactory = factoryDao.findFactoryByTenantIdToBoard(tenantId);
         } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
             //工厂管理员/工厂用户，拥有所属工厂数据权限
             //查询工厂信息
             if(judgeUserVo.getUser() != null && judgeUserVo.getUser().getFactoryId() != null){
-                Factory queryFactory = factoryDao.findById(judgeUserVo.getUser().getFactoryId());
+                Factory queryFactory = factoryDao.findByIdToBoard(judgeUserVo.getUser().getFactoryId());
                 if (queryFactory != null) {
                     resultFactory.add(queryFactory);
                 }
             }
+        }
+        return resultFactory;
+    }
+
+    /**
+     * 根据登录人角色查询工厂状态
+     * @param userId
+     * @param tenantId
+     * @return
+     */
+    public List<Factory> findFactoryStatusByLoginRole(UUID userId,UUID tenantId) throws ThingsboardException{
+        List<Factory> resultFactory = new ArrayList<>();
+        //查询登录人角色
+        //查询登录人角色及所属工厂
+        JudgeUserVo judgeUserVo = userRoleMenuSvc.decideUser(new UserId(userId));
+        if (judgeUserVo != null && judgeUserVo.getTenantFlag() != null &&judgeUserVo.getTenantFlag()) {
+            //租户管理员/租户有菜单权限的用户，拥有全部数据权限
+            resultFactory = factoryDao.findFactoryByTenantIdToBoard(tenantId);
+        } else if(judgeUserVo != null && judgeUserVo.getFactoryManagementFlag() != null && judgeUserVo.getFactoryManagementFlag()){
+            //工厂管理员/工厂用户，拥有所属工厂数据权限
+            //查询工厂信息
+            if(judgeUserVo.getUser() != null && judgeUserVo.getUser().getFactoryId() != null){
+                Factory queryFactory = factoryDao.findByIdToBoard(judgeUserVo.getUser().getFactoryId());
+                if (queryFactory != null) {
+                    resultFactory.add(queryFactory);
+                }
+            }
+        }
+        //查询网关状态
+        if (CollectionUtils.isNotEmpty(resultFactory)){
+            resultFactory.forEach(i->{
+                //工厂下网关的在线、离线状态。有一个在线视为正常，全部离线视为异常
+                try {
+                    i.setFactoryStatus(factoryDao.checkoutFactoryStatus(i.getId()));
+                } catch (ThingsboardException e) {
+                    new ThingsboardException("查询工厂在线报错", ThingsboardErrorCode.FAIL_VIOLATION);
+                }
+            });
         }
         return resultFactory;
     }
