@@ -27,6 +27,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -298,10 +299,10 @@ public class FactoryController extends BaseController  {
     @ApiOperation("根据登录人角色查询工厂状态")
     @RequestMapping(value = "/findFactoryStatusByLoginRole", method = RequestMethod.GET)
     @ResponseBody
-    public List<FactoryStatusVo> findFactoryStatusByLoginRole() throws ThingsboardException {
+    public List<FactoryStatusVo> findFactoryStatusByLoginRole(@RequestParam(value = "factoryId", required = false) UUID factoryId) throws ThingsboardException {
         try {
             List<FactoryStatusVo> factoryVoList = new ArrayList<>();
-            List<Factory> factoryList = factoryService.findFactoryStatusByLoginRole(getCurrentUser().getId().getId(),getCurrentUser().getTenantId().getId());
+            List<Factory> factoryList = factoryService.findFactoryStatusByLoginRole(getCurrentUser().getId().getId(),getCurrentUser().getTenantId().getId(),factoryId);
             if(!CollectionUtils.isEmpty(factoryList)){
                 factoryList.forEach(i->{
                     factoryVoList.add(new FactoryStatusVo(i));

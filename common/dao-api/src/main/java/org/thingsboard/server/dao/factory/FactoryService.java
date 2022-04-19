@@ -107,6 +107,6 @@ public interface FactoryService {
      * @param tenantId
      * @return
      */
-    List<Factory> findFactoryStatusByLoginRole(UUID userId,UUID tenantId)throws ThingsboardException;
+    List<Factory> findFactoryStatusByLoginRole(UUID userId,UUID tenantId,UUID factoryId)throws ThingsboardException;
 
 }
