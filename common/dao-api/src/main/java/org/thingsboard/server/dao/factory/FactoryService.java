@@ -101,4 +101,12 @@ public interface FactoryService {
      */
     Boolean checkFactoryHaveGateway(String factoryId) throws ThingsboardException;
 
+    /**
+     * 根据登录人角色查询工厂状态
+     * @param userId
+     * @param tenantId
+     * @return
+     */
+    List<Factory> findFactoryStatusByLoginRole(UUID userId,UUID tenantId)throws ThingsboardException;
+
 }

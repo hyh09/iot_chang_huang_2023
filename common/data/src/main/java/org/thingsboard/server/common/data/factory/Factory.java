@@ -5,10 +5,8 @@ import lombok.Data;
 import org.thingsboard.server.common.data.HasCustomerId;
 import org.thingsboard.server.common.data.HasName;
 import org.thingsboard.server.common.data.HasOtaPackage;
-import org.thingsboard.server.common.data.HasTenantId;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.OtaPackageId;
-import org.thingsboard.server.common.data.id.TenantId;
 
 import java.util.UUID;
 
@@ -78,6 +76,8 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
     private Boolean active;
     @ApiModelProperty("网关设备名称")
     private String gatewayName;
+    @ApiModelProperty("工厂下网关的在线、离线状态。有一个在线视为正常，全部离线视为异常")
+    private Boolean factoryStatus;
     /*********************************************查询条件***********************************/
 
     public Factory() {
@@ -85,6 +85,15 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
     }
     public Factory(UUID id) {
         this.id = id;
+    }
+
+    public Factory toFactoryFromBoardRequst() {
+        Factory factory = new Factory(id);
+        factory.setName(name);
+        factory.setLongitude(longitude);
+        factory.setLatitude(latitude);
+        factory.setLogoIcon(logoIcon);
+        return factory;
     }
 
     @Override
