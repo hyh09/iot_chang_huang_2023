@@ -542,5 +542,40 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         return result;
     }
 
+    /**
+     * 根据租户查询,集团看板定制
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Factory> findFactoryByTenantIdToBoard(UUID tenantId){
+        List<Factory> result = new ArrayList<>();
+        List<Factory> factoryByTenantId = factoryRepository.findFactoryByTenantId(tenantId);
+        if(CollectionUtils.isNotEmpty(factoryByTenantId)){
+            factoryByTenantId.forEach(i->{
+                result.add(i.toFactoryFromBoardRequst());
+            });
+        }
+        return result;
+    }
+
+    /**
+     * 根据租户查询,集团看板定制
+     * @param factoryId
+     * @return
+     */
+    @Override
+    public Factory findByIdToBoard(UUID factoryId){
+        Factory factory = new Factory();
+        Optional<FactoryEntity> byId = factoryRepository.findById(factoryId);
+        if(byId != null){
+            FactoryEntity byIdToBoard = byId.get();
+            if(byIdToBoard != null){
+                return byIdToBoard.toData().toFactoryFromBoardRequst();
+            }
+        }
+        return factory;
+    }
+
 }
 

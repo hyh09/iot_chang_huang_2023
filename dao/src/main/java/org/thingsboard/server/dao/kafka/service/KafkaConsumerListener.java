@@ -8,6 +8,9 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
+import org.thingsboard.server.dao.mylock.Lock;
+import org.thingsboard.server.dao.mylock.ZookeeperDistrbuteLock;
+import org.thingsboard.server.dao.mylock.ZookeeperProperties;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.service.EnergyHistoryHourService;
@@ -41,67 +44,70 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
     @Autowired
     private EnergyHistoryHourService energyHistoryHourService;
     @Autowired  private TsKvRepository tsKvRepository;
+    @Autowired  private ZookeeperProperties zookeeperProperties;
 
     @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
     public void kafkaListener(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
 //            log.info("打印mess:{}",message);
+            Lock lock = new ZookeeperDistrbuteLock(zookeeperProperties);
 
-            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-            String title = dataBodayVo.getTitle();
-            UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue())) {
-                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+            try {
+                DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+                lock.getLock("statistical"+dataBodayVo.getEntityId());
+                String title = dataBodayVo.getTitle();
+                UUID entityId = dataBodayVo.getEntityId();
+                if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue())) {
+                    dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+                }
+                statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
+            }finally {
+                lock.unLock();
             }
-            statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
+
+
+        }
+
+    }
+
+
+//    @KafkaListener(topics = {"hs_energy_chart_kafka"}, groupId = "group2", containerFactory = "kafkaListenerContainerFactory01")
+//    public void kafkaListenerChart(String message) {
+//        if (StringUtils.isNotEmpty(message)) {
+//            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+//            String title = dataBodayVo.getTitle();
+//            UUID entityId = dataBodayVo.getEntityId();
+//            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue()) ) {
+//                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+//            }
+//
 //            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
-//            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
-
-//            Long endTime = System.currentTimeMillis();
-//            Long tempTime = (endTime - startTime);
-//            log.info("消费端的花费时间："+
-//                    (((tempTime/86400000)>0)?((tempTime/86400000)+"d"):"")+
-//                    ((((tempTime/86400000)>0)||((tempTime%86400000/3600000)>0))?((tempTime%86400000/3600000)+"h"):(""))+
-//                    ((((tempTime/3600000)>0)||((tempTime%3600000/60000)>0))?((tempTime%3600000/60000)+"m"):(""))+
-//                    ((((tempTime/60000)>0)||((tempTime%60000/1000)>0))?((tempTime%60000/1000)+"s"):(""))+
-//                    ((tempTime%1000)+"ms"));
-
-        }
-
-    }
-
-
-    @KafkaListener(topics = {"hs_energy_chart_kafka"}, groupId = "group2", containerFactory = "kafkaListenerContainerFactory01")
-    public void kafkaListenerChart(String message) {
-        if (StringUtils.isNotEmpty(message)) {
-            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-            String title = dataBodayVo.getTitle();
-            UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue()) ) {
-                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
-            }
-
-            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
-
-
-        }
-
-    }
+//
+//
+//        }
+//
+//    }
 
 
     @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
     public void kafkaListenerhour(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
+            Lock lock = new ZookeeperDistrbuteLock(zookeeperProperties);
 
-            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-            String title = dataBodayVo.getTitle();
-            UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue()) ) {
-                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
-            }
-            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
+            try {
+               DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+               lock.getLock("hour" + dataBodayVo.getEntityId());
+               String title = dataBodayVo.getTitle();
+               UUID entityId = dataBodayVo.getEntityId();
+               if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue())) {
+                   dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+               }
+               energyHistoryHourService.saveByHour(entityId, dataBodayVo, title);
+           }finally {
+               lock.unLock();
+           }
         }
 
     }
