@@ -170,7 +170,15 @@ export class FactoryMngService {
 
   // 根据当前登录人获取工厂网关的整体在线状态
   public getFactoryOnlineStatus(factoryId: string = '', config?: RequestConfig): Observable<{[id: string]: boolean}> {
-    return this.http.get<{[id: string]: boolean}>(`/api/deviceMonitor/rtMonitor/factory/onlineStatus?factoryId=${factoryId}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<{ id: string; factoryStatus: boolean }[]>(
+      `/api/factory/findFactoryStatusByLoginRole?factoryId=${factoryId}`, defaultHttpOptionsFromConfig(config)
+    ).pipe(map(res => {
+      const map = {};
+      (res || []).forEach(item => {
+        map[item.id] = item.factoryStatus;
+      });
+      return map;
+    }));
   }
 
   // 根据当前登录人获取所有工厂下的网关id
