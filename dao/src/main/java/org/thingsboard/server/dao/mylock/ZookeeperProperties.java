@@ -21,7 +21,7 @@ public class ZookeeperProperties {
 
 
     public String getZkUrl() {
-        System.out.println("zkUrl:"+zkUrl);
+//        System.out.println("zkUrl:"+zkUrl);
         return zkUrl;
     }
 

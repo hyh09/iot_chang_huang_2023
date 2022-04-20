@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class StringUtilToll {
 
     private final static String zero ="0";
+    private static final Pattern PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
 
 
     /**
@@ -156,23 +157,23 @@ public class StringUtilToll {
     }
 
 
-    /**
-     * 是否是 0
-     * @param v2
-     * @return
-     */
+
     public  static  Boolean isZero(String v2)
     {
-        if(v2 == null)
-        {
+            if(!isNumeric(v2))
+                {
+                    return false;
+                }
+            if(v2 == null)
+                {
+                    return  false;
+                }
+            BigDecimal b2 = new BigDecimal(v2);
+            if(b2.compareTo(BigDecimal.ZERO)==0)
+                {
+                    return true;
+                }
             return  false;
-        }
-        BigDecimal b2 = new BigDecimal(v2);
-        if(b2.compareTo(BigDecimal.ZERO)==0)
-        {
-            return true;
-        }
-        return  false;
 
     }
 
@@ -286,14 +287,14 @@ public class StringUtilToll {
 
 
 
-    private static final Pattern PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
 
-    public boolean isNumeric(String strNum) {
-        if (strNum == null) {
-            return false;
+        public static boolean isNumeric(String strNum) {
+                if (strNum == null)
+                {
+                    return false;
+                }
+            return PATTERN.matcher(strNum).matches();
         }
-        return PATTERN.matcher(strNum).matches();
-    }
 
 
 
