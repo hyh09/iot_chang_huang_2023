@@ -58,7 +58,8 @@ public class MenuInfo {
     public String region;
 
     /********************以下是非数据库字段************************/
-    private Boolean associatedTenant = false;
+    private Boolean associatedTenant = false;  //是否关联了租户
+    private Boolean checkAllFlag = false;  //true-全选 ，false-半选
 
     /********************以上是非数据库字段************************/
 
