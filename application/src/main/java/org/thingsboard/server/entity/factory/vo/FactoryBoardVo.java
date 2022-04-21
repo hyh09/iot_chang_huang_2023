@@ -20,8 +20,11 @@ public class FactoryBoardVo {
     @ApiModelProperty("纬度")
     public String latitude;
 
-    @ApiModelProperty("logo图标")
+    @ApiModelProperty("背景图片")
     public String logoIcon;
+
+    @ApiModelProperty("logo图标")
+    private String logoImages;
 
     @ApiModelProperty("工厂名称")
     public String name;
@@ -32,6 +35,7 @@ public class FactoryBoardVo {
         this.latitude = factory.getLatitude();
         this.logoIcon = factory.getLogoIcon();
         this.name = factory.getName();
+        this.logoImages = factory.getLogoImages();
     }
 
 
