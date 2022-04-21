@@ -1183,7 +1183,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                 result.setOutput(this.formatDoubleData(shirtActualCapacityTotal));
                                 if (shirtActualCapacityTotal.compareTo(BigDecimal.ZERO) > 0)
                                     result.setQualityRate(this.formatDoubleData(actualCapacityTotal.multiply(new BigDecimal(100)).divide(shirtActualCapacityTotal, 2, RoundingMode.HALF_UP)));
-                                result.setInQualityNum(this.formatDoubleData(shirtActualCapacityTotal.subtract(actualCapacityTotal)));
+                                result.setInQualityNum(this.formatNegativeNumber(this.formatDoubleData(shirtActualCapacityTotal.subtract(actualCapacityTotal))));
                             })
                     ).join();
                 })
