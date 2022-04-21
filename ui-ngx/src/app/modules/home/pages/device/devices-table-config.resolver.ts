@@ -229,7 +229,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
   configureCellActions(deviceScope: string): Array<CellActionDescriptor<DeviceInfo>> {
     const actions: Array<CellActionDescriptor<DeviceInfo>> = [];
     if (deviceScope === 'tenant') {
-      actions.push(
+      // actions.push(
         // {
         //   name: this.translate.instant('device.make-public'),
         //   icon: 'share',
@@ -248,7 +248,7 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
         //   isEnabled: (entity) => (entity.customerId && entity.customerId.id !== NULL_UUID && !entity.customerIsPublic),
         //   onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
         // },
-      );
+      // );
       if (this.utils.hasPermission('device-mng.distribute-device')) {
         actions.push({
           name: this.translate.instant('device-mng.distribute-device'),

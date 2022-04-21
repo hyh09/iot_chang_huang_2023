@@ -18,7 +18,7 @@ public abstract class ZookeeperAbstractLock  implements   Lock {
 
 	public void getLock(String keyName) {
 		if (tryLock(keyName)) {
-			System.out.println("###获取锁成功#####");
+//			System.out.println("###获取锁成功#####");
 		} else {
 			// 等待
 			waitLock(keyName);
