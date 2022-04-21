@@ -140,6 +140,7 @@ public class RTMonitorController extends BaseController {
     /**
      * 获得实时监控数据列表
      */
+    @Deprecated
     @ApiOperation(value = "获得实时监控数据列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
@@ -167,6 +168,82 @@ public class RTMonitorController extends BaseController {
         FactoryDeviceQuery query;
         query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
         return this.deviceMonitorService.getRTMonitorData(getTenantId(), query, pageLink);
+    }
+
+    /**
+     * 实时监控列表-设备列表
+     */
+    @ApiOperation(value = "实时监控列表-设备列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
+            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/devices")
+    public PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam(required = false) String factoryId,
+            @RequestParam(required = false) String workshopId,
+            @RequestParam(required = false) String productionLineId,
+            @RequestParam(required = false) String deviceId
+    ) throws ThingsboardException {
+        PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
+        validatePageLink(pageLink);
+        FactoryDeviceQuery query;
+        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
+        return this.deviceMonitorService.getRTMonitorSimplificationData(getTenantId(), query, pageLink);
+    }
+
+    /**
+     * 实时监控列表-设备在线状态
+     */
+    @ApiOperation(value = "实时监控列表-设备在线状态", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
+            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device/onlineStatus")
+    public RTMonitorDeviceOnlineStatusResult getRTMonitorDeviceOnlineStatusData(
+            @RequestParam(required = false) String factoryId,
+            @RequestParam(required = false) String workshopId,
+            @RequestParam(required = false) String productionLineId,
+            @RequestParam(required = false) String deviceId
+    ) throws ThingsboardException {
+        FactoryDeviceQuery query;
+        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
+        return this.deviceMonitorService.getRTMonitorDeviceOnlineStatusData(getTenantId(), query);
+    }
+
+    /**
+     * 实时监控列表-设备报警统计
+     */
+    @ApiOperation(value = "实时监控列表-设备报警统计", notes = "近六个月，从远及近; 优先级为设备、产线、车间、工厂，如均为null则为未分配")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
+            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
+    })
+    @GetMapping("/rtMonitor/device/alarm/statistics")
+    public List<AlarmTimesResult> RTMonitorDeviceAlarmStatisticsResult(
+            @RequestParam(required = false) String factoryId,
+            @RequestParam(required = false) String workshopId,
+            @RequestParam(required = false) String productionLineId,
+            @RequestParam(required = false) String deviceId
+    ) throws ThingsboardException {
+        FactoryDeviceQuery query;
+        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
+        return this.deviceMonitorService.getRTMonitorDeviceAlarmStatisticsResult(getTenantId(), query);
     }
 
     /**
@@ -308,83 +385,6 @@ public class RTMonitorController extends BaseController {
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
         validatePageLink(pageLink);
         return this.deviceMonitorService.listDeviceTelemetryHistories(getTenantId(), DeviceId.fromString(deviceId), pageLink);
-    }
-
-    /**
-     * 获得实时监控数据列表-精简版
-     */
-    @Deprecated
-    @ApiOperation(value = "获得实时监控数据列表-精简版", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
-            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
-            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
-            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
-    })
-    @GetMapping("/rtMonitor/device/simplification")
-    public PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(
-            @RequestParam int page,
-            @RequestParam int pageSize,
-            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
-            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
-            @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workshopId,
-            @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId
-    ) throws ThingsboardException {
-        PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
-        validatePageLink(pageLink);
-        FactoryDeviceQuery query;
-        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
-        return this.deviceMonitorService.getRTMonitorSimplificationData(getTenantId(), query, pageLink);
-    }
-
-    /**
-     * 获得实时监控数据列表-设备在线状态
-     */
-    @ApiOperation(value = "获得实时监控数据列表-设备在线状态", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
-    })
-    @GetMapping("/rtMonitor/device/onlineStatus")
-    public RTMonitorDeviceOnlineStatusResult getRTMonitorDeviceOnlineStatusData(
-            @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workshopId,
-            @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId
-    ) throws ThingsboardException {
-        FactoryDeviceQuery query;
-        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
-        return this.deviceMonitorService.getRTMonitorDeviceOnlineStatusData(getTenantId(), query);
-    }
-
-    /**
-     * 获得实时监控数据列表-设备报警统计
-     */
-    @ApiOperation(value = "获得实时监控数据列表-设备报警统计", notes = "近六个月，从远及近; 优先级为设备、产线、车间、工厂，如均为null则为未分配")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query"),
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query"),
-            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query")
-    })
-    @GetMapping("/rtMonitor/device/alarm/statistics")
-    public List<AlarmTimesResult> RTMonitorDeviceAlarmStatisticsResult(
-            @RequestParam(required = false) String factoryId,
-            @RequestParam(required = false) String workshopId,
-            @RequestParam(required = false) String productionLineId,
-            @RequestParam(required = false) String deviceId
-    ) throws ThingsboardException {
-        FactoryDeviceQuery query;
-        query = new FactoryDeviceQuery(factoryId, workshopId, productionLineId, deviceId);
-        return this.deviceMonitorService.getRTMonitorDeviceAlarmStatisticsResult(getTenantId(), query);
     }
 
     /**

@@ -79,6 +79,15 @@ public interface CommonService {
         return val1.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().doubleValue();
     }
 
+    /**
+     * 格式化数据
+     */
+    default double formatNegativeNumber(double val1) {
+        if (val1 < 0)
+            return 0d;
+        return val1;
+    }
+
 
     /**
      * 剔除无效遥测数据
