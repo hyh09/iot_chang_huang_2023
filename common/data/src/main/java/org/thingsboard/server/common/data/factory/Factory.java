@@ -93,6 +93,7 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
         factory.setLongitude(longitude);
         factory.setLatitude(latitude);
         factory.setLogoIcon(logoIcon);
+        factory.setLogoImages(logoImages);
         return factory;
     }
 
