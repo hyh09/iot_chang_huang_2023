@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,16 +21,16 @@ import org.thingsboard.server.dao.sql.role.service.UserRoleMenuSvc;
 import org.thingsboard.server.entity.factory.dto.AddFactoryDto;
 import org.thingsboard.server.entity.factory.dto.FactoryVersionDto;
 import org.thingsboard.server.entity.factory.dto.QueryFactoryDto;
-import org.thingsboard.server.entity.factory.vo.FactoryLevelAllListVo;
-import org.thingsboard.server.entity.factory.vo.FactoryVersionVo;
-import org.thingsboard.server.entity.factory.vo.FactoryVo;
+import org.thingsboard.server.entity.factory.vo.*;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Api(value="工厂管理Controller",tags={"工厂管理接口"})
 @RequiredArgsConstructor
 @RestController
@@ -237,13 +238,13 @@ public class FactoryController extends BaseController  {
     @ApiOperation("根据登录人角色查询工厂列表")
     @RequestMapping(value = "/findFactoryListByLoginRole", method = RequestMethod.GET)
     @ResponseBody
-    public List<FactoryVo> findFactoryListByLoginRole() throws ThingsboardException {
+    public List<FactoryBoardVo> findFactoryListByLoginRole() throws ThingsboardException {
         try {
-            List<FactoryVo> factoryVoList = new ArrayList<>();
+            List<FactoryBoardVo> factoryVoList = new ArrayList<>();
             List<Factory> factoryList = factoryService.findFactoryListByLoginRole(getCurrentUser().getId().getId(),getCurrentUser().getTenantId().getId());
             if(!CollectionUtils.isEmpty(factoryList)){
                 factoryList.forEach(i->{
-                    factoryVoList.add(new FactoryVo(i));
+                    factoryVoList.add(new FactoryBoardVo(i));
                 });
             }
             return factoryVoList;
@@ -293,5 +294,24 @@ public class FactoryController extends BaseController  {
     public Boolean checkFactoryHaveGateway(@RequestParam(required = true) String factoryId) throws ThingsboardException{
         checkParameterChinees("id",factoryId);
         return factoryService.checkFactoryHaveGateway(factoryId);
+    }
+
+    @ApiOperation("根据登录人角色查询工厂状态")
+    @RequestMapping(value = "/findFactoryStatusByLoginRole", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FactoryStatusVo> findFactoryStatusByLoginRole(@RequestParam(value = "factoryId", required = false) UUID factoryId) throws ThingsboardException {
+        try {
+            List<FactoryStatusVo> factoryVoList = new ArrayList<>();
+            List<Factory> factoryList = factoryService.findFactoryStatusByLoginRole(getCurrentUser().getId().getId(),getCurrentUser().getTenantId().getId(),factoryId);
+            if(!CollectionUtils.isEmpty(factoryList)){
+                factoryList.forEach(i->{
+                    factoryVoList.add(new FactoryStatusVo(i));
+                });
+            }
+            return factoryVoList;
+        } catch (Exception e) {
+            log.info("根据登录人角色查询工厂状态异常", e);
+            throw handleException(e);
+        }
     }
 }

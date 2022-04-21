@@ -18,10 +18,7 @@ import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
@@ -241,7 +238,6 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         List<Menu> menuList = menuDao.findMenusByName(menuType,name);
         List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(new TenantMenu(tenantId,this.IS_BUTTON_FALSE));
 
-        Iterator<TenantMenu> it = tenantMenuList.iterator();
         if(!CollectionUtils.isEmpty(menuList)){
             if(!CollectionUtils.isEmpty(tenantMenuList)){
                 menuList.forEach(i->{
@@ -261,7 +257,49 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
                 });
             }
         }
+        //计算有子集的节点，是否半选或全选
+        this.checkAll(resultList);
         return resultList;
+    }
+
+    private void checkAll(List<MenuInfo> resultList){
+        Map<UUID,List<MenuInfo>> filterMap = new HashMap<>();
+        if(CollectionUtils.isNotEmpty(resultList)){
+            resultList.forEach(i->{
+                if(i.getParentId() != null){
+                    if(filterMap.containsKey(i.getParentId())){
+                        List<MenuInfo> menuInfos = new ArrayList<>(filterMap.get(i.getParentId()));
+                        menuInfos.add(i);
+                        filterMap.put(i.getParentId(),menuInfos);
+                    }else {
+                        filterMap.put(i.getParentId(),Arrays.asList(i));
+                    }
+                }
+            });
+        }
+        if(filterMap != null){
+            for (UUID key:filterMap.keySet()){
+                List<MenuInfo> menuInfos = filterMap.get(key);
+                Boolean checkAllFlag = true;
+                for (MenuInfo menuInfo :menuInfos){
+                    if(!menuInfo.getAssociatedTenant()){
+                        checkAllFlag = false;
+                        break;
+                    }
+                }
+                this.checkAll(resultList,key,checkAllFlag);
+            }
+        }
+    }
+
+    private void checkAll(List<MenuInfo> resultList,UUID key,Boolean checkAllFlag){
+        if(CollectionUtils.isNotEmpty(resultList)){
+            resultList.stream().forEach(f->{
+                if(f.getId().toString().equals(key.toString())){
+                    f.setCheckAllFlag(checkAllFlag);
+                }
+            });
+        }
     }
 
     /**

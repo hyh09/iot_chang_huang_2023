@@ -297,6 +297,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
         if (topicName.startsWith(MqttTopics.BASE_GATEWAY_API_TOPIC)) {
             if (gatewaySessionHandler != null) {
+                statisticsCount ++;
                 log.info("网关数据上报了！"+topicName);
                 log.info("当前是第"+statisticsCount+"次上报数据！");
                 handleGatewayPublishMsg(ctx, topicName, msgId, mqttMsg);
