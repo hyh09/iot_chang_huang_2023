@@ -1,11 +1,9 @@
-import { filter } from 'rxjs/operators';
-import { providerClass } from './../../components/widget/lib/maps/providers/index';
 import { Component, OnInit, Inject, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppState } from '@app/core/core.state';
 import { TenantMenuService } from '@app/core/http/custom/tenant-menu.service';
-import { TreeNodeOptions, UtilsService } from '@app/core/services/utils.service';
+import { UtilsService } from '@app/core/services/utils.service';
 import { MenuType } from '@app/shared/models/custom/menu-mng.models';
 import { DialogComponent, TenantInfo, TenantMenus } from '@app/shared/public-api';
 import { Store } from '@ngrx/store';
@@ -13,10 +11,6 @@ import { NzFormatBeforeDropEvent, NzFormatEmitEvent, NzTreeComponent, NzTreeNode
 import { Observable, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { ActionNotificationShow } from '@app/core/notification/notification.actions';
-
-export interface SetMenusDialogData {
-  
-}
 
 @Component({
   selector: 'tb-set-tenant-menus',
