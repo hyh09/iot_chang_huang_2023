@@ -120,6 +120,10 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     //是否只查网关  默认否
     private Boolean onlyGatewayFlag = false;
     private Boolean deviceFlg=false;
+    @ApiModelProperty("是否过滤设备图片")
+    private Boolean filterPictureFlag = false;
+    @ApiModelProperty("是否过滤设备图标")
+    private Boolean filterIconFlag = false;
     /**********************************以上是非数据库字段***************************************/
 
 
