@@ -142,15 +142,16 @@ export class FactoryMngService {
   // 自定义查询设备列表
   public getDevices(params: {
     name?: string; factoryId?: string; dictDeviceId?: string; workshopId?: string; productionLineId?: string;
-    factoryName?: string; workshopName?: string; productionLineName?: string; filterGatewayFlag?: boolean
-  }, config?: RequestConfig): Observable<ProdDevice[]> {
+    factoryName?: string; workshopName?: string; productionLineName?: string; filterGatewayFlag?: boolean;
+  }, filterImg = false, config?: RequestConfig): Observable<ProdDevice[]> {
     let queryStr: string[] = [];
     if (params) {
       Object.keys(params).forEach(key => {
         queryStr.push(`${key}=${params[key]}`);
       });
     }
-    return this.http.get<ProdDevice[]>(`/api/findDeviceListByCdn?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<ProdDevice[]>(`/api/findDeviceListByCdn?${queryStr.join('&')}&filterPictureFlag=${filterImg}&filterIconFlag=${filterImg}`,
+      defaultHttpOptionsFromConfig(config));
   }
 
   // 分配设备
