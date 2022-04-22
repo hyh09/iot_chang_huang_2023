@@ -434,6 +434,13 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                             }
                         }
                     }
+                    //是否过滤图片
+                    if(device.getFilterIconFlag()){
+                        deviceBo.setIcon(null);
+                    }
+                    if(device.getFilterPictureFlag()){
+                        deviceBo.setPicture(null);
+                    }
                     resultList.add(deviceBo);
                 }
             }
