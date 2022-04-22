@@ -33,7 +33,7 @@ import { EntityAction } from '@home/models/entity/entity-component.models';
 import { TenantTabsComponent } from '@home/pages/tenant/tenant-tabs.component';
 import { mergeMap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
-import { SetMenusDialogData, SetTenantMenusComponent } from './set-tenant-menus.component';
+import { SetTenantMenusComponent } from './set-tenant-menus.component';
 
 @Injectable()
 export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<TenantInfo>> {
@@ -104,7 +104,7 @@ export class TenantsTableConfigResolver implements Resolve<EntityTableConfig<Ten
     if ($event) {
       $event.stopPropagation();
     }
-    this.dialog.open<SetTenantMenusComponent, SetMenusDialogData, TenantMenus>(SetTenantMenusComponent, {
+    this.dialog.open<SetTenantMenusComponent, any, TenantMenus>(SetTenantMenusComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
       data: tenant

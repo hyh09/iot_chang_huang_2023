@@ -147,6 +147,7 @@ export class TenantMenus extends Array<TenantMenu> {}
 
 export interface SysMenu extends CustomBaseData, TreeNodeOptions {
   associatedTenant: boolean;
+  checkAllFlag: boolean;
   code: string;
   level: number;
   menuIcon: string;

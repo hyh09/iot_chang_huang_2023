@@ -173,7 +173,6 @@ public class RTMonitorController extends BaseController {
     /**
      * 实时监控列表-设备列表
      */
-    @Deprecated
     @ApiOperation(value = "实时监控列表-设备列表", notes = "优先级为设备、产线、车间、工厂，如均为null则为未分配")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),

@@ -35,6 +35,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.sql.role.dao.TenantMenuRoleDao;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuDao;
 
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -299,7 +300,14 @@ public class JpaTenantMenuDao extends JpaAbstractSearchTextDao<TenantMenuEntity,
                     predicates.add(cb.equal(root.get("sysMenuId"),tenantMenu.getSysMenuId()));
                 }
             }
-            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            List<Order> orders = new ArrayList<>();
+            orders.add(cb.asc(root.get("parentId")));
+            orders.add(cb.asc(root.get("sort")));
+            query.orderBy(orders);
+            Predicate[] p = new Predicate[predicates.size()];
+
+            return query.where(cb.and(predicates.toArray(p))).getGroupRestriction();
+            //return cb.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         List<TenantMenuEntity> all = tenantMenuRepository.findAll(specification);
         if(CollectionUtils.isNotEmpty(all)){
