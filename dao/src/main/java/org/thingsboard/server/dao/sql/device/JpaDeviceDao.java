@@ -882,7 +882,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Device device = new Device();
         device.setTenantId(tenantId);
         device.setAllot(false);
-        return this.queryList(device);
+        List<Device> collect = this.queryList(device).stream().map(m -> {
+            m.setPicture(null);
+            return m;
+        }).collect(Collectors.toList());
+        return collect;
     }
 
     @Override
