@@ -184,6 +184,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.setProductionLineIds(productionLineIds);
         this.setTenantId(new TenantId(factory.getTenantId()));
         this.setName(factory.getDeviceName());
+        this.setFilterPictureFlag(true);
     }
 
     public Device(TenantId tenantId, String name){
