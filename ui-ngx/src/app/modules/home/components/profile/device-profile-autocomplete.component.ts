@@ -289,9 +289,9 @@ export class DeviceProfileAutocompleteComponent implements ControlValueAccessor,
 
   fetchDeviceProfiles(searchText?: string): Observable<Array<DeviceProfileInfo>> {
     this.searchText = searchText;
-    const pageLink = new PageLink(10, 0, searchText, {
-      property: 'name',
-      direction: Direction.ASC
+    const pageLink = new PageLink(9999999, 0, searchText, {
+      property: 'createdTime',
+      direction: Direction.DESC
     });
     return this.deviceProfileService.getDeviceProfileInfos(pageLink, this.transportType, {ignoreLoading: true}).pipe(
       catchError(() => of(emptyPageData<DeviceProfileInfo>())),
