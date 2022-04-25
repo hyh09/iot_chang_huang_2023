@@ -61,6 +61,8 @@ import org.thingsboard.server.dao.device.claim.ClaimResponse;
 import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
+import org.thingsboard.server.dao.hs.dao.FileEntity;
+import org.thingsboard.server.dao.hs.dao.FileRepository;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
@@ -104,6 +106,8 @@ public class DeviceController extends BaseController {
 
     @Autowired
     private RedisMessagePublish pub;
+    @Autowired
+    private FileRepository fileRepository;
 
 
     @ApiOperation("云对接查设备详情")
@@ -1047,14 +1051,64 @@ public class DeviceController extends BaseController {
     @ResponseBody
     public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
         List<DeviceVo> result = new ArrayList<>();
-        deviceQry.setTenantId(getCurrentUser().getTenantId().getId());
-        List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice(),null,null);
-        if(!CollectionUtils.isEmpty(deviceListByCdn)){
-            deviceListByCdn.forEach(i->{
-                result.add(new DeviceVo(i));
-            });
+        try {
+            deviceQry.setTenantId(getCurrentUser().getTenantId().getId());
+            List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice(),null,null);
+            if(!CollectionUtils.isEmpty(deviceListByCdn)){
+                for (Device device:deviceListByCdn){
+                    result.add(new DeviceVo(device));
+                }
+                //是否只查有设备模型的设备
+                if(deviceQry.getHasModel() != null && deviceQry.getHasModel()){
+                    result = this.findDeviceByHasModel(result);
+                }
+            }
+        } catch (ThingsboardException e) {
+            log.error("自定义条件查询设备列表异常-"+e.getMessage(),e);
+            e.printStackTrace();
         }
         return result;
+    }
+
+    /**
+     * 只查有设备模型的设备
+     * @param result
+     * @return
+     */
+    private List<DeviceVo> findDeviceByHasModel(List<DeviceVo> result)throws ThingsboardException{
+        try {
+            if(!CollectionUtils.isEmpty(result)){
+                List<DeviceVo> filterDevice = result.stream().filter(f -> f.getDictDeviceId() != null && StringUtils.isNotEmpty(f.getDictDeviceId().toString())).collect(Collectors.toList());
+                if(!CollectionUtils.isEmpty(filterDevice)){
+                    List<UUID> collect = filterDevice.stream().map(m -> m.getDictDeviceId()).collect(Collectors.toList());
+                    if(!CollectionUtils.isEmpty(collect)){
+                        collect = collect.stream().distinct().collect(Collectors.toList());
+                        List<FileEntity> deviceModelCountByDeviceIds = fileRepository.findDeviceModelByDictDeviceIds(collect);
+                        if(!CollectionUtils.isEmpty(deviceModelCountByDeviceIds)){
+                            Iterator<DeviceVo> iterator = result.iterator();
+                            while (iterator.hasNext()){
+                                DeviceVo deviceVo = iterator.next();
+                                Boolean HasModel = false;
+                                for (FileEntity i:deviceModelCountByDeviceIds) {
+                                    if(deviceVo.getDictDeviceId().toString().equals(i.getEntityId().toString())){
+                                        HasModel = true;
+                                        break;
+                                    }
+                                }
+                                if(!HasModel){
+                                    iterator.remove();
+                                }
+                            }
+                            return result;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("【查询设备模型异常】"+e.getMessage(),e);
+            throw new ThingsboardException("查询设备模型异常", ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+        return null;
     }
 
     @ApiOperation("查询设备字典下发的设备列表")

@@ -1,6 +1,5 @@
 package org.thingsboard.server.dao.hs.dao;
 
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -35,4 +34,7 @@ public interface FileRepository extends PagingAndSortingRepository<FileEntity, U
     List<FileEntity> findAllByTenantIdAndScopeOrderByCreatedTimeDesc(UUID tenantId, String scope);
 
     void deleteAllByTenantIdAndScopeAndEntityId(UUID tenantId, String scope, UUID entityId);
+
+    @Query(value = "select f from FileEntity f where f.scope ='DICT_DEVICE_MODEL' and f.entityId in :dictDeviceIds group by f.entityId,f.id")
+    List<FileEntity> findDeviceModelByDictDeviceIds(@Param("dictDeviceIds") List<UUID> dictDeviceIds);
 }
