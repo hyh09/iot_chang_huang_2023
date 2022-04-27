@@ -228,6 +228,14 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
 
   configureCellActions(deviceScope: string): Array<CellActionDescriptor<DeviceInfo>> {
     const actions: Array<CellActionDescriptor<DeviceInfo>> = [];
+    if (this.utils.hasPermission('device-mng.distribute-device')) {
+      actions.push({
+        name: this.translate.instant('device-mng.distribute-device'),
+        mdiIcon: 'mdi:distribute',
+        isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
+        onAction: ($event, entity) => this.distributeDevice($event, [entity.id], entity.additionalInfo && entity.additionalInfo.gateway)
+      });
+    }
     if (deviceScope === 'tenant') {
       // actions.push(
         // {
@@ -249,14 +257,6 @@ export class DevicesTableConfigResolver implements Resolve<EntityTableConfig<Dev
         //   onAction: ($event, entity) => this.unassignFromCustomer($event, entity)
         // },
       // );
-      if (this.utils.hasPermission('device-mng.distribute-device')) {
-        actions.push({
-          name: this.translate.instant('device-mng.distribute-device'),
-          mdiIcon: 'mdi:distribute',
-          isEnabled: (entity) => (!entity.customerId || entity.customerId.id === NULL_UUID),
-          onAction: ($event, entity) => this.distributeDevice($event, [entity.id], entity.additionalInfo && entity.additionalInfo.gateway)
-        });
-      }
       actions.push(
       // {
       //   name: this.translate.instant('device.make-private'),

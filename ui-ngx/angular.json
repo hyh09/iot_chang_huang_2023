@@ -216,7 +216,7 @@
               "browserTarget": "thingsboard:build:changsheng"
             },
             "xinxiang": {
-              "browserTarget": "thingsboard:build:changsheng"
+              "browserTarget": "thingsboard:build:xinxiang"
             }
           }
         },
