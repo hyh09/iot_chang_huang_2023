@@ -24,7 +24,7 @@ package:
       - ui-ngx/node_modules
     # keep cache across branch
     key: "${CI_COMMIT_REF_SLUG}"
-  image: 47.110.145.204:8084/huansiyl/jdk11-mvn-node-docker
+  image: 47.110.145.204:8084/buildenv/jdk11-mvn-node-docker
   retry: 1
   tags:
     - hz-k8s-iot-test
@@ -71,9 +71,9 @@ deploy:
     - export KUBECONFIG=/.kube/config
   script:
     - echo "重启deployment"
-    - cd ./k8s
-    - bash ./k8s-deploy-thirdparty.sh
-    - bash ./k8s-deploy-resources.sh
+#    - cd ./k8s
+#    - bash ./k8s-deploy-thirdparty.sh
+#    - bash ./k8s-deploy-resources.sh
     - kubectl version
     - kubectl rollout restart deployment tb-web-ui
     - kubectl rollout restart deployment tb-node
