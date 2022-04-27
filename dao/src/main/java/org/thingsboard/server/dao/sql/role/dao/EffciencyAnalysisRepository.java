@@ -298,7 +298,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sqlAll.append(sonSql01);
         if(vo.getType().equals("0"))
         {
-            sqlAll.append(" and   d1.flg = true");
+            sqlAll.append(DEVICE_FLG_TRUE);
         }
         sqlAll.append(orderSql).append(" limit 10");
         List<CensusSqlByDayEntity>   list  = querySql(sqlAll.toString(),param, "censusSqlByDayEntity_02");
