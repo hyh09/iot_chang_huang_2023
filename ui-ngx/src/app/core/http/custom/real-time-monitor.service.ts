@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
 import { AuthService } from "@app/core/auth/auth.service";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
-import { DevcieHistoryHeader, DeviceDetails, DevicePropHistory, RealTimeData, RelatedParams } from "@app/shared/models/custom/device-monitor.models";
+import { AlarmTimesListItem, DevcieHistoryHeader, DeviceDetails, DeviceOnlineOverview, DevicePageData, DevicePropHistory, RealTimeData, RelatedParams } from "@app/shared/models/custom/device-monitor.models";
 import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
 import { PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
@@ -50,6 +50,39 @@ export class RealTimeMonitorService {
       });
     }
     return this.http.get<RealTimeData>(`/api/deviceMonitor/rtMonitor/device${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取实时监控设备列表
+  public getRealTimeDevices(pageLink: PageLink, params: FactoryTreeNodeIds, config?: RequestConfig): Observable<DevicePageData> {
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get<DevicePageData>(`/api/deviceMonitor/rtMonitor/devices${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取实时监控设备在线离线数量
+  public getRealTimeOnlineOverview(params: FactoryTreeNodeIds, config?: RequestConfig): Observable<DeviceOnlineOverview> {
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get<DeviceOnlineOverview>(`/api/deviceMonitor/rtMonitor/device/onlineStatus?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取实时监控设备报警统计
+  public getRealTimeAlarmStatistics(params: FactoryTreeNodeIds, config?: RequestConfig): Observable<AlarmTimesListItem[]> {
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get<AlarmTimesListItem[]>(`/api/deviceMonitor/rtMonitor/device/alarm/statistics?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备详情数据
