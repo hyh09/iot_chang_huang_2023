@@ -26,7 +26,7 @@
       [pageSize]="pageLink.pageSize"
       hidePageSize
       showFirstLastButtons
-      (page)="pageLink.page = $event.pageIndex; fetchData();"
+      (page)="pageLink.page = $event.pageIndex; getDevices();"
     ></mat-paginator>
   </div>
   <div fxLayout="column" fxLayoutGap="16px" class="right-content">
