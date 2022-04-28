@@ -76,10 +76,10 @@ deploy:
 #    - bash ./k8s-deploy-thirdparty.sh
 #    - bash ./k8s-deploy-resources.sh
     - kubectl version
-    - kubectl rollout restart deployment tb-web-ui
-    - kubectl rollout restart deployment tb-node
+    - kubectl rollout restart deployment tb-web-ui -n hsyl-iot
+    - kubectl rollout restart deployment tb-node -n hsyl-iot
   only:
     - dev
   after_script:
-    - kubectl get pods -l app=tb-node
-    - kubectl get pods -l app=tb-web-ui
+    - kubectl get pods -l app=tb-node -n hsyl-iot
+    - kubectl get pods -l app=tb-web-ui -n hsyl-iot
