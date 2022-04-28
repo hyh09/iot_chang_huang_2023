@@ -59,14 +59,24 @@ export class RealTimeMonitorComponent implements OnDestroy {
       }
       this.factoryInfo = factoryInfo;
     }
-    this.realTimeMonitorService.getRealTimeData(this.pageLink, this.factoryInfo).subscribe(res => {
-      this.totalDevices = res.allDeviceCount || 0;
-      this.deviceList = res.devicePageData.data || [];
+    this.getDevices();
+    this.getOnlineOverview();
+    this.getAlarmStatistics();
+  }
+
+  getDevices() {
+    this.realTimeMonitorService.getRealTimeDevices(this.pageLink, this.factoryInfo).subscribe(res => {
+      this.deviceList = res.data || [];
+      this.totalDevices = res.totalElements || 0;
+    });
+  }
+
+  getOnlineOverview() {
+    this.realTimeMonitorService.getRealTimeOnlineOverview(this.factoryInfo).subscribe(res => {
       this.runStateData = {
         onLineDeviceCount: res.onLineDeviceCount || 0,
         offLineDeviceCount: res.offLineDeviceCount || 0
       }
-      this.alarmTimesList = res.alarmTimesList || [];
       this.realTimeMonitorService.switchDevices(res.deviceIdList, true);
       this.realTimeMonitorService.subscribe(res.deviceIdList || [], ({ deviceId, isActive }) => {
         if (deviceId === undefined || isActive === undefined) {
@@ -82,6 +92,12 @@ export class RealTimeMonitorComponent implements OnDestroy {
           };
         }
       }, true);
+    });
+  }
+
+  getAlarmStatistics() {
+    this.realTimeMonitorService.getRealTimeAlarmStatistics(this.factoryInfo).subscribe(res => {
+      this.alarmTimesList = res || [];
     });
   }
 

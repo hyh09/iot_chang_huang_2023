@@ -53,13 +53,16 @@ export interface DevicePageData {
   totalPages: number;
 }
 
-export interface RealTimeData {
-  alarmTimesList: AlarmTimesListItem[];
+export interface DeviceOnlineOverview {
   allDeviceCount: number;
-  devicePageData: DevicePageData;
   deviceIdList: string[];
   offLineDeviceCount: number;
   onLineDeviceCount: number;
+}
+
+export interface RealTimeData extends DeviceOnlineOverview {
+  alarmTimesList: AlarmTimesListItem[];
+  devicePageData: DevicePageData;
 }
 
 export interface DeviceBaseInfo {
