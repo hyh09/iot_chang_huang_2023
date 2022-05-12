@@ -139,6 +139,7 @@ public class FileController extends BaseController {
     public void downloadFileStreaming(@RequestParam("id") String id, HttpServletResponse response) throws ThingsboardException, IOException {
         var fileInfo = this.fileService.getFileInfo(getTenantId(), id);
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileInfo.getFileName(), StandardCharsets.UTF_8));
+        response.addHeader("cache-control", "max-age=25200000");
         try (InputStream is = new FileInputStream(fileInfo.getLocation()); OutputStream os = response.getOutputStream();) {
             int read;
             byte[] bytes = new byte[4096];
