@@ -32,6 +32,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     public static final Boolean IS_BUTTON_TRUE = true;
     public static final Boolean IS_BUTTON_FALSE = false;
     public static final int ONE = 1;
+    public static final int ZERO = 0;
     public static final String XTCD = "XTCD"; //系统菜单首字母
 
     private final MenuDao menuDao;
@@ -236,7 +237,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         List<MenuInfo> resultList = new ArrayList<>();
 
         List<Menu> menuList = menuDao.findMenusByName(menuType,name);
-        List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(new TenantMenu(tenantId,this.IS_BUTTON_FALSE));
+        List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(new TenantMenu(tenantId,this.IS_BUTTON_FALSE,menuType));
 
         if(!CollectionUtils.isEmpty(menuList)){
             if(!CollectionUtils.isEmpty(tenantMenuList)){
@@ -265,14 +266,22 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     private void checkAll(List<MenuInfo> resultList){
         Map<UUID,List<MenuInfo>> filterMap = new HashMap<>();
         if(CollectionUtils.isNotEmpty(resultList)){
-            resultList.forEach(i->{
-                if(i.getParentId() != null){
-                    if(filterMap.containsKey(i.getParentId())){
+            resultList.forEach(i-> {
+                if (i.getParentId() != null) {
+                    if (filterMap.containsKey(i.getParentId())) {
                         List<MenuInfo> menuInfos = new ArrayList<>(filterMap.get(i.getParentId()));
                         menuInfos.add(i);
-                        filterMap.put(i.getParentId(),menuInfos);
-                    }else {
-                        filterMap.put(i.getParentId(),Arrays.asList(i));
+                        filterMap.put(i.getParentId(), menuInfos);
+                    } else {
+                        filterMap.put(i.getParentId(), Arrays.asList(i));
+                    }
+                } else if (i.getLevel() == ZERO) {
+                    if (filterMap.containsKey(i.getId())) {
+                        List<MenuInfo> menuInfos = new ArrayList<>(filterMap.get(i.getId()));
+                        menuInfos.add(i);
+                        filterMap.put(i.getId(), menuInfos);
+                    } else {
+                        filterMap.put(i.getId(), Arrays.asList(i));
                     }
                 }
             });
