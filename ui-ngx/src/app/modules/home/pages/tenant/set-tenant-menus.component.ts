@@ -44,6 +44,8 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
   pcTenantOriginMenuIds: string[] = [];
   appTenantOriginMenuIds: string[] = [];
 
+  saving: boolean = false;
+
   constructor(
     protected store: Store<AppState>,
     protected router: Router,
@@ -231,9 +233,11 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
   }
 
   save() {
+    this.saving = true;
     const pcList = this.pcTenantTree.getTreeNodes().map(node => (node.origin));
     const appList = this.appTenantTree.getTreeNodes().map(node => (node.origin));
     this.tenantMenuService.saveTenantMenus(pcList, appList, this.tenantInfo.id.id).subscribe(() => {
+      this.saving = false;
       this.dialogRef.close(null);
       this.store.dispatch(new ActionNotificationShow({
         message: this.translate.instant('tenant.set-tenant-menus-success'),

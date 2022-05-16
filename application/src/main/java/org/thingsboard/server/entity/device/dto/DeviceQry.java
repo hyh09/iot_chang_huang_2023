@@ -22,6 +22,9 @@ public class DeviceQry extends AbstractDevice{
     @ApiModelProperty("是否只查有设备模型的设备")
     private Boolean hasModel = false;
 
+    @ApiModelProperty("是否查有设备场景的设备")
+    private Boolean hasScene = false;
+
     @Override
     public Device toDevice() {
         Device device = super.toDevice();

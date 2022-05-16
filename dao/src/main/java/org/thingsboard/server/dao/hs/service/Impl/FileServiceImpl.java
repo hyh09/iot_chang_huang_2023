@@ -1,12 +1,14 @@
 package org.thingsboard.server.dao.hs.service.Impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.common.util.ThingsBoardThreadFactory;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -31,6 +33,7 @@ import javax.annotation.PreDestroy;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -288,6 +291,23 @@ public class FileServiceImpl extends AbstractEntityService implements FileServic
         Path tempFilePath = this.packageTempFileLocation(tenantId, guid + chunk);
         this.writeFile(file, tempFilePath);
         return this.uploadMultiPartFile(tenantId, guid, checksum, checksumAlgorithm, chunks, fileName);
+    }
+
+    /**
+     * 过滤没有设备场景的设备列表
+     *
+     * @param tenantId 租户Id
+     * @param devices  设备列表
+     * @return 设备列表
+     */
+    @Override
+    public List<Device> filterDeviceSceneDevices(TenantId tenantId, List<Device> devices) {
+        return devices.stream()
+                .map(v-> CompletableFuture.supplyAsync(()->ImmutablePair.of(v, this.getFileInfoByScopeAndEntityId(tenantId, FileScopeEnum.DEVICE_SCENE, v.getId().getId()))))
+                .map(CompletableFuture::join)
+                .filter(v->v.getRight() != null)
+                .map(ImmutablePair::getLeft)
+                .collect(Collectors.toList());
     }
 
     /**

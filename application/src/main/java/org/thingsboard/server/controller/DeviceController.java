@@ -63,7 +63,9 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.dao.FileEntity;
 import org.thingsboard.server.dao.hs.dao.FileRepository;
+import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
+import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.util.ReflectionUtils;
@@ -108,6 +110,9 @@ public class DeviceController extends BaseController {
     private RedisMessagePublish pub;
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private FileService fileService;
 
 
     @ApiOperation("云对接查设备详情")
@@ -1051,9 +1056,13 @@ public class DeviceController extends BaseController {
     @ResponseBody
     public List<DeviceVo> findDeviceListByCdn(DeviceQry deviceQry) throws ThingsboardException{
         List<DeviceVo> result = new ArrayList<>();
+        var tenantId = getTenantId();
         try {
             deviceQry.setTenantId(getCurrentUser().getTenantId().getId());
             List<Device> deviceListByCdn = deviceService.findDeviceListByCdn(deviceQry.toDevice(),null,null);
+            if (deviceQry.getHasScene() && deviceListByCdn != null && !deviceListByCdn.isEmpty())
+                deviceListByCdn = this.fileService.filterDeviceSceneDevices(tenantId, deviceListByCdn);
+
             if(!CollectionUtils.isEmpty(deviceListByCdn)){
                 for (Device device:deviceListByCdn){
                     result.add(new DeviceVo(device));
