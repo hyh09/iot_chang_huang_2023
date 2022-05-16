@@ -61,9 +61,10 @@ public class TenantMenu{
         this.id = id.getId();
     }
 
-    public TenantMenu(UUID tenantId,Boolean isButton) {
+    public TenantMenu(UUID tenantId,Boolean isButton, String menuType) {
         this.tenantId = tenantId;
         this.isButton = isButton;
+        this.menuType = menuType;
     }
 
     public void updTenantMenu(TenantMenu tenantMenu){
