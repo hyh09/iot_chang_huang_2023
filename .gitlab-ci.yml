@@ -35,7 +35,7 @@ package:
     - mvn $MAVEN_CLI_OPTS clean install -pl tb-node -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
     - mvn $MAVEN_CLI_OPTS clean install -pl web-ui -Dmaven.test.skip=true -Ddockerfile.skip=false -f msa/pom.xml
   only:
-    - dev
+    - test
   after_script:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
@@ -53,7 +53,7 @@ push:
     - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
     - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
   only:
-    - dev
+    - test
   after_script:
     - echo "镜像打包完毕,镜像如下:"
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
@@ -79,7 +79,7 @@ deploy:
     - kubectl rollout restart deployment tb-web-ui -n hsyl-iot
     - kubectl rollout restart deployment tb-node -n hsyl-iot
   only:
-    - dev
+    - test
   after_script:
     - kubectl get pods -l app=tb-node -n hsyl-iot
     - kubectl get pods -l app=tb-web-ui -n hsyl-iot
