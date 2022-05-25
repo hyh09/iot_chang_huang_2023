@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.menu.MenuId;
@@ -32,6 +31,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     public static final Boolean IS_BUTTON_TRUE = true;
     public static final Boolean IS_BUTTON_FALSE = false;
     public static final int ONE = 1;
+    public static final int ZERO = 0;
     public static final String XTCD = "XTCD"; //系统菜单首字母
 
     private final MenuDao menuDao;
@@ -103,15 +103,18 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     @Override
     public Menu updateMenu(Menu menu)  throws ThingsboardException{
         log.trace("Executing updateMenu [{}]", menu);
-        /**按钮名称、lang_key、path、icon修改，变更租户菜单按钮**/
+        /**名称、lang_key、path、icon、父级菜单修改，都要变更租户菜单**/
         Boolean updFalg = false;  //是否需要变更
+        Boolean tenantMenuParentId = false; //租户菜单是否变更父级菜单
+
         Menu menuById = menuDao.getMenuById(menu.getId());
         if(menuById != null){
-            if(menuById.getIsButton()){
-                if(menuById.getParentId() != null && menu.getParentId() != null
-                        && !menuById.getParentId().toString().equals(menu.getParentId().toString())){
-                    throw new ThingsboardException("按钮不允许变更父级菜单", ThingsboardErrorCode.FAIL_VIOLATION);
-                }
+            if((menuById.getParentId() == null && menu.getParentId() != null)
+                    || (menuById.getParentId() != null && menu.getParentId() == null)
+                    || (StringUtils.isNotEmpty(menuById.getParentId()+"") && StringUtils.isNotEmpty(menu.getParentId()+"") && !(menuById.getParentId()+"").equals(menu.getParentId()+""))
+            ){
+                updFalg = true;
+                tenantMenuParentId = true;
             }
             if((menuById.getName() != null && menu.getName() == null)
                     || (menuById.getName() == null && menu.getName() != null)
@@ -153,6 +156,9 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
                         if(menu.getIsButton()){
                             tenantMenu.setTenantMenuName(menu.getName());
                         }
+                        if(tenantMenuParentId){
+                            this.updateTenantMenuParentId(tenantMenu,menu.getParentId());
+                        }
                         tenantMenu.setSysMenuName(menu.getName());
                         tenantMenu.setSysMenuCode(menu.getCode());
                         tenantMenu.setLangKey(menu.getLangKey());
@@ -168,6 +174,16 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
             }
         }
         return menuDao.saveMenu(menu);
+    }
+
+    private void updateTenantMenuParentId(TenantMenu tenantMenu,UUID sysMenuParentId){
+        TenantMenu tenantMenuQry = new TenantMenu();
+        tenantMenuQry.setSysMenuId(sysMenuParentId);
+        tenantMenuQry.setTenantId(tenantMenu.getTenantId());
+        List<TenantMenu> allByCdn = tenantMenuDao.findAllByCdn(tenantMenuQry);
+        if(CollectionUtils.isNotEmpty(allByCdn) && allByCdn.get(0).getId() != null){
+            tenantMenu.setParentId(allByCdn.get(0).getId());
+        }
     }
 
     /**
@@ -236,7 +252,7 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
         List<MenuInfo> resultList = new ArrayList<>();
 
         List<Menu> menuList = menuDao.findMenusByName(menuType,name);
-        List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(new TenantMenu(tenantId,this.IS_BUTTON_FALSE));
+        List<TenantMenu> tenantMenuList = tenantMenuDao.findAllByCdn(new TenantMenu(tenantId,this.IS_BUTTON_FALSE,menuType));
 
         if(!CollectionUtils.isEmpty(menuList)){
             if(!CollectionUtils.isEmpty(tenantMenuList)){
@@ -265,14 +281,22 @@ public class MenuServiceImpl extends AbstractEntityService implements MenuServic
     private void checkAll(List<MenuInfo> resultList){
         Map<UUID,List<MenuInfo>> filterMap = new HashMap<>();
         if(CollectionUtils.isNotEmpty(resultList)){
-            resultList.forEach(i->{
-                if(i.getParentId() != null){
-                    if(filterMap.containsKey(i.getParentId())){
+            resultList.forEach(i-> {
+                if (i.getParentId() != null) {
+                    if (filterMap.containsKey(i.getParentId())) {
                         List<MenuInfo> menuInfos = new ArrayList<>(filterMap.get(i.getParentId()));
                         menuInfos.add(i);
-                        filterMap.put(i.getParentId(),menuInfos);
-                    }else {
-                        filterMap.put(i.getParentId(),Arrays.asList(i));
+                        filterMap.put(i.getParentId(), menuInfos);
+                    } else {
+                        filterMap.put(i.getParentId(), Arrays.asList(i));
+                    }
+                } else if (i.getLevel() == ZERO) {
+                    if (filterMap.containsKey(i.getId())) {
+                        List<MenuInfo> menuInfos = new ArrayList<>(filterMap.get(i.getId()));
+                        menuInfos.add(i);
+                        filterMap.put(i.getId(), menuInfos);
+                    } else {
+                        filterMap.put(i.getId(), Arrays.asList(i));
                     }
                 }
             });
