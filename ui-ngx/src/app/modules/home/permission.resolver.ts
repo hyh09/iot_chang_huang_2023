@@ -66,13 +66,13 @@ export class PermissionResolver implements Resolve<Permissions>  {
       return {
         firstPath,
         menuSections: this.formatTree(menuSections, 'pages'),
-        homeSections: this.formatTree(homeSections, 'places'),
+        homeSections: this.formatTree(homeSections, 'places', true),
         menuBtnMap
       };
     }));
   }
 
-  private formatTree(data: { id?: string; parentId?: string; [key: string]: any }[], childrenKey = 'children') {
+  private formatTree(data: { id?: string; parentId?: string; [key: string]: any }[], childrenKey = 'children', isHomeSections = false) {
     const arr: any[] = [];
     const map = {};
     if (data) {
@@ -91,7 +91,21 @@ export class PermissionResolver implements Resolve<Permissions>  {
         } else {
           arr.push(item);
         }
-      })
+      });
+      if (isHomeSections) {
+        Object.keys(map).forEach(key => {
+          if (!map[key].parentId && map[key][childrenKey]?.length === 0) {
+            const item = {
+              ...map[key],
+              isLeaf: true,
+              parentId: map[key].id
+            };
+            delete item[childrenKey];
+            map[key][childrenKey].push(item);
+            map[key].isLeaf = false;
+          }
+        });
+      }
     }
     return arr;
   }
