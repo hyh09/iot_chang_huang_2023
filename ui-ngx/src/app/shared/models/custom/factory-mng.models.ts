@@ -89,6 +89,8 @@ export interface NotDistributedDevice extends CommonData {
   deviceProfileId: string;
   picture: string;
   rowType: FactoryRowType;
+  icon?: string;
+  logoImages?: string;
 }
 
 export interface FactoryMngList {

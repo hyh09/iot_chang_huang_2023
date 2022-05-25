@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.service;
 
 
 import org.springframework.web.multipart.MultipartFile;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
@@ -143,4 +144,13 @@ public interface FileService {
      * @return 文件Id
      */
     String saveMultipartFile(TenantId tenantId, String guid, String checksum, String checksumChunk, ChecksumAlgorithm checksumAlgorithm, int chunk, int chunks, String fileName, MultipartFile file) throws IOException, ThingsboardException;
+
+    /**
+     * 过滤没有设备场景的设备列表
+     *
+     * @param tenantId 租户Id
+     * @param devices 设备列表
+     * @return 设备列表
+     */
+    List<Device> filterDeviceSceneDevices(TenantId tenantId, List<Device> devices);
 }

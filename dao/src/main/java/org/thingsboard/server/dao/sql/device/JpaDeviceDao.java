@@ -434,6 +434,13 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                             }
                         }
                     }
+                    //是否过滤图片
+                    if(device.getFilterIconFlag()){
+                        deviceBo.setIcon(null);
+                    }
+                    if(device.getFilterPictureFlag()){
+                        deviceBo.setPicture(null);
+                    }
                     resultList.add(deviceBo);
                 }
             }
@@ -875,7 +882,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Device device = new Device();
         device.setTenantId(tenantId);
         device.setAllot(false);
-        return this.queryList(device);
+        List<Device> collect = this.queryList(device).stream().map(m -> {
+            m.setPicture(null);
+            return m;
+        }).collect(Collectors.toList());
+        return collect;
     }
 
     @Override
