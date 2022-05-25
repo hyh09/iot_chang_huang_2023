@@ -10,27 +10,26 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content>
-    <mat-tab-group>
-      <mat-tab label="PC">
+    <nz-tabset [nzSelectedIndex]="selectedIndex" (nzSelectedIndexChange)="selectedIndex = $event; cd.detectChanges();">
+      <nz-tab nzTitle="{{ 'menu-mng.pc-menu' | translate }}">
         <div fxLayout="row" fxLayoutGap="16px" class="menus-settings-wrapper">
           <div class="menus-wrapper">
             <div class="tree-title">{{ 'tenant.sys-menus' | translate }}</div>
             <div class="tree-wrapper">
-              <mat-form-field>
-                <mat-label>{{ 'tenant.search-sys-menus' | translate }}</mat-label>
-                <input type="text" matInput [(ngModel)]="pcSysSearch" />
-                <button *ngIf="pcSysSearch" matSuffix mat-icon-button aria-label="Clear" (click)="pcSysSearch = ''">
-                  <mat-icon class="material-icons">close</mat-icon>
-                </button>
-              </mat-form-field>
+              <nz-input-group [nzSuffix]="suffixIcon" class="tree-search">
+                <input type="text" nz-input placeholder="{{ 'tenant.search-sys-menus' | translate }}" [(ngModel)]="pcSysSearch" />
+              </nz-input-group>
+              <ng-template #suffixIcon>
+                <i nz-icon nzType="search"></i>
+              </ng-template>
               <nz-tree
                 #pcSysTree
                 [nzData]="pcSysMenus"
-                [nzCheckedKeys]="sysDefaultCheckedKeys"
                 [nzSearchValue]="pcSysSearch"
                 nzVirtualHeight="300px"
                 nzCheckable
                 nzMultiple
+                [nzCheckedKeys]="sysDefaultCheckedKeys"
                 (nzCheckBoxChange)="sysCheckChange($event, menuType.PC)"
               ></nz-tree>
             </div>
@@ -45,14 +44,13 @@
           </div>
           <div class="menus-wrapper">
             <div class="tree-title">{{ 'tenant.tenant-menus' | translate }}</div>
-            <div class="tree-wrapper">
-              <mat-form-field>
-                <mat-label>{{ 'tenant.search-tenant-menus' | translate }}</mat-label>
-                <input type="text" matInput [(ngModel)]="pcTenantSearch" />
-                <button *ngIf="pcTenantSearch" matSuffix mat-icon-button aria-label="Clear" (click)="pcTenantSearch = ''">
-                  <mat-icon class="material-icons">close</mat-icon>
-                </button>
-              </mat-form-field>
+            <div *ngIf="selectedIndex === 0 || submitting" class="tree-wrapper">
+              <nz-input-group [nzSuffix]="suffixIcon" class="tree-search">
+                <input type="text" nz-input placeholder="{{ 'tenant.search-tenant-menus' | translate }}" [(ngModel)]="pcTenantSearch" />
+              </nz-input-group>
+              <ng-template #suffixIcon>
+                <i nz-icon nzType="search"></i>
+              </ng-template>
               <nz-tree
                 #pcTenantTree
                 [nzData]="pcTenantMenus"
@@ -67,19 +65,18 @@
             </div>
           </div>
         </div>
-      </mat-tab>
-      <mat-tab label="App">
+      </nz-tab>
+      <nz-tab nzTitle="{{ 'menu-mng.app-menu' | translate }}">
         <div fxLayout="row" fxLayoutGap="16px" class="menus-settings-wrapper">
           <div class="menus-wrapper">
             <div class="tree-title">{{ 'tenant.sys-menus' | translate }}</div>
             <div class="tree-wrapper">
-              <mat-form-field>
-                <mat-label>{{ 'tenant.search-sys-menus' | translate }}</mat-label>
-                <input type="text" matInput [(ngModel)]="appSysSearch" />
-                <button *ngIf="appSysSearch" matSuffix mat-icon-button aria-label="Clear" (click)="appSysSearch = ''">
-                  <mat-icon class="material-icons">close</mat-icon>
-                </button>
-              </mat-form-field>
+              <nz-input-group [nzSuffix]="suffixIcon" class="tree-search">
+                <input type="text" nz-input placeholder="{{ 'tenant.search-sys-menus' | translate }}" [(ngModel)]="appSysSearch" />
+              </nz-input-group>
+              <ng-template #suffixIcon>
+                <i nz-icon nzType="search"></i>
+              </ng-template>
               <nz-tree
                 #appSysTree
                 [nzData]="appSysMenus"
@@ -87,6 +84,7 @@
                 nzVirtualHeight="300px"
                 nzCheckable
                 nzMultiple
+                [nzCheckedKeys]="sysDefaultCheckedKeys"
                 (nzCheckBoxChange)="sysCheckChange($event, menuType.APP)"
               ></nz-tree>
             </div>
@@ -101,14 +99,13 @@
           </div>
           <div class="menus-wrapper">
             <div class="tree-title">{{ 'tenant.tenant-menus' | translate }}</div>
-            <div class="tree-wrapper">
-              <mat-form-field>
-                <mat-label>{{ 'tenant.search-tenant-menus' | translate }}</mat-label>
-                <input type="text" matInput [(ngModel)]="appTenantSearch" />
-                <button *ngIf="appTenantSearch" matSuffix mat-icon-button aria-label="Clear" (click)="appTenantSearch = ''">
-                  <mat-icon class="material-icons">close</mat-icon>
-                </button>
-              </mat-form-field>
+            <div *ngIf="selectedIndex === 1 || submitting" class="tree-wrapper">
+              <nz-input-group [nzSuffix]="suffixIcon" class="tree-search">
+                <input type="text" nz-input placeholder="{{ 'tenant.search-tenant-menus' | translate }}" [(ngModel)]="appTenantSearch" />
+              </nz-input-group>
+              <ng-template #suffixIcon>
+                <i nz-icon nzType="search"></i>
+              </ng-template>
               <nz-tree
                 #appTenantTree
                 [nzData]="appTenantMenus"
@@ -123,8 +120,8 @@
             </div>
           </div>
         </div>
-      </mat-tab>
-    </mat-tab-group>
+      </nz-tab>
+    </nz-tabset>
   </div>
   <div mat-dialog-actions fxLayoutAlign="end center">
     <button
@@ -139,7 +136,7 @@
       mat-raised-button
       type="button"
       color="primary"
-      [disabled]="saving || (isLoading$ | async)"
+      [disabled]="submitting && (isLoading$ | async)"
       (click)="save()"
     >{{ 'action.confirm' | translate }}</button>
   </div>
