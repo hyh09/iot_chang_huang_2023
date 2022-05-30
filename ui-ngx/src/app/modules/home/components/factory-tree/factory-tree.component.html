@@ -14,6 +14,8 @@
   <nz-tree
     [nzData]="treeData"
     [nzSearchValue]="searchValue"
+    [nzHideUnMatched]="true"
+    [nzSearchFunc]="searchFunc"
     [nzVirtualHeight]="scrollHeight"
     [nzSelectedKeys]="selectedKeys"
     [nzExpandedKeys]="expandedKeys"
