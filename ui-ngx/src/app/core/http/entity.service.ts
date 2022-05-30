@@ -312,7 +312,7 @@ export class EntityService {
     const customerId = authUser.customerId;
     switch (entityType) {
       case EntityType.FACTORY:
-        pageLink.sortOrder.property = 'name';
+        pageLink.sortOrder.property = 'createdTime';
         entitiesObservable = this.factoryMngService.getAllFactories(pageLink.textSearch, config).pipe(map(res => {
           const arr: any[] = res || [];
           arr.forEach(item => (item.id = { entityType: EntityType.FACTORY, id: item.id }));
@@ -325,7 +325,7 @@ export class EntityService {
         }));
         break;
       case EntityType.WORKSHOP:
-        pageLink.sortOrder.property = 'name';
+        pageLink.sortOrder.property = 'createdTime';
         entitiesObservable = this.factoryMngService.getAllWorkShops('', '', pageLink.textSearch, config).pipe(map(res => {
           const arr: any[] = res || [];
           arr.forEach(item => (item.id = { entityType: EntityType.WORKSHOP, id: item.id }));
@@ -338,7 +338,7 @@ export class EntityService {
         }));
         break;
       case EntityType.PRODUCTION_LINE:
-        pageLink.sortOrder.property = 'name';
+        pageLink.sortOrder.property = 'createdTime';
         entitiesObservable = this.factoryMngService.getAllProdLines('', '', '', pageLink.textSearch, config).pipe(map(res => {
           const arr: any[] = res || [];
           arr.forEach(item => (item.id = { entityType: EntityType.PRODUCTION_LINE, id: item.id }));
@@ -351,11 +351,11 @@ export class EntityService {
         }));
         break;
       case EntityType.DEVICE:
-        pageLink.sortOrder.property = 'name';
+        pageLink.sortOrder.property = 'createdTime';
         if (authUser.authority === Authority.CUSTOMER_USER) {
           entitiesObservable = this.deviceService.getCustomerDeviceInfos(customerId, pageLink, subType, config);
         } else {
-          entitiesObservable = this.deviceService.getTenantDeviceInfos(pageLink, subType, config);
+          entitiesObservable = this.deviceService.getDeviceInfos(pageLink, { deviceName: pageLink.textSearch, type: subType }, config); // .getTenantDeviceInfos(pageLink, subType, config);
         }
         break;
       case EntityType.ASSET:
