@@ -8,6 +8,7 @@
     "build:prod": "ng build --prod --vendor-chunk",
     "build:changsheng": "ng build --prod --vendor-chunk -c changsheng",
     "build:xinxiang": "ng build --prod --vendor-chunk -c xinxiang",
+    "build:cambodia": "ng build --prod --vendor-chunk -c cambodia",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

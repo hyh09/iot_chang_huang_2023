@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, ChangeDetectorRef, ViewContainerRef, AfterViewInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AppState } from '@app/core/core.state';
@@ -17,7 +17,7 @@ import { ActionNotificationShow } from '@app/core/notification/notification.acti
   templateUrl: './set-tenant-menus.component.html',
   styleUrls: ['./set-tenant-menus.component.scss']
 })
-export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusComponent, TenantMenus> implements OnInit {
+export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusComponent, TenantMenus> implements OnInit, AfterViewInit {
 
   @ViewChild('pcSysTree') private pcSysTree: NzTreeComponent;
   @ViewChild('pcTenantTree') private pcTenantTree: NzTreeComponent;
@@ -44,7 +44,9 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
   pcTenantOriginMenuIds: string[] = [];
   appTenantOriginMenuIds: string[] = [];
 
-  saving: boolean = false;
+  selectedIndex = 0;
+
+  submitting: boolean = true;
 
   constructor(
     protected store: Store<AppState>,
@@ -53,7 +55,8 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     protected tenantMenuService: TenantMenuService,
     private translate: TranslateService,
     @Inject(MAT_DIALOG_DATA) protected tenantInfo: TenantInfo,
-    protected utils: UtilsService
+    protected utils: UtilsService,
+    public cd: ChangeDetectorRef
   ) {
     super(store, router, dialogRef);
   }
@@ -63,6 +66,12 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
     this.appTenantOriginMenuIds = [];
     this.getMenuList(MenuType.PC);
     this.getMenuList(MenuType.APP);
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.submitting = false;
+    }, 1);
   }
 
   getMenuList(menuType: MenuType) {
@@ -233,11 +242,12 @@ export class SetTenantMenusComponent extends DialogComponent<SetTenantMenusCompo
   }
 
   save() {
-    this.saving = true;
+    this.submitting = true;
+    this.cd.detectChanges();
     const pcList = this.pcTenantTree.getTreeNodes().map(node => (node.origin));
     const appList = this.appTenantTree.getTreeNodes().map(node => (node.origin));
     this.tenantMenuService.saveTenantMenus(pcList, appList, this.tenantInfo.id.id).subscribe(() => {
-      this.saving = false;
+      this.submitting = false;
       this.dialogRef.close(null);
       this.store.dispatch(new ActionNotificationShow({
         message: this.translate.instant('tenant.set-tenant-menus-success'),
