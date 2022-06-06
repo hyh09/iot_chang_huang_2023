@@ -94,6 +94,7 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
+    - mvn verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}
   allow_failure: true
   only:
     - merge_requests
