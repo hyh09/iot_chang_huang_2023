@@ -1778,5 +1778,4 @@
       <sonar.projectKey>hs-iot_iot-platform_AYE25JQxnQKN8hZXPdWD</sonar.projectKey>
       <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
     </properties>
-    <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
 </project>
