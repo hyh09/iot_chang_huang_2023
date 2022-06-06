@@ -156,81 +156,81 @@ public class UserRoleMenuImpl  implements UserRoleMenuSvc {
 
     }
 
-    @Override
-    public User save(User user, User user1)  {
-        if(user.getFactoryId() == null)
-        {
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 工厂id不能为空!");
-        }
-
-        if(user1.getTenantId() ==  null)
-        {
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 所属租户不能为空!");
-        }
-
-        UserVo  vo1 = new UserVo();
-        vo1.setEmail(user.getEmail());
-        if(checkSvc.checkValueByKey(vo1)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
-        }
-        UserVo  vo2 = new UserVo();
-        vo2.setPhoneNumber(user.getPhoneNumber());
-        if(checkSvc.checkValueByKey(vo2)){
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
-        }
-
-        //用户编码如果不传就
-        if(StringUtils.isNotEmpty(user.getUserCode()))
-        {
-            CodeVo  codeVo =  new CodeVo();
-            codeVo.setKey("1");
-         String    str = (String) checkSvc.queryCodeNew(codeVo,user1.getTenantId());
-          user.setUserCode(str);
-        }
-
-        String  encodePassword =   passwordEncoder.encode(DataConstants.DEFAULT_PASSWORD);
-        user.setTenantId(user1.getTenantId());
-        user.setUserCreator(user1.getUuidId().toString());
-        user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
-
-//         user.setAuthority(Authority.FACTORY_MANAGEMENT);
-
-        User  rmUser= userService.save(user,encodePassword);
-
-
-      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),user1.getTenantId().getId());
-        if(entityBy != null)
-        {
-            UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
-            entityRR.setUserId(rmUser.getUuidId());
-            entityRR.setTenantSysRoleId(entityBy.getId());
-            entityRR.setTenantId(rmUser.getTenantId().getId());
-            userMenuRoleService.saveEntity(entityRR);
-            return rmUser;
-        }
-
-        TenantSysRoleEntity entity = new TenantSysRoleEntity();
-        entity.setCreatedUser(user1.getUuidId());
-        entity.setUpdatedUser(user1.getUuidId());
-        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
-        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
-        entity.setTenantId(user1.getTenantId().getId());
-        //####备注: 改为租户可见
-//        entity.setFactoryId(user.getFactoryId());
-//        entity.setType(user.getType());
-
-        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
-
-        entity.setSystemTab("1");
-        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
-
-        UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
-        entityRR.setUserId(rmUser.getUuidId());
-        entityRR.setTenantSysRoleId(rmEntity.getId());
-        entityRR.setTenantId(rmUser.getTenantId().getId());
-        userMenuRoleService.saveEntity(entityRR);
-        return rmUser;
-    }
+//    @Override
+//    public User save(User user, User user1)  {
+//        if(user.getFactoryId() == null)
+//        {
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 工厂id不能为空!");
+//        }
+//
+//        if(user1.getTenantId() ==  null)
+//        {
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"创建工厂管理员 所属租户不能为空!");
+//        }
+//
+//        UserVo  vo1 = new UserVo();
+//        vo1.setEmail(user.getEmail());
+//        if(checkSvc.checkValueByKey(vo1)){
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"邮箱 ["+user.getEmail()+"]已经被占用!");
+//        }
+//        UserVo  vo2 = new UserVo();
+//        vo2.setPhoneNumber(user.getPhoneNumber());
+//        if(checkSvc.checkValueByKey(vo2)){
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"手机号["+user.getPhoneNumber()+"]已经被占用!!");
+//        }
+//
+//        //用户编码如果不传就
+//        if(StringUtils.isNotEmpty(user.getUserCode()))
+//        {
+//            CodeVo  codeVo =  new CodeVo();
+//            codeVo.setKey("1");
+//         String    str = (String) checkSvc.queryCodeNew(codeVo,user1.getTenantId());
+//          user.setUserCode(str);
+//        }
+//
+//        String  encodePassword =   passwordEncoder.encode(DataConstants.DEFAULT_PASSWORD);
+//        user.setTenantId(user1.getTenantId());
+//        user.setUserCreator(user1.getUuidId().toString());
+//        user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
+//
+////         user.setAuthority(Authority.FACTORY_MANAGEMENT);
+//
+//        User  rmUser= userService.save(user,encodePassword);
+//
+//
+//      TenantSysRoleEntity entityBy=  tenantSysRoleService.queryEntityBy(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode(),user1.getTenantId().getId());
+//        if(entityBy != null)
+//        {
+//            UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
+//            entityRR.setUserId(rmUser.getUuidId());
+//            entityRR.setTenantSysRoleId(entityBy.getId());
+//            entityRR.setTenantId(rmUser.getTenantId().getId());
+//            userMenuRoleService.saveEntity(entityRR);
+//            return rmUser;
+//        }
+//
+//        TenantSysRoleEntity entity = new TenantSysRoleEntity();
+//        entity.setCreatedUser(user1.getUuidId());
+//        entity.setUpdatedUser(user1.getUuidId());
+//        entity.setRoleCode(RoleEnums.FACTORY_ADMINISTRATOR.getRoleCode());
+//        entity.setRoleName(RoleEnums.FACTORY_ADMINISTRATOR.getRoleName());
+//        entity.setTenantId(user1.getTenantId().getId());
+//        //####备注: 改为租户可见
+////        entity.setFactoryId(user.getFactoryId());
+////        entity.setType(user.getType());
+//
+//        entity.setType(CreatorTypeEnum.TENANT_CATEGORY.getCode());
+//
+//        entity.setSystemTab("1");
+//        TenantSysRoleEntity rmEntity=  tenantSysRoleService.saveEntity(entity);
+//
+//        UserMenuRoleEntity entityRR = new UserMenuRoleEntity();
+//        entityRR.setUserId(rmUser.getUuidId());
+//        entityRR.setTenantSysRoleId(rmEntity.getId());
+//        entityRR.setTenantId(rmUser.getTenantId().getId());
+//        userMenuRoleService.saveEntity(entityRR);
+//        return rmUser;
+//    }
 
 
     @Override
