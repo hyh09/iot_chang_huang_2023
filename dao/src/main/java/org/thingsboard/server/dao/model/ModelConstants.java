@@ -666,6 +666,11 @@ public class ModelConstants {
         return "count(" + s + ")";
     }
 
+    public  static  String as(String s)
+    {
+        return  "  as "+s;
+    }
+
     public static String[] getFetchColumnNames(Aggregation aggregation) {
         switch (aggregation) {
             case NONE:
@@ -684,4 +689,12 @@ public class ModelConstants {
                 throw new RuntimeException("Aggregation type: " + aggregation + " is not supported!");
         }
     }
+
+
+
+
+    public  static   String STG_YIE_ID_DATA="stg/UserQuery.stg";
+    public  static  String USER_SQL_VO="getCountUserSqlByVo";
+
+
 }

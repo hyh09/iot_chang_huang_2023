@@ -475,12 +475,16 @@ public class UserController extends BaseController  {
             }
 
             UserVo  vo1 = new UserVo();
+            vo1.setTenantId(securityUser.getTenantId().getId());
             vo1.setEmail(user.getEmail());
+            vo1.setFactoryId(user.getFactoryId());
             if(checkSvc.checkValueByKey(vo1)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
             }
             UserVo  vo2 = new UserVo();
+            vo2.setTenantId(securityUser.getTenantId().getId());
             vo2.setPhoneNumber(user.getPhoneNumber());
+            vo2.setFactoryId(user.getFactoryId());
             if(checkSvc.checkValueByKey(vo2)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
@@ -722,12 +726,14 @@ public class UserController extends BaseController  {
         UserVo  vo1 = new UserVo();
         vo1.setUserId(user.getUuidId().toString());
         vo1.setEmail(user.getEmail());
+        vo1.setFactoryId(user.getFactoryId());
         if(checkSvc.checkValueByKey(vo1)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 这个邮箱 ["+user.getEmail()+"]已经被占用!");
         }
         UserVo  vo2 = new UserVo();
         vo2.setUserId(user.getUuidId().toString());
         vo2.setEmail(user.getPhoneNumber());
+        vo2.setFactoryId(user.getFactoryId());
         if(checkSvc.checkValueByKey(vo2)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"这个手机号:["+user.getPhoneNumber()+"]已经被占用!!");
         }
