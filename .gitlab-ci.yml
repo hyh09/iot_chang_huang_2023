@@ -99,6 +99,8 @@ sonarqube-check:
   script:
     - mvn verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}
   allow_failure: true
+  tags:
+    - hz-k8s-iot-test
   only:
     - merge_requests
     - develop
