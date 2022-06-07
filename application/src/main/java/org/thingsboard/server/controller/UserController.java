@@ -510,7 +510,7 @@ public class UserController extends BaseController  {
 
             }else {
                 user.setType(securityUser.getType());
-                user.setFactoryId(securityUser.getFactoryId());
+//                user.setFactoryId(securityUser.getFactoryId());
                 if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()){
                     user.setOperationType(OperationTypeEums.ROLE_NON_EDITABLE.getValue());
                     user.setUserLevel(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());
