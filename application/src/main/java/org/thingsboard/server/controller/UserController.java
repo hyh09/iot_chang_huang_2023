@@ -497,7 +497,7 @@ public class UserController extends BaseController  {
             user.setTenantId(tenantId);
             user.setUserCreator(securityUser.getId().toString());
 
-            if(user.getFactoryId()!= null && user.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
+            if(user.getFactoryId()!= null && securityUser.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
             {
                 log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
