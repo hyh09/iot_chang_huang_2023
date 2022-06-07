@@ -2,6 +2,7 @@ stages:
   - package
   - push
   - deploy
+  - sonarqube-check # 执行sonar代码分析
   
 variables:
   #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -42,7 +43,7 @@ package:
     - echo "删除无用镜像"
     - docker rmi -f `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
     
-# 打包并构建镜像
+# 打包并构建镜像2
 push:
   stage: push
   retry: 1
@@ -83,3 +84,25 @@ deploy:
   after_script:
     - kubectl get pods -l app=tb-node -n hsyl-iot
     - kubectl get pods -l app=tb-web-ui -n hsyl-iot
+
+# sonar配置
+sonarqube-check:
+  stage: sonarqube-check
+  image: 47.110.145.204:8084/buildenv/jdk11-mvn-node-docker:latest
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - mvn verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}
+  allow_failure: true
+  tags:
+    - hz-k8s-iot-test
+  only:
+    - merge_requests
+    - develop
+
+
