@@ -79,6 +79,17 @@ public class JpaUserDao extends JpaAbstractSearchTextDao<UserEntity, User> imple
         return DaoUtil.getData(userRepository.findByEmail(email));
     }
 
+    @Override
+    public List<User> findByEmailList(TenantId tenantId, String email) {
+        List<UserEntity> list = this.userRepository.findByEmailList(email);
+        return list.stream().map(DaoUtil::getData).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> findByPhoneNumberList(String phoneNumber) {
+        List<UserEntity> list = this.userRepository.findByPhoneNumberList(phoneNumber);
+        return list.stream().map(DaoUtil::getData).collect(Collectors.toList());
+    }
 
     /**
      *

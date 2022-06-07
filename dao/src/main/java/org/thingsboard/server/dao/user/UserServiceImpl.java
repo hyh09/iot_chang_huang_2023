@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,21 +47,25 @@ import org.thingsboard.server.common.data.security.event.UserAuthDataChangedEven
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import org.thingsboard.server.common.data.vo.PasswordVo;
 import org.thingsboard.server.common.data.vo.user.UpdateOperationVo;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.customer.CustomerDao;
 import org.thingsboard.server.dao.entity.AbstractEntityService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.service.PaginatedRemover;
 import org.thingsboard.server.dao.sql.user.UserCredentialsRepository;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantDao;
+import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.thingsboard.server.dao.service.Validator.*;
 
@@ -115,6 +120,41 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
         } else {
             return userDao.findByEmail(tenantId, email.toLowerCase());
         }
+    }
+
+    @Override
+    public User findUserByEmailAndfactoryId(TenantId tenantId, String email,String  factoryId) {
+        List<User>  userList= userDao.findByEmailList(tenantId,email);
+        if(CollectionUtils.isEmpty(userList))
+        {
+            return  null;
+        }
+        if(StringUtils.isEmpty(factoryId))
+        {
+           return userList.stream().filter(user -> (user.getFactoryId() == null)).findFirst().orElse(null);
+        }
+
+        return userList.stream().filter(user -> (user.getFactoryId()) != null)
+                .filter(user -> user.getFactoryId().toString().equals(factoryId))
+                .findFirst().orElse(null);
+
+    }
+
+    @Override
+    public User findByPhoneNumberAndFactoryId(String phoneNumber,String  factoryId) {
+        List<User>  userList= userDao.findByPhoneNumberList(phoneNumber);
+        if(CollectionUtils.isEmpty(userList))
+        {
+            return  null;
+        }
+        if(StringUtils.isEmpty(factoryId))
+        {
+            return userList.stream().filter(user -> (user.getFactoryId() == null)).findFirst().orElse(null);
+        }
+
+        return userList.stream().filter(user -> (user.getFactoryId()) != null)
+                .filter(user -> user.getFactoryId().toString().equals(factoryId))
+                .findFirst().orElse(null);
     }
 
     @Override
@@ -539,11 +579,11 @@ public class UserServiceImpl extends AbstractEntityService implements UserServic
                             break;
                     }
 
-                    User existentUserWithEmail = findUserByEmail(tenantId, user.getEmail());
-                    if (existentUserWithEmail != null && !isSameData(existentUserWithEmail, user)) {
-                        throw new DataValidationException("这个邮箱 '" + user.getEmail() + "' "
-                                + " 已经被占用!");
-                    }
+//                    User existentUserWithEmail = findUserByEmail(tenantId, user.getEmail());
+//                    if (existentUserWithEmail != null && !isSameData(existentUserWithEmail, user)) {
+//                        throw new DataValidationException("这个邮箱 '" + user.getEmail() + "' "
+//                                + " 已经被占用!");
+//                    }
                     if (!tenantId.getId().equals(ModelConstants.NULL_UUID)) {
                         Tenant tenant = tenantDao.findById(tenantId, user.getTenantId().getId());
                         if (tenant == null) {
