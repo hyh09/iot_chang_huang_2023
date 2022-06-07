@@ -43,7 +43,7 @@ package:
     - echo "删除无用镜像"
     - docker rmi -f `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
     
-# 打包并构建镜像
+# 打包并构建镜像2
 push:
   stage: push
   retry: 1
