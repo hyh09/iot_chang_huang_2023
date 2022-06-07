@@ -37,7 +37,14 @@ public interface UserRepository extends PagingAndSortingRepository<UserEntity, U
 
     UserEntity findByEmail(String email);
 
+    @Query(value ="SELECT u FROM UserEntity u WHERE u.email = :email " )
+    List<UserEntity> findByEmailList(@Param("email") String email);
+
     UserEntity  findByPhoneNumber(String phoneNumber);
+
+    @Query(value ="SELECT u FROM UserEntity u WHERE u.phoneNumber = :phoneNumber " )
+    List<UserEntity> findByPhoneNumberList(@Param("phoneNumber") String phoneNumber);
+
 
     @Query("SELECT u FROM UserEntity u WHERE u.tenantId = :tenantId " +
             "AND u.customerId = :customerId AND u.authority = :authority " +

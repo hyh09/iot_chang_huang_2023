@@ -50,6 +50,10 @@ public interface UserDao extends Dao<User>, TenantEntityDao {
      */
     User findByEmail(TenantId tenantId, String email);
 
+    List<User> findByEmailList(TenantId tenantId, String email);
+
+    List<User>  findByPhoneNumberList(String phoneNumber);
+
     User  findByPhoneNumber(String phoneNumber);
 
     /**
