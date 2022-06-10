@@ -1,9 +1,8 @@
 stages:
+  - sonarqube-check # 执行sonar代码分析
 #  - package
 #  - push
 #  - deploy
-  - sonarqube-check # 执行sonar代码分析
-  
 variables:
   #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   #MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
@@ -97,7 +96,7 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
-    - mvn verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}
+    - mvn verify  sonar:sonar -Ddockerfile.skip -Dmaven.test.skip=true   -Dsonar.branch.name=${CI_COMMIT_REF_NAME}
   allow_failure: true
   tags:
     - hz-k8s-iot-test
