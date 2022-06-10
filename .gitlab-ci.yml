@@ -1,7 +1,7 @@
 stages:
-  - package
-  - push
-  - deploy
+#  - package
+#  - push
+#  - deploy
   - sonarqube-check # 执行sonar代码分析
   
 variables:
