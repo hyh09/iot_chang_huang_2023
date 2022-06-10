@@ -102,6 +102,6 @@ sonarqube-check:
   tags:
     - hz-k8s-iot-test
   only:
-    - dev
+    - develop
 
 
