@@ -41,7 +41,7 @@ package:
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
     - echo "删除无用镜像"
     - docker rmi -f `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
-    
+
 # 打包并构建镜像2
 push:
   stage: push
@@ -64,7 +64,7 @@ deploy:
   retry: 1
   image:
     name: bitnami/kubectl:latest
-    entrypoint: [""]
+    entrypoint: [ "" ]
   tags:
     - hz-k8s-iot-test
   before_script:
@@ -72,9 +72,9 @@ deploy:
     - export KUBECONFIG=/.kube/config
   script:
     - echo "重启deployment"
-#    - cd ./k8s
-#    - bash ./k8s-deploy-thirdparty.sh
-#    - bash ./k8s-deploy-resources.sh
+    #    - cd ./k8s
+    #    - bash ./k8s-deploy-thirdparty.sh
+    #    - bash ./k8s-deploy-resources.sh
     - kubectl version
     - kubectl rollout restart deployment tb-web-ui -n hsyl-iot
     - kubectl rollout restart deployment tb-node -n hsyl-iot
@@ -86,8 +86,7 @@ deploy:
 
 # sonar配置
 sonarqube-check:
-  stage: sonarqube-check
-  image: 47.110.145.204:8084/buildenv/jdk11-mvn-node-docker:latest
+  image: maven:3.6.3-jdk-11
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
     GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
@@ -96,11 +95,10 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
-    - mvn verify  sonar:sonar -Ddockerfile.skip -Dmaven.test.skip=true   -Dsonar.branch.name=${CI_COMMIT_REF_NAME}
+    - mvn  --settings .m2/settings.xml verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}   -Dmaven.test.skip=true  -Dsonar.projectKey=hs-iot_iot-platform_AYE25JQxnQKN8hZXPdWD
   allow_failure: true
-  tags:
-    - hz-k8s-iot-test
   only:
     - develop
+
 
 
