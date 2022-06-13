@@ -43,6 +43,8 @@
         <pkg.copyInstallScripts>true</pkg.copyInstallScripts>
         <pkg.implementationTitle>ThingsBoard</pkg.implementationTitle>
         <pkg.mainClass>org.thingsboard.server.ThingsboardServerApplication</pkg.mainClass>
+        <sonar.projectKey>hs-iot_iot-platform_AYE25JQxnQKN8hZXPdWD</sonar.projectKey>
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
     </properties>
 
     <dependencies>
