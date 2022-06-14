@@ -1,7 +1,7 @@
 stages:
   - package
-  #- push
-  #- deploy
+  - push
+  - deploy
   - sonarqube-check # 执行sonar代码分析
 variables:
   #MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -41,48 +41,48 @@ package:
     - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
     - echo "删除无用镜像"
     - docker rmi -f `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
-#
-## 打包并构建镜像2
-#push:
-#  stage: push
-#  retry: 1
-#  tags:
-#    - hz-k8s-iot-test
-#  script:
-#    - echo "推送镜像"
-#    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
-#    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
-#  only:
-#    - test
-#  after_script:
-#    - echo "镜像打包完毕,镜像如下:"
-#    - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
-#
-## 部署到测试环境
-#deploy:
-#  stage: deploy
-#  retry: 1
-#  image:
-#    name: bitnami/kubectl:latest
-#    entrypoint: [ "" ]
-#  tags:
-#    - hz-k8s-iot-test
-#  before_script:
-#    - echo ${HS_CONFIG} | base64 -d > /.kube/config
-#    - export KUBECONFIG=/.kube/config
-#  script:
-#    - echo "重启deployment"
-#    #    - cd ./k8s
-#    #    - bash ./k8s-deploy-thirdparty.sh
-#    #    - bash ./k8s-deploy-resources.sh
-#    - kubectl version
-#    - kubectl rollout restart deployment tb-web-ui -n hsyl-iot
-#    - kubectl rollout restart deployment tb-node -n hsyl-iot
-#  only:
-#    - test
-#  after_script:
-#    - kubectl get pods -l app=tb-node -n hsyl-iot
-#    - kubectl get pods -l app=tb-web-ui -n hsyl-iot
+
+# 打包并构建镜像2
+push:
+  stage: push
+  retry: 1
+  tags:
+    - hz-k8s-iot-test
+  script:
+    - echo "推送镜像"
+    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
+    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
+  only:
+    - test
+  after_script:
+    - echo "镜像打包完毕,镜像如下:"
+    - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
+
+# 部署到测试环境
+deploy:
+  stage: deploy
+  retry: 1
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [ "" ]
+  tags:
+    - hz-k8s-iot-test
+  before_script:
+    - echo ${HS_CONFIG} | base64 -d > /.kube/config
+    - export KUBECONFIG=/.kube/config
+  script:
+    - echo "重启deployment"
+    #    - cd ./k8s
+    #    - bash ./k8s-deploy-thirdparty.sh
+    #    - bash ./k8s-deploy-resources.sh
+    - kubectl version
+    - kubectl rollout restart deployment tb-web-ui -n hsyl-iot
+    - kubectl rollout restart deployment tb-node -n hsyl-iot
+  only:
+    - test
+  after_script:
+    - kubectl get pods -l app=tb-node -n hsyl-iot
+    - kubectl get pods -l app=tb-web-ui -n hsyl-iot
 
 # sonar配置
 sonarqube-check:
