@@ -95,8 +95,10 @@ sonarqube-check:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
+  tags:
+    - hz-k8s-iot-test
   script:
-    - mvn  --settings .m2/settings.xml verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}   -Dmaven.test.skip=true  -Dsonar.projectKey=hs-iot_iot-platform_AYE25JQxnQKN8hZXPdWD
+    - mvn verify  sonar:sonar -Ddockerfile.skip -Dsonar.branch.name=${CI_COMMIT_REF_NAME}   -Dmaven.test.skip=true  -Dsonar.projectKey=hs-iot_iot-platform_AYE25JQxnQKN8hZXPdWD
   allow_failure: true
   only:
     - develop
