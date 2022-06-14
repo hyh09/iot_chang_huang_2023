@@ -23,7 +23,7 @@
     <version>3.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Thingsboard</name>
+    <name>iot-platform</name>
 
     <inceptionYear>2016</inceptionYear>
 
