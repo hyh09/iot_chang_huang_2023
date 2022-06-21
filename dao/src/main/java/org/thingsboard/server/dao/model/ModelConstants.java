@@ -638,6 +638,35 @@ public class ModelConstants {
     public static final String DOUBLE_VALUE_COLUMN = "dbl_v";
     public static final String JSON_VALUE_COLUMN = "json_v";
 
+    public static final String LONG_VALUE_MAX_TIME_COLUMN = "maxtime";
+    public static final String LONG_VALUE_MIN_TIME_COLUMN = "mintime";
+
+
+    /**
+     * Abstract
+     */
+    public static final String ABSTRACT_ENTITY_ID_COLUMN = "entity_id";
+    public static final String ABSTRACT_TS_COLUMN = TS_COLUMN;
+    public static final String ABSTRACT_DATE_COLUMN="date";
+    public static final String ABSTRACT_WATER_ADDED_VALUE_COLUMN = "water_added_value";
+    public static final String ABSTRACT_WATER_FIRST_VALUE_COLUMN = "water_first_value";
+    public static final String ABSTRACT_WATER_VALUE_COLUMN = "water_value";
+    public static final String ABSTRACT_WATER_FIRST_TIME_COLUMN = "water_first_time";
+    public static final String ABSTRACT_WATER_LAST_TIME_COLUMN = "water_last_time";
+
+
+    public static final String ABSTRACT_ELECTRIC_ADDED_VALUE_COLUMN = "electric_added_value";
+
+
+    public static final String ABSTRACT_GAS_ADDED_VALUE_COLUMN = "gas_added_value";
+
+    /**
+     *
+     */
+    public static final String HOUR_TABLE_NAME = "hs_energy_hour";
+    public static final String DAY_TABLE_NAME="hs_statistical_data";
+
+
     protected static final String[] NONE_AGGREGATION_COLUMNS = new String[]{LONG_VALUE_COLUMN, DOUBLE_VALUE_COLUMN, BOOLEAN_VALUE_COLUMN, STRING_VALUE_COLUMN, JSON_VALUE_COLUMN, KEY_COLUMN, TS_COLUMN};
 
     protected static final String[] COUNT_AGGREGATION_COLUMNS = new String[]{count(LONG_VALUE_COLUMN), count(DOUBLE_VALUE_COLUMN), count(BOOLEAN_VALUE_COLUMN), count(STRING_VALUE_COLUMN), count(JSON_VALUE_COLUMN)};
@@ -671,6 +700,20 @@ public class ModelConstants {
         return  "  as "+s;
     }
 
+
+    public static String as(String s, String alias) {
+        return s + " as " + alias + " ";
+    }
+
+    public static String toNumber(String s) {
+        return "to_number( " + s + ",'99999999999999999999999999.9999')";
+    }
+
+    public static  String toChar(String s,String format)
+    {
+        return " to_char("+s+", \'"+format+"\')";
+    }
+
     public static String[] getFetchColumnNames(Aggregation aggregation) {
         switch (aggregation) {
             case NONE:
@@ -691,6 +734,25 @@ public class ModelConstants {
     }
 
 
+    public static String STG_YIE_ID_DATA_02 = "stg/YieIdData.stg";
+    public static String CQL_VALUE_TS_KV = "sqlTemplateCqlYieIdTskv";
+    public static String CQL_MAX_MIN_TIME_TS_KV = "sqlTemplateCqlYieIdTskvMaxTs";
+    public static String CQL_ENERGY_HISTORY_KV = "sqlEnergyHistoryKv";
+
+    public static String SQL_ENERGY_TEMPLATE = "sqlEnergyDataHourTemplate";
+    public static String SQL_CHILD_DEVICE_TEMPLATE = "sqlChildDeviceTemplate";
+
+    /**
+     * 变量
+     */
+    public static final String HOUR_TIME = "tsTime";
+    public static final String HOUR_VALUE = "tsValue";
+
+    /**
+     * MAP组合
+     */
+    public static final String HOUR_TABLE_NAME_MAP = HOUR_TABLE_NAME + "_sumValue_maping";
+    public static final String MONTH_TABLE_NAME_MAP = DAY_TABLE_NAME + "_sumValue_maping";
 
 
     public  static   String STG_YIE_ID_DATA="stg/UserQuery.stg";
