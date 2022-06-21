@@ -33,7 +33,9 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Project Name: thingsboard
@@ -58,6 +60,8 @@ public class DingDingServer implements DdingDingSendMssSvc {
     @Autowired private FactoryService factoryService;
 
     private final RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+
+    private Map<UUID,String> mapFactory = new ConcurrentHashMap();
 
 
     @Override
@@ -84,7 +88,8 @@ public class DingDingServer implements DdingDingSendMssSvc {
                 log.error("设备该工厂id查询不到设备了,入参{}", factoryId);
                 return;
             }
-            Boolean flg = factoryIsOnline(deviceIdList);
+            Boolean flg = factoryIsOnline(deviceIdList,factoryId);
+
             if (!flg) {
                 toSendMess(new ParamVo(new ParamTextVo(factory.getName())));
             }
@@ -101,15 +106,21 @@ public class DingDingServer implements DdingDingSendMssSvc {
      * @param deviceIds
      * @return
      */
-    private Boolean factoryIsOnline( List<UUID> deviceIds) {
+    private Boolean factoryIsOnline( List<UUID> deviceIds, UUID factoryId ) {
         List<AttributeKvEntity> activeByDeviceIds = attributesDao.findActiveByDeviceIds(deviceIds);
         if (CollectionUtils.isNotEmpty(activeByDeviceIds)) {
             int online = (int) activeByDeviceIds.stream().filter(AttributeKvEntity::getBooleanValue).count();
             if(online>0)
             {
+                mapFactory.put(factoryId,"不发");
                 return true;
             }
         }
+        if(StringUtils.isNotEmpty(mapFactory.get(factoryId))  && mapFactory.get(factoryId).equals("发"))
+        {
+            return true;
+        }
+        mapFactory.put(factoryId,"发");
         return false;
     }
 
