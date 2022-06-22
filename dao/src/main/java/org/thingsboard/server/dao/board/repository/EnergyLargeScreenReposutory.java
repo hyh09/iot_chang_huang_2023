@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.board.repository;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.stringtemplate.v4.ST;
@@ -13,6 +14,7 @@ import org.thingsboard.server.dao.sql.role.entity.device.DeviceSqlEntity;
 import org.thingsboard.server.dao.sql.role.entity.hour.EffectHourEntity;
 import org.thingsboard.server.dao.sql.role.entity.month.EffectMonthEntity;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +60,26 @@ public class EnergyLargeScreenReposutory extends JpaSqlTool {
      */
     public List<UUID> getDeviceIdByVo(EnergyHourVo vo) {
         List<DeviceSqlEntity>  entities =  querySql(getDeviceIdTemplate(vo), null, ModelConstants.DEVICE_COLUMN_FAMILY_NAME+"map1");
-        List<UUID> deviceId = entities.stream().map(DeviceSqlEntity::getId).collect(Collectors.toList());
+      List<DeviceSqlEntity>  entities1= new ArrayList<>();
+              entities.stream().forEach(m1->{
+               if(m1.getAdditionalInfo() == null)
+               {
+                   entities1.add(m1);
+               }else {
+                   JsonNode gateway = m1.getAdditionalInfo().get("gateway");
+                   if (gateway != null && !gateway.asBoolean())
+                   {
+                       entities1.add(m1);
+                   }
+                   if(gateway == null)
+                   {
+                       entities1.add(m1);
+                   }
+               }
+        });
+
+        List<UUID> deviceId = entities1.stream()
+                .map(DeviceSqlEntity::getId).collect(Collectors.toList());
         return  deviceId;
     }
 
@@ -95,6 +116,7 @@ public class EnergyLargeScreenReposutory extends JpaSqlTool {
         ST sqlST = stg.getInstanceOf(ModelConstants.SQL_CHILD_DEVICE_TEMPLATE);
         List<String> childColumnList = new LinkedList<String>();
         childColumnList.add(ModelConstants.ID_PROPERTY);
+        childColumnList.add(ModelConstants.as(ModelConstants.ADDITIONAL_INFO_PROPERTY,ModelConstants.DEVICE_ADDITIONAL_INFO_PROPERTY_JSON));
         sqlST.add("childColumns", childColumnList);
         sqlST.add("childModel",vo);
         sqlST.add("childtableName", ModelConstants.DEVICE_COLUMN_FAMILY_NAME);

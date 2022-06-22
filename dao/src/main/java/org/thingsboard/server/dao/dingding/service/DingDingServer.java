@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.dingding.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,6 +16,7 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.energyboard.EnergyBoard;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.vo.bodrd.energy.Input.EnergyHourVo;
 import org.thingsboard.server.dao.attributes.AttributesDao;
 import org.thingsboard.server.dao.board.repository.EnergyLargeScreenReposutory;
@@ -63,17 +65,38 @@ public class DingDingServer implements DdingDingSendMssSvc {
 
     private Map<UUID,String> mapFactory = new ConcurrentHashMap();
 
+    private  String ACTIVE="active";
+    private  String ADDITIONAL_INFO_FILED_NAME="gateway";
 
     @Override
     @Async("threadPoolTaskExecutor_1")
-    public void send(UUID entityId) {
+    public void send(UUID entityId, AttributeKvEntry entry) {
         try {
+            if(entityId.equals(UUID.fromString("90369bc0-f148-11ec-846b-e5d6d79ce73e")))
+            {
+                log.info("=========================");
+            }
+            if(ACTIVE.equals(entry.getKey()) && entry.getBooleanValue() != null){
+                if(entry.getBooleanValue().get()) {
+                    return;
+                }
+            }
+
 //            String  threandName=  Thread.currentThread().getName();
 //            System.out.println("钉钉发送设备id入参:{}threandName：{}"+ entityId+threandName);
             Device device = deviceDao.findById(entityId);
             if (device == null) {
                 log.error("钉钉发送查询不到设备,入参{}", entityId);
                 return;
+            }
+            if(device.getAdditionalInfo() != null)
+            {
+                JsonNode jsonNode =  device.getAdditionalInfo();
+                JsonNode jsonNode1 =  jsonNode.get(ADDITIONAL_INFO_FILED_NAME);
+                if(jsonNode1 != null && jsonNode1.asBoolean())
+                {
+                    return;
+                }
             }
             UUID factoryId = device.getFactoryId();
             if (factoryId == null) {

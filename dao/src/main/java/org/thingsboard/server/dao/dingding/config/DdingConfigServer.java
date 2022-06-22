@@ -36,7 +36,7 @@ public class DdingConfigServer {
 //            if (StringUtils.isNotEmpty(json)) {
 //                return JsonUtils.jsonToPojo(json, DingdingVo.class);
 //            }
-            AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(null, AdminSettingsKeyEmuns.dingding_webhook.name());
+            AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(null, AdminSettingsKeyEmuns.dingding_webhook01.name());
             if (adminSettings == null) {
                 return null;
             }
