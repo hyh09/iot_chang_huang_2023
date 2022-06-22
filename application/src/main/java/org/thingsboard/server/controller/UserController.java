@@ -460,10 +460,10 @@ public class UserController extends BaseController  {
          DataValidator.validateCode(user.getUserCode());
 
         SecurityUser  securityUser =  getCurrentUser();
-        if(user.getFactoryId() == null)
-        {
-            user.setFactoryId(securityUser.getFactoryId());
-        }
+//        if(user.getFactoryId() == null)
+//        {
+//            user.setFactoryId(securityUser.getFactoryId());
+//        }
         log.info("打印当前的管理人的信息:{}",securityUser);
         log.info("打印当前的管理人的信息工厂id:{},创建者类别{}，用户的等级:{}",securityUser.getFactoryId(),securityUser.getType(),securityUser.getUserLevel());
 
@@ -482,14 +482,14 @@ public class UserController extends BaseController  {
             UserVo  vo1 = new UserVo();
             vo1.setTenantId(securityUser.getTenantId().getId());
             vo1.setEmail(user.getEmail());
-            vo1.setFactoryId(user.getFactoryId());
+            vo1.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
             if(checkSvc.checkValueByKey(vo1)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
             }
             UserVo  vo2 = new UserVo();
             vo2.setTenantId(securityUser.getTenantId().getId());
             vo2.setPhoneNumber(user.getPhoneNumber());
-            vo2.setFactoryId(user.getFactoryId());
+            vo2.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
             if(checkSvc.checkValueByKey(vo2)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
@@ -497,7 +497,7 @@ public class UserController extends BaseController  {
             user.setTenantId(tenantId);
             user.setUserCreator(securityUser.getId().toString());
 
-            if(user.getFactoryId()!= null && securityUser.getType().equals(CreatorTypeEnum.TENANT_CATEGORY.getCode()))
+            if(user.getFactoryId()!= null )
             {
                 log.info("当前保存的是工厂管理员角色用户:{}",user);
                 user.setType(CreatorTypeEnum.FACTORY_MANAGEMENT.getCode());
@@ -510,7 +510,7 @@ public class UserController extends BaseController  {
 
             }else {
                 user.setType(securityUser.getType());
-//                user.setFactoryId(securityUser.getFactoryId());
+                user.setFactoryId(securityUser.getFactoryId());
                 if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()){
                     user.setOperationType(OperationTypeEums.ROLE_NON_EDITABLE.getValue());
                     user.setUserLevel(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());
@@ -582,14 +582,14 @@ public class UserController extends BaseController  {
         UserVo  vo1 = new UserVo();
         vo1.setEmail(user.getEmail());
         vo1.setUserId(user.getUuidId().toString());
-        vo1.setFactoryId(user.getFactoryId());
+        vo1.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
         if(checkSvc.checkValueByKey(vo1)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
         }
         UserVo  vo2 = new UserVo();
         vo2.setPhoneNumber(user.getPhoneNumber());
         vo2.setUserId(user.getUuidId().toString());
-        vo2.setFactoryId(user.getFactoryId());
+        vo2.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
         if(checkSvc.checkValueByKey(vo2)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
         }
@@ -807,6 +807,16 @@ public class UserController extends BaseController  {
          return  true;
      }
      return false;
+    }
+
+
+
+    private  UUID  getCurrentFactoryId(UUID  factoryId) throws ThingsboardException {
+        if(factoryId !=null)
+        {
+            return  factoryId;
+        }
+        return   getCurrentUser().getFactoryId();
     }
 
 
