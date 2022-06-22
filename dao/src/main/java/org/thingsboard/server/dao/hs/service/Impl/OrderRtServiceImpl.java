@@ -136,6 +136,9 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
             orderExcelBO.setSalesman(CommonUtil.getCellStringVal(row.getCell(26)));
             orderExcelBO.setShortShipment(CommonUtil.getCellStringVal(row.getCell(27)));
             orderExcelBO.setOverShipment(CommonUtil.getCellStringVal(row.getCell(28)));
+            var intendedTime = CommonUtil.getCellDateVal(row.getCell(29));
+            if (intendedTime == null)
+                throw new RuntimeException(this.formatExcelErrorInfo(rowNum, "计划完工时间不能为空!"));
             orderExcelBO.setIntendedTime(CommonUtil.getCellDateVal(row.getCell(29)));
             orderExcelBO.setStandardAvailableTime(CommonUtil.getCellDecimalVal(row.getCell(30)));
             orderExcelBO.setComment(CommonUtil.getCellStringVal(row.getCell(31)));
@@ -166,6 +169,7 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
             Order order = new Order();
             BeanUtils.copyProperties(orderExcelBO, order);
             order.setTenantId(tenantId.toString());
+            order.setIsDone(false);
             return order;
         }).map(OrderEntity::new).collect(Collectors.toList());
         orders.forEach(this.orderRepository::save);
@@ -206,7 +210,7 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
 
         var names = List.of("*工厂", "车间", "产线", "*订单号", "合同号", "参考订单号", "接单日期", "客户订单号", "客户", "订单类型", "经营方式",
                 "币种", "汇率", "税率", "税种", "*总数量", "总金额", "单位", "单价类型", "附加金额", "付款方式", "紧急程度",
-                "工艺要求", "季节", "数量", "跟单员", "销售员", "短装(%)", "溢装%", "计划完工日期", "订单标准用时(小时)", "备注");
+                "工艺要求", "季节", "数量", "跟单员", "销售员", "短装(%)", "溢装%", "*计划完工日期", "订单标准用时(小时)", "备注");
         IntStream.iterate(0, k -> k + 1).limit(names.size()).boxed()
                 .forEach(v -> row.createCell(v).setCellValue(names.get(v)));
         return workbook;

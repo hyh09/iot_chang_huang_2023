@@ -13,7 +13,7 @@ public enum  AdminSettingsKeyEmuns {
 
     appStoreCrud("应用商城租户用户同步开关"), //配置的信息:  {"switch":false}
 
-     dingding_webhook("钉钉群机器人url"),
+     dingding_webhook01("钉钉群机器人url"),
         ;
 
 

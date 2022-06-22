@@ -212,7 +212,7 @@ public class ModelConstants {
     public static final String DEVICE_DICT_DEVICE_ID_PROPERTY = "dict_device_id";
     public static final String DEVICE_PICTURE_PROPERTY = "picture";
     public static final String DEVICE_ICON_PROPERTY = "icon";
-
+    public static final String DEVICE_ADDITIONAL_INFO_PROPERTY_JSON=DEVICE_ADDITIONAL_INFO_PROPERTY+"JSON";
 
     public static final String DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_and_search_text";
     public static final String DEVICE_BY_TENANT_BY_TYPE_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME = "device_by_tenant_by_type_and_search_text";
