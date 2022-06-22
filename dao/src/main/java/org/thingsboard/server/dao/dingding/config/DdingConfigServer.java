@@ -25,23 +25,16 @@ import org.thingsboard.server.dao.util.JsonUtils;
 public class DdingConfigServer {
     @Autowired
     private AdminSettingsService adminSettingsService;
-//    @Autowired
-//    private TokenMangerServiceRedis tokenMangerServiceRedis;
 
 
    public  DingdingVo queryDingdingConfig()
     {
         try {
-//            String json = (String) tokenMangerServiceRedis.get(AdminSettingsKeyEmuns.dingding_webhook.name());
-//            if (StringUtils.isNotEmpty(json)) {
-//                return JsonUtils.jsonToPojo(json, DingdingVo.class);
-//            }
-            AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(null, AdminSettingsKeyEmuns.dingding_webhook01.name());
+            AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(null, AdminSettingsKeyEmuns.dingding_webhook.name());
             if (adminSettings == null) {
                 return null;
             }
             DingdingVo dingdingVo = JsonUtils.beanToBean(adminSettings.getJsonValue(), DingdingVo.class);
-//            tokenMangerServiceRedis.set(AdminSettingsKeyEmuns.dingding_webhook.name(), JsonUtils.objectToJson(dingdingVo), 4L);
             return dingdingVo;
         }catch (Exception e)
         {

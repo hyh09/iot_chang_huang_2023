@@ -72,18 +72,11 @@ public class DingDingServer implements DdingDingSendMssSvc {
     @Async("threadPoolTaskExecutor_1")
     public void send(UUID entityId, AttributeKvEntry entry) {
         try {
-            if(entityId.equals(UUID.fromString("90369bc0-f148-11ec-846b-e5d6d79ce73e")))
-            {
-                log.info("=========================");
-            }
             if(ACTIVE.equals(entry.getKey()) && entry.getBooleanValue() != null){
                 if(entry.getBooleanValue().get()) {
                     return;
                 }
             }
-
-//            String  threandName=  Thread.currentThread().getName();
-//            System.out.println("钉钉发送设备id入参:{}threandName：{}"+ entityId+threandName);
             Device device = deviceDao.findById(entityId);
             if (device == null) {
                 log.error("钉钉发送查询不到设备,入参{}", entityId);
