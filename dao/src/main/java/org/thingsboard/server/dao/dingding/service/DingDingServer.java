@@ -89,7 +89,7 @@ public class DingDingServer implements DdingDingSendMssSvc {
                     log.error("设备该工厂id查询不到设备了,入参{}", factoryId);
                     return;
                 }
-                Boolean flg = factoryIsOnline(deviceIdList, factoryId);
+                Boolean flg = factoryIsOnline(deviceIdList);
                 if (!flg) {
                     toSendMess(new ParamVo(new ParamTextVo(factory.getName())));
                 }
@@ -107,7 +107,7 @@ public class DingDingServer implements DdingDingSendMssSvc {
      * @param deviceIds
      * @return
      */
-    private Boolean factoryIsOnline(List<UUID> deviceIds, UUID factoryId) {
+    private Boolean factoryIsOnline(List<UUID> deviceIds) {
         List<AttributeKvEntity> activeByDeviceIds = attributesDao.findActiveByDeviceIds(deviceIds);
         if (CollectionUtils.isNotEmpty(activeByDeviceIds)) {
             int online = (int) activeByDeviceIds.stream().filter(AttributeKvEntity::getBooleanValue).count();
