@@ -55,7 +55,7 @@ public class EfficiencyStatisticsController extends BaseController {
             return efficiencyStatisticsSvc.queryCapAppNewMethod(queryTsKvVo, getTenantId(),pageLink);
         }catch (Exception e)
         {
-            e.printStackTrace();
+            log.error("执行[queryCapacity方法]入参{}异常信息:{}",queryTsKvVo,e);
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
     }

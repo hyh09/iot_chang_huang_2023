@@ -138,16 +138,17 @@ public class DingDingServer implements DdingDingSendMssSvc {
     }
 
 
-    public ResultDingDingVo toSendMess(ParamVo vo) throws ThingsboardException {
-        DingdingVo dingdingVo = ddingConfigServer.queryDingdingConfig();
-        if (dingdingVo == null) {
+    public void toSendMess(ParamVo vo) throws ThingsboardException {
+        List<DingdingVo> dingdingVoList = ddingConfigServer.queryDingdingConfig();
+        if (dingdingVoList == null) {
             log.error("配置信息钉钉信息为空");
-            return null;
+            return;
         }
-        log.debug("[钉钉]方法执行打印入参:{}", JsonUtils.objectToJson(vo));
-        ResultDingDingVo dingDingVo = restTemplateBuilder.build().postForObject(dingdingVo.getUrl(), new HttpEntity<>(vo, getHeaders()), ResultDingDingVo.class);
-        log.debug("[钉钉]方法执行打印出参:{}", JsonUtils.objectToJson(dingDingVo));
-        return dingDingVo;
+        dingdingVoList.stream().forEach(m1->{
+            log.debug("[钉钉]方法执行打印入参:{}", JsonUtils.objectToJson(vo));
+            ResultDingDingVo dingDingVo = restTemplateBuilder.build().postForObject(m1.getUrl(), new HttpEntity<>(vo, getHeaders()), ResultDingDingVo.class);
+            log.debug("[钉钉]方法执行打印出参:{}", JsonUtils.objectToJson(dingDingVo));
+        });
     }
 
 

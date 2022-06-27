@@ -527,8 +527,7 @@ public class UserController extends BaseController  {
         }
 
         catch (Exception e){
-            e.printStackTrace();
-
+            log.error("创建用户的异常日志:入参为{}异常日志{}",user,e);
             throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
         }
 
