@@ -463,9 +463,10 @@ public class CommonUtils {
         int minute = localDateTime.getMinute();
 
 
-        if(hour>=23)
+        if(hour>=23 && minute>0)
         {
-            hour=-1;
+            hour=-1;//valid values 0 - 23
+            day=day+1;
         }
 
         if(minute==0) {
