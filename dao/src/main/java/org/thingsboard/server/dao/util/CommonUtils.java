@@ -461,19 +461,10 @@ public class CommonUtils {
         int day =  localDateTime.getDayOfMonth();
         int hour =  localDateTime.getHour();
         int minute = localDateTime.getMinute();
-
-
-        if(hour>=23 && minute>0)
-        {
-            hour=-1;//valid values 0 - 23
-            day=day+1;
-        }
-
         if(minute==0) {
             localDateTime1 = LocalDateTime.of(year, month, day, hour, 0, 0, 0);
         }else if(minute>0  ) {
-
-            localDateTime1 = LocalDateTime.of(year, month, day, hour+1, 0, 0, 0);
+            localDateTime1 =localDateTime.plusHours(1).toLocalDate().atTime(localDateTime.plusHours(1).getHour(),0,0);
         }
         return getTimestampOfDateTime(localDateTime1);
     }
