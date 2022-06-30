@@ -182,19 +182,19 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceConnect(TenantId tenantId, DeviceId deviceId) {
-        log.info("设备【" + deviceId + "]建立连接！");
-        log.trace("on Device Connect [{}]", deviceId.getId());
-        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-        long ts = System.currentTimeMillis();
-        stateData.getState().setLastConnectTime(ts);
-        save(deviceId, LAST_CONNECT_TIME, ts);
-        pushRuleEngineMessage(stateData, CONNECT_EVENT);
-        checkAndUpdateState(deviceId, stateData);
-        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
-        //断开连接，如果还在线，则要改为离线
-        if (!isActive(ts, stateData.getState())) {
-            this.updateGatewayStateTrue(deviceId,stateData);
-        }
+//        log.info("设备【" + deviceId + "]建立连接！");
+//        log.trace("on Device Connect [{}]", deviceId.getId());
+//        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+//        long ts = System.currentTimeMillis();
+//        stateData.getState().setLastConnectTime(ts);
+//        save(deviceId, LAST_CONNECT_TIME, ts);
+//        pushRuleEngineMessage(stateData, CONNECT_EVENT);
+//        checkAndUpdateState(deviceId, stateData);
+//        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
+//        //断开连接，如果还在线，则要改为离线
+//        if (!isActive(ts, stateData.getState())) {
+//            this.updateGatewayStateTrue(deviceId,stateData);
+//        }
     }
 
     @Override
@@ -256,17 +256,17 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceDisconnect(TenantId tenantId, DeviceId deviceId) {
-        log.info("设备【" + deviceId + "]断开连接！");
-        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-        long ts = System.currentTimeMillis();
-        stateData.getState().setLastDisconnectTime(ts);
-        save(deviceId, LAST_DISCONNECT_TIME, ts);
-        pushRuleEngineMessage(stateData, DISCONNECT_EVENT);
-        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
-        //断开连接，如果还在线，则要改为离线
-        if (isActive(ts, stateData.getState())) {
-            this.updateGatewayStateFalse(deviceId,stateData);
-        }
+//        log.info("设备【" + deviceId + "]断开连接！");
+//        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+//        long ts = System.currentTimeMillis();
+//        stateData.getState().setLastDisconnectTime(ts);
+//        save(deviceId, LAST_DISCONNECT_TIME, ts);
+//        pushRuleEngineMessage(stateData, DISCONNECT_EVENT);
+//        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
+//        //断开连接，如果还在线，则要改为离线
+//        if (isActive(ts, stateData.getState())) {
+//            this.updateGatewayStateFalse(deviceId,stateData);
+//        }
 
     }
 
