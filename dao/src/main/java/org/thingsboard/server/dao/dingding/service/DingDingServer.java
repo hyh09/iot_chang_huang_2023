@@ -72,43 +72,40 @@ public class DingDingServer implements DdingDingSendMssSvc {
     @Async("threadPoolTaskExecutor_1")
     public void send(UUID entityId, AttributeKvEntry entry) {
         try {
+
+
             if(ACTIVE.equals(entry.getKey()) && entry.getBooleanValue() != null){
-                if(entry.getBooleanValue().get()) {
+//                if(entry.getBooleanValue().get()) {
+//                    return;
+//                }
+                Device device = deviceDao.findById(entityId);
+                if (device == null) {
+                    log.error("钉钉发送查询不到设备,入参{}", entityId);
                     return;
                 }
-            }
-            Device device = deviceDao.findById(entityId);
-            if (device == null) {
-                log.error("钉钉发送查询不到设备,入参{}", entityId);
-                return;
-            }
-            if(device.getAdditionalInfo() != null)
-            {
-                JsonNode jsonNode =  device.getAdditionalInfo();
-                JsonNode jsonNode1 =  jsonNode.get(ADDITIONAL_INFO_FILED_NAME);
-                if(jsonNode1 != null && jsonNode1.asBoolean())
-                {
+
+                UUID factoryId = device.getFactoryId();
+                if (factoryId == null) {
+                    log.error("钉钉发送查询不到设备该工厂id,入参{}", entityId);
                     return;
                 }
-            }
-            UUID factoryId = device.getFactoryId();
-            if (factoryId == null) {
-                log.error("钉钉发送查询不到设备该工厂id,入参{}", entityId);
-                return;
-            }
-            Factory factory = factoryService.findById(factoryId);
+                Factory factory = factoryService.findById(factoryId);
 
 
-            List<UUID> deviceIdList = energyLargeScreenReposutory.getDeviceIdByVo(new EnergyHourVo(factoryId, null, null, null));
-            if (CollectionUtils.isEmpty(deviceIdList)) {
-                log.error("设备该工厂id查询不到设备了,入参{}", factoryId);
-                return;
-            }
-            Boolean flg = factoryIsOnline(deviceIdList,factoryId);
+                List<UUID> deviceIdList = energyLargeScreenReposutory.getDeviceIdByVo(new EnergyHourVo(factoryId, null, null, null));
+                if (CollectionUtils.isEmpty(deviceIdList)) {
+                    log.error("设备该工厂id查询不到设备了,入参{}", factoryId);
+                    return;
+                }
+                Boolean flg = factoryIsOnline(deviceIdList,factoryId);
 
-            if (!flg) {
-                toSendMess(new ParamVo(new ParamTextVo(factory.getName())));
+                if (!flg) {
+                    toSendMess(new ParamVo(new ParamTextVo(factory.getName())));
+                }
             }
+
+
+
         }catch (Exception  e)
         {
             log.error("【钉钉的异常信息]",e.getMessage());
@@ -141,16 +138,17 @@ public class DingDingServer implements DdingDingSendMssSvc {
     }
 
 
-    public ResultDingDingVo toSendMess(ParamVo vo) throws ThingsboardException {
-        DingdingVo dingdingVo = ddingConfigServer.queryDingdingConfig();
-        if (dingdingVo == null) {
+    public void toSendMess(ParamVo vo) throws ThingsboardException {
+        List<DingdingVo> dingdingVoList = ddingConfigServer.queryDingdingConfig();
+        if (dingdingVoList == null) {
             log.error("配置信息钉钉信息为空");
-            return null;
+            return;
         }
-        log.debug("[钉钉]方法执行打印入参:{}", JsonUtils.objectToJson(vo));
-        ResultDingDingVo dingDingVo = restTemplateBuilder.build().postForObject(dingdingVo.getUrl(), new HttpEntity<>(vo, getHeaders()), ResultDingDingVo.class);
-        log.debug("[钉钉]方法执行打印出参:{}", JsonUtils.objectToJson(dingDingVo));
-        return dingDingVo;
+        dingdingVoList.stream().forEach(m1->{
+            log.debug("[钉钉]方法执行打印入参:{}", JsonUtils.objectToJson(vo));
+            ResultDingDingVo dingDingVo = restTemplateBuilder.build().postForObject(m1.getUrl(), new HttpEntity<>(vo, getHeaders()), ResultDingDingVo.class);
+            log.debug("[钉钉]方法执行打印出参:{}", JsonUtils.objectToJson(dingDingVo));
+        });
     }
 
 
@@ -180,3 +178,4 @@ public class DingDingServer implements DdingDingSendMssSvc {
 
 
 }
+

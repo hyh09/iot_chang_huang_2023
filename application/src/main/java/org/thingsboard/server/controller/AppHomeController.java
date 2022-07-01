@@ -61,7 +61,7 @@ public class AppHomeController extends BaseController{
 //            return result;
         }catch (Exception e)
         {
-            e.printStackTrace();
+            log.error("执行[queryCapacity]方法异常:入参信息：{}具体异常信息{}",factoryId,e);
 
         }
         return  result;
@@ -97,6 +97,7 @@ public class AppHomeController extends BaseController{
         }catch (Exception e)
         {
             e.printStackTrace();
+            log.error("执行[threeEnergyValue]入参工厂{}异常信息:{}",factoryId,e);
 
         }
         return  result;
