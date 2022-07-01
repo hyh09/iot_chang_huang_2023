@@ -256,7 +256,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceDisconnect(TenantId tenantId, DeviceId deviceId) {
-//        log.info("设备【" + deviceId + "]断开连接！");
+//        log.info("设备【" + deviceId + "]断开连接！"); 
 //        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
 //        long ts = System.currentTimeMillis();
 //        stateData.getState().setLastDisconnectTime(ts);
