@@ -26,6 +26,8 @@ public interface DictDeviceRepository extends PagingAndSortingRepository<DictDev
 
     Optional<DictDeviceEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
+    Optional<DictDeviceEntity> findByTenantIdAndCode(UUID tenantId, String code);
+
     @Query("select d.code from DictDeviceEntity d where d.tenantId = :tenantId")
     List<String> findAllCodesByTenantId(@Param("tenantId") UUID tenantId);
 

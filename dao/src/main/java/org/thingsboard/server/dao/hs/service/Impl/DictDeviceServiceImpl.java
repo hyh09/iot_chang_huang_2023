@@ -4,15 +4,19 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
@@ -23,15 +27,18 @@ import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
+import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
 import javax.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -860,12 +867,75 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     /**
      * 根据设备字典id查询设备字典信息
+     *
      * @param dictDeviceId
      * @return
      */
     @Override
-    public DictDevice findById(UUID dictDeviceId){
+    public DictDevice findById(UUID dictDeviceId) {
         return dictDeviceRepository.findById(dictDeviceId).get().toData();
+    }
+
+    /**
+     * 设备字典-导入
+     *
+     * @param tenantId          租户Id
+     * @param userId            用户Id
+     * @param checksum          校验和
+     * @param checksumAlgorithm 检验和算法
+     * @param file              文件
+     */
+    @Override
+    @SuppressWarnings("all")
+    @Transactional
+    public void saveDictDevicesFromFile(TenantId tenantId, UserId userId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException {
+        var workbook = new XSSFWorkbook(file.getInputStream());
+        var nums = workbook.getNumberOfSheets();
+        if (nums == 0)
+            throw new ThingsboardException("sheet 数量为0", ThingsboardErrorCode.GENERAL);
+
+        List<DictDeviceComponentProperty> properties = Lists.newArrayList();
+        for (int i = 0; i < nums; i++) {
+            var sheet = workbook.getSheetAt(i);
+            var sheetName = sheet.getSheetName().trim();
+
+            var dictDevice = this.dictDeviceRepository.findByTenantIdAndCode(tenantId.getId(), sheetName)
+                    .map(DictDeviceEntity::toData)
+                    .orElseThrow(() -> new ThingsboardException(sheetName + "匹配不到设备字典！", ThingsboardErrorCode.GENERAL));
+            var r = sheet.getLastRowNum();
+            IntStream.iterate(0, k -> k + 1).limit(sheet.getLastRowNum() + 1).forEach(rowNum -> {
+                var row = sheet.getRow(rowNum);
+                var property = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(0)))
+                        .filter(StringUtils::isNotBlank).map(String::trim).orElseThrow(() -> new RuntimeException(this.formatExcelErrorInfo(rowNum, sheetName + " 属性为空！")));
+                var componentName = Optional.ofNullable(CommonUtil.getCellStringVal(row.getCell(1)))
+                        .filter(StringUtils::isNotBlank).map(String::trim).orElseThrow(() -> new RuntimeException(this.formatExcelErrorInfo(rowNum, sheetName + " 部件名称为空！")));
+                var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceIdAndNameEquals(toUUID(dictDevice.getId()), componentName));
+                var componentId = "";
+                if (componentList.isEmpty()) {
+                    var dictDeviceComponentEntity = new DictDeviceComponentEntity(DictDeviceComponent.builder()
+                            .sort(99)
+                            .dictDeviceId(dictDevice.getId())
+                            .name(componentName)
+                            .build());
+                    this.componentRepository.save(dictDeviceComponentEntity);
+                    componentId = dictDeviceComponentEntity.getId().toString();
+                } else {
+                    var component = componentList.get(0);
+                    componentId = component.getId();
+                }
+                properties.add(DictDeviceComponentProperty.builder()
+                        .dictDeviceId(dictDevice.getId())
+                        .content("0")
+                        .componentId(componentId)
+                        .sort(99)
+                        .name(property)
+                        .title(property)
+                        .build());
+            });
+        }
+
+        if (!properties.isEmpty())
+            this.componentPropertyRepository.saveAll(properties.stream().map(DictDeviceComponentPropertyEntity::new).collect(Collectors.toList()));
     }
 
     /**

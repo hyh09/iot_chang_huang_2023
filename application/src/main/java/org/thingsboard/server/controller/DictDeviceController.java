@@ -8,7 +8,10 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.HSConstants;
@@ -21,6 +24,7 @@ import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -257,5 +261,25 @@ public class DictDeviceController extends BaseController {
     public void deleteDictDeviceGraph(@PathVariable("graphId") UUID graphId) throws ThingsboardException {
         checkParameter("graphId", graphId);
         this.dictDeviceService.deleteDictDeviceGraph(getTenantId(), graphId);
+    }
+
+    /**
+     * 设备字典-导入
+     */
+    @ApiOperation(value = "设备字典-导入")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "checksum", value = "校验和", paramType = "query"),
+            @ApiImplicitParam(name = "checksumAlgorithmStr", value = "校验和算法", paramType = "query"),
+            @ApiImplicitParam(name = "file", value = "文件", paramType = "form", dataType = "file", required = true),
+    })
+    @PostMapping(value = "/dict/device/import")
+    public void dictDeviceImport(@RequestParam(required = false) String checksum,
+                            @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
+                            @RequestBody MultipartFile file) throws ThingsboardException, IOException {
+        if (file == null || file.isEmpty())
+            throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
+
+        ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm.valueOf(checksumAlgorithmStr.toUpperCase());
+        this.dictDeviceService.saveDictDevicesFromFile(getTenantId(), getCurrentUser().getId(), checksum, checksumAlgorithm, file);
     }
 }
