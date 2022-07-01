@@ -29,4 +29,6 @@ public interface DictDeviceComponentRepository extends PagingAndSortingRepositor
 
     @Query("select t from DictDeviceComponentEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
     List<DictDeviceComponentEntity> findAllByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
+
+    List<DictDeviceComponentEntity> findAllByDictDeviceIdAndNameEquals(UUID dictDeviceId, String name);
 }
