@@ -218,16 +218,24 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.listUpdatedComponentIds(dictDeviceVO.getComponentList(), componentIds, componentPropertyIds);
             if (!componentIds.isEmpty())
                 this.componentRepository.deleteByDictDeviceAndIdsNotIn(dictDeviceId, componentIds);
+            else
+                this.componentRepository.deleteByDictDeviceId(dictDeviceId);
             if (!componentPropertyIds.isEmpty())
                 this.componentPropertyRepository.deleteByDictDeviceAndIdsNotIn(dictDeviceId, componentPropertyIds);
+            else
+                this.componentPropertyRepository.deleteByDictDeviceId(dictDeviceId);
 
             List<UUID> groupIds = Lists.newArrayList();
             List<UUID> groupPropertyIds = Lists.newArrayList();
             this.listUpdatedGroupIds(dictDeviceVO.getGroupList(), groupIds, groupPropertyIds);
             if (!groupIds.isEmpty())
                 this.groupRepository.deleteByDictDeviceAndIdsNotIn(dictDeviceId, groupIds);
+            else
+                this.groupRepository.deleteByDictDeviceId(dictDeviceId);
             if (!groupPropertyIds.isEmpty())
                 this.groupPropertyRepository.deleteByDictDeviceAndIdsNotIn(dictDeviceId, groupPropertyIds);
+            else
+                this.groupPropertyRepository.deleteByDictDeviceId(dictDeviceId);
 
             this.deleteGraphProperties(dictDeviceId, componentPropertyIds, groupPropertyIds);
 
