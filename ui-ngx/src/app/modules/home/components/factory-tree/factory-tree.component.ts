@@ -4,6 +4,7 @@ import { AppState, RealTimeMonitorService, TreeNodeEmitEvent, UtilsService } fro
 import { FactoryTableOriginRow, FactoryTreeNodeIds, FactoryTreeNodeOptions } from '@app/shared/models/custom/factory-mng.models';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
+import { NzTreeNodeOptions } from 'ng-zorro-antd/tree';
 import { EntityTableHeaderComponent } from '../entity/entity-table-header.component';
 
 @Component({
@@ -200,6 +201,10 @@ export class FactoryTreeComponent extends EntityTableHeaderComponent<any> implem
       this.entitiesTableConfig.table.resetSortAndFilter(true);
     }
     this.clickNode.emit(params);
+  }
+
+  searchFunc = (node: NzTreeNodeOptions): boolean => {
+    return node && node.title && node.title.indexOf(this.searchValue) > -1;
   }
 
   public setKeyState(factoryInfo: FactoryTreeNodeIds) {

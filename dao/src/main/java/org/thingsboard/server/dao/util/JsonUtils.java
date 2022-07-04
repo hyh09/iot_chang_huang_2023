@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.thingsboard.server.dao.sql.role.entity.UserMenuRoleEntity;
 
 import java.util.List;
@@ -57,6 +58,10 @@ public class JsonUtils {
      */
     public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
         try {
+            if(StringUtils.isBlank(jsonData))
+            {
+                return null;
+            }
             T t = MAPPER.readValue(jsonData, beanType);
             return t;
         } catch (Exception e) {

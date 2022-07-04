@@ -55,4 +55,11 @@ public interface AttributesDao {
      * @return
      */
     List<AttributeKvEntity> findAllByEntityIds(List<UUID> entityIds, String attributeType,String attributeKey);
+
+    /**
+     * 查询设备在线状态
+     * @param deviceId
+     * @return
+     */
+    List<AttributeKvEntity> findActiveByDeviceIds(List<UUID> deviceId);
 }

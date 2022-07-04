@@ -39,6 +39,10 @@ public interface UserService {
 
 	User findUserByEmail(TenantId tenantId, String email);
 
+	User findUserByEmailAndfactoryId(TenantId tenantId, String email,String  factoryId);
+
+	User findByPhoneNumberAndFactoryId(String phoneNumber,String  factoryId);
+
 	User findByPhoneNumber(String phoneNumber);
 
 	User saveUser(User user);

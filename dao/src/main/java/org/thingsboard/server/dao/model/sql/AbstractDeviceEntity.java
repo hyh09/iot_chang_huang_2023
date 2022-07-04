@@ -70,7 +70,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
 
     @Type(type = "json")
     @Column(name = ModelConstants.DEVICE_ADDITIONAL_INFO_PROPERTY)
-    private JsonNode additionalInfo;
+    protected JsonNode additionalInfo;
 
     @Column(name = ModelConstants.DEVICE_DEVICE_PROFILE_ID_PROPERTY, columnDefinition = "uuid")
     private UUID deviceProfileId;

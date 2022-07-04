@@ -3,20 +3,23 @@ package org.thingsboard.server.dao.sql.role.userrole.sqldata;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 import org.thingsboard.server.common.data.vo.CustomException;
 import org.thingsboard.server.common.data.vo.QueryUserVo;
 import org.thingsboard.server.common.data.vo.enums.ActivityException;
 import org.thingsboard.server.common.data.vo.user.CodeVo;
 import org.thingsboard.server.common.data.vo.user.UserVo;
 import org.thingsboard.server.common.data.vo.user.enums.UserLeveEnums;
+import org.thingsboard.server.dao.model.CompareType;
+import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
 import org.thingsboard.server.dao.sql.role.userrole.SqlSplicingSvc;
 //import org.thingsboard.server.dao.sql.role.service.rolemenu.InMenuByUserVo;
 //import org.thingsboard.server.service.userrole.SqlSplicingSvc;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -83,43 +86,53 @@ public class SqlSplicingImpl implements SqlSplicingSvc {
 
     @Override
     public SqlVo getCountUserSqlByVo(UserVo vo) {
-        String  sqlCount ="select count(1) from  tb_user t1 where 1=1 ";
-        StringBuffer whereSql  = new StringBuffer();
-        Map<String, Object> param= new HashMap<>();
-        if(StringUtils.isNoneBlank(vo.getEmail()))
-        {
-            whereSql.append(" and t1.email =:email ");
-            param.put("email",vo.getEmail());
-        }
-        if(StringUtils.isNoneBlank(vo.getPhoneNumber()))
-        {
-            whereSql.append(" and t1.phone_number =:phoneNumber ");
-            param.put("phoneNumber",vo.getPhoneNumber());
-        }
-
-        if(StringUtils.isNoneBlank(vo.getUserCode()))
-        {
-            whereSql.append(" and t1.user_code =:userCode ");
-            param.put("userCode",vo.getUserCode());
-        }
-        if((vo.getTenantId()) != null)
-        {
-            whereSql.append(" and t1.tenant_id =:tenantId ");
-            param.put("tenantId",vo.getTenantId());
-        }
-
-
-        if(StringUtils.isNoneBlank(vo.getUserId()))
-        {
-
-            whereSql.append(" and t1.id !=:id ");
-            param.put("id", UUID.fromString(vo.getUserId()));
-        }
-        if(StringUtils.isEmpty(whereSql))
-        {
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"入参不能为空");
-        }
-        return  new  SqlVo(sqlCount+whereSql.toString(),param);
+        STGroup stg = new STGroupFile(ModelConstants.STG_YIE_ID_DATA);
+        ST sqlST = stg.getInstanceOf(ModelConstants.USER_SQL_VO);
+        List<String> columnList = new LinkedList<String>();
+        columnList.add(ModelConstants.count("1")+ModelConstants.as("count"));
+        sqlST.add("columns", columnList);
+        sqlST.add("model",vo );
+        sqlST.add("tableName",ModelConstants.USER_PG_HIBERNATE_COLUMN_FAMILY_NAME );
+        sqlST.add("CompareType",new CompareType());
+        String cql =sqlST.render();
+        return  new  SqlVo(cql,null);
+//        String  sqlCount ="select count(1) from  tb_user t1 where 1=1 ";
+//        StringBuffer whereSql  = new StringBuffer();
+//        Map<String, Object> param= new HashMap<>();
+//        if(StringUtils.isNoneBlank(vo.getEmail()))
+//        {
+//            whereSql.append(" and t1.email =:email ");
+//            param.put("email",vo.getEmail());
+//        }
+//        if(StringUtils.isNoneBlank(vo.getPhoneNumber()))
+//        {
+//            whereSql.append(" and t1.phone_number =:phoneNumber ");
+//            param.put("phoneNumber",vo.getPhoneNumber());
+//        }
+//
+//        if(StringUtils.isNoneBlank(vo.getUserCode()))
+//        {
+//            whereSql.append(" and t1.user_code =:userCode ");
+//            param.put("userCode",vo.getUserCode());
+//        }
+//        if((vo.getTenantId()) != null)
+//        {
+//            whereSql.append(" and t1.tenant_id =:tenantId ");
+//            param.put("tenantId",vo.getTenantId());
+//        }
+//
+//
+//        if(StringUtils.isNoneBlank(vo.getUserId()))
+//        {
+//
+//            whereSql.append(" and t1.id !=:id ");
+//            param.put("id", UUID.fromString(vo.getUserId()));
+//        }
+//        if(StringUtils.isEmpty(whereSql))
+//        {
+//            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"入参不能为空");
+//        }
+//        return  new  SqlVo(sqlCount+whereSql.toString(),param);
     }
 
 

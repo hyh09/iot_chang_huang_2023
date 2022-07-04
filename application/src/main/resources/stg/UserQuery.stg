@@ -1,0 +1,11 @@
+getCountUserSqlByVo(columns,model,tableName,CompareType)
+::= <<select  <columns;separator=","> from <tableName> where 1=1
+<if(model.tenantId)> and tenant_id= '<model.tenantId>'<endif>
+<if(model.userId)> and id  <CompareType.ne> '<model.userId>'<endif>
+<if(model.email )> and  email= '<model.email>'<endif>
+<if(model.phoneNumber )> and phone_number= '<model.phoneNumber>'<endif>
+<if(model.userCode )> and user_code= '<model.userCode>'<endif>
+<if(model.factoryId)> and factory_id= '<model.factoryId>'
+<else> and factory_id is null
+<endif>
+>>

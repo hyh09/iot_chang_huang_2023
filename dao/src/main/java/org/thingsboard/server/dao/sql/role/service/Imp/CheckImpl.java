@@ -41,7 +41,7 @@ public class CheckImpl  implements CheckSvc {
         log.info("调用查询菜单列表的入参{}",vo);
         SqlVo sqlVo= splicingSvc.getCountUserSqlByVo(vo);
         log.debug("调用查询菜单列表的入参{},通过sql{},查询到得结果{}",sqlVo.getParam(),sqlVo.getSql());
-        Long count= tenantSysRoleService.queryContListSqlLocal(sqlVo.getSql(),sqlVo.getParam());
+        Long count= tenantSysRoleService.queryContListSqlLocal(sqlVo.getSql(),null);
         log.info("调用查询菜单列表的入参{},通过sql{},查询到得结果{}",sqlVo.getParam(),sqlVo.getSql(),count);
         return  (count>0?true:false);
     }
