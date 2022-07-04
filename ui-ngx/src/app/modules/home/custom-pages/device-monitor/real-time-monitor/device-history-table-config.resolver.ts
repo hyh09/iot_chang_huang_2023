@@ -48,7 +48,7 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
 
         const now = new Date();
         this.config.componentsData = {
-          dateRange: [getTheStartOfDay(now), getTheEndOfDay(now)]
+          dateRange: [getTheStartOfDay(now, false), getTheEndOfDay(now, false)]
         };
 
         this.realTimeMonitorService.getDeviceRelatedParams(this.deviceId).subscribe(_res => {
