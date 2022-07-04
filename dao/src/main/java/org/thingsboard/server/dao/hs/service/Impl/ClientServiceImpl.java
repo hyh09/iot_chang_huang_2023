@@ -266,8 +266,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             }
             return map;
         } else {
-            return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
-                    .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
+            return allDeviceIdList.stream().map(v->CompletableFuture.supplyAsync(()->ImmutablePair.of(v, this.getDeviceOnlineStatus(DeviceId.fromString(v.toString())))))
+                    .map(CompletableFuture::join).collect(Collectors.toMap(v->v.getLeft().toString(), ImmutablePair::getRight));
         }
     }
 
