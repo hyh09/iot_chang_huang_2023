@@ -1,7 +1,10 @@
 package org.thingsboard.server.dao.hs.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.UserId;
+import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
@@ -10,6 +13,7 @@ import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -234,8 +238,20 @@ public interface DictDeviceService {
 
     /**
      * 根据设备字典id查询设备字典信息
+     *
      * @param dictDeviceId
      * @return
      */
     DictDevice findById(UUID dictDeviceId);
+
+    /**
+     * 设备字典-导入
+     *
+     * @param tenantId          租户Id
+     * @param userId            用户Id
+     * @param checksum          校验和
+     * @param checksumAlgorithm 检验和算法
+     * @param file              文件
+     */
+    void saveDictDevicesFromFile(TenantId tenantId, UserId userId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException;
 }

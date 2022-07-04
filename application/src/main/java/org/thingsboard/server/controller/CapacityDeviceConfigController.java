@@ -113,8 +113,7 @@ public class CapacityDeviceConfigController extends BaseController {
             log.info("配置入参的:{}", vo);
             return deviceService.appQueryPage(vo, pageLink);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.info("===产能运算配置界面接口查询==>{}", e);
+            log.error("===产能运算配置界面接口查询==>{}", e);
             throw handleException(e);
         }
     }
@@ -158,7 +157,6 @@ public class CapacityDeviceConfigController extends BaseController {
             return energyChartService.getDeviceCapacity(deviceId, startTime, endTime, type, keyNum);
         } catch (Exception e) {
             log.error("查询设备时间区间内每小时产量/能耗历史异常",e);
-            e.printStackTrace();
         }
         return null;
     }

@@ -199,6 +199,28 @@
                   "maximumError": "12mb"
                 }
               ]
+            },
+            "cambodia": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cambodia.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": false,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "9mb",
+                  "maximumError": "12mb"
+                }
+              ]
             }
           }
         },
@@ -217,6 +239,9 @@
             },
             "xinxiang": {
               "browserTarget": "thingsboard:build:xinxiang"
+            },
+            "cambodia": {
+              "browserTarget": "thingsboard:build:cambodia"
             }
           }
         },

@@ -130,6 +130,41 @@
         align-items: center;
       }
     }
+    .qr-code-wrapper {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      width: 280px;
+      height: 136px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      padding: 0 8px;
+      .qr-code-item {
+        padding: 20px 8px 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        .qr-code {
+          width: 70px;
+          height: 70px;
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        }
+        .qr-code-name {
+          height: 17px;
+          font-size: 12px;
+          font-weight: 400;
+          text-align: center;
+          color: #fff;
+          line-height: 17px;
+          letter-spacing: -0.24px;
+        }
+      }
+    }
   }
 }
 

@@ -83,8 +83,7 @@ public class RoleMenuController extends BaseController{
             return roleMenuSvc.queryByUser(vo);
         }catch (Exception e)
         {
-            log.info("查询当前登录人的用户:{}",e);
-            e.printStackTrace();
+            log.error("查询当queryByUser方法:{}",e);
             return  null;
         }
 
@@ -105,7 +104,7 @@ public class RoleMenuController extends BaseController{
 //                    vo.setUserId(securityUser.getUuidId());
 
                 } catch (ThingsboardException e) {
-                    e.printStackTrace();
+                    log.error("查询[/queryAllOld]方法:{}",e);
                     return ResultVo.getFail(e.getMessage());
                 }
         }

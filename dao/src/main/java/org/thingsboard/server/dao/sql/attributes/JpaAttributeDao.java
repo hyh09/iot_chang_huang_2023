@@ -30,6 +30,7 @@ import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.stats.StatsFactory;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.attributes.AttributesDao;
+import org.thingsboard.server.dao.dingding.service.svc.DdingDingSendMssSvc;
 import org.thingsboard.server.dao.model.sql.AttributeKvCompositeKey;
 import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
 import org.thingsboard.server.dao.sql.JpaAbstractDaoListeningExecutorService;
@@ -46,6 +47,10 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService implements AttributesDao {
+
+    private final String SN="sn";
+    private final String ACTIVE="active";
+    private final String SERVER_SCOPE="SERVER_SCOPE";
 
     @Autowired
     ScheduledLogExecutorComponent logExecutor;
@@ -73,6 +78,7 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
 
     @Value("${sql.batch_sort:false}")
     private boolean batchSortEnabled;
+    @Autowired  private DdingDingSendMssSvc ddingDingSendMssSvc;
 
     private TbSqlBlockingQueueWrapper<AttributeKvEntity> queue;
 
@@ -166,6 +172,9 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
         return attributeKvRepository.findAllByEntityIds(entityIds, attributeType,attributeKey);
     }
 
+
+
+
     @Override
     public ListenableFuture<Void> save(TenantId tenantId, EntityId entityId, String attributeType, AttributeKvEntry attribute) {
         AttributeKvEntity entity = new AttributeKvEntity();
@@ -176,8 +185,15 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
         entity.setLongValue(attribute.getLongValue().orElse(null));
         entity.setBooleanValue(attribute.getBooleanValue().orElse(null));
         entity.setJsonValue(attribute.getJsonValue().orElse(null));
+        ddingDingSendMssSvc.send(entityId.getId(),attribute);
         return addToQueue(entity);
     }
+
+    @Override
+    public List<AttributeKvEntity> findActiveByDeviceIds(List<UUID> deviceId){
+        return attributeKvRepository.findActiveByAttributeTypeAndEntityTypeAndEntityIdsAndAttributeKey(SERVER_SCOPE, EntityType.DEVICE, deviceId, ACTIVE);
+    }
+
 
     private ListenableFuture<Void> addToQueue(AttributeKvEntity entity) {
         return queue.add(entity);
