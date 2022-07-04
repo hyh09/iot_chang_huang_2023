@@ -546,7 +546,7 @@ audit-log:
 
 state:
   # Should be greater then transport.sessions.report_timeout
-  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:120}"
+  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:300}"
   defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:10}"
   persistToTelemetry: "${PERSIST_STATE_TO_TELEMETRY:false}"
   defaultGatewayTimeout: "${DEFAULT_GATEWAY_TIMEOUT:300}"
