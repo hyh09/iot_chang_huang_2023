@@ -79,8 +79,8 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
           this.config.entitiesFetchFunction = pageLink => {
             let startTime: number, endTime: number;
             if (this.config.componentsData.dateRange) {
-              startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
-              endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+              startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
+              endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
             }
             const { pageSize, page, textSearch, sortOrder } = pageLink;
             const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
