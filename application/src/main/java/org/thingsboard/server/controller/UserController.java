@@ -323,6 +323,9 @@ public class UserController extends BaseController  {
     public void deleteUser(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
         checkParameter(USER_ID, strUserId);
         try {
+            String userName = getCurrentUser().getUserName();
+            UUID uuidId = getCurrentUser().getUuidId();
+            log.info("[{}][{}]执行了删除用户[{}]的操作",userName,uuidId,strUserId);
             UserId userId = new UserId(toUUID(strUserId));
             User user = checkUserId(userId, Operation.DELETE);
 
@@ -337,6 +340,7 @@ public class UserController extends BaseController  {
             sendDeleteNotificationMsg(getTenantId(), userId, relatedEdgeIds);
 
         } catch (Exception e) {
+            log.error("删除用户报错！",e);
             logEntityAction(emptyId(EntityType.USER),
                     null,
                     null,
