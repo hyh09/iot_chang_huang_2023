@@ -912,7 +912,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     return RTMonitorDeviceResult.builder()
                             .id(idStr)
                             .name(e.getName())
-                            .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                            .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                             .build();
                 }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
