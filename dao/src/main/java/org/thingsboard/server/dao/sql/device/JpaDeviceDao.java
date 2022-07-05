@@ -955,6 +955,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return deviceList;
     }
 
+
+    @Override
+    public List<Device> findAllBy() {
+        return DaoUtil.convertDataList(deviceRepository.findAllBy());
+    }
+
     /**
      * 查工厂名称
      * @param deviceList

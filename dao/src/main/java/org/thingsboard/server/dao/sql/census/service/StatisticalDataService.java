@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
@@ -31,10 +32,29 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
   	private  final  String ZERO="0";
 
 
+    /**
+     * 1小时刷新一次
+     * @param device 当前要处理的数据
+     */
+  	@Transactional
+    public  void saveDataTask(Device device)
+    {
+        StatisticalDataEntity  statisticalDataEntity=   this.dao.queryAllByEntityIdAndDate(device.getUuidId(),LocalDate.now());
+        if(statisticalDataEntity == null)
+        {
+
+        }else {
+
+        }
+
+    }
+
+
+
     @Transactional
     public  StatisticalDataEntity  todayDataProcessing(UUID entityId, DataBodayVo tsKvEntry, String  title)
     {
-//        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
+        logger.info("打印的数据todayDataProcessing:{},entityId{}title{}",tsKvEntry,entityId,title);
         StatisticalDataEntity  entityDatabase = this.queryTodayByEntityId(entityId,tsKvEntry.getTs());
         if(entityDatabase == null){
             StatisticalDataEntity   entityNew = setEntityProperOnSave( entityId,tsKvEntry,title);
@@ -243,6 +263,13 @@ public class StatisticalDataService  extends BaseSQLServiceImpl<StatisticalDataE
 
         return  entityNew;
     }
+
+
+    /********** 查询天的起点的数据（水 电 气 产量) ********************/
+//    private String  getFirstValue(UUID entityId,String key)
+//    {
+//
+//    }
 
 
 }	

@@ -363,4 +363,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      */
     List<Device> findGatewayByFactoryId(UUID factoryIds);
 
+
+    List<Device>  findAllBy();
+
 }

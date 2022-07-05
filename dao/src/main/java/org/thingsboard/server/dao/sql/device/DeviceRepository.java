@@ -334,4 +334,12 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> findGatewayByFactoryId(UUID factoryId);
 
 
+    /**
+     * 查询所有的设备
+     * @return
+     */
+    @Query(nativeQuery = true, value = "select * from device d  where  position('\"gateway\":true' in d.additional_info)=0  ")
+    List<DeviceEntity> findAllBy();
+
+
 }
