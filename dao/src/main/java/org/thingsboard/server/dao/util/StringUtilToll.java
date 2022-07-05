@@ -138,7 +138,7 @@ public class StringUtilToll {
 
 
     /**
-     * 保留4位小数
+     * 保留2位小数
      */
     public  static  String roundUp(String num)
     {

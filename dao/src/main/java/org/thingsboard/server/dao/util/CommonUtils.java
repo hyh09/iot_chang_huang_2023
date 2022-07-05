@@ -292,6 +292,16 @@ public class CommonUtils {
 
     }
 
+    /**
+     * 时间戳转换LocalDate
+     * @param timeMillis
+     * @return
+     */
+    public static LocalDate  getLocalDateByLong(Long timeMillis)
+    {
+       return LocalDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), ZoneId.systemDefault()).toLocalDate();
+    }
+
 
     /**
      *  获取所在时间所在时间片段

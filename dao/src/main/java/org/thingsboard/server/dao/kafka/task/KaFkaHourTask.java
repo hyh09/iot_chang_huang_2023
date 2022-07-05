@@ -78,6 +78,7 @@ public class KaFkaHourTask {
         for(Device device:deviceIdLists)
         {
             energyHistoryHourService.save(getHour(device,startHourTime,hourEndTime,mapKeyNameMap));
+            statisticalDataService.saveDataTask(device,hourEndTime,mapKeyNameMap);
         }
 
     }

@@ -46,7 +46,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
     @Autowired  private TsKvRepository tsKvRepository;
     @Autowired  private ZookeeperProperties zookeeperProperties;
 
-    @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
+//    @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
     public void kafkaListener(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
@@ -78,7 +78,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
 
 
 
-    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
+//    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
     public void kafkaListenerhour(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
@@ -107,7 +107,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
 
 
 
-    private String  setPreviousByZero(DataBodayVo dataBodayVo)
+    public String  setPreviousByZero(DataBodayVo dataBodayVo)
     {
        UUID  entityId=dataBodayVo.getEntityId();
        long time=dataBodayVo.getTs();
