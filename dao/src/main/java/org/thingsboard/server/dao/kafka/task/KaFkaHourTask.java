@@ -67,7 +67,7 @@ public class KaFkaHourTask {
         LocalDateTime hourEndTime = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         LocalDateTime startHourTime= hourEndTime.minusHours(1);//一小时整点时间
         log.info("当前统计的维度开始时间:{}结束时间{}",startHourTime,hourEndTime);
-        FileUtil.writeAppendFile("","当前执行的时间:{}"+LocalDateTime.now());
+//        FileUtil.writeAppendFile("","当前执行的时间:{}"+LocalDateTime.now());
         List<Device>   deviceIdLists = deviceService.findAllBy();
         log.info("查询当前所有租户下的设备共计多少条:{}",deviceIdLists.size());
         if(CollectionUtils.isEmpty(deviceIdLists))
