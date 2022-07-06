@@ -338,7 +338,7 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
      * 查询所有的设备
      * @return
      */
-    @Query(nativeQuery = true, value = "select * from device d  where   ( position('\"gateway\":true' in d1.additional_info)=0  or  d1.additional_info is null )  ")
+    @Query(nativeQuery = true, value = "select * from device d  where   ( position('\"gateway\":true' in d.additional_info)=0  or  d.additional_info is null )  ")
     List<DeviceEntity> findAllBy();
 
 
