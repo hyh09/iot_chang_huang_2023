@@ -57,7 +57,7 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
     @Transactional
     @Async
     public void saveDataTask(Device device, LocalDateTime endTime, Map<String,Integer> mapKeyNameMa) {
-        Long  startTime02 = 0L;
+        Long  startTime02 = 0L; //开始时间的天维度不存在跨天问题
         Long endTime02 = 0L;
         if(endTime.getHour() == 0)
         {
@@ -68,7 +68,7 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
             endTime02=CommonUtils.getTimestampOfDateTime(endTime);//统一1小时刷新一; 避免设备多，延迟跨时间问题
         }
 
-        StatisticalDataEntity statisticalDataEntity = this.dao.queryAllByEntityIdAndDate(device.getUuidId(), LocalDate.now());
+        StatisticalDataEntity statisticalDataEntity = this.dao.queryAllByEntityIdAndDate(device.getUuidId(), CommonUtils.longToLocalDate(startTime02));//
         if (statisticalDataEntity == null) {
             StaticalDataVo water= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.water.getCode()),startTime02,endTime02,null);
             StaticalDataVo electric=  tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.electric.getCode()),startTime02,endTime02,null);

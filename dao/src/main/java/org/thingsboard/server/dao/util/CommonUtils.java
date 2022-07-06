@@ -391,6 +391,16 @@ public class CommonUtils {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault()).toLocalTime();
     }
 
+    /**
+     * long 转换 localDate
+     * @param timestamp
+     * @return
+     */
+    public  static   LocalDate longToLocalDate(long timestamp)
+    {
+       return    LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()).toLocalDate();
+    }
+
 
     /**
      * 获取两个时间段的整点时间
