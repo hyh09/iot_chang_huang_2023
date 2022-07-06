@@ -41,5 +41,5 @@ public interface TskvDataServiceSvc {
      * @return
      */
     StatisticalDataEntity  StaticalDataVoToStatisticalDataEntity(StatisticalDataEntity statisticalDataEntity,StaticalDataVo waterVo,StaticalDataVo electricVo,
-                                                                 StaticalDataVo gasVo,StaticalDataVo capacitiesVo,Long endTime02);
+                                                                 StaticalDataVo gasVo,StaticalDataVo capacitiesVo);
 }

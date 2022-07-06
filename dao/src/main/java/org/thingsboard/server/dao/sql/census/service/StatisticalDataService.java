@@ -74,7 +74,7 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
             StaticalDataVo electric=  tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.electric.getCode()),startTime02,endTime02,null);
             StaticalDataVo gas= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.gas.getCode()),startTime02,endTime02,null);
             StaticalDataVo capacities=tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.capacities.getCode()),startTime02,endTime02,null);
-            StatisticalDataEntity    saveEntity = tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity( new StatisticalDataEntity(), water, electric, gas, capacities, endTime02);
+            StatisticalDataEntity    saveEntity = tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(new StatisticalDataEntity(), water, electric, gas, capacities);
             saveEntity.setEntityId(device.getUuidId());
             this.save(saveEntity);
            return;
@@ -83,7 +83,7 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
           StaticalDataVo electric= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.electric.getCode()),startTime02,endTime02,statisticalDataEntity.getElectricFirstValue());
           StaticalDataVo gas= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.gas.getCode()),startTime02,endTime02,statisticalDataEntity.getGasFirstValue());
           StaticalDataVo capacities= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.capacities.getCode()),startTime02,endTime02,statisticalDataEntity.getCapacityFirstValue());
-            StatisticalDataEntity    updateEntity =  tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(statisticalDataEntity,water,electric,gas,capacities,endTime02);
+            StatisticalDataEntity    updateEntity =  tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(statisticalDataEntity,water,electric,gas,capacities);
             updateEntity.setEntityId(device.getUuidId());
             this.dao.updateNonNull(updateEntity.getId(),updateEntity);
          return;

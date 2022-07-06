@@ -16,6 +16,7 @@ import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -97,12 +98,12 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
     public StatisticalDataEntity StaticalDataVoToStatisticalDataEntity(StatisticalDataEntity statisticalDataEntity,StaticalDataVo waterVo,
                                                                        StaticalDataVo electricVo,
                                                                        StaticalDataVo gasVo,
-                                                                       StaticalDataVo capacitiesVo,
-                                                                       Long endTime02) {
+                                                                       StaticalDataVo capacitiesVo
+                                                                      ) {
 
         if(statisticalDataEntity.getId() == null)
         {
-            statisticalDataEntity.setDate(CommonUtils.getLocalDateByLong(endTime02));
+            statisticalDataEntity.setDate(getLocalDateByVo(waterVo,electricVo,gasVo,capacitiesVo));
         }
         //水
         statisticalDataEntity.setWaterFirstTime(waterVo.getFirstTime());
@@ -138,5 +139,25 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
 
 
         return statisticalDataEntity;
+    }
+
+
+    private LocalDate  getLocalDateByVo(StaticalDataVo waterVo,
+                                        StaticalDataVo electricVo,
+                                        StaticalDataVo gasVo,
+                                        StaticalDataVo capacitiesVo)
+    {
+        if(StringUtilToll.isNotZero(waterVo.getLastTime()+"") ) {
+          return   CommonUtils.getLocalDateByLong(waterVo.getLastTime());
+        }
+        if(StringUtilToll.isNotZero(electricVo.getLastTime()+"") ) {
+            return   CommonUtils.getLocalDateByLong(electricVo.getLastTime());
+        }
+        if(StringUtilToll.isNotZero(gasVo.getLastTime()+"") ) {
+            return   CommonUtils.getLocalDateByLong(gasVo.getLastTime());
+        }
+        return   CommonUtils.getLocalDateByLong(capacitiesVo.getLastTime());
+
+
     }
 }
