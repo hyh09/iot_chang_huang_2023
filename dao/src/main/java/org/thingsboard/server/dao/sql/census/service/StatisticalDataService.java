@@ -57,36 +57,40 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
     @Transactional
     @Async
     public void saveDataTask(Device device, LocalDateTime endTime, Map<String,Integer> mapKeyNameMa) {
-        Long  startTime02 = 0L; //开始时间的天维度不存在跨天问题
-        Long endTime02 = 0L;
-        if(endTime.getHour() == 0)
-        {
-            startTime02= CommonUtils.getTimestampOfDateTime(endTime.minusHours(24)); //统计昨天0点到今天23点59分的59秒或者到今天0点
-            endTime02=CommonUtils.getTimestampOfDateTime(endTime);//CommonUtils.getZero();//今天0点
-        }else {
-            startTime02=CommonUtils.getZeroByLocalDateTime(endTime);//今天0点
-            endTime02=CommonUtils.getTimestampOfDateTime(endTime);//统一1小时刷新一; 避免设备多，延迟跨时间问题
-        }
+        try {
+            Long startTime02 = 0L; //开始时间的天维度不存在跨天问题
+            Long endTime02 = 0L;
+            if (endTime.getHour() == 0) {
+                startTime02 = CommonUtils.getTimestampOfDateTime(endTime.minusHours(24)); //统计昨天0点到今天23点59分的59秒或者到今天0点
+                endTime02 = CommonUtils.getTimestampOfDateTime(endTime);//CommonUtils.getZero();//今天0点
+            } else {
+                startTime02 = CommonUtils.getZeroByLocalDateTime(endTime);//今天0点
+                endTime02 = CommonUtils.getTimestampOfDateTime(endTime);//统一1小时刷新一; 避免设备多，延迟跨时间问题
+            }
 
-        StatisticalDataEntity statisticalDataEntity = this.dao.queryAllByEntityIdAndDate(device.getUuidId(), CommonUtils.longToLocalDate(startTime02));//
-        if (statisticalDataEntity == null) {
-            StaticalDataVo water= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.water.getCode()),startTime02,endTime02,null);
-            StaticalDataVo electric=  tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.electric.getCode()),startTime02,endTime02,null);
-            StaticalDataVo gas= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.gas.getCode()),startTime02,endTime02,null);
-            StaticalDataVo capacities=tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.capacities.getCode()),startTime02,endTime02,null);
-            StatisticalDataEntity    saveEntity = tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(new StatisticalDataEntity(), water, electric, gas, capacities);
-            saveEntity.setEntityId(device.getUuidId());
-            this.save(saveEntity);
-           return;
-        } else {
-          StaticalDataVo water= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.water.getCode()),startTime02,endTime02,statisticalDataEntity.getWaterFirstValue());
-          StaticalDataVo electric= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.electric.getCode()),startTime02,endTime02,statisticalDataEntity.getElectricFirstValue());
-          StaticalDataVo gas= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.gas.getCode()),startTime02,endTime02,statisticalDataEntity.getGasFirstValue());
-          StaticalDataVo capacities= tskvDataServiceSvc.getInterval(device.getUuidId(),mapKeyNameMa.get(KeyNameEnums.capacities.getCode()),startTime02,endTime02,statisticalDataEntity.getCapacityFirstValue());
-            StatisticalDataEntity    updateEntity =  tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(statisticalDataEntity,water,electric,gas,capacities);
-            updateEntity.setEntityId(device.getUuidId());
-            this.dao.updateNonNull(updateEntity.getId(),updateEntity);
-         return;
+            StatisticalDataEntity statisticalDataEntity = this.dao.queryAllByEntityIdAndDate(device.getUuidId(), CommonUtils.longToLocalDate(startTime02));//
+            if (statisticalDataEntity == null) {
+                StaticalDataVo water = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.water.getCode()), startTime02, endTime02, null);
+                StaticalDataVo electric = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.electric.getCode()), startTime02, endTime02, null);
+                StaticalDataVo gas = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.gas.getCode()), startTime02, endTime02, null);
+                StaticalDataVo capacities = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.capacities.getCode()), startTime02, endTime02, null);
+                StatisticalDataEntity saveEntity = tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(new StatisticalDataEntity(), water, electric, gas, capacities);
+                saveEntity.setEntityId(device.getUuidId());
+                this.save(saveEntity);
+                return;
+            } else {
+                StaticalDataVo water = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.water.getCode()), startTime02, endTime02, statisticalDataEntity.getWaterFirstValue());
+                StaticalDataVo electric = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.electric.getCode()), startTime02, endTime02, statisticalDataEntity.getElectricFirstValue());
+                StaticalDataVo gas = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.gas.getCode()), startTime02, endTime02, statisticalDataEntity.getGasFirstValue());
+                StaticalDataVo capacities = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.capacities.getCode()), startTime02, endTime02, statisticalDataEntity.getCapacityFirstValue());
+                StatisticalDataEntity updateEntity = tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(statisticalDataEntity, water, electric, gas, capacities);
+                updateEntity.setEntityId(device.getUuidId());
+                this.dao.updateNonNull(updateEntity.getId(), updateEntity);
+                return;
+            }
+        }catch (Exception e)
+        {
+            logger.error("===saveDataTask异常====>{}",e);
         }
 
     }

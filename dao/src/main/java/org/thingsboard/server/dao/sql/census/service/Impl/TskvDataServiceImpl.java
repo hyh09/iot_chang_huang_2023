@@ -106,37 +106,44 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
             statisticalDataEntity.setDate(getLocalDateByVo(waterVo,electricVo,gasVo,capacitiesVo));
         }
         //水
-        statisticalDataEntity.setWaterFirstTime(waterVo.getFirstTime());
-        statisticalDataEntity.setWaterFirstValue(waterVo.getFirstValue());
-        statisticalDataEntity.setWaterLastTime(waterVo.getLastTime());
-        statisticalDataEntity.setWaterValue(waterVo.getLastValue());
-        statisticalDataEntity.setWaterAddedValue(waterVo.getAddValue());
-        statisticalDataEntity.setTs(waterVo.getLastTime());
+        if(waterVo != null) {
+            statisticalDataEntity.setWaterFirstTime(waterVo.getFirstTime());
+            statisticalDataEntity.setWaterFirstValue(waterVo.getFirstValue());
+            statisticalDataEntity.setWaterLastTime(waterVo.getLastTime());
+            statisticalDataEntity.setWaterValue(waterVo.getLastValue());
+            statisticalDataEntity.setWaterAddedValue(waterVo.getAddValue());
+            statisticalDataEntity.setTs(waterVo.getLastTime());
+        }
 
         //电
-        statisticalDataEntity.setElectricFirstTime(electricVo.getFirstTime());
-        statisticalDataEntity.setElectricFirstValue(electricVo.getFirstValue());
-        statisticalDataEntity.setElectricLastTime(electricVo.getLastTime());
-        statisticalDataEntity.setElectricValue(electricVo.getLastValue());
-        statisticalDataEntity.setElectricAddedValue(electricVo.getAddValue());
-        statisticalDataEntity.setTs(electricVo.getLastTime());
+        if(electricVo != null) {
+            statisticalDataEntity.setElectricFirstTime(electricVo.getFirstTime());
+            statisticalDataEntity.setElectricFirstValue(electricVo.getFirstValue());
+            statisticalDataEntity.setElectricLastTime(electricVo.getLastTime());
+            statisticalDataEntity.setElectricValue(electricVo.getLastValue());
+            statisticalDataEntity.setElectricAddedValue(electricVo.getAddValue());
+            statisticalDataEntity.setTs(electricVo.getLastTime());
+        }
 
         //气
-        statisticalDataEntity.setGasFirstTime(gasVo.getFirstTime());
-        statisticalDataEntity.setGasFirstValue(gasVo.getFirstValue());
-        statisticalDataEntity.setGasLastTime(gasVo.getLastTime());
-        statisticalDataEntity.setGasValue(gasVo.getLastValue());
-        statisticalDataEntity.setGasAddedValue(gasVo.getAddValue());
-        statisticalDataEntity.setTs(electricVo.getLastTime());
+        if(gasVo != null) {
+            statisticalDataEntity.setGasFirstTime(gasVo.getFirstTime());
+            statisticalDataEntity.setGasFirstValue(gasVo.getFirstValue());
+            statisticalDataEntity.setGasLastTime(gasVo.getLastTime());
+            statisticalDataEntity.setGasValue(gasVo.getLastValue());
+            statisticalDataEntity.setGasAddedValue(gasVo.getAddValue());
+            statisticalDataEntity.setTs(gasVo.getLastTime());
+        }
 
         //产量
-        statisticalDataEntity.setCapacityFirstTime(capacitiesVo.getFirstTime());
-        statisticalDataEntity.setCapacityFirstValue(capacitiesVo.getFirstValue());
-        statisticalDataEntity.setCapacityLastTime(capacitiesVo.getLastTime());
-        statisticalDataEntity.setCapacityValue(capacitiesVo.getLastValue());
-        statisticalDataEntity.setCapacityAddedValue(capacitiesVo.getAddValue());
-        statisticalDataEntity.setTs(electricVo.getLastTime());
-
+        if(capacitiesVo != null) {
+            statisticalDataEntity.setCapacityFirstTime(capacitiesVo.getFirstTime());
+            statisticalDataEntity.setCapacityFirstValue(capacitiesVo.getFirstValue());
+            statisticalDataEntity.setCapacityLastTime(capacitiesVo.getLastTime());
+            statisticalDataEntity.setCapacityValue(capacitiesVo.getLastValue());
+            statisticalDataEntity.setCapacityAddedValue(capacitiesVo.getAddValue());
+            statisticalDataEntity.setTs(capacitiesVo.getLastTime());
+        }
 
         return statisticalDataEntity;
     }
