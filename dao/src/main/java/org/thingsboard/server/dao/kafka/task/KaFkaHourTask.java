@@ -77,8 +77,13 @@ public class KaFkaHourTask {
         Map<String,Integer>  mapKeyNameMap= keyToKeyIdMap();
         for(Device device:deviceIdLists)
         {
+            try {
             energyHistoryHourService.save(getHour(device,startHourTime,hourEndTime,mapKeyNameMap));
-            statisticalDataService.saveDataTask(device,hourEndTime,mapKeyNameMap);
+                statisticalDataService.saveDataTask(device, hourEndTime, mapKeyNameMap);
+            }catch (Exception e)
+            {
+                log.error("异常信息:{}",e);
+            }
         }
 
     }
