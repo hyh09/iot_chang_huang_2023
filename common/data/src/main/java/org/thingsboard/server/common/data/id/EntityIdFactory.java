@@ -18,6 +18,8 @@ package org.thingsboard.server.common.data.id;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.edge.EdgeEventType;
 import org.thingsboard.server.common.data.id.factory.FactoryId;
+import org.thingsboard.server.common.data.id.hs.*;
+import org.thingsboard.server.common.data.id.hs.UserCredentialsId;
 import org.thingsboard.server.common.data.id.productionline.ProductionLineId;
 import org.thingsboard.server.common.data.id.workshop.WorkshopId;
 
@@ -86,6 +88,20 @@ public class EntityIdFactory {
                 return new WorkshopId(uuid);
             case PRODUCTION_LINE:
                 return new ProductionLineId(uuid);
+            case ORDER:
+                return new OrderId(uuid);
+            case ORDER_PLAN:
+                return new OrderPlanId(uuid);
+            case PRODUCTION_CALENDAR:
+                return new ProductionCalendarId(uuid);
+            case TENANT_MENU_ROLE:
+                return new TenantMenuRoleId(uuid);
+            case USER_MENU_ROLE:
+                return new UserMenuRoleId(uuid);
+            case USER_ROLE:
+                return new UserRoleId(uuid);
+            case USER_CREDENTIALS:
+                return new UserCredentialsId(uuid);
         }
         throw new IllegalArgumentException("EntityType " + type + " is not supported!");
     }

@@ -48,7 +48,13 @@ public enum ActionType {
     PROVISION_SUCCESS(false),
     PROVISION_FAILURE(false),
     ASSIGNED_TO_EDGE(false), // log edge name
-    UNASSIGNED_FROM_EDGE(false);
+    UNASSIGNED_FROM_EDGE(false),
+
+    // hs
+    USER_CHANGE_PASSWORD(false),
+    ORDER_IMPORT(false),
+    ORDER_DONE(false)
+    ;
 
     private final boolean isRead;
 

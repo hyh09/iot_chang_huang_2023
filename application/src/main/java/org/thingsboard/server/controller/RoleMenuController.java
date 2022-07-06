@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.vo.menu.TenantMenuVo;
@@ -48,7 +50,9 @@ public class RoleMenuController extends BaseController{
         SecurityUser securityUser = getCurrentUser();
         vo.setTenantId(securityUser.getTenantId().getId());
            roleMenuSvc.binding(vo);
-           return  "success";
+        saveAuditLog(getCurrentUser(), null, EntityType.USER_MENU_ROLE, null, ActionType.UPDATED, vo);
+
+        return  "success";
     }
 
 

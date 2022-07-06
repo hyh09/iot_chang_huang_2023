@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -62,6 +64,10 @@ public class ProductionCalenderController extends BaseController{
             log.info("/api/productionCalender/save保存设备生产日历报错：",e);
             throw handleException(e);
         }
+        if (productionCalenderAddDto.getId() == null)
+            saveAuditLog(getCurrentUser(), null, EntityType.PRODUCTION_CALENDAR, null, ActionType.ADDED, productionCalenderAddDto);
+        else
+            saveAuditLog(getCurrentUser(), productionCalenderAddDto.getId(), EntityType.PRODUCTION_CALENDAR, null, ActionType.UPDATED, productionCalenderAddDto);
     }
 
     @ApiOperation("生产日历分页查询")
@@ -180,6 +186,7 @@ public class ProductionCalenderController extends BaseController{
             log.info("/api/productionCalender/deleteById删除生产日历报错：",e);
             throw handleException(e);
         }
+        saveAuditLog(getCurrentUser(), toUUID(id), EntityType.PRODUCTION_CALENDAR, null, ActionType.DELETED, id);
     }
 
     @ApiOperation("集团看板大屏生产监控")
