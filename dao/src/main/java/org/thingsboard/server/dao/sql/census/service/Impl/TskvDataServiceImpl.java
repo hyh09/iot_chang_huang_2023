@@ -134,7 +134,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
         statisticalDataEntity.setCapacityFirstValue(capacitiesVo.getFirstValue());
         statisticalDataEntity.setCapacityLastTime(capacitiesVo.getLastTime());
         statisticalDataEntity.setCapacityValue(capacitiesVo.getLastValue());
-        statisticalDataEntity.setElectricAddedValue(capacitiesVo.getAddValue());
+        statisticalDataEntity.setCapacityAddedValue(capacitiesVo.getAddValue());
         statisticalDataEntity.setTs(electricVo.getLastTime());
 
 

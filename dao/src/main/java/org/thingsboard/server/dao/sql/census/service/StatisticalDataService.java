@@ -61,10 +61,10 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
         Long endTime02 = 0L;
         if(endTime.getHour() == 0)
         {
-            startTime02= CommonUtils.getYesterdayZero(); //统计昨天0点到今天23点59分的59秒或者到今天0点
-            endTime02=CommonUtils.getZero();//今天0点
+            startTime02= CommonUtils.getTimestampOfDateTime(endTime.minusHours(24)); //统计昨天0点到今天23点59分的59秒或者到今天0点
+            endTime02=CommonUtils.getTimestampOfDateTime(endTime);//CommonUtils.getZero();//今天0点
         }else {
-            startTime02=CommonUtils.getZero();//今天0点
+            startTime02=CommonUtils.getZeroByLocalDateTime(endTime);//今天0点
             endTime02=CommonUtils.getTimestampOfDateTime(endTime);//统一1小时刷新一; 避免设备多，延迟跨时间问题
         }
 

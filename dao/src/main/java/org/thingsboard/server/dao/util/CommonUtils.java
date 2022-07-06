@@ -480,6 +480,26 @@ public class CommonUtils {
     }
 
 
+    /**
+     *
+     * @param localDateTime
+     * @return
+     */
+    public  static  Long   getZeroByLocalDateTime(LocalDateTime localDateTime)
+    {
+        LocalDateTime localDateTime1 = null;
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        int second =localDateTime.getSecond();
+        localDateTime1  =  LocalDateTime.of(year,month,day,0,0,0,0);
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
+
+
 
 
 
