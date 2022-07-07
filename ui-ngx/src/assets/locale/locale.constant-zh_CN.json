@@ -589,7 +589,10 @@
     "type-bind-users": "关联用户",
     "type-unbind-users": "取消关联用户",
     "type-assigned-to-edge": "分配给边缘",
-    "type-unassigned-from-edge": "取消分配给边缘"
+    "type-unassigned-from-edge": "取消分配给边缘",
+    "type-user-change-password": "用户修改密码",
+    "type-import-order": "导入订单",
+    "type-finish-order": "订单报工完成"
   },
   "common": {
     "created-time": "创建时间",
@@ -2068,6 +2071,10 @@
     "type-entity-views": "实体视图",
     "type-order": "订单",
     "type-orders": "订单",
+    "type-order-plan": "订单计划",
+    "type-tenant-menu-role": "租户菜单角色",
+    "type-user-menu-role": "用户菜单角色",
+    "type-user-credentials": "用户令牌",
     "type-plugin": "插件",
     "type-plugins": "插件",
     "type-required": "实体类型必填",

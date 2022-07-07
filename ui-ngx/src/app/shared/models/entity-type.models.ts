@@ -56,7 +56,13 @@ export enum EntityType {
   CHART_SETTINGS = 'CHART_SETTINGS',
   CHART = 'CHART',
   PROD_MNG = 'PROD_MNG',
-  MNG_CALENDAR = 'MNG_CALENDAR'
+  MNG_CALENDAR = 'MNG_CALENDAR',
+  ORDER = 'ORDER',
+  ORDER_PLAN = 'ORDER_PLAN',
+  TENANT_MENU_ROLE = 'TENANT_MENU_ROLE',
+  USER_MENU_ROLE = 'USER_MENU_ROLE',
+  USER_CREDENTIALS = 'USER_CREDENTIALS',
+  PRODUCTION_CALENDAR = 'PRODUCTION_CALENDAR'
 }
 
 export enum AliasEntityType {
@@ -514,6 +520,42 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         add: 'device-mng.add-prod-calendar',
         noEntities: 'device-mng.no-prod-calendars-text',
         selectedEntities: 'device-mng.selected-prod-calendars'
+      }
+    ],
+    [
+      EntityType.ORDER,
+      {
+        type: 'entity.type-order'
+      }
+    ],
+    [
+      EntityType.ORDER_PLAN,
+      {
+        type: 'entity.type-order-plan'
+      }
+    ],
+    [
+      EntityType.TENANT_MENU_ROLE,
+      {
+        type: 'entity.type-tenant-menu-role'
+      }
+    ],
+    [
+      EntityType.USER_MENU_ROLE,
+      {
+        type: 'entity.type-user-menu-role'
+      }
+    ],
+    [
+      EntityType.USER_CREDENTIALS,
+      {
+        type: 'entity.type-user-credentials'
+      }
+    ],
+    [
+      EntityType.PRODUCTION_CALENDAR,
+      {
+        type: 'entity.type-prod-calendar'
       }
     ]
   ]

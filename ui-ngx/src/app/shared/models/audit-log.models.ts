@@ -62,7 +62,10 @@ export enum ActionType {
   CHANGE_PASSWORD = 'CHANGE_PASSWORD',
   SET_PERMISSIONS = 'SET_PERMISSIONS',
   BIND_USERS = 'BIND_USERS',
-  UNBIND_USERS = 'UNBIND_USERS'
+  UNBIND_USERS = 'UNBIND_USERS',
+  USER_CHANGE_PASSWORD = 'USER_CHANGE_PASSWORD',
+  ORDER_IMPORT = 'ORDER_IMPORT',
+  ORDER_DONE = 'ORDER_DONE'
 }
 
 export enum ActionStatus {
@@ -105,7 +108,10 @@ export const actionTypeTranslations = new Map<ActionType, string>(
     [ActionType.CHANGE_PASSWORD, 'audit-log.type-change-password'],
     [ActionType.SET_PERMISSIONS, 'audit-log.type-set-permissions'],
     [ActionType.BIND_USERS, 'audit-log.type-bind-users'],
-    [ActionType.UNBIND_USERS, 'audit-log.type-unbind-users']
+    [ActionType.UNBIND_USERS, 'audit-log.type-unbind-users'],
+    [ActionType.USER_CHANGE_PASSWORD, 'audit-log.type-user-change-password'],
+    [ActionType.ORDER_IMPORT, 'audit-log.type-import-order'],
+    [ActionType.ORDER_DONE, 'audit-log.type-finish-order']
   ]
 );
 
