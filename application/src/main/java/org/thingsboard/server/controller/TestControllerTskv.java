@@ -1,5 +1,6 @@
-package org.thingsboard.server.controller.test;
+package org.thingsboard.server.controller;;
 
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 @RestController
 @TbCoreComponent
 @RequestMapping("/test/tsky")
+@Api(value = "测试数据", tags = {"手动补历史时间点数据"})
 public class TestControllerTskv {
 
     @Autowired private DeviceDao deviceDao;
