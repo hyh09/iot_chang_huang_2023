@@ -47,8 +47,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
-@RequestMapping("/api/test/tsky")
-public class TestControllerTskv  extends BaseController {
+@RequestMapping("/api/yuhui/tsky")
+public class YunControllerTskv extends BaseController {
 
     @Autowired private DeviceDao deviceDao;
     @Autowired  private   DeviceService deviceService;
