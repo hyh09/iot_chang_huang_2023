@@ -75,7 +75,9 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
                 StaticalDataVo capacities = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.capacities.getCode()), startTime02, endTime02, null);
                 StatisticalDataEntity saveEntity = tskvDataServiceSvc.StaticalDataVoToStatisticalDataEntity(new StatisticalDataEntity(), water, electric, gas, capacities);
                 saveEntity.setEntityId(device.getUuidId());
-                this.save(saveEntity);
+                if(saveEntity.getDate() !=null) {
+                    this.save(saveEntity);
+                }
                 return;
             } else {
                 StaticalDataVo water = tskvDataServiceSvc.getInterval(device.getUuidId(), mapKeyNameMa.get(KeyNameEnums.water.getCode()), startTime02, endTime02, statisticalDataEntity.getWaterFirstValue());
