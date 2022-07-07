@@ -58,7 +58,7 @@ public class TestControllerTskv  extends BaseController {
     @Autowired private  BoardTrendChartRepositoryNewMethon boardTrendChartRepositoryNewMethon;
 
 
-    @PostMapping("/testSave")
+    @PostMapping("/test001")
     public  String testSave(@RequestBody TestSaveVo vo)
     {
         log.info("当前执行的时间:{}", vo.getLocalDateTime());
@@ -86,7 +86,7 @@ public class TestControllerTskv  extends BaseController {
 
 
 
-    @PostMapping("/testSavehour")
+    @PostMapping("/test002")
     public  String testSavehour(@RequestBody TestSaveVo vo)
     {
         log.info("当前执行的时间:{}", vo.getLocalDateTime());
