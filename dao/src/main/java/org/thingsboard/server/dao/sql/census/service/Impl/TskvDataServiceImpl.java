@@ -154,17 +154,15 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
                                         StaticalDataVo gasVo,
                                         StaticalDataVo capacitiesVo)
     {
-        if(StringUtilToll.isNotZero(waterVo.getLastTime()+"") ) {
+        if(waterVo != null && StringUtilToll.isNotZero(waterVo.getLastTime()+"") ) {
           return   CommonUtils.getLocalDateByLong(waterVo.getLastTime());
         }
-        if(StringUtilToll.isNotZero(electricVo.getLastTime()+"") ) {
+        if(electricVo != null && StringUtilToll.isNotZero(electricVo.getLastTime()+"") ) {
             return   CommonUtils.getLocalDateByLong(electricVo.getLastTime());
         }
-        if(StringUtilToll.isNotZero(gasVo.getLastTime()+"") ) {
+        if(gasVo!= null && StringUtilToll.isNotZero(gasVo.getLastTime()+"") ) {
             return   CommonUtils.getLocalDateByLong(gasVo.getLastTime());
         }
-        return   CommonUtils.getLocalDateByLong(capacitiesVo.getLastTime());
-
-
+            return   CommonUtils.getLocalDateByLong(capacitiesVo.getLastTime());
     }
 }
