@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @TbCoreComponent
 @RequestMapping("/api/test/tsky")
 @Api(value = "测试数据", tags = {"手动补历史时间点数据"})
-public class TestControllerTskv {
+public class TestControllerTskv  extends BaseController {
 
     @Autowired private DeviceDao deviceDao;
     @Autowired  private   DeviceService deviceService;
