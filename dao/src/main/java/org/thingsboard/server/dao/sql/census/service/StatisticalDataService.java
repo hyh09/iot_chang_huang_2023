@@ -55,7 +55,6 @@ public class StatisticalDataService extends BaseSQLServiceImpl<StatisticalDataEn
      * @param mapKeyNameMa
      */
     @Transactional
-    @Async
     public void saveDataTask(Device device, LocalDateTime endTime, Map<String,Integer> mapKeyNameMa) {
         try {
             Long startTime02 = 0L; //开始时间的天维度不存在跨天问题
