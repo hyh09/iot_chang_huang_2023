@@ -1,6 +1,7 @@
 package org.thingsboard.server.controller;;
 
 import io.swagger.annotations.Api;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +42,12 @@ import java.util.stream.Collectors;
  * 业务中文描述:  手动补历史时间点数据
  * Copyright (c) 2022,All Rights Reserved.
  */
+@Api(value = "测试数据", tags = {"手动补历史时间点数据"})
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/test/tsky")
-@Api(value = "测试数据", tags = {"手动补历史时间点数据"})
 public class TestControllerTskv  extends BaseController {
 
     @Autowired private DeviceDao deviceDao;
