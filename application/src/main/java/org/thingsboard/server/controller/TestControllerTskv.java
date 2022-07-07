@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @TbCoreComponent
-@RequestMapping("/test/tsky")
+@RequestMapping("/api/test/tsky")
 @Api(value = "测试数据", tags = {"手动补历史时间点数据"})
 public class TestControllerTskv {
 
