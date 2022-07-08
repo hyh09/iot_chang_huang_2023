@@ -94,7 +94,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sqlPartOnDevice(queryTsKvVo,sonSql01,param);
         if(queryTsKvVo.getDeviceId()  == null) {
 //            sonSql01.append(" and  d1.flg = true");
-             sonSql01.append(DEVICE_FLG_TRUE);
+//             sonSql01.append(DEVICE_FLG_TRUE);
         }
         sonSql.append(sonSql01).append("  ) group by  t1.entity_id ");
         StringBuffer  sql = new StringBuffer();
@@ -199,7 +199,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
         if(isCap) {
 //            sonSql01.append(" and  d1.flg = true");
-             sonSql01.append(DEVICE_FLG_TRUE);
+//             sonSql01.append(DEVICE_FLG_TRUE);
         }
 
         sonSql.append(sonSql01).append("  ) ");
