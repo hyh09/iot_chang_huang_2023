@@ -74,7 +74,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     public  static  String  FROM_SQL_02="    from   device  d1 left join hs_statistical_data tb on  d1.id = tb.entity_id  and  tb.ts>=:startTime and tb.ts<:endTime  where 1=1 " ;
 
 
-    private  static  String  DEVICE_FLG_TRUE="  and  EXISTS  (select 1  from   hs_order_plan  p1  where  p1.device_id=d1.id   and enabled =true )";
+//    private  static  String  DEVICE_FLG_TRUE="  and  EXISTS  (select 1  from   hs_order_plan  p1  where  p1.device_id=d1.id   and enabled =true )";
 
 
     /**
@@ -233,7 +233,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
         if(isCap) {
 //            sonSql01.append(" and  d1.flg = true");
-              sonSql01.append(DEVICE_FLG_TRUE);
+//              sonSql01.append(DEVICE_FLG_TRUE);
         }
         StringBuffer  sql = new StringBuffer();
         sql.append("select  d1.id as entity_id  from  device d1 where  1=1 ");
@@ -270,7 +270,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
                 .append(" and h1.\"date\" =:todayDate")
                 .append(sonSql01);
         if(vo.getType().equals("0")){
-            sql.append(DEVICE_FLG_TRUE);
+//            sql.append(DEVICE_FLG_TRUE);
 //            sql.append(" and  d1.flg = true");
             sql.append(" ORDER BY to_number(h1.capacity_added_value,'99999999999999999999999999.9999') DESC ");
             orderSql.append(" ORDER BY t2.capacity_added_value ");
@@ -299,7 +299,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sqlAll.append(sonSql01);
         if(vo.getType().equals("0"))
         {
-            sqlAll.append(DEVICE_FLG_TRUE);
+//            sqlAll.append(DEVICE_FLG_TRUE);
         }
         sqlAll.append(orderSql).append(" limit 10");
         List<CensusSqlByDayEntity>   list  = querySql(sqlAll.toString(),param, "censusSqlByDayEntity_02");
