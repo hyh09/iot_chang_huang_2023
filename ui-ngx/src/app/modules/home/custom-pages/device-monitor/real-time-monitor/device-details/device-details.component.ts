@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RealTimeMonitorService } from '@app/core/http/custom/real-time-monitor.service';
@@ -40,7 +41,8 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     protected store: Store<AppState>,
-    protected translate: TranslateService
+    protected translate: TranslateService,
+    protected datePipe: DatePipe
   ) {
     this.deviceId = this.route.snapshot.params.deviceId;
   }
@@ -266,7 +268,14 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
         time = prop.createdTime;
       }
     });
-    return time;
+    return time || '';
+  }
+
+  generateDatetime(time: number | string) {
+    if (time) {
+      return this.datePipe.transform(time, 'yyyy-MM-dd HH:mm:ss')
+    }
+    return '-'
   }
 
 }
