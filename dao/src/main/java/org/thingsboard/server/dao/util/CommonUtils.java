@@ -292,6 +292,16 @@ public class CommonUtils {
 
     }
 
+    /**
+     * 时间戳转换LocalDate
+     * @param timeMillis
+     * @return
+     */
+    public static LocalDate  getLocalDateByLong(Long timeMillis)
+    {
+       return LocalDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), ZoneId.systemDefault()).toLocalDate();
+    }
+
 
     /**
      *  获取所在时间所在时间片段
@@ -381,6 +391,16 @@ public class CommonUtils {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(l),ZoneId.systemDefault()).toLocalTime();
     }
 
+    /**
+     * long 转换 localDate
+     * @param timestamp
+     * @return
+     */
+    public  static   LocalDate longToLocalDate(long timestamp)
+    {
+       return    LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()).toLocalDate();
+    }
+
 
     /**
      * 获取两个时间段的整点时间
@@ -468,6 +488,26 @@ public class CommonUtils {
         }
         return getTimestampOfDateTime(localDateTime1);
     }
+
+
+    /**
+     *
+     * @param localDateTime
+     * @return
+     */
+    public  static  Long   getZeroByLocalDateTime(LocalDateTime localDateTime)
+    {
+        LocalDateTime localDateTime1 = null;
+        int year =  localDateTime.getYear();
+        Month month =  localDateTime.getMonth();
+        int day =  localDateTime.getDayOfMonth();
+        int hour =  localDateTime.getHour();
+        int minute = localDateTime.getMinute();
+        int second =localDateTime.getSecond();
+        localDateTime1  =  LocalDateTime.of(year,month,day,0,0,0,0);
+        return getTimestampOfDateTime(localDateTime1);
+    }
+
 
 
 

@@ -46,7 +46,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
     @Autowired  private TsKvRepository tsKvRepository;
     @Autowired  private ZookeeperProperties zookeeperProperties;
 
-    @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
+//    @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
     public void kafkaListener(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
@@ -62,7 +62,10 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
                     dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
                 }
                 statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
-            }finally {
+            }catch (Exception e){
+                log.error("小时的异常:{}",e);
+            }
+            finally {
                 lock.unLock();
             }
 
@@ -72,25 +75,10 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
     }
 
 
-//    @KafkaListener(topics = {"hs_energy_chart_kafka"}, groupId = "group2", containerFactory = "kafkaListenerContainerFactory01")
-//    public void kafkaListenerChart(String message) {
-//        if (StringUtils.isNotEmpty(message)) {
-//            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-//            String title = dataBodayVo.getTitle();
-//            UUID entityId = dataBodayVo.getEntityId();
-//            if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue()) ) {
-//                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
-//            }
-//
-//            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
-//
-//
-//        }
-//
-//    }
 
 
-    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
+
+//    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
     public void kafkaListenerhour(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
@@ -105,7 +93,11 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
                    dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
                }
                energyHistoryHourService.saveByHour(entityId, dataBodayVo, title);
-           }finally {
+           }catch (Exception e)
+            {
+                log.error("小时的统计表的异常:{}",e);
+            }
+            finally {
                lock.unLock();
            }
         }
@@ -115,7 +107,7 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
 
 
 
-    private String  setPreviousByZero(DataBodayVo dataBodayVo)
+    public String  setPreviousByZero(DataBodayVo dataBodayVo)
     {
        UUID  entityId=dataBodayVo.getEntityId();
        long time=dataBodayVo.getTs();
@@ -135,16 +127,6 @@ public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
         return  o.toString();
 
 
-//        TenantId tenantId = new TenantId(dataBodayVo.getTenantId());
-//        DeviceId deviceId = new DeviceId(dataBodayVo.getEntityId());
-//        ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, deviceId, dataBodayVo.getKey());
-//        try {
-//            TsKvEntry tsKvEntry1 = tsKvEntryListenableFuture.get();
-//            return  (tsKvEntry1.getValue() != null ? tsKvEntry1.getValue().toString() : dataBodayVo.getValue());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return dataBodayVo.getValue();
     }
 
 }

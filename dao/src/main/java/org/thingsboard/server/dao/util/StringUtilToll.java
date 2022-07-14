@@ -47,8 +47,14 @@ public class StringUtilToll {
         {
             return zero;
         }
+
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
+        //2022-07-06 柬埔寨生产遇到产量的上传一个  负的上亿数据,
+        if(b2.compareTo(BigDecimal.ZERO)<0)
+        {
+            return zero;
+        }
         BigDecimal  result = b1.subtract(b2).stripTrailingZeros();
         return  result.compareTo(BigDecimal.ZERO )<0?"0":roundUp(result.toPlainString());
     }
@@ -138,7 +144,7 @@ public class StringUtilToll {
 
 
     /**
-     * 保留4位小数
+     * 保留2位小数
      */
     public  static  String roundUp(String num)
     {

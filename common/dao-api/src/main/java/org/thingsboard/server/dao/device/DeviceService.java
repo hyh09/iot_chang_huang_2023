@@ -210,4 +210,7 @@ public interface DeviceService {
     long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
 
 
+
+     List<Device> findAllBy();
+
 }

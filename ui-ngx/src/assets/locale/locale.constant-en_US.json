@@ -590,7 +590,10 @@
     "type-change-password": "Change password",
     "type-set-permissions": "Set permissions",
     "type-bind-users": "Bind users",
-    "type-unbind-users": "Unbind users"
+    "type-unbind-users": "Unbind users",
+    "type-user-change-password": "User change password",
+    "type-import-order": "Import orders",
+    "type-finish-order": "Finish order"
   },
   "common": {
     "username": "Username",
@@ -2092,6 +2095,10 @@
     "list-of-role": "{ count, plural, 1 {One role} other {List of # roles} }",
     "type-order": "Order",
     "type-orders": "Orders",
+    "type-order-plan": "Order plan",
+    "type-tenant-menu-role": "Tenant menus and roles",
+    "type-user-menu-role": "User menus and roles",
+    "type-user-credentials": "User Credentials",
     "type-data-dic": "Data dictionary",
     "type-data-dics": "Data dictionaries",
     "type-device-dic": "Device dictionary",

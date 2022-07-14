@@ -137,7 +137,8 @@ public class JpaSqlTool {
         {
             sonSql01.append(" and  d1.tenant_id = :tenantId");
             param.put("tenantId", queryTsKvVo.getTenantId());
-            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+//            sonSql01.append("  and position('\"gateway\":true' in d1.additional_info)=0" );
+            sonSql01.append("  and (position('\"gateway\":true' in d1.additional_info)=0 or    d1.additional_info is null )"   );
 
         }
         if(queryTsKvVo.getFactoryId() != null)
@@ -216,5 +217,8 @@ public class JpaSqlTool {
         return  keyIds;
 
     }
+
+
+
 
 }

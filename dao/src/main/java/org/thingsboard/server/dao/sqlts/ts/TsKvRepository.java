@@ -239,5 +239,14 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
                                                     @Param("time") long time
     );
 
+    @Query(value ="SELECT  * FROM ts_kv tskv WHERE tskv.entity_id = :entityId "+
+           "  AND tskv.key = :entityKey  and  tskv.ts in (select  min(tskv1.ts)  from ts_kv tskv1 WHERE tskv1.entity_id = :entityId  AND tskv1.key = :entityKey " +
+            "  AND tskv1.ts >= :startTime AND tskv1.ts < :endTime )  ",nativeQuery = true)
+    TsKvEntity  findAllTodayFirstData(@Param("entityId") UUID entityId,@Param("entityKey") int entityKey,@Param("startTime") long startTime,@Param("endTime") long endTime);
+
+    @Query(value ="SELECT  * FROM ts_kv tskv WHERE tskv.entity_id = :entityId "+
+            "  AND tskv.key = :entityKey  and  tskv.ts in (select  max(tskv1.ts)  from ts_kv tskv1 WHERE tskv1.entity_id = :entityId  AND tskv1.key = :entityKey " +
+            "  AND tskv1.ts >= :startTime AND tskv1.ts < :endTime )  ",nativeQuery = true)
+    TsKvEntity  findAllTodayLastData(@Param("entityId") UUID entityId,@Param("entityKey") int entityKey,@Param("startTime") long startTime,@Param("endTime") long endTime);
 
 }

@@ -23,8 +23,9 @@ import javax.persistence.Table;
 //@Proxy(lazy = false)	
 @JsonIgnoreProperties(value={"hibernateLazyInitializer","handler","fieldHandler"})	
 public class StatisticalDataEntity  extends AbstractStatisticalDataEntity {
-	
-	
-	
 
- }	
+ public StatisticalDataEntity() {
+ }
+
+
+}

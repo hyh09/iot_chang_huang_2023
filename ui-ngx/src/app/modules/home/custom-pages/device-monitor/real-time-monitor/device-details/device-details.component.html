@@ -58,7 +58,7 @@
                   <span *ngIf="data.firstPropName"><span *ngFor="let prop of data.properties || []">{{ prop.content }}{{ prop.unit }}{{ prop.suffix }}</span></span>
                   <span *ngIf="!data.firstPropName">{{data.content}}{{data.unit}}</span>
                 </td>
-                <td width="26%">{{(data.firstPropName ? getAssociatedPropLatestTime(data) : data.createdTime) | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td width="26%">{{ generateDatetime(data.firstPropName ? getAssociatedPropLatestTime(data) : data.createdTime) }}</td>
               </tr>
             </tbody>
           </nz-table>
@@ -110,7 +110,7 @@
                             <span *ngIf="data.firstPropName"><span *ngFor="let prop of data.properties || []">{{ prop.content }}{{ prop.unit }}{{ prop.suffix }}</span></span>
                             <span *ngIf="!data.firstPropName">{{data.content}}{{data.unit}}</span>
                           </td>
-                          <td width="26%">{{(data.firstPropName ? getAssociatedPropLatestTime(data) : data.createdTime) | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                          <td width="26%">{{ generateDatetime(data.firstPropName ? getAssociatedPropLatestTime(data) : data.createdTime) }}</td>
                         </tr>
                       </tbody>  
                     </nz-table>

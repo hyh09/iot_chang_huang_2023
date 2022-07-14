@@ -47,6 +47,7 @@ public class EnergyHistoryHourService extends BaseSQLServiceImpl<EnergyHistoryHo
 
 
 
+
  
 
     public EnergyHistoryHourEntity queryTodayByEntityId(UUID entityId, long timestamp)

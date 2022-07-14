@@ -444,12 +444,12 @@ public class UserController extends BaseController  {
     @ApiOperation(value = "用户管理界面下的修改密码")
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
-    public Object  changeOthersPassword( @RequestBody PasswordVo vo)
-    {
+    public Object  changeOthersPassword( @RequestBody PasswordVo vo) throws ThingsboardException {
            log.info("【changeOthersPassword】打印当前的入参{}",vo);
            vo.setPassword(passwordEncoder.encode(vo.getPassword()));
 //            eventPublisher.publishEvent(new UserAuthDataChangedEvent( UserId.fromString(vo.getUserId())));
-           return  userService.changeOthersPassword(vo);
+        saveAuditLog(getCurrentUser(), toUUID(vo.getUserId()), EntityType.USER, null, ActionType.USER_CHANGE_PASSWORD, vo);
+        return  userService.changeOthersPassword(vo);
     }
 
 
@@ -527,6 +527,9 @@ public class UserController extends BaseController  {
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId(),getTenantId());
             savedUser.setRoleIds(user.getRoleIds());
+
+            saveAuditLog(getCurrentUser(), user.getId().getId(), EntityType.USER, user.getUserName(), ActionType.ADDED, user);
+
             return  savedUser;
         }
 
@@ -534,6 +537,7 @@ public class UserController extends BaseController  {
             log.error("创建用户的异常日志:入参为{}异常日志{}",user,e);
             throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
         }
+
 
     }
 
@@ -555,6 +559,8 @@ public class UserController extends BaseController  {
         try {
             userService.deleteUser(getTenantId(), userId);
             userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
+
+            saveAuditLog(getCurrentUser(), user.getId().getId(), EntityType.USER, user.getUserName(), ActionType.DELETED, user);
             return "success";
         }catch (EmptyResultDataAccessException e)
         {
@@ -608,6 +614,9 @@ public class UserController extends BaseController  {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId(),getTenantId());
            }
         user.setRoleIds(user.getRoleIds());
+
+        saveAuditLog(getCurrentUser(), user.getId().getId(), EntityType.USER, user.getUserName(), ActionType.UPDATED, user);
+
         return  user;
     }
 
