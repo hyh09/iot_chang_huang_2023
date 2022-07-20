@@ -16,6 +16,7 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.entity.productioncalender.dto.ProductionCalenderAddDto;
+import org.thingsboard.server.entity.productioncalender.dto.ProductionCalenderPageQry;
 import org.thingsboard.server.entity.productioncalender.dto.ProductionMonitorListQry;
 import org.thingsboard.server.entity.productioncalender.vo.ProductionCalenderHisListVo;
 import org.thingsboard.server.entity.productioncalender.vo.ProductionCalenderPageListVo;
@@ -64,26 +65,30 @@ public class ProductionCalenderController extends BaseController{
             log.info("/api/productionCalender/save保存设备生产日历报错：",e);
             throw handleException(e);
         }
-        if (productionCalenderAddDto.getId() == null)
+        if (productionCalenderAddDto.getId() == null) {
             saveAuditLog(getCurrentUser(), null, EntityType.PRODUCTION_CALENDAR, null, ActionType.ADDED, productionCalenderAddDto);
-        else
+        }else {
             saveAuditLog(getCurrentUser(), productionCalenderAddDto.getId(), EntityType.PRODUCTION_CALENDAR, null, ActionType.UPDATED, productionCalenderAddDto);
+        }
     }
 
     @ApiOperation("生产日历分页查询")
     @RequestMapping(value = "/getPageList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryName", value = "工厂名称",paramType = "query"),
-            @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query")
+            @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query"),
+            @ApiImplicitParam(name = "qry", value = "其他条件",paramType = "query")
     })
     @ResponseBody
-    public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,@RequestParam(required = false) String sortProperty,@RequestParam(required = false)  String sortOrder,
-                                                                          @RequestParam String factoryName, @RequestParam String deviceName) throws ThingsboardException {
+    public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,
+                                                                          @RequestParam(required = false) String sortProperty,
+                                                                          @RequestParam(required = false)  String sortOrder,
+                                                                          ProductionCalenderPageQry qry) throws ThingsboardException {
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             List<ProductionCalenderPageListVo> calenderPageListVos = new ArrayList<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,getCurrentUser().getTenantId().getId(),sortProperty,sortOrder),pageLink);
+            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(qry.toProductionCalender(getCurrentUser().getTenantId().getId(),sortProperty,sortOrder),pageLink);
             List<ProductionCalender> productionCalenderList = productionCalenderPageData.getData();
             if(!CollectionUtils.isEmpty(productionCalenderList)){
                 for (ProductionCalender productionCalender : productionCalenderList) {
