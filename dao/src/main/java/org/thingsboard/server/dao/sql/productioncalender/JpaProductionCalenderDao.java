@@ -62,6 +62,10 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 " where 1 = 1  and position('\"gateway\":true' in a1.additional_info)=0 ");
 
         if (productionCalender != null) {
+            if (productionCalender.getFactoryId() != null && StringUtils.isNotEmpty(productionCalender.getFactoryId().toString())) {
+                sonSql01.append(" and a2.id =:factoryId");
+                param.put("factoryId", productionCalender.getFactoryId());
+            }
             if (StringUtils.isNotEmpty(productionCalender.getFactoryName())) {
                 sonSql01.append(" and a2.name like :factoryName");
                 param.put("factoryName", "%" + productionCalender.getFactoryName() + "%");
@@ -71,7 +75,7 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 param.put("deviceName", "%" + productionCalender.getDeviceName() + "%");
             }
             if (productionCalender.getTenantId() != null) {
-                sonSql01.append(" and a1.tenant_id = :tenantId");
+                sonSql01.append(" and a1.tenant_id =:tenantId");
                 param.put("tenantId", productionCalender.getTenantId());
             }
             //排序
