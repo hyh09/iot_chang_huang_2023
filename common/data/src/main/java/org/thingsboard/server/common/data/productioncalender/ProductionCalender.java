@@ -69,7 +69,8 @@ public class ProductionCalender {
      * @param sortProperty
      * @param sortOrder
      */
-    public ProductionCalender(String deviceName,String factoryName,UUID tenantId,String sortProperty,String sortOrder) {
+    public ProductionCalender(UUID factoryId,String deviceName,String factoryName,UUID tenantId,String sortProperty,String sortOrder) {
+        this.factoryId = factoryId;
         this.deviceName = deviceName;
         this.factoryName = factoryName;
         this.tenantId = tenantId;
