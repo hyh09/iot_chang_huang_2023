@@ -5,6 +5,7 @@ import { ProdCalendar, ProdMng } from "@app/shared/models/custom/device-mng.mode
 import { PageLink, PageData, HasUUID } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class ProdMngService {
   // 获取生产管理列表
   public getProdMngList(pageLink: PageLink, filterParams: { factoryName: string; deviceName: string; }, config?: RequestConfig): Observable<PageData<ProdMng>> {
     return this.http.get<PageData<ProdMng>>(
-      `/api/productionCalender/getPageList${pageLink.toQuery()}&factoryName=${filterParams.factoryName}&deviceName=${filterParams.deviceName}`,
+      `/api/productionCalender/getPageList${pageLink.toQuery()}&factoryName=${filterParams.factoryName}&deviceName=${filterParams.deviceName}&factoryId=${environment.factoryId || ''}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
