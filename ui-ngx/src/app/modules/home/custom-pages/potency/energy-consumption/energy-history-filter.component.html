@@ -12,7 +12,7 @@
     <div class="title">{{ 'potency.interval-energy-consumption' | translate: { deviceName: entitiesTableConfig.componentsData.deviceName} }}</div>
     <nz-radio-group [(ngModel)]="keyNum" nzSize="small" (ngModelChange)="getIntervalData()">
       <label nz-radio-button nzValue="1">{{ 'potency.water' | translate }}</label>
-      <label nz-radio-button nzValue="2">{{ 'potency.electricity' | translate }}</label>
+      <label nz-radio-button nzValue="2">{{ 'potency.electric' | translate }}</label>
       <label nz-radio-button nzValue="3">{{ 'potency.gas' | translate }}</label>
     </nz-radio-group>
   </div>
