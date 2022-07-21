@@ -2561,6 +2561,7 @@
     "icon": "Icon",
     "select-icon": "Select icon",
     "material-icons": "Material icons",
+    "upload-icon": "Upload icon",
     "show-all": "Show all icons"
   },
   "import": {
@@ -3912,8 +3913,8 @@
     "delete-alarm-rule-title": "Are you sure you want to delete the alarm rule '{{deviceProfileName}}'?",
     "delete-alarm-rules-text": "Be careful, after the confirmation all selected alarm rules will be removed and all related data will become unrecoverable.",
     "delete-alarm-rules-title": "Are you sure you want to delete { count, plural, 1 {1 alarm rule} other {# alarm rules} }?",
-    "on-line": "on line",
-    "off-line": "off line",
+    "on-line": "online",
+    "off-line": "offline",
     "device-empty": "No devices were found.",
     "run-state-overview": "Operation overview",
     "running-devices": "Online / offline devices",
@@ -3954,7 +3955,7 @@
     "today-energy-consumption-top10": "Today ranking of device energy consumption",
     "today-capacity-top10": "Today ranking of device yield",
     "water": "Water (T)",
-    "electricity": "Electricity (KWH)",
+    "electricity": "Electric (KWH)",
     "gas": "Gas (T)",
     "interval-energy-consumption": "Interval energy consumption of {{deviceName}}",
     "interval-capacity": "Internal yield of {{deviceName}}"
