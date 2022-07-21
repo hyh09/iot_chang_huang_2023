@@ -39,6 +39,9 @@ public interface FactoryRepository extends PagingAndSortingRepository<FactoryEnt
 
     List<FactoryEntity> findAllByTenantIdOrderByCreatedTimeDesc(UUID tenantId);
 
+    @Query("select new FactoryEntity(t.id, t.name, t.tenantId) from FactoryEntity t")
+    List<FactoryEntity> findAllSimple();
+
     @Async
     @Query("select new FactoryEntity(t.id, t.name) from FactoryEntity t where " +
             "t.tenantId = :tenantId ")
