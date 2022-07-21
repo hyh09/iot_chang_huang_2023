@@ -43,6 +43,12 @@ public interface ProductionLineRepository extends PagingAndSortingRepository<Pro
     CompletableFuture<List<ProductionLineEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
 
     @Async
+    @Query("select new ProductionLineEntity(t.id, t.name, t.factoryId, t.workshopId) from ProductionLineEntity t where " +
+            "t.tenantId = :tenantId " +
+            "order by t.sort asc, t.createdTime asc")
+    CompletableFuture<List<ProductionLineEntity>> findAllIdAndNameAndSortByTenantIdOrderBySortAsc(@Param("tenantId") UUID tenantId);
+
+    @Async
     @Query("select t from ProductionLineEntity t where " +
             "t.tenantId = :tenantId " +
             "AND t.workshopId = :workshopId " +
