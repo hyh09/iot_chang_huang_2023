@@ -46,6 +46,7 @@ import org.thingsboard.server.common.msg.queue.TbCallback;
 import org.thingsboard.server.common.msg.queue.TopicPartitionInfo;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.device.DeviceService;
+import org.thingsboard.server.dao.hs.service.Impl.ScheduleTaskService;
 import org.thingsboard.server.dao.model.sql.AbstractTsKvEntity;
 import org.thingsboard.server.dao.model.sqlts.latest.TsKvLatestEntity;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
@@ -95,6 +96,9 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     private final TimeseriesService tsService;
     private final TbClusterService clusterService;
     private final PartitionService partitionService;
+
+    @Autowired
+    private ScheduleTaskService scheduleTaskService;
 
     @Autowired
     private AttributeKvRepository attributeKvRepository;
@@ -240,6 +244,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                     state.setActive(true);
                     save(deviceId, ACTIVITY_STATE, true);
                     pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
+                    this.scheduleTaskService.rtCheckFactoryStatus(deviceId);
                 }
                 /*else {
                 log.info("网关设备在线判断2未通过！【" + deviceId + "】");
