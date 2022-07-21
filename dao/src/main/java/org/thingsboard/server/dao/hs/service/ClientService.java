@@ -448,4 +448,16 @@ public interface ClientService {
      * @param profileId 设备配置Id
      */
     List<Device> listDevicesByProfileId(DeviceProfileId profileId);
+
+    /**
+     * 列举全部工厂
+     */
+    List<Factory> listFactories();
+
+    /**
+     * 查询单个设备是否在线
+     *
+     * @param deviceId 设备Id
+     */
+    Boolean isDeviceOnline(UUID deviceId);
 }

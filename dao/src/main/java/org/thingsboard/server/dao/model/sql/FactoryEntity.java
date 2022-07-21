@@ -28,6 +28,13 @@ public class FactoryEntity extends AbstractFactoryEntity<Factory>  {
         this.setName(name);
     }
 
+    public FactoryEntity(UUID id, String name, UUID tenantId) {
+        super();
+        this.id = id;
+        this.setTenantId(tenantId);
+        this.setName(name);
+    }
+
     @Override
     public Factory toData() {
         return super.toFactory();

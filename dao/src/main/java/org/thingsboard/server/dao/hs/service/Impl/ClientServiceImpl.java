@@ -156,6 +156,24 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     FactoryDao factoryDao;
 
     /**
+     * 查询单个设备是否在线
+     *
+     * @param deviceId 设备Id
+     */
+    @Override
+    public Boolean isDeviceOnline(UUID deviceId) {
+        return this.getDeviceOnlineStatus(DeviceId.fromString(deviceId.toString()));
+    }
+
+    /**
+     * 列举全部工厂
+     */
+    @Override
+    public List<Factory> listFactories() {
+        return DaoUtil.convertDataList(this.factoryRepository.findAllSimple());
+    }
+
+    /**
      * 查询用户
      *
      * @param userId 用户Id
