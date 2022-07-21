@@ -81,6 +81,9 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
     @Column(name = "del_flag")
     private String delFlag = "A";
 
+    @Column(name = "sort")
+    private Integer sort;
+
     public AbstractProductionLineEntity() {
         super();
     }
