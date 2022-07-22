@@ -71,6 +71,7 @@ export class DeviceFormComponent extends EntityComponent<ProdDevice> {
       dictDeviceId: [entity && entity.dictDeviceId ? entity.dictDeviceId : ''],
       name: [entity ? entity.name : '', Validators.required],
       deviceNo: [entity ? entity.deviceNo : ''],
+      sort: [entity ? entity.sort: ''],
       comment: [entity ? entity.comment : ''],
       picture: [entity ? entity.picture : ''],
       fileName: [entity ? entity.fileName : ''],
