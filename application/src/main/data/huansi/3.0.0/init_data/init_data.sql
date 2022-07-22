@@ -4,7 +4,10 @@
 INSERT INTO "public"."hs_init"("id", "init_data", "scope", "created_time", "created_user", "updated_time", "updated_user") VALUES ('a6bcd176-7538-402c-9035-5b966888faa0', '[{"id": null, "name": "能耗", "groupPropertyList": [{"id": null, "name": "water", "unit": "T", "title": "耗水量", "content": "0", "createdTime": null}, {"id": null, "name": "electric", "unit": "KWH", "title": "耗电量", "content": "0", "createdTime": null}, {"id": null, "name": "gas", "unit": "T", "title": "耗气量", "content": "0", "createdTime": null}]}, {"id": null, "name": "产能", "groupPropertyList": [{"id": null, "name": "capacities", "unit": "", "title": "总产能", "content": "0", "createdTime": null}]}]', 'DICT_DEVICE_GROUP', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9', 1636522070426, '07b770d0-3bb3-11ec-ad5a-9bec5deb66b9');
 
 
-
+-- July 22, 2022 17:50:48 GMT+8
+UPDATE "public"."hs_production_line" SET "sort" = '1' WHERE "name" = '前处理段';
+UPDATE "public"."hs_production_line" SET "sort" = '2' WHERE "name" = '转移印染段';
+UPDATE "public"."hs_production_line" SET "sort" = '3' WHERE "name" = '后处理段';
 
 
 

@@ -56,6 +56,8 @@ public class Factory implements HasName,HasCustomerId, HasOtaPackage {
     private UUID updatedUser;
     private String delFlag;
 
+    private Integer sort;
+
     /*********************************************查询条件***********************************/
     //车间名称
     public String workshopName;

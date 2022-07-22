@@ -63,7 +63,6 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.dao.FileEntity;
 import org.thingsboard.server.dao.hs.dao.FileRepository;
-import org.thingsboard.server.dao.hs.entity.enums.FileScopeEnum;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceVO;
 import org.thingsboard.server.dao.hs.service.FileService;
 import org.thingsboard.server.dao.model.ModelConstants;
@@ -927,6 +926,7 @@ public class DeviceController extends BaseController {
             savedDevice.setProductionLineName(addDeviceDto.getProductionLineName());
             return new DeviceVo(savedDevice);
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }

@@ -3636,6 +3636,7 @@
     "little-endian-required": "Small end in front is required.",
     "send-driver-config-success": "Send configuration is required.",
     "factory-mng": "Factory management",
+    "sort": "Sort",
     "dashboard-bg": "Dashboard background image",
     "prod-capactity-settings": "Yield operation configuration",
     "in-calculation": "Involve in yield operation",

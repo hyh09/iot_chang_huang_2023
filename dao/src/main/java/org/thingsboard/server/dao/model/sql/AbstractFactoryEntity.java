@@ -96,6 +96,9 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
     @Column(name = "updated_user")
     private UUID updatedUser;
 
+    @Column(name = "sort")
+    private Integer sort;
+
     @Column(name = "del_flag")
     private String delFlag = "A";
 
@@ -161,6 +164,11 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         this.updatedTime = factory.getUpdatedTime();
         this.updatedUser = factory.getUpdatedUser();
         this.delFlag = factory.getDelFlag();
+        if(factory.getSort() == null){
+            this.sort = 0;
+        }else {
+            this.sort = factory.getSort();
+        }
     }
 
     public Factory toFactory(){
@@ -186,6 +194,7 @@ public abstract class AbstractFactoryEntity<T extends Factory> extends BaseSqlEn
         factory.setUpdatedTime(updatedTime);
         factory.setUpdatedUser(updatedUser);
         factory.setDelFlag(delFlag);
+        factory.setSort(sort);
         return factory;
     }
 

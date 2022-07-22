@@ -73,6 +73,7 @@ public class FactoryController extends BaseController  {
             }
             return new FactoryVo(factory);
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -92,6 +93,7 @@ public class FactoryController extends BaseController  {
             checkParameter("id",id);
             factoryService.delFactory(toUUID(id));
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -120,6 +122,7 @@ public class FactoryController extends BaseController  {
             }
             return factoryVoList;
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -142,6 +145,7 @@ public class FactoryController extends BaseController  {
             factory.setLoginUserId(getCurrentUser().getId().getId());
             return new FactoryLevelAllListVo(factoryService.findFactoryListByCdn(factory));
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -162,6 +166,7 @@ public class FactoryController extends BaseController  {
             checkParameter("id",id);
             return new FactoryVo(checkNotNull(factoryService.findById(toUUID(id))));
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -191,6 +196,7 @@ public class FactoryController extends BaseController  {
             }
             return resultVo;
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -226,6 +232,7 @@ public class FactoryController extends BaseController  {
             }
             return new PageData<FactoryVersionVo>(resultVo,page,resultVo.size(),hasNext);
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
@@ -249,6 +256,7 @@ public class FactoryController extends BaseController  {
             }
             return factoryVoList;
         } catch (Exception e) {
+            log.error("异常",e);
             throw handleException(e);
         }
     }
