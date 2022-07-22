@@ -1742,6 +1742,7 @@ CREATE TABLE IF NOT EXISTS public.hs_production_line
     updated_time character varying(255) COLLATE pg_catalog."default",
     updated_user uuid,
     workshop_id uuid NOT NULL,
+    sort int4 NOT NULL DEFAULT 0,
     additional_info character varying COLLATE pg_catalog."default",
     CONSTRAINT tb_production_line_pkey PRIMARY KEY (id)
 )

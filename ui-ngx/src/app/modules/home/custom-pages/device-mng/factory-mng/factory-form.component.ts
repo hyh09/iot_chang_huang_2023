@@ -34,6 +34,7 @@ export class FactoryFormComponent extends EntityComponent<Factory> {
       postalCode: [entity ? entity.postalCode : ''],
       address: [entity ? entity.address : '', Validators.required],
       remark: [entity ? entity.remark : ''],
+      sort: [entity ? entity.sort: ''],
       logoImages: [{
         value: entity ? entity.logoImages : '',
         disabled: !this.isEdit
