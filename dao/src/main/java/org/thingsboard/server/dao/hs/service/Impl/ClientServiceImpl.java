@@ -828,10 +828,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public FactoryDetailBO getFactoryHierarchy(TenantId tenantId, UUID factoryId) {
         FactoryDetailBO factoryBO = new FactoryDetailBO();
-        CompletableFuture.allOf(this.factoryRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setFactories(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getId())).map(DaoUtil::getData).collect(Collectors.toList()))),
-                this.workshopRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setWorkshops(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+        CompletableFuture.allOf(this.factoryRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setFactories(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.workshopRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setWorkshops(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
                 this.productionLineRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setProductionLines(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
-                this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setDevices(v.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList())))).join();
+                this.deviceRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setDevices(v.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList())))).join();
         return factoryBO;
     }
 
