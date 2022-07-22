@@ -126,6 +126,11 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
         this.updatedTime = productionLine.getUpdatedTime();
         this.updatedUser = productionLine.getUpdatedUser();
         this.delFlag = productionLine.getDelFlag();
+        if(productionLine.getSort() == null){
+            this.sort = 0;
+        }else {
+            this.sort = productionLine.getSort();
+        }
     }
 
     public ProductionLine toProductionLine(){
@@ -145,6 +150,7 @@ public abstract class AbstractProductionLineEntity<T extends ProductionLine> ext
         productionLine.setUpdatedTime(updatedTime);
         productionLine.setUpdatedUser(updatedUser);
         productionLine.setDelFlag(delFlag);
+        productionLine.setSort(sort);
         return productionLine;
     }
 

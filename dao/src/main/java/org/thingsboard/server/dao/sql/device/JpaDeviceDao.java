@@ -396,6 +396,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     predicates.add(in);
                 }
                 //排序
+                Order sort = cb.asc(root.get("sort"));
                 if(StringUtils.isNotEmpty(orderValue) && StringUtils.isNotEmpty(descOrAsc)){
                     Order order = null;
                     if(descOrAsc.equals(DESC)){
@@ -403,9 +404,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     }else {
                         order = cb.asc(root.get(orderValue));
                     }
-                    return query.orderBy(order).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+                    return query.orderBy(sort,order).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
                 }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                return query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             List<DeviceEntity> all = deviceRepository.findAll(specification);
             if (CollectionUtils.isNotEmpty(all)) {

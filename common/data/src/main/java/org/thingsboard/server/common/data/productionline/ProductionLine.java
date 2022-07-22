@@ -4,11 +4,9 @@ import lombok.Data;
 import org.thingsboard.server.common.data.HasCustomerId;
 import org.thingsboard.server.common.data.HasName;
 import org.thingsboard.server.common.data.HasOtaPackage;
-import org.thingsboard.server.common.data.HasTenantId;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.OtaPackageId;
-import org.thingsboard.server.common.data.id.TenantId;
 
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +54,7 @@ public class ProductionLine implements HasName,HasCustomerId, HasOtaPackage {
     private long updatedTime;
     private UUID updatedUser;
     private String delFlag;
+    private Integer sort;
 
     /**********************************以下是非数据库字段***************************************/
     //工厂名称

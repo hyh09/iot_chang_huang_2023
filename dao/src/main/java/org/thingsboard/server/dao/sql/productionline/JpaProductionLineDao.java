@@ -37,6 +37,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,7 +150,11 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
                     productionLine.getWorkshopIds().forEach(in::value);
                     predicates.add(in);
                 }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                /**
+                 * order By
+                 */
+                Order sort = cb.asc(root.get("sort"));
+                return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             List<ProductionLineEntity> all = productionLineRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
