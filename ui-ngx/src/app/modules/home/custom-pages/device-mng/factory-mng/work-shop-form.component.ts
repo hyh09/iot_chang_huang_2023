@@ -30,6 +30,7 @@ export class WorkShopFormComponent extends EntityComponent<WorkShop> {
       factoryName: [entity && entity.factoryName ? entity.factoryName : this.entitiesTableConfig.componentsData.factoryName],
       name: [entity ? entity.name : '', Validators.required],
       remark: [entity ? entity.remark : ''],
+      sort: [entity ? entity.sort: ''],
       logoImages: [{
         value: entity ? entity.logoImages : '',
         disabled: !this.isEdit

@@ -13,6 +13,7 @@ interface CommonData {
   updatedTime?: number;
   updatedUser?: string;
   remark?: string;
+  sort?: string | number;
 }
 
 export declare type FactoryRowType = 'factory' | 'workShop' | 'prodLine' | 'device';
