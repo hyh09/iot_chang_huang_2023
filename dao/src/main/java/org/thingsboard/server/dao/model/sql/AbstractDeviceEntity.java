@@ -170,6 +170,11 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.comment = device.getComment();
         this.deviceNo = device.getDeviceNo();
         this.deviceFlg = device.getDeviceFlg();
+        if(device.getSort() == null){
+            this.sort = 0;
+        }else {
+            this.sort = device.getSort();
+        }
     }
 
     public AbstractDeviceEntity(DeviceEntity deviceEntity) {
@@ -199,6 +204,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.comment = deviceEntity.getComment();
         this.deviceNo = deviceEntity.getDeviceNo();
         this.deviceFlg = deviceEntity.getDeviceFlg();
+        this.sort = deviceEntity.getSort();
 
     }
 

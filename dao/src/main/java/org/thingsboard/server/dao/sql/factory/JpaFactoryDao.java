@@ -41,6 +41,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,7 +217,11 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                         predicates.add(cb.equal(root.get("id"), judgeUserVo.getUser().getFactoryId()));
                     }
                 }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                /**
+                 * order By
+                 */
+                Order sort = cb.asc(root.get("sort"));
+                return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             factoryList = factoryRepository.findAll(specification);
             System.out.println("结果："+ (System.currentTimeMillis() - l));
@@ -505,7 +510,11 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
                 ids.forEach(in::value);
                 predicates.add(in);
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                /**
+                 * order By
+                 */
+                Order sort = cb.asc(root.get("sort"));
+                return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             List<FactoryEntity> all = factoryRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){

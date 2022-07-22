@@ -80,6 +80,9 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
     @Column(name = "del_flag")
     private String delFlag = "A";
 
+    @Column(name = "sort")
+    private Integer sort;
+
     //产线
     //public List<ProductionLineEntity> productionLineEntityList;
     @Transient
@@ -126,6 +129,11 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         this.updatedTime = workshop.getUpdatedTime();
         this.updatedUser = workshop.getUpdatedUser();
         this.delFlag = workshop.getDelFlag();
+        if(workshop.getSort() == null){
+            this.sort = 0;
+        }else {
+            this.sort = workshop.getSort();
+        }
     }
 
     public Workshop toWorkshop(){
@@ -143,6 +151,7 @@ public abstract class AbstractWorkshopEntity<T extends Workshop> extends BaseSql
         workshop.setUpdatedTime(updatedTime);
         workshop.setUpdatedUser(updatedUser);
         workshop.setDelFlag(delFlag);
+        workshop.setSort(sort);
         return workshop;
     }
 

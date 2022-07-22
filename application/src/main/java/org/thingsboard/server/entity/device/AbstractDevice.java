@@ -95,6 +95,8 @@ public abstract class AbstractDevice{
     private long updatedTime;
 
     private UUID updatedUser;
+    @ApiModelProperty("排序值")
+    public Integer sort;
 
     /*******************************以下是非数据库字段***************************************/
     @ApiModelProperty("工厂名称")
@@ -149,6 +151,7 @@ public abstract class AbstractDevice{
         this.factoryName = device.getFactoryName();
         this.workshopName = device.getWorkshopName();
         this.productionLineName = device.getProductionLineName();
+        this.sort = device.getSort();
     }
 
     public AbstractDevice(DeviceEntity deviceEntity) {
@@ -219,6 +222,7 @@ public abstract class AbstractDevice{
         device.setDictDeviceId(dictDeviceId);
         device.setComment(this.comment);
         device.setDeviceNo(this.deviceNo);
+        device.setSort(sort);
         return device;
     }
 
