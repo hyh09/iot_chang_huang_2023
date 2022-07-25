@@ -85,25 +85,20 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     }
 
 
-//    /**
-//     * 该接口删除不使用
-//     * @return
-//     * @throws ThingsboardException
-//     */
-//    @ApiOperation("效能分页首页得数据，获取表头接口")
-//    @ApiResponses({
-//            @ApiResponse(code = 200, message =queryEntityByKeysHeader),
-//    })
-//    @RequestMapping(value = "/queryEntityByKeysHeader", method = RequestMethod.GET)
-//    public  Object queryEntityByKeysHeader() throws ThingsboardException {
-//        try{
-//            return efficiencyStatisticsSvc.queryEntityByKeysHeader();
-//        }catch (Exception e)
-//        {
-//            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}",e);
-//            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
-//        }
-//    }
+    @ApiOperation("效能分页首页得数据，获取表头接口")
+    @ApiResponses({
+            @ApiResponse(code = 200, message =queryEntityByKeysHeader),
+    })
+    @RequestMapping(value = "/queryEntityByKeysHeader", method = RequestMethod.GET)
+    public  Object queryEntityByKeysHeader() throws ThingsboardException {
+        try{
+            return efficiencyStatisticsSvc.queryEntityByKeysHeader();
+        }catch (Exception e)
+        {
+            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
 
 
 
