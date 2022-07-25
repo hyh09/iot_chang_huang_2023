@@ -20,7 +20,7 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-<mat-form-field>
+<mat-form-field *ngIf="env.loginPlatform === 0">
   <mat-label>{{ 'order.factory-name' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.factoryName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button

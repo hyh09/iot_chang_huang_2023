@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
 import { OrderForm } from '@app/shared/models/custom/order-form-mng.models';
+import { environment } from '@env/environment';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -10,6 +11,8 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './orders-filters.component.html'
 })
 export class OrdersFiltersComponent extends EntityTableHeaderComponent<OrderForm> {
+
+  env = environment;
 
   constructor(
     protected store: Store<AppState>,
