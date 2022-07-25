@@ -14,7 +14,6 @@ import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
 export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTableConfig<any>> {
 
   private readonly config: EntityTableConfig<any> = new EntityTableConfig<any>();
-  private oldFactoryId: string = '';
 
   constructor(
     private potencyService: PotencyService,
@@ -69,9 +68,8 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
 
         this.config.entitiesFetchFunction = pageLink => {
           const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-          if (factoryId && this.oldFactoryId !== factoryId) {
+          if (factoryId) {
             this.config.componentsData.factroryChange$.next(factoryId);
-            this.oldFactoryId = factoryId;
           }
           let startTime: number, endTime: number;
           if (this.config.componentsData.dateRange) {
