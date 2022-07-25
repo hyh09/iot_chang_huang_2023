@@ -41,6 +41,7 @@ public interface EfficiencyStatisticsSvc {
      * 效能分析 pc端的表头接口  返回  title (单位)
      * @return
      */
+    @Deprecated
     List<String> queryEntityByKeysHeader();
 
     //能耗历史的表头
