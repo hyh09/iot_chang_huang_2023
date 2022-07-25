@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
 import { FactoryVersion } from '@app/shared/models/custom/system-mng.models';
+import { environment } from '@env/environment';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -10,6 +11,8 @@ import { TranslateService } from '@ngx-translate/core';
   templateUrl: './factory-version-filters.component.html'
 })
 export class FactoryVersionFiltersComponent extends EntityTableHeaderComponent<FactoryVersion> {
+
+  env = environment;
 
   constructor(
     protected store: Store<AppState>,
