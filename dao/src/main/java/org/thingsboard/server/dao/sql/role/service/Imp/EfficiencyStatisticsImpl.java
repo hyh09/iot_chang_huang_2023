@@ -208,6 +208,37 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
     }
 
+    @Override
+    public Object queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
+        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
+        if(deviceInfo == null)
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
+        }
+        String deviceName = deviceInfo.getName();
+        //先查询能耗的属性
+        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        queryTsKvVo.setKeys(keys1);
+        Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink));
+        List<Map> list = page.getContent();
+        log.debug("查询当前角色下的用户绑定数据list{}",list);
+        if(CollectionUtils.isEmpty(list))
+        {
+            return new PageDataWithNextPage<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
+        }
+        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
+        if(page.hasNext())
+        {
+            Page<Map>  page1=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink.nextPageLink()));
+            List<Map> mapList1 = page1.getContent();
+            List<Map> mapList2 =   translateTitle(mapList1, deviceName,mapNameToVo);
+            Map  map=  mapList2.stream().findFirst().orElse(null);
+            return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),map);
+        }
+        return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
+    }
+
     /**
      * 查询产能历史
      * @param queryTsKvVo
