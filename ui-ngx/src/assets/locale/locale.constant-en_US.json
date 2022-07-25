@@ -3956,7 +3956,7 @@
     "today-energy-consumption-top10": "Today ranking of device energy consumption",
     "today-capacity-top10": "Today ranking of device yield",
     "water": "Water (T)",
-    "electricity": "Electric (KWH)",
+    "electric": "Electric (KWH)",
     "gas": "Gas (T)",
     "interval-energy-consumption": "Interval energy consumption of {{deviceName}}",
     "interval-capacity": "Internal yield of {{deviceName}}"
