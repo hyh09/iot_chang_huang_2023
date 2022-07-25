@@ -119,6 +119,7 @@ public class ScheduleTaskService {
                     v.setUrl(k);
                     this.sendDDMsg(v);
                 }), threadPoolTaskExecutor).join());
+        log.info("end check factory status ...");
     }
 
     /**
