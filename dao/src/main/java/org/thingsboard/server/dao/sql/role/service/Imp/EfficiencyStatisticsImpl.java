@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.DataConstants;
+import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
+import org.thingsboard.server.common.data.effciency.total.EfficiencyTotalValue;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -307,6 +309,23 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
 
+    @Override
+    public PageDataAndTotalValue<EfficiencyEntityInfo> queryEntityByKeysNew(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException {
+        if(queryTsKvVo.getFactoryId() == null)
+        {
+            queryTsKvVo.setFactoryId(getFirstFactory(tenantId));
+        }
+        //查询天维度的数据
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergyListAll(queryTsKvVo,pageLink);
+        //分页
+        Page<EnergyEffciencyNewEntity> page= PageUtil.createPageFromList(entityList,pageLink);
+        //具体的数据
+        List<EnergyEffciencyNewEntity> pageList=  page.getContent();
+        List<EfficiencyEntityInfo>  efficiencyEntityInfoList =  this.resultProcessingByEnergyPcNew(pageList);
+        EfficiencyTotalValue  efficiencyTotalValue = getTotalValueNewMethodnew(entityList);
+        return new PageDataAndTotalValue<EfficiencyEntityInfo>(efficiencyTotalValue,efficiencyEntityInfoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+
+    }
 
     @Override
     public ResultCapAppVo queryCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
@@ -882,6 +901,35 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return mapList;
     }
 
+
+    /*****
+     * PC端的能耗列表接口
+     * @param resultList     返回的结果
+     * @return
+     */
+    private  List<EfficiencyEntityInfo>  resultProcessingByEnergyPcNew(List<EnergyEffciencyNewEntity>  resultList)
+    {
+        List<EfficiencyEntityInfo>  efficiencyEntityInfoList = new ArrayList<EfficiencyEntityInfo>();
+        resultList.stream().forEach(vo->{
+            EfficiencyEntityInfo   efficiencyEntityInfo = new EfficiencyEntityInfo();
+            efficiencyEntityInfo.setDeviceName(vo.getDeviceName());
+            efficiencyEntityInfo.setDeviceId(vo.getEntityId());
+            efficiencyEntityInfo.setWaterConsumption(StringUtilToll.roundUp(vo.getWaterAddedValue()));
+            efficiencyEntityInfo.setElectricConsumption(StringUtilToll.roundUp(vo.getElectricAddedValue()));
+            efficiencyEntityInfo.setGasConsumption(StringUtilToll.roundUp(vo.getGasAddedValue()));
+            efficiencyEntityInfo.setCapacityConsumption(StringUtilToll.roundUp(vo.getCapacityAddedValue()));
+
+
+            String   capacityValue =vo.getCapacityAddedValue();
+            efficiencyEntityInfo.setUnitWaterConsumption(computeUnitEnergyConsumption(capacityValue,vo.getWaterAddedValue(),vo.getWaterLastTime(),vo.getWaterFirstTime()));
+            efficiencyEntityInfo.setUnitElectricConsumption(computeUnitEnergyConsumption(capacityValue,vo.getElectricAddedValue(),vo.getElectricLastTime(),vo.getElectricFirstTime()));
+            efficiencyEntityInfo.setUnitGasConsumption(computeUnitEnergyConsumption(capacityValue,vo.getGasAddedValue(),vo.getGasLastTime(),vo.getGasFirstTime()));
+            efficiencyEntityInfoList.add(efficiencyEntityInfo);
+        });
+        return efficiencyEntityInfoList;
+    }
+
+
     /**
      *
      * @param mapNameToVo
@@ -960,6 +1008,41 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
       return  totalValueList;
 
     }
+
+
+    /**
+     *Pc能耗的返回
+     * @param pageList
+     * @return
+     */
+    private   EfficiencyTotalValue getTotalValueNewMethodnew(List<EnergyEffciencyNewEntity> pageList)
+    {
+        EfficiencyTotalValue  totalValue  = new EfficiencyTotalValue();
+        BigDecimal invoiceAmount = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                .map(EnergyEffciencyNewEntity::getWaterAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String waterTotalValue= StringUtilToll.roundUp(invoiceAmount.stripTrailingZeros().toPlainString());
+        totalValue.setTotalWaterConsumption(waterTotalValue);
+
+        BigDecimal invoiceAmount02 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                .map(EnergyEffciencyNewEntity::getElectricAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String electricTotalValue= StringUtilToll.roundUp(invoiceAmount02.stripTrailingZeros().toPlainString());
+        totalValue.setTotalElectricConsumption(electricTotalValue);
+
+
+        BigDecimal invoiceAmount03 = pageList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
+                .map(EnergyEffciencyNewEntity::getGasAddedValue).map(BigDecimal::new).reduce(BigDecimal.ZERO,
+                        BigDecimal::add);
+        String value03= StringUtilToll.roundUp(invoiceAmount03.stripTrailingZeros().toPlainString());
+        totalValue.setTotalGasConsumption(value03);
+        return  totalValue;
+
+    }
+
 
 
     /**

@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
@@ -158,6 +159,54 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
+
+
+    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###新接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "startTime", value = "开始时间"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间"),
+            @ApiImplicitParam(name = "deviceId", value = "设备id")
+    })
+    @RequestMapping(value = "/queryEntityByKeysNew", method = RequestMethod.GET)
+    @ResponseBody
+    public PageDataAndTotalValue<EfficiencyEntityInfo> queryEntityByKeysNew(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId,
+            @RequestParam(required = false) UUID productionLineId,
+            @RequestParam(required = false) UUID workshopId,
+            @RequestParam(required = false) UUID factoryId
+    ) throws ThingsboardException {
+        try {
+            if ( startTime == null  || endTime == null) {
+                startTime=(CommonUtils.getZero());
+                endTime=(CommonUtils.getNowTime());
+            }
+
+            QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+            queryTsKvVo.setDeviceId(deviceId);
+            queryTsKvVo.setProductionLineId(productionLineId);
+            queryTsKvVo.setWorkshopId(workshopId);
+            queryTsKvVo.setFactoryId(factoryId);
+            queryTsKvVo.setStartTime(startTime);
+            queryTsKvVo.setEndTime(endTime);
+            PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+            queryTsKvVo.setTenantId(getTenantId().getId());
+            PageDataAndTotalValue<EfficiencyEntityInfo> obj =  efficiencyStatisticsSvc.queryEntityByKeysNew(queryTsKvVo,getTenantId(), pageLink);
+            return  obj;
+
+        }catch (Exception e)
+        {
+            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}",e);
+            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        }
+    }
+
 
 
 

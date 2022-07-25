@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
@@ -41,6 +42,7 @@ public interface EfficiencyStatisticsSvc {
      * 效能分析 pc端的表头接口  返回  title (单位)
      * @return
      */
+    @Deprecated
     List<String> queryEntityByKeysHeader();
 
     //能耗历史的表头
@@ -74,6 +76,7 @@ public interface EfficiencyStatisticsSvc {
      */
     PageDataAndTotalValue<Map> queryEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
+    PageDataAndTotalValue<EfficiencyEntityInfo> queryEntityByKeysNew(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
 
 
