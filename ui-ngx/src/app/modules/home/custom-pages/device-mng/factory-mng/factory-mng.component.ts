@@ -18,6 +18,7 @@ import { DeviceFormComponent } from './device-form.component';
 import { DistributeDeviceComponent, DistributeDeviceDialogData } from './distribute-device.component';
 import { Router } from '@angular/router';
 import { SetPermissionsComponent, SetPermissionsDialogData } from '../../auth-mng/role-mng/set-permissions.component';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'tb-factory-mng',
@@ -27,7 +28,7 @@ import { SetPermissionsComponent, SetPermissionsDialogData } from '../../auth-mn
 export class FactoryMngComponent extends PageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public isDetailsOpen: boolean = false;
-  public filters = FILTERS;
+  public filters = [...FILTERS];
   public filterParams = {
     name: '',
     workshopName: '',
@@ -52,6 +53,10 @@ export class FactoryMngComponent extends PageComponent implements OnInit, AfterV
     private router: Router
   ) {
     super(store);
+    // 工厂端隐藏工厂筛选项
+    if (environment.loginPlatform === 1) {
+      this.filters = this.filters.filter(item => item.propName !== 'name')
+    }
   }
 
   ngOnInit() {

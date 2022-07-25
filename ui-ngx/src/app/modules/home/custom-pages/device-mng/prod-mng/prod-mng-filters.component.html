@@ -1,4 +1,4 @@
-<mat-form-field>
+<mat-form-field *ngif="env.loginPlatform === 0">
   <mat-label>{{ 'device-mng.factory-name' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.factoryName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button

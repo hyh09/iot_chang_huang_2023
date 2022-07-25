@@ -41,7 +41,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       workshopId: '',
       productionLineId: '',
       deviceId: '',
-      dateRange: [now, now],
+      dateRange: [getTheStartOfDay(now, false), getTheEndOfDay(now, false)],
       totalCapacity: 0,
       factroryChange$: new BehaviorSubject<string>('')
     }
@@ -62,8 +62,8 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       }
       let startTime: number, endTime: number;
       if (this.config.componentsData.dateRange) {
-        startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
-        endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+        startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
+        endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
