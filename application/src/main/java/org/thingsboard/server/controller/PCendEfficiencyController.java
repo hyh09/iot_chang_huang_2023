@@ -315,7 +315,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setSortOrder(sortOrder);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
 
-            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
+            return efficiencyStatisticsSvc.queryEnergyHistoryNew(queryTsKvVo,getTenantId(), pageLink);
         }catch (Exception e)
         {
             log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
