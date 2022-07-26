@@ -61,6 +61,13 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         this.setName(name);
     }
 
+    public DeviceEntity (UUID id, String name, String rename){
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setRename(rename);
+    }
+
     public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
         super();
         this.id = id;
