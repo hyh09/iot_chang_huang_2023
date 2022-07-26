@@ -90,7 +90,9 @@ zk:
   # Enable/disable zookeeper discovery service.
   enabled: "${ZOOKEEPER_ENABLED:false}"
   # Zookeeper connect string
-  url: "${ZOOKEEPER_URL:localhost:2181}"
+  #url: "${ZOOKEEPER_URL:localhost:2181}"
+  ##本地虚拟机中的zk 2022年7月26号配置
+  url: "${ZOOKEEPER_URL:192.168.110.100:2181,192.168.110.100:2888,192.168.110.100:3888}"
   # Zookeeper retry interval in milliseconds
   retry_interval_ms: "${ZOOKEEPER_RETRY_INTERVAL_MS:3000}"
   # Zookeeper connection timeout in milliseconds
