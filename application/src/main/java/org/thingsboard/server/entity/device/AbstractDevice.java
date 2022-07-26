@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.entity.device;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -44,8 +45,11 @@ public abstract class AbstractDevice{
     @ApiModelProperty("")
     private String type;
 
-    @ApiModelProperty("设备名称")
+    @ApiModelProperty("设备编码")
     private String name;
+
+    @ApiModelProperty("设备名称")
+    private String rename;
 
     @ApiModelProperty("标签")
     private String label;
@@ -223,7 +227,13 @@ public abstract class AbstractDevice{
         device.setComment(this.comment);
         device.setDeviceNo(this.deviceNo);
         device.setSort(sort);
+        device.setRename(rename);
         return device;
+    }
+
+    //2022-7-26设备名称变更为设备编码
+    public void setDevieCode(){
+        this.name = Uuids.timeBased().toString();
     }
 
 }

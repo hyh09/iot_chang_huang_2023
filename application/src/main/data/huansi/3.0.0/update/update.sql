@@ -20,6 +20,8 @@ COMMENT ON COLUMN public.device.device_no IS '设备编号';
 alter table device add flg boolean default false;
 ALTER TABLE public.device ADD COLUMN sort bigint;
 COMMENT ON COLUMN public.device.sort IS '排序值';
+ALTER TABLE public.device ADD COLUMN rename character varying(255) COLLATE pg_catalog."default";
+COMMENT ON COLUMN public.device.rename IS '重命名';
 
 
 
