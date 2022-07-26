@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
+import org.thingsboard.server.common.data.effciency.data.EfficiencyHistoryDataVo;
 import org.thingsboard.server.common.data.effciency.total.EfficiencyTotalValue;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -121,8 +122,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  final  static  String AFTER_HISTORY_ENERGY="量";//历史能耗 ：
 
 
-
-
+    /**
+     * 效能分析能耗列表的动态接口字段 ，弃用
+     * @return
+     */
     @Override
     public List<String> queryEntityByKeysHeader() {
         log.debug("效能分页首页得数据，获取表头接口");
@@ -207,6 +210,38 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
          }
         return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
     }
+
+    @Override
+    public Object queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
+        DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
+        if(deviceInfo == null)
+        {
+            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
+        }
+        String deviceName = deviceInfo.getName();
+        //先查询能耗的属性
+        List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
+        queryTsKvVo.setKeys(keys1);
+        Page<Map>  page=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink));
+        List<Map> list = page.getContent();
+        log.debug("查询当前角色下的用户绑定数据list{}",list);
+        if(CollectionUtils.isEmpty(list))
+        {
+            return new PageDataWithNextPage<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
+        }
+        List<EfficiencyHistoryDataVo> mapList =   translateTitleNew(list, deviceName);
+        if(page.hasNext())
+        {
+            Page<Map>  page1=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink.nextPageLink()));
+            List<Map> mapList1 = page1.getContent();
+            List<EfficiencyHistoryDataVo> mapList2 =   translateTitleNew(mapList1, deviceName);
+            EfficiencyHistoryDataVo  map=  mapList2.stream().findFirst().orElse(null);
+            return new PageDataWithNextPage<EfficiencyHistoryDataVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),map);
+        }
+        return new PageDataWithNextPage<EfficiencyHistoryDataVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
+    }
+
 
     /**
      * 查询产能历史
@@ -773,6 +808,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
             });
             mapList.add(map1);
+        }
+
+        return mapList;
+
+    }
+
+
+    private   List<EfficiencyHistoryDataVo> translateTitleNew(List<Map> list,String deviceName  )
+    {
+        List<EfficiencyHistoryDataVo> mapList = new ArrayList<EfficiencyHistoryDataVo>();
+
+        for(Map m:list)
+        {
+                EfficiencyHistoryDataVo  efficiencyHistoryDataVo = new EfficiencyHistoryDataVo();
+                efficiencyHistoryDataVo.setCreatedTime(m.get("createdTime")!=null?(Long) m.get("createdTime"):0);
+                efficiencyHistoryDataVo.setDeviceName(deviceName);
+                efficiencyHistoryDataVo.setElectric(m.get("electric")!=null?m.get("electric").toString():"0");
+                efficiencyHistoryDataVo.setWater(m.get("water")!=null?m.get("water").toString():"0");
+                efficiencyHistoryDataVo.setGas(m.get("gas")!=null?m.get("gas").toString():"0");
+                mapList.add(efficiencyHistoryDataVo);
         }
 
         return mapList;

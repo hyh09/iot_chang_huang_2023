@@ -50,6 +50,9 @@ public interface EfficiencyStatisticsSvc {
 
     Object  queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
 
+    Object  queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
+
+
     PageDataWithNextPage<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
