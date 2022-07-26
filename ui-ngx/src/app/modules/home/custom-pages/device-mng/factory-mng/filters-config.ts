@@ -1,4 +1,4 @@
-export const FILTERS = [{
+export const FILTERS: { langKey: string; propName: string; }[] = [{
   langKey: 'device-mng.factory-name',
   propName: 'name'
 }, {

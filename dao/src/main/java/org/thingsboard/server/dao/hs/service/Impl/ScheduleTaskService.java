@@ -90,35 +90,40 @@ public class ScheduleTaskService {
     }
 
     void scheduleCheckFactoryStatus() {
-        log.info("starting check factory status ...");
+        log.info("starting check factory status ..DDEnabled: " + DDEnabled + " urls:" + urls);
         if (!DDEnabled || StringUtils.isBlank(urls))
             return;
-        List<String> urlList = Arrays.stream(urls.split(",")).map(String::trim).collect(Collectors.toList());
-        this.clientService.listFactories().stream()
-                .map(v -> CompletableFuture.supplyAsync(() -> this.clientService.listSimpleDevicesByQuery(new TenantId(v.getTenantId()), new FactoryDeviceQuery().setFactoryId(v.getId().toString())), threadPoolTaskExecutor)
-                        .thenApplyAsync(devices -> {
-                            if (!devices.isEmpty()) {
-                                var r = devices.stream().map(f -> CompletableFuture.supplyAsync(() -> this.clientService.isDeviceOnline(f.getId().getId()), threadPoolTaskExecutor)).map(CompletableFuture::join)
-                                        .allMatch(Boolean.FALSE::equals);
-                                if (r) {
-                                    if (Boolean.TRUE.equals(factoryStatusMap.getOrDefault(v.getId(), true))) {
-                                        factoryStatusMap.put(v.getId(), false);
-                                        return DDMsgBO.builder()
-                                                .tenantName(this.tenantRepository.findById(v.getTenantId()).map(TenantEntity::getTitle).orElse(""))
-                                                .factoryName(v.getName())
-                                                .build();
+        try {
+            List<String> urlList = Arrays.stream(urls.split(",")).map(String::trim).collect(Collectors.toList());
+            this.clientService.listFactories().stream()
+                    .map(v -> CompletableFuture.supplyAsync(() -> this.clientService.listSimpleDevicesByQuery(new TenantId(v.getTenantId()), new FactoryDeviceQuery().setFactoryId(v.getId().toString())), threadPoolTaskExecutor)
+                            .thenApplyAsync(devices -> {
+                                if (!devices.isEmpty()) {
+                                    var r = devices.stream().map(f -> CompletableFuture.supplyAsync(() -> this.clientService.isDeviceOnline(f.getId().getId()), threadPoolTaskExecutor)).map(CompletableFuture::join)
+                                            .allMatch(Boolean.FALSE::equals);
+                                    if (r) {
+                                        if (Boolean.TRUE.equals(factoryStatusMap.getOrDefault(v.getId(), true))) {
+                                            factoryStatusMap.put(v.getId(), false);
+                                            return DDMsgBO.builder()
+                                                    .tenantName(this.tenantRepository.findById(v.getTenantId()).map(TenantEntity::getTitle).orElse(""))
+                                                    .factoryName(v.getName())
+                                                    .build();
+                                        }
+                                    } else {
+                                        factoryStatusMap.put(v.getId(), true);
                                     }
-                                } else {
-                                    factoryStatusMap.put(v.getId(), true);
                                 }
-                            }
-                            return null;
-                        }))
-                .map(CompletableFuture::join).filter(Objects::nonNull)
-                .forEach(v -> CompletableFuture.runAsync(() -> urlList.forEach(k -> {
-                    v.setUrl(k);
-                    this.sendDDMsg(v);
-                }), threadPoolTaskExecutor).join());
+                                return null;
+                            }))
+                    .map(CompletableFuture::join).filter(Objects::nonNull)
+                    .forEach(v -> CompletableFuture.runAsync(() -> urlList.forEach(k -> {
+                        v.setUrl(k);
+                        this.sendDDMsg(v);
+                    }), threadPoolTaskExecutor).join());
+        } catch (Exception ex) {
+            log.error("failed to check factory status " + ex.getMessage());
+        }
+        log.info("end check factory status ...");
     }
 
     /**

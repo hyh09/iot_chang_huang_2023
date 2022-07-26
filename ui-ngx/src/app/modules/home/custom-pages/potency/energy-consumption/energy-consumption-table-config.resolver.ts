@@ -7,14 +7,13 @@ import { TranslateService } from "@ngx-translate/core";
 import { FactoryTreeComponent } from '@app/modules/home/components/factory-tree/factory-tree.component';
 import { map } from 'rxjs/operators';
 import { BehaviorSubject, Observable, Observer } from "rxjs";
-import { EnergyConsumptionOverviewComponent } from "./energy-consumption-overview.component";
-import { getTheStartOfDay, getTheEndOfDay } from "@app/core/utils";
+import { EnergyConsumptionOverviewComponent } from './energy-consumption-overview.component';
+import { getTheEndOfDay, getTheStartOfDay } from "@app/core/utils";
 
 @Injectable()
 export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTableConfig<any>> {
 
   private readonly config: EntityTableConfig<any> = new EntityTableConfig<any>();
-  private oldFactoryId: string = '';
 
   constructor(
     private potencyService: PotencyService,
@@ -48,7 +47,7 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       workshopId: '',
       productionLineId: '',
       deviceId: '',
-      dateRange: [now, now],
+      dateRange: [getTheStartOfDay(now, false), getTheEndOfDay(now, false)],
       totalValue: [],
       factroryChange$: new BehaviorSubject<string>('')
     };
@@ -69,14 +68,13 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
 
         this.config.entitiesFetchFunction = pageLink => {
           const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-          if (factoryId && this.oldFactoryId !== factoryId) {
+          if (factoryId) {
             this.config.componentsData.factroryChange$.next(factoryId);
-            this.oldFactoryId = factoryId;
           }
           let startTime: number, endTime: number;
           if (this.config.componentsData.dateRange) {
-            startTime = (getTheStartOfDay(this.config.componentsData.dateRange[0] as Date) as number);
-            endTime = (getTheEndOfDay(this.config.componentsData.dateRange[1] as Date) as number);
+            startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
+            endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
           }
           const { pageSize, page, textSearch, sortOrder } = pageLink;
           const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
