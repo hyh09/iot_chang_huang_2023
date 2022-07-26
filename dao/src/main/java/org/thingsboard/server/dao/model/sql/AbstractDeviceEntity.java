@@ -26,11 +26,7 @@ import org.hibernate.annotations.TypeDefs;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.device.data.DeviceData;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.OtaPackageId;
-import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.dao.model.BaseSqlEntity;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.model.SearchTextEntity;
@@ -130,6 +126,9 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
     @Column(name = "sort")
     private Integer sort;
 
+    @Column(name = "rename")
+    private String rename;
+
     public AbstractDeviceEntity() {
         super();
     }
@@ -175,6 +174,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         }else {
             this.sort = device.getSort();
         }
+        this.rename = device.getRename();
     }
 
     public AbstractDeviceEntity(DeviceEntity deviceEntity) {
@@ -205,7 +205,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         this.deviceNo = deviceEntity.getDeviceNo();
         this.deviceFlg = deviceEntity.getDeviceFlg();
         this.sort = deviceEntity.getSort();
-
+        this.rename = deviceEntity.getRename();
     }
 
     @Override
@@ -253,6 +253,7 @@ public abstract class AbstractDeviceEntity<T extends Device> extends BaseSqlEnti
         device.setDeviceNo(this.deviceNo);
         device.setDeviceFlg(this.deviceFlg);
         device.setSort(this.sort);
+        device.setRename(this.rename);
         return device;
     }
 

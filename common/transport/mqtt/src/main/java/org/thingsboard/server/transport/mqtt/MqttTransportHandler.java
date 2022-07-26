@@ -642,7 +642,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     }
 
     void processConnect(ChannelHandlerContext ctx, MqttConnectMessage msg) {
-        log.info("[{}] Processing connect msg for client: {}!", sessionId, msg.payload().clientIdentifier());
+        log.info("[{}] 处理客户端的连接消息: {}!", sessionId, msg.payload().clientIdentifier());
         String userName = msg.payload().userName();
         String clientId = msg.payload().clientIdentifier();
         if (DataConstants.PROVISION.equals(userName) || DataConstants.PROVISION.equals(clientId)) {
