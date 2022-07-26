@@ -30,8 +30,13 @@
 ></nz-range-picker>
 <div class="data-overview">
   <div class="overview-item">{{ 'potency.total-energy-consumption' | translate }}</div>
-  <div
-    *ngFor="let item of entitiesTableConfig.componentsData.totalValue"
-    class="overview-item"
-  >{{ item }}</div>
+  <div class="overview-item">
+    {{ 'potency.total-water-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalWaterConsumption || 0 }}
+  </div>
+  <div class="overview-item">
+    {{ 'potency.total-electric-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalElectricConsumption || 0 }}
+  </div>
+  <div class="overview-item">
+    {{ 'potency.total-gas-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalGasConsumption || 0 }}
+  </div>
 </div>

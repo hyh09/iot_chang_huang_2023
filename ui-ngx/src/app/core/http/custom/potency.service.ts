@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, TimePageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
-import { DeviceCapacityList, DeviceEnergyConsumptionList, PotencyInterval, PotencyTop10, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, PotencyInterval, PotencyTop10, RunningState } from '@app/shared/models/custom/potency.models';
 import { DeviceProp } from "@app/shared/models/custom/device-monitor.models";
 import { map } from "rxjs/operators";
 
@@ -59,11 +59,6 @@ export class PotencyService {
       }));
   }
 
-  // 获取能耗分析表头
-  public getEnergyConsumptionTableHeader(config?: RequestConfig): Observable<string[]> {
-    return this.http.get<string[]>(`/api/pc/efficiency/queryEntityByKeysHeader`, defaultHttpOptionsFromConfig(config));
-  }
-
   // 获取能耗分析数据列表
   public getEnergyConsumptionDatas(pageLink: TimePageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceEnergyConsumptionList> {
     let queryStr: string[] = [];
@@ -73,23 +68,18 @@ export class PotencyService {
       });
     }
     return this.http.get<DeviceEnergyConsumptionList>(
-      `/api/pc/efficiency/queryEntityByKeys${pageLink.toQuery()}&${queryStr.join('&')}`,
+      `/api/pc/efficiency/queryEntityByKeysNew${pageLink.toQuery()}&${queryStr.join('&')}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
 
-  // 获取设备能耗历史数据表头
-  public getEnergyHistoryTableHeader(config?: RequestConfig): Observable<string[]> {
-    return this.http.get<string[]>(`/api/pc/efficiency/queryEnergyHistoryHeader`, defaultHttpOptionsFromConfig(config));
-  }
-
   // 获取设备能耗历史数据列表
-  public getEnergyHistoryDatas(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<PageData<object>> {
-    return this.http.get<PageData<object>>(
-      `/api/pc/efficiency/queryEnergyHistory${pageLink.toQuery()}&deviceId=${deviceId}`,
+  public getEnergyHistoryDatas(pageLink: TimePageLink, deviceId: string, config?: RequestConfig): Observable<PageData<DeviceEnergyConsumption>> {
+    return this.http.get<PageData<DeviceEnergyConsumption>>(
+      `/api/pc/efficiency/queryEnergyHistoryNew${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)).pipe(map(res => {
         if (res && res.data && res.data.length > 0) {
-          const othersKeys = ['createdTime', '设备名称'];
+          const othersKeys = ['createdTime', 'deviceName'];
           const valueKeys = Object.keys(res.data[0]).filter(key => !othersKeys.includes(key));
           res.data.forEach((item, index) => {
             const nextItem = res.data[index + 1] || res.nextData;

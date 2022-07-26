@@ -17,8 +17,24 @@ export interface DeviceCapacityList {
   totalPages: number;
 }
 
-export interface DeviceEnergyConsumptionList extends PageData<object> {
-  totalValue: string[];
+export interface DeviceEnergyConsumption extends BaseData<any> {
+  deviceId?: string;
+  deviceName: string;
+  waterConsumption: string;
+  electricConsumption: string;
+  gasConsumption: string;
+  capacityConsumption?: string;
+  unitWaterConsumption?: string;
+  unitElectricConsumption?: string;
+  unitGasConsumption?: string;
+}
+
+export interface DeviceEnergyConsumptionList extends PageData<DeviceEnergyConsumption> {
+  totalValue: {
+    totalWaterConsumption: string;
+    totalElectricConsumption: string;
+    totalGasConsumption: string;
+  }
 }
 
 export interface RunningState {
