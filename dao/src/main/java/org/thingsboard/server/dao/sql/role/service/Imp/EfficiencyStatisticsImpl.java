@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
+import org.thingsboard.server.common.data.effciency.data.EfficiencyHistoryDataVo;
 import org.thingsboard.server.common.data.effciency.total.EfficiencyTotalValue;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -121,8 +122,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private  final  static  String AFTER_HISTORY_ENERGY="量";//历史能耗 ：
 
 
-
-
+    /**
+     * 效能分析能耗列表的动态接口字段 ，弃用
+     * @return
+     */
     @Override
     public List<String> queryEntityByKeysHeader() {
         log.debug("效能分页首页得数据，获取表头接口");
@@ -227,17 +230,18 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             return new PageDataWithNextPage<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
         }
-        List<Map> mapList =   translateTitle(list, deviceName,mapNameToVo);
+        List<EfficiencyHistoryDataVo> mapList =   translateTitleNew(list, deviceName);
         if(page.hasNext())
         {
             Page<Map>  page1=  effectHistoryKvRepository.queryEntity(queryTsKvVo, DaoUtil.toPageable(pageLink.nextPageLink()));
             List<Map> mapList1 = page1.getContent();
-            List<Map> mapList2 =   translateTitle(mapList1, deviceName,mapNameToVo);
-            Map  map=  mapList2.stream().findFirst().orElse(null);
-            return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),map);
+            List<EfficiencyHistoryDataVo> mapList2 =   translateTitleNew(mapList1, deviceName);
+            EfficiencyHistoryDataVo  map=  mapList2.stream().findFirst().orElse(null);
+            return new PageDataWithNextPage<EfficiencyHistoryDataVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),map);
         }
-        return new PageDataWithNextPage<Map>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
+        return new PageDataWithNextPage<EfficiencyHistoryDataVo>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
     }
+
 
     /**
      * 查询产能历史
@@ -804,6 +808,26 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 }
             });
             mapList.add(map1);
+        }
+
+        return mapList;
+
+    }
+
+
+    private   List<EfficiencyHistoryDataVo> translateTitleNew(List<Map> list,String deviceName  )
+    {
+        List<EfficiencyHistoryDataVo> mapList = new ArrayList<EfficiencyHistoryDataVo>();
+
+        for(Map m:list)
+        {
+                EfficiencyHistoryDataVo  efficiencyHistoryDataVo = new EfficiencyHistoryDataVo();
+                efficiencyHistoryDataVo.setCreatedTime(m.get("createdTime")!=null?(Long) m.get("createdTime"):0);
+                efficiencyHistoryDataVo.setDeviceName(deviceName);
+                efficiencyHistoryDataVo.setElectric(m.get("electric")!=null?m.get("electric").toString():"0");
+                efficiencyHistoryDataVo.setWater(m.get("water")!=null?m.get("water").toString():"0");
+                efficiencyHistoryDataVo.setGas(m.get("gas")!=null?m.get("gas").toString():"0");
+                mapList.add(efficiencyHistoryDataVo);
         }
 
         return mapList;
