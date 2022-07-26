@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.controller;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -177,6 +178,11 @@ public class DeviceController extends BaseController {
                              @RequestParam(name = "accessToken", required = false) String accessToken) throws ThingsboardException {
         boolean created = device.getId() == null;
         try {
+            if(device.getId() == null && StringUtils.isEmpty(device.getId().toString())){
+                //2022-7-26设备唯一编码
+                device.setRename(Uuids.timeBased().toString());
+            }
+
             device.setTenantId(getCurrentUser().getTenantId());
 
             Device oldDevice = null;
@@ -892,6 +898,10 @@ public class DeviceController extends BaseController {
             checkNotNull(addDeviceDto);
             boolean created = addDeviceDto.getId() == null;
             Device device = addDeviceDto.toDevice();
+            if(device.getId() == null && StringUtils.isEmpty(device.getId().toString())){
+                //2022-7-26设备唯一编码
+                device.setRename(Uuids.timeBased().toString());
+            }
             device.setTenantId(getCurrentUser().getTenantId());
             Device oldDevice = null;
             String saveType = null;
