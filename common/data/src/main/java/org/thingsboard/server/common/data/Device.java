@@ -89,6 +89,9 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
 
     private UUID updatedUser;
 
+    @ApiModelProperty("设备重命名")
+    private String rename;
+
     /**********************************以下是非数据库字段***************************************/
 
     private List<UUID> deviceIdList;
@@ -163,7 +166,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.factoryName = device.getFactoryName();
         this.workshopName = device.getWorkshopName();
         this.productionLineName = device.getProductionLineName();
-
+        this.rename = device.getRename();
     }
 
     public Device updateDevice(Device device) {

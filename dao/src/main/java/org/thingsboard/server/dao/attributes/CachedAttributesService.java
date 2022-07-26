@@ -25,6 +25,8 @@ import org.springframework.cache.Cache;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.thingsboard.server.common.data.DataConstants;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
@@ -34,18 +36,11 @@ import org.thingsboard.server.common.data.kv.KvEntry;
 import org.thingsboard.server.common.stats.DefaultCounter;
 import org.thingsboard.server.common.stats.StatsFactory;
 import org.thingsboard.server.dao.cache.CacheExecutorService;
+import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.service.Validator;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -58,6 +53,8 @@ import static org.thingsboard.server.dao.attributes.AttributeUtils.validate;
 public class CachedAttributesService implements AttributesService {
     private static final String STATS_NAME = "attributes.cache";
     public static final String LOCAL_CACHE_TYPE = "caffeine";
+    //设备重命名
+    public static final String RENAME = "rename";
 
     private final AttributesDao attributesDao;
     private final AttributesCacheWrapper cacheWrapper;
@@ -65,6 +62,7 @@ public class CachedAttributesService implements AttributesService {
     private final DefaultCounter hitCounter;
     private final DefaultCounter missCounter;
     private Executor cacheExecutor;
+    private DeviceDao deviceDao;
 
     @Value("${cache.type}")
     private String cacheType;
@@ -72,11 +70,12 @@ public class CachedAttributesService implements AttributesService {
     public CachedAttributesService(AttributesDao attributesDao,
                                    AttributesCacheWrapper cacheWrapper,
                                    StatsFactory statsFactory,
-                                   CacheExecutorService cacheExecutorService) {
+                                   CacheExecutorService cacheExecutorService,
+                                   DeviceDao deviceDao) {
         this.attributesDao = attributesDao;
         this.cacheWrapper = cacheWrapper;
         this.cacheExecutorService = cacheExecutorService;
-
+        this.deviceDao = deviceDao;
         this.hitCounter = statsFactory.createDefaultCounter(STATS_NAME, "result", "hit");
         this.missCounter = statsFactory.createDefaultCounter(STATS_NAME, "result", "miss");
     }
@@ -200,6 +199,7 @@ public class CachedAttributesService implements AttributesService {
         // TODO: can do if (attributesCache.get() != null) attributesCache.put() instead, but will be more twice more requests to cache
         List<String> attributeKeys = attributes.stream().map(KvEntry::getKey).collect(Collectors.toList());
         future.addListener(() -> evictAttributesFromCache(tenantId, entityId, scope, attributeKeys), cacheExecutor);
+        future.addListener(() -> updateDevice(tenantId, entityId, scope, attributes), cacheExecutor);
         return future;
     }
 
@@ -218,6 +218,33 @@ public class CachedAttributesService implements AttributesService {
             }
         } catch (Exception e) {
             log.error("[{}][{}] Failed to remove values from cache.", tenantId, entityId, e);
+        }
+    }
+
+    /**
+     * 更新设备一些自定义值
+     * @param tenantId
+     * @param entityId
+     * @param scope
+     * @param attributes
+     */
+    private void updateDevice(TenantId tenantId, EntityId entityId, String scope, List<AttributeKvEntry> attributes) {
+        try {
+            if(DataConstants.CLIENT_SCOPE.equals(scope)){
+                for (AttributeKvEntry entry : attributes) {
+                    if(entry.getKey().equals(RENAME)){
+                        Device device = deviceDao.findById(entityId.getId());
+                        if(!entry.getValue().toString().equals(device.getRename())){
+                            device.setRename(entry.getValue() + "");
+                            log.info("同步设备名称设为：{}",device.getRename());
+                            deviceDao.saveOrUpdDevice(device);
+                        }
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("[{}][{}] 遥测属性，更新设备值异常.", tenantId, entityId, e);
         }
     }
 }
