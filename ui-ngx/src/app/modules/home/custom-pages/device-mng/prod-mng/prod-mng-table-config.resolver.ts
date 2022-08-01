@@ -30,14 +30,14 @@ export class ProdMngTableConfigResolver implements Resolve<EntityTableConfig<Pro
 
     this.config.componentsData = {
       factoryName: '',
-      deviceName: ''
+      rename: ''
     }
   }
 
   resolve(): EntityTableConfig<ProdMng> {
     this.config.columns = [
       new EntityTableColumn<ProdMng>('factoryName', 'device-mng.factory-name', '33.333333%'),
-      new EntityTableColumn<ProdMng>('deviceName', 'device-mng.device-name', '33.333333%'),
+      new EntityTableColumn<ProdMng>('rename', 'device-mng.device-name', '33.333333%'),
       new DateEntityTableColumn<ProdMng>('startTime', 'datetime.time-from', this.datePipe, '150px'),
       new DateEntityTableColumn<ProdMng>('endTime', 'datetime.time-to', this.datePipe, '150px')
     ];
@@ -47,7 +47,7 @@ export class ProdMngTableConfigResolver implements Resolve<EntityTableConfig<Pro
 
     this.config.componentsData = {
       factoryName: '',
-      deviceName: ''
+      rename: ''
     }
 
     this.config.tableTitle = this.translate.instant('device-mng.prod-mng');
@@ -82,8 +82,8 @@ export class ProdMngTableConfigResolver implements Resolve<EntityTableConfig<Pro
     if ($event) {
       $event.stopPropagation();
     }
-    const { factoryId, deviceId, factoryName, deviceName } = entity || {};
-    this.router.navigateByUrl(`deviceManagement/prodManagement/${factoryId}/${deviceId}/calendars?factoryName=${encodeURIComponent(factoryName)}&deviceName=${encodeURIComponent(deviceName)}`);
+    const { factoryId, deviceId, factoryName, rename } = entity || {};
+    this.router.navigateByUrl(`deviceManagement/prodManagement/${factoryId}/${deviceId}/calendars?factoryName=${encodeURIComponent(factoryName)}&deviceName=${encodeURIComponent(rename)}`);
   }
 
 }

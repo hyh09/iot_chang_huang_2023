@@ -37,7 +37,7 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
     this.config.entitiesDeleteEnabled = false;
     this.config.selectionEnabled = false;
 
-    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('deviceName', 'potency.device-name', '200px', entity => entity.deviceName || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('rename', 'potency.device-name', '200px', entity => entity.rename || '', () => ({}), false));
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('waterConsumption', 'potency.water-consumption', '100px', entity => entity.waterConsumption || '', () => ({}), false));
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('electricConsumption', 'potency.electric-consumption', '100px', entity => entity.electricConsumption || '', () => ({}), false));
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('gasConsumption', 'potency.gas-consumption', '100px', entity => entity.gasConsumption || '', () => ({}), false));

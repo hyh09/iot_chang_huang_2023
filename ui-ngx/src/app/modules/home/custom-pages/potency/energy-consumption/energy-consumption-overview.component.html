@@ -9,7 +9,7 @@
   </div>
   <div class="bar-wrapper">
     <div *ngFor="let item of top10; let $index = index" class="bar-item">
-      <div class="device-name" [title]="item.deviceName">No.{{ $index + 1 }} {{ item.deviceName }}</div>
+      <div class="device-name" [title]="item.rename">No.{{ $index + 1 }} {{ item.rename }}</div>
       <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
         <div fxFlex>
           <nz-progress [nzPercent]="item.percent" [nzStrokeColor]="{ '0%': '#0e4ba1', '100%': '#99d5d4' }" nzStatus="active" [nzShowInfo]="false"></nz-progress>

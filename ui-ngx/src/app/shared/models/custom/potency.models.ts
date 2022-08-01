@@ -3,7 +3,7 @@ import { BaseData, PageData } from "@app/shared/public-api";
 export interface DeviceCapacity extends BaseData<any> {
   deviceId: string;
   value: string;
-  deviceName: string;
+  rename: string;
   productionName?: string;
   workshopName?: string;
 }
@@ -19,7 +19,7 @@ export interface DeviceCapacityList {
 
 export interface DeviceEnergyConsumption extends BaseData<any> {
   deviceId?: string;
-  deviceName: string;
+  rename: string;
   waterConsumption: string;
   electricConsumption: string;
   gasConsumption: string;
@@ -54,7 +54,7 @@ export interface RunningState {
 
 export interface PotencyTop10Item {
   deviceId: string;
-  deviceName: string;
+  rename: string;
   value: string;
   percent?: number;
 }
