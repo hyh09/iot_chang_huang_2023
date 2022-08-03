@@ -528,7 +528,7 @@ public class UserController extends BaseController  {
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId(),getTenantId());
             savedUser.setRoleIds(user.getRoleIds());
 
-            saveAuditLog(getCurrentUser(), user.getId().getId(), EntityType.USER, user.getUserName(), ActionType.ADDED, user);
+            saveAuditLog(getCurrentUser(), savedUser.getUuidId(), EntityType.USER, user.getUserName(), ActionType.ADDED, user);
 
             return  savedUser;
         }
