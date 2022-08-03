@@ -502,6 +502,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     }
 
     void updateInactivityStateIfExpired() {
+        log.info("start updateInactivityStateIfExpired ...");
         final long ts = System.currentTimeMillis();
         partitionedDevices.forEach((tpi, deviceIds) -> {
             log.debug("Calculating state updates. tpi {} for {} devices", tpi.getFullTopicName(), deviceIds.size());
