@@ -54,20 +54,23 @@ private List<String> list=new ArrayList<>();
         list.add("springfox");//BeanModelProperty
         list.add("org.hibernate.persister");
         list.add("org.hibernate.loader");//EntityReferenceInitializerImpl  ResultSetProcessorImpl
-
+        list.add("org.hibernate.type.descriptor.sql"); //BasicBinder  绑定参数的打印
+       list.add("org.hibernate.SQL");//打印sql
+        list.add("org.hibernate.query");//查询语句
+        list.add("delight.nashornsandbox");//打印sql
         /**
          * 连接池
          */
-//        list.add("com.zaxxer.hikari.pool.HikariPool");
-//        list.add("com.datastax.oss.driver");
-//        list.add("org.hibernate.metamodel.internal");
-//        list.add("org.hibernate.resource.jdbc");
-//        list.add("org.hibernate.internal.SessionImpl");
-//
-//        /**
-//         * org.postgresql
-//         */
-//        list.add("org.postgresql");
+        list.add("com.zaxxer.hikari.pool.HikariPool");
+        list.add("com.datastax.oss.driver");
+        list.add("org.hibernate.metamodel.internal");
+        list.add("org.hibernate.resource.jdbc");
+        list.add("org.hibernate.internal.SessionImpl");
+
+        /**
+         * org.postgresql
+         */
+        list.add("org.postgresql");
 
         /**
          * apache
