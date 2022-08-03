@@ -58,6 +58,7 @@ private List<String> list=new ArrayList<>();
        list.add("org.hibernate.SQL");//打印sql
         list.add("org.hibernate.query");//查询语句
         list.add("delight.nashornsandbox");//打印sql
+        list.add("org.hibernate.resource.transaction.internal");
         /**
          * 连接池
          */
@@ -96,6 +97,8 @@ private List<String> list=new ArrayList<>();
         list.add("org.thingsboard.server.service.transport");//DefaultTbCoreToTransportService
         list.add("org.thingsboard.server.dao.nosql");//CassandraAbstractDao
         list.add("org.thingsboard.server.queue.common");
+        list.add("org.thingsboard.server.dao.sql");
+        list.add("org.thingsboard.server.controller.timetask");
 
 
 
