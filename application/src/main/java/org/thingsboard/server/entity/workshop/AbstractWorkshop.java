@@ -60,6 +60,8 @@ public abstract class AbstractWorkshop{
     @ApiModelProperty("删除标记（A-未删除；D-已删除）")
     private String delFlag = "A";
 
+    private Integer sort;
+
 
     /***********************************************以下非数据库字段*************************************************************/
     @ApiModelProperty("工厂名称")
@@ -89,6 +91,7 @@ public abstract class AbstractWorkshop{
         this.updatedTime = workshop.getUpdatedTime();
         this.updatedUser = workshop.getUpdatedUser();
         this.delFlag = workshop.getDelFlag();
+        this.sort = workshop.getSort();
     }
 
     public Workshop toWorkshop(){
@@ -106,6 +109,7 @@ public abstract class AbstractWorkshop{
         workshop.setUpdatedTime(updatedTime);
         workshop.setUpdatedUser(updatedUser);
         workshop.setDelFlag(delFlag);
+        workshop.setSort(sort);
         return workshop;
     }
 

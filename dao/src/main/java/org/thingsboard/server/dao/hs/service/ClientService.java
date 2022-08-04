@@ -76,6 +76,15 @@ public interface ClientService {
     <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQuery(TenantId tenantId, T t, PageLink pageLink);
 
     /**
+     * 分页查询设备列表-按设备排序值排序
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     * @param pageLink 分页参数
+     */
+    <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQueryOrderBySort(TenantId tenantId, T t, PageLink pageLink);
+
+    /**
      * 查询全部设备的在线情况
      *
      * @param allDeviceIdList 设备的UUID列表
@@ -209,6 +218,21 @@ public interface ClientService {
     Map<UUID, User> mapIdToUser(List<UUID> userIds);
 
     /**
+     * 查询订单产能-通过遥测数据
+     *
+     * @param plans 生产计划列表
+     */
+    BigDecimal getOrderCapacitiesByTs(List<OrderPlan> plans);
+
+    /**
+     * 查询订单产能-通过遥测数据
+     *
+     * @param plans   生产计划列表
+     * @param orderId 订单Id
+     */
+    OrderCapacityBO getOrderCapacitiesByTs(List<OrderPlan> plans, UUID orderId);
+
+    /**
      * 查询订单产能
      *
      * @param plans 生产计划列表
@@ -222,13 +246,6 @@ public interface ClientService {
      * @param orderId 订单Id
      */
     OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId);
-
-    /**
-     * 查询订单设备产能
-     *
-     * @param plans 生产计划列表
-     */
-    Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans);
 
     /**
      * 根据工厂名称精确查询
@@ -359,7 +376,7 @@ public interface ClientService {
      * @param endTime    结束时间
      * @param properties 属性
      */
-    Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties);
+    Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) throws ExecutionException, InterruptedException;
 
     /**
      * 查询设备班次时间列表
@@ -431,4 +448,16 @@ public interface ClientService {
      * @param profileId 设备配置Id
      */
     List<Device> listDevicesByProfileId(DeviceProfileId profileId);
+
+    /**
+     * 列举全部工厂
+     */
+    List<Factory> listFactories();
+
+    /**
+     * 查询单个设备是否在线
+     *
+     * @param deviceId 设备Id
+     */
+    Boolean isDeviceOnline(UUID deviceId);
 }

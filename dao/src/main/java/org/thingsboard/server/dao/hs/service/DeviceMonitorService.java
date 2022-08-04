@@ -114,7 +114,7 @@ public interface DeviceMonitorService {
      * @param isShowAttributes 是否显示属性
      * @return 查询设备历史-表头，包含时间
      */
-    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes);
+    List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) throws ExecutionException, InterruptedException;
 
     /**
      * 【APP】获得实时监控列表数据
@@ -286,4 +286,14 @@ public interface DeviceMonitorService {
      * @return 设备关键参数
      */
     DeviceKeyParametersResult getDeviceKeyParameters(TenantId tenantId, UUID deviceId) throws ThingsboardException;
+
+    /**
+     * 查询设备部件名称
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param componentId 部件Id
+     * @return 部件名称
+     */
+    String getRtMonitorDeviceComponentName(TenantId tenantId, UUID deviceId, UUID componentId);
 }

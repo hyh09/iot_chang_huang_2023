@@ -63,6 +63,8 @@ public abstract class AbstractProductionLine{
     @ApiModelProperty("删除标记（A-未删除；D-已删除）")
     public String delFlag = "A";
 
+    private Integer sort;
+
     public AbstractProductionLine() {
         super();
     }
@@ -85,6 +87,7 @@ public abstract class AbstractProductionLine{
         this.updatedTime = productionLine.getUpdatedTime();
         this.updatedUser = productionLine.getUpdatedUser();
         this.delFlag = productionLine.getDelFlag();
+        this.sort = productionLine.getSort();
     }
 
     public ProductionLine toProductionLine(){
@@ -104,6 +107,7 @@ public abstract class AbstractProductionLine{
         productionLine.setUpdatedTime(updatedTime);
         productionLine.setUpdatedUser(updatedUser);
         productionLine.setDelFlag(delFlag);
+        productionLine.setSort(sort);
         return productionLine;
     }
 

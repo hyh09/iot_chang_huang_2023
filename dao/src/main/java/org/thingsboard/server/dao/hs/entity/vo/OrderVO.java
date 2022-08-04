@@ -10,6 +10,7 @@ import org.apache.commons.compress.utils.Lists;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -130,6 +131,7 @@ public class OrderVO {
     @ApiModelProperty(value = "备注")
     private String comment;
 
+    @NotNull
     @ApiModelProperty(value = "计划日期")
     private Long intendedTime;
 
@@ -141,6 +143,9 @@ public class OrderVO {
 
     @ApiModelProperty(value = "完成度", notes = "仅用于显示")
     private BigDecimal completeness;
+
+    @ApiModelProperty(value = "是否完成")
+    private Boolean isDone;
 
     @Valid
     @ApiModelProperty(value = "生产计划设备列表", required = true)

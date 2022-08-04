@@ -1,21 +1,25 @@
 package org.thingsboard.server.dao.kafka.service;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
+import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
+import org.thingsboard.server.dao.mylock.Lock;
+import org.thingsboard.server.dao.mylock.ZookeeperDistrbuteLock;
+import org.thingsboard.server.dao.mylock.ZookeeperProperties;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.service.EnergyHistoryHourService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
+import org.thingsboard.server.dao.sqlts.BaseAbstractSqlTimeseriesDao;
+import org.thingsboard.server.dao.sqlts.ts.TsKvRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesLatestDao;
 import org.thingsboard.server.dao.util.JsonUtils;
+import org.thingsboard.server.dao.util.StringUtilToll;
 
 import java.util.UUID;
 
@@ -27,7 +31,7 @@ import java.util.UUID;
  **/
 @Slf4j
 @Component
-public class KafkaConsumerListener {
+public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
 
     @Autowired
     private StatisticalDataService statisticalDataService;
@@ -39,48 +43,31 @@ public class KafkaConsumerListener {
     private TimeseriesLatestDao timeseriesLatestDao;
     @Autowired
     private EnergyHistoryHourService energyHistoryHourService;
+    @Autowired  private TsKvRepository tsKvRepository;
+    @Autowired  private ZookeeperProperties zookeeperProperties;
 
-    @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
+//    @KafkaListener(topics = {"hs_statistical_data_kafka"}, groupId = "group1", containerFactory = "kafkaListenerContainerFactory")
     public void kafkaListener(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
 //            log.info("打印mess:{}",message);
+            Lock lock = new ZookeeperDistrbuteLock(zookeeperProperties);
 
-            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-            String title = dataBodayVo.getTitle();
-            UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
-                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+            try {
+                DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+                lock.getLock("statistical"+dataBodayVo.getEntityId());
+                String title = dataBodayVo.getTitle();
+                UUID entityId = dataBodayVo.getEntityId();
+                if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue())) {
+                    dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+                }
+                statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
+            }catch (Exception e){
+                log.error("小时的异常:{}",e);
             }
-            statisticalDataService.todayDataProcessing(entityId, dataBodayVo, title);
-//            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
-//            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
-
-//            Long endTime = System.currentTimeMillis();
-//            Long tempTime = (endTime - startTime);
-//            log.info("消费端的花费时间："+
-//                    (((tempTime/86400000)>0)?((tempTime/86400000)+"d"):"")+
-//                    ((((tempTime/86400000)>0)||((tempTime%86400000/3600000)>0))?((tempTime%86400000/3600000)+"h"):(""))+
-//                    ((((tempTime/3600000)>0)||((tempTime%3600000/60000)>0))?((tempTime%3600000/60000)+"m"):(""))+
-//                    ((((tempTime/60000)>0)||((tempTime%60000/1000)>0))?((tempTime%60000/1000)+"s"):(""))+
-//                    ((tempTime%1000)+"ms"));
-
-        }
-
-    }
-
-
-    @KafkaListener(topics = {"hs_energy_chart_kafka"}, groupId = "group2", containerFactory = "kafkaListenerContainerFactory01")
-    public void kafkaListenerChart(String message) {
-        if (StringUtils.isNotEmpty(message)) {
-            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-            String title = dataBodayVo.getTitle();
-            UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
-                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+            finally {
+                lock.unLock();
             }
-
-            energyChartService.todayDataProcessing(entityId, dataBodayVo, title);
 
 
         }
@@ -88,22 +75,31 @@ public class KafkaConsumerListener {
     }
 
 
-    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
+
+
+
+//    @KafkaListener(topics = {"hs_energy_hour_kafka"}, groupId = "group3", containerFactory = "kafkaListenerContainerFactory02")
     public void kafkaListenerhour(String message) {
         if (StringUtils.isNotEmpty(message)) {
             Long startTime = System.currentTimeMillis();
+            Lock lock = new ZookeeperDistrbuteLock(zookeeperProperties);
 
-            DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
-            String title = dataBodayVo.getTitle();
-            UUID entityId = dataBodayVo.getEntityId();
-            if (StringUtils.isEmpty(dataBodayVo.getValue()) || dataBodayVo.getValue().equals("0")) {
-                dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+            try {
+               DataBodayVo dataBodayVo = JsonUtils.jsonToPojo(message, DataBodayVo.class);
+               lock.getLock("hour" + dataBodayVo.getEntityId());
+               String title = dataBodayVo.getTitle();
+               UUID entityId = dataBodayVo.getEntityId();
+               if (StringUtils.isEmpty(dataBodayVo.getValue()) || StringUtilToll.isZero(dataBodayVo.getValue())) {
+                   dataBodayVo.setValue(setPreviousByZero(dataBodayVo));
+               }
+               energyHistoryHourService.saveByHour(entityId, dataBodayVo, title);
+           }catch (Exception e)
+            {
+                log.error("小时的统计表的异常:{}",e);
             }
-
-            energyHistoryHourService.saveByHour(entityId,dataBodayVo,title);
-
-
-
+            finally {
+               lock.unLock();
+           }
         }
 
     }
@@ -111,18 +107,26 @@ public class KafkaConsumerListener {
 
 
 
-    private String  setPreviousByZero(DataBodayVo dataBodayVo)
+    public String  setPreviousByZero(DataBodayVo dataBodayVo)
     {
-        TenantId tenantId = new TenantId(dataBodayVo.getTenantId());
-        DeviceId deviceId = new DeviceId(dataBodayVo.getEntityId());
-        ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, deviceId, dataBodayVo.getKey());
-        try {
-            TsKvEntry tsKvEntry1 = tsKvEntryListenableFuture.get();
-            return  (tsKvEntry1.getValue() != null ? tsKvEntry1.getValue().toString() : dataBodayVo.getValue());
-        } catch (Exception e) {
-            e.printStackTrace();
+       UUID  entityId=dataBodayVo.getEntityId();
+       long time=dataBodayVo.getTs();
+        Integer  key=   getOrSaveKeyId(dataBodayVo.getKey());
+        Long longTime =    tsKvRepository.findAllMaxTime(entityId,key,time);
+        if(longTime  == null )
+        {
+            return "0";
         }
-        return dataBodayVo.getValue();
+        TsKvEntity tsKvEntity =    tsKvRepository.findAllByTsAndEntityIdAndKey(entityId,key,longTime);
+        TsKvEntry  entry=   tsKvEntity.toData();
+        Object o =entry.getValue();
+        if(o == null)
+        {
+            return  "0";
+        }
+        return  o.toString();
+
+
     }
 
 }

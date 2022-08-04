@@ -112,6 +112,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public static final String GATEWAY = "gateway";
 
 
+
     @Autowired
     private DeviceDao deviceDao;
 
@@ -1067,8 +1068,8 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
      * @return
      */
     @Override
-    public List<Device> findDeviceListByCdn(Device device){
-        return deviceDao.findDeviceListByCdn(device);
+    public List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc){
+        return deviceDao.findDeviceListByCdn(device,orderValue,descOrAsc);
     }
 
 
@@ -1150,7 +1151,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public List<Device> findDeviceIssueListByCdn(Device device){
         List<Device> result = new ArrayList<>();
         //查询所有设备
-        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device);
+        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(device,null,null);
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             //只要网关创建的设备
             result = this.filterDeviceFromGateway(deviceListByCdn);
@@ -1199,7 +1200,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             Device qryGateway = new Device();
             qryGateway.setTenantId(deviceList.get(0).getTenantId());
             qryGateway.setOnlyGatewayFlag(true);
-            List<Device> gatewayListByTenant = deviceDao.findDeviceListByCdn(qryGateway);
+            List<Device> gatewayListByTenant = deviceDao.findDeviceListByCdn(qryGateway,null,null);
             if(!CollectionUtils.isEmpty(gatewayListByTenant)){
                 gateways = gatewayListByTenant.stream().distinct().collect(Collectors.toList());
             }
@@ -1219,7 +1220,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             //2.查找出网关下的设备
             if(!CollectionUtils.isEmpty(gateways)){
                 //查询源于这些网关的设备
-                List<UUID> fromIds = gateways.stream().distinct().map(s -> s.getId().getId()).collect(Collectors.toList());
+                List<UUID> fromIds = gateways.stream().map(s -> s.getId().getId()).collect(Collectors.toList());
+                if(!CollectionUtils.isEmpty(fromIds)){
+                    fromIds = fromIds.stream().distinct().collect(Collectors.toList());
+                }
                 List<EntityRelation> byFromIds = relationService.findByFromIds(fromIds, RelationTypeGroup.COMMON);
                 if(!CollectionUtils.isEmpty(byFromIds)){
                     Iterator<Device> iterator = deviceList.iterator();
@@ -1252,7 +1256,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public List<Device> findFactorysByIds(List<Device> deviceList){
         List<Device> result = deviceList;
         if(!CollectionUtils.isEmpty(result)){
-            List<UUID> factoryIds = deviceList.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            List<UUID> factoryIds = deviceList.stream().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            if(!CollectionUtils.isEmpty(factoryIds)){
+                factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+            }
             if(!CollectionUtils.isEmpty(factoryIds)){
                 List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
                 for(Device device : result){
@@ -1274,7 +1281,10 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     public List<Device> findWorkshopsByIds(List<Device> deviceList){
         List<Device> result = deviceList;
         if(!CollectionUtils.isEmpty(deviceList)){
-            List<UUID> workshopIds = deviceList.stream().distinct().map(s -> s.getWorkshopId()).collect(Collectors.toList());
+            List<UUID> workshopIds = deviceList.stream().map(s -> s.getWorkshopId()).collect(Collectors.toList());
+            if(!CollectionUtils.isEmpty(workshopIds)){
+                workshopIds = workshopIds.stream().distinct().collect(Collectors.toList());
+            }
             if(!CollectionUtils.isEmpty(workshopIds)){
                 List<Workshop> workshopByIdList = workshopDao.getWorkshopByIdList(workshopIds);
                 for(Device device : result){
@@ -1318,6 +1328,12 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Override
     public long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId) {
         return this.deviceDao.countAllByDictDeviceIdAndTenantId(dictDeviceId,tenantId);
+    }
+
+
+    @Override
+    public List<Device> findAllBy() {
+        return this.deviceDao.findAllBy();
     }
 
     private final String Yes="已匹配";

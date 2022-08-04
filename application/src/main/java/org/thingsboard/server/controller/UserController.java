@@ -133,8 +133,8 @@ public class UserController extends BaseController  {
             user.setFactoryName(factory!=null?factory.getName():"");
 
         }
-
-        return  user;
+        user.setSystemUser(configureRoles(user));
+    return  user;
     }
 
 
@@ -323,6 +323,9 @@ public class UserController extends BaseController  {
     public void deleteUser(@PathVariable(USER_ID) String strUserId) throws ThingsboardException {
         checkParameter(USER_ID, strUserId);
         try {
+            String userName = getCurrentUser().getUserName();
+            UUID uuidId = getCurrentUser().getUuidId();
+            log.info("[{}][{}]执行了删除用户[{}]的操作",userName,uuidId,strUserId);
             UserId userId = new UserId(toUUID(strUserId));
             User user = checkUserId(userId, Operation.DELETE);
 
@@ -337,6 +340,7 @@ public class UserController extends BaseController  {
             sendDeleteNotificationMsg(getTenantId(), userId, relatedEdgeIds);
 
         } catch (Exception e) {
+            log.error("删除用户报错！",e);
             logEntityAction(emptyId(EntityType.USER),
                     null,
                     null,
@@ -440,12 +444,12 @@ public class UserController extends BaseController  {
     @ApiOperation(value = "用户管理界面下的修改密码")
     @RequestMapping(value = "/user/changeOthersPassword",method = RequestMethod.POST)
     @ResponseBody
-    public Object  changeOthersPassword( @RequestBody PasswordVo vo)
-    {
+    public Object  changeOthersPassword( @RequestBody PasswordVo vo) throws ThingsboardException {
            log.info("【changeOthersPassword】打印当前的入参{}",vo);
            vo.setPassword(passwordEncoder.encode(vo.getPassword()));
 //            eventPublisher.publishEvent(new UserAuthDataChangedEvent( UserId.fromString(vo.getUserId())));
-           return  userService.changeOthersPassword(vo);
+        saveAuditLog(getCurrentUser(), toUUID(vo.getUserId()), EntityType.USER, null, ActionType.USER_CHANGE_PASSWORD, vo);
+        return  userService.changeOthersPassword(vo);
     }
 
 
@@ -458,7 +462,12 @@ public class UserController extends BaseController  {
     public User save(@RequestBody User user) throws ThingsboardException {
          DataValidator.validateEmail(user.getEmail());
          DataValidator.validateCode(user.getUserCode());
+
         SecurityUser  securityUser =  getCurrentUser();
+//        if(user.getFactoryId() == null)
+//        {
+//            user.setFactoryId(securityUser.getFactoryId());
+//        }
         log.info("打印当前的管理人的信息:{}",securityUser);
         log.info("打印当前的管理人的信息工厂id:{},创建者类别{}，用户的等级:{}",securityUser.getFactoryId(),securityUser.getType(),securityUser.getUserLevel());
 
@@ -475,12 +484,16 @@ public class UserController extends BaseController  {
             }
 
             UserVo  vo1 = new UserVo();
+            vo1.setTenantId(securityUser.getTenantId().getId());
             vo1.setEmail(user.getEmail());
+            vo1.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
             if(checkSvc.checkValueByKey(vo1)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
             }
             UserVo  vo2 = new UserVo();
+            vo2.setTenantId(securityUser.getTenantId().getId());
             vo2.setPhoneNumber(user.getPhoneNumber());
+            vo2.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
             if(checkSvc.checkValueByKey(vo2)){
                 throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
             }
@@ -514,14 +527,17 @@ public class UserController extends BaseController  {
             User savedUser = checkNotNull(userService.save(user,encodePassword));
             userRoleMemuSvc.relationUserBach(user.getRoleIds(),savedUser.getUuidId(),getTenantId());
             savedUser.setRoleIds(user.getRoleIds());
+
+            saveAuditLog(getCurrentUser(), savedUser.getUuidId(), EntityType.USER, user.getUserName(), ActionType.ADDED, user);
+
             return  savedUser;
         }
 
         catch (Exception e){
-            e.printStackTrace();
-
+            log.error("创建用户的异常日志:入参为{}异常日志{}",user,e);
             throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
         }
+
 
     }
 
@@ -543,6 +559,8 @@ public class UserController extends BaseController  {
         try {
             userService.deleteUser(getTenantId(), userId);
             userRoleMemuSvc.deleteRoleByUserId(user.getUuidId());
+
+            saveAuditLog(getCurrentUser(), user.getId().getId(), EntityType.USER, user.getUserName(), ActionType.DELETED, user);
             return "success";
         }catch (EmptyResultDataAccessException e)
         {
@@ -573,12 +591,14 @@ public class UserController extends BaseController  {
         UserVo  vo1 = new UserVo();
         vo1.setEmail(user.getEmail());
         vo1.setUserId(user.getUuidId().toString());
+        vo1.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
         if(checkSvc.checkValueByKey(vo1)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 邮箱 ["+user.getEmail()+"]已经被占用!");
         }
         UserVo  vo2 = new UserVo();
         vo2.setPhoneNumber(user.getPhoneNumber());
         vo2.setUserId(user.getUuidId().toString());
+        vo2.setFactoryId(getCurrentFactoryId(user.getFactoryId()));
         if(checkSvc.checkValueByKey(vo2)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 手机号["+user.getPhoneNumber()+"]已经被占用!!");
         }
@@ -594,6 +614,9 @@ public class UserController extends BaseController  {
                userRoleMemuSvc.updateRoleByUserId(user.getRoleIds(),user.getUuidId(),getTenantId());
            }
         user.setRoleIds(user.getRoleIds());
+
+        saveAuditLog(getCurrentUser(), user.getId().getId(), EntityType.USER, user.getUserName(), ActionType.UPDATED, user);
+
         return  user;
     }
 
@@ -722,12 +745,14 @@ public class UserController extends BaseController  {
         UserVo  vo1 = new UserVo();
         vo1.setUserId(user.getUuidId().toString());
         vo1.setEmail(user.getEmail());
+        vo1.setFactoryId(user.getFactoryId());
         if(checkSvc.checkValueByKey(vo1)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode()," 这个邮箱 ["+user.getEmail()+"]已经被占用!");
         }
         UserVo  vo2 = new UserVo();
         vo2.setUserId(user.getUuidId().toString());
         vo2.setEmail(user.getPhoneNumber());
+        vo2.setFactoryId(user.getFactoryId());
         if(checkSvc.checkValueByKey(vo2)){
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"这个手机号:["+user.getPhoneNumber()+"]已经被占用!!");
         }
@@ -765,6 +790,45 @@ public class UserController extends BaseController  {
         entityRR.setTenantId(user.getTenantId().getId());
         userMenuRoleService.saveEntity(entityRR);
 
+    }
+
+
+
+
+    private  Boolean  configureRoles(User user) throws ThingsboardException {
+        List<UUID> rolesId =user.getRoleIds();
+        if(CollectionUtils.isEmpty(rolesId))
+        {
+            return false;
+        }
+
+        AdminSettings  settings =  adminSettingsService.findAdminSettingsByKey(getTenantId(),getTenantId().getId().toString());
+        if(settings == null)
+        {
+            return  false;
+        }
+
+         JsonNode jsonConfig = settings.getJsonValue();
+        String  systemRoleId = jsonConfig.get("systemRoleId").asText();
+        log.info("打印systemRoleId：{}",systemRoleId);
+        log.info("打印rolesId：{}",rolesId);
+
+     Long  count=   rolesId.stream().filter(id-> id.toString().equals(systemRoleId)).count();
+     if(count>0)
+     {
+         return  true;
+     }
+     return false;
+    }
+
+
+
+    private  UUID  getCurrentFactoryId(UUID  factoryId) throws ThingsboardException {
+        if(factoryId !=null)
+        {
+            return  factoryId;
+        }
+        return   getCurrentUser().getFactoryId();
     }
 
 

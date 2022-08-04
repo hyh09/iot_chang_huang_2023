@@ -84,7 +84,8 @@ public class BulletinBoardV3Controller   extends BaseController {
     {
 
         try {
-            return bulletinV3BoardVsSvc.queryDashboardValue(deviceDictionaryVo);
+
+            return bulletinV3BoardVsSvc.queryDashboardValue(deviceDictionaryVo,getTenantId());
 
         } catch (Exception e) {
             log.error("【看板3期】queryDashboardValue接口异常：{}",e);

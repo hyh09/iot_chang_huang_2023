@@ -194,6 +194,7 @@ public class DefaultMailService implements MailService {
             sendMail(mailSender, mailFrom, email, subject, message);
         }catch (Exception  e)
         {
+            log.error("执行【sendActivationEmail】方法的异常:{}",e);
             e.printStackTrace();
         }
     }

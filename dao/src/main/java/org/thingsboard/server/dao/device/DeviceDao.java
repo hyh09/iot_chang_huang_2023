@@ -260,7 +260,7 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @param device
      * @return
      */
-    List<Device> findDeviceListByCdn(Device device);
+    List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc);
 
 
     /**
@@ -362,5 +362,8 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
      * @return
      */
     List<Device> findGatewayByFactoryId(UUID factoryIds);
+
+
+    List<Device>  findAllBy();
 
 }

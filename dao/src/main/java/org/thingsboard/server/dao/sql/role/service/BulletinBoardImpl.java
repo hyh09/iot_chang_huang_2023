@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.sql.role.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -134,7 +135,8 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
     @Override
     public ConsumptionTodayVo todayUnitEnergy(QueryTsKvVo vo, TenantId tenantId) {
         List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(vo);
-        print("看板的今日能耗数据",entityList);
+        print("看板的今日能耗数据001",entityList);
+//        List<EnergyEffciencyNewEntity>  entityList1 =  dataToConversionSvc.groupEntityIdSum(entityList);
         return  dataToConversionSvc.todayUntiEnergyByEntityList(entityList,tenantId,vo);
     }
 
@@ -350,9 +352,9 @@ public class BulletinBoardImpl implements BulletinBoardSvc {
 
     private  void print(String str,Object   obj)  {
         try {
-//            ObjectMapper mapper=new ObjectMapper();
-//            String jsonStr=mapper.writeValueAsString(obj);
-////            log.info("[json]"+str+jsonStr);
+            ObjectMapper mapper=new ObjectMapper();
+            String jsonStr=mapper.writeValueAsString(obj);
+            log.info("[json]"+str+jsonStr);
         }catch (Exception e)
         {
             log.info(str+obj);

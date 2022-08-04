@@ -33,6 +33,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +177,11 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
                 workshop.getFactoryIds().forEach(in::value);
                 predicates.add(in);
             }
-            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+            /**
+             * order By
+             */
+            Order sort = cb.asc(root.get("sort"));
+            return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         };
         List<WorkshopEntity> all = workshopRepository.findAll(specification);
         if(CollectionUtils.isNotEmpty(all)){
@@ -229,7 +234,10 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
             List<WorkshopEntity> all = workshopRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
                 //查询工厂名称
-                List<UUID> factoryIds = all.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+                List<UUID> factoryIds = all.stream().map(s -> s.getFactoryId()).collect(Collectors.toList());
+                if(!org.springframework.util.CollectionUtils.isEmpty(factoryIds)){
+                    factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+                }
                 List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
                 all.forEach(i->{
                     Workshop workshop = i.toWorkshop();
@@ -255,7 +263,10 @@ public class JpaWorkshopDao extends JpaAbstractSearchTextDao<WorkshopEntity, Wor
     public List<Workshop> getParentNameByList(List<Workshop> workshopList){
         if(CollectionUtils.isNotEmpty(workshopList)){
             //查询工厂名称
-            List<UUID> factoryIds = workshopList.stream().distinct().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            List<UUID> factoryIds = workshopList.stream().map(s -> s.getFactoryId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(factoryIds)){
+                factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+            }
             List<Factory> factoryByIdList = factoryDao.getFactoryByIdList(factoryIds);
             workshopList.forEach(i->{
                 if(CollectionUtils.isNotEmpty(factoryByIdList)){

@@ -105,6 +105,11 @@ public class User extends SearchTextBasedWithAdditionalInfo<UserId> implements H
     @ApiModelProperty(value = "用户所需要绑定的角色【角色di】 更新的时候为空会清理此角色")
     private  List<UUID> roleIds;
 
+    /**
+     * 系统用户
+     */
+    private  Boolean  systemUser;
+
 
     private Authority authority;
     @NoXss

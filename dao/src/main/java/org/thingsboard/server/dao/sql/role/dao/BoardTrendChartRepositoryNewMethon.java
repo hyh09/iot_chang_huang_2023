@@ -57,7 +57,7 @@ public class BoardTrendChartRepositoryNewMethon extends JpaSqlTool {
 
 
     /**
-     * 查询设备的产能
+     * 查询的对应的key下的
      */
      public String getCapacityValueByDeviceIdAndInTime(DeviceCapacityVo  vo,int keyId)
      {

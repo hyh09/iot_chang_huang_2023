@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -36,7 +37,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
+@Slf4j
 @Api(value="系统菜单Controller",tags={"系统菜单口"})
 @RequiredArgsConstructor
 @RestController
@@ -61,6 +62,9 @@ public class MenuController extends BaseController {
     public MenuVo saveMenu(@RequestBody AddMenuDto addMenuDto) throws ThingsboardException {
         try {
             checkNotNull(addMenuDto);
+            if(addMenuDto.getIsButton() != null && addMenuDto.getIsButton()){
+                checkParameterChinees("按钮父级菜单",addMenuDto.getParentId());
+            }
             checkSameLevelNameRepetition(addMenuDto);
             Menu menu = checkAddMenuList(addMenuDto);
             if(addMenuDto.getId() == null){
@@ -260,6 +264,7 @@ public class MenuController extends BaseController {
             checkParameter("租户标识tenantId不能为空",tenantId);
             return checkNotNull(menuService.getTenantMenuListByTenantId(menuType,UUID.fromString(tenantId),name));
         } catch (Exception e) {
+            log.error("查询系统菜单列表（标记被当前租户绑定过的）异常",e);
             throw handleException(e);
         }
     }

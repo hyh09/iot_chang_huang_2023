@@ -67,4 +67,19 @@ public interface FactoryDao extends Dao<Factory>{
      * @return
      */
     Boolean checkoutFactoryStatus(UUID factoryId)throws ThingsboardException;
+
+    /**
+     * 根据租户查询,集团看板定制
+     * @param tenantId
+     * @return
+     */
+    List<Factory> findFactoryByTenantIdToBoard(UUID tenantId);
+
+    /**
+     * 根据租户查询,集团看板定制
+     * @param factoryId
+     * @return
+     */
+    Factory findByIdToBoard(UUID factoryId);
+
 }

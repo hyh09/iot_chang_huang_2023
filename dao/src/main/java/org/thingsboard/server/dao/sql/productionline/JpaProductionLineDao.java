@@ -37,6 +37,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,7 +150,11 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
                     productionLine.getWorkshopIds().forEach(in::value);
                     predicates.add(in);
                 }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                /**
+                 * order By
+                 */
+                Order sort = cb.asc(root.get("sort"));
+                return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             List<ProductionLineEntity> all = productionLineRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
@@ -202,7 +207,7 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
     public void delProductionLine(UUID id) throws ThingsboardException{
         Device device = new Device();
         device.setProductionLineId(id);
-        if(CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
+        if(CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device,null,null))){
             /*逻辑删除暂时不用
              ProductionLineEntity productionLineEntity = productionLineRepository.findById(id).get();
             productionLineEntity.setDelFlag("D");
@@ -268,7 +273,10 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
             List<ProductionLineEntity> all = productionLineRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
                 //查询车间名称
-                List<UUID> workshopIds = all.stream().distinct().map(s -> s.getWorkshopId()).collect(Collectors.toList());
+                List<UUID> workshopIds = all.stream().map(s -> s.getWorkshopId()).collect(Collectors.toList());
+                if(!org.springframework.util.CollectionUtils.isEmpty(workshopIds)){
+                    workshopIds = workshopIds.stream().distinct().collect(Collectors.toList());
+                }
                 List<Workshop> workshopList = workshopDao.getWorkshopByIdList(workshopIds);
                 all.forEach(i->{
                     ProductionLine productionLine = i.toProductionLine();
@@ -295,7 +303,10 @@ public class JpaProductionLineDao extends JpaAbstractSearchTextDao<ProductionLin
     public List<ProductionLine> getParentNameByList(List<ProductionLine> productionLineList){
         if(CollectionUtils.isNotEmpty(productionLineList)){
             //查询车间名称
-            List<UUID> workshopIds = productionLineList.stream().distinct().map(s -> s.getWorkshopId()).collect(Collectors.toList());
+            List<UUID> workshopIds = productionLineList.stream().map(s -> s.getWorkshopId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(workshopIds)){
+                workshopIds = workshopIds.stream().distinct().collect(Collectors.toList());
+            }
             List<Workshop> workshopList = workshopDao.getWorkshopByIdList(workshopIds);
             productionLineList.forEach(i->{
                 if(CollectionUtils.isNotEmpty(workshopList)){

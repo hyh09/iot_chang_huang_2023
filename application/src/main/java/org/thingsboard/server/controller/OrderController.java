@@ -8,15 +8,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
+import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
-import org.thingsboard.server.dao.hs.service.OrderService;
+import org.thingsboard.server.dao.hs.service.OrderRtService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -46,7 +49,7 @@ import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 public class OrderController extends BaseController {
 
     @Autowired
-    OrderService orderService;
+    OrderRtService orderService;
 
     @Autowired
     ClientService clientService;
@@ -69,6 +72,7 @@ public class OrderController extends BaseController {
 
         ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm.valueOf(checksumAlgorithmStr.toUpperCase());
         this.orderService.saveOrdersFromFile(getTenantId(), getCurrentUser().getId(), checksum, checksumAlgorithm, file);
+        saveAuditLog(getCurrentUser(), null, EntityType.ORDER, null, ActionType.ORDER_IMPORT, "");
     }
 
     /**
@@ -144,8 +148,14 @@ public class OrderController extends BaseController {
     @ApiOperation(value = "Pc-订单-更新或新增")
     @PostMapping("/order")
     public OrderVO updateOrSaveOrder(@RequestBody @Valid OrderVO orderVO) throws ThingsboardException {
+        var tempId = orderVO.getId();
         var oldOrderVO = this.orderService.updateOrSaveOrder(getTenantId(), orderVO);
-        return this.orderService.getOrderDetail(getTenantId(), toUUID(oldOrderVO.getId()));
+        var newOrderVO =  this.orderService.getOrderDetail(getTenantId(), toUUID(oldOrderVO.getId()));
+        if (StringUtils.isBlank(tempId))
+            saveAuditLog(getCurrentUser(), null, EntityType.ORDER, orderVO.getOrderNo(), ActionType.ADDED, orderVO);
+        else
+            saveAuditLog(getCurrentUser(), toUUID(tempId), EntityType.ORDER, orderVO.getOrderNo(), ActionType.UPDATED, orderVO);
+        return newOrderVO;
     }
 
     /**
@@ -158,7 +168,23 @@ public class OrderController extends BaseController {
     @DeleteMapping("/order/{id}")
     public void deleteOrder(@PathVariable("id") String orderId) throws ThingsboardException {
         checkParameter("orderId", orderId);
+        var data = this.orderService.getOrderDetail(getTenantId(), toUUID(orderId));
         this.orderService.deleteOrder(getTenantId(), toUUID(orderId));
+        saveAuditLog(getCurrentUser(), toUUID(orderId), EntityType.ORDER, null, ActionType.DELETED, data);
+    }
+
+    /**
+     * Pc-订单-报工完成
+     */
+    @ApiOperation(value = "Pc-订单-报工完成")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "订单Id", paramType = "path", required = true)
+    })
+    @PostMapping("/order/{id}/done")
+    public void updateOrderDone(@PathVariable("id") String orderId) throws ThingsboardException {
+        checkParameter("orderId", orderId);
+        this.orderService.updateOrderDone(getTenantId(), toUUID(orderId));
+        saveAuditLog(getCurrentUser(), toUUID(orderId), EntityType.ORDER, null, ActionType.ORDER_DONE, orderId);
     }
 
     /**
@@ -298,6 +324,7 @@ public class OrderController extends BaseController {
     /**
      * App-订单-订单监控-生产计划-更新实际时间
      */
+    @Deprecated
     @ApiOperation(value = "App-订单-订单监控-生产计划-更新实际时间")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "planId", value = "设备计划Id", paramType = "path", required = true),

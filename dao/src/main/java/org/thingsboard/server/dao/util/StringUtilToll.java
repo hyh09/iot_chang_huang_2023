@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -15,10 +16,11 @@ import java.util.regex.Pattern;
  * @author: HU.YUNHUI
  * @create: 2021-11-08 13:26
  **/
-
+@Slf4j
 public class StringUtilToll {
 
     private final static String zero ="0";
+    private static final Pattern PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
 
 
     /**
@@ -45,8 +47,14 @@ public class StringUtilToll {
         {
             return zero;
         }
+
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
+        //2022-07-06 柬埔寨生产遇到产量的上传一个  负的上亿数据,
+        if(b2.compareTo(BigDecimal.ZERO)<0)
+        {
+            return zero;
+        }
         BigDecimal  result = b1.subtract(b2).stripTrailingZeros();
         return  result.compareTo(BigDecimal.ZERO )<0?"0":roundUp(result.toPlainString());
     }
@@ -136,7 +144,7 @@ public class StringUtilToll {
 
 
     /**
-     * 保留4位小数
+     * 保留2位小数
      */
     public  static  String roundUp(String num)
     {
@@ -155,11 +163,41 @@ public class StringUtilToll {
     }
 
 
+
     public  static  Boolean isZero(String v2)
     {
-        BigDecimal b2 = new BigDecimal(v2);
-        if(b2.compareTo(BigDecimal.ZERO)==0)
-        {
+            if(!isNumeric(v2))
+                {
+                    return false;
+                }
+            if(v2 == null)
+                {
+                    return  false;
+                }
+            BigDecimal b2 = new BigDecimal(v2);
+            if(b2.compareTo(BigDecimal.ZERO)==0)
+                {
+                    return true;
+                }
+            return  false;
+
+    }
+
+
+
+
+    /**
+     * 是否是 0  用于运行状态的返回
+     * @param v2
+     * @return
+     */
+    public  static  Boolean isNotZero(String v2)
+    {
+        if(isNumber(v2)) {
+            BigDecimal b2 = new BigDecimal(v2);
+            if (b2.compareTo(BigDecimal.ZERO) == 0) {
+                return false;
+            }
             return true;
         }
         return  false;
@@ -222,7 +260,47 @@ public class StringUtilToll {
 
 
 
+    public  static  Long  getMaxByLong(List<Long> finalValueList)
+    {
 
+        Long maxValue=   finalValueList.stream().filter(f -> f != null).max((x,y)->{
+            if(compareTo(x.toString(),y.toString()))
+                return 1;
+            else
+                return -1;
+        }).orElse(0L);
+        return  maxValue;
+
+    }
+
+
+    public  static  String  getMaxSum(List<String> finalValueList)
+    {
+
+        String maxValue=   finalValueList.stream().filter(s->StringUtils.isNotEmpty(s)).max((x,y)->{
+            if(compareTo(x,y))
+                return 1;
+            else
+                return -1;
+        }).orElse("0");
+        return  maxValue;
+
+    }
+
+
+
+
+
+
+
+
+        public static boolean isNumeric(String strNum) {
+                if (strNum == null)
+                {
+                    return false;
+                }
+            return PATTERN.matcher(strNum).matches();
+        }
 
 
 

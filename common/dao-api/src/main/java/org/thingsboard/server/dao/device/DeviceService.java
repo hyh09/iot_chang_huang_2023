@@ -15,21 +15,12 @@
  */
 package org.thingsboard.server.dao.device;
 
-import com.datastax.oss.driver.api.core.paging.OffsetPager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.thingsboard.server.common.data.Device;
-import org.thingsboard.server.common.data.DeviceInfo;
-import org.thingsboard.server.common.data.DeviceProfile;
-import org.thingsboard.server.common.data.DeviceTransportType;
-import org.thingsboard.server.common.data.EntitySubtype;
+import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.device.DeviceSearchQuery;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
-import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.id.*;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -194,7 +185,7 @@ public interface DeviceService {
      * @param device
      * @return
      */
-    List<Device> findDeviceListByCdn(Device device);
+    List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc);
 
     PageData<CapacityDeviceVo> queryPage(CapacityDeviceVo  vo, PageLink pageLink) throws JsonProcessingException;
 
@@ -218,5 +209,8 @@ public interface DeviceService {
 
     long  countAllByDictDeviceIdAndTenantId(UUID dictDeviceId,UUID tenantId);
 
+
+
+     List<Device> findAllBy();
 
 }

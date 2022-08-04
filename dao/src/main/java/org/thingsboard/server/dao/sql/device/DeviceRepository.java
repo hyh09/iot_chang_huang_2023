@@ -66,10 +66,16 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     CompletableFuture<List<DeviceEntity>> findAllByTenantIdAndFactoryId(@Param("tenantId") UUID tenantId, @Param("factoryId") UUID factoryId);
 
     @Async
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo, t.sort) from DeviceEntity t where " +
             "t.tenantId = :tenantId " +
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
+
+    @Async
+    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo, t.sort) from DeviceEntity t where " +
+            "t.tenantId = :tenantId " +
+            "order by t.sort asc, t.createdTime asc")
+    CompletableFuture<List<DeviceEntity>> findAllIdAndNameAndSortByTenantIdOrderBySortAsc(@Param("tenantId") UUID tenantId);
 
     @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
             "t.id = :id ")
@@ -332,6 +338,14 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
      */
     @Query(nativeQuery = true, value = "select * from device d  where d.factory_id = ?1 and position('\"gateway\":true' in d.additional_info)!=0")
     List<DeviceEntity> findGatewayByFactoryId(UUID factoryId);
+
+
+    /**
+     * 查询所有的设备
+     * @return
+     */
+    @Query(nativeQuery = true, value = "select * from device d  where   ( position('\"gateway\":true' in d.additional_info)=0  or  d.additional_info is null )  ")
+    List<DeviceEntity> findAllBy();
 
 
 }

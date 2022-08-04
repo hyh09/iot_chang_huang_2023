@@ -9,11 +9,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
 import org.thingsboard.server.entity.productioncalender.dto.ProductionCalenderAddDto;
+import org.thingsboard.server.entity.productioncalender.dto.ProductionCalenderPageQry;
 import org.thingsboard.server.entity.productioncalender.dto.ProductionMonitorListQry;
 import org.thingsboard.server.entity.productioncalender.vo.ProductionCalenderHisListVo;
 import org.thingsboard.server.entity.productioncalender.vo.ProductionCalenderPageListVo;
@@ -21,6 +24,7 @@ import org.thingsboard.server.entity.productioncalender.vo.ProductionMonitorList
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,22 +65,30 @@ public class ProductionCalenderController extends BaseController{
             log.info("/api/productionCalender/save保存设备生产日历报错：",e);
             throw handleException(e);
         }
+        if (productionCalenderAddDto.getId() == null) {
+            saveAuditLog(getCurrentUser(), null, EntityType.PRODUCTION_CALENDAR, null, ActionType.ADDED, productionCalenderAddDto);
+        }else {
+            saveAuditLog(getCurrentUser(), productionCalenderAddDto.getId(), EntityType.PRODUCTION_CALENDAR, null, ActionType.UPDATED, productionCalenderAddDto);
+        }
     }
 
     @ApiOperation("生产日历分页查询")
     @RequestMapping(value = "/getPageList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "factoryName", value = "工厂名称",paramType = "query"),
-            @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query")
+            @ApiImplicitParam(name = "deviceName", value = "设备名称",paramType = "query"),
+            @ApiImplicitParam(name = "qry", value = "其他条件",paramType = "query")
     })
     @ResponseBody
     public PageData<ProductionCalenderPageListVo> getTenantDeviceInfoList(@RequestParam int pageSize, @RequestParam int page,
-                                                                          @RequestParam String factoryName, @RequestParam String deviceName) throws ThingsboardException {
+                                                                          @RequestParam(required = false) String sortProperty,
+                                                                          @RequestParam(required = false)  String sortOrder,
+                                                                          ProductionCalenderPageQry qry) throws ThingsboardException {
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             List<ProductionCalenderPageListVo> calenderPageListVos = new ArrayList<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(new ProductionCalender(deviceName,factoryName,getCurrentUser().getTenantId().getId()),pageLink);
+            PageData<ProductionCalender> productionCalenderPageData = productionCalenderService.findProductionCalenderPage(qry.toProductionCalender(getCurrentUser().getTenantId().getId(),sortProperty,sortOrder),pageLink);
             List<ProductionCalender> productionCalenderList = productionCalenderPageData.getData();
             if(!CollectionUtils.isEmpty(productionCalenderList)){
                 for (ProductionCalender productionCalender : productionCalenderList) {
@@ -95,13 +107,14 @@ public class ProductionCalenderController extends BaseController{
     @ApiImplicitParam(name = "deviceId",value = "设备标识",dataType = "String",paramType="query",required = true)
     @RequestMapping(value = "/getHistoryPageByDeviceId", method = RequestMethod.GET)
     @ResponseBody
-    public PageData<ProductionCalenderHisListVo> getHistoryPageByDeviceId(@RequestParam int pageSize, @RequestParam int page,@RequestParam("deviceId") String deviceId)throws ThingsboardException{
+    public PageData<ProductionCalenderHisListVo> getHistoryPageByDeviceId(@RequestParam int pageSize, @RequestParam int page,@RequestParam(required = false) String sortProperty,@RequestParam(required = false)  String sortOrder,
+            @RequestParam("deviceId") String deviceId)throws ThingsboardException{
         try {
             PageData<ProductionCalenderPageListVo> voPageData = new PageData<>();
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
             List<ProductionCalenderHisListVo> result = new ArrayList<>();
             checkParameterChinees("deviceId",deviceId);
-            PageData<ProductionCalender> calenderPageData = productionCalenderService.getHistoryPageByDeviceId(toUUID(deviceId),pageLink);
+            PageData<ProductionCalender> calenderPageData = productionCalenderService.getHistoryPageByDeviceId(toUUID(deviceId),pageLink,sortProperty,sortOrder);
 
             List<ProductionCalender> productionCalenderList = calenderPageData.getData();
             if(!org.springframework.util.CollectionUtils.isEmpty(productionCalenderList)){
@@ -178,6 +191,7 @@ public class ProductionCalenderController extends BaseController{
             log.info("/api/productionCalender/deleteById删除生产日历报错：",e);
             throw handleException(e);
         }
+        saveAuditLog(getCurrentUser(), toUUID(id), EntityType.PRODUCTION_CALENDAR, null, ActionType.DELETED, id);
     }
 
     @ApiOperation("集团看板大屏生产监控")
@@ -190,7 +204,9 @@ public class ProductionCalenderController extends BaseController{
             List<ProductionCalender> calenderList = productionCalenderService.getProductionMonitorList(dto.toProductionCalender(getCurrentUser().getTenantId().getId()));
             if(!org.springframework.util.CollectionUtils.isEmpty(calenderList)){
                 for (ProductionCalender productionCalender :calenderList){
-                    result.add(new ProductionMonitorListVo(productionCalender));
+                    ProductionMonitorListVo productionMonitorListVo = new ProductionMonitorListVo(productionCalender);
+                    productionMonitorListVo.setYearAchieve(new BigDecimal(productionMonitorListVo.getYearAchieve()).multiply(new BigDecimal(100)).toString());
+                    result.add(productionMonitorListVo);
                 }
             }
             return result;

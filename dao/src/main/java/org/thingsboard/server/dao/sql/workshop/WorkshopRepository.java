@@ -42,6 +42,12 @@ public interface WorkshopRepository extends PagingAndSortingRepository<WorkshopE
             "order by t.createdTime desc")
     CompletableFuture<List<WorkshopEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
 
+    @Async
+    @Query("select new WorkshopEntity(t.id, t.name, t.factoryId) from WorkshopEntity t where " +
+            "t.tenantId = :tenantId " +
+            "order by t.sort asc, t.createdTime asc")
+    CompletableFuture<List<WorkshopEntity>> findAllIdAndNameAndSortByTenantIdOrderBySortAsc(@Param("tenantId") UUID tenantId);
+
 
     @Async
     @Query("select t from WorkshopEntity t where " +

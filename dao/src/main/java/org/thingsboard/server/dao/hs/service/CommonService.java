@@ -1,7 +1,10 @@
 package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.DataType;
 import org.thingsboard.server.common.data.kv.KvEntry;
@@ -9,6 +12,7 @@ import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
 import org.thingsboard.server.dao.hs.entity.bo.KeyParamTime;
 import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
@@ -26,6 +30,20 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 获得用户名
+     */
+    default String getUserName(User user) {
+        try {
+            if (user.getUserLevel() == 3)
+                return (Optional.ofNullable(user.getFirstName()).map(String::trim).orElse("") + Optional.ofNullable(user.getLastName()).map(String::trim).orElse("")).trim();
+            else
+                return Optional.ofNullable(user.getUserName()).map(String::trim).orElse("");
+        } catch (Exception ignore) {
+            return "";
+        }
+    }
 
     /**
      * 统计时间
@@ -59,6 +77,15 @@ public interface CommonService {
      */
     default double formatDoubleData(BigDecimal val1) {
         return val1.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().doubleValue();
+    }
+
+    /**
+     * 格式化数据
+     */
+    default double formatNegativeNumber(double val1) {
+        if (val1 < 0)
+            return 0d;
+        return val1;
     }
 
 

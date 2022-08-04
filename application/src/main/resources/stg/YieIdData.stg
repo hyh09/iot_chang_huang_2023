@@ -1,0 +1,55 @@
+sqlTemplateCqlYieIdTskv(columns,model,time,tableName)
+  ::= <<select  <columns;separator=","> from <tableName> where
+  <if(model.entityId )>  entity_id= <model.entityId><endif>
+  <if(model.keyName )> and key= '<model.keyName>'<endif>
+  <if(time )> and ts= <time><endif>
+      ALLOW FILTERING
+  >>
+
+
+sqlTemplateCqlYieIdTskvMaxTs(columns,model,keyName,tableName,CompareType)
+::= <<select  <columns;separator=","> from <tableName> where
+<if(model.entityId )>  entity_id= <model.entityId> <endif>
+<if(keyName)> and key= '<keyName>' <endif>
+<if(model.startTime )> and ts   <CompareType.largeEqual>  <model.startTime> <endif>
+<if(model.endTime )> and ts  <CompareType.smallEqual> <model.endTime> <endif>
+ALLOW FILTERING
+>>
+
+
+sqlEnergyHistoryKv(columns,model,pageLink,keyName,tableName,CompareType)
+::= <<select  <columns;separator=","> from <tableName> where
+<if(model.deviceId )>  entity_id= <model.deviceId> <endif>
+<if(model.keyName)> and key= '<model.keyName>' <endif>
+<if(model.startTime )> and ts   <CompareType.largeEqual>  <model.startTime> <endif>
+<if(model.endTime )> and ts  <CompareType.smallEqual> <model.endTime> <endif>
+<if (pageLink.pageSize)>  limit < (pageLink.pageSize)> <endif>
+ALLOW FILTERING
+>>
+
+
+
+
+
+
+//SQL #postGreql
+sqlEnergyDataHourTemplate(columns,model,tableName,childColumns,childtableName,CompareType)
+  ::= <<select  <columns;separator=","> from <tableName> where 1=1
+  and   entity_id in ( <sqlChildDeviceTemplate(childColumns,model,childtableName)>)
+  <if(model.entityId )>and   entity_id= <model.entityId><endif>
+  <if(model.startTime )>  and ts <CompareType.largeEqual>  <model.startTime><endif>
+  <if(model.endTime )>  and ts <CompareType.lt>  <model.endTime><endif>
+  <if(model.groupBy )>  GROUP BY   <model.groupBy>  <endif>
+
+  >>
+
+
+sqlChildDeviceTemplate(childColumns,childModel,childtableName)
+::= <<select  <childColumns;separator=","> from <childtableName> where 1=1
+<if (childModel.tenantId)> and tenant_id = '<childModel.tenantId>'<endif>
+<if (childModel.factoryId)> and factory_id = '<childModel.factoryId>'<endif>
+<if (childModel.workshopId)> and workshop_id = '<childModel.workshopId>'<endif>
+<if (childModel.productionLineId)> and production_line_id = '<childModel.productionLineId>'<endif>
+<if (childModel.deviceId)> and id = '<childModel.deviceId>'<endif>
+>>
+

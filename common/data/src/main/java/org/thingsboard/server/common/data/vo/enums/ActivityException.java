@@ -9,6 +9,7 @@ package org.thingsboard.server.common.data.vo.enums;
 public enum ActivityException {
 
     FAILURE_ERROR("0","失败的异常状态"),
+    MAX_QUERY_ERROR("500","查询数据太大,请您缩小时间查询!"),
 
     ;
     private String code;

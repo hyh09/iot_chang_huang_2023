@@ -61,6 +61,13 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         this.setName(name);
     }
 
+    public DeviceEntity (UUID id, String name, String rename){
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setRename(rename);
+    }
+
     public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
         super();
         this.id = id;
@@ -68,6 +75,19 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         this.setFactoryId(factoryId);
         this.setWorkshopId(workshopId);
         this.setProductionLineId(productionLineId);
+        try {
+            this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
+        } catch (Exception ignore){}
+    }
+
+    public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo, Integer sort) throws JsonProcessingException {
+        super();
+        this.id = id;
+        this.setName(name);
+        this.setFactoryId(factoryId);
+        this.setWorkshopId(workshopId);
+        this.setProductionLineId(productionLineId);
+        this.setSort(sort);
         try {
             this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
         } catch (Exception ignore){}

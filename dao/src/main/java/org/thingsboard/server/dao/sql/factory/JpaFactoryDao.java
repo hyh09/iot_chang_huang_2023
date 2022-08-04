@@ -41,6 +41,7 @@ import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
 import org.thingsboard.server.dao.workshop.WorkshopDao;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
 
     //在线状态
     public static final String ATTRIBUTE_ACTIVE = "active";
+    //升序
+    public static final String ASC = "ASC";
+    public static final String SORT = "sort";
 
     @Autowired
     private FactoryRepository factoryRepository;
@@ -151,7 +155,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         Device device = new Device();
         device.setFactoryId(id);
         if(CollectionUtils.isEmpty(workshopDao.findWorkshopListByfactoryId(id))
-                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device))){
+                && CollectionUtils.isEmpty(deviceDao.findDeviceListByCdn(device,null,null))){
            /* 逻辑删除暂时不用
             FactoryEntity factoryEntity = factoryRepository.findById(id).get();
             factoryEntity.setDelFlag("D");
@@ -191,7 +195,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         List<Workshop> workshopList = new ArrayList<>();
         List<ProductionLine> productionLineList = new ArrayList<>();
         List<Device> deviceList = new ArrayList<>();
-
+        long l = System.currentTimeMillis();
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
             boolean notBlankWorkshopName = StringUtils.isNotBlank(factory.getWorkshopName());
@@ -213,9 +217,15 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                         predicates.add(cb.equal(root.get("id"), judgeUserVo.getUser().getFactoryId()));
                     }
                 }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                /**
+                 * order By
+                 */
+                Order sort = cb.asc(root.get("sort"));
+                return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             factoryList = factoryRepository.findAll(specification);
+            System.out.println("结果："+ (System.currentTimeMillis() - l));
+            l = System.currentTimeMillis();
 
             if(CollectionUtils.isNotEmpty(factoryList)){
                 List<UUID> factoryIds = factoryList.stream().map(m->m.getId()).collect(Collectors.toList());
@@ -223,12 +233,18 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 workshopList = workshopDao.findWorkshopListByCdn(new Workshop(factory,factoryIds));
                 if(CollectionUtils.isNotEmpty(workshopList)){
                     List<UUID> workshopIds = workshopList.stream().map(m->m.getId()).collect(Collectors.toList());
+                    System.out.println("结果："+ (System.currentTimeMillis() - l));
+                    l = System.currentTimeMillis();
                     //查询产线
                     productionLineList = productionLineDao.findProductionLineListBuyCdn(new ProductionLine(factory,workshopIds));
                     if(CollectionUtils.isNotEmpty(productionLineList)){
                         List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
                         //查询设备,过滤掉网关
-                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds));
+                        System.out.println("结果："+ (System.currentTimeMillis() - l));
+                        l = System.currentTimeMillis();
+                        deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds),SORT,ASC);
+                        System.out.println("结果："+ (System.currentTimeMillis() - l));
+                        l = System.currentTimeMillis();
                     }
                 }
             }
@@ -248,6 +264,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 }
             }
         }
+        System.out.println("结果："+ (System.currentTimeMillis() - l));
         return new FactoryListVo(this.toFactoryList(factoryList),workshopList,productionLineList,deviceList);
     }
 
@@ -260,7 +277,9 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         List<Factory> resultFactory = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(factoryEntityList)){
             factoryEntityList.forEach(i->{
-                resultFactory.add(i.toFactory());
+                Factory factoryResult = i.toFactory();
+                factoryResult.setLogoIcon(null);
+                resultFactory.add(factoryResult);
             });
         }
         return resultFactory;
@@ -491,7 +510,11 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 CriteriaBuilder.In<UUID> in = cb.in(root.get("id"));
                 ids.forEach(in::value);
                 predicates.add(in);
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                /**
+                 * order By
+                 */
+                Order sort = cb.asc(root.get("sort"));
+                return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             List<FactoryEntity> all = factoryRepository.findAll(specification);
             if(CollectionUtils.isNotEmpty(all)){
@@ -537,6 +560,41 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
             }
         }
         return result;
+    }
+
+    /**
+     * 根据租户查询,集团看板定制
+     * @param tenantId
+     * @return
+     */
+    @Override
+    public List<Factory> findFactoryByTenantIdToBoard(UUID tenantId){
+        List<Factory> result = new ArrayList<>();
+        List<Factory> factoryByTenantId = factoryRepository.findFactoryByTenantId(tenantId);
+        if(CollectionUtils.isNotEmpty(factoryByTenantId)){
+            factoryByTenantId.forEach(i->{
+                result.add(i.toFactoryFromBoardRequst());
+            });
+        }
+        return result;
+    }
+
+    /**
+     * 根据租户查询,集团看板定制
+     * @param factoryId
+     * @return
+     */
+    @Override
+    public Factory findByIdToBoard(UUID factoryId){
+        Factory factory = new Factory();
+        Optional<FactoryEntity> byId = factoryRepository.findById(factoryId);
+        if(byId != null){
+            FactoryEntity byIdToBoard = byId.get();
+            if(byIdToBoard != null){
+                return byIdToBoard.toData().toFactoryFromBoardRequst();
+            }
+        }
+        return factory;
     }
 
 }

@@ -75,6 +75,8 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
     @Async
     CompletableFuture<List<OrderPlanEntity>> findAllByOrderId(UUID orderId);
 
+    List<OrderPlanEntity> findAllPlansByOrderId(UUID orderId);
+
     @Query("select t2 from OrderPlanEntity t2 " +
             "where t2.id not in(" +
             "   select t1.id from OrderPlanEntity t1 " +
@@ -112,7 +114,7 @@ public interface OrderPlanRepository extends PagingAndSortingRepository<OrderPla
      */
     @Query("select t1 from OrderPlanEntity t1 where t1.factoryId = :factoryId and ( " +
             "( t1.intendedStartTime >= :startTime and t1.intendedEndTime <= :endTime ) or" +
-            "( t1.intendedStartTime >= :startTime and t1.actualStartTime <= :endTime and t1.intendedEndTime >= :endTime) or" +
+            "( t1.intendedStartTime >= :startTime and t1.intendedStartTime <= :endTime and t1.intendedEndTime >= :endTime) or" +
             "( t1.intendedEndTime >= :startTime and t1.intendedEndTime <= :endTime and t1.intendedStartTime <= :startTime) or" +
             "( t1.intendedStartTime <= :startTime and t1.intendedEndTime >= :endTime ) " +
             ")")

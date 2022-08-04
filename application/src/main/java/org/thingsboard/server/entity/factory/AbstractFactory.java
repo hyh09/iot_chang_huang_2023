@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ import org.thingsboard.server.common.data.factory.Factory;
 import java.util.UUID;
 
 @Data
-public abstract class AbstractFactory{
+public abstract class AbstractFactory {
 
     @ApiModelProperty("工厂标识")
     public UUID id;
@@ -86,6 +86,9 @@ public abstract class AbstractFactory{
     @ApiModelProperty("删除标记（A-未删除；D-已删除）")
     public String delFlag = "A";
 
+    @ApiModelProperty("排序值")
+    public Integer sort;
+
 
     public AbstractFactory() {
         super();
@@ -117,9 +120,10 @@ public abstract class AbstractFactory{
         this.updatedTime = factory.getUpdatedTime();
         this.updatedUser = factory.getUpdatedUser();
         this.delFlag = factory.getDelFlag();
+        this.sort = factory.getSort();
     }
 
-    public Factory toFactory(){
+    public Factory toFactory() {
         Factory factory = new Factory(this.id);
         factory.setCode(code);
         factory.setName(name);
@@ -142,6 +146,7 @@ public abstract class AbstractFactory{
         factory.setUpdatedTime(updatedTime);
         factory.setUpdatedUser(updatedUser);
         factory.setDelFlag(delFlag);
+        factory.setSort(sort);
         return factory;
     }
 

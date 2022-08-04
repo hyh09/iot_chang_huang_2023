@@ -40,6 +40,7 @@ import org.thingsboard.server.dao.hs.entity.enums.AlarmSimpleStatus;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
+import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
@@ -121,7 +122,10 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     DictDeviceGraphItemRepository graphItemRepository;
 
     // 订单Service
-    OrderService orderService;
+    OrderRtService orderService;
+
+    // 部件componentRepository
+    DictDeviceComponentRepository componentRepository;
 
     /**
      * 获得设备配置列表
@@ -261,9 +265,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         result.setDeviceIdList(uuids.stream().map(UUID::toString).collect(Collectors.toList()));
         CompletableFuture.allOf(
                 CompletableFuture.supplyAsync(() -> this.listAlarmTimesResult(tenantId, uuids)).thenAcceptAsync(result::setAlarmTimesList),
-                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink))
+                CompletableFuture.supplyAsync(() -> this.clientService.listPageDevicesPageByQueryOrderBySort(tenantId, query, pageLink))
                         .thenAcceptAsync(devicePageData -> CompletableFuture.supplyAsync(() -> {
-                                    var uuidList = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+                                    var uuidList = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
                                     if (uuidList.isEmpty())
                                         return new HashMap<String, DictDevice>();
                                     else
@@ -279,7 +283,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                         return RTMonitorDeviceResult.builder()
                                                 .id(idStr)
                                                 .name(e.getName())
-                                                .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                                                .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                                                 .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                                                 .build();
                                     }).collect(Collectors.toList());
@@ -359,7 +363,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return DeviceDetailResult.builder()
                 .id(device.getId().toString())
                 .name(device.getName())
-                .picture(Optional.ofNullable(device.getPicture()).orElse(dictDevice.getPicture()))
+                .picture(Optional.ofNullable(dictDevice.getPicture()).orElse(null))
                 .isOnLine(calculateValueInMap(this.clientService.listDevicesOnlineStatus(List.of(device.getId().getId())), device.getId().toString()))
                 .factoryName(Optional.ofNullable(deviceBaseDTO.getFactory()).map(Factory::getName).orElse(null))
                 .workShopName(Optional.ofNullable(deviceBaseDTO.getWorkshop()).map(Workshop::getName).orElse(null))
@@ -452,13 +456,13 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) {
+    public List<DictDeviceGroupPropertyVO> listDeviceTelemetryHistoryTitles(TenantId tenantId, String deviceId, boolean isShowAttributes) throws ExecutionException, InterruptedException {
         List<DictDeviceGroupPropertyVO> propertyVOList = new ArrayList<>() {{
             add(DictDeviceGroupPropertyVO.builder()
                     .name(HSConstants.CREATED_TIME).title(HSConstants.CREATED_TIME).build());
         }};
 
-        var keyList = this.timeseriesService.findAllKeysByEntityIds(tenantId, List.of(DeviceId.fromString(deviceId)));
+        var keyList = this.timeseriesService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
         if (isShowAttributes)
             keyList.addAll(this.clientService.listDeviceAttributeKvs(tenantId, toUUID(deviceId)).stream().map(AttributeKvEntry::getKey).collect(Collectors.toList()));
         if (keyList.isEmpty())
@@ -896,7 +900,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
         return CompletableFuture.supplyAsync(() -> {
-            var dictDeviceIds = devicePageData.getData().stream().filter(v -> v.getPicture() == null).map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
+            var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
             if (dictDeviceIds.isEmpty())
                 return new HashMap<String, DictDevice>();
             else
@@ -908,7 +912,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     return RTMonitorDeviceResult.builder()
                             .id(idStr)
                             .name(e.getName())
-                            .image(Optional.ofNullable(e.getPicture()).orElse(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null)))
+                            .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                             .build();
                 }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
@@ -1165,27 +1169,40 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
                                 try {
                                     var ratedCapacity = this.dictDeviceService.getDictDeviceDetail(device.getDictDeviceId().toString(), tenantId).getRatedCapacity();
-                                    var trueCapacityTotal = this.clientService.getOrderCapacities(plans);
+                                    var trueCapacityTotal = this.clientService.getOrderCapacitiesByTs(plans);
                                     result.setCapacityEfficiency(this.formatDoubleData(trueCapacityTotal.multiply(new BigDecimal(100)).divide(ratedCapacity.multiply(this.toDecimalHour(shirtTimeL)), 2, RoundingMode.HALF_UP)));
                                 } catch (Exception ignore) {
                                 }
 
                                 var shirtActualCapacityTotal = shirtTimes.stream()
                                         .map(v -> CompletableFuture.supplyAsync(() -> this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, v.getStartTime(), v.getEndTime())))
-                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacities(f)))
+                                        .map(v -> v.thenApplyAsync(f -> this.clientService.getOrderCapacitiesByTs(f)))
                                         .map(CompletableFuture::join)
                                         .reduce(BigDecimal.ZERO, BigDecimal::add, (a, b) -> null);
 
                                 result.setOutput(this.formatDoubleData(shirtActualCapacityTotal));
                                 if (shirtActualCapacityTotal.compareTo(BigDecimal.ZERO) > 0)
                                     result.setQualityRate(this.formatDoubleData(actualCapacityTotal.multiply(new BigDecimal(100)).divide(shirtActualCapacityTotal, 2, RoundingMode.HALF_UP)));
-                                result.setInQualityNum(this.formatDoubleData(shirtActualCapacityTotal.subtract(actualCapacityTotal)));
+                                result.setInQualityNum(this.formatNegativeNumber(this.formatDoubleData(shirtActualCapacityTotal.subtract(actualCapacityTotal))));
                             })
                     ).join();
                 })
         ).join();
 
         return result;
+    }
+
+    /**
+     * 查询设备部件名称
+     *
+     * @param tenantId    租户Id
+     * @param deviceId    设备Id
+     * @param componentId 部件Id
+     * @return 部件名称
+     */
+    @Override
+    public String getRtMonitorDeviceComponentName(TenantId tenantId, UUID deviceId, UUID componentId) {
+        return this.componentRepository.findById(componentId).map(DictDeviceComponentEntity::toData).map(DictDeviceComponent::getName).orElse("");
     }
 
     /**
@@ -1295,7 +1312,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     }
 
     @Autowired
-    public void setOrderService(OrderService orderService) {
+    public void setOrderService(OrderRtService orderService) {
         this.orderService = orderService;
+    }
+
+    @Autowired
+    public void setComponentRepository(DictDeviceComponentRepository componentRepository) {
+        this.componentRepository = componentRepository;
     }
 }

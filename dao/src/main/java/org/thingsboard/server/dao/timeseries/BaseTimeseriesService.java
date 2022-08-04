@@ -232,28 +232,28 @@ public class BaseTimeseriesService implements TimeseriesService  {
 //        }
 
          String  title =    dataInitMap.get(tsKvEntry.getKey());
-        if(StringUtils.isNotBlank(title))
-        {
-            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(tenantId,entityId,tsKvEntry,title);
-            try {
-//                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
-                kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
-                kafkaProducerService.sendMessageSync("hs_energy_chart_kafka", JsonUtils.objectToJson(dataBodayVo));
-                kafkaProducerService.sendMessageSync("hs_energy_hour_kafka", JsonUtils.objectToJson(dataBodayVo));
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-            }
-//            log.info("打印当前的数据打印标题{}",title);
-//            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
-//            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
-//            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
-
-        }
+//        if(StringUtils.isNotBlank(title))
+//        {
+//            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(tenantId,entityId,tsKvEntry,title);
+//            try {
+////                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
+////                kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
+////                kafkaProducerService.sendMessageSync("hs_energy_chart_kafka", JsonUtils.objectToJson(dataBodayVo));
+////                kafkaProducerService.sendMessageSync("hs_energy_hour_kafka", JsonUtils.objectToJson(dataBodayVo));
+//
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            } catch (TimeoutException e) {
+//                e.printStackTrace();
+//            }
+////            log.info("打印当前的数据打印标题{}",title);
+////            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
+////            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
+////            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
+//
+//        }
 //        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
 //        if(count>0) {
 //            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);

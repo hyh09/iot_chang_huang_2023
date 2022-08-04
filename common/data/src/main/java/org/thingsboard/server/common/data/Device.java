@@ -79,6 +79,8 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private String comment;
     @ApiModelProperty("设备机台编号")
     private String deviceNo;
+    @ApiModelProperty("排序值")
+    private Integer sort;
     public long createdTime;
 
     public UUID createdUser;
@@ -86,6 +88,9 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private long updatedTime;
 
     private UUID updatedUser;
+
+    @ApiModelProperty("设备重命名")
+    private String rename;
 
     /**********************************以下是非数据库字段***************************************/
 
@@ -118,6 +123,10 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     //是否只查网关  默认否
     private Boolean onlyGatewayFlag = false;
     private Boolean deviceFlg=false;
+    @ApiModelProperty("是否过滤设备图片")
+    private Boolean filterPictureFlag = false;
+    @ApiModelProperty("是否过滤设备图标")
+    private Boolean filterIconFlag = false;
     /**********************************以上是非数据库字段***************************************/
 
 
@@ -157,7 +166,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.factoryName = device.getFactoryName();
         this.workshopName = device.getWorkshopName();
         this.productionLineName = device.getProductionLineName();
-
+        this.rename = device.getRename();
     }
 
     public Device updateDevice(Device device) {
@@ -178,6 +187,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.setProductionLineIds(productionLineIds);
         this.setTenantId(new TenantId(factory.getTenantId()));
         this.setName(factory.getDeviceName());
+        this.setFilterPictureFlag(true);
     }
 
     public Device(TenantId tenantId, String name){

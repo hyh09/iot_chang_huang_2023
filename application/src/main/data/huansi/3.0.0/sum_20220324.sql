@@ -1131,6 +1131,7 @@ CREATE TABLE IF NOT EXISTS public.hs_factory
     admin_user_id uuid,
     admin_user_name character varying(255) COLLATE pg_catalog."default",
     additional_info character varying COLLATE pg_catalog."default",
+    sort bigint,
     CONSTRAINT tb_factory_pkey PRIMARY KEY (id)
 )
 
@@ -1380,6 +1381,8 @@ CREATE TABLE IF NOT EXISTS public.hs_order
     unit character varying(255) COLLATE pg_catalog."default",
     unit_price_type character varying(255) COLLATE pg_catalog."default",
     workshop_id uuid,
+    is_done bool NOT NULL DEFAULT false,
+    sort bigint,
     CONSTRAINT hs_dict_data_copy1_pkey PRIMARY KEY (id),
     CONSTRAINT uk_hs_order_no UNIQUE (tenant_id, order_no)
 )
@@ -2213,8 +2216,9 @@ ALTER TABLE public.device ADD COLUMN updated_user uuid;
 ALTER TABLE public.device ADD COLUMN comment character varying(255) COLLATE pg_catalog."default";
 COMMENT ON COLUMN public.device.comment IS '备注';
 ALTER TABLE public.device ADD COLUMN device_no character varying(255) COLLATE pg_catalog."default";
-COMMENT ON COLUMN public.device.comment IS '设备编号';
+COMMENT ON COLUMN public.device.device_no IS '设备编号';
 alter table device add flg boolean default false;
+alter table device add sort bigint;
 
 
 

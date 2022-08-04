@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.tenantmenu.TenantMenu;
 import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
@@ -82,6 +84,7 @@ public class TenantMenuController extends BaseController {
             throw handleException(e);
         }
 
+        saveAuditLog(getCurrentUser(), null, EntityType.TENANT_MENU_ROLE, null, ActionType.UPDATED, saveTenantMenuDto);
     }
 
     /**
@@ -202,6 +205,9 @@ public class TenantMenuController extends BaseController {
             tenantMenuList.forEach(i -> {
                 tenantMenuVos.add(new TenantMenuVo(i));
             });
+
+            saveAuditLog(getCurrentUser(), null, EntityType.TENANT_MENU_ROLE, null, ActionType.ADDED, addTenantMenuDtos);
+
             return tenantMenuVos;
         } catch (Exception e) {
             throw handleException(e);
@@ -233,6 +239,9 @@ public class TenantMenuController extends BaseController {
             tenantMenuList.forEach(i -> {
                 tenantMenuVos.add(new TenantMenuVo(i));
             });
+
+            saveAuditLog(getCurrentUser(), null, EntityType.TENANT_MENU_ROLE, null, ActionType.UPDATED, updTenantMenuDto);
+
             return tenantMenuVos;
         } catch (Exception e) {
             throw handleException(e);
@@ -262,6 +271,9 @@ public class TenantMenuController extends BaseController {
             tenantMenuList.forEach(i -> {
                 tenantMenuVos.add(new TenantMenuVo(i));
             });
+
+            saveAuditLog(getCurrentUser(), null, EntityType.TENANT_MENU_ROLE, null, ActionType.UPDATED, tenantMenuList);
+
             return tenantMenuVos;
         } catch (Exception e) {
             throw handleException(e);
@@ -290,6 +302,9 @@ public class TenantMenuController extends BaseController {
             tenantMenuList.forEach(i -> {
                 tenantMenuVos.add(new TenantMenuVo(i));
             });
+
+            saveAuditLog(getCurrentUser(), null, EntityType.TENANT_MENU_ROLE, null, ActionType.DELETED, tenantMenuList);
+
             return tenantMenuVos;
         } catch (Exception e) {
             throw handleException(e);

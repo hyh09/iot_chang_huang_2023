@@ -27,6 +27,14 @@ import java.util.*;
 
 @Component
 public class JpaProductionCalenderDao implements ProductionCalenderDao {
+    private final String SORT_FACTORY_NAME = "factoryName";
+    private final String SORT_DEVICE_NAME = "deviceName";
+    private final String SORT_START_TIME = "startTime";
+    private final String SORT_END_TIME = "endTime";
+    private final String SORT_DESC = "DESC";
+    private final String SORT_ASC = "ASC";
+    private final String SORT_UPDATED_TIME = "updatedTime";
+    private final String SORT_CREATED_TIME = "createdTime";
 
     @Autowired
     private ProductionCalenderRepository productionCalenderRepository;
@@ -38,9 +46,9 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
     private JpaSqlTool jpaSqlTool;
 
 
-    private Page<ProductionCalenderEntity> queryWhereSql(ProductionCalender productionCalender,Pageable pageable){
+    private Page<ProductionCalenderEntity> queryWhereSql(ProductionCalender productionCalender, Pageable pageable) {
         Map<String, Object> param = new HashMap<>();
-        StringBuffer  sonSql01 = new StringBuffer();
+        StringBuffer sonSql01 = new StringBuffer();
         sonSql01.append(" select a1.id as device_id,a1.name as device_name,a2.id as factory_id ,a2.name as factory_name,a3.start_time,a3.end_time from device as a1 " +
                 " left join hs_factory as a2 on a1.factory_id = a2.id " +
                 " left join (" +
@@ -51,20 +59,46 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
                 "    )as t2  " +
                 "    on t1.device_id = t2.device_id and t1.end_time = t2.end_time " +
                 " ) as a3 on a3.device_id = a1.id " +
-                " where 1 = 1  and position('\"gateway\":true' in a1.additional_info)=0 " );
+                " where 1 = 1  and position('\"gateway\":true' in a1.additional_info)=0 ");
 
-        if(productionCalender != null){
-            if(productionCalender.getFactoryName() != null){
+        if (productionCalender != null) {
+            if (productionCalender.getFactoryId() != null && StringUtils.isNotEmpty(productionCalender.getFactoryId().toString())) {
+                sonSql01.append(" and a2.id =:factoryId");
+                param.put("factoryId", productionCalender.getFactoryId());
+            }
+            if (StringUtils.isNotEmpty(productionCalender.getFactoryName())) {
                 sonSql01.append(" and a2.name like :factoryName");
-                param.put("factoryName","%" + productionCalender.getFactoryName() + "%");
+                param.put("factoryName", "%" + productionCalender.getFactoryName() + "%");
             }
-            if(StringUtils.isNotEmpty(productionCalender.getDeviceName())){
+            if (StringUtils.isNotEmpty(productionCalender.getDeviceName())) {
                 sonSql01.append(" and a1.name like :deviceName");
-                param.put("deviceName","%" + productionCalender.getDeviceName() + "%");
+                param.put("deviceName", "%" + productionCalender.getDeviceName() + "%");
             }
-            if(productionCalender.getTenantId() != null){
-                sonSql01.append(" and a1.tenant_id = :tenantId");
+            if (productionCalender.getTenantId() != null) {
+                sonSql01.append(" and a1.tenant_id =:tenantId");
                 param.put("tenantId", productionCalender.getTenantId());
+            }
+            //排序
+            if (StringUtils.isNotEmpty(productionCalender.getSortProperty()) && StringUtils.isNotEmpty(productionCalender.getSortOrder())) {
+                sonSql01.append(" order by ");
+                switch (productionCalender.getSortProperty()) {
+                    case SORT_FACTORY_NAME:
+                        sonSql01.append("a2.name ");
+                        break;
+                    case SORT_DEVICE_NAME:
+                        sonSql01.append("a1.name ");
+                        break;
+                    case SORT_START_TIME:
+                        sonSql01.append("a3.start_time ");
+                        break;
+                    case SORT_END_TIME:
+                        sonSql01.append("a3.end_time ");
+                        break;
+                    default:
+                        sonSql01.append("a3.end_time ");
+                        break;
+                }
+                sonSql01.append(productionCalender.getSortOrder());
             }
         }
         return jpaSqlTool.querySql(sonSql01.toString(), param, pageable, "productionCalendarEntity_01");
@@ -73,26 +107,37 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
 
     /**
      * 新增/修改
+     *
      * @param productionCalender
      * @throws ThingsboardException
      */
     @Override
     public void saveProductionCalender(ProductionCalender productionCalender) throws ThingsboardException {
+        //校验，同一个设备的生产日历时间不允许存在交叉
         if (productionCalender.getDeviceId() != null) {
             List<ProductionCalenderEntity> allByDeviceIdAndStartTimeAndEndTime = productionCalenderRepository.findAllByDeviceIdAndStartTimeAndEndTime(productionCalender.getDeviceId(), productionCalender.getStartTime(), productionCalender.getEndTime());
-            if(CollectionUtils.isNotEmpty(allByDeviceIdAndStartTimeAndEndTime)){
-                throw new ThingsboardException("设备【"+productionCalender.getDeviceName()+"】日历时间有重叠！", ThingsboardErrorCode.GENERAL);
+            if (CollectionUtils.isNotEmpty(allByDeviceIdAndStartTimeAndEndTime)) {
+                if (productionCalender.getId() != null) {
+                    if (allByDeviceIdAndStartTimeAndEndTime.size() > 1) {
+                        throw new ThingsboardException("设备【" + productionCalender.getDeviceName() + "】日历时间有重叠！", ThingsboardErrorCode.GENERAL);
+                    } else {
+                        if (!allByDeviceIdAndStartTimeAndEndTime.get(0).getId().toString().equals(productionCalender.getId().toString())) {
+                            throw new ThingsboardException("设备【" + productionCalender.getDeviceName() + "】日历时间有重叠！", ThingsboardErrorCode.GENERAL);
+                        }
+                    }
+                } else {
+                    throw new ThingsboardException("设备【" + productionCalender.getDeviceName() + "】日历时间有重叠！", ThingsboardErrorCode.GENERAL);
+                }
             }
         }
         ProductionCalenderEntity productionCalenderEntity = new ProductionCalenderEntity(productionCalender);
-        //校验，同一个设备的生产日历时间不允许存在交叉
         if (productionCalenderEntity.getId() == null) {
             UUID uuid = Uuids.timeBased();
             productionCalenderEntity.setId(uuid);
         }
-        if(StringUtils.isEmpty(productionCalender.getFactoryName()) && productionCalender.getFactoryId() != null){
+        if (StringUtils.isEmpty(productionCalender.getFactoryName()) && productionCalender.getFactoryId() != null) {
             Factory byId = factoryDao.findById(productionCalender.getFactoryId());
-            if(byId != null){
+            if (byId != null) {
                 productionCalenderEntity.setFactoryName(byId.getName());
             }
         }
@@ -101,6 +146,7 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
 
     /**
      * 单条删除
+     *
      * @param id
      * @throws ThingsboardException
      */
@@ -111,13 +157,14 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
 
     /**
      * 查单条记录
+     *
      * @param id
      * @return
      */
     @Override
     public ProductionCalender findById(UUID id) {
         Optional<ProductionCalenderEntity> byId = productionCalenderRepository.findById(id);
-        if(byId != null && byId.get() != null){
+        if (byId != null && byId.get() != null) {
             return byId.get().toData();
         }
         return null;
@@ -125,55 +172,58 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
 
     /**
      * 分页查询
+     *
      * @param pageLink
      * @return
      */
     @Override
-    public PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink){
+    public PageData<ProductionCalender> findProductionCalenderPage(ProductionCalender productionCalender, PageLink pageLink) {
         List<ProductionCalender> result = new ArrayList<>();
         Pageable pageable1 = DaoUtil.toPageable(pageLink);
         //统计生产日历设备分组信息
-        Page<ProductionCalenderEntity> page = queryWhereSql(productionCalender,pageable1);
+        Page<ProductionCalenderEntity> page = queryWhereSql(productionCalender, pageable1);
         //转换数据
         List<ProductionCalenderEntity> content = page.getContent();
-        if(CollectionUtils.isNotEmpty(content)){
-            content.forEach(i->{
+        if (CollectionUtils.isNotEmpty(content)) {
+            content.forEach(i -> {
                 result.add(i.toData());
             });
         }
         PageData<ProductionCalender> resultPage = new PageData<>();
-        resultPage = new PageData<ProductionCalender>(result,page.getTotalPages(),page.getTotalElements(),page.hasNext());
+        resultPage = new PageData<ProductionCalender>(result, page.getTotalPages(), page.getTotalElements(), page.hasNext());
         return resultPage;
     }
 
     /**
      * 设备生产日历历史记录分页列表
+     *
      * @param deviceId
      * @param pageLink
      * @return
      */
     @Override
-    public PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink) {
+    public PageData<ProductionCalender> getHistoryPageByDeviceId(UUID deviceId, PageLink pageLink,String sortProperty,String sortOrder) {
 
         List<ProductionCalender> result = new ArrayList<>();
         // 动态条件查询
-        Specification<ProductionCalenderEntity> specification = dynamicCondition(new ProductionCalender(deviceId));
+        Specification<ProductionCalenderEntity> specification = dynamicCondition(new ProductionCalender(deviceId,sortProperty,sortOrder));
         Pageable pageable = DaoUtil.toPageable(pageLink);
         Page<ProductionCalenderEntity> page = productionCalenderRepository.findAll(specification, pageable);
 
-        List<ProductionCalenderEntity> entityList =page.getContent();
-        if(CollectionUtils.isNotEmpty(entityList)){
-            entityList.forEach(s->{
+        List<ProductionCalenderEntity> entityList = page.getContent();
+        if (CollectionUtils.isNotEmpty(entityList)) {
+            entityList.forEach(s -> {
                 result.add(s.toData());
             });
         }
         PageData<ProductionCalender> resultPage = new PageData<>();
-        resultPage = new PageData<ProductionCalender>(result,page.getTotalPages(),page.getTotalElements(),page.hasNext());
+        resultPage = new PageData<ProductionCalender>(result, page.getTotalPages(), page.getTotalElements(), page.hasNext());
         return resultPage;
     }
 
     /**
      * 设备生产日历历史记录列表
+     *
      * @param deviceId
      * @return
      */
@@ -184,8 +234,8 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
         // 动态条件查询
         Specification<ProductionCalenderEntity> specification = dynamicCondition(new ProductionCalender(deviceId));
         List<ProductionCalenderEntity> entityList = productionCalenderRepository.findAll(specification);
-        if(CollectionUtils.isNotEmpty(entityList)){
-            entityList.forEach(s->{
+        if (CollectionUtils.isNotEmpty(entityList)) {
+            entityList.forEach(s -> {
                 result.add(s.toData());
             });
         }
@@ -194,41 +244,66 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
 
     /**
      * 动态条件
+     *
      * @param productionCalender
      * @return
      */
-    public Specification<ProductionCalenderEntity> dynamicCondition(ProductionCalender productionCalender){
-        return  (root, query, cb) -> {
+    public Specification<ProductionCalenderEntity> dynamicCondition(ProductionCalender productionCalender) {
+        return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if(productionCalender != null){
-                if(productionCalender.getTenantId() != null){
-                    predicates.add(cb.equal(root.get("tenantId"),productionCalender.getTenantId()));
+            //排序
+            Order order = cb.desc(root.get("createdTime"));
+            if (productionCalender != null) {
+                if (productionCalender.getTenantId() != null) {
+                    predicates.add(cb.equal(root.get("tenantId"), productionCalender.getTenantId()));
                 }
-                if(productionCalender.getFactoryId() != null){
-                    predicates.add(cb.equal(root.get("factoryId"),productionCalender.getFactoryId()));
+                if (productionCalender.getFactoryId() != null) {
+                    predicates.add(cb.equal(root.get("factoryId"), productionCalender.getFactoryId()));
                 }
-                if(StringUtils.isNotEmpty(productionCalender.getDeviceName())){
-                    predicates.add(cb.like(root.get("deviceName"),productionCalender.getDeviceName()));
+                if (StringUtils.isNotEmpty(productionCalender.getDeviceName())) {
+                    predicates.add(cb.like(root.get("deviceName"), productionCalender.getDeviceName()));
                 }
-                if(productionCalender.getDeviceId() != null){
-                    predicates.add(cb.equal(root.get("deviceId"),productionCalender.getDeviceId()));
+                if (productionCalender.getDeviceId() != null) {
+                    predicates.add(cb.equal(root.get("deviceId"), productionCalender.getDeviceId()));
+                }
+
+                if (StringUtils.isNotEmpty(productionCalender.getSortProperty()) && StringUtils.isNotEmpty(productionCalender.getSortOrder())) {
+
+                    switch (productionCalender.getSortProperty()) {
+                        case SORT_UPDATED_TIME:
+                            if(SORT_DESC.equals(productionCalender.getSortOrder())){
+                                order = cb.desc(root.get("updatedTime"));
+                            }
+                            if(SORT_ASC.equals(productionCalender.getSortOrder())){
+                                order = cb.asc(root.get("updatedTime"));
+                            }
+                            break;
+                        case SORT_CREATED_TIME:
+                            if(SORT_DESC.equals(productionCalender.getSortOrder())){
+                                order = cb.desc(root.get("createdTime"));
+                            }
+                            if(SORT_ASC.equals(productionCalender.getSortOrder())){
+                                order = cb.asc(root.get("createdTime"));
+                            }
+                            break;
+                    }
                 }
             }
             /**
              * order By
              */
-            Order createdTime = cb.desc(root.get("createdTime"));
-            return  query.orderBy(createdTime).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+            return query.orderBy(order).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         };
     }
 
     /**
      * 查询设备当天班次
+     *
      * @param deviceId
      * @return
      */
     @Override
-    public List<ProductionCalender> getDeviceByTimenterval(UUID deviceId,long startTime,long endTime) {
+    public List<ProductionCalender> getDeviceByTimenterval(UUID deviceId, long startTime, long endTime) {
         List<ProductionCalender> result = new ArrayList<>();
         // 动态条件查询
         Specification<ProductionCalenderEntity> specification = (root, query, cb) -> {
@@ -250,13 +325,14 @@ public class JpaProductionCalenderDao implements ProductionCalenderDao {
 
     /**
      * 查询时间范围有交集的实生产日历
+     *
      * @param deviceId
      * @param startTime
      * @param endTime
      * @return
      */
     @Override
-    public List<ProductionCalender> findAllByDeviceIdAndStartTimeAndEndTime(UUID deviceId,long startTime,long endTime){
+    public List<ProductionCalender> findAllByDeviceIdAndStartTimeAndEndTime(UUID deviceId, long startTime, long endTime) {
         List<ProductionCalender> result = new ArrayList<>();
         List<ProductionCalenderEntity> entityList = productionCalenderRepository.findAllByDeviceIdAndStartTimeAndEndTime(deviceId, startTime, endTime);
         if (CollectionUtils.isNotEmpty(entityList)) {

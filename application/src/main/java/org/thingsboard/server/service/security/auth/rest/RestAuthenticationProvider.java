@@ -95,12 +95,23 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
 
     private Authentication authenticateByUsernameAndPassword(Authentication authentication, UserPrincipal userPrincipal, String username, LoginRequest loginRequest) {
         String  password  =loginRequest.getPassword();
+        if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
+        {
+            FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
+            if(factoryURLAppTableEntity == null)
+            {
+                log.info("查询不到配置表信息【FACTORY_URL_APP_TABLE】入参为{}",loginRequest.getAppUrl());
+                throw  new UserDoesNotExistException(" user does not exist ");
+            }
+            loginRequest.setFactoryId(factoryURLAppTableEntity.getFactoryId());
+        }
+
         User user = new User();
         if(isEmail(username)) {
-             user = userService.findUserByEmail(TenantId.SYS_TENANT_ID, username);
+             user = userService.findUserByEmailAndfactoryId(TenantId.SYS_TENANT_ID, username,loginRequest.getFactoryId());
              checkUserLogin(user,loginRequest);
          }else {
-            user = userService.findByPhoneNumber(username);
+            user = userService.findByPhoneNumberAndFactoryId(username,loginRequest.getFactoryId());
         }
         if (user == null) {
             throw new UsernameNotFoundException("User not found: " + username);
@@ -246,16 +257,16 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         }
 
 
-        if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
-        {
-            FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
-            if(factoryURLAppTableEntity == null)
-            {
-                log.info("查询不到配置表信息【FACTORY_URL_APP_TABLE】入参为{}",loginRequest.getAppUrl());
-               throw  new UserDoesNotExistException(" user does not exist ");
-            }
-            loginRequest.setFactoryId(factoryURLAppTableEntity.getFactoryId());
-        }
+//        if(StringUtils.isNotBlank(loginRequest.getAppUrl()))
+//        {
+//            FactoryURLAppTableEntity  factoryURLAppTableEntity =  factoryURLAppTableService.queryAllByAppUrl(loginRequest.getAppUrl());
+//            if(factoryURLAppTableEntity == null)
+//            {
+//                log.info("查询不到配置表信息【FACTORY_URL_APP_TABLE】入参为{}",loginRequest.getAppUrl());
+//               throw  new UserDoesNotExistException(" user does not exist ");
+//            }
+//            loginRequest.setFactoryId(factoryURLAppTableEntity.getFactoryId());
+//        }
 
           String userType = user.getType();
           String factoryId =loginRequest.getFactoryId();

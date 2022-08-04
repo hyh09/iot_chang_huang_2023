@@ -156,6 +156,24 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     FactoryDao factoryDao;
 
     /**
+     * 查询单个设备是否在线
+     *
+     * @param deviceId 设备Id
+     */
+    @Override
+    public Boolean isDeviceOnline(UUID deviceId) {
+        return this.getDeviceOnlineStatus(DeviceId.fromString(deviceId.toString()));
+    }
+
+    /**
+     * 列举全部工厂
+     */
+    @Override
+    public List<Factory> listFactories() {
+        return DaoUtil.convertDataList(this.factoryRepository.findAllSimple());
+    }
+
+    /**
      * 查询用户
      *
      * @param userId 用户Id
@@ -239,6 +257,18 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     }
 
     /**
+     * 分页查询设备列表-按设备排序值排序
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     * @param pageLink 分页参数
+     */
+    @Override
+    public <T extends FactoryDeviceQuery> PageData<Device> listPageDevicesPageByQueryOrderBySort(TenantId tenantId, T t, PageLink pageLink) {
+        return DaoUtil.toPageData(this.deviceRepository.findAll(this.getDeviceQuerySpecificationOrderBySort(tenantId, t), DaoUtil.toPageable(pageLink)));
+    }
+
+    /**
      * 查询全部设备的在线情况
      *
      * @param allDeviceIdList 设备的UUID列表
@@ -254,8 +284,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
             }
             return map;
         } else {
-            return attributeKvRepository.findAllOneKeyByEntityIdList(EntityType.DEVICE, allDeviceIdList, HSConstants.ATTR_ACTIVE)
-                    .stream().collect(Collectors.toMap(e -> e.getId().getEntityId().toString(), AttributeKvEntity::getBooleanValue));
+            return allDeviceIdList.stream().map(v->CompletableFuture.supplyAsync(()->ImmutablePair.of(v, this.getDeviceOnlineStatus(DeviceId.fromString(v.toString())))))
+                    .map(CompletableFuture::join).collect(Collectors.toMap(v->v.getLeft().toString(), ImmutablePair::getRight));
         }
     }
 
@@ -389,7 +419,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     public PageData<Map<String, Object>> listPageTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
         long sta = System.currentTimeMillis();
         if (this.commonComponent.isPersistToCassandra()) {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            var keyList = this.tsService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
             if (keyList.isEmpty())
                 return new PageData<>(Lists.newArrayList(), 0, 0L, false);
 
@@ -600,8 +630,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param plans 生产计划列表
      */
     @Override
-    public BigDecimal getOrderCapacities(List<OrderPlan> plans) {
-        return this.getOrderCapacities(plans, null).getCapacities();
+    public BigDecimal getOrderCapacitiesByTs(List<OrderPlan> plans) {
+        return this.getOrderCapacitiesByTs(plans, null).getCapacities();
     }
 
     /**
@@ -611,7 +641,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param orderId 订单Id
      */
     @Override
-    public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
+    public OrderCapacityBO getOrderCapacitiesByTs(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
             log.trace("查询设备指定时间段产能：" + "empty");
             return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
@@ -637,15 +667,33 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param plans 生产计划列表
      */
     @Override
-    public Map<UUID, BigDecimal> mapPlanIdToCapacities(List<OrderPlan> plans) {
+    public BigDecimal getOrderCapacities(List<OrderPlan> plans) {
+        return this.getOrderCapacities(plans, null).getCapacities();
+    }
+
+    /**
+     * 查询订单产能
+     *
+     * @param plans   生产计划列表
+     * @param orderId 订单Id
+     */
+    @Override
+    public OrderCapacityBO getOrderCapacities(List<OrderPlan> plans, UUID orderId) {
         if (plans.isEmpty()) {
             log.trace("查询设备指定时间段产能：" + "empty");
-            return Maps.newHashMap();
+            return OrderCapacityBO.builder().orderId(orderId).capacities(BigDecimal.ZERO).deviceCapacities(Lists.newArrayList()).build();
         } else {
-            var dataMap = this.bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(plans.stream().map(OrderPlan::toDeviceCapacityVO).filter(f -> f.getStartTime() != null).filter(f -> f.getEndTime() != null).collect(Collectors.toList())).entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new BigDecimal(v.getValue())));
-            log.trace("查询设备指定时间段产能：" + dataMap);
-            return dataMap;
+            return OrderCapacityBO.builder()
+                    .orderId(orderId)
+                    .deviceCapacities(
+                            plans.stream().map(v -> OrderDeviceCapacityBO.builder()
+                                .planId(toUUID(v.getId()))
+                                .enabled(v.getEnabled())
+                                .capacities(Optional.ofNullable(v.getActualCapacity()).orElse(BigDecimal.ZERO))
+                                .build()).collect(Collectors.toList())
+                    )
+                    .capacities(plans.stream().filter(OrderPlan::getEnabled).map(OrderPlan::getActualCapacity).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add))
+                    .build();
         }
     }
 
@@ -780,43 +828,11 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Override
     public FactoryDetailBO getFactoryHierarchy(TenantId tenantId, UUID factoryId) {
         FactoryDetailBO factoryBO = new FactoryDetailBO();
-        CompletableFuture.allOf(this.factoryRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setFactories(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getId())).map(DaoUtil::getData).collect(Collectors.toList()))),
-                this.workshopRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setWorkshops(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
-                this.productionLineRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setProductionLines(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
-                this.deviceRepository.findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setDevices(v.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList())))).join();
+        CompletableFuture.allOf(this.factoryRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setFactories(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.workshopRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setWorkshops(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.productionLineRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setProductionLines(v.stream().filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList()))),
+                this.deviceRepository.findAllIdAndNameAndSortByTenantIdOrderBySortAsc(tenantId.getId()).thenAcceptAsync(v -> factoryBO.setDevices(v.stream().filter(e -> e.getAdditionalInfo() == null || e.getAdditionalInfo().get("gateway") == null || !"true".equals(e.getAdditionalInfo().get("gateway").asText())).filter(e -> factoryId == null || factoryId.equals(e.getFactoryId())).map(DaoUtil::getData).collect(Collectors.toList())))).join();
         return factoryBO;
-    }
-
-    /**
-     * 组装设备请求 specification
-     *
-     * @param tenantId 租户Id
-     * @param t        extends FactoryDeviceQuery
-     */
-    @SuppressWarnings("all")
-    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
-        return (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
-            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
-
-            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
-                // do nothing
-            } else if (!StringUtils.isBlank(t.getDeviceId())) {
-                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
-            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
-                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
-            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
-                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
-            } else if (!StringUtils.isBlank(t.getFactoryId())) {
-                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
-            } else {
-                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
-            }
-
-            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
-            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
-        };
     }
 
     /**
@@ -984,20 +1000,30 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
      * @param properties 属性
      */
     @Override
-    public Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) {
-        // TODO consider cassandra
-        var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
-        if (keyIds.isEmpty())
-            return Maps.newHashMap();
-        var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIn(properties).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey));
-        var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
-        Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
+    public Map<String, List<HistoryGraphPropertyTsKvVO>> listTsHistoriesByProperties(TenantId tenantId, UUID deviceId, Long startTime, Long endTime, List<String> properties) throws ExecutionException, InterruptedException {
+        if (this.commonComponent.isPersistToCassandra()) {
+            List<ReadTsKvQuery> queries = properties.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, Integer.MAX_VALUE, Aggregation.NONE, "desc"))
+                    .collect(Collectors.toList());
+            Map<String, List<HistoryGraphPropertyTsKvVO>> map = new HashMap<>();
+            this.tsService.findAll(tenantId, DeviceId.fromString(deviceId.toString()), queries).get()
+                    .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed())
+                    .collect(Collectors.toList()).forEach(v -> map.computeIfAbsent(v.getKey(), f -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder().ts(v.getTs()).value(this.formatKvEntryValue(v)).build()));
+            return map;
+        } else {
+            var keyIds = this.tsLatestRepository.findAllKeyIdsByEntityId(deviceId);
+            if (keyIds.isEmpty())
+                return Maps.newHashMap();
+            var keyIdToKeyMap = this.tsDictionaryRepository.findAllByKeyIn(properties).stream().collect(Collectors.toMap(TsKvDictionary::getKeyId, TsKvDictionary::getKey));
+            var kvEntityResult = this.tsRepository.findAllByStartTsAndEndTsOrderByTsDesc(deviceId, Sets.newHashSet(keyIds), startTime, endTime);
+            Map<String, List<HistoryGraphPropertyTsKvVO>> map = Maps.newHashMap();
 
-        kvEntityResult.forEach(v -> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
-                .ts(v.getTs())
-                .value(this.formatKvEntryValue(v.toData()))
-                .build()));
-        return map;
+            kvEntityResult.forEach(v -> map.computeIfAbsent(keyIdToKeyMap.get(v.getKey()), k -> Lists.newArrayList()).add(HistoryGraphPropertyTsKvVO.builder()
+                    .ts(v.getTs())
+                    .value(this.formatKvEntryValue(v.toData()))
+                    .build()));
+            return map;
+        }
+
     }
 
     /**
@@ -1029,7 +1055,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @SuppressWarnings("all")
     public List<Map<String, Object>> listTsHistories(TenantId tenantId, DeviceId deviceId, TimePageLink timePageLink) throws ExecutionException, InterruptedException {
         if (this.commonComponent.isPersistToCassandra()) {
-            var keyList = this.tsService.findAllKeysByEntityIds(tenantId, List.of(deviceId));
+            var keyList = this.tsService.findAllLatest(tenantId, DeviceId.fromString(deviceId.toString())).get().stream().map(TsKvEntry::getKey).collect(Collectors.toList());
             if (keyList.isEmpty())
                 return Lists.newArrayList();
 
@@ -1121,6 +1147,70 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 组装设备请求 specification
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @SuppressWarnings("all")
+    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecification(TenantId tenantId, T t) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+
+            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+                // do nothing
+            } else if (!StringUtils.isBlank(t.getDeviceId())) {
+                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+            } else if (!StringUtils.isBlank(t.getFactoryId())) {
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+            } else {
+                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+            }
+
+            query.orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        };
+    }
+
+    /**
+     * 组装设备请求 specification
+     *
+     * @param tenantId 租户Id
+     * @param t        extends FactoryDeviceQuery
+     */
+    @SuppressWarnings("all")
+    public <T extends FactoryDeviceQuery> Specification<DeviceEntity> getDeviceQuerySpecificationOrderBySort(TenantId tenantId, T t) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
+            predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
+
+            if (Boolean.TRUE.equals(t.getIsQueryAll())) {
+                // do nothing
+            } else if (!StringUtils.isBlank(t.getDeviceId())) {
+                predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getProductionLineId())) {
+                predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
+            } else if (!StringUtils.isBlank(t.getWorkshopId())) {
+                predicates.add(cb.equal(root.<UUID>get("workshopId"), toUUID(t.getWorkshopId())));
+            } else if (!StringUtils.isBlank(t.getFactoryId())) {
+                predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+            } else {
+                predicates.add(cb.isNull(root.<UUID>get("productionLineId")));
+            }
+
+            query.orderBy(cb.asc(root.get("sort"))).orderBy(cb.desc(root.get("createdTime"))).orderBy(cb.desc(root.get("name")));
+            return query.where(predicates.toArray(new Predicate[0])).getRestriction();
+        };
     }
 
     @Autowired

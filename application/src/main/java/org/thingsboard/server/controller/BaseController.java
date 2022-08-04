@@ -15,10 +15,12 @@
  */
 package org.thingsboard.server.controller;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,12 +31,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.*;
 import org.thingsboard.server.common.data.alarm.Alarm;
 import org.thingsboard.server.common.data.alarm.AlarmInfo;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.asset.AssetInfo;
+import org.thingsboard.server.common.data.audit.ActionStatus;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
@@ -80,6 +84,7 @@ import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.menu.MenuService;
 import org.thingsboard.server.dao.model.ModelConstants;
+import org.thingsboard.server.dao.model.sql.AuditLogEntity;
 import org.thingsboard.server.dao.oauth2.OAuth2ConfigTemplateService;
 import org.thingsboard.server.dao.oauth2.OAuth2Service;
 import org.thingsboard.server.dao.ota.OtaPackageService;
@@ -88,6 +93,8 @@ import org.thingsboard.server.dao.productionline.ProductionLineService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.dao.rule.RuleChainService;
+import org.thingsboard.server.dao.settings.AdminSettingsService;
+import org.thingsboard.server.dao.sql.audit.AuditLogRepository;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
@@ -296,6 +303,11 @@ public abstract class BaseController {
 
     @Autowired
     protected DeviceOeeEveryHourService deviceOeeEveryHourService;
+    @Autowired
+    protected AdminSettingsService  adminSettingsService;
+
+    @Autowired
+    protected AuditLogRepository auditLogRepository;
 
 /*
 
@@ -1167,4 +1179,27 @@ public abstract class BaseController {
         return  null;
     }
 
+
+    public void saveAuditLog(SecurityUser securityUser, UUID entityId, EntityType entityType, String entityName,
+                             ActionType actionType, Object actionData) {
+        try {
+            AuditLogEntity auditLogEntity = new AuditLogEntity();
+            auditLogEntity.setId(Uuids.timeBased());
+            auditLogEntity.setTenantId(securityUser.getTenantId().getId());
+            auditLogEntity.setCustomerId(CustomerId.NULL_UUID);
+            auditLogEntity.setEntityId(entityId == null ? EntityId.NULL_UUID: entityId);
+            auditLogEntity.setEntityType(entityType);
+            auditLogEntity.setEntityName(entityName);
+            auditLogEntity.setUserId(securityUser.getId().getId());
+            auditLogEntity.setUserName(securityUser.getUserName());
+            auditLogEntity.setActionType(actionType);
+            auditLogEntity.setActionData(actionData != null?JacksonUtil.toJsonNode(new Gson().toJson(actionData)): null);
+            auditLogEntity.setActionFailureDetails(null);
+            auditLogEntity.setActionStatus(ActionStatus.SUCCESS);
+            auditLogEntity.setCreatedTime(System.currentTimeMillis());
+            this.auditLogRepository.save(auditLogEntity);
+        } catch (Exception ex) {
+            log.error("Error 插入日志失败 [{}]", ex.getMessage(), ex);
+        }
+    }
 }

@@ -59,6 +59,7 @@ import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,6 +75,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public static final String ATTRIBUTE_VERSION = "version";
     //在线状态
     public static final String ATTRIBUTE_ACTIVE = "active";
+    //倒序
+    public static final String DESC = "DESC";
+    //升序
+    public static final String ASC = "ASC";
+    public static final String SORT = "sort";
 
     @Autowired
     private DeviceRepository deviceRepository;
@@ -359,7 +365,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     }
 
     @Override
-    public List<Device> findDeviceListByCdn(Device device) {
+    public List<Device> findDeviceListByCdn(Device device,String orderValue,String descOrAsc) {
         List<Device> resultList = new ArrayList<>();
         if (device != null) {
             Specification<DeviceEntity> specification = (root, query, cb) -> {
@@ -389,7 +395,18 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                     device.getProductionLineIds().forEach(in::value);
                     predicates.add(in);
                 }
-                return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                //排序
+                Order sort = cb.asc(root.get("sort"));
+                if(StringUtils.isNotEmpty(orderValue) && StringUtils.isNotEmpty(descOrAsc)){
+                    Order order = null;
+                    if(descOrAsc.equals(DESC)){
+                        order = cb.desc(root.get(orderValue));
+                    }else {
+                        order = cb.asc(root.get(orderValue));
+                    }
+                    return query.orderBy(sort,order).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+                }
+                return query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             List<DeviceEntity> all = deviceRepository.findAll(specification);
             if (CollectionUtils.isNotEmpty(all)) {
@@ -417,6 +434,13 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                                 continue;
                             }
                         }
+                    }
+                    //是否过滤图片
+                    if(device.getFilterIconFlag()){
+                        deviceBo.setIcon(null);
+                    }
+                    if(device.getFilterPictureFlag()){
+                        deviceBo.setPicture(null);
                     }
                     resultList.add(deviceBo);
                 }
@@ -826,7 +850,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
             List<DeviceEntity> all = deviceRepository.findAll(specification);
             if (CollectionUtils.isNotEmpty(all)) {
                 //查询产线名称
-                List<UUID> productionLineIds = all.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+                List<UUID> productionLineIds = all.stream().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+                if(!org.springframework.util.CollectionUtils.isEmpty(productionLineIds)){
+                    productionLineIds = productionLineIds.stream().distinct().collect(Collectors.toList());
+                }
                 List<ProductionLine> productionLineList = productionLineDao.getProductionLineByIdList(productionLineIds);
                 all.forEach(i -> {
                     Device device = i.toData();
@@ -856,7 +883,11 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         Device device = new Device();
         device.setTenantId(tenantId);
         device.setAllot(false);
-        return this.queryList(device);
+        List<Device> collect = this.queryList(device).stream().map(m -> {
+            m.setPicture(null);
+            return m;
+        }).collect(Collectors.toList());
+        return collect;
     }
 
     @Override
@@ -925,6 +956,12 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         return deviceList;
     }
 
+
+    @Override
+    public List<Device> findAllBy() {
+        return DaoUtil.convertDataList(deviceRepository.findAllBy());
+    }
+
     /**
      * 查工厂名称
      * @param deviceList
@@ -933,7 +970,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public List<Device> getFactoryByList(List<Device> deviceList) {
         if (CollectionUtils.isNotEmpty(deviceList)) {
             //查询产线名称
-            List<UUID> factoryIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<UUID> factoryIds = deviceList.stream().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(factoryIds)){
+                factoryIds = factoryIds.stream().distinct().collect(Collectors.toList());
+            }
             List<Factory> resultFactory = factoryDao.getFactoryByIdList(factoryIds);
             deviceList.forEach(i -> {
                 if (CollectionUtils.isNotEmpty(resultFactory)) {
@@ -957,7 +997,10 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     public List<Device> getParentNameByList(List<Device> deviceList) {
         if (CollectionUtils.isNotEmpty(deviceList)) {
             //查询产线名称
-            List<UUID> productionLineIds = deviceList.stream().distinct().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            List<UUID> productionLineIds = deviceList.stream().map(s -> s.getProductionLineId()).collect(Collectors.toList());
+            if(!org.springframework.util.CollectionUtils.isEmpty(productionLineIds)){
+                productionLineIds = productionLineIds.stream().distinct().collect(Collectors.toList());
+            }
             List<ProductionLine> productionLineList = productionLineDao.getProductionLineByIdList(productionLineIds);
             deviceList.forEach(i -> {
                 if (CollectionUtils.isNotEmpty(productionLineList)) {
@@ -986,6 +1029,7 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     /**
      * 构造查询条件,需要家条件在这里面加
      * @param device
+     * @param pageLink
      * @return
      */
     private Specification<DeviceEntity> queryCondition(Device device, PageLink pageLink) {

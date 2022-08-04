@@ -130,6 +130,9 @@ public class OrderEntity extends BasePgEntity<OrderEntity> implements ToData<Ord
     @Column(name = HsModelConstants.ORDER_STANDARD_AVAILABLE_TIME)
     private BigDecimal standardAvailableTime;
 
+    @Column(name = HsModelConstants.ORDER_IS_DONE)
+    private Boolean isDone;
+
     public OrderEntity() {
     }
 
@@ -173,6 +176,7 @@ public class OrderEntity extends BasePgEntity<OrderEntity> implements ToData<Ord
         this.intendedTime = common.getIntendedTime();
         this.standardAvailableTime = common.getStandardAvailableTime();
         this.additionalAmount = common.getAdditionalAmount();
+        this.isDone = common.getIsDone();
 
         this.setCreatedTimeAndCreatedUser(common);
     }
@@ -216,6 +220,7 @@ public class OrderEntity extends BasePgEntity<OrderEntity> implements ToData<Ord
         common.setComment(comment);
         common.setStandardAvailableTime(standardAvailableTime);
         common.setIntendedTime(intendedTime);
+        common.setIsDone(isDone);
 
         common.setCreatedTime(createdTime);
         common.setCreatedUser(createdUser);

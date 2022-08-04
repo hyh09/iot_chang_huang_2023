@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.service.state;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Function;
@@ -45,9 +46,11 @@ import org.thingsboard.server.common.msg.queue.TbCallback;
 import org.thingsboard.server.common.msg.queue.TopicPartitionInfo;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.device.DeviceService;
+import org.thingsboard.server.dao.hs.service.Impl.ScheduleTaskService;
 import org.thingsboard.server.dao.model.sql.AbstractTsKvEntity;
 import org.thingsboard.server.dao.model.sqlts.latest.TsKvLatestEntity;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
+import org.thingsboard.server.dao.sql.attributes.JpaAttributeDao;
 import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
@@ -62,6 +65,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -94,6 +98,9 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     private final PartitionService partitionService;
 
     @Autowired
+    private ScheduleTaskService scheduleTaskService;
+
+    @Autowired
     private AttributeKvRepository attributeKvRepository;
 
     @Autowired
@@ -117,6 +124,10 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     @Getter
     private int initFetchPackSize;
 
+    @Value("${state.defaultGatewayTimeout}")
+    @Getter
+    private long defaultGatewayTimeout;
+
     private ListeningScheduledExecutorService scheduledExecutor;
     private ExecutorService deviceStateExecutor;
 
@@ -125,7 +136,11 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     private final ConcurrentMap<TopicPartitionInfo, Set<DeviceId>> partitionedDevices = new ConcurrentHashMap<>();
     final ConcurrentMap<DeviceId, DeviceStateData> deviceStates = new ConcurrentHashMap<>();
 
+    final ConcurrentMap<UUID, String> gatewayStates = new ConcurrentHashMap<>();
+
     final Queue<Set<TopicPartitionInfo>> subscribeQueue = new ConcurrentLinkedQueue<>();
+
+    private SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public DefaultDeviceStateService(TenantService tenantService, DeviceService deviceService,
                                      AttributesService attributesService, TimeseriesService tsService,
@@ -171,23 +186,48 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceConnect(TenantId tenantId, DeviceId deviceId) {
-        log.trace("on Device Connect [{}]", deviceId.getId());
-        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-        long ts = System.currentTimeMillis();
-        stateData.getState().setLastConnectTime(ts);
-        save(deviceId, LAST_CONNECT_TIME, ts);
-        pushRuleEngineMessage(stateData, CONNECT_EVENT);
-        checkAndUpdateState(deviceId, stateData);
-        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
+//        log.info("设备【" + deviceId + "]建立连接！");
+//        log.trace("on Device Connect [{}]", deviceId.getId());
+//        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+//        long ts = System.currentTimeMillis();
+//        stateData.getState().setLastConnectTime(ts);
+//        save(deviceId, LAST_CONNECT_TIME, ts);
+//        pushRuleEngineMessage(stateData, CONNECT_EVENT);
+//        checkAndUpdateState(deviceId, stateData);
+//        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
+//        //断开连接，如果还在线，则要改为离线
+//        if (!isActive(ts, stateData.getState())) {
+//            this.updateGatewayStateTrue(deviceId,stateData);
+//        }
     }
 
     @Override
     public void onDeviceActivity(TenantId tenantId, DeviceId deviceId, long lastReportedActivity) {
         log.trace("on Device Activity [{}], lastReportedActivity [{}]", deviceId.getId(), lastReportedActivity);
         final DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-        if (lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()) {
-            updateActivityState(deviceId, stateData, lastReportedActivity);
+        //网关这里不判断
+        if(!gatewayStates.containsKey(deviceId.getId())){
+            if (lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()) {
+                updateActivityState(deviceId, stateData, lastReportedActivity);
+            } else {
+                /*if(gatewayStates.containsKey(deviceId.getId())){
+                    //输出网关状态不成立日志
+                    log.info("判断设备在线的前提条件1是：lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()");
+                    if (!(lastReportedActivity > 0)) {
+                        log.info("第1个不满足true条件【lastReportedActivity > 0】结果为：" + sf.format(new Date(lastReportedActivity)));
+                    }
+                    if (!(lastReportedActivity > stateData.getState().getLastActivityTime())) {
+                        log.info("网关设备在线判断1未通过！【" + deviceId + "】");
+                        log.info("第2个不满足true条件【lastReportedActivity > stateData.getState().getLastActivityTime()】结果为：" + (lastReportedActivity > stateData.getState().getLastActivityTime()));
+                        log.info("【lastReportedActivity】结果为：" + sf.format(new Date(lastReportedActivity)));
+                        log.info("【stateData.getState().getLastActivityTime()】结果为：" + sf.format(new Date(stateData.getState().getLastActivityTime())));
+                        log.info("干预网关在线");
+                        this.updateGatewayStateTrue(deviceId,stateData);
+                    }
+                }*/
+            }
         }
+
         cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
     }
 
@@ -197,11 +237,22 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
             save(deviceId, LAST_ACTIVITY_TIME, lastReportedActivity);
             DeviceState state = stateData.getState();
             state.setLastActivityTime(lastReportedActivity);
-            if (!state.isActive()) {
-                state.setActive(true);
-                save(deviceId, ACTIVITY_STATE, true);
-                pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
+            //网关这里不判断
+            if(!gatewayStates.containsKey(deviceId.getId())){
+                if (!state.isActive()) {
+                    log.info("设备【" + deviceId + "]上线了！");
+                    state.setActive(true);
+                    save(deviceId, ACTIVITY_STATE, true);
+                    pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
+                    this.scheduleTaskService.rtCheckFactoryStatus(deviceId);
+                }
+                /*else {
+                log.info("网关设备在线判断2未通过！【" + deviceId + "】");
+                log.info("判断设备在线的前提条件2是：!state.isActive()");
+                log.info("stateData.getState()"+state.toString());
+                }*/
             }
+
         } else {
             log.debug("updateActivityState - fetched state IN NULL for device {}, lastReportedActivity {}", deviceId, lastReportedActivity);
             cleanUpDeviceStateMap(deviceId);
@@ -210,12 +261,18 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
 
     @Override
     public void onDeviceDisconnect(TenantId tenantId, DeviceId deviceId) {
-        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-        long ts = System.currentTimeMillis();
-        stateData.getState().setLastDisconnectTime(ts);
-        save(deviceId, LAST_DISCONNECT_TIME, ts);
-        pushRuleEngineMessage(stateData, DISCONNECT_EVENT);
-        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
+//        log.info("设备【" + deviceId + "]断开连接！"); 
+//        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+//        long ts = System.currentTimeMillis();
+//        stateData.getState().setLastDisconnectTime(ts);
+//        save(deviceId, LAST_DISCONNECT_TIME, ts);
+//        pushRuleEngineMessage(stateData, DISCONNECT_EVENT);
+//        cleanDeviceStateIfBelongsExternalPartition(tenantId, deviceId);
+//        //断开连接，如果还在线，则要改为离线
+//        if (isActive(ts, stateData.getState())) {
+//            this.updateGatewayStateFalse(deviceId,stateData);
+//        }
+
     }
 
     @Override
@@ -377,6 +434,8 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         List<ListenableFuture<Void>> fetchFutures = new ArrayList<>();
         PageData<Device> page = deviceService.findDevicesByTenantId(tenant.getId(), pageLink);
         for (Device device : page.getData()) {
+            //缓存网关
+            this.initGateway(device);
             TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, tenant.getId(), device.getId());
             if (addedPartitions.contains(tpi)) {
                 log.debug("[{}][{}] Device belong to current partition. tpi [{}]. Fetching state from DB", device.getName(), device.getId(), tpi);
@@ -398,6 +457,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
                 log.debug("[{}][{}] Device doesn't belong to current partition. tpi [{}]", device.getName(), device.getId(), tpi);
             }
         }
+        log.info("已缓存网关："+gatewayStates.toString());
 
         Futures.addCallback(Futures.successfulAsList(fetchFutures), new FutureCallback<List<Void>>() {
             @Override
@@ -442,6 +502,7 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
     }
 
     void updateInactivityStateIfExpired() {
+        log.info("start updateInactivityStateIfExpired ...");
         final long ts = System.currentTimeMillis();
         partitionedDevices.forEach((tpi, deviceIds) -> {
             log.debug("Calculating state updates. tpi {} for {} devices", tpi.getFullTopicName(), deviceIds.size());
@@ -486,13 +547,47 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         log.trace("Processing state {} for device {}", stateData, deviceId);
         if (stateData != null) {
             DeviceState state = stateData.getState();
-            if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
-                state.setActive(false);
-                state.setLastInactivityAlarmTime(ts);
-                save(deviceId, INACTIVITY_ALARM_TIME, ts);
-                save(deviceId, ACTIVITY_STATE, false);
-                pushRuleEngineMessage(stateData, INACTIVITY_EVENT);
+            //网关这里不判断
+            if(!gatewayStates.containsKey(deviceId.getId())){
+                if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts) {
+                    log.info("设备【" + deviceId + "】离线了！");
+                    state.setActive(false);
+                    state.setLastInactivityAlarmTime(ts);
+                    save(deviceId, INACTIVITY_ALARM_TIME, ts);
+                    save(deviceId, ACTIVITY_STATE, false);
+                    pushRuleEngineMessage(stateData, INACTIVITY_EVENT);
+                } else {
+                /*if(gatewayStates.containsKey(deviceId.getId())){
+                    //输出条件未成立的结果
+                    log.info("网关离线判断未通过！【" + deviceId + "】");
+                    log.info("判断网关设备离线的三个为TRUE的条件【if (!isActive(ts, state) && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()) && stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】");
+                    if (isActive(ts, state)) {
+                        log.info("第1个不满足true条件【!isActive(ts, state)】结果为：" + !isActive(ts, state));
+                        log.info("ts < state.getLastActivityTime() + state.getInactivityTimeout()的值为：");
+                        log.info("ts的值为:"+sf.format(new Date(ts)));
+                        log.info("state.getLastActivityTime()+ state.getInactivityTimeout()的值为:"+sf.format(new Date(state.getLastActivityTime()))+"+"+sf.format(new Date(state.getInactivityTimeout()))+"="+sf.format(new Date(state.getLastActivityTime()+ state.getInactivityTimeout())));
+                    }
+                    if (!(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())) {
+                        log.info("第2个不满足true条件【(state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime())】结果为：" + (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() < state.getLastActivityTime()));
+                        log.info("state.getLastInactivityAlarmTime()的值为：" + sf.format(new Date(state.getLastInactivityAlarmTime())));
+                        log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
+                    }
+                    if (!(stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)) {
+                        log.info("第3个不满足true条件【(stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts)】结果为：" + (stateData.getDeviceCreationTime() + state.getInactivityTimeout() < ts));
+                        log.info("stateData.getDeviceCreationTime() + state.getInactivityTimeout() 的值为：" + sf.format(new Date(stateData.getDeviceCreationTime() + state.getInactivityTimeout())));
+                        log.info("stateData.getDeviceCreationTime()的值为：" + sf.format(new Date(stateData.getDeviceCreationTime())));
+                        log.info("state.getLastActivityTime()的值为：" + sf.format(new Date(state.getLastActivityTime())));
+                        log.info("ts的值为：" + sf.format(new Date(ts)));
+                    }
+                    log.info("干预网关在线");
+                    this.updateGatewayStateTrue(deviceId,stateData);
+                }
+*/
+                    //网关状态更新补偿
+                    //this.updateGatewayState(deviceId, stateData, false, ts);
+                }
             }
+
         } else {
             log.debug("[{}] Device that belongs to other server is detected and removed.", deviceId);
             cleanUpDeviceStateMap(deviceId);
@@ -701,6 +796,89 @@ public class DefaultDeviceStateService extends TbApplicationEventListener<Partit
         @Override
         public void onFailure(Throwable t) {
             log.warn("[{}] Failed to update attribute [{}] with value [{}]", deviceId, key, value, t);
+        }
+    }
+
+    /**
+     * 初始化网关离线状态
+     *
+     * @param device
+     */
+    private void initGateway(Device device) {
+        if (device.getAdditionalInfo() != null) {
+            JsonNode gateway = device.getAdditionalInfo().get("gateway");
+            if (gateway != null && gateway.asBoolean()) {
+                gatewayStates.put(device.getId().getId(), device.getName());
+            }
+        }
+    }
+
+    /**
+     * 网关上线/离线状态更新
+     *
+     * @param device
+     * @param stateData
+     * @param active    true-代表补偿更新在线  false-代表补偿更新离线
+     * @return
+     */
+    public void updateGatewayState(DeviceId device, DeviceStateData stateData, Boolean active, Long ts) {
+        UUID deviceId = device.getId();
+        if (gatewayStates.containsKey(deviceId)) {
+            if (active) {
+                log.info("补偿更新网关在线");
+                log.info("网关【" + gatewayStates.get(deviceId) + "】上线了！");
+                stateData.getState().setActive(false);
+                updateActivityState(device, stateData, System.currentTimeMillis());
+            } else {
+                ts = System.currentTimeMillis();
+                //规定时间内未更新视为离线
+                log.info("最后状态更新时间" + sf.format(new Date(stateData.getState().getLastActivityTime())));
+                log.info("最后状态更新时间加上默认在线时间" + sf.format(new Date(stateData.getState().getLastActivityTime() + (this.defaultGatewayTimeout * 1000))));
+                log.info("当前系统时间" + sf.format(new Date(ts)));
+                if (stateData.getState().getLastActivityTime() + (this.defaultGatewayTimeout * 1000) < ts) {
+                    log.info("补偿更新网关离线");
+                    log.info("网关【" + gatewayStates.get(deviceId) + "】离线了！");
+                    DeviceState state = stateData.getState();
+                    state.setActive(false);
+                    state.setLastInactivityAlarmTime(ts);
+                    save(device, INACTIVITY_ALARM_TIME, ts);
+                    save(device, ACTIVITY_STATE, false);
+                    pushRuleEngineMessage(stateData, INACTIVITY_EVENT);
+                }
+            }
+        }
+    }
+
+    //更新为离线
+    public void updateGatewayStateFalse(DeviceId device,DeviceStateData stateData) {
+        long ts = System.currentTimeMillis();
+        UUID deviceId = device.getId();
+        if (gatewayStates.containsKey(deviceId)) {
+            log.info("网关【" + gatewayStates.get(deviceId) + "】离线了！");
+            DeviceState state = stateData.getState();
+            state.setActive(false);
+            state.setLastInactivityAlarmTime(ts);
+            save(device, INACTIVITY_ALARM_TIME, ts);
+            save(device, ACTIVITY_STATE, false);
+            pushRuleEngineMessage(stateData, INACTIVITY_EVENT);
+        }
+    }
+
+    //更新为在线
+    public void updateGatewayStateTrue(DeviceId device,DeviceStateData stateData) {
+        long ts = System.currentTimeMillis();
+        UUID deviceId = device.getId();
+        if (gatewayStates.containsKey(deviceId)) {
+            log.info("网关【" + gatewayStates.get(deviceId) + "】离线了！");
+            save(device, LAST_ACTIVITY_TIME, ts);
+            DeviceState state = stateData.getState();
+            state.setLastActivityTime(ts);
+            if (!state.isActive()) {
+                log.info("设备【" + deviceId + "]上线了！");
+                state.setActive(true);
+                save(device, ACTIVITY_STATE, true);
+                pushRuleEngineMessage(stateData, ACTIVITY_EVENT);
+            }
         }
     }
 }

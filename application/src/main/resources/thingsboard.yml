@@ -25,6 +25,10 @@ hs:
     location: "${HS_FILE_LOCATION:/upload}"
   geo:
     address: "https://nominatim.openstreetmap.org"
+  dd:
+    #    urls: "${HS_DD_URLS:https://oapi.dingtalk.com/robot/send?access_token=76663cb70e0bf353a08f4cb23ef195ed9e54318946097a85210c1158a18012c7}"
+    urls: "${HS_DD_URLS:https://oapi.dingtalk.com/robot/send?access_token=28f445bc438984a85d7ea73e8956c2d56991c0dfe40c2cc170ec7426be7e4f0a}"
+    enabled: "${HS_DD_ENABLED:false}"
 
 server:
   # Server bind address
@@ -346,11 +350,20 @@ actors:
 
 cache:
   # caffeine or redis
-  type: "${CACHE_TYPE:caffeine}"
+  type: "${CACHE_TYPE:redis}"
   maximumPoolSize: "${CACHE_MAXIMUM_POOL_SIZE:16}" # max pool size to process futures that calls the external cache
   attributes:
     # make sure that if cache.type is 'redis' and cache.attributes.enabled is 'true' that you change 'maxmemory-policy' Redis config property to 'allkeys-lru', 'allkeys-lfu' or 'allkeys-random'
     enabled: "${CACHE_ATTRIBUTES_ENABLED:true}"
+
+logging:
+  level:
+    org.springframework.web: error
+    org.hibernate.SQL: debug
+    org.hibernate.engine.QueryParameters: debug
+    org.hibernate.engine.query.HQLQueryPlan: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    # org.springframework.jdbc.core: debug
 
 caffeine:
   specs:
@@ -405,7 +418,7 @@ redis:
   connection:
     type: "${REDIS_CONNECTION_TYPE:standalone}"
   standalone:
-    host: "${REDIS_HOST:localhost}"
+    host: "${REDIS_HOST:192.168.110.100}"
     port: "${REDIS_PORT:6379}"
     useDefaultClientConfig: "${REDIS_USE_DEFAULT_CLIENT_CONFIG:true}"
     # this value may be used only if you used not default ClientConfig
@@ -488,20 +501,26 @@ spring:
       repositories:
         enabled: "true"
   jpa:
+    show-sql: "true"
+    properties:
+      hibernate:
+        format_sql: "true"
     open-in-view: "false"
     hibernate:
       ddl-auto: "none"
     database-platform: "${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}"
   datasource:
     driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver}"
-#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.4.80.151:30685/hsiotdb}"
-#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.10.10.56:5432/test-prod1}"
+    #    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.4.80.151:30685/hsiotdb}"
+    #    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.10.10.56:5432/test-prod1}"
+    #url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/hsiotdb}"
+    #url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://111.229.157.131:30682/hsiotdb}"
+    ###长胜测环境
     url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/hsiotdb}"
-#    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/hsiotdb}"
     username: "${SPRING_DATASOURCE_USERNAME:postgres}"
     password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
     hikari:
-      maximumPoolSize: "${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:16}"
+      maximumPoolSize: "${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:50}"
 
 # Audit log parameters
 audit-log:
@@ -546,9 +565,10 @@ audit-log:
 
 state:
   # Should be greater then transport.sessions.report_timeout
-  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:32}"
+  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:300}"
   defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:10}"
   persistToTelemetry: "${PERSIST_STATE_TO_TELEMETRY:false}"
+  defaultGatewayTimeout: "${DEFAULT_GATEWAY_TIMEOUT:300}"
 
 js:
   evaluator: "${JS_EVALUATOR:local}" # local/remote
@@ -755,7 +775,7 @@ swagger:
   version: "${SWAGGER_VERSION:2.0}"
 
 queue:
-  type: "${TB_QUEUE_TYPE:in-memory}" # in-memory or kafka (Apache Kafka) or aws-sqs (AWS SQS) or pubsub (PubSub) or service-bus (Azure Service Bus) or rabbitmq (RabbitMQ)
+  type: "${TB_QUEUE_TYPE:kafka}" # in-memory or kafka (Apache Kafka) or aws-sqs (AWS SQS) or pubsub (PubSub) or service-bus (Azure Service Bus) or rabbitmq (RabbitMQ)
   in_memory:
     stats:
       # For debug lvl

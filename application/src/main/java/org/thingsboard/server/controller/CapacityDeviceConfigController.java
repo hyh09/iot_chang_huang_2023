@@ -25,12 +25,12 @@ import java.util.UUID;
  * @create: 2021-12-06 14:09
  **/
 @Slf4j
-@Api(value="产能运算配置界面接口",tags={"产能运算配置界面接口"})
+@Api(value = "产能运算配置界面接口", tags = {"产能运算配置界面接口"})
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/capacityDevice/")
-public class CapacityDeviceConfigController extends BaseController{
-    private  final  String ONE="1";
+public class CapacityDeviceConfigController extends BaseController {
+    private final String ONE = "1";
 
     @ApiOperation("查询列表接口")
     @RequestMapping(value = "/pageQuery", params = {"pageSize", "page"}, method = RequestMethod.GET)
@@ -43,7 +43,7 @@ public class CapacityDeviceConfigController extends BaseController{
 
     })
     @ResponseBody
-    public PageData<CapacityDeviceVo>  pageQuery(
+    public PageData<CapacityDeviceVo> pageQuery(
             @RequestParam int pageSize, @RequestParam int page,
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String sortProperty,
@@ -54,11 +54,11 @@ public class CapacityDeviceConfigController extends BaseController{
             @RequestParam(required = false) String deviceId,
             @RequestParam(required = false) String deviceName
 
-            ) throws ThingsboardException {
+    ) throws ThingsboardException {
         try {
 
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-            CapacityDeviceVo vo   = new  CapacityDeviceVo();
+            CapacityDeviceVo vo = new CapacityDeviceVo();
 
             vo.setFactoryId(getUidByStr(factoryId));
             vo.setWorkshopId(getUidByStr(workshopId));
@@ -66,16 +66,14 @@ public class CapacityDeviceConfigController extends BaseController{
             vo.setDeviceId(getUidByStr(deviceId));
             vo.setDeviceName(deviceName);
             vo.setTenantId(getTenantId().getId());
-            log.info("配置入参的:{}",vo);
-            return  deviceService.queryPage(vo,pageLink);
+            log.info("配置入参的:{}", vo);
+            return deviceService.queryPage(vo, pageLink);
         } catch (Exception e) {
             e.printStackTrace();
-            log.info("===产能运算配置界面接口查询==>{}",e);
+            log.info("===产能运算配置界面接口查询==>{}", e);
             throw handleException(e);
         }
     }
-
-
 
 
     @ApiOperation("app查询列表接口")
@@ -89,7 +87,7 @@ public class CapacityDeviceConfigController extends BaseController{
 
     })
     @ResponseBody
-    public PageData<AppCapacityDeviceVo>  appPageQuery(
+    public PageData<AppCapacityDeviceVo> appPageQuery(
             @RequestParam int pageSize, @RequestParam int page,
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String sortProperty,
@@ -104,7 +102,7 @@ public class CapacityDeviceConfigController extends BaseController{
         try {
 
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-            CapacityDeviceVo vo   = new  CapacityDeviceVo();
+            CapacityDeviceVo vo = new CapacityDeviceVo();
 
             vo.setFactoryId(getUidByStr(factoryId));
             vo.setWorkshopId(getUidByStr(workshopId));
@@ -112,15 +110,13 @@ public class CapacityDeviceConfigController extends BaseController{
             vo.setDeviceId(getUidByStr(deviceId));
             vo.setDeviceName(deviceName);
             vo.setTenantId(getTenantId().getId());
-            log.info("配置入参的:{}",vo);
-            return   deviceService.appQueryPage(vo,pageLink);
+            log.info("配置入参的:{}", vo);
+            return deviceService.appQueryPage(vo, pageLink);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.info("===产能运算配置界面接口查询==>{}",e);
+            log.error("===产能运算配置界面接口查询==>{}", e);
             throw handleException(e);
         }
     }
-
 
 
     @ApiOperation("更新状态")
@@ -130,11 +126,11 @@ public class CapacityDeviceConfigController extends BaseController{
             @ApiImplicitParam(name = "deviceFlg", value = "是否参与产能运算"),
     })
     @ResponseBody
-    public String  updateFlgById(
+    public String updateFlgById(
             @RequestParam UUID deviceId,
             @RequestParam Boolean deviceFlg
     ) throws ThingsboardException {
-           deviceService.updateFlgById(deviceFlg,deviceId);
+        deviceService.updateFlgById(deviceFlg, deviceId);
 
         return "success";
     }
@@ -142,28 +138,32 @@ public class CapacityDeviceConfigController extends BaseController{
     @ApiOperation("查询设备时间区间内每小时产量/能耗历史")
     @RequestMapping(value = "/getDeviceCapacity", method = RequestMethod.GET)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备id",required = true,paramType = "query"),
-            @ApiImplicitParam(name = "startTime", value = "开始时间",paramType = "query"),
-            @ApiImplicitParam(name = "endTime", value = "结束时间",paramType = "query"),
-            @ApiImplicitParam(name = "type", value = "0【产量】，1【能耗】",required = true,paramType = "query"),
-            @ApiImplicitParam(name = "keyNum", value = "1【水】，2【电】，3【气】；",paramType = "query")
+            @ApiImplicitParam(name = "deviceId", value = "设备id", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+            @ApiImplicitParam(name = "type", value = "0【产量】，1【能耗】", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "keyNum", value = "1【水】，2【电】，3【气】；", paramType = "query")
     })
     @ResponseBody
     public List<CapacityDeviceHoursVo> getDeviceCapacity(
-            @RequestParam UUID deviceId, @RequestParam long startTime,@RequestParam long endTime,@RequestParam String type,@RequestParam String keyNum
-    ) throws ThingsboardException {
-        checkParameterChinees("deviceId",deviceId);
-        checkParameterChinees("type 0【产量】，1【能耗",type);
-        if(ONE.equals(type)){
-            checkParameterChinees("keyNum 1【水】，2【电】，3【气",keyNum);
+            @RequestParam UUID deviceId, @RequestParam long startTime, @RequestParam long endTime, @RequestParam String type, @RequestParam String keyNum) throws ThingsboardException {
+
+        try {
+            checkParameterChinees("deviceId", deviceId);
+            checkParameterChinees("type 0【产量】，1【能耗", type);
+            if (ONE.equals(type)) {
+                checkParameterChinees("keyNum 1【水】，2【电】，3【气", keyNum);
+            }
+            return energyChartService.getDeviceCapacity(deviceId, startTime, endTime, type, keyNum);
+        } catch (Exception e) {
+            log.error("查询设备时间区间内每小时产量/能耗历史异常",e);
         }
-        return energyChartService.getDeviceCapacity(deviceId,startTime,endTime,type,keyNum);
+        return null;
     }
 
 
-    private  UUID  getUidByStr(String str)
-    {
-       return StringUtils.isBlank(str)?null:UUID.fromString(str);
+    private UUID getUidByStr(String str) {
+        return StringUtils.isBlank(str) ? null : UUID.fromString(str);
     }
 
 }

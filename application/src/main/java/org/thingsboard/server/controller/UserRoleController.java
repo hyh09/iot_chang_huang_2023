@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
@@ -76,7 +78,9 @@ public class UserRoleController extends BaseController{
         {
             throw new ThingsboardException("添加角色失败：角色编码["+entity.getRoleCode()+"]已经存在!", ThingsboardErrorCode.FAIL_VIOLATION);
         }
-        return   tenantSysRoleService.saveEntity(entity);
+        var data = tenantSysRoleService.saveEntity(entity);
+        saveAuditLog(getCurrentUser(), null, EntityType.USER_ROLE, null, ActionType.ADDED, entity);
+        return data;
     }
 
     @ApiOperation(value = "角色的更新接口")
@@ -87,7 +91,9 @@ public class UserRoleController extends BaseController{
         SecurityUser securityUser =  getCurrentUser();
         entity.setUpdatedUser(securityUser.getUuidId());
         entity.setRoleCode(null);
-        return   tenantSysRoleService.updateRecord(entity);
+        var data =   tenantSysRoleService.updateRecord(entity);
+        saveAuditLog(getCurrentUser(), null, EntityType.USER_ROLE, null, ActionType.UPDATED, entity);
+        return data;
     }
 
     @ApiOperation(value = "角色id的详情的查询")
@@ -142,10 +148,12 @@ public class UserRoleController extends BaseController{
             tenantSysRoleService.deleteById(strUuid(roleId));
             userRoleMemuSvc.deleteRoleByRole(strUuid(roleId));
             tenantMenuRoleService.deleteByTenantSysRoleId(strUuid(roleId));
-            return "success";
+        saveAuditLog(getCurrentUser(), toUUID(roleId), EntityType.USER_ROLE, null, ActionType.DELETED, roleId);
+
+        return "success";
 
 
-
+        
     }
 
 
@@ -207,23 +215,28 @@ public class UserRoleController extends BaseController{
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
         log.info("[角色用户绑定]打印得入参为:{}",vo);
+    
+      var data =   userRoleMemuSvc.relationUserAndRole(vo, getTenantId());
+        saveAuditLog(getCurrentUser(), null, EntityType.USER_ROLE, null, ActionType.UPDATED, vo);
 
-      return   userRoleMemuSvc.relationUserAndRole(vo, getTenantId());
+        return data;
     }
 
 
 
     @ApiOperation(value = "角色用户解绑【一个角色解绑多个用户】")
     @RequestMapping(value = "/unboundUser", method = RequestMethod.POST)
-    public Object  unboundUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result)
-    {
+    public Object  unboundUser(@RequestBody @Valid RoleBindUserVo vo, BindingResult result) throws ThingsboardException {
         if (result.hasErrors()) {
             return ResultVo.getFail("入参校验错误: " +result.getFieldError().getDefaultMessage());
         }
 
         log.info("[角色用户解绑]打印得入参为:{}",vo);
 
-        return   userRoleMemuSvc.unboundUser(vo);
+        var data =   userRoleMemuSvc.unboundUser(vo);
+        saveAuditLog(getCurrentUser(), null, EntityType.USER_ROLE, null, ActionType.UPDATED, vo);
+
+        return data;
     }
 
 
