@@ -25,6 +25,8 @@ public class EfficiencyEntityInfo {
 
     @ApiModelProperty("设备名称")
     private String deviceName;
+    @ApiModelProperty("设备名称")
+    private  String rename;
 
     @ApiModelProperty("设备id")
     private UUID deviceId;

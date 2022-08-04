@@ -40,7 +40,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
     /**pc端产能接口 */
     private  String FIND_SON_QUERY="select t1.entity_id,sum(to_number(capacity_added_value,'99999999999999999999999999999999.9999')) as capacity_added_value" +
             " from hs_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
-    public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
+    public  static  String  SELECT_START_DEVICE =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.rename as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
     public  static  String  SELECT_TS_CAP =" ,tb.capacity_added_value  ";
     public  static  String  FROM_QUERY_CAP="    from   device  d1 left join table1 tb on  d1.id = tb.entity_id  where 1=1 " ;
 
@@ -52,7 +52,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
             " min(electric_first_time) as electric_first_time,max(electric_last_time) as electric_last_time,"+
             " min(gas_first_time) as gas_first_time,max(gas_last_time) as gas_last_time"+
             " from hs_statistical_data  t1 where   t1.ts>=:startTime AND t1.ts<=:endTime And  t1.entity_id in ( select  d1.id  from  device  d1 where 1= 1  ";
-    public  static  String  SELECT_START_DEVICE_02 =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.name as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
+    public  static  String  SELECT_START_DEVICE_02 =" select d1.id as entity_id,d1.dict_device_id as dictDeviceId, d1.rename as deviceName,d1.picture ,d1.factory_id as factoryId ,d1.workshop_id as workshopId ,d1.production_line_id  as productionLineId  ";
 
     public  static  String  SELECT_TS_CAP_02 =" ,tb.capacity_added_value,tb.water_added_value,tb.electric_added_value,tb.gas_added_value, " +
             "    tb.water_first_time,tb.water_last_time,tb.electric_first_time, tb.electric_last_time,tb.gas_first_time,tb.gas_last_time ";
@@ -264,7 +264,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         StringBuffer  sonSql01 = new StringBuffer();
         sqlPartOnDevice(vo.toQueryTsKvVo(),sonSql01,param);
         StringBuffer  orderSql  = new StringBuffer();
-        sql.append(" select h1.date,h1.entity_id,d1.name,h1.water_added_value,h1.gas_added_value,h1.electric_added_value,h1.capacity_added_value  ")
+        sql.append(" select h1.date,h1.entity_id,d1.rename,h1.water_added_value,h1.gas_added_value,h1.electric_added_value,h1.capacity_added_value  ")
                 .append(" from  hs_statistical_data h1 ,device d1")
                 .append("  where h1.entity_id =d1.id  ")
                 .append(" and h1.\"date\" =:todayDate")
@@ -294,7 +294,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool{
         sql.append("  LIMIT 10 ");
         StringBuffer  sqlAll = new StringBuffer();
         sqlAll.append(" with table01 as (").append(sql).append(")")
-               .append(" select d1.id as entity_id ,d1.name ,t2.date,t2.water_added_value,t2.gas_added_value,t2.electric_added_value,t2.capacity_added_value")
+               .append(" select d1.id as entity_id ,d1.rename ,t2.date,t2.water_added_value,t2.gas_added_value,t2.electric_added_value,t2.capacity_added_value")
                .append(" from device d1 left JOIN table01 t2  on d1.id=t2.entity_id where 1=1 ");
         sqlAll.append(sonSql01);
         if(vo.getType().equals("0"))

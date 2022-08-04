@@ -213,7 +213,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Override
     public Object queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
-        Map<String,DictDeviceGroupPropertyVO>  mapNameToVo  = deviceDictPropertiesSvc.getMapPropertyVo();
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
@@ -822,7 +821,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         for(Map m:list)
         {
                 EfficiencyHistoryDataVo  efficiencyHistoryDataVo = new EfficiencyHistoryDataVo();
-                efficiencyHistoryDataVo.setCreatedTime(m.get("createdTime")!=null?(Long) m.get("createdTime"):0);
+                efficiencyHistoryDataVo.setCreatedTime(m.get("ts")!=null?(Long) m.get("ts"):0);
                 efficiencyHistoryDataVo.setDeviceName(deviceName);
                 efficiencyHistoryDataVo.setElectric(m.get("electric")!=null?m.get("electric").toString():"0");
                 efficiencyHistoryDataVo.setWater(m.get("water")!=null?m.get("water").toString():"0");
@@ -968,6 +967,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         resultList.stream().forEach(vo->{
             EfficiencyEntityInfo   efficiencyEntityInfo = new EfficiencyEntityInfo();
             efficiencyEntityInfo.setDeviceName(vo.getDeviceName());
+            efficiencyEntityInfo.setRename(vo.getDeviceName());
             efficiencyEntityInfo.setDeviceId(vo.getEntityId());
             efficiencyEntityInfo.setWaterConsumption(StringUtilToll.roundUp(vo.getWaterAddedValue()));
             efficiencyEntityInfo.setElectricConsumption(StringUtilToll.roundUp(vo.getElectricAddedValue()));
@@ -1173,7 +1173,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return    entities.stream().map(m1 ->{
             ResultEnergyTopTenVo  vo1= new ResultEnergyTopTenVo();
             vo1.setDeviceId(m1.getEntityId());
-            vo1.setDeviceName(m1.getDeviceName());
+            vo1.setDeviceName(m1.getRename());
+            vo1.setRename(m1.getRename());
             if(vo.getType().equals("0")){
                 vo1.setValue(StringUtils.isNotEmpty(m1.getCapacityAddedValue()) ? m1.getCapacityAddedValue() : "0");
             }else {
