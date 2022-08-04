@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
+import org.thingsboard.server.common.data.effciency.data.EfficiencyHistoryDataVo;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
@@ -292,7 +293,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @ApiResponse(code = 200, message =queryEnergyHistory_messg),
     })
     @ResponseBody
-    public Object queryEnergyHistoryNew(
+    public  PageDataWithNextPage<EfficiencyHistoryDataVo> queryEnergyHistoryNew(
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,
