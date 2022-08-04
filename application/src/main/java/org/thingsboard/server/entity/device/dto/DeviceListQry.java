@@ -38,7 +38,7 @@ public class DeviceListQry {
         device.setType(this.type);
         device.setDeviceProfileId(new DeviceProfileId(this.deviceProfileId));
         device.setAllot(this.isAllot);
-        device.setName(this.searchText);
+        device.setRename(this.searchText);
         return device;
     }
 

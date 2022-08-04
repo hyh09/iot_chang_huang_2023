@@ -3,6 +3,7 @@ package org.thingsboard.server.common.data.factory;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.apache.commons.collections.CollectionUtils;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.productionline.ProductionLine;
 import org.thingsboard.server.common.data.workshop.Workshop;
@@ -31,5 +32,29 @@ public class FactoryListVo {
         this.workshopEntityList = workshopEntityList;
         this.productionLineEntityList = productionLineEntityList;
         this.deviceEntityList = deviceList;
+        //处理反参中设备名称用name返回
+        if(CollectionUtils.isNotEmpty(this.deviceEntityList)){
+            deviceEntityList.forEach(i->{
+                i.setName(i.getRename());
+            });
+        }
+    }
+    public void renameByNotDistributionList(List<Device> notDistributionDevice ){
+        this.notDistributionList = notDistributionDevice;
+        //处理反参中设备名称用name返回
+        if(CollectionUtils.isNotEmpty(this.notDistributionList)){
+            notDistributionList.forEach(i->{
+                i.setName(i.getRename());
+            });
+        }
+    }
+    public void renameByDeviceEntityList(List<Device> deviceEntityList ){
+        this.deviceEntityList = deviceEntityList;
+        //处理反参中设备名称用name返回
+        if(CollectionUtils.isNotEmpty(this.deviceEntityList)){
+            deviceEntityList.forEach(i->{
+                i.setName(i.getRename());
+            });
+        }
     }
 }

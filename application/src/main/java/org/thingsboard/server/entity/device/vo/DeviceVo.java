@@ -16,5 +16,8 @@ public class DeviceVo extends AbstractDevice {
     private DictDeviceVO dictDeviceVO;
 
     public DeviceVo(){super();}
-    public DeviceVo(Device device){super(device);}
+    public DeviceVo(Device device){
+        super(device);
+        super.renameDevice();
+    }
 }

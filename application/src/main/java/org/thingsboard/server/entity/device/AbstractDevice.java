@@ -15,7 +15,6 @@
  */
 package org.thingsboard.server.entity.device;
 
-import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -156,6 +155,7 @@ public abstract class AbstractDevice{
         this.workshopName = device.getWorkshopName();
         this.productionLineName = device.getProductionLineName();
         this.sort = device.getSort();
+        this.rename = device.getRename();
     }
 
     public AbstractDevice(DeviceEntity deviceEntity) {
@@ -181,6 +181,7 @@ public abstract class AbstractDevice{
         this.dictDeviceId = deviceEntity.getDictDeviceId();
         this.comment = deviceEntity.getComment();
         this.deviceNo = deviceEntity.getDeviceNo();
+        this.rename = deviceEntity.getRename();
     }
 
     public Device toDevice() {
@@ -231,9 +232,11 @@ public abstract class AbstractDevice{
         return device;
     }
 
-    //2022-7-26设备名称变更为设备编码
-    public void setDevieCode(){
-        this.name = Uuids.timeBased().toString();
+    /**
+     * 处理反参用name来标识设备名称
+     */
+    public void renameDevice() {
+        this.name = this.rename;
     }
 
 }

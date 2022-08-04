@@ -145,7 +145,7 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
         if (judgeUserVo != null && judgeUserVo.getTenantFlag() && factory.getTenantId() != null) {
             List<Device> notDistributionDevice = deviceService.getNotDistributionDevice(new TenantId(factory.getTenantId()));
             if (CollectionUtils.isNotEmpty(notDistributionDevice)) {
-                factoryListByCdn.setNotDistributionList(notDistributionDevice);
+                factoryListByCdn.renameByNotDistributionList(notDistributionDevice);
             }
         }
         return factoryListByCdn;
@@ -225,7 +225,8 @@ public class FactoryServiceImpl extends AbstractEntityService implements Factory
                     if (m.getGatewayUpdateTs() != null) {
                         rstFactory.setPublishTime(m.getGatewayUpdateTs());
                     }
-                    rstFactory.setGatewayName(m.getName());
+                    String rename = m.getRename();
+                    rstFactory.setGatewayName(rename);
                     rstFactory.setActive(m.getActive());
                     resultFactory.add(rstFactory);
                 }

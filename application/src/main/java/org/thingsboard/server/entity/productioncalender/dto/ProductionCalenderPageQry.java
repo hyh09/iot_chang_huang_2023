@@ -17,9 +17,9 @@ public class ProductionCalenderPageQry {
     @ApiModelProperty("工厂名称")
     private String factoryName;
     @ApiModelProperty("设备名称")
-    private String deviceName;
+    private String rename;
 
     public ProductionCalender toProductionCalender(UUID tenantId, String sortProperty,String sortOrder){
-        return new ProductionCalender(factoryId,deviceName,factoryName,tenantId,sortProperty,sortOrder);
+        return new ProductionCalender(factoryId, rename,factoryName,tenantId,sortProperty,sortOrder);
     }
 }
