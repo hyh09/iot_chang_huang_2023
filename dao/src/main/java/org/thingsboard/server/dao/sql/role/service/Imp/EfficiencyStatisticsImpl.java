@@ -967,6 +967,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         resultList.stream().forEach(vo->{
             EfficiencyEntityInfo   efficiencyEntityInfo = new EfficiencyEntityInfo();
             efficiencyEntityInfo.setDeviceName(vo.getDeviceName());
+            efficiencyEntityInfo.setRename(vo.getDeviceName());
             efficiencyEntityInfo.setDeviceId(vo.getEntityId());
             efficiencyEntityInfo.setWaterConsumption(StringUtilToll.roundUp(vo.getWaterAddedValue()));
             efficiencyEntityInfo.setElectricConsumption(StringUtilToll.roundUp(vo.getElectricAddedValue()));
