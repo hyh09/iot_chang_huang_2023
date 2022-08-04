@@ -13,8 +13,10 @@ import lombok.Data;
  * Copyright (c) 2022,All Rights Reserved.
  */
 @Data
-public class DeviceRenameVo   {
+public class DeviceRenameVo  {
 
     @ApiModelProperty("设备名称")
     protected String rename;
+
+
 }

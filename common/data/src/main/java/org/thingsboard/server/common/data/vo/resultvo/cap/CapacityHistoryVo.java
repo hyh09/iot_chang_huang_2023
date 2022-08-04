@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 import org.thingsboard.server.common.data.vo.device.DeviceRenameVo;
+import org.thingsboard.server.common.data.vo.rename.RenameGetSvc;
 
 /**
  * @program: thingsboard
@@ -15,7 +16,7 @@ import org.thingsboard.server.common.data.vo.device.DeviceRenameVo;
 @Data
 @ToString
 @ApiModel(value = "产能历史实体出参")
-public class CapacityHistoryVo extends DeviceRenameVo {
+public class CapacityHistoryVo implements RenameGetSvc {
 
     /**
      * 设备的id
@@ -38,5 +39,12 @@ public class CapacityHistoryVo extends DeviceRenameVo {
     @ApiModelProperty("上报时间 支持排序 ")
     private  String  createdTime;
 
+    public String getDeviceId() {
+        return deviceId;
+    }
 
+    @Override
+    public String getRename() {
+        return getDeviceName();
+    }
 }
