@@ -79,7 +79,7 @@ export class PotencyService {
       `/api/pc/efficiency/queryEnergyHistoryNew${pageLink.toQuery()}&deviceId=${deviceId}`,
       defaultHttpOptionsFromConfig(config)).pipe(map(res => {
         if (res && res.data && res.data.length > 0) {
-          const othersKeys = ['createdTime', 'deviceName'];
+          const othersKeys = ['createdTime', 'rename', 'deviceName'];
           const valueKeys = Object.keys(res.data[0]).filter(key => !othersKeys.includes(key));
           res.data.forEach((item, index) => {
             const nextItem = res.data[index + 1] || res.nextData;
