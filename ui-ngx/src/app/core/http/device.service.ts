@@ -31,6 +31,7 @@ import {
 import { EntitySubtype } from '@app/shared/models/entity-type.models';
 import { AuthService } from '@core/auth/auth.service';
 import { PersistentRpc } from '@shared/models/rpc.models';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +44,12 @@ export class DeviceService {
 
   public getDeviceInfos(pageLink: PageLink, { deviceName = '', isAllot = '', active = '', type = '' },
                         config?: RequestConfig): Observable<PageData<DeviceInfo>> {
-    return this.http.get<PageData<DeviceInfo>>(`/api/tenant/deviceInfoList${pageLink.toQuery()}&searchText=${encodeURIComponent(deviceName)}&isAllot=${isAllot}&active=${active}&type=${type}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<PageData<DeviceInfo>>(
+      `/api/tenant/deviceInfoList${pageLink.toQuery()}&searchText=${encodeURIComponent(deviceName)}&isAllot=${isAllot}&active=${active}&type=${type}`,
+      defaultHttpOptionsFromConfig(config)).pipe(map(res => {
+        res.data?.forEach(item => item.name = item.rename);
+        return res;
+      }));
   }
 
   public getTenantDeviceInfos(pageLink: PageLink, type: string = '',
