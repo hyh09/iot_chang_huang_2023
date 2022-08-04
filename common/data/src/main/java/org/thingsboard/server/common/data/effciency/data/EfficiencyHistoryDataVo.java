@@ -21,6 +21,9 @@ public class EfficiencyHistoryDataVo {
     @ApiModelProperty("设备名称")
     private String deviceName;
 
+    @ApiModelProperty("设备名称")
+    private String rename;
+
     @ApiModelProperty("创建时间")
     private long createdTime;
 

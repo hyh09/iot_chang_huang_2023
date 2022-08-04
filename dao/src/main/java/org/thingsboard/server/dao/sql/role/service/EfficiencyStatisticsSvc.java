@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.sql.role.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
+import org.thingsboard.server.common.data.effciency.data.EfficiencyHistoryDataVo;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
@@ -50,7 +51,7 @@ public interface EfficiencyStatisticsSvc {
 
     Object  queryEnergyHistory(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
 
-    Object  queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo,TenantId tenantId, PageLink pageLink);
+    PageDataWithNextPage<EfficiencyHistoryDataVo>  queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
     PageDataWithNextPage<CapacityHistoryVo> queryCapacityHistory(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink);

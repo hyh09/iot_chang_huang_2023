@@ -212,13 +212,13 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
     @Override
-    public Object queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
+    public  PageDataWithNextPage<EfficiencyHistoryDataVo> queryEnergyHistoryNew(QueryTsKvHisttoryVo queryTsKvVo, TenantId tenantId, PageLink pageLink) {
         DeviceEntity deviceInfo =     deviceRepository.findByTenantIdAndId(tenantId.getId(),queryTsKvVo.getDeviceId());
         if(deviceInfo == null)
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
         }
-        String deviceName = deviceInfo.getName();
+        String deviceName = deviceInfo.getRename();
         //先查询能耗的属性
         List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         queryTsKvVo.setKeys(keys1);
@@ -227,7 +227,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         log.debug("查询当前角色下的用户绑定数据list{}",list);
         if(CollectionUtils.isEmpty(list))
         {
-            return new PageDataWithNextPage<Map>(page.getContent(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
+            return new PageDataWithNextPage<EfficiencyHistoryDataVo>( new ArrayList<EfficiencyHistoryDataVo>(), page.getTotalPages(), page.getTotalElements(), page.hasNext(),null);
         }
         List<EfficiencyHistoryDataVo> mapList =   translateTitleNew(list, deviceName);
         if(page.hasNext())
@@ -826,6 +826,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
                 efficiencyHistoryDataVo.setCreatedTime(objTs!=null?Long.valueOf(objTs.toString()):0);
 
                 efficiencyHistoryDataVo.setDeviceName(deviceName);
+                efficiencyHistoryDataVo.setRename(deviceName);
                 efficiencyHistoryDataVo.setElectric(m.get("electric")!=null?m.get("electric").toString():"0");
                 efficiencyHistoryDataVo.setWater(m.get("water")!=null?m.get("water").toString():"0");
                 efficiencyHistoryDataVo.setGas(m.get("gas")!=null?m.get("gas").toString():"0");
