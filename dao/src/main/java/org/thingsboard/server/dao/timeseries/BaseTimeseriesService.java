@@ -21,12 +21,12 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
@@ -35,21 +35,19 @@ import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.kv.*;
 import org.thingsboard.server.common.data.vo.enums.EfficiencyEnums;
+import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.kafka.service.KafkaProducerService;
-import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
-import org.thingsboard.server.dao.util.JsonUtils;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -67,6 +65,8 @@ public class BaseTimeseriesService implements TimeseriesService  {
 
     private static final int INSERTS_PER_ENTRY = 3;
     private static final int DELETES_PER_ENTRY = INSERTS_PER_ENTRY;
+    //设备重命名
+    private static final String RENAME = "rename";
     public static final Function<List<Integer>, Integer> SUM_ALL_INTEGERS = new Function<List<Integer>, Integer>() {
         @Override
         public @Nullable Integer apply(@Nullable List<Integer> input) {
@@ -87,6 +87,9 @@ public class BaseTimeseriesService implements TimeseriesService  {
 
     @Autowired
     private TimeseriesDao timeseriesDao;
+
+    @Autowired
+    private DeviceDao deviceDao;
 
     @Autowired
     private TimeseriesLatestDao timeseriesLatestDao;
@@ -262,6 +265,24 @@ public class BaseTimeseriesService implements TimeseriesService  {
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
         futures.add(timeseriesDao.save(tenantId, entityId, tsKvEntry, ttl));
+        updateDevice(entityId, tsKvEntry);
+    }
+
+    /**
+     * 异步执行更新设备名称
+     * @param entityId
+     * @param tsKvEntry
+     */
+    private void updateDevice(EntityId entityId, TsKvEntry tsKvEntry){
+        CompletableFuture.runAsync(()->{
+            if(RENAME.equals(tsKvEntry.getKey().toString()) && tsKvEntry.getValue() != null){
+                Device device = deviceDao.findById(entityId.getId());
+                if(!tsKvEntry.getValue().toString().equals(device.getRename())){
+                    device.setRename(tsKvEntry.getValue().toString());
+                    deviceDao.saveOrUpdDevice(device);
+                }
+            }
+        });
     }
 
     private List<ReadTsKvQuery> updateQueriesForEntityView(EntityView entityView, List<ReadTsKvQuery> queries) {
