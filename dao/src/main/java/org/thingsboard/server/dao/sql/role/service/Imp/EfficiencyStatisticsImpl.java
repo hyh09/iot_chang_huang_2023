@@ -821,7 +821,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         for(Map m:list)
         {
                 EfficiencyHistoryDataVo  efficiencyHistoryDataVo = new EfficiencyHistoryDataVo();
-                efficiencyHistoryDataVo.setCreatedTime(m.get("ts")!=null?(Long) m.get("ts"):0);
+
+                Object  objTs=  m.get("ts");
+                efficiencyHistoryDataVo.setCreatedTime(objTs!=null?Long.valueOf(objTs.toString()):0);
+
                 efficiencyHistoryDataVo.setDeviceName(deviceName);
                 efficiencyHistoryDataVo.setElectric(m.get("electric")!=null?m.get("electric").toString():"0");
                 efficiencyHistoryDataVo.setWater(m.get("water")!=null?m.get("water").toString():"0");
