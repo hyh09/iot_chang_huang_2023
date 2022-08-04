@@ -9,7 +9,7 @@
   </div>
   <div class="bar-wrapper">
     <div *ngFor="let item of top10; let $index = index" class="bar-item">
-      <div class="device-name" [title]="item.deviceName">No.{{ $index + 1 }} {{ item.deviceName }}</div>
+      <div class="device-name" [title]="item.rename">No.{{ $index + 1 }} {{ item.rename }}</div>
       <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
         <div fxFlex>
           <nz-progress [nzPercent]="item.percent" [nzStrokeColor]="{ '0%': '#0e4ba1', '100%': '#99d5d4' }" nzStatus="active" [nzShowInfo]="false"></nz-progress>
@@ -30,8 +30,13 @@
 ></nz-range-picker>
 <div class="data-overview">
   <div class="overview-item">{{ 'potency.total-energy-consumption' | translate }}</div>
-  <div
-    *ngFor="let item of entitiesTableConfig.componentsData.totalValue"
-    class="overview-item"
-  >{{ item }}</div>
+  <div class="overview-item">
+    {{ 'potency.total-water-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalWaterConsumption || 0 }}
+  </div>
+  <div class="overview-item">
+    {{ 'potency.total-electric-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalElectricConsumption || 0 }}
+  </div>
+  <div class="overview-item">
+    {{ 'potency.total-gas-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalGasConsumption || 0 }}
+  </div>
 </div>

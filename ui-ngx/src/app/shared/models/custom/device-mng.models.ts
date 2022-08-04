@@ -186,14 +186,14 @@ export interface ProdMng extends BaseData<any> {
   factoryId: string;
   factoryName: string;
   deviceId: string;
-  deviceName: string;
+  rename: string;
   startTime: number;
   endTime: number;
 }
 
 export interface ProdCalendar extends BaseData<any> {
   deviceId: string;
-  deviceName: string;
+  rename: string;
   factoryId: string;
   factoryName: string;
   startTime: number;

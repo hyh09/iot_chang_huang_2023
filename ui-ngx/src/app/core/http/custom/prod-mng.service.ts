@@ -17,9 +17,9 @@ export class ProdMngService {
   ) { }
 
   // 获取生产管理列表
-  public getProdMngList(pageLink: PageLink, filterParams: { factoryName: string; deviceName: string; }, config?: RequestConfig): Observable<PageData<ProdMng>> {
+  public getProdMngList(pageLink: PageLink, filterParams: { factoryName: string; rename: string; }, config?: RequestConfig): Observable<PageData<ProdMng>> {
     return this.http.get<PageData<ProdMng>>(
-      `/api/productionCalender/getPageList${pageLink.toQuery()}&factoryName=${filterParams.factoryName}&deviceName=${filterParams.deviceName}&factoryId=${environment.factoryId || ''}`,
+      `/api/productionCalender/getPageList${pageLink.toQuery()}&factoryName=${filterParams.factoryName}&rename=${filterParams.rename}&factoryId=${environment.factoryId || ''}`,
       defaultHttpOptionsFromConfig(config)
     );
   }

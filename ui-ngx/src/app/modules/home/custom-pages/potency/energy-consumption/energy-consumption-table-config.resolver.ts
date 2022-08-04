@@ -9,11 +9,12 @@ import { map } from 'rxjs/operators';
 import { BehaviorSubject, Observable, Observer } from "rxjs";
 import { EnergyConsumptionOverviewComponent } from './energy-consumption-overview.component';
 import { getTheEndOfDay, getTheStartOfDay } from "@app/core/utils";
+import { DeviceEnergyConsumption } from "@app/shared/models/custom/potency.models";
 
 @Injectable()
-export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTableConfig<any>> {
+export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTableConfig<DeviceEnergyConsumption>> {
 
-  private readonly config: EntityTableConfig<any> = new EntityTableConfig<any>();
+  private readonly config: EntityTableConfig<DeviceEnergyConsumption> = new EntityTableConfig<DeviceEnergyConsumption>();
 
   constructor(
     private potencyService: PotencyService,
@@ -26,7 +27,22 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
     this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
 
-    this.config.loadDataOnInit = false;
+    this.config.tableTitle = this.translate.instant('potency.energy-consumption');
+    this.config.addEnabled = false;
+    this.config.searchEnabled = false;
+    this.config.refreshEnabled = false;
+    this.config.detailsPanelEnabled = false;
+    this.config.entitiesDeleteEnabled = false;
+    this.config.selectionEnabled = false;
+    
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('rename', 'potency.device-name', '200px', entity => entity.rename || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('waterConsumption', 'potency.water-consumption', '100px', entity => entity.waterConsumption || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('electricConsumption', 'potency.electric-consumption', '100px', entity => entity.electricConsumption || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('gasConsumption', 'potency.gas-consumption', '100px', entity => entity.gasConsumption || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('capacityConsumption', 'potency.capacity', '100px', entity => entity.capacityConsumption || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('unitWaterConsumption', 'potency.unit-water-consumption', '', entity => entity.unitWaterConsumption || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('unitElectricConsumption', 'potency.unit-electric-consumption', '', entity => entity.unitElectricConsumption || '', () => ({}), false));
+    this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('unitGasConsumption', 'potency.unit-gas-consumption', '', entity => entity.unitGasConsumption || '', () => ({}), false));
 
     this.config.cellActionDescriptors = [{
       name: this.translate.instant('potency.go-to-history'),
@@ -34,13 +50,13 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       isEnabled: () => (true),
       onAction: ($event, entity) => this.router.navigate([`/potency/energyConsumption/${entity.deviceId}/history`], {
         queryParams: {
-          deviceName: encodeURIComponent(entity['设备名称'])
+          deviceName: encodeURIComponent(entity.rename)
         }
       })
     }];
   }
 
-  resolve(): Observable<EntityTableConfig<any>> {
+  resolve(): EntityTableConfig<DeviceEnergyConsumption> {
     const now = new Date();
     this.config.componentsData = {
       factoryId: '',
@@ -48,46 +64,29 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       productionLineId: '',
       deviceId: '',
       dateRange: [getTheStartOfDay(now, false), getTheEndOfDay(now, false)],
-      totalValue: [],
+      totalValue: {},
       factroryChange$: new BehaviorSubject<string>('')
     };
-    return new Observable((observer: Observer<EntityTableConfig<any>>) => {
-      this.potencyService.getEnergyConsumptionTableHeader().subscribe(res => {
-        this.config.tableTitle = this.translate.instant('potency.energy-consumption');
-        this.config.addEnabled = false;
-        this.config.searchEnabled = false;
-        this.config.refreshEnabled = false;
-        this.config.detailsPanelEnabled = false;
-        this.config.entitiesDeleteEnabled = false;
-        this.config.selectionEnabled = false;
 
-        this.config.columns = [];
-        (res || []).forEach((col, index) => {
-          this.config.columns.push(new EntityTableColumn<any>(col, col, index === 0 ? '200px' : '', (entity) => (entity[col] || ''), () => ({}), false));
-        });
+    this.config.entitiesFetchFunction = pageLink => {
+      const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
+      if (factoryId) {
+        this.config.componentsData.factroryChange$.next(factoryId);
+      }
+      let startTime: number, endTime: number;
+      if (this.config.componentsData.dateRange) {
+        startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
+        endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
+      }
+      const { pageSize, page, textSearch, sortOrder } = pageLink;
+      const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+      return this.potencyService.getEnergyConsumptionDatas(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
+        this.config.componentsData.totalValue = res.totalValue || {};
+        return res;
+      }));
+    }
 
-        this.config.entitiesFetchFunction = pageLink => {
-          const { factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-          if (factoryId) {
-            this.config.componentsData.factroryChange$.next(factoryId);
-          }
-          let startTime: number, endTime: number;
-          if (this.config.componentsData.dateRange) {
-            startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
-            endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
-          }
-          const { pageSize, page, textSearch, sortOrder } = pageLink;
-          const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
-          return this.potencyService.getEnergyConsumptionDatas(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
-            this.config.componentsData.totalValue = res.totalValue || [];
-            return res;
-          }));
-        }
-
-        observer.next(this.config);
-        observer.complete();
-      });
-    });
+    return this.config;
   }
 
 }

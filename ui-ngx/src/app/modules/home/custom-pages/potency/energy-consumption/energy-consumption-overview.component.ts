@@ -2,7 +2,7 @@ import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { PotencyService } from '@app/core/http/custom/potency.service';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
-import { PotencyTop10 } from '@app/shared/models/custom/potency.models';
+import { DeviceEnergyConsumption, PotencyTop10 } from '@app/shared/models/custom/potency.models';
 import { Store } from '@ngrx/store';
 import { differenceInCalendarDays } from 'date-fns';
 import { BehaviorSubject } from 'rxjs';
@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
   templateUrl: './energy-consumption-overview.component.html',
   styleUrls: ['./energy-consumption-overview.component.scss']
 })
-export class EnergyConsumptionOverviewComponent extends EntityTableHeaderComponent<object> implements AfterViewInit {
+export class EnergyConsumptionOverviewComponent extends EntityTableHeaderComponent<DeviceEnergyConsumption> implements AfterViewInit {
 
   today = new Date();
   keyNum: '1' | '2' | '3' = '1';
