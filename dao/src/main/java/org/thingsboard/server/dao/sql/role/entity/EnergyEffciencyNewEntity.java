@@ -121,7 +121,7 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
 
 
     /**
-     * 设备的名称
+     * 设备的名称  d."rename"
      */
     @Transient
     private  String  deviceName;
