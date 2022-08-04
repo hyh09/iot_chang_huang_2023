@@ -195,7 +195,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         List<Workshop> workshopList = new ArrayList<>();
         List<ProductionLine> productionLineList = new ArrayList<>();
         List<Device> deviceList = new ArrayList<>();
-        long l = System.currentTimeMillis();
         if(factory != null){
             boolean notBlankFactoryName = StringUtils.isNotBlank(factory.getName());
             boolean notBlankWorkshopName = StringUtils.isNotBlank(factory.getWorkshopName());
@@ -224,8 +223,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 return  query.orderBy(sort).where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
             };
             factoryList = factoryRepository.findAll(specification);
-            System.out.println("结果："+ (System.currentTimeMillis() - l));
-            l = System.currentTimeMillis();
 
             if(CollectionUtils.isNotEmpty(factoryList)){
                 List<UUID> factoryIds = factoryList.stream().map(m->m.getId()).collect(Collectors.toList());
@@ -233,18 +230,12 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 workshopList = workshopDao.findWorkshopListByCdn(new Workshop(factory,factoryIds));
                 if(CollectionUtils.isNotEmpty(workshopList)){
                     List<UUID> workshopIds = workshopList.stream().map(m->m.getId()).collect(Collectors.toList());
-                    System.out.println("结果："+ (System.currentTimeMillis() - l));
-                    l = System.currentTimeMillis();
                     //查询产线
                     productionLineList = productionLineDao.findProductionLineListBuyCdn(new ProductionLine(factory,workshopIds));
                     if(CollectionUtils.isNotEmpty(productionLineList)){
                         List<UUID> productionLineIds = productionLineList.stream().map(m->m.getId()).collect(Collectors.toList());
                         //查询设备,过滤掉网关
-                        System.out.println("结果："+ (System.currentTimeMillis() - l));
-                        l = System.currentTimeMillis();
                         deviceList = deviceDao.findDeviceListByCdn(new Device(factory,productionLineIds),SORT,ASC);
-                        System.out.println("结果："+ (System.currentTimeMillis() - l));
-                        l = System.currentTimeMillis();
                     }
                 }
             }
@@ -264,7 +255,6 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
                 }
             }
         }
-        System.out.println("结果："+ (System.currentTimeMillis() - l));
         return new FactoryListVo(this.toFactoryList(factoryList),workshopList,productionLineList,deviceList);
     }
 
@@ -350,7 +340,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         result.setFactoryEntityList(resultFactoryList);
         result.setWorkshopEntityList(resultWorkshopList);
         result.setProductionLineEntityList(resultLineList);
-        result.setDeviceEntityList(resultDeviceList);
+        result.renameByDeviceEntityList(resultDeviceList);
         return result;
     }
 
@@ -414,7 +404,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         result.setFactoryEntityList(resultFactoryList);
         result.setWorkshopEntityList(resultWorkshopList);
         result.setProductionLineEntityList(resultLineList);
-        result.setDeviceEntityList(resultDeviceList);
+        result.renameByDeviceEntityList(resultDeviceList);
         return result;
 
     }
@@ -472,7 +462,7 @@ public class JpaFactoryDao extends JpaAbstractSearchTextDao<FactoryEntity, Facto
         result.setFactoryEntityList(resultFactoryList);
         result.setWorkshopEntityList(resultWorkshopList);
         result.setProductionLineEntityList(resultLineList);
-        result.setDeviceEntityList(resultDeviceList);
+        result.renameByDeviceEntityList(resultDeviceList);
         return result;
     }
 

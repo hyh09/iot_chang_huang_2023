@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.dao.device;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
@@ -42,7 +43,6 @@ import org.thingsboard.server.common.data.device.credentials.BasicMqttCredential
 import org.thingsboard.server.common.data.device.data.*;
 import org.thingsboard.server.common.data.devicecomponent.DeviceComponent;
 import org.thingsboard.server.common.data.edge.Edge;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.*;
@@ -212,7 +212,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
     @Override
     public Device saveDeviceWithAccessToken(Device device, String accessToken) throws ThingsboardException {
         //同租户下，设备名称不能重复
-//        List<Device> deviceListByCdn = deviceDao.findDeviceListByCdn(new Device(device.getTenantId(), device.getName()));
+        /* 2022-8-3注释代码。需求变更为设备名称可重复
         List<Device> deviceListByCdn =deviceDao.queryAllByTenantIdAndName(device.getTenantId(),device.getName());
         if(!CollectionUtils.isEmpty(deviceListByCdn)){
             if(device.getId() == null){
@@ -222,7 +222,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
                     throw new ThingsboardException("设备名称重复！", ThingsboardErrorCode.FAIL_VIOLATION);
                 }
             }
-        }
+        }*/
         return doSaveDevice(device, accessToken, true);
     }
 
@@ -309,6 +309,7 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             }
             device.setType(deviceProfile.getName());
             device.setDeviceData(syncDeviceData(deviceProfile, device.getDeviceData()));
+            this.swapNameAndRename(device);
             return deviceDao.save(device.getTenantId(), device);
         } catch (Exception t) {
             ConstraintViolationException e = extractConstraintViolationException(t).orElse(null);
@@ -320,6 +321,30 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             } else {
                 throw t;
             }
+        }
+    }
+
+    /**
+     * 2022-8-3变更
+     * 转换设备名称
+     * name 设备唯一码
+     * rename 设备名称
+     * @param device
+     */
+    public void swapNameAndRename(Device device){
+        //新增需要初始值
+        if(device.getId() == null || device.getId().getId() == null){
+            //设备名称要存到rename
+            device.setRename(device.getName());
+            //name作为唯一编码使用
+            device.setName(Uuids.timeBased().toString());
+        }else {
+            //查询编码
+            DeviceInfo deviceInfoById = deviceDao.findDeviceInfoById(device.getTenantId(), device.getId().getId());
+            //设备名称要存到rename
+            device.setRename(device.getName());
+            //name作为唯一编码使用
+            device.setName(deviceInfoById.getName());
         }
     }
 
