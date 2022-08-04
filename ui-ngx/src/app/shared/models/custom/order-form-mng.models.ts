@@ -45,7 +45,7 @@ export interface OrderForm extends OrderCapacity {
 export interface OrderDevice {
   id?: string;
   deviceId?: string;
-  deviceName?: string;
+  rename?: string;
   enabled?: boolean;
   intendedCapacity?: string;
   actualCapacity?: string;
