@@ -71,6 +71,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
             capVo.setValue(StringUtils.isEmpty(entity.getCapacityAddedValue())?"0":entity.getCapacityAddedValue());
             capVo.setDeviceId(entity.getEntityId().toString());
             capVo.setDeviceName(entity.getDeviceName());
+            capVo.setRename(entity.getDeviceName());
             capVo.setDictDeviceId(entity.getDictDeviceId());
             capVo.setFlg(entity.getFlg());
             capVo.setWorkshopName(getWorkShopName(entity.getWorkshopId(),tenantId));

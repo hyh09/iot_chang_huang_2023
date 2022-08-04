@@ -26,6 +26,8 @@ public class AppDeviceCapVo {
     @ApiModelProperty("设备的名称 ")
     private String deviceName;
 
+    private String rename;
+
     @ApiModelProperty("设备图片 ")
     private  String  picture;
     /**
