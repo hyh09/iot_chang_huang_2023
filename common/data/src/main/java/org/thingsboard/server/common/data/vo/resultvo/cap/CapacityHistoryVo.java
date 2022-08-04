@@ -16,7 +16,7 @@ import org.thingsboard.server.common.data.vo.rename.RenameGetSvc;
 @Data
 @ToString
 @ApiModel(value = "产能历史实体出参")
-public class CapacityHistoryVo implements RenameGetSvc {
+public class CapacityHistoryVo  extends  DeviceRenameVo implements RenameGetSvc {
 
     /**
      * 设备的id
