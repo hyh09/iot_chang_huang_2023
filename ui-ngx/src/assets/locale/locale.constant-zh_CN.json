@@ -534,7 +534,7 @@
     "selected-attributes": "已选择{ count, plural, 1 {# 个属性} other {# 个属性} }",
     "selected-telemetry": "已选择 { count, plural, 1 {# telemetry unit} other {# telemetry units} }",
     "show-on-widget": "在部件上显示",
-    "value": "价值",
+    "value": "值",
     "value-required": "属性值必填",
     "widget-mode": "部件模式"
   },
@@ -2306,7 +2306,7 @@
     "type": "类型",
     "unique-id-required": "当前扩展ID已经存在。",
     "username": "用户名",
-    "value": "价值",
+    "value": "值",
     "value-expression": "值表达式"
   },
   "filter": {
@@ -2580,7 +2580,7 @@
       "timeseries": "时间序列",
       "type": "类型"
     },
-    "column-value": "价值",
+    "column-value": "值",
     "csv-delimiter": "CSV分隔符",
     "csv-first-line-header": "第一行包含列名",
     "csv-update-data": "更新属性/遥测",
@@ -2616,7 +2616,7 @@
     "key": "键名",
     "no-data": "没有条目",
     "remove-entry": "删除条目",
-    "value": "价值"
+    "value": "值"
   },
   "language": {
     "language": "语言",
@@ -3442,7 +3442,7 @@
       "update-failed": "更新失败",
       "update-successful": "更新成功",
       "update-timeseries": "更新 Timeseries",
-      "value": "价值"
+      "value": "值"
     }
   },
   "platform": {
@@ -3845,9 +3845,18 @@
     "energy-consumption-history": "能耗历史",
     "running-state": "运行状态",
     "device-name": "设备名称",
-    "capacity": "产量 (M)",
     "total-capacity": "总产量：",
     "total-energy-consumption": "总能耗：",
+    "total-water-consumption": "耗水量 (T)：",
+    "total-electric-consumption": "耗电量 (KWH)：",
+    "total-gas-consumption": "耗气量 (T)：",
+    "water-consumption": "耗水量 (T)",
+    "electric-consumption": "耗电量 (KWH)",
+    "gas-consumption": "耗气量 (T)",
+    "capacity": "产量 (M)",
+    "unit-water-consumption": "单位能耗耗水量 (T/M)",
+    "unit-electric-consumption": "单位能耗耗电量 (KWH/M)",
+    "unit-gas-consumption": "单位能耗耗气量 (T/M)",
     "go-to-history": "查看历史数据",
     "created-time": "上报时间",
     "property": "参数",

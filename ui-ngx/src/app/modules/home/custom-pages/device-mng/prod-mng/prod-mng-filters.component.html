@@ -11,11 +11,11 @@
 </mat-form-field>
 <mat-form-field>
   <mat-label>{{ 'device-mng.device-name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.deviceName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.rename" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
-    *ngIf="entitiesTableConfig.componentsData.deviceName"
+    *ngIf="entitiesTableConfig.componentsData.rename"
     matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('deviceName')"
+    (click)="onClear('rename')"
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>

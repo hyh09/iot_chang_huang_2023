@@ -7,14 +7,14 @@ import { Store } from '@ngrx/store';
 import { differenceInCalendarDays } from 'date-fns';
 import { BehaviorSubject } from 'rxjs';
 import * as echarts from 'echarts';
-import { PotencyInterval } from '@app/shared/models/custom/potency.models';
+import { DeviceEnergyConsumption, PotencyInterval } from '@app/shared/models/custom/potency.models';
 
 @Component({
   selector: 'tb-energy-history-filter',
   templateUrl: './energy-history-filter.component.html',
   styleUrls: ['./energy-history-filter.component.scss']
 })
-export class EnergyHistoryFilterComponent extends EntityTableHeaderComponent<object> implements AfterViewInit {
+export class EnergyHistoryFilterComponent extends EntityTableHeaderComponent<DeviceEnergyConsumption> implements AfterViewInit {
 
   today = new Date();
   deviceId: string = '';

@@ -28,7 +28,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
     this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
 
     this.config.columns.push(
-      new EntityTableColumn<DeviceCapacity>('deviceName', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.deviceName || ''), () => ({}), false),
+      new EntityTableColumn<DeviceCapacity>('rename', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.rename || ''), () => ({}), false),
       new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%')
     );
   }
@@ -79,7 +79,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       isEnabled: () => (true),
       onAction: ($event, entity) => this.router.navigate([`/potency/deviceCapacity/${entity.deviceId}/history`], {
         queryParams: {
-          deviceName: encodeURIComponent(entity.deviceName)
+          deviceName: encodeURIComponent(entity.rename)
         }
       })
     }];

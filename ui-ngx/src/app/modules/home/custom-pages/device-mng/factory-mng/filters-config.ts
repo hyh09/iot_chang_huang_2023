@@ -9,5 +9,5 @@ export const FILTERS: { langKey: string; propName: string; }[] = [{
   propName: 'productionLineName'
 }, {
   langKey: 'device-mng.device-name',
-  propName: 'deviceName'
+  propName: 'rename'
 }]
