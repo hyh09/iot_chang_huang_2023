@@ -620,16 +620,16 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     @Override
     public TodaySectionHistoryVo todaySectionHistory(TsSqlDayVo vo) {
-//        TodaySectionHistoryVo  resultVO = new TodaySectionHistoryVo();
-//        resultVO.setTodayValue(todayValueOfOutput(vo));
-//        resultVO.setSectionValue(sectionValueOfOutput(vo));
-//        resultVO.setHistoryValue(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
-//        return resultVO;
-        TodaySectionHistoryVo  resultVo = new TodaySectionHistoryVo();
-        resultVo.setSectionValue( kanbanInervalCapacityRepository.capacitySumValue(vo,vo.getStartTime(),vo.getEndTime()));
-        resultVo.setTodayValue(kanbanInervalCapacityRepository.capacitySumValue(vo,CommonUtils.getZero(),CommonUtils.getNowTime()));
-        resultVo.setHistoryValue(kanbanInervalCapacityRepository.capacitySumValue(vo,1L,CommonUtils.getNowTime()));
-        return resultVo;
+        TodaySectionHistoryVo  resultVO = new TodaySectionHistoryVo();
+        resultVO.setTodayValue(todayValueOfOutput(vo));
+        resultVO.setSectionValue(sectionValueOfOutput(vo));
+        resultVO.setHistoryValue(effciencyAnalysisRepository.queryHistoricalTelemetryData(vo,true,KeyTitleEnums.key_capacity.getCode()));
+        return resultVO;
+//        TodaySectionHistoryVo  resultVo = new TodaySectionHistoryVo();
+//        resultVo.setSectionValue( kanbanInervalCapacityRepository.capacitySumValue(vo,vo.getStartTime(),vo.getEndTime()));
+//        resultVo.setTodayValue(kanbanInervalCapacityRepository.capacitySumValue(vo,CommonUtils.getZero(),CommonUtils.getNowTime()));
+//        resultVo.setHistoryValue(kanbanInervalCapacityRepository.capacitySumValue(vo,1L,CommonUtils.getNowTime()));
+//        return resultVo;
     }
 
     /**
