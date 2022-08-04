@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.vo.device.DeviceRenameVo;
 
 /**
  * Project Name: all-in-one-multi-end-code
@@ -17,13 +18,12 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class EfficiencyHistoryDataVo {
+public class EfficiencyHistoryDataVo extends DeviceRenameVo {
 
     @ApiModelProperty("设备名称")
     private String deviceName;
 
-    @ApiModelProperty("设备名称")
-    private String rename;
+
 
     @ApiModelProperty("创建时间")
     private long createdTime;

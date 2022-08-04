@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.common.data.vo.device.DeviceRenameVo;
 
 /**
  * @program: thingsboard
@@ -14,7 +15,7 @@ import lombok.ToString;
 @Data
 @ToString
 @ApiModel(value = "产能历史实体出参")
-public class CapacityHistoryVo {
+public class CapacityHistoryVo extends DeviceRenameVo {
 
     /**
      * 设备的id
