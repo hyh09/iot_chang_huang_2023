@@ -1,5 +1,6 @@
 package org.thingsboard.server.common.data.effciency.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -28,14 +29,17 @@ public class EfficiencyHistoryDataVo {
     private long createdTime;
 
     @ApiModelProperty("水")
+    @JsonProperty("waterConsumption")
     private String water;
 
 
     @ApiModelProperty("电")
+    @JsonProperty("electricConsumption")
     private  String electric;
 
 
     @ApiModelProperty("gas")
+    @JsonProperty("gasConsumption")
     private String gas;
 
 
