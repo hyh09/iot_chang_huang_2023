@@ -118,7 +118,7 @@ export class OrderFormComponent extends EntityComponent<OrderForm> {
     return this.fb.group({
       id: [planDevices ? planDevices.id : ''],
       deviceId: [planDevices ? planDevices.deviceId : ''],
-      deviceName: [planDevices ? planDevices.deviceName : ''],
+      rename: [planDevices ? planDevices.rename : ''],
       enabled: [planDevices ? planDevices.enabled : false],
       intendedCapacity: [planDevices ? planDevices.intendedCapacity : ''],
       actualCapacity: [planDevices ? planDevices.actualCapacity : ''],

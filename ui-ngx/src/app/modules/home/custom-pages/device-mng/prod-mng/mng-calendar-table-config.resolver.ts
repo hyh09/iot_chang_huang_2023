@@ -29,7 +29,7 @@ export class MngCalendarTableConfigResolver implements Resolve<EntityTableConfig
       factoryId: '',
       deviceId: '',
       factoryName: '',
-      deviceName: ''
+      rename: ''
     }
 
     this.config.columns.push(
@@ -47,7 +47,7 @@ export class MngCalendarTableConfigResolver implements Resolve<EntityTableConfig
     Object.assign(this.config.componentsData, {
       factoryId, deviceId,
       factoryName: decodeURIComponent(factoryName),
-      deviceName: decodeURIComponent(deviceName)
+      rename: decodeURIComponent(deviceName)
     });
 
     this.config.searchEnabled = false;
@@ -66,7 +66,7 @@ export class MngCalendarTableConfigResolver implements Resolve<EntityTableConfig
       _date.setMinutes(end.getMinutes());
       const endTime = _date.getTime();
       return this.prodMngService.saveProdCalendar({
-        ...calendar, factoryId, deviceId, deviceName: decodeURIComponent(deviceName), startTime, endTime
+        ...calendar, factoryId, deviceId, rename: decodeURIComponent(deviceName), startTime, endTime
       });
     }
     this.config.loadEntity = id => this.prodMngService.getProdCalendar(id);

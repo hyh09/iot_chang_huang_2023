@@ -3,7 +3,7 @@ import { BaseData, PageData } from "@app/shared/public-api";
 export interface DeviceCapacity extends BaseData<any> {
   deviceId: string;
   value: string;
-  deviceName: string;
+  rename: string;
   productionName?: string;
   workshopName?: string;
 }
@@ -17,8 +17,24 @@ export interface DeviceCapacityList {
   totalPages: number;
 }
 
-export interface DeviceEnergyConsumptionList extends PageData<object> {
-  totalValue: string[];
+export interface DeviceEnergyConsumption extends BaseData<any> {
+  deviceId?: string;
+  rename: string;
+  waterConsumption: string;
+  electricConsumption: string;
+  gasConsumption: string;
+  capacityConsumption?: string;
+  unitWaterConsumption?: string;
+  unitElectricConsumption?: string;
+  unitGasConsumption?: string;
+}
+
+export interface DeviceEnergyConsumptionList extends PageData<DeviceEnergyConsumption> {
+  totalValue: {
+    totalWaterConsumption: string;
+    totalElectricConsumption: string;
+    totalGasConsumption: string;
+  }
 }
 
 export interface RunningState {
@@ -38,7 +54,7 @@ export interface RunningState {
 
 export interface PotencyTop10Item {
   deviceId: string;
-  deviceName: string;
+  rename: string;
   value: string;
   percent?: number;
 }
