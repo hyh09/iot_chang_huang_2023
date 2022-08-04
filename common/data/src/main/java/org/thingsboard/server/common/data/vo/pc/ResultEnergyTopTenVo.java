@@ -26,6 +26,8 @@ public class ResultEnergyTopTenVo {
      */
     @ApiModelProperty("设备的名称 ")
     private String deviceName;
+
+    private String rename;
     /**
      * 设备的id
      */

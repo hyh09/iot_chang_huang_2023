@@ -1173,7 +1173,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         return    entities.stream().map(m1 ->{
             ResultEnergyTopTenVo  vo1= new ResultEnergyTopTenVo();
             vo1.setDeviceId(m1.getEntityId());
-            vo1.setDeviceName(m1.getDeviceName());
+            vo1.setDeviceName(m1.getRename());
+            vo1.setRename(m1.getRename());
             if(vo.getType().equals("0")){
                 vo1.setValue(StringUtils.isNotEmpty(m1.getCapacityAddedValue()) ? m1.getCapacityAddedValue() : "0");
             }else {
