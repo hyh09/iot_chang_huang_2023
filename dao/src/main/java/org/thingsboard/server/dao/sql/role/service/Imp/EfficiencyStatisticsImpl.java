@@ -628,7 +628,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         TodaySectionHistoryVo  resultVo = new TodaySectionHistoryVo();
         resultVo.setSectionValue( kanbanInervalCapacityRepository.capacitySumValue(vo,vo.getStartTime(),vo.getEndTime()));
         resultVo.setTodayValue(kanbanInervalCapacityRepository.capacitySumValue(vo,CommonUtils.getZero(),CommonUtils.getNowTime()));
-        resultVo.setHistoryValue(kanbanInervalCapacityRepository.capacitySumValue(vo,1L,CommonUtils.getNowTime()));
+        resultVo.setHistoryValue(kanbanInervalCapacityRepository.capacitySumValue(vo,null,null));
         return resultVo;
     }
 
