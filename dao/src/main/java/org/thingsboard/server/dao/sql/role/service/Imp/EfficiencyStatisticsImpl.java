@@ -188,7 +188,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         {
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),"查询不到此设备!");
         }
-        String deviceName = deviceInfo.getName();
+        String deviceName = deviceInfo.getRename();
         //先查询能耗的属性
         List<String>  keys1=  deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
         queryTsKvVo.setKeys(keys1);
