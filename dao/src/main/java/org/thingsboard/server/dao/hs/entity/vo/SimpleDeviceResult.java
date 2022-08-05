@@ -34,13 +34,21 @@ public class SimpleDeviceResult {
     @ApiModelProperty("设备名称")
     private String name;
 
+    /**
+     * 设备重命名名称
+     */
+    @ApiModelProperty("设备重命名名称")
+    private String rename;
+
     public SimpleDeviceResult(UUID id, String name) {
         this.id = id;
         this.name = name;
+        this.rename = name;
     }
 
     public SimpleDeviceResult(Device device) {
         this.id = device.getId().getId();
         this.name = device.getName();
+        this.rename = device.getRename();
     }
 }

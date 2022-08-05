@@ -39,6 +39,12 @@ public class AlarmRecordResult {
     private String name;
 
     /**
+     * 设备重命名名称
+     */
+    @ApiModelProperty("设备重命名名称")
+    private String rename;
+
+    /**
      * 报警标题
      */
     @ApiModelProperty("报警标题")
