@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.entity.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @Accessors(chain = true)
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(value = "设备返回结果")
 public class SimpleDeviceResult {
     /**
@@ -50,11 +52,5 @@ public class SimpleDeviceResult {
         this.id = device.getId().getId();
         this.name = device.getName();
         this.rename = device.getRename();
-    }
-
-    public SimpleDeviceResult(UUID id, String name, String rename) {
-        this.id = id;
-        this.name = name;
-        this.rename = rename;
     }
 }
