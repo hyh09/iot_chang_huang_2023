@@ -163,7 +163,9 @@ public class DeviceController extends BaseController {
         checkParameter(DEVICE_ID, strDeviceId);
         try {
             DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
-            return checkDeviceInfoId(deviceId, Operation.READ);
+            DeviceInfo deviceInfo = checkDeviceInfoId(deviceId, Operation.READ);
+            deviceInfo.renameDevice();
+            return deviceInfo;
         } catch (Exception e) {
             throw handleException(e);
         }
