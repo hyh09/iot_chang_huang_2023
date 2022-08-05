@@ -307,8 +307,8 @@ public class OrderRtServiceImpl extends AbstractEntityService implements OrderRt
                         OrderPlanDeviceVO orderPlanDeviceVO = new OrderPlanDeviceVO();
                         BeanUtils.copyProperties(e, orderPlanDeviceVO);
                         Optional.ofNullable(map.get(toUUID(e.getDeviceId()))).ifPresent(device -> {
-                            orderPlanDeviceVO.setDeviceName(device.getName());
-                            orderPlanDeviceVO.setRename(device.getName());
+                            orderPlanDeviceVO.setDeviceName(device.getRename());
+                            orderPlanDeviceVO.setRename(device.getRename());
                         });
                         return orderPlanDeviceVO;
                     }).collect(Collectors.toList()));
