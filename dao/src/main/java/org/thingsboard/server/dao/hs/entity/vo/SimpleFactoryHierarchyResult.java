@@ -37,6 +37,12 @@ public class SimpleFactoryHierarchyResult {
     private String title;
 
     /**
+     * 设备重命名名称
+     */
+    @ApiModelProperty("设备重命名名称")
+    private String rename;
+
+    /**
      * 设备Key
      */
     @ApiModelProperty("设备Key")

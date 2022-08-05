@@ -228,6 +228,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
             return AlarmRecordResult.builder()
                     .name(device.getName())
+                    .rename(device.getRename())
                     .id(e.getId().toString())
                     .createdTime(e.getCreatedTime())
                     .title(e.getType())
@@ -283,6 +284,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                         return RTMonitorDeviceResult.builder()
                                                 .id(idStr)
                                                 .name(e.getName())
+                                                .rename(e.getRename())
                                                 .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                                                 .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                                                 .build();
@@ -363,6 +365,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         return DeviceDetailResult.builder()
                 .id(device.getId().toString())
                 .name(device.getName())
+                .rename(device.getRename())
                 .picture(Optional.ofNullable(dictDevice.getPicture()).orElse(null))
                 .isOnLine(calculateValueInMap(this.clientService.listDevicesOnlineStatus(List.of(device.getId().getId())), device.getId().toString()))
                 .factoryName(Optional.ofNullable(deviceBaseDTO.getFactory()).map(Factory::getName).orElse(null))
@@ -912,6 +915,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                     return RTMonitorDeviceResult.builder()
                             .id(idStr)
                             .name(e.getName())
+                            .rename(e.getRename())
                             .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                             .build();
@@ -1158,6 +1162,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                                 var device = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId).toData();
                                 result.setId(device.getId().toString());
                                 result.setName(device.getName());
+                                result.setRename(device.getRename());
 
                                 var plans = this.orderService.listDeviceOrderPlansInActualTimeField(tenantId, deviceId, todayStartTime, tomorrowStartTime);
                                 var actualCapacityTotal = plans.stream().reduce(BigDecimal.ZERO, (r, e) -> {
