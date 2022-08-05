@@ -161,7 +161,7 @@ public class ProductionCalenderServiceImpl implements ProductionCalenderService 
                 String intended = orderService.findIntendedByDeviceId(deviceId, startTime, endTime);
 
                 resultProductionCalender.setDeviceId(deviceId);
-                resultProductionCalender.setDeviceName(device.getName());
+                resultProductionCalender.setDeviceName(device.getRename());
                 resultProductionCalender.setAchieveOrPlan((actual == null ? "0" : actual) + "/" + (intended == null ? "0" : intended));
                 //2.产能达成率 = 选择设备实际时间范围内（默认当天）参与产能运算的设备实际计算产量总和【调云辉提供的接口】/（订单关联的设备的标准产能【设备字典的额定产能】*设备日历中的时间【生产日历-取交叉-取小时】总和）
                 //2.1 时间范围内设备实际产能总和
