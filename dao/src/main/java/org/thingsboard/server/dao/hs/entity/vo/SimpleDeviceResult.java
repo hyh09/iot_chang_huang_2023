@@ -51,4 +51,10 @@ public class SimpleDeviceResult {
         this.name = device.getName();
         this.rename = device.getRename();
     }
+
+    public SimpleDeviceResult(UUID id, String name, String rename) {
+        this.id = id;
+        this.name = name;
+        this.rename = rename;
+    }
 }
