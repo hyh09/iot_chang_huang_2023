@@ -219,7 +219,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let data of deviceTable.data; let $index = index">
-            <td nzLeft>{{ data.deviceName || '' }}</td>
+            <td nzLeft>{{ data.rename || '' }}</td>
             <td>{{ data.intendedCapacity === undefined || data.intendedCapacity === null ? '' : data.intendedCapacity }}</td>
             <td>{{ data.actualCapacity === undefined || data.actualCapacity === null ? '' : data.actualCapacity }}</td>
             <td>
