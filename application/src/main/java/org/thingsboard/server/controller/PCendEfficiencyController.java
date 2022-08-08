@@ -25,13 +25,18 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
+import org.thingsboard.server.excel.po.AppDeviceCapPo;
+import org.thingsboard.server.excel.util.ExcelUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @program: thingsboard
@@ -84,6 +89,28 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             e.printStackTrace();
             throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
         }
+    }
+
+    /**
+     * 导出 Excel（一个 sheet）
+     */
+    @RequestMapping(value = "writeExcel", method = RequestMethod.GET)
+    public void writeExcel(  @RequestParam int pageSize,
+                             @RequestParam int page,
+                             @RequestParam(required = false) String textSearch,
+                             @RequestParam(required = false) String sortProperty,
+                             @RequestParam(required = false) String sortOrder,
+                             @RequestParam(required = false) Long startTime,
+                             @RequestParam(required = false) Long endTime,
+                             @RequestParam(required = false) UUID deviceId,
+                             @RequestParam(required = false) UUID productionLineId,
+                             @RequestParam(required = false) UUID workshopId,
+                             @RequestParam(required = false) UUID factoryId,HttpServletResponse response) throws IOException, ThingsboardException {
+        PageDataAndTotalValue<AppDeviceCapVo> pageDataAndTotalValue = queryCapacity(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId,productionLineId,workshopId,factoryId);
+        String fileName = "一个 Excel 文件";
+        String sheetName = "第一个 sheet";
+        List<AppDeviceCapPo> list = pageDataAndTotalValue.getData().stream().map(vo->AppDeviceCapPo.builder().rename(vo.getRename()).value(vo.getValue()).build()).collect(Collectors.toList());
+        ExcelUtil.writeExcel(response, list, fileName, sheetName, new AppDeviceCapPo());
     }
 
 
