@@ -131,7 +131,7 @@ public class DataToConversionImpl implements DataToConversionSvc {
         Map<UUID,String> mapFactoryCache = new HashMap<>();
         entityList.stream().forEach(m1->{
             DeviceEntity  deviceEntity=   deviceEntities.stream().filter(d1->d1.getId().equals(m1.getEntityId())).findFirst().orElse(new DeviceEntity());
-            m1.setDeviceName(deviceEntity.getName());
+            m1.setDeviceName(deviceEntity.getRename());
             m1.setFactoryId(deviceEntity.getFactoryId());
             print("deviceEntities-m1",m1);
 
