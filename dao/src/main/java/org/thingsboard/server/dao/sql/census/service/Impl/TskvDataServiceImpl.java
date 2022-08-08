@@ -67,7 +67,8 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
             return null;
         }
         dataVo.setLastTime(tsKvEntityEnd.getTs());
-        dataVo.setLastValue(tsKvEntityEnd.getValue() != null ? StringUtilToll.roundUp(tsKvEntityEnd.getValueAsString()) : "0");
+        String lastValue=tsKvEntityEnd.getValue() != null ? StringUtilToll.roundUp(tsKvEntityEnd.getValueAsString()) : "0";
+        dataVo.setLastValue(lastValue);
         if (StringUtilToll.isNotZero(firstValue)) {
             dataVo.setAddValue(StringUtilToll.sub(tsKvEntityEnd.getValueAsString(), firstValue));
             return dataVo;
@@ -79,7 +80,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
         }
         dataVo.setFirstValue(firstValue02);
         dataVo.setFirstTime(tsKvEntityEnd.getTs());
-        dataVo.setAddValue(StringUtilToll.sub(tsKvEntityEnd.getValueAsString(), firstValue02));
+        dataVo.setAddValue(StringUtilToll.sub(lastValue, firstValue02));
         return dataVo;
 
 
