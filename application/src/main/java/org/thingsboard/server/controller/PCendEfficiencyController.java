@@ -1,5 +1,7 @@
 package org.thingsboard.server.controller;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.util.MapUtils;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +27,16 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
+import org.thingsboard.server.dao.util.JsonUtils;
 import org.thingsboard.server.excel.po.AppDeviceCapPo;
-import org.thingsboard.server.excel.util.ExcelUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -107,10 +111,8 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
                              @RequestParam(required = false) UUID workshopId,
                              @RequestParam(required = false) UUID factoryId,HttpServletResponse response) throws IOException, ThingsboardException {
         PageDataAndTotalValue<AppDeviceCapVo> pageDataAndTotalValue = queryCapacity(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId,productionLineId,workshopId,factoryId);
-        String fileName = "产能列表数据";
-        String sheetName = "sheet";
         List<AppDeviceCapPo> list = pageDataAndTotalValue.getData().stream().map(vo->AppDeviceCapPo.builder().rename(vo.getRename()).value(vo.getValue()).build()).collect(Collectors.toList());
-        ExcelUtil.writeExcel(response, list, fileName, sheetName, new AppDeviceCapPo());
+        easyExcel(response,"产能列表","",list);
     }
 
 
