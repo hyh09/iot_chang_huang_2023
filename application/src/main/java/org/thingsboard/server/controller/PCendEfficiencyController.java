@@ -107,8 +107,8 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
                              @RequestParam(required = false) UUID workshopId,
                              @RequestParam(required = false) UUID factoryId,HttpServletResponse response) throws IOException, ThingsboardException {
         PageDataAndTotalValue<AppDeviceCapVo> pageDataAndTotalValue = queryCapacity(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId,productionLineId,workshopId,factoryId);
-        String fileName = "一个 Excel 文件";
-        String sheetName = "第一个 sheet";
+        String fileName = "产能列表数据";
+        String sheetName = "sheet";
         List<AppDeviceCapPo> list = pageDataAndTotalValue.getData().stream().map(vo->AppDeviceCapPo.builder().rename(vo.getRename()).value(vo.getValue()).build()).collect(Collectors.toList());
         ExcelUtil.writeExcel(response, list, fileName, sheetName, new AppDeviceCapPo());
     }
