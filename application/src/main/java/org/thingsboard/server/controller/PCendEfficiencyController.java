@@ -1,12 +1,9 @@
 package org.thingsboard.server.controller;
 
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.util.MapUtils;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
 import org.thingsboard.server.common.data.effciency.data.EfficiencyHistoryDataVo;
@@ -29,17 +26,16 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
-import org.thingsboard.server.dao.util.JsonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 import org.thingsboard.server.excel.po.AppDeviceCapPo;
 import org.thingsboard.server.excel.po.CapacityHistoryPo;
 import org.thingsboard.server.excel.po.EfficiencyEntityInfoPo;
+import org.thingsboard.server.excel.po.EfficiencyHistoryDataPo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -360,6 +356,29 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     }
 
 
+    @ApiOperation("能耗历史的导出接口")
+    @RequestMapping(value = "/excelEnergyHistoryNew", method = RequestMethod.GET)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = queryEnergyHistory_messg),
+    })
+    @ResponseBody
+    public void excelEnergyHistoryNew(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId,
+            HttpServletResponse response
+    ) throws ThingsboardException, IOException {
+        PageDataWithNextPage<EfficiencyHistoryDataVo>  pageDataWithNextPage= this.queryEnergyHistoryNew(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId);
+        List<EfficiencyHistoryDataPo> poList= getEfficiencyHistoryPo(pageDataWithNextPage);
+        easyExcel(response,"能耗历史","",poList,EfficiencyHistoryDataPo.class);
+    }
+
+
     @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
@@ -526,6 +545,56 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
         po.setValue("0");
         return po;
     }
+
+
+    /**
+     * 如果是一条返回是0
+     * @param pageData
+     * @return
+     */
+    private List<EfficiencyHistoryDataPo> getEfficiencyHistoryPo(PageDataWithNextPage<EfficiencyHistoryDataVo>  pageData) {
+
+        List<EfficiencyHistoryDataPo> poList = new ArrayList<>();
+        List<EfficiencyHistoryDataVo> voList = pageData.getData();
+        if (CollectionUtils.isEmpty(voList)) {
+            return poList;
+        }
+        EfficiencyHistoryDataVo lastData1= pageData.getNextData();
+        if(lastData1!= null){
+            voList.add(lastData1);
+        }
+        for(int i=0;0<voList.size();i++)
+        {
+            if((i+1)<voList.size()) {
+                poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
+            }else {
+                poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i),null));
+            }
+
+
+        }
+        return poList;
+
+    }
+
+    private  EfficiencyHistoryDataPo  geEfficiencyHistoryPoByCurrentVoAndNex(EfficiencyHistoryDataVo currentVo,EfficiencyHistoryDataVo nexVo)
+    {
+        EfficiencyHistoryDataPo po = new  EfficiencyHistoryDataPo();
+        po.setCreatedTime(currentVo.getCreatedTime());
+        po.setDeviceName(currentVo.getDeviceName());
+        if(nexVo!= null)
+        {
+           po.setWater(StringUtilToll.sub(nexVo.getWater(),currentVo.getWater()));
+           po.setGas(StringUtilToll.sub(nexVo.getGas(),currentVo.getGas()));
+           po.setElectric(StringUtilToll.sub(nexVo.getElectric(),currentVo.getElectric()));
+            return  po;
+        }
+        po.setWater("0");
+        po.setGas("0");
+        po.setElectric("0");
+        return po;
+    }
+
 
 
 }
