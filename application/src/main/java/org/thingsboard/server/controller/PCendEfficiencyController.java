@@ -33,6 +33,7 @@ import org.thingsboard.server.dao.util.JsonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 import org.thingsboard.server.excel.po.AppDeviceCapPo;
 import org.thingsboard.server.excel.po.CapacityHistoryPo;
+import org.thingsboard.server.excel.po.EfficiencyEntityInfoPo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
@@ -227,6 +228,36 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
         }
     }
 
+
+
+    @RequestMapping(value = "/excelEntityByKeysNew", method = RequestMethod.GET)
+    @ResponseBody
+    public void  excelEntityByKeysNew(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId,
+            @RequestParam(required = false) UUID productionLineId,
+            @RequestParam(required = false) UUID workshopId,
+            @RequestParam(required = false) UUID factoryId,
+            HttpServletResponse response
+    ) throws ThingsboardException, IOException {
+        PageDataAndTotalValue<EfficiencyEntityInfo> pageDataAndTotalValue= this.queryEntityByKeysNew(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId,productionLineId,workshopId,factoryId);
+        List<EfficiencyEntityInfo> list= pageDataAndTotalValue.getData();
+      List<EfficiencyEntityInfoPo> poList= list.stream().map(vo->
+                 EfficiencyEntityInfoPo.builder()
+                         .rename(vo.getRename())
+                         .waterConsumption(vo.getWaterConsumption()).unitWaterConsumption(vo.getUnitWaterConsumption())
+                         .electricConsumption(vo.getElectricConsumption()).unitElectricConsumption(vo.getUnitElectricConsumption())
+                         .gasConsumption(vo.getGasConsumption()).unitGasConsumption(vo.getUnitGasConsumption())
+                         .capacityConsumption(vo.getCapacityConsumption())
+                .build()).collect(Collectors.toList());
+        easyExcel(response,"能耗分析","",poList,EfficiencyEntityInfoPo.class);
+    }
 
     @ApiOperation("效能分析-能耗历史的表头数据返回-无参请求")
     @ApiResponses({
