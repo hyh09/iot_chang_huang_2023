@@ -1210,7 +1210,7 @@ public abstract class BaseController {
     }
 
 
-    protected  void easyExcel(HttpServletResponse response,String excelName,String sheetName,Collection<?> data) throws IOException {
+    protected  void easyExcel(HttpServletResponse response,String excelName,String sheetName,Collection<?> data,Class cls) throws IOException {
         try {
             if (StringUtils.isEmpty(sheetName)) {
                 sheetName = "sheet";
@@ -1221,7 +1221,7 @@ public abstract class BaseController {
             String fileName = URLEncoder.encode(excelName, "UTF-8").replaceAll("\\+", "%20");
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
             // 这里需要设置不关闭流
-            EasyExcel.write(response.getOutputStream(), AppDeviceCapPo.class)
+            EasyExcel.write(response.getOutputStream(), cls)
                     .autoCloseStream(Boolean.FALSE).sheet(sheetName)
                     .registerWriteHandler(new EasyExcelCustomCellWriteHandler())
                     .doWrite(data);

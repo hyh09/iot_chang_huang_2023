@@ -3,6 +3,8 @@ package org.thingsboard.server.excel.po;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.*;
 
+import java.io.Serializable;
+
 /**
  * Project Name: thingsboard
  * File Name: AppDeviceCapPo
@@ -17,7 +19,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppDeviceCapPo  {
+public class AppDeviceCapPo implements Serializable {
     @ExcelProperty(value = "设备名称" ,index = 0)
     private String rename;
 

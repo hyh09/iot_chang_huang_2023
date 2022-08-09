@@ -5,6 +5,8 @@ import com.alibaba.excel.util.MapUtils;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
 import org.thingsboard.server.common.data.effciency.data.EfficiencyHistoryDataVo;
@@ -28,7 +30,9 @@ import org.thingsboard.server.common.data.vo.resultvo.cap.CapacityHistoryVo;
 import org.thingsboard.server.controller.example.AnswerExample;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.JsonUtils;
+import org.thingsboard.server.dao.util.StringUtilToll;
 import org.thingsboard.server.excel.po.AppDeviceCapPo;
+import org.thingsboard.server.excel.po.CapacityHistoryPo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
@@ -57,7 +61,6 @@ import java.util.stream.Collectors;
 public class PCendEfficiencyController extends BaseController implements AnswerExample {
 
 
-
     @ApiOperation(value = "【PC端查询产能接口】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
@@ -82,59 +85,52 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID productionLineId,
             @RequestParam(required = false) UUID workshopId,
             @RequestParam(required = false) UUID factoryId
-            ) throws ThingsboardException {
+    ) throws ThingsboardException {
         try {
             QueryTsKvVo queryTsKvVo = new QueryTsKvVo(startTime, endTime, deviceId, productionLineId, workshopId, factoryId);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             queryTsKvVo.setTenantId(getTenantId().getId());
             return efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo, getTenantId(), pageLink);
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw  new CustomException(ActivityException.FAILURE_ERROR.getCode(),e.getMessage());
+            throw new CustomException(ActivityException.FAILURE_ERROR.getCode(), e.getMessage());
         }
     }
 
     /**
      * 产能列表的导出
      */
-    @RequestMapping(value = "writeExcel", method = RequestMethod.GET)
-    public void writeExcel(  @RequestParam int pageSize,
-                             @RequestParam int page,
-                             @RequestParam(required = false) String textSearch,
-                             @RequestParam(required = false) String sortProperty,
-                             @RequestParam(required = false) String sortOrder,
-                             @RequestParam(required = false) Long startTime,
-                             @RequestParam(required = false) Long endTime,
-                             @RequestParam(required = false) UUID deviceId,
-                             @RequestParam(required = false) UUID productionLineId,
-                             @RequestParam(required = false) UUID workshopId,
-                             @RequestParam(required = false) UUID factoryId,HttpServletResponse response) throws IOException, ThingsboardException {
-        PageDataAndTotalValue<AppDeviceCapVo> pageDataAndTotalValue = queryCapacity(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId,productionLineId,workshopId,factoryId);
-        List<AppDeviceCapPo> list = pageDataAndTotalValue.getData().stream().map(vo->AppDeviceCapPo.builder().rename(vo.getRename()).value(vo.getValue()).build()).collect(Collectors.toList());
-        easyExcel(response,"产能列表","",list);
+    @RequestMapping(value = "excelCapacity", method = RequestMethod.GET)
+    public void excelCapacity(@RequestParam int pageSize,
+                              @RequestParam int page,
+                              @RequestParam(required = false) String textSearch,
+                              @RequestParam(required = false) String sortProperty,
+                              @RequestParam(required = false) String sortOrder,
+                              @RequestParam(required = false) Long startTime,
+                              @RequestParam(required = false) Long endTime,
+                              @RequestParam(required = false) UUID deviceId,
+                              @RequestParam(required = false) UUID productionLineId,
+                              @RequestParam(required = false) UUID workshopId,
+                              @RequestParam(required = false) UUID factoryId, HttpServletResponse response) throws IOException, ThingsboardException {
+        PageDataAndTotalValue<AppDeviceCapVo> pageDataAndTotalValue = queryCapacity(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime, deviceId, productionLineId, workshopId, factoryId);
+        List<AppDeviceCapPo> list = pageDataAndTotalValue.getData().stream().map(vo -> AppDeviceCapPo.builder().rename(vo.getRename()).value(vo.getValue()).build()).collect(Collectors.toList());
+        easyExcel(response, "产能列表", "", list, AppDeviceCapPo.class);
     }
 
 
     @ApiOperation("效能分页首页得数据，获取表头接口")
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEntityByKeysHeader),
+            @ApiResponse(code = 200, message = queryEntityByKeysHeader),
     })
     @RequestMapping(value = "/queryEntityByKeysHeader", method = RequestMethod.GET)
-    public  Object queryEntityByKeysHeader() throws ThingsboardException {
-        try{
+    public Object queryEntityByKeysHeader() throws ThingsboardException {
+        try {
             return efficiencyStatisticsSvc.queryEntityByKeysHeader();
-        }catch (Exception e)
-        {
-            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        } catch (Exception e) {
+            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
-
-
-
-
-
 
 
     @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###新接口")
@@ -145,7 +141,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryEntityByKeys", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+            @ApiResponse(code = 200, message = queryEnergyHistory_messg),
     })
     @ResponseBody
     public Object queryEntityByKeys(
@@ -162,9 +158,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID factoryId
     ) throws ThingsboardException {
         try {
-            if ( startTime == null  || endTime == null) {
-                startTime=(CommonUtils.getZero());
-                endTime=(CommonUtils.getNowTime());
+            if (startTime == null || endTime == null) {
+                startTime = (CommonUtils.getZero());
+                endTime = (CommonUtils.getNowTime());
             }
 
             QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
@@ -176,18 +172,14 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setEndTime(endTime);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             queryTsKvVo.setTenantId(getTenantId().getId());
-            PageDataAndTotalValue<Map> obj =  efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo,getTenantId(), pageLink);
-            return  obj;
+            PageDataAndTotalValue<Map> obj = efficiencyStatisticsSvc.queryEntityByKeysNewMethod(queryTsKvVo, getTenantId(), pageLink);
+            return obj;
 
-        }catch (Exception e)
-        {
-            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        } catch (Exception e) {
+            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
-
-
-
 
 
     @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###新接口")
@@ -212,9 +204,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID factoryId
     ) throws ThingsboardException {
         try {
-            if ( startTime == null  || endTime == null) {
-                startTime=(CommonUtils.getZero());
-                endTime=(CommonUtils.getNowTime());
+            if (startTime == null || endTime == null) {
+                startTime = (CommonUtils.getZero());
+                endTime = (CommonUtils.getNowTime());
             }
 
             QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
@@ -226,43 +218,31 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setEndTime(endTime);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
             queryTsKvVo.setTenantId(getTenantId().getId());
-            PageDataAndTotalValue<EfficiencyEntityInfo> obj =  efficiencyStatisticsSvc.queryEntityByKeysNew(queryTsKvVo,getTenantId(), pageLink);
-            return  obj;
+            PageDataAndTotalValue<EfficiencyEntityInfo> obj = efficiencyStatisticsSvc.queryEntityByKeysNew(queryTsKvVo, getTenantId(), pageLink);
+            return obj;
 
-        }catch (Exception e)
-        {
-            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        } catch (Exception e) {
+            log.error("【效能分析 首页的数据; 包含单位能耗数据】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
-
-
-
-
-
 
 
     @ApiOperation("效能分析-能耗历史的表头数据返回-无参请求")
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistoryHeader),
+            @ApiResponse(code = 200, message = queryEnergyHistoryHeader),
     })
     @ResponseBody
     @RequestMapping(value = "/queryEnergyHistoryHeader", method = RequestMethod.GET)
     public List<String> queryEnergyHistoryHeader() throws ThingsboardException {
-        try{
-        return efficiencyStatisticsSvc.queryEnergyHistoryHeader();
-        }catch (Exception e)
-        {
-            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        try {
+            return efficiencyStatisticsSvc.queryEnergyHistoryHeader();
+        } catch (Exception e) {
+            log.error("【效能分析-能耗历史的表头数据返回-无参请求 】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
 
     }
-
-
-
-
-
 
 
     @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
@@ -273,7 +253,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryEnergyHistory", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+            @ApiResponse(code = 200, message = queryEnergyHistory_messg),
     })
     @ResponseBody
     public Object queryEnergyHistory(
@@ -287,9 +267,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID deviceId
     ) throws ThingsboardException {
         try {
-            if ( startTime == null  || endTime == null) {
-                startTime=(CommonUtils.getZero());
-                endTime=(CommonUtils.getNowTime());
+            if (startTime == null || endTime == null) {
+                startTime = (CommonUtils.getZero());
+                endTime = (CommonUtils.getNowTime());
             }
 
             QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
@@ -299,16 +279,12 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setSortOrder(sortOrder);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
 
-            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo,getTenantId(), pageLink);
-        }catch (Exception e)
-        {
-            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+            return efficiencyStatisticsSvc.queryEnergyHistory(queryTsKvVo, getTenantId(), pageLink);
+        } catch (Exception e) {
+            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
-
-
-
 
 
     @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
@@ -319,10 +295,10 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryEnergyHistoryNew", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+            @ApiResponse(code = 200, message = queryEnergyHistory_messg),
     })
     @ResponseBody
-    public  PageDataWithNextPage<EfficiencyHistoryDataVo> queryEnergyHistoryNew(
+    public PageDataWithNextPage<EfficiencyHistoryDataVo> queryEnergyHistoryNew(
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,
@@ -333,9 +309,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID deviceId
     ) throws ThingsboardException {
         try {
-            if ( startTime == null  || endTime == null) {
-                startTime=(CommonUtils.getZero());
-                endTime=(CommonUtils.getNowTime());
+            if (startTime == null || endTime == null) {
+                startTime = (CommonUtils.getZero());
+                endTime = (CommonUtils.getNowTime());
             }
 
             QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
@@ -345,17 +321,12 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setSortOrder(sortOrder);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
 
-            return efficiencyStatisticsSvc.queryEnergyHistoryNew(queryTsKvVo,getTenantId(), pageLink);
-        }catch (Exception e)
-        {
-            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+            return efficiencyStatisticsSvc.queryEnergyHistoryNew(queryTsKvVo, getTenantId(), pageLink);
+        } catch (Exception e) {
+            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
-
-
-
-
 
 
     @ApiOperation("效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间")
@@ -366,7 +337,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     })
     @RequestMapping(value = "/queryCapacityHistory", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =queryEnergyHistory_messg),
+            @ApiResponse(code = 200, message = queryEnergyHistory_messg),
     })
     @ResponseBody
     public PageDataWithNextPage<CapacityHistoryVo> queryCapacityHistory(
@@ -380,9 +351,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID deviceId
     ) throws ThingsboardException {
         try {
-            if ( startTime == null  || endTime == null) {
-                startTime=(CommonUtils.getZero());
-                endTime=(CommonUtils.getNowTime());
+            if (startTime == null || endTime == null) {
+                startTime = (CommonUtils.getZero());
+                endTime = (CommonUtils.getNowTime());
             }
 
             QueryTsKvHisttoryVo queryTsKvVo = new QueryTsKvHisttoryVo();
@@ -392,18 +363,34 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             queryTsKvVo.setSortOrder(sortOrder);
             PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
 
-            return efficiencyStatisticsSvc.queryCapacityHistory(queryTsKvVo,getTenantId(), pageLink);
-        }catch (Exception e)
-        {
-            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+            return efficiencyStatisticsSvc.queryCapacityHistory(queryTsKvVo, getTenantId(), pageLink);
+        } catch (Exception e) {
+            log.error("【效能分析-能耗历史的分页查询接口 ---统计维度是时间，排序只能是时间 】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
 
+    @RequestMapping(value = "excelCapacityHistory", method = RequestMethod.GET)
+    public void excelCapacityHistory(
+            @RequestParam int pageSize,
+            @RequestParam int page,
+            @RequestParam(required = false) String textSearch,
+            @RequestParam(required = false) String sortProperty,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) UUID deviceId,
+            HttpServletResponse response
+    ) throws ThingsboardException, IOException {
+        PageDataWithNextPage<CapacityHistoryVo> pageData = queryCapacityHistory(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime, deviceId);
+        List<CapacityHistoryPo> list=  getCapacityHistoryPo(pageData);
+        easyExcel(response, "产量历史", "",list, CapacityHistoryPo.class);
+    }
 
 
     /**
      * PC端
+     *
      * @param deviceId
      * @return
      * @throws ThingsboardException
@@ -411,54 +398,48 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ApiOperation("设备属性分组后的属性name属性接口--pc端下拉框")
     @RequestMapping(value = "/queryDictName", method = RequestMethod.GET)
     @ApiResponses({
-            @ApiResponse(code = 200, message =pc_queryDictName),
+            @ApiResponse(code = 200, message = pc_queryDictName),
     })
     @ResponseBody
-    public  List<RunningStateVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
+    public List<RunningStateVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         try {
             return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-            log.info("====>:{}",e);
-            throw  new  ThingsboardException(e.getMessage(),ThingsboardErrorCode.FAIL_VIOLATION);
+            log.info("====>:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
-
 
 
     @ApiOperation(value = "【PC端查询当前设备的运行状态】")
     @ApiResponses({
-            @ApiResponse(code = 200, message =pc_queryTheRunningStatusByDevice),
+            @ApiResponse(code = 200, message = pc_queryTheRunningStatusByDevice),
     })
     @RequestMapping(value = "/queryTheRunningStatusByDevice", method = RequestMethod.POST)
     @ResponseBody
     public List<OutRunningStateVo> queryTheRunningStatusByDevice(@RequestBody InputRunningSateVo queryTsKvVo) throws ThingsboardException {
-        try
-        {
+        try {
             return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId());
-        }catch (Exception e)
-        {
-            log.error("【PC端查询当前设备的运行状态】异常信息:{}",e);
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+        } catch (Exception e) {
+            log.error("【PC端查询当前设备的运行状态】异常信息:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
         }
     }
 
 
-
     @ApiOperation(value = "【设备当天水能耗排行】")
     @PostMapping("/queryTodayEffceency")
-    public  List<ResultEnergyTopTenVo>  queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
+    public List<ResultEnergyTopTenVo> queryTodayEffceency(@RequestBody PcTodayEnergyRaningVo vo) throws ThingsboardException {
         try {
             LocalDate today = LocalDate.now();
             SecurityUser authUser = getCurrentUser();
             vo.setTenantId(getTenantId().getId());
             vo.setDate(today);
             return efficiencyStatisticsSvc.queryPcResultEnergyTopTenVo(vo);
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw  new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
 
         }
     }
@@ -466,19 +447,54 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     @ApiOperation(value = "【产能分布图表】")
     @PostMapping("/queryTodayProportionChartOutput")
-    public  Object queryTodayProportionChartOutput(@RequestBody PcTodayProportionChartOutput vo)
-    {
-       return  null;
+    public Object queryTodayProportionChartOutput(@RequestBody PcTodayProportionChartOutput vo) {
+        return null;
     }
 
 
+    /**
+     * 如果是一条返回是0
+     * @param pageData
+     * @return
+     */
+    private List<CapacityHistoryPo> getCapacityHistoryPo(PageDataWithNextPage<CapacityHistoryVo> pageData) {
+
+        List<CapacityHistoryPo> capacityHistoryPoList = new ArrayList<>();
+        List<CapacityHistoryVo> voList = pageData.getData();
+        if (CollectionUtils.isEmpty(voList)) {
+            return capacityHistoryPoList;
+        }
+        CapacityHistoryVo lastData= pageData.getNextData();
+        if(lastData!= null){
+            voList.add(lastData);
+        }
+        for(int i=0;0<voList.size();i++)
+        {
+            if((i+1)<voList.size()) {
+                capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
+            }else {
+                capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i),null));
+            }
 
 
+        }
+        return capacityHistoryPoList;
 
+    }
 
-
-
-
+    private  CapacityHistoryPo  getCapacityHistoryPoByCurrentVoAndNex(CapacityHistoryVo currentVo,CapacityHistoryVo nexVo)
+    {
+        CapacityHistoryPo po = new  CapacityHistoryPo();
+        po.setCreatedTime(currentVo.getCreatedTime());
+        po.setDeviceName(currentVo.getDeviceName());
+        if(nexVo!= null)
+        {
+           po.setValue(StringUtilToll.sub(nexVo.getValue(),currentVo.getValue()));
+           return  po;
+        }
+        po.setValue("0");
+        return po;
+    }
 
 
 }
