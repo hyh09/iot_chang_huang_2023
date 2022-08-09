@@ -92,7 +92,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     }
 
     /**
-     * 导出 Excel（一个 sheet）
+     * 产能列表的导出
      */
     @RequestMapping(value = "writeExcel", method = RequestMethod.GET)
     public void writeExcel(  @RequestParam int pageSize,
