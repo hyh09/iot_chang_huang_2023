@@ -92,7 +92,8 @@ public class FactoryDetailBO {
                             .build()).collect(Collectors.toList()))),
                     CompletableFuture.runAsync(() -> result.setDevices(devices.stream().filter(v -> v.getProductionLineId() != null).map(v -> SimpleFactoryHierarchyResult.builder()
                             .id(v.getId().getId())
-                            .title(v.getName())
+                            .title(v.getRename())
+                            .rename(v.getRename())
                             .key(v.getId().getId())
                             .rowType(FactoryHierarchyRowTypeEnum.DEVICE)
                             .factoryId(v.getFactoryId())
@@ -102,7 +103,8 @@ public class FactoryDetailBO {
                             .build()).collect(Collectors.toList()))),
                     CompletableFuture.runAsync(() -> result.setUndistributedDevices(devices.stream().filter(v -> v.getProductionLineId() == null).map(v -> SimpleFactoryHierarchyResult.builder()
                             .id(v.getId().getId())
-                            .title(v.getName())
+                            .title(v.getRename())
+                            .rename(v.getRename())
                             .key(v.getId().getId())
                             .rowType(FactoryHierarchyRowTypeEnum.DEVICE)
                             .factoryId(v.getFactoryId())
@@ -114,7 +116,8 @@ public class FactoryDetailBO {
         } else {
             result.setDevices(devices.stream().map(v -> SimpleFactoryHierarchyResult.builder()
                     .id(v.getId().getId())
-                    .title(v.getName())
+                    .title(v.getRename())
+                    .rename(v.getRename())
                     .key(v.getId().getId())
                     .rowType(FactoryHierarchyRowTypeEnum.DEVICE)
                     .factoryId(v.getFactoryId())

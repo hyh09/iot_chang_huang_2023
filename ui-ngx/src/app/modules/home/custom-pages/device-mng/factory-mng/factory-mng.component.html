@@ -216,7 +216,7 @@
                         <mat-icon>delete</mat-icon>
                       </button>
                       <button
-                        *ngIf="item.rowType === 'device' && utils.hasPermission('device-mng.delete-device')"
+                        *ngIf="item.rowType === 'device' && item.parentId !== '-1' && utils.hasPermission('device-mng.delete-device')"
                         mat-icon-button
                         [disabled]="(isLoading$ | async) || (item.children && item.children.length > 0)"
                         matTooltip="{{ 'device-mng.delete-device' | translate }}"

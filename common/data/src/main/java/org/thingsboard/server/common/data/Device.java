@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -122,13 +122,13 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private UUID gatewayId;
     //是否只查网关  默认否
     private Boolean onlyGatewayFlag = false;
-    private Boolean deviceFlg=false;
+    private Boolean deviceFlg = false;
     @ApiModelProperty("是否过滤设备图片")
     private Boolean filterPictureFlag = false;
     @ApiModelProperty("是否过滤设备图标")
     private Boolean filterIconFlag = false;
-    /**********************************以上是非数据库字段***************************************/
 
+    /**********************************以上是非数据库字段***************************************/
 
 
     public Device() {
@@ -148,7 +148,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         this.label = device.getLabel();
         this.deviceProfileId = device.getDeviceProfileId();
         this.deviceProfileName = device.getDeviceProfileName();
-        this.deviceData =device.getDeviceData();
+        this.deviceData = device.getDeviceData();
         this.firmwareId = device.getFirmwareId();
         this.softwareId = device.getSoftwareId();
         this.workshopId = device.getWorkshopId();
@@ -182,20 +182,20 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         return this;
     }
 
-    public Device (Factory factory,List<UUID> productionLineIds){
+    public Device(Factory factory, List<UUID> productionLineIds) {
         this.setFilterGatewayFlag(true);
         this.setProductionLineIds(productionLineIds);
         this.setTenantId(new TenantId(factory.getTenantId()));
-        this.setName(factory.getDeviceName());
+        this.setRename(factory.getDeviceName());
         this.setFilterPictureFlag(true);
     }
 
-    public Device(TenantId tenantId, String name){
+    public Device(TenantId tenantId, String name) {
         this.setTenantId(tenantId);
         this.setName(name);
     }
 
-    public Device(UUID tenantId, UUID factoryId, UUID workshopId,Boolean filterGatewayFlag) {
+    public Device(UUID tenantId, UUID factoryId, UUID workshopId, Boolean filterGatewayFlag) {
         this.tenantId = new TenantId(tenantId);
         this.factoryId = factoryId;
         this.workshopId = workshopId;
@@ -203,7 +203,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     }
 
 
-    public Device (UUID tenantId){
+    public Device(UUID tenantId) {
         this.setTenantId(new TenantId(tenantId));
     }
 
@@ -525,6 +525,13 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
         builder.append(id);
         builder.append("]");
         return builder.toString();
+    }
+
+    /**
+     * 处理反参用name来标识设备名称
+     */
+    public void renameDevice() {
+        this.name = this.rename;
     }
 
 }

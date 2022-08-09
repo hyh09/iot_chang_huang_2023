@@ -26,7 +26,7 @@ public class QueryFactoryDto{
     public String productionLineName;
 
     @ApiModelProperty(name = "设备名称")
-    public String deviceName;
+    public String rename;
 
     public QueryFactoryDto(){}
 
@@ -36,7 +36,7 @@ public class QueryFactoryDto{
         factory.setName(this.name);
         factory.setWorkshopName(this.workshopName);
         factory.setProductionLineName(this.productionLineName);
-        factory.setDeviceName(deviceName);
+        factory.setDeviceName(rename);
         return factory;
     }
 

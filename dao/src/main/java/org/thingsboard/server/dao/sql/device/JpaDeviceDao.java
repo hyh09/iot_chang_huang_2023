@@ -376,6 +376,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 if (org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getName())) {
                     predicates.add(cb.like(root.get("name"), "%" + device.getName().trim() + "%"));
                 }
+                if (org.thingsboard.server.common.data.StringUtils.isNotEmpty(device.getRename())) {
+                    predicates.add(cb.like(root.get("rename"), "%" + device.getRename().trim() + "%"));
+                }
                 if (device.getFactoryId() != null && StringUtils.isNotEmpty(device.getFactoryId().toString())) {
                     predicates.add(cb.equal(root.get("factoryId"), device.getFactoryId()));
                 }
@@ -772,9 +775,9 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
         // 动态条件查询
         Specification<DeviceEntity> specification = this.queryCondition(device, pageLink);
         Pageable pageable = DaoUtil.toPageable(pageLink);
-        Page<DeviceEntity> menuEntities = deviceRepository.findAll(specification, pageable);
+        Page<DeviceEntity> deviceEntities = deviceRepository.findAll(specification, pageable);
         PageData<Device> resultPage = new PageData<>();
-        resultPage = new PageData<Device>(this.resultList(menuEntities.getContent()), menuEntities.getTotalPages(), menuEntities.getTotalElements(), menuEntities.hasNext());
+        resultPage = new PageData<Device>(this.resultList(deviceEntities.getContent()), deviceEntities.getTotalPages(), deviceEntities.getTotalElements(), deviceEntities.hasNext());
         return resultPage;
     }
 
@@ -1060,8 +1063,8 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
                 if (StringUtils.isNotEmpty(device.getName())) {
                     predicates.add(cb.like(root.get("name"), "%" + device.getName().trim() + "%"));
                 }
-                if (pageLink != null && StringUtils.isNotEmpty(pageLink.getTextSearch())) {
-                    predicates.add(cb.like(root.get("name"), "%" + pageLink.getTextSearch().trim() + "%"));
+                if (StringUtils.isNotEmpty(device.getRename())) {
+                    predicates.add(cb.like(root.get("rename"), "%" + device.getRename().trim() + "%"));
                 }
                 if (StringUtils.isNotEmpty(device.getType())) {
                     predicates.add(cb.like(root.get("type"), "%" + device.getType().trim() + "%"));

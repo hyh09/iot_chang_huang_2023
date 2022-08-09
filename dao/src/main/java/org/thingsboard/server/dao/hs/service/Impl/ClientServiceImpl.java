@@ -175,7 +175,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     /**
      * 查询用户
-     *
+     * 
      * @param userId 用户Id
      */
     @Override
@@ -221,7 +221,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         var cb = entityManager.getCriteriaBuilder();
         var query = cb.createQuery(DeviceEntity.class);
         var root = query.from(DeviceEntity.class);
-        query.multiselect(root.<UUID>get("id"), root.get("name"));
+        query.multiselect(root.<UUID>get("id"), root.get("name"), root.get("rename"));
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
         predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));

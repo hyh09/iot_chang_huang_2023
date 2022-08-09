@@ -35,6 +35,12 @@ public class DeviceKeyParametersResult {
     private String name;
 
     /**
+     * 设备重命名名称
+     */
+    @ApiModelProperty("设备重命名名称")
+    private String rename;
+
+    /**
      * 开机率
      */
     @ApiModelProperty("开机率")

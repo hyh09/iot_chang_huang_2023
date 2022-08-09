@@ -356,14 +356,6 @@ cache:
     # make sure that if cache.type is 'redis' and cache.attributes.enabled is 'true' that you change 'maxmemory-policy' Redis config property to 'allkeys-lru', 'allkeys-lfu' or 'allkeys-random'
     enabled: "${CACHE_ATTRIBUTES_ENABLED:true}"
 
-logging:
-  level:
-    org.springframework.web: error
-    org.hibernate.SQL: debug
-    org.hibernate.engine.QueryParameters: debug
-    org.hibernate.engine.query.HQLQueryPlan: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
-    # org.springframework.jdbc.core: debug
 
 caffeine:
   specs:
@@ -501,10 +493,6 @@ spring:
       repositories:
         enabled: "true"
   jpa:
-    show-sql: "true"
-    properties:
-      hibernate:
-        format_sql: "true"
     open-in-view: "false"
     hibernate:
       ddl-auto: "none"
