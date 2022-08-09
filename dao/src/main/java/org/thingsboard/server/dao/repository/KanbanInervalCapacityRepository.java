@@ -47,8 +47,8 @@ public class KanbanInervalCapacityRepository extends JpaSqlTool {
             sql.append(" and  h1.actual_start_time <= :endTime");
             param.put("endTime", endTime );
         }
-        Long sumValue =  countLong(sql.toString(),param);
-        return  sumValue != null ?sumValue.toString():"0";
+        String sumValue =  queryResultStr(sql.toString(),param);
+        return  sumValue;
 
     }
 }

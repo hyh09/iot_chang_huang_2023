@@ -123,6 +123,23 @@ public class JpaSqlTool {
     }
 
 
+    public  String  queryResultStr(String sql, Map<String, Object> param)
+    {
+        Query query = null;
+
+        query = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        if(param!= null){
+            for(Map.Entry<String, ?> entry : param.entrySet()){
+                if(sql.indexOf(":" + entry.getKey()) > -1 ){
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        Object  object= query.getSingleResult();
+        return  (object != null ?object.toString():"0");
+    }
+
+
 
 
     /**
