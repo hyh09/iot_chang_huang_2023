@@ -15,6 +15,8 @@
  */
 package org.thingsboard.server.controller;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.util.MapUtils;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -107,11 +109,14 @@ import org.thingsboard.server.dao.tenant.TenantService;
 import org.thingsboard.server.dao.tenantmenu.TenantMenuService;
 import org.thingsboard.server.dao.tool.UserLanguageSvc;
 import org.thingsboard.server.dao.user.UserService;
+import org.thingsboard.server.dao.util.JsonUtils;
 import org.thingsboard.server.dao.widget.WidgetTypeService;
 import org.thingsboard.server.dao.widget.WidgetsBundleService;
 import org.thingsboard.server.dao.workshop.WorkshopService;
 import org.thingsboard.server.entity.menu.dto.AddMenuDto;
 import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
+import org.thingsboard.server.excel.po.AppDeviceCapPo;
+import org.thingsboard.server.excel.util.EasyExcelCustomCellWriteHandler;
 import org.thingsboard.server.exception.ThingsboardErrorResponseHandler;
 import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.provider.TbQueueProducerProvider;
@@ -134,6 +139,8 @@ import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.*;
 
 import static org.thingsboard.server.dao.service.Validator.validateId;
@@ -1164,7 +1171,6 @@ public abstract class BaseController {
     /***
      * 设置参数 普通用户看不到
      *   租户管理员创建的角色
-     * @param queryParam
      * @throws ThingsboardException
      */
     public   List<Integer>  setParametersByRoleLevel () throws ThingsboardException {
@@ -1200,6 +1206,35 @@ public abstract class BaseController {
             this.auditLogRepository.save(auditLogEntity);
         } catch (Exception ex) {
             log.error("Error 插入日志失败 [{}]", ex.getMessage(), ex);
+        }
+    }
+
+
+    protected  void easyExcel(HttpServletResponse response,String excelName,String sheetName,Collection<?> data) throws IOException {
+        try {
+            if (StringUtils.isEmpty(sheetName)) {
+                sheetName = "sheet";
+            }
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String fileName = URLEncoder.encode(excelName, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+            // 这里需要设置不关闭流
+            EasyExcel.write(response.getOutputStream(), AppDeviceCapPo.class)
+                    .autoCloseStream(Boolean.FALSE).sheet(sheetName)
+                    .registerWriteHandler(new EasyExcelCustomCellWriteHandler())
+                    .doWrite(data);
+        }catch (Exception e)
+        {
+            log.error("打印下载excel错误的日志:{}",e);
+            response.reset();
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            Map<String, String> map = MapUtils.newHashMap();
+            map.put("status", "failure");
+            map.put("message", "下载文件失败");
+            response.getWriter().println(JsonUtils.objectToJson(map));
         }
     }
 }

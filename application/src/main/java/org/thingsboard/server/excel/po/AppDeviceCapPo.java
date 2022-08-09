@@ -1,7 +1,6 @@
 package org.thingsboard.server.excel.po;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.alibaba.excel.metadata.BaseRowModel;
 import lombok.*;
 
 /**
@@ -18,7 +17,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppDeviceCapPo extends BaseRowModel {
+public class AppDeviceCapPo  {
     @ExcelProperty(value = "设备名称" ,index = 0)
     private String rename;
 
