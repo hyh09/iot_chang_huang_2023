@@ -31,7 +31,9 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
     this.config.componentsData = {
       dateRange: null,
       deviceIdLoaded$: this.deviceIdLoaded$,
-      deviceName: ''
+      deviceName: '',
+      timePageLink: null,
+      exportTableData: null
     }
 
     this.config.columns.push(
@@ -65,7 +67,13 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+      this.config.componentsData.timePageLink = timePageLink;
       return this.potencyService.getDeviceCapacityHistoryList(timePageLink, this.deviceId);
+    }
+
+    this.config.componentsData.exportTableData = () => {
+      const { timePageLink } = this.config.componentsData;
+      this.potencyService.exportDeviceCapacityHistoryList(timePageLink, this.deviceId).subscribe();
     }
 
     return this.config;
