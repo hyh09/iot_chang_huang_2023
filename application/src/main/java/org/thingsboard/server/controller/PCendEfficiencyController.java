@@ -515,15 +515,12 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             return capacityHistoryPoList;
         }
         CapacityHistoryVo lastData= pageData.getNextData();
-        if(lastData!= null){
-            voList.add(lastData);
-        }
-        for(int i=0;0<voList.size();i++)
+        for(int i=0;i<voList.size();i++)
         {
             if((i+1)<voList.size()) {
                 capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
             }else {
-                capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i),null));
+                capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i),lastData));
             }
 
 
@@ -535,11 +532,11 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     private  CapacityHistoryPo  getCapacityHistoryPoByCurrentVoAndNex(CapacityHistoryVo currentVo,CapacityHistoryVo nexVo)
     {
         CapacityHistoryPo po = new  CapacityHistoryPo();
-        po.setCreatedTime(currentVo.getCreatedTime());
+        po.setCreatedTime(CommonUtils.stampToDate(currentVo.getCreatedTime()));
         po.setDeviceName(currentVo.getDeviceName());
         if(nexVo!= null)
         {
-           po.setValue(StringUtilToll.sub(nexVo.getValue(),currentVo.getValue()));
+           po.setValue(StringUtilToll.sub(currentVo.getValue(),nexVo.getValue()));
            return  po;
         }
         po.setValue("0");
@@ -560,15 +557,13 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             return poList;
         }
         EfficiencyHistoryDataVo lastData1= pageData.getNextData();
-        if(lastData1!= null){
-            voList.add(lastData1);
-        }
-        for(int i=0;0<voList.size();i++)
+
+        for(int i=0;i<voList.size();i++)
         {
             if((i+1)<voList.size()) {
                 poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
             }else {
-                poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i),null));
+                poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i),lastData1));
             }
 
 
@@ -580,13 +575,13 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     private  EfficiencyHistoryDataPo  geEfficiencyHistoryPoByCurrentVoAndNex(EfficiencyHistoryDataVo currentVo,EfficiencyHistoryDataVo nexVo)
     {
         EfficiencyHistoryDataPo po = new  EfficiencyHistoryDataPo();
-        po.setCreatedTime(currentVo.getCreatedTime());
+        po.setCreatedTime(CommonUtils.stampToDateByLong(currentVo.getCreatedTime()));
         po.setDeviceName(currentVo.getDeviceName());
         if(nexVo!= null)
         {
-           po.setWater(StringUtilToll.sub(nexVo.getWater(),currentVo.getWater()));
-           po.setGas(StringUtilToll.sub(nexVo.getGas(),currentVo.getGas()));
-           po.setElectric(StringUtilToll.sub(nexVo.getElectric(),currentVo.getElectric()));
+           po.setWater(StringUtilToll.sub(currentVo.getWater(),nexVo.getWater()));
+           po.setGas(StringUtilToll.sub(currentVo.getGas(),nexVo.getGas()));
+           po.setElectric(StringUtilToll.sub(currentVo.getElectric(),nexVo.getElectric()));
             return  po;
         }
         po.setWater("0");

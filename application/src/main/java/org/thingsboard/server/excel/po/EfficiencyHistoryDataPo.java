@@ -38,7 +38,7 @@ public class EfficiencyHistoryDataPo implements Serializable {
     private String gas;
 
     @ExcelProperty(value ="耗气量 (T)",index = 4)
-    private long createdTime;
+    private String createdTime;
 
 
 
