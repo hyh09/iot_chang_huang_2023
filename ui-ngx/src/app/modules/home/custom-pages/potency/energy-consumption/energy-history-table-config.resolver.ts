@@ -46,7 +46,9 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
     this.config.componentsData = {
       dateRange: null,
       deviceIdLoaded$: this.deviceIdLoaded$,
-      deviceName: ''
+      deviceName: '',
+      timePageLink: null,
+      exportTableData: null
     };
   }
 
@@ -65,7 +67,13 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+      this.config.componentsData.timePageLink = timePageLink;
       return this.potencyService.getEnergyHistoryDatas(timePageLink, this.deviceId);
+    }
+
+    this.config.componentsData.exportTableData = () => {
+      const { timePageLink } = this.config.componentsData;
+      this.potencyService.exportEnergyHistoryDatas(timePageLink, this.deviceId).subscribe();
     }
 
     return this.config;

@@ -5,7 +5,8 @@ import { PageData, TimePageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, PotencyInterval, PotencyTop10, RunningState } from '@app/shared/models/custom/potency.models';
 import { DeviceProp } from "@app/shared/models/custom/device-monitor.models";
-import { map } from "rxjs/operators";
+import { map, tap } from "rxjs/operators";
+import { TranslateService } from "@ngx-translate/core";
 
 interface FilterParams {
   factoryId?: string;
@@ -21,7 +22,8 @@ interface FilterParams {
 export class PotencyService {
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private translate: TranslateService
   ) { }
 
   // 查询设备产量列表
@@ -33,6 +35,27 @@ export class PotencyService {
       });
     }
     return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacity${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 导出设备产量列表
+  public exportDeviceCapacityList(pageLink: TimePageLink, params: FilterParams) {
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get(`/api/pc/efficiency/excelCapacity${pageLink.toQuery()}&${queryStr.join('&')}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+      var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+      var link = document.createElement('a');
+      var href = window.URL.createObjectURL(blob);
+      link.href = href;
+      link.download = this.translate.instant('potency.device-capacity');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(href);
+    }));
   }
 
   // 查询设备产量历史列表
@@ -59,6 +82,22 @@ export class PotencyService {
       }));
   }
 
+  // 导出设备产量历史列表
+  public exportDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string) {
+    return this.http.get(
+      `/api/pc/efficiency/excelCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = this.translate.instant('potency.device-capacity-history');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
+      }));
+  }
+
   // 获取能耗分析数据列表
   public getEnergyConsumptionDatas(pageLink: TimePageLink, params: FilterParams, config?: RequestConfig): Observable<DeviceEnergyConsumptionList> {
     let queryStr: string[] = [];
@@ -71,6 +110,28 @@ export class PotencyService {
       `/api/pc/efficiency/queryEntityByKeysNew${pageLink.toQuery()}&${queryStr.join('&')}`,
       defaultHttpOptionsFromConfig(config)
     );
+  }
+
+  // 导出能耗分析数据列表
+  public exportEnergyConsumptionDatas(pageLink: TimePageLink, params: FilterParams) {
+    let queryStr: string[] = [];
+    if (params) {
+      Object.keys(params).forEach(key => {
+        queryStr.push(`${key}=${params[key]}`);
+      });
+    }
+    return this.http.get(
+      `/api/pc/efficiency/excelEntityByKeysNew${pageLink.toQuery()}&${queryStr.join('&')}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = this.translate.instant('potency.energy-consumption');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
+      }));
   }
 
   // 获取设备能耗历史数据列表
@@ -101,6 +162,22 @@ export class PotencyService {
           });
         }
         return res;
+      }));
+  }
+
+  // 导出设备能耗历史数据列表
+  public exportEnergyHistoryDatas(pageLink: TimePageLink, deviceId: string) {
+    return this.http.get(
+      `/api/pc/efficiency/excelEnergyHistoryNew${pageLink.toQuery()}&deviceId=${deviceId}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = this.translate.instant('potency.energy-consumption-history');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
       }));
   }
 
