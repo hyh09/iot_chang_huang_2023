@@ -46,6 +46,7 @@ export interface OrderDevice {
   id?: string;
   deviceId?: string;
   rename?: string;
+  deviceName?: string;
   enabled?: boolean;
   intendedCapacity?: string;
   actualCapacity?: string;
