@@ -232,7 +232,7 @@ export class OrderDeviceFormComponent extends DialogComponent<OrderDeviceFormCom
         deviceId,
         intendedCapacity,
         actualCapacity,
-        rename: this.deviceMap[deviceId].name,
+        deviceName: this.deviceMap[deviceId].name,
         intendedStartTime: intendedStartTime ? new Date(intendedStartTime).getTime() : null,
         intendedEndTime: intendedEndTime ? new Date(intendedEndTime).getTime() : null,
         actualStartTime: actualStartTime ? new Date(actualStartTime).getTime() : null,
