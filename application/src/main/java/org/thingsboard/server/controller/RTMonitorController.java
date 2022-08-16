@@ -7,7 +7,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ehcache.core.util.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -23,6 +25,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.servlet.http.HttpServletResponse;
@@ -389,7 +392,12 @@ public class RTMonitorController extends BaseController {
         PageData<Map<String, Object>> pageData =   this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
         List<Map<String,Object>> mapList= pageData.getData();
 
-        easyExcelAndHeadWrite(response,"设备历史数据","",mapList);
+        List<DictDeviceGroupPropertyVO>  header = this.listRTMonitorHistory(deviceId,false);
+        Map<String,String> headMap=header.stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName, DictDeviceGroupPropertyVO::getTitle));
+        headMap.put(CREATE_TIME_COLUMN,"创建时间");
+        List<List<String>> headList =new ArrayList<>();
+        headList.add(new ArrayList<String>(headMap.values()));
+        easyExcelAndHeadWrite(response,"设备历史数据","",headList,getExcelData(mapList,headMap));
     }
 
     /**
@@ -451,6 +459,33 @@ public class RTMonitorController extends BaseController {
     ) throws ThingsboardException {
         checkParameter("deviceId", deviceId);
         return this.deviceMonitorService.listDeviceKeys(getTenantId(), deviceId);
+    }
+
+
+    private  List<List<String>>  getExcelData( List<Map<String,Object>> mapList,Map<String,String> headMap)
+    {
+        List<List<String>> data  = new ArrayList<>();
+
+        if(CollectionUtils.isNotEmpty(mapList))
+        {
+            for(Map<String,Object> map:mapList)
+            {
+                List<String>  dataColumn= new ArrayList<>();
+                for(String st1: headMap.keySet())
+                {
+                    if(CREATE_TIME_COLUMN.equals(st1))
+                    {
+                        dataColumn.add( CommonUtils.stampToDate(map.get(CREATE_TIME_COLUMN).toString()));
+                    }else {
+                        Object obj = map.get(st1);
+                        dataColumn.add(obj != null ? obj.toString() : "");
+                    }
+                }
+                data.add(dataColumn);
+
+            }
+        }
+        return data;
     }
 
 }

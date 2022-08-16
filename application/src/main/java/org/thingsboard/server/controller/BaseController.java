@@ -157,6 +157,8 @@ public abstract class BaseController {
     protected static final String DEFAULT_DASHBOARD = "defaultDashboardId";
     protected static final String HOME_DASHBOARD = "homeDashboardId";
 
+    protected static  final String CREATE_TIME_COLUMN="createdTime";
+
     private static final int DEFAULT_PAGE_SIZE = 1000;
 
     private static final ObjectMapper json = new ObjectMapper();
@@ -1241,37 +1243,8 @@ public abstract class BaseController {
 
 
 
-    protected   void easyExcelAndHeadWrite(HttpServletResponse response,String excelName,String sheetName,List<Map<String,Object>> listMaps) throws IOException {
+    protected   void easyExcelAndHeadWrite(HttpServletResponse response,String excelName,String sheetName,List<List<String>> heads,List<List<String>> data) throws IOException {
         try {
-           if(CollectionUtils.isEmpty(listMaps))
-           {
-               excelMsg(response,"下载的内容为空！");
-
-           }
-
-            List<List<String>> data= new ArrayList<>();
-            List<List<String>> heads=new ArrayList<>();
-
-
-            for(Map<String,Object> map:listMaps)
-            {
-                List<String>  headColumn= new ArrayList<>();
-                List<String>  dataColumn= new ArrayList<>();
-
-                for(String s:map.keySet())
-                {
-                    headColumn.add(s);
-                    Object  o = map.get(s);
-                    dataColumn.add(o!=null?o.toString():"");
-                }
-                if(CollectionUtils.isEmpty(heads))
-                {
-                    heads.add(headColumn);
-                }
-                data.add(dataColumn);
-            }
-
-
             if (StringUtils.isEmpty(sheetName)) {
                 sheetName = "sheet";
             }
