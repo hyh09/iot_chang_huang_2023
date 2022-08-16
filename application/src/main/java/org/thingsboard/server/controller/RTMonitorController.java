@@ -25,10 +25,11 @@ import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -356,6 +357,39 @@ public class RTMonitorController extends BaseController {
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
         validatePageLink(pageLink);
         return this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
+    }
+
+
+
+    @ApiOperation(value = "导出设备历史数据", notes = "默认倒序，不允许排序")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query"),
+            @ApiImplicitParam(name = "isShowAttributes", value = "是否显示属性", paramType = "query", defaultValue = "false")
+    })
+    @GetMapping("/rtMonitor/device/excelHistory")
+    public void  excelHistory(
+            @RequestParam String deviceId,
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes,
+            HttpServletResponse response
+    ) throws ThingsboardException, ExecutionException, InterruptedException, IOException {
+        checkParameter("deviceId", deviceId);
+        checkParameter("startTime", startTime);
+        if (endTime == null || endTime <= 0L)
+            endTime = CommonUtil.getTodayCurrentTime();
+        TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
+        validatePageLink(pageLink);
+        PageData<Map<String, Object>> pageData =   this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
+        List<Map<String,Object>> mapList= pageData.getData();
+
+        easyExcelAndHeadWrite(response,"设备历史数据","",mapList);
     }
 
     /**

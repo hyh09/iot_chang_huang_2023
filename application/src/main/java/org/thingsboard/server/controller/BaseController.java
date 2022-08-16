@@ -1210,6 +1210,7 @@ public abstract class BaseController {
     }
 
 
+
     protected  void easyExcel(HttpServletResponse response,String excelName,String sheetName,Collection<?> data,Class cls) throws IOException {
         try {
             if (StringUtils.isEmpty(sheetName)) {
@@ -1237,4 +1238,75 @@ public abstract class BaseController {
             response.getWriter().println(JsonUtils.objectToJson(map));
         }
     }
+
+
+
+    protected   void easyExcelAndHeadWrite(HttpServletResponse response,String excelName,String sheetName,List<Map<String,Object>> listMaps) throws IOException {
+        try {
+           if(CollectionUtils.isEmpty(listMaps))
+           {
+               excelMsg(response,"下载的内容为空！");
+
+           }
+
+            List<List<String>> data= new ArrayList<>();
+            List<List<String>> heads=new ArrayList<>();
+
+
+            for(Map<String,Object> map:listMaps)
+            {
+                List<String>  headColumn= new ArrayList<>();
+                List<String>  dataColumn= new ArrayList<>();
+
+                for(String s:map.keySet())
+                {
+                    headColumn.add(s);
+                    Object  o = map.get(s);
+                    dataColumn.add(o!=null?o.toString():"");
+                }
+                if(CollectionUtils.isEmpty(heads))
+                {
+                    heads.add(headColumn);
+                }
+                data.add(dataColumn);
+            }
+
+
+            if (StringUtils.isEmpty(sheetName)) {
+                sheetName = "sheet";
+            }
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String fileName = URLEncoder.encode(excelName, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+            // 这里需要设置不关闭流
+            EasyExcel.write(response.getOutputStream())
+                    .head(heads)
+                    .autoCloseStream(Boolean.FALSE)
+                    .sheet(sheetName)
+                    .registerWriteHandler(new EasyExcelCustomCellWriteHandler())
+                    .doWrite(data);
+        }catch (Exception e)
+        {
+            log.error("打印下载excel错误的日志:{}",e);
+            excelMsg(response,"下载文件失败！");
+        }
+    }
+
+
+    private  void excelMsg(HttpServletResponse response,String msgs) throws IOException {
+        response.reset();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        Map<String, String> map = MapUtils.newHashMap();
+        map.put("status", "failure");
+        map.put("message", msgs);
+        response.getWriter().println(JsonUtils.objectToJson(map));
+
+    }
+
+
+
+
 }
