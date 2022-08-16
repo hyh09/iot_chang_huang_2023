@@ -385,8 +385,9 @@ public class RTMonitorController extends BaseController {
     ) throws ThingsboardException, ExecutionException, InterruptedException, IOException {
         checkParameter("deviceId", deviceId);
         checkParameter("startTime", startTime);
-        if (endTime == null || endTime <= 0L)
+        if (endTime == null || endTime <= 0L) {
             endTime = CommonUtil.getTodayCurrentTime();
+        }
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
         validatePageLink(pageLink);
         PageData<Map<String, Object>> pageData =   this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
@@ -395,9 +396,22 @@ public class RTMonitorController extends BaseController {
         List<DictDeviceGroupPropertyVO>  header = this.listRTMonitorHistory(deviceId,false);
         Map<String,String> headMap=header.stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName, DictDeviceGroupPropertyVO::getTitle));
         headMap.put(CREATE_TIME_COLUMN,"创建时间");
+
+        List<String>  stringList = new ArrayList<>();
         List<List<String>> headList =new ArrayList<>();
-        headList.add(new ArrayList<String>(headMap.values()));
-        easyExcelAndHeadWrite(response,"设备历史数据","",headList,getExcelData(mapList,headMap));
+        header.stream().forEach(vo->{
+          List<String> head01 = new ArrayList<>();
+          if(vo.getTitle().equals(CREATE_TIME_COLUMN)){
+                head01.add("创建时间");
+            }else {
+                head01.add(vo.getTitle());
+            }
+                    headList.add(head01);
+                    stringList.add(vo.getName());
+        }
+      );
+
+        easyExcelAndHeadWrite(response,"设备历史数据","",headList,getExcelData(mapList,stringList));
     }
 
     /**
@@ -462,7 +476,7 @@ public class RTMonitorController extends BaseController {
     }
 
 
-    private  List<List<String>>  getExcelData( List<Map<String,Object>> mapList,Map<String,String> headMap)
+    private  List<List<String>>  getExcelData( List<Map<String,Object>> mapList,List<String> stringList)
     {
         List<List<String>> data  = new ArrayList<>();
 
@@ -471,7 +485,7 @@ public class RTMonitorController extends BaseController {
             for(Map<String,Object> map:mapList)
             {
                 List<String>  dataColumn= new ArrayList<>();
-                for(String st1: headMap.keySet())
+                for(String st1: stringList)
                 {
                     if(CREATE_TIME_COLUMN.equals(st1))
                     {
