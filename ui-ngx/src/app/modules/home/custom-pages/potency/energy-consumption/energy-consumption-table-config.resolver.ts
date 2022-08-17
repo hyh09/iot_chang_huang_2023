@@ -65,9 +65,7 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       deviceId: '',
       dateRange: [getTheStartOfDay(now, false), getTheEndOfDay(now, false)],
       totalValue: {},
-      factroryChange$: new BehaviorSubject<string>(''),
-      timePageLink: null,
-      exportTableData: null
+      factroryChange$: new BehaviorSubject<string>('')
     };
 
     this.config.entitiesFetchFunction = pageLink => {
@@ -82,16 +80,10 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
       }
       const { pageSize, page, textSearch, sortOrder } = pageLink;
       const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
-      this.config.componentsData.timePageLink = timePageLink;
       return this.potencyService.getEnergyConsumptionDatas(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).pipe(map(res => {
         this.config.componentsData.totalValue = res.totalValue || {};
         return res;
       }));
-    }
-
-    this.config.componentsData.exportTableData = () => {
-      const { timePageLink, factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-      this.potencyService.exportEnergyConsumptionDatas(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).subscribe();
     }
 
     return this.config;

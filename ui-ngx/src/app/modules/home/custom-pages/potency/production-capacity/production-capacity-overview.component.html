@@ -23,7 +23,7 @@
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
   (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
-<div class="action-btns" style="margin-left: 11px;">
+<div *ngIf="isHistory" class="action-btns" style="margin-left: 11px;">
   <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
     {{ 'action.export' | translate }}
   </button>
