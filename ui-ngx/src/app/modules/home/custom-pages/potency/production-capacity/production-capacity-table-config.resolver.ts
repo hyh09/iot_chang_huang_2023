@@ -44,8 +44,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       dateRange: [getTheStartOfDay(now, false), getTheEndOfDay(now, false)],
       totalCapacity: 0,
       factroryChange$: new BehaviorSubject<string>(''),
-      timePageLink: null,
-      exportTableData: null
+      timePageLink: null
     }
 
     this.config.tableTitle = this.translate.instant('potency.device-capacity');
@@ -74,11 +73,6 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
         this.config.componentsData.totalCapacity = res.totalValue || 0;
         return res;
       }));
-    }
-
-    this.config.componentsData.exportTableData = () => {
-      const { timePageLink, factoryId, workshopId, productionLineId, deviceId } = this.config.componentsData;
-      this.potencyService.exportDeviceCapacityList(timePageLink, { factoryId, workshopId, productionLineId, deviceId }).subscribe();
     }
 
     this.config.cellActionDescriptors = [{
