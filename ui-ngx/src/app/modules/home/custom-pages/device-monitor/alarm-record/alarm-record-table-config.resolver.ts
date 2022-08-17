@@ -33,7 +33,9 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
       productionLineId: '',
       deviceId: '',
       status: AlarmStatusType.ANY,
-      level: AlarmLevelType.ANY
+      level: AlarmLevelType.ANY,
+      timePageLink: null,
+      exportTableData: null
     }
 
     this.config.columns.push(
@@ -57,7 +59,9 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
       productionLineId: '',
       deviceId: '',
       status: AlarmStatusType.ANY,
-      level: AlarmLevelType.ANY
+      level: AlarmLevelType.ANY,
+      pageLink: null,
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('device-monitor.alarm-record');
@@ -73,7 +77,18 @@ export class AlarmRecordTableConfigResolver implements Resolve<EntityTableConfig
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 
-    this.config.entitiesFetchFunction = pageLink => this.alarmRecordService.getAlarmRecords(pageLink, this.config.componentsData);
+    this.config.entitiesFetchFunction = pageLink => {
+      this.config.componentsData.pageLink = pageLink;
+      const { factoryId, workshopId, productionLineId, deviceId, status, level } = this.config.componentsData;
+      return this.alarmRecordService.getAlarmRecords(pageLink, { factoryId, workshopId, productionLineId, deviceId, status, level });
+    }
+
+    this.config.componentsData.exportTableData = () => {
+      const { pageLink } = this.config.componentsData;
+      const { factoryId, workshopId, productionLineId, deviceId, status, level } = this.config.componentsData;
+      this.alarmRecordService.exportAlarmRecords(pageLink, { factoryId, workshopId, productionLineId, deviceId, status, level }).subscribe();
+    }
+
     this.config.loadDataOnInit = false;
 
     return this.config;
