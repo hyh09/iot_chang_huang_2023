@@ -37,9 +37,9 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
     }
 
     this.config.columns.push(
-      new EntityTableColumn<DeviceCapacity>('rename', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.rename || ''), () => ({}), false),
-      new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%'),
-      new DateEntityTableColumn<DeviceCapacity>('createdTime', this.translate.instant('potency.created-time'), this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false),
+      new EntityTableColumn<DeviceCapacity>('rename', 'potency.device-name', '50%', (entity) => (entity.rename || ''), () => ({}), false),
+      new EntityTableColumn<DeviceCapacity>('value', 'potency.capacity', '50%'),
+      new DateEntityTableColumn<DeviceCapacity>('createdTime', 'potency.created-time', this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false),
     );
   }
 

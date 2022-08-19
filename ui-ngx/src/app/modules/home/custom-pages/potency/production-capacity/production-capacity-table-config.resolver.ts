@@ -28,8 +28,8 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
     this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
 
     this.config.columns.push(
-      new EntityTableColumn<DeviceCapacity>('rename', this.translate.instant('potency.device-name'), '50%', (entity) => (entity.rename || ''), () => ({}), false),
-      new EntityTableColumn<DeviceCapacity>('value', this.translate.instant('potency.capacity'), '50%')
+      new EntityTableColumn<DeviceCapacity>('rename', 'potency.device-name', '50%', (entity) => (entity.rename || ''), () => ({}), false),
+      new EntityTableColumn<DeviceCapacity>('value', 'potency.capacity', '50%')
     );
   }
 
