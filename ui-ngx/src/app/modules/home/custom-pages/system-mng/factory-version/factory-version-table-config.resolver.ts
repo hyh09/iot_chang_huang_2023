@@ -29,10 +29,10 @@ export class FactoryVersionTableConfigResolver implements Resolve<EntityTableCon
     }
 
     this.config.columns.push(
-      new EntityTableColumn<FactoryVersion>('gatewayName', this.translate.instant('system-mng.gateway-name'), '40%'),
-      new EntityTableColumn<FactoryVersion>('factoryVersion', this.translate.instant('system-mng.version'), '150px'),
-      new EntityTableColumn<FactoryVersion>('factoryName', this.translate.instant('system-mng.factory-belong'), '60%'),
-      new EntityTableColumn<FactoryVersion>('active', this.translate.instant('system-mng.online-offline'), '150px',({ active }) => {
+      new EntityTableColumn<FactoryVersion>('gatewayName','system-mng.gateway-name', '40%'),
+      new EntityTableColumn<FactoryVersion>('factoryVersion', 'system-mng.version', '150px'),
+      new EntityTableColumn<FactoryVersion>('factoryName', 'system-mng.factory-belong', '60%'),
+      new EntityTableColumn<FactoryVersion>('active', 'system-mng.online-offline', '150px',({ active }) => {
         return active ? this.translate.instant('system-mng.online') : this.translate.instant('system-mng.offline');
       }),
       new DateEntityTableColumn<FactoryVersion>('publishTime', 'system-mng.publish-time', this.datePipe, '150px')
