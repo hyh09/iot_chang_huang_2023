@@ -34,14 +34,14 @@ export class ProdCapacitySettingsTableConfigResolver implements Resolve<EntityTa
     }
 
     this.config.columns.push(
-      new EntityTableColumn<ProdCapacitySettings>('flg', this.translate.instant('device-mng.in-calculation'), '80px', () => (''),
+      new EntityTableColumn<ProdCapacitySettings>('flg', 'device-mng.in-calculation', '80px', () => (''),
       () => ({ textAlign: 'center' }), true, () => ({ textAlign: 'center' }), () => undefined, false, null, () => (false), true, (entity, flag) => {
         this.prodCapacitySettingsService.setFlag(entity.deviceId, flag).subscribe();
       }),
-      new EntityTableColumn<ProdCapacitySettings>('deviceName', this.translate.instant('device-mng.device-name'), '34%'),
-      new EntityTableColumn<ProdCapacitySettings>('deviceFileName', this.translate.instant('device-profile.device-profile'), '33%'),
-      new EntityTableColumn<ProdCapacitySettings>('dictName', this.translate.instant('device-mng.device-dic'), '33%'),
-      new EntityTableColumn<ProdCapacitySettings>('deviceNo', this.translate.instant('device-mng.model'), '150px'),
+      new EntityTableColumn<ProdCapacitySettings>('deviceName', 'device-mng.device-name', '34%'),
+      new EntityTableColumn<ProdCapacitySettings>('deviceFileName', 'device-profile.device-profile', '33%'),
+      new EntityTableColumn<ProdCapacitySettings>('dictName', 'device-mng.device-dic', '33%'),
+      new EntityTableColumn<ProdCapacitySettings>('deviceNo', 'device-mng.model', '150px'),
       new DateEntityTableColumn<ProdCapacitySettings>('createdTime', 'common.created-time', this.datePipe, '150px')
     );
   }
