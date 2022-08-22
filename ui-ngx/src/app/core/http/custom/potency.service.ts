@@ -47,7 +47,8 @@ export class PotencyService {
             const nextItem = res.data[index + 1] || res.nextData;
             let value: number;
             if (nextItem) {
-              value = (parseFloat(item.value || '0') * 100 - parseFloat(nextItem.value || '0') * 100) / 100;
+              const nextVal = parseFloat(nextItem.value || '0')
+              value = nextVal <= 0 ? 0 : (parseFloat(item.value || '0') * 100 - nextVal * 100) / 100;
               if (value < 0) {
                 value = 0;
               }
