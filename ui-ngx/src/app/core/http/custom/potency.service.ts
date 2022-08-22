@@ -104,7 +104,8 @@ export class PotencyService {
             let value: { [name: string]: number | string } = {};
             if (nextItem) {
               valueKeys.forEach(key => {
-                value[key] = (parseFloat(item[key] || '0') * 100 - parseFloat(nextItem[key] || '0') * 100) / 100;
+                const nextVal = parseFloat(nextItem[key] || '0')
+                value[key] = nextVal <= 0 ? 0 : (parseFloat(item[key] || '0') * 100 - nextVal * 100) / 100;
                 if (value[key] < 0) {
                   value[key] = 0;
                 }
