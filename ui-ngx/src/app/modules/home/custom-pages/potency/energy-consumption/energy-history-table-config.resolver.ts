@@ -29,14 +29,6 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
 
     this.config.filterComponent = EnergyHistoryFilterComponent;
 
-    this.config.tableTitle = this.translate.instant('potency.energy-consumption-history');
-    this.config.addEnabled = false;
-    this.config.searchEnabled = false;
-    this.config.refreshEnabled = false;
-    this.config.detailsPanelEnabled = false;
-    this.config.entitiesDeleteEnabled = false;
-    this.config.selectionEnabled = false;
-
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('rename', 'potency.device-name', '200px', entity => entity.rename || '', () => ({}), false));
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('waterConsumption', 'potency.water-consumption', '100px', entity => entity.waterConsumption || '', () => ({}), false));
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('electricConsumption', 'potency.electric-consumption', '100px', entity => entity.electricConsumption || '', () => ({}), false));
@@ -53,6 +45,14 @@ export class EnergyHistoryTableConfigResolver implements Resolve<EntityTableConf
   }
 
   resolve(route: ActivatedRouteSnapshot): EntityTableConfig<DeviceEnergyConsumption> {
+    this.config.tableTitle = this.translate.instant('potency.energy-consumption-history');
+    this.config.addEnabled = false;
+    this.config.searchEnabled = false;
+    this.config.refreshEnabled = false;
+    this.config.detailsPanelEnabled = false;
+    this.config.entitiesDeleteEnabled = false;
+    this.config.selectionEnabled = false;
+
     this.deviceId = route.params.deviceId;
     this.config.componentsData.deviceName = decodeURIComponent(route.queryParams.deviceName || '');
     this.config.componentsData.deviceIdLoaded$.next(this.deviceId);

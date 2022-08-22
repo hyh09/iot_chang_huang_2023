@@ -26,14 +26,6 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
     this.config.filterComponent = EnergyConsumptionOverviewComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
     this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
-
-    this.config.tableTitle = this.translate.instant('potency.energy-consumption');
-    this.config.addEnabled = false;
-    this.config.searchEnabled = false;
-    this.config.refreshEnabled = false;
-    this.config.detailsPanelEnabled = false;
-    this.config.entitiesDeleteEnabled = false;
-    this.config.selectionEnabled = false;
     
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('rename', 'potency.device-name', '200px', entity => entity.rename || '', () => ({}), false));
     this.config.columns.push(new EntityTableColumn<DeviceEnergyConsumption>('waterConsumption', 'potency.water-consumption', '100px', entity => entity.waterConsumption || '', () => ({}), false));
@@ -57,6 +49,14 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
   }
 
   resolve(): EntityTableConfig<DeviceEnergyConsumption> {
+    this.config.tableTitle = this.translate.instant('potency.energy-consumption');
+    this.config.addEnabled = false;
+    this.config.searchEnabled = false;
+    this.config.refreshEnabled = false;
+    this.config.detailsPanelEnabled = false;
+    this.config.entitiesDeleteEnabled = false;
+    this.config.selectionEnabled = false;
+
     const now = new Date();
     this.config.componentsData = {
       factoryId: '',
