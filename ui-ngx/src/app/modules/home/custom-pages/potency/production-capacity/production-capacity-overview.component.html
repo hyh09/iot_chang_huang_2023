@@ -23,11 +23,11 @@
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
   (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
-<div *ngIf="isHistory" class="action-btns" style="margin-left: 11px;">
+<!-- <div *ngIf="isHistory" class="action-btns" style="margin-left: 11px;">
   <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
     {{ 'action.export' | translate }}
   </button>
-</div>
+</div> -->
 <div *ngIf="!isHistory" class="data-overview">
   <div class="overview-item">{{ 'potency.total-capacity' | translate }}{{ entitiesTableConfig.componentsData.totalCapacity }} (M)</div>
 </div>
