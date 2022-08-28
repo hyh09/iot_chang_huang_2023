@@ -70,7 +70,7 @@ public class AlarmRecordResultPo implements Serializable {
     /**
      * 级别显示值
      */
-    @ExcelProperty(value = "级别显示值",index = 5)
+    @ExcelProperty(value = "严重程度",index = 5)
     private String levelStr;
 
 
