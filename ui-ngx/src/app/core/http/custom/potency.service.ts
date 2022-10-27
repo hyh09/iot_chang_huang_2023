@@ -1,11 +1,12 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
-import { PageData, TimePageLink } from "@app/shared/public-api";
-import { Observable } from "rxjs";
+import { PageData, TimePageLink } from '@app/shared/public-api';
+import { Observable } from 'rxjs';
 import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, PotencyInterval, PotencyTop10, RunningState } from '@app/shared/models/custom/potency.models';
-import { DeviceProp } from "@app/shared/models/custom/device-monitor.models";
-import { map } from "rxjs/operators";
+import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
+import { map, tap } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 interface FilterParams {
   factoryId?: string;
@@ -21,7 +22,8 @@ interface FilterParams {
 export class PotencyService {
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private translate: TranslateService
   ) { }
 
   // 查询设备产量列表
@@ -45,7 +47,8 @@ export class PotencyService {
             const nextItem = res.data[index + 1] || res.nextData;
             let value: number;
             if (nextItem) {
-              value = (parseFloat(item.value || '0') * 100 - parseFloat(nextItem.value || '0') * 100) / 100;
+              const nextVal = parseFloat(nextItem.value || '0')
+              value = nextVal <= 0 ? 0 : (parseFloat(item.value || '0') * 100 - nextVal * 100) / 100;
               if (value < 0) {
                 value = 0;
               }
@@ -56,6 +59,22 @@ export class PotencyService {
           });
         }
         return res;
+      }));
+  }
+
+  // 导出设备产量历史列表
+  public exportDeviceCapacityHistoryList(pageLink: TimePageLink, deviceId: string) {
+    return this.http.get(
+      `/api/pc/efficiency/excelCapacityHistory${pageLink.toQuery()}&deviceId=${deviceId}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = this.translate.instant('potency.device-capacity-history');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
       }));
   }
 
@@ -86,7 +105,8 @@ export class PotencyService {
             let value: { [name: string]: number | string } = {};
             if (nextItem) {
               valueKeys.forEach(key => {
-                value[key] = (parseFloat(item[key] || '0') * 100 - parseFloat(nextItem[key] || '0') * 100) / 100;
+                const nextVal = parseFloat(nextItem[key] || '0')
+                value[key] = nextVal <= 0 ? 0 : (parseFloat(item[key] || '0') * 100 - nextVal * 100) / 100;
                 if (value[key] < 0) {
                   value[key] = 0;
                 }
@@ -101,6 +121,22 @@ export class PotencyService {
           });
         }
         return res;
+      }));
+  }
+
+  // 导出设备能耗历史数据列表
+  public exportEnergyHistoryDatas(pageLink: TimePageLink, deviceId: string) {
+    return this.http.get(
+      `/api/pc/efficiency/excelEnergyHistoryNew${pageLink.toQuery()}&deviceId=${deviceId}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = this.translate.instant('potency.energy-consumption-history');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
       }));
   }
 

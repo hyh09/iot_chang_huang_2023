@@ -1,12 +1,14 @@
-import { HttpClient } from "@angular/common/http";
-import { Inject, Injectable } from "@angular/core";
-import { AuthService } from "@app/core/auth/auth.service";
+import { HttpClient } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
+import { AuthService } from '@app/core/auth/auth.service';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
-import { AlarmTimesListItem, DevcieHistoryHeader, DeviceDetails, DeviceOnlineOverview, DevicePageData, DevicePropHistory, RealTimeData, RelatedParams } from "@app/shared/models/custom/device-monitor.models";
-import { FactoryTreeNodeIds } from "@app/shared/models/custom/factory-mng.models";
-import { PageData, PageLink } from "@app/shared/public-api";
-import { Observable } from "rxjs";
-import { WINDOW } from "@app/core/services/window.service";
+import { AlarmTimesListItem, DevcieHistoryHeader, DeviceDetails, DeviceOnlineOverview, DevicePageData, DevicePropHistory, RealTimeData, RelatedParams } from '@app/shared/models/custom/device-monitor.models';
+import { FactoryTreeNodeIds } from '@app/shared/models/custom/factory-mng.models';
+import { PageData, PageLink } from '@app/shared/public-api';
+import { Observable } from 'rxjs';
+import { WINDOW } from '@app/core/services/window.service';
+import { tap } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +26,8 @@ export class RealTimeMonitorService {
   constructor(
     private http: HttpClient,
     @Inject(WINDOW) private window: Window,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     let port = this.window.location.port;
     if (this.window.location.protocol === 'https:') {
@@ -120,6 +123,22 @@ export class RealTimeMonitorService {
       `/api/deviceMonitor/rtMonitor/device/history${pageLink.toQuery()}&deviceId=${deviceId}&isShowAttributes=${isShowAttributes}`,
       defaultHttpOptionsFromConfig(config)
     );
+  }
+
+  // 导出设备历史数据列表
+  public exportDeviceHistoryDatas(pageLink: PageLink, deviceId: string, deviceName: string, isShowAttributes: boolean = false) {
+    return this.http.get(
+      `/api/deviceMonitor/rtMonitor/device/excelHistory${pageLink.toQuery()}&deviceId=${deviceId}&isShowAttributes=${isShowAttributes}`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = `${this.translate.instant('device-monitor.device-history')}_${deviceName}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
+      }));
   }
 
   // 开启订阅
@@ -233,7 +252,7 @@ export class RealTimeMonitorService {
         const msg: { attrSubCmds?: any; tsSubCmds?: any } = {};
         const content: any[] = this.tempDeviceIdList.map((deviceId, index) => ({
           cmdId: index,
-          entityType: "DEVICE",
+          entityType: 'DEVICE',
           entityId: deviceId,
           scope: listenDeviceActive ? 'SERVER_SCOPE' : 'LATEST_TELEMETRY'
         }));

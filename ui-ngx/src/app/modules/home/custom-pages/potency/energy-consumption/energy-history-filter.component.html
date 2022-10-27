@@ -7,6 +7,11 @@
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
   (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
+<!-- <div class="action-btns" style="margin-left: 11px;">
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
+  </button>
+</div> -->
 <div class="interval-data-chart">
   <div fxLayout="row" fxLayoutAlign="space-between center" class="header">
     <div class="title">{{ 'potency.interval-energy-consumption' | translate: { deviceName: entitiesTableConfig.componentsData.deviceName} }}</div>

@@ -45,6 +45,10 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
         this.config.detailsPanelEnabled = false;
         this.config.entitiesDeleteEnabled = false;
         this.config.selectionEnabled = false;
+        this.config.componentsData = {
+          timePageLink: null,
+          exportTableData: null
+        };
 
         const now = new Date();
         this.config.componentsData = {
@@ -84,8 +88,14 @@ export class DeviceHistoryTableConfigResolver implements Resolve<EntityTableConf
             }
             const { pageSize, page, textSearch, sortOrder } = pageLink;
             const timePageLink = new TimePageLink(pageSize, page, textSearch, sortOrder, startTime, endTime);
+            this.config.componentsData.timePageLink = timePageLink;
             return this.realTimeMonitorService.getDeviceHistoryDatas(timePageLink, this.deviceId);
-          };
+          }
+
+          this.config.componentsData.exportTableData = () => {
+            const { timePageLink } = this.config.componentsData;
+            this.realTimeMonitorService.exportDeviceHistoryDatas(timePageLink, this.deviceId, this.deviceName).subscribe();
+          }
 
           observer.next(this.config);
           observer.complete();
