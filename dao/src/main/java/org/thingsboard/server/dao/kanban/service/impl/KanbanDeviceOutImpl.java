@@ -3,18 +3,24 @@ package org.thingsboard.server.dao.kanban.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.dao.hs.entity.vo.DeviceDetailResult;
+import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.kanban.service.svc.KanbanDeviceOutSvc;
 import org.thingsboard.server.dao.kanban.vo.KanbanDeviceVo;
+import org.thingsboard.server.dao.kanban.vo.inside.ComponentDataDTO;
+import org.thingsboard.server.dao.kanban.vo.inside.DataDTO;
 import org.thingsboard.server.dao.kanban.vo.transformation.KanbanEnergyVo;
 import org.thingsboard.server.dao.sql.census.entity.StatisticalDataEntity;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * @Project Name: thingsboard
@@ -32,6 +38,7 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
     @Autowired
     private DeviceMonitorService deviceMonitorService;
 
+
     @Override
     public KanbanEnergyVo queryEnergyByDeviceId(UUID deviceId, long timestamp) {
         StatisticalDataEntity statisticalDataEntity = statisticalDataService.queryTodayByEntityId(deviceId, timestamp);
@@ -39,19 +46,69 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
 
     }
 
+    /**
+     * 预警  /api/deviceMonitor/board/alarmRecord/day/statistics
+     *
+     * @param tenantId
+     * @param deviceId
+     * @return
+     */
     @Override
-    public KanbanDeviceVo getRTMonitorDeviceDetail(TenantId tenantId, String id) throws InterruptedException, ExecutionException, ThingsboardException {
-        DeviceDetailResult detailResult = deviceMonitorService.getRTMonitorDeviceDetail(tenantId, id);
-        return  null;
+    public AlarmDayResult getAlarmRecordStatisticByDay(TenantId tenantId, UUID deviceId) {
+        FactoryDeviceQuery query = new FactoryDeviceQuery().setDeviceId(deviceId.toString());
+        AlarmDayResult alarmDayResult = deviceMonitorService.getAlarmRecordStatisticByDay(tenantId, query);
+        return alarmDayResult;
+    }
+
+
+    @Override
+    public KanbanDeviceVo getRTMonitorDeviceDetail(TenantId tenantId, String id)  {
+        DeviceDetailResult detailResult = null;
+        try {
+            detailResult = deviceMonitorService.getRTMonitorDeviceDetail(tenantId, id);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ThingsboardException e) {
+            e.printStackTrace();
+        }
+        return deviceDetailResultToKanbanDeviceVo(detailResult);
     }
 
 
     private KanbanDeviceVo deviceDetailResultToKanbanDeviceVo(DeviceDetailResult detailResult) {
+
         KanbanDeviceVo deviceVo = new KanbanDeviceVo();
+        if (detailResult == null) {
+            return deviceVo;
+        }
         Boolean isOnline = detailResult.getIsOnLine();
         deviceVo.setDeviceId(detailResult.getId());
         deviceVo.setOnlineState(processingIsOnline(isOnline));
-        return  deviceVo;
+        List<DictDeviceComponentVO> deviceComponentVOList= detailResult.getComponentList();
+
+        List<ComponentDataDTO> componentDataList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(deviceComponentVOList)){
+
+            for(DictDeviceComponentVO data:deviceComponentVOList){
+                ComponentDataDTO  componentDataDTO = new ComponentDataDTO();
+                componentDataDTO.setName(data.getName());
+                List<DictDeviceComponentPropertyVO> propertyVOList = data.getPropertyList();
+                if(!CollectionUtils.isEmpty(propertyVOList)){
+                    List<DataDTO>  list=   propertyVOList.stream().map(data2->{
+                        DataDTO  dataDTO = new DataDTO();
+                        dataDTO.setKey(data2.getName());
+                        dataDTO.setValue(data2.getContent());
+                        return  dataDTO;
+                    }).collect(Collectors.toList());
+                    componentDataDTO.setData(list);
+                }
+                componentDataList.add(componentDataDTO);
+            }
+        }
+        deviceVo.setComponentData(componentDataList);
+        return deviceVo;
     }
 
 
@@ -78,6 +135,7 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
 
     /**
      * 在线状态（0-在线 1-离线）
+     *
      * @param isOnline
      * @return
      */
@@ -85,7 +143,7 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
         if (isOnline == null) {
             return "1";
         }
-        if(isOnline){
+        if (isOnline) {
             return "0";
         }
         return "1";
