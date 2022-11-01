@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.kanban.vo.inside;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
@@ -21,11 +22,13 @@ public class ComponentDataDTO {
     /**
      * 零件名
      */
+    @ApiModelProperty(value = "零件名")
     @JsonProperty("Name")
     private String name;
     /**
      * 零件数据
      */
+    @ApiModelProperty(value = "零件数据")
     @JsonProperty("Data")
     private List<DataDTO> data;
 
