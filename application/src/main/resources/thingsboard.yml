@@ -504,7 +504,7 @@ spring:
     #url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/hsiotdb}"
     #url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://111.229.157.131:30682/hsiotdb}"
     ###长胜测环境
-    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://111.229.157.131:30682/hsiotdb}"
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://121.40.253.159:30682/hsiotdb}"
     username: "${SPRING_DATASOURCE_USERNAME:postgres}"
     password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
     hikari:
