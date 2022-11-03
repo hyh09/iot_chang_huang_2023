@@ -16,6 +16,7 @@ import org.thingsboard.server.dao.kanban.vo.transformation.KanbanEnergyVo;
 import org.thingsboard.server.dao.sql.census.entity.StatisticalDataEntity;
 import org.thingsboard.server.dao.sql.census.service.StatisticalDataService;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -114,11 +115,11 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
 
     private KanbanEnergyVo statisticalDataEntityToKanbanEnergyVo(StatisticalDataEntity entity) {
         return KanbanEnergyVo.builder()
-                .consumptiontodayWater(processingIsEmpty(entity, entity.getWaterAddedValue()))
-                .consumptiontodayElectricity(processingIsEmpty(entity, entity.getElectricAddedValue()))
-                .consumptiontodayGas(processingIsEmpty(entity, entity.getGasAddedValue()))
-                .productionToday(processingIsEmpty(entity, entity.getCapacityAddedValue()))
-                .productionTotal(processingIsEmpty(entity, entity.getCapacityValue()))
+                .consumptiontodayWater(processingIsEmpty(entity, "getWaterAddedValue"))
+                .consumptiontodayElectricity(processingIsEmpty(entity, "getElectricAddedValue"))
+                .consumptiontodayGas(processingIsEmpty(entity, "getGasAddedValue"))
+                .productionToday(processingIsEmpty(entity, "getCapacityAddedValue"))
+                .productionTotal(processingIsEmpty(entity, "getCapacityAddedValue"))
                 .build();
     }
 
@@ -127,10 +128,18 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
         if (entity == null) {
             return "0";
         }
-        if (StringUtils.isEmpty(str)) {
-            return "0";
+        Class<?> clazz=  entity.getClass();
+        try {
+            Method getMethod = clazz.getMethod(str);
+         String value= (String) getMethod.invoke(entity);
+         if (StringUtils.isNotEmpty(value)) {
+                return value;
+          }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return str;
+
+        return "0";
     }
 
     /**

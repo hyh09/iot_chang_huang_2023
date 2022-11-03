@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.kanban.service.svc;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.kanban.vo.KanbanDeviceVo;
 
@@ -15,5 +16,5 @@ import java.util.UUID;
  */
 public interface KanbanDeviceOneOutSvc {
 
-    KanbanDeviceVo integratedDeviceInterface(TenantId tenantId, UUID deviceId);
+    KanbanDeviceVo integratedDeviceInterface(TenantId tenantId, UUID deviceId) throws ThingsboardException;
 }
