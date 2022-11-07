@@ -40,11 +40,12 @@ public class PerformanceAnalysisListSvcTest {
     @Test
     public void yieldList() {
         QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+        queryTsKvVo.setTenantId(UUID.fromString("34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17"));
         queryTsKvVo.setFactoryId(UUID.fromString("e7fd0750-589a-11ec-afcd-2bd77acada1c"));
         queryTsKvVo.setStartTime(1667750400000L);
         queryTsKvVo.setEndTime(1667836799999L);
         queryTsKvVo.setKey(KeyNameEnums.capacities.getCode());
         List<EnergyEffciencyNewEntity> energyEffciencyNewEntities = performanceAnalysisListSvc.yieldList(queryTsKvVo);
-        log.info("打印当前的数据:{}", JacksonUtil.toString(energyEffciencyNewEntities));
+        System.out.println("打印当前的数据:{}"+JacksonUtil.toString(energyEffciencyNewEntities));
     }
 }
