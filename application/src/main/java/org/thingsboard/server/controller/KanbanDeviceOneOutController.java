@@ -34,7 +34,7 @@ public class KanbanDeviceOneOutController extends BaseController {
 
     @ApiOperation(value = "获取设备的信息看板")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "deviceId", value = "设备id"),
+            @ApiImplicitParam(name = "deviceId",required=true,paramType="form", value = "设备id",example="ac0297b1-5656-11ec-a240-955d7c1497e4"),
     })
     @GetMapping(value = "/integratedDeviceInterface")
     public KanbanDeviceVo integratedDeviceInterface(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
