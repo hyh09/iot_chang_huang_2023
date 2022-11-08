@@ -318,6 +318,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     }
 
     private List<EnergyEffciencyNewEntity> orderByCapPacityValue(List<EnergyEffciencyNewEntity> entityList1) {
+        //将负数改为改为0;
+
       return   entityList1.stream().sorted((s1, s2) -> strToBigDecimal(s2.getCapacityAddedValue()).compareTo(strToBigDecimal(s1.getCapacityAddedValue()))).collect(Collectors.toList());
 
     }
@@ -325,6 +327,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private BigDecimal strToBigDecimal(String str) {
         if (StringUtils.isEmpty(str)) {
+            return new BigDecimal("0");
+        }
+        BigDecimal value =  new BigDecimal(str);
+        if(value.signum() == -1){
             return new BigDecimal("0");
         }
         return new BigDecimal(str);

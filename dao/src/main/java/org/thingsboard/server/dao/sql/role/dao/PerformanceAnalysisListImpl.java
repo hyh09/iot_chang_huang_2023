@@ -51,7 +51,7 @@ public class PerformanceAnalysisListImpl extends JpaSqlTool implements Performan
         TABLE_01_SQL.append("  select id  from  device d1 where 1=1  ");
         sqlPartOnDevice(queryTsKvVo, TABLE_01_SQL, param);
         TABLE_01_SQL.append(" ) ");
-        TABLE_01_SQL.append("  and ts>=:startTime and ts<=:endTime and key =:keyId  group by entity_id ) ");
+        TABLE_01_SQL.append("  and ts>=:startTime and ts<=:endTime and key =:keyId and  concat(long_v,dbl_v,str_v,json_v)<>'0'  group by entity_id ) ");
         TABLE_01_SQL.append(" SELECT  d1.id as entity_id ,d1.rename as deviceName,d1.picture, d1.dict_device_id as dictDeviceId ");
         TABLE_01_SQL.append(" ,d1.factory_id as factoryId,d1.workshop_id as workshopId,d1.production_line_id as productionLineId,");
         TABLE_01_SQL.append("   ( to_number((select  concat(long_v,dbl_v,str_v,json_v) from  ts_kv tk01  where  tk01.entity_id=t01.entity_id  and tk01.\"key\" = t01.keyId and  tk01.ts=t01.endTs ),\n" +
