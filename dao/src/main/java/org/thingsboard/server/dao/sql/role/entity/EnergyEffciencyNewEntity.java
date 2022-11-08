@@ -8,6 +8,7 @@ import org.thingsboard.server.dao.util.sql.entity.AbstractStatisticalDataEntity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.UUID;
 
 /**
@@ -181,7 +182,7 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
         if(value.signum() == -1){
             return new BigDecimal("0").toPlainString();
         }
-        return new BigDecimal(str).toPlainString();
+        return  value.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 
 
