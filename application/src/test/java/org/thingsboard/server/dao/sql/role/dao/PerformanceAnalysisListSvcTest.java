@@ -8,9 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.ThingsboardServerApplication;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
+import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
+import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +36,9 @@ public class PerformanceAnalysisListSvcTest {
     @Autowired
     private PerformanceAnalysisListSvc performanceAnalysisListSvc;
 
+    @Autowired
+    private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+
     /**
      * startTime: 1667750400000
      * endTime: 1667836799999
@@ -46,6 +54,21 @@ public class PerformanceAnalysisListSvcTest {
         queryTsKvVo.setEndTime(1667836799999L);
         queryTsKvVo.setKey(KeyNameEnums.capacities.getCode());
         List<EnergyEffciencyNewEntity> energyEffciencyNewEntities = performanceAnalysisListSvc.yieldList(queryTsKvVo);
-        System.out.println("打印当前的数据:{}"+JacksonUtil.toString(energyEffciencyNewEntities));
+        System.out.println("打印当前的数据:{}" + JacksonUtil.toString(energyEffciencyNewEntities));
+    }
+
+    @Test
+    public void queryPCCapAppNewMethod() {
+        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+        queryTsKvVo.setTenantId(UUID.fromString("34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17"));
+        queryTsKvVo.setFactoryId(UUID.fromString("24d0aa00-589c-11ec-afcd-2bd77acada1c"));
+        queryTsKvVo.setStartTime(1667836800000L);
+        queryTsKvVo.setEndTime(1667923199999L);
+        queryTsKvVo.setKey(KeyNameEnums.capacities.getCode());
+
+        TenantId  tenantId  = new TenantId(queryTsKvVo.getTenantId());
+        PageLink pageLink= new PageLink(8,0);
+        PageDataAndTotalValue<AppDeviceCapVo> energyEffciencyNewEntities = efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo,tenantId,pageLink);
+        System.out.println("PageDataAndTotalValue<AppDeviceCapVo> 打印当前的数据:{}" + JacksonUtil.toString(energyEffciencyNewEntities));
     }
 }

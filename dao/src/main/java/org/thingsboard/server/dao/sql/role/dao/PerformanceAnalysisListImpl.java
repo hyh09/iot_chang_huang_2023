@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.vo.QueryEnergyVo;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sqlts.BaseAbstractSqlTimeseriesDao;
 
@@ -37,7 +38,7 @@ public class PerformanceAnalysisListImpl extends JpaSqlTool implements Performan
      */
     @Override
     public List<EnergyEffciencyNewEntity> yieldList(QueryTsKvVo queryTsKvVo) {
-        Integer keyId = findKeyIdByKeyNameSvc.getKeyIdByKeyName(queryTsKvVo.getKey());
+        Integer keyId = findKeyIdByKeyNameSvc.getKeyIdByKeyName(KeyNameEnums.capacities.getCode());
         Map<String, Object> param = new HashMap<>();
         String sql = buildSql(queryTsKvVo, param, keyId);
         List<EnergyEffciencyNewEntity> querySqlList = querySql(sql, param, "energyEffciencyNewEntity_01");
