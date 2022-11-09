@@ -28,7 +28,7 @@ public class ComponentDataDTO {
     /**
      * 零件数据
      */
-    @ApiModelProperty(value = "零件数据")
+    @ApiModelProperty(value = "部件数据")
     @JsonProperty("Data")
     private List<DataDTO> data;
 

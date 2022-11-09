@@ -95,7 +95,7 @@ public class KanbanDeviceVo {
     /**
      * /零部件数据   /api/deviceMonitor/board/rtMonitor/device/{id}
      */
-    @ApiModelProperty(value = "零部件数据")
+    @ApiModelProperty(value = "部件数据")
     @JsonProperty("ComponentData")
     private List<ComponentDataDTO> componentData;
 
