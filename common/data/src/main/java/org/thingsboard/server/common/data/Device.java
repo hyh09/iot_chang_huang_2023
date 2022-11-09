@@ -43,7 +43,7 @@ public class Device extends SearchTextBasedWithAdditionalInfo<DeviceId> implemen
     private TenantId tenantId;
     private CustomerId customerId;
     @NoXss
-    @ApiModelProperty("设备名称")
+    @ApiModelProperty("设备名称") //注: 已经不是设备名称了,设备的序号
     private String name;
     //设备配置名称
     @NoXss
