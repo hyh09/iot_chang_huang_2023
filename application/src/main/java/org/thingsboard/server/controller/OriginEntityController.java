@@ -61,12 +61,9 @@ public class OriginEntityController extends BaseController {
      * 工厂数据接口
      */
     @ApiOperation(value = "工厂数据接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
-    })
     @GetMapping("/factory/data")
     @SuppressWarnings("all")
-    public Map<String, Object> listBoardCapacityMonitorOrders(@RequestParam(value = "factoryId", required = false) UUID factoryId) throws ThingsboardException {
+    public Map<String, Object> listBoardCapacityMonitorOrders() throws ThingsboardException {
         Map<String, Object> dataMap = Maps.newHashMap();
         var factories = this.clientService.listFactories();
         List<Map<String, Object>> dataList = Lists.newArrayList();
