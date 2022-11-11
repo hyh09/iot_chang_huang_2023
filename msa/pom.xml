@@ -38,8 +38,8 @@
     </properties>
 
     <modules>
-        <module>tb</module>
-        <module>js-executor</module>
+        <!--<module>tb</module>-->
+        <!--<module>js-executor</module>-->
         <module>web-ui</module>
         <module>tb-node</module>
         <module>transport</module>
