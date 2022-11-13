@@ -1159,12 +1159,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                             }),
 
                             CompletableFuture.runAsync(() -> {
-                                log.info("deviceId:" + deviceId);
-                                log.info("tenantId:" + tenantId.getId());
                                 var deviceEntity = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId);
-                                log.info("deviceEntity:" + deviceEntity);
                                 var device = deviceEntity.toData();
-                                log.info("device:" + device);
                                 result.setId(device.getId().toString());
                                 result.setName(device.getRename());
                                 result.setRename(device.getRename());

@@ -72,7 +72,7 @@ public class OriginEntityController extends BaseController {
                                                               @RequestParam(value = "endTime", required = false) Long endTime,
                                                               @RequestParam(value = "factoryId", required = false) UUID factoryId) throws ThingsboardException {
         Map<String, Object> dataMap = Maps.newHashMap();
-        var factories = this.clientService.listFactories();
+        var factories = this.clientService.listFactories(getTenantId());
         List<Map<String, Object>> dataList = Lists.newArrayList();
 
         var todayCurrentTime = endTime;
@@ -148,7 +148,7 @@ public class OriginEntityController extends BaseController {
 
             //车间数据
             List<Map<String, Object>> workshopDataMapList = Lists.newArrayList();
-            var workshops = this.clientService.listWorkshopsByFactoryId(new TenantId(factory.getTenantId()), factory.getId());
+            var workshops = this.clientService.listWorkshopsByFactoryId(getTenantId(), factory.getId());
             for (Workshop workshop : workshops) {
                 Map<String, Object> workshopDataMap = Maps.newHashMap();
                 workshopDataMap.put("Name", workshop.getName());
@@ -203,7 +203,7 @@ public class OriginEntityController extends BaseController {
 
                 // 设备数据
                 List<Map<String, Object>> deviceDataMapList = Lists.newArrayList();
-                var devices = this.clientService.listSimpleDevicesByQuery(new TenantId(workshop.getTenantId()), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
+                var devices = this.clientService.listSimpleDevicesByQuery(getTenantId(), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
                 for (Device device : devices) {
                     var deviceKeyParametersResult = this.rtMonitorBoardController.getDeviceKeyParameters(device.getId().getId());
                     Map<String, Object> deviceDataMap = Maps.newHashMap();
