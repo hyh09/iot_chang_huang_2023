@@ -201,7 +201,7 @@ public class OriginEntityController extends BaseController {
                 workshopOrderMonitorMap.put("OrderMonitor", workshopOrderDataMapList);
                 workshopDataMap.put("OrderMonitor", workshopOrderMonitorMap);
 
-                // 设备数据
+                // 设备数据.
                 List<Map<String, Object>> deviceDataMapList = Lists.newArrayList();
                 var devices = this.clientService.listSimpleDevicesByQuery(getTenantId(), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
                 for (Device device : devices) {
