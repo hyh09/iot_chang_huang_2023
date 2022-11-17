@@ -319,8 +319,19 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private List<EnergyEffciencyNewEntity> orderByCapPacityValue(List<EnergyEffciencyNewEntity> entityList1) {
         //将负数改为改为0;
-
       return   entityList1.stream().sorted((s1, s2) -> strToBigDecimal(s2.getCapacityAddedValue()).compareTo(strToBigDecimal(s1.getCapacityAddedValue()))).collect(Collectors.toList());
+
+    }
+
+
+    private List<EnergyEffciencyNewEntity> orderByAllValue(List<EnergyEffciencyNewEntity> entityList1) {
+        //将负数改为改为0;
+        return   entityList1.stream()
+                .sorted((s1, s2) -> strToBigDecimal(s2.getWaterAddedValue()).compareTo(strToBigDecimal(s1.getWaterAddedValue())))
+                .sorted((s1, s2) -> strToBigDecimal(s2.getElectricAddedValue()).compareTo(strToBigDecimal(s1.getElectricAddedValue())))
+                .sorted((s1, s2) -> strToBigDecimal(s2.getGasAddedValue()).compareTo(strToBigDecimal(s1.getGasAddedValue())))
+                .sorted((s1, s2) -> strToBigDecimal(s2.getCapacityAddedValue()).compareTo(strToBigDecimal(s1.getCapacityAddedValue())))
+                .collect(Collectors.toList());
 
     }
 
@@ -367,14 +378,23 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if (queryTsKvVo.getFactoryId() == null) {
             queryTsKvVo.setFactoryId(getFirstFactory(tenantId));
         }
-        //查询天维度的数据
-        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergyListAll(queryTsKvVo, pageLink);
-        //分页
+//        //查询天维度的数据
+//        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergyListAll(queryTsKvVo, pageLink);
+//        //分页
+//        Page<EnergyEffciencyNewEntity> page = PageUtil.createPageFromList(entityList, pageLink);
+//        //具体的数据
+//        List<EnergyEffciencyNewEntity> pageList = page.getContent();
+//        List<EfficiencyEntityInfo> efficiencyEntityInfoList = this.resultProcessingByEnergyPcNew(pageList);
+//        EfficiencyTotalValue efficiencyTotalValue = getTotalValueNewMethodnew(entityList);
+//        return new PageDataAndTotalValue<EfficiencyEntityInfo>(efficiencyTotalValue, efficiencyEntityInfoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+
+        List<EnergyEffciencyNewEntity> entityList1 = performanceAnalysisListSvc.queryEnergyListAll(queryTsKvVo);
+        List<EnergyEffciencyNewEntity> entityList = orderByAllValue(entityList1);
         Page<EnergyEffciencyNewEntity> page = PageUtil.createPageFromList(entityList, pageLink);
-        //具体的数据
         List<EnergyEffciencyNewEntity> pageList = page.getContent();
         List<EfficiencyEntityInfo> efficiencyEntityInfoList = this.resultProcessingByEnergyPcNew(pageList);
-        EfficiencyTotalValue efficiencyTotalValue = getTotalValueNewMethodnew(entityList);
+        //将查询的结果返回原接口返回的对象
+        EfficiencyTotalValue efficiencyTotalValue= getTotalValueNewMethodnew(entityList1);
         return new PageDataAndTotalValue<EfficiencyEntityInfo>(efficiencyTotalValue, efficiencyEntityInfoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
 
     }

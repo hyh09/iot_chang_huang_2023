@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.sql.role.dao;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.vo.QueryEnergyVo;
@@ -10,10 +11,9 @@ import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sqlts.BaseAbstractSqlTimeseriesDao;
 
 import javax.persistence.ColumnResult;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @Project Name: thingsboard
@@ -38,12 +38,50 @@ public class PerformanceAnalysisListImpl extends JpaSqlTool implements Performan
      */
     @Override
     public List<EnergyEffciencyNewEntity> yieldList(QueryTsKvVo queryTsKvVo) {
-        Integer keyId = findKeyIdByKeyNameSvc.getKeyIdByKeyName(KeyNameEnums.capacities.getCode());
+        return getAddValue(queryTsKvVo, KeyNameEnums.capacities.getCode());
+//        Integer keyId = findKeyIdByKeyNameSvc.getKeyIdByKeyName(KeyNameEnums.capacities.getCode());
+//        Map<String, Object> param = new HashMap<>();
+//        String sql = buildSql(queryTsKvVo, param, keyId);
+//        List<EnergyEffciencyNewEntity> querySqlList = querySql(sql, param, "energyEffciencyNewEntity_01");
+//        return querySqlList;
+    }
+
+    @Override
+    public List<EnergyEffciencyNewEntity> queryEnergyListAll(QueryTsKvVo queryTsKvVo) {
+        List<EnergyEffciencyNewEntity> capacities = new ArrayList<>();
+        List<EnergyEffciencyNewEntity> water = new ArrayList<>();
+        List<EnergyEffciencyNewEntity> electric = new ArrayList<>();
+        List<EnergyEffciencyNewEntity> gas = new ArrayList<>();
+        CompletableFuture.allOf(
+                CompletableFuture.supplyAsync(() -> capacities.addAll(getAddValue(queryTsKvVo, KeyNameEnums.capacities.getCode()))),
+                CompletableFuture.supplyAsync(() -> water.addAll(getAddValue(queryTsKvVo, KeyNameEnums.water.getCode()))),
+                CompletableFuture.supplyAsync(() -> electric.addAll(getAddValue(queryTsKvVo, KeyNameEnums.electric.getCode()))),
+                CompletableFuture.supplyAsync(() -> gas.addAll(getAddValue(queryTsKvVo, KeyNameEnums.gas.getCode())))
+
+        ).join();
+        if (CollectionUtils.isNotEmpty(capacities)) {
+            Map<UUID, String> waterMap = water.stream().collect(Collectors.toMap(EnergyEffciencyNewEntity::getEntityId, EnergyEffciencyNewEntity::getCapacityAddedValue));
+            Map<UUID, String> electricMap = electric.stream().collect(Collectors.toMap(EnergyEffciencyNewEntity::getEntityId, EnergyEffciencyNewEntity::getCapacityAddedValue));
+            Map<UUID, String> gasMap = gas.stream().collect(Collectors.toMap(EnergyEffciencyNewEntity::getEntityId, EnergyEffciencyNewEntity::getCapacityAddedValue));
+            capacities.stream().forEach(entity->{
+                entity.setWaterAddedValue(waterMap.get(entity.getEntityId()));
+                entity.setElectricAddedValue(electricMap.get(entity.getEntityId()));
+                entity.setGasAddedValue(gasMap.get(entity.getEntityId()));
+            });
+
+        }
+        return capacities;
+    }
+
+    @Override
+    public List<EnergyEffciencyNewEntity> getAddValue(QueryTsKvVo queryTsKvVo, String keyName) {
+        Integer keyId = findKeyIdByKeyNameSvc.getKeyIdByKeyName(keyName);
         Map<String, Object> param = new HashMap<>();
         String sql = buildSql(queryTsKvVo, param, keyId);
         List<EnergyEffciencyNewEntity> querySqlList = querySql(sql, param, "energyEffciencyNewEntity_01");
         return querySqlList;
     }
+
 
     private String buildSql(QueryTsKvVo queryTsKvVo, Map<String, Object> param, Integer keyId) {
         StringBuffer TABLE_01_SQL = new StringBuffer();
