@@ -873,7 +873,11 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public DictDevice findById(UUID dictDeviceId) {
-        return dictDeviceRepository.findById(dictDeviceId).get().toData();
+        Optional<DictDeviceEntity> byId = dictDeviceRepository.findById(dictDeviceId);
+        if (!byId.isEmpty() && byId.get() != null){
+            return byId.get().toData();
+        }
+        return null;
     }
 
     /**
