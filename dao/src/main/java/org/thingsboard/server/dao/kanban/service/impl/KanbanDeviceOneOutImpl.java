@@ -7,6 +7,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.hs.entity.vo.AlarmDayResult;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
@@ -28,8 +29,12 @@ import java.util.concurrent.CompletableFuture;
  */
 @Service
 public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
-    @Autowired private KanbanDeviceOutSvc kanbanDeviceOutSvc;
-    @Autowired private DeviceService deviceService;
+    @Autowired
+    private KanbanDeviceOutSvc kanbanDeviceOutSvc;
+    @Autowired
+    private DeviceService deviceService;
+    @Autowired
+    private DeviceDao deviceDao;
 
 
     @Override
@@ -37,7 +42,7 @@ public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
         try {
             KanbanDeviceVo vo = new KanbanDeviceVo();
             vo.setDeviceId(deviceId.toString());
-            Device device = deviceService.findDeviceById(tenantId, new DeviceId(deviceId));
+            Device device = deviceDao.findDeviceByTenantIdAndId(tenantId,  deviceId);
             if (device == null) {
                 throw new ThingsboardException("查询不到该设备！", ThingsboardErrorCode.FAIL_VIOLATION);
             }
@@ -66,7 +71,7 @@ public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
             ).join();
             return vo;
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
