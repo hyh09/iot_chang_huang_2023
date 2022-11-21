@@ -86,6 +86,8 @@ public class OriginEntityController extends BaseController {
         }
 
         for (Factory factory : factories) {
+            if (factoryId != null && !factory.getId().equals(factory))
+                continue;
             Map<String, Object> factoryDataMap = Maps.newHashMap();
             factoryDataMap.put("Name", factory.getName());
             factoryDataMap.put("FactoryID", factory.getId());
@@ -201,7 +203,7 @@ public class OriginEntityController extends BaseController {
                 workshopOrderMonitorMap.put("OrderMonitor", workshopOrderDataMapList);
                 workshopDataMap.put("OrderMonitor", workshopOrderMonitorMap);
 
-                // 设备数据.
+                // 设备数据
                 List<Map<String, Object>> deviceDataMapList = Lists.newArrayList();
                 var devices = this.clientService.listSimpleDevicesByQuery(getTenantId(), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
                 for (Device device : devices) {
