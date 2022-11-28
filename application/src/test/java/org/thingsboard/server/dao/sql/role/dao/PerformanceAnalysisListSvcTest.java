@@ -62,6 +62,21 @@ public class PerformanceAnalysisListSvcTest {
         QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
         queryTsKvVo.setTenantId(UUID.fromString("34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17"));
         queryTsKvVo.setFactoryId(UUID.fromString("24d0aa00-589c-11ec-afcd-2bd77acada1c"));
+        queryTsKvVo.setStartTime(1667318400000L);
+        queryTsKvVo.setEndTime(1669132799999L);
+        queryTsKvVo.setKey(KeyNameEnums.capacities.getCode());
+
+        TenantId  tenantId  = new TenantId(queryTsKvVo.getTenantId());
+        PageLink pageLink= new PageLink(10,0);
+        PageDataAndTotalValue<AppDeviceCapVo> energyEffciencyNewEntities = efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo,tenantId,pageLink);
+        System.out.println("PageDataAndTotalValue<AppDeviceCapVo> 打印当前的数据:{}" + JacksonUtil.toString(energyEffciencyNewEntities));
+    }
+
+    @Test
+    public void queryPCCapAppNewMethod02() {
+        QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
+        queryTsKvVo.setTenantId(UUID.fromString("34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17"));
+        queryTsKvVo.setFactoryId(UUID.fromString("24d0aa00-589c-11ec-afcd-2bd77acada1c"));
         queryTsKvVo.setStartTime(1667836800000L);
         queryTsKvVo.setEndTime(1667923199999L);
         queryTsKvVo.setKey(KeyNameEnums.capacities.getCode());
@@ -71,4 +86,11 @@ public class PerformanceAnalysisListSvcTest {
         PageDataAndTotalValue<AppDeviceCapVo> energyEffciencyNewEntities = efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo,tenantId,pageLink);
         System.out.println("PageDataAndTotalValue<AppDeviceCapVo> 打印当前的数据:{}" + JacksonUtil.toString(energyEffciencyNewEntities));
     }
+
+
+
+
+
+
+
 }
