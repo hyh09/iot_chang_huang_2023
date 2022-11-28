@@ -172,7 +172,7 @@ public class TimescaleTimeseriesDao extends AbstractSqlTimeseriesDao implements 
                 entityId.getId(),
                 keyId,
                 query.getStartTs(),
-                query.getEndTs(),
+                    query.getEndTs(),
                 PageRequest.of(0, query.getLimit(),
                         Sort.by(Sort.Direction.fromString(
                                 query.getOrder()), "ts")));
