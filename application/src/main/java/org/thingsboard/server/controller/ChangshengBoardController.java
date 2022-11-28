@@ -274,8 +274,8 @@ public class ChangshengBoardController extends BaseController {
                     vo.setDictDeviceId(i.getId());
                     vo.setStartTime(startTime);
                     vo.setEndTime(endTime);
-                    vo.setKey(KeyTitleEnums.key_water.getCode());
                     try {
+                        vo.setKey(KeyTitleEnums.key_water.getCode());
 //                        equipmentTypes.setTrendChart02VoWater(bulletinBoardV3Controller.trendChart(vo));
                         equipmentTypes.setTrendChart02VoWater(bulletinV3BoardVsSvc.trendChart(vo, tenantId));
                         vo.setKey(KeyTitleEnums.key_cable.getCode());
