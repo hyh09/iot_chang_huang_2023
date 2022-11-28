@@ -45,17 +45,17 @@ public class GroupBoardJsonVo {
     @Data
     public class EquipmentOverview {
         @ApiModelProperty("在线设备")
-        private Integer EquipmentOnline;
+        private String EquipmentOnline;
         @ApiModelProperty("离线设备")
-        private Integer EquipmentOffline;
+        private String EquipmentOffline;
 
         public EquipmentOverview() {
         }
 
         public EquipmentOverview(DeviceOnlineStatusResult result) {
             if (result != null) {
-                this.EquipmentOnline = result.getOnLineDeviceCount();
-                this.EquipmentOffline = result.getOffLineDeviceCount();
+                this.EquipmentOnline = result.getOnLineDeviceCount()+"";
+                this.EquipmentOffline = result.getOffLineDeviceCount()+"";
             }
         }
     }
@@ -158,7 +158,7 @@ public class GroupBoardJsonVo {
         @ApiModelProperty("完成率")
         private String CompletedPercentage;
         @ApiModelProperty("是否超时（0-正常，1-超时）")
-        private Integer IsOvertime;
+        private String IsOvertime;
 
         public OrderMonitorSon() {
         }
@@ -170,7 +170,7 @@ public class GroupBoardJsonVo {
                 this.CompletedDividedByTotal = vo.getCompletedCapacities() + "/" + vo.getTotal();
                 this.CompletedPercentage = vo.getCompleteness() + "";
                 if (vo.getIsOvertime() != null) {
-                    this.IsOvertime = vo.getIsOvertime() ? 1 : 0;
+                    this.IsOvertime = vo.getIsOvertime() ? "1" : "0";
                 }
             }
         }
@@ -301,7 +301,7 @@ public class GroupBoardJsonVo {
             EnergyConsumptionTrend_Electricity = new ArrayList<>();
             if (vo != null && CollectionUtils.isNotEmpty(vo.getSolidLine())) {
                 vo.getSolidLine().forEach(i -> {
-                    EnergyConsumptionTrend_Water.add(new KeyValue(i.getTime() + "", i.getValue()));
+                    EnergyConsumptionTrend_Electricity.add(new KeyValue(i.getTime() + "", i.getValue()));
                 });
             }
         }
@@ -315,7 +315,7 @@ public class GroupBoardJsonVo {
             EnergyConsumptionTrend_Gas = new ArrayList<>();
             if (vo != null && CollectionUtils.isNotEmpty(vo.getSolidLine())) {
                 vo.getSolidLine().forEach(i -> {
-                    EnergyConsumptionTrend_Water.add(new KeyValue(i.getTime() + "", i.getValue()));
+                    EnergyConsumptionTrend_Gas.add(new KeyValue(i.getTime() + "", i.getValue()));
                 });
             }
         }
