@@ -55,6 +55,7 @@ import org.thingsboard.server.dao.model.sql.DeviceInfoEntity;
 import org.thingsboard.server.dao.productionline.ProductionLineDao;
 import org.thingsboard.server.dao.relation.RelationDao;
 import org.thingsboard.server.dao.sql.JpaAbstractSearchTextDao;
+import org.thingsboard.server.dao.sql.role.entity.device.DeviceSqlEntity;
 import org.thingsboard.server.dao.util.BeanToMap;
 import org.thingsboard.server.dao.util.sql.JpaQueryHelper;
 
@@ -963,6 +964,32 @@ public class JpaDeviceDao extends JpaAbstractSearchTextDao<DeviceEntity, Device>
     @Override
     public List<Device> findAllBy() {
         return DaoUtil.convertDataList(deviceRepository.findAllBy());
+    }
+
+    @Override
+    public List<DeviceEntity> findAllByEntity(DeviceEntity userExtension) {
+        List<DeviceEntity> entities = this.deviceRepository.findAll(JpaDeviceSpecificationUtil.build.specification(userExtension));
+        if(CollectionUtils.isEmpty(entities)){
+            return entities;
+        }
+        List<DeviceEntity>  entities1= new ArrayList<>();
+        entities.stream().forEach(m1->{
+            if(m1.getAdditionalInfo() == null)
+            {
+                entities1.add(m1);
+            }else {
+                JsonNode gateway = m1.getAdditionalInfo().get("gateway");
+                if (gateway != null && !gateway.asBoolean())
+                {
+                    entities1.add(m1);
+                }
+                if(gateway == null)
+                {
+                    entities1.add(m1);
+                }
+            }
+        });
+        return  entities1;
     }
 
     /**

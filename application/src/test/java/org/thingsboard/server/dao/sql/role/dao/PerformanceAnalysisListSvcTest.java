@@ -16,6 +16,8 @@ import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.sql.role.service.Imp.TsKvDeviceRepository;
+import org.thingsboard.server.dao.sql.role.service.Imp.vo.TskvDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,15 +59,17 @@ public class PerformanceAnalysisListSvcTest {
         System.out.println("打印当前的数据:{}" + JacksonUtil.toString(energyEffciencyNewEntities));
     }
 
+    /**
+     *查询产量的列表数据
+     */
     @Test
     public void queryPCCapAppNewMethod() {
         QueryTsKvVo queryTsKvVo = new QueryTsKvVo();
         queryTsKvVo.setTenantId(UUID.fromString("34b42c20-4e61-11ec-8ae5-dbf4f4ba7d17"));
         queryTsKvVo.setFactoryId(UUID.fromString("24d0aa00-589c-11ec-afcd-2bd77acada1c"));
-        queryTsKvVo.setStartTime(1667318400000L);
-        queryTsKvVo.setEndTime(1669132799999L);
+        queryTsKvVo.setStartTime(1669564800000L);
+        queryTsKvVo.setEndTime(1669651199999L);
         queryTsKvVo.setKey(KeyNameEnums.capacities.getCode());
-
         TenantId  tenantId  = new TenantId(queryTsKvVo.getTenantId());
         PageLink pageLink= new PageLink(10,0);
         PageDataAndTotalValue<AppDeviceCapVo> energyEffciencyNewEntities = efficiencyStatisticsSvc.queryPCCapAppNewMethod(queryTsKvVo,tenantId,pageLink);
@@ -89,6 +93,18 @@ public class PerformanceAnalysisListSvcTest {
 
 
 
+    @Autowired
+    private TsKvDeviceRepository tsKvDeviceRepository;
+
+    @Test
+    public  void queryTest(){
+        UUID id=UUID.fromString("0048d390-6465-11ec-903a-0b302b886cc7");
+        Long startTime =1669564800000L;
+          Long endTime =1669651199999L;
+          Integer keyId =1242;
+        String  tskvDto =  tsKvDeviceRepository.queryData(id,startTime,endTime,keyId);
+        log.info(tskvDto.toString());
+    }
 
 
 
