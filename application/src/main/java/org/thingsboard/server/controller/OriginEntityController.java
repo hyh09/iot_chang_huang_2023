@@ -86,6 +86,8 @@ public class OriginEntityController extends BaseController {
         }
 
         for (Factory factory : factories) {
+            if (factoryId != null && !factory.getId().equals(factory))
+                continue;
             Map<String, Object> factoryDataMap = Maps.newHashMap();
             factoryDataMap.put("Name", factory.getName());
             factoryDataMap.put("FactoryID", factory.getId());
@@ -201,24 +203,24 @@ public class OriginEntityController extends BaseController {
                 workshopOrderMonitorMap.put("OrderMonitor", workshopOrderDataMapList);
                 workshopDataMap.put("OrderMonitor", workshopOrderMonitorMap);
 
-                // 设备数据.
-                List<Map<String, Object>> deviceDataMapList = Lists.newArrayList();
+                // 设备数据
+                List<Map<String, String>> deviceDataMapList = Lists.newArrayList();
                 var devices = this.clientService.listSimpleDevicesByQuery(getTenantId(), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
                 for (Device device : devices) {
                     var deviceKeyParametersResult = this.rtMonitorBoardController.getDeviceKeyParameters(device.getId().getId());
-                    Map<String, Object> deviceDataMap = Maps.newHashMap();
+                    Map<String, String> deviceDataMap = Maps.newHashMap();
                     deviceDataMap.put("EquipmentID", deviceKeyParametersResult.getId());
                     deviceDataMap.put("EquipmentName", deviceKeyParametersResult.getName());
-                    deviceDataMap.put("Data1", deviceKeyParametersResult.getOperationRate());
-                    deviceDataMap.put("Data2", deviceKeyParametersResult.getCapacityEfficiency());
-                    deviceDataMap.put("Data3", deviceKeyParametersResult.getStartingUpDuration());
-                    deviceDataMap.put("Data4", deviceKeyParametersResult.getShutdownDuration());
-                    deviceDataMap.put("Data5", deviceKeyParametersResult.getMaintenanceDuration());
-                    deviceDataMap.put("Data6", deviceKeyParametersResult.getShiftDuration());
-                    deviceDataMap.put("Data7", deviceKeyParametersResult.getOutput());
-                    deviceDataMap.put("Data8", deviceKeyParametersResult.getOee());
-                    deviceDataMap.put("Data9", deviceKeyParametersResult.getQualityRate());
-                    deviceDataMap.put("Data10", deviceKeyParametersResult.getInQualityNum());
+                    deviceDataMap.put("Data1", String.valueOf(deviceKeyParametersResult.getOperationRate()));
+                    deviceDataMap.put("Data2", String.valueOf(deviceKeyParametersResult.getCapacityEfficiency()));
+                    deviceDataMap.put("Data3", String.valueOf(deviceKeyParametersResult.getStartingUpDuration()));
+                    deviceDataMap.put("Data4", String.valueOf(deviceKeyParametersResult.getShutdownDuration()));
+                    deviceDataMap.put("Data5", String.valueOf(deviceKeyParametersResult.getMaintenanceDuration()));
+                    deviceDataMap.put("Data6", String.valueOf(deviceKeyParametersResult.getShiftDuration()));
+                    deviceDataMap.put("Data7", String.valueOf(deviceKeyParametersResult.getOutput()));
+                    deviceDataMap.put("Data8", String.valueOf(deviceKeyParametersResult.getOee()));
+                    deviceDataMap.put("Data9", String.valueOf(deviceKeyParametersResult.getQualityRate()));
+                    deviceDataMap.put("Data10", String.valueOf(deviceKeyParametersResult.getInQualityNum()));
                     deviceDataMapList.add(deviceDataMap);
                 }
                 workshopDataMap.put("EquipmentData", deviceDataMapList);
