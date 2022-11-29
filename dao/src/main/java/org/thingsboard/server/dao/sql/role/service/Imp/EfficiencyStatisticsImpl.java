@@ -416,7 +416,6 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if (queryTsKvVo.getFactoryId() == null) {
             queryTsKvVo.setFactoryId(getFirstFactory(tenantId));
         }
-
         List<EnergyEffciencyNewEntity> entityList1 = performanceAnalysisListSvc.queryEnergyListAll(queryTsKvVo);
         List<EnergyEffciencyNewEntity> entityList = orderByAllValue(entityList1);
         Page<EnergyEffciencyNewEntity> page = PageUtil.createPageFromList(entityList, pageLink);
