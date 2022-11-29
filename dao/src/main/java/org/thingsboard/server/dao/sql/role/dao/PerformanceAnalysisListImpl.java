@@ -89,7 +89,6 @@ public class PerformanceAnalysisListImpl extends JpaSqlTool implements Performan
     @Override
     public List<EnergyEffciencyNewEntity> getAddValue(QueryTsKvVo queryTsKvVo, String keyName) {
         List<EnergyEffciencyNewEntity> energyOfAllKeysList = new ArrayList<>();//
-
         Map<UUID, String> mapValue = new HashMap<>();
         //1.先查询出所有的设备
         List<DeviceEntity> deviceEntityList = findDeviceByCondition(queryTsKvVo);

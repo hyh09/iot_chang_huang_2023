@@ -95,7 +95,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     }
 
 
-    @ApiOperation(value = "【PC端查询产能接口】")
+    @ApiOperation(value = "【PC端产能查询秒之间的查询】")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
             @ApiImplicitParam(name = "endTime", value = "结束时间"),
@@ -105,7 +105,6 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @ApiImplicitParam(name = "factoryId", value = "工厂id  UUID类型"),
     })
     @RequestMapping(value = "/queryCapacityOnSecondLeve", params = {"pageSize", "page"}, method = RequestMethod.GET)
-
     @ResponseBody
     public PageDataAndTotalValue<AppDeviceCapVo> queryCapacityOnSecondLeve(
             @RequestParam int pageSize,
@@ -262,7 +261,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     }
 
 
-    @ApiOperation("效能分析 首页的数据; 包含单位能耗数据 ###新接口")
+    @ApiOperation("效能分析列表查询 秒查询")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "startTime", value = "开始时间"),
             @ApiImplicitParam(name = "endTime", value = "结束时间"),
