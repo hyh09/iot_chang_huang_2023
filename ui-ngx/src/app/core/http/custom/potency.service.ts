@@ -34,7 +34,9 @@ export class PotencyService {
         queryStr.push(`${key}=${params[key]}`);
       });
     }
-    return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacity${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    const { startTime, endTime } = pageLink;
+    const timeDiff = (endTime - startTime) / 1000 / 60 / 60 / 24;
+    return this.http.get<DeviceCapacityList>(`/api/pc/efficiency/queryCapacity${timeDiff < 5 ? 'OnSecondLeve' : ''}${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 查询设备产量历史列表
@@ -86,8 +88,10 @@ export class PotencyService {
         queryStr.push(`${key}=${params[key]}`);
       });
     }
+    const { startTime, endTime } = pageLink;
+    const timeDiff = (endTime - startTime) / 1000 / 60 / 60 / 24;
     return this.http.get<DeviceEnergyConsumptionList>(
-      `/api/pc/efficiency/queryEntityByKeysNew${pageLink.toQuery()}&${queryStr.join('&')}`,
+      `/api/pc/efficiency/queryEntityByKeysNew${timeDiff < 5 ? 'OnSecondLeve' : ''}${pageLink.toQuery()}&${queryStr.join('&')}`,
       defaultHttpOptionsFromConfig(config)
     );
   }
