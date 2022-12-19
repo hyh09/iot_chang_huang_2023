@@ -168,7 +168,7 @@ public class BulletinBoardController extends BaseController{
         }catch (Exception e)
         {
             e.printStackTrace();
-
+            log.error(e.getMessage(),e);
         }
         return  result;
     }

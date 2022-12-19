@@ -22,8 +22,16 @@ import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResource;
 import org.thingsboard.server.dao.hs.entity.vo.AlarmRecordResult;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.util.CommonUtils;
+import org.thingsboard.server.excel.po.alarm.AlarmRecordResultPo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.security.permission.Operation;
+
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
 
@@ -155,5 +163,40 @@ public class AlarmRecordController extends BaseController {
         query.setDeviceId(deviceId).setProductionLineId(productionLineId)
                 .setFactoryId(factoryId).setWorkshopId(workshopId);
         return this.deviceMonitorService.listPageAlarmRecords(getTenantId(), query, pageLink);
+    }
+
+
+    /**
+     * 导出报警记录列表
+
+     */
+    @GetMapping(value = "/excelAlarmRecord")
+    public void  excelAlarmRecord(
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam AlarmSimpleStatus status,
+            @RequestParam AlarmSimpleLevel level,
+            @RequestParam(required = false) Long startTime,
+            @RequestParam(required = false) Long endTime,
+            @RequestParam(required = false) String factoryId,
+            @RequestParam(required = false) String workshopId,
+            @RequestParam(required = false) String productionLineId,
+            @RequestParam(required = false) String deviceId,
+            HttpServletResponse response
+    ) throws ThingsboardException, IOException {
+        PageData<AlarmRecordResult>  pageData= this.getAlarms(page,pageSize,sortProperty,sortOrder,status,level,startTime,endTime,factoryId,workshopId,productionLineId,deviceId);
+        List<AlarmRecordResult> list= pageData.getData();
+        List<AlarmRecordResultPo>  recordResultPos=list.stream().map(m1 ->{return  AlarmRecordResultPo.builder()
+                .createdTime( CommonUtils.stampToDateByLong(m1.getCreatedTime()))
+                .rename(m1.getRename())
+                .title(m1.getTitle())
+                .info(m1.getInfo())
+                .statusStr(m1.getStatusStr())
+                .levelStr(m1.getLevelStr())
+                .build();
+        }).collect(Collectors.toList());
+        easyExcel(response,"报警记录","",recordResultPos, AlarmRecordResultPo.class);
     }
 }

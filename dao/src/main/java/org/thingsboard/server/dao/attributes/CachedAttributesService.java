@@ -232,7 +232,7 @@ public class CachedAttributesService implements AttributesService {
         try {
             if(DataConstants.CLIENT_SCOPE.equals(scope)){
                 for (AttributeKvEntry entry : attributes) {
-                    if(entry.getKey().equals(RENAME)){
+                    if(RENAME.equals(entry.getKey()) && entry.getValue() != null){
                         Device device = deviceDao.findById(entityId.getId());
                         if(!entry.getValue().toString().equals(device.getRename())){
                             device.setRename(entry.getValue() + "");

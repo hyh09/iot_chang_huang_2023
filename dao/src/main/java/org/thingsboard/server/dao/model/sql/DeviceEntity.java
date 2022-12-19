@@ -68,10 +68,11 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         this.setRename(rename);
     }
 
-    public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
+    public DeviceEntity (UUID id, String name, String rename, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
         super();
         this.id = id;
         this.setName(name);
+        this.setRename(rename);
         this.setFactoryId(factoryId);
         this.setWorkshopId(workshopId);
         this.setProductionLineId(productionLineId);
@@ -80,10 +81,11 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         } catch (Exception ignore){}
     }
 
-    public DeviceEntity (UUID id, String name, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo, Integer sort) throws JsonProcessingException {
+    public DeviceEntity (UUID id, String name, String rename, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo, Integer sort) throws JsonProcessingException {
         super();
         this.id = id;
         this.setName(name);
+        this.setRename(rename);
         this.setFactoryId(factoryId);
         this.setWorkshopId(workshopId);
         this.setProductionLineId(productionLineId);

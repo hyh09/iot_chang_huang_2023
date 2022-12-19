@@ -48,36 +48,36 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> findAllByTenantIdAndDictDeviceIdIn(UUID tenantId, Set<UUID> dictDeviceIds);
 
     @Async
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.rename, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
             "t.deviceProfileId = :deviceProfileId ")
     CompletableFuture<List<DeviceEntity>> findAllByDeviceProfileId(@Param("deviceProfileId") UUID deviceProfileId);
 
     @Async
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.rename, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
             "t.tenantId = :tenantId " +
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllByTenantId(@Param("tenantId") UUID tenantId);
 
     @Async
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.rename, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
             "t.tenantId = :tenantId and " +
             "t.factoryId = :factoryId " +
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllByTenantIdAndFactoryId(@Param("tenantId") UUID tenantId, @Param("factoryId") UUID factoryId);
 
     @Async
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo, t.sort) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.rename, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo, t.sort) from DeviceEntity t where " +
             "t.tenantId = :tenantId " +
             "order by t.createdTime desc")
     CompletableFuture<List<DeviceEntity>> findAllIdAndNameByTenantIdOrderByCreatedTimeDesc(@Param("tenantId") UUID tenantId);
 
     @Async
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo, t.sort) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.rename, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo, t.sort) from DeviceEntity t where " +
             "t.tenantId = :tenantId " +
             "order by t.sort asc, t.createdTime asc")
     CompletableFuture<List<DeviceEntity>> findAllIdAndNameAndSortByTenantIdOrderBySortAsc(@Param("tenantId") UUID tenantId);
 
-    @Query("select new DeviceEntity(t.id, t.name, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
+    @Query("select new DeviceEntity(t.id, t.name, t.rename, t.factoryId, t.workshopId, t.productionLineId, t.additionalInfo) from DeviceEntity t where " +
             "t.id = :id ")
     DeviceEntity findSimpleById(@Param("id") UUID id);
 
@@ -294,14 +294,14 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> queryAllByIds(@Param("ids") List<UUID> ids);
 
 
-    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceDataVo(t.id,t.name,t.code,f1.id,f1.name,t.workshopId,w1.name,t.productionLineId,p1.name,t.picture) " +
+    @Query(value = "select new org.thingsboard.server.common.data.vo.device.DeviceDataVo(t.id,t.rename,t.code,f1.id,f1.name,t.workshopId,w1.name,t.productionLineId,p1.name,t.picture) " +
             "from DeviceEntity  t LEFT  JOIN  FactoryEntity f1  on  t.factoryId = f1.id" +
             " LEFT JOIN  WorkshopEntity  w1  ON  w1.id = t.workshopId     LEFT JOIN ProductionLineEntity  p1  ON  p1.id = t.productionLineId  " +
             "  where  t.factoryId=?1 and t.name like  %?2%    ")
     Page<DeviceDataVo> queryAllByNameLike(UUID factoryId, String Name, Pageable pageable);
 
 
-    @Query(nativeQuery = true, value = "select cast(t.id as VARCHAR ), t.name,t.code, cast(f1.id as VARCHAR ) as factoryId, f1.name  as factoryName," +
+    @Query(nativeQuery = true, value = "select cast(t.id as VARCHAR ), t.rename as name,t.code, cast(f1.id as VARCHAR ) as factoryId, f1.name  as factoryName," +
             " cast(t.workshop_id as VARCHAR )  as workshopId , w1.name as workshopName," +
             " cast(t.production_line_id as VARCHAR )   as productionLineId ,p1.name as productionLineName, t.picture " +
             "from device  t LEFT  JOIN  hs_factory f1  on  t.factory_id = f1.id" +
@@ -322,7 +322,7 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     void updateFlgById(@Param("deviceFlg") Boolean deviceFlg, @Param("id") UUID id);
 
 
-    @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.name =:name ")
+    @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.rename =:name ")
     List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId, @Param("name") String name);
 
     @Query(nativeQuery = true, value = "select * from device d  where d.tenant_id = ?1 and position('\"gateway\":true' in d.additional_info)=0")

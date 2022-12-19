@@ -175,7 +175,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     /**
      * 查询用户
-     *
+     * 
      * @param userId 用户Id
      */
     @Override
@@ -221,7 +221,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         var cb = entityManager.getCriteriaBuilder();
         var query = cb.createQuery(DeviceEntity.class);
         var root = query.from(DeviceEntity.class);
-        query.multiselect(root.<UUID>get("id"), root.get("name"));
+        query.multiselect(root.<UUID>get("id"), root.get("name"), root.get("rename"));
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(root.<UUID>get("tenantId"), tenantId.getId()));
         predicates.add(cb.or(cb.isNull(root.<String>get("additionalInfo")), cb.equal(cb.locate(root.<String>get("additionalInfo"), "\"gateway\":true"), 0)));
@@ -1166,6 +1166,8 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 // do nothing
             } else if (!StringUtils.isBlank(t.getDeviceId())) {
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
+            } else if (!StringUtils.isBlank(t.getDeviceName())) {
+                predicates.add(cb.like(root.get("rename"), "%" + t.getDeviceName().trim() + "%"));
             } else if (!StringUtils.isBlank(t.getProductionLineId())) {
                 predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
             } else if (!StringUtils.isBlank(t.getWorkshopId())) {

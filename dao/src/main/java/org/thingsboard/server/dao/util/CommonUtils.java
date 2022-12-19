@@ -466,6 +466,14 @@ public class CommonUtils {
         return res;
     }
 
+    public static String stampToDateByLong(Long lt){
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+
 
     /**
      *

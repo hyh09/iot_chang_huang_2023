@@ -69,6 +69,7 @@
                             <goal>yarn</goal>
                         </goals>
                         <configuration>
+                            <arguments>--registry https://registry.npmmirror.com</arguments>
                             <arguments>install</arguments>
                         </configuration>
                     </execution>

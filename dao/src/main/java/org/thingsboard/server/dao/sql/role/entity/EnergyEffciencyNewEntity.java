@@ -3,9 +3,12 @@ package org.thingsboard.server.dao.sql.role.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 import org.thingsboard.server.dao.util.sql.entity.AbstractStatisticalDataEntity;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.UUID;
 
 /**
@@ -121,7 +124,7 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
 
 
     /**
-     * 设备的名称
+     * 设备的名称  d."rename"
      */
     @Transient
     private  String  deviceName;
@@ -167,7 +170,19 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
         this.workshopId = workshopId;
         this.productionLineId = productionLineId;
 
-        this.capacityAddedValue =capacityAddedValue;
+        this.capacityAddedValue =strToBigDecimal(capacityAddedValue);
+    }
+
+
+    private String  strToBigDecimal(String str) {
+        if (StringUtils.isEmpty(str)) {
+            return new BigDecimal("0").toPlainString();
+        }
+        BigDecimal value =  new BigDecimal(str);
+        if(value.signum() == -1){
+            return new BigDecimal("0").toPlainString();
+        }
+        return  value.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 
 
