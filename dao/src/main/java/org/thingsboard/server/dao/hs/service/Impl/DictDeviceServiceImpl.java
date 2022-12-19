@@ -28,6 +28,9 @@ import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
@@ -940,6 +943,44 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
         if (!properties.isEmpty())
             this.componentPropertyRepository.saveAll(properties.stream().map(DictDeviceComponentPropertyEntity::new).collect(Collectors.toList()));
+    }
+
+    /**
+     * 数据过滤-设备列表
+     *
+     * @param query    设备查询参数
+     * @param tenantId 租户Id
+     * @param pageLink 分页参数
+     * @return 数据过滤-设备列表
+     */
+    @Override
+    public PageData<DictDeviceSwitchDeviceVO> listDictDeviceSwitchDevicesByQuery(FactoryDeviceQuery query, TenantId tenantId, PageLink pageLink) {
+        return null;
+    }
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param q        查询参数
+     * @return 数据过滤-参数管理列表
+     */
+    @Override
+    public PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q) {
+        return null;
+    }
+
+    /**
+     * 数据过滤-属性开关更新或新增
+     *
+     * @param tenantId       租户Id
+     * @param deviceSwitchVO 设备开关信息
+     * @return 设备开关信息
+     */
+    @Override
+    public DeviceSwitchVO updateOrSaveDiceDeviceSwitches(TenantId tenantId, DeviceSwitchVO deviceSwitchVO) {
+        return null;
     }
 
     /**
