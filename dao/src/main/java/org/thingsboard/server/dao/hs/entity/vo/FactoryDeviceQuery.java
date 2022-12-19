@@ -44,6 +44,12 @@ public class FactoryDeviceQuery {
     private String deviceId;
 
     /**
+     * 设备名称
+     */
+    @ApiModelProperty("设备名称")
+    private String deviceName;
+
+    /**
      * 是否查询全部
      */
     @ApiModelProperty("是否查询全部")
@@ -54,6 +60,23 @@ public class FactoryDeviceQuery {
         this.workshopId = workshopId;
         this.productionLineId = productionLineId;
         this.deviceId = deviceId;
+        this.isQueryAll = Boolean.FALSE;
+    }
+
+    public FactoryDeviceQuery(String factoryId, String workshopId, String productionLineId, String deviceId, Boolean flag) {
+        this.factoryId = factoryId;
+        this.workshopId = workshopId;
+        this.productionLineId = productionLineId;
+        this.deviceId = deviceId;
+        this.isQueryAll = flag;
+    }
+
+    public FactoryDeviceQuery(String factoryId, String deviceName) {
+        this.factoryId = factoryId;
+        this.workshopId = null;
+        this.productionLineId = null;
+        this.deviceId = null;
+        this.deviceName = deviceName;
         this.isQueryAll = Boolean.FALSE;
     }
 

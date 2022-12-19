@@ -191,4 +191,14 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_GRAPH_ITEM_SORT = "sort";
     public static final String DICT_DEVICE_GRAPH_ENABLE = "enable";
     public static final String DICT_DEVICE_GRAPH_SUFFIX = "suffix";
+
+
+    /**
+     * 设备字典属性开关
+     */
+    public static final String DICT_DEVICE_SWITCH_TABLE_NAME = "hs_dict_device_switch";
+
+    public static final String DICT_DEVICE_SWITCH_PROPERTY_ID = "property_id";
+    public static final String DICT_DEVICE_SWITCH_PROPERTY_TYPE = "property_type";
+    public static final String DICT_DEVICE_SWITCH_SWITCH = "switch";
 }
