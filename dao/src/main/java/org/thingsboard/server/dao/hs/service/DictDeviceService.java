@@ -274,9 +274,19 @@ public interface DictDeviceService {
      * @param tenantId 租户Id
      * @param deviceId 设备Id
      * @param q        查询参数
+     * @param pageLink 分页参数
      * @return 数据过滤-参数管理列表
      */
-    PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q);
+    PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException;
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 数据过滤-参数管理列表
+     */
+    List<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId) throws ThingsboardException;
 
     /**
      * 数据过滤-属性开关更新或新增

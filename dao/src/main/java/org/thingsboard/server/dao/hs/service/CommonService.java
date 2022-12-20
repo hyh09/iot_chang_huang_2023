@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.hs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.thingsboard.server.common.data.Device;
@@ -8,6 +9,8 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.kv.AttributeKvEntry;
 import org.thingsboard.server.common.data.kv.DataType;
 import org.thingsboard.server.common.data.kv.KvEntry;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.bo.GraphTsKv;
 import org.thingsboard.server.dao.hs.entity.bo.KeyParamTime;
 import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
@@ -30,6 +33,20 @@ import java.util.stream.IntStream;
  * @since 2021.11.5
  */
 public interface CommonService {
+
+    /**
+     * 列表数据转分页数据
+     *
+     * @param tList    列表数据
+     * @param pageLink 分页参数
+     */
+    default <T> PageData<T> toPageDataByList(List<T> tList, PageLink pageLink) {
+        if (tList.isEmpty())
+            return new PageData<>(Lists.newArrayList(), 0, 0L, false);
+        var totalPage = Double.valueOf(Math.ceil(Double.parseDouble(String.valueOf(tList.size())) / pageLink.getPageSize())).intValue();
+        var subList = tList.subList(Math.min(pageLink.getPageSize() * pageLink.getPage(), tList.size()), Math.min(pageLink.getPageSize() * (pageLink.getPage() + 1), tList.size()));
+        return new PageData<>(subList, totalPage, Long.parseLong(String.valueOf(tList.size())), pageLink.getPage() + 1 < totalPage);
+    }
 
     /**
      * 获得用户名

@@ -28,6 +28,10 @@ import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.hsms.dao.DictDeviceSwitchEntity;
+import org.thingsboard.server.dao.hsms.dao.DictDeviceSwitchRepository;
+import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
+import org.thingsboard.server.dao.hsms.entity.po.DictDeviceSwitch;
 import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
@@ -98,6 +102,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     // 图表属性Repository
     DictDeviceGraphItemRepository graphItemRepository;
+
+    // 设备字典属性开关Repository
+    DictDeviceSwitchRepository switchRepository;
 
     /**
      * 获得当前可用设备字典编码
@@ -877,7 +884,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public DictDevice findById(UUID dictDeviceId) {
         Optional<DictDeviceEntity> byId = dictDeviceRepository.findById(dictDeviceId);
-        if (!byId.isEmpty() && byId.get() != null){
+        if (!byId.isEmpty() && byId.get() != null) {
             return byId.get().toData();
         }
         return null;
@@ -956,6 +963,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public PageData<DictDeviceSwitchDeviceVO> listDictDeviceSwitchDevicesByQuery(FactoryDeviceQuery query, TenantId tenantId, PageLink pageLink) {
         return null;
+
     }
 
     /**
@@ -964,10 +972,23 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @param tenantId 租户Id
      * @param deviceId 设备Id
      * @param q        查询参数
+     * @param pageLink 分页参数
      * @return 数据过滤-参数管理列表
      */
     @Override
-    public PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q) {
+    public PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException {
+        return null;
+    }
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 数据过滤-参数管理列表
+     */
+    @Override
+    public List<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId) throws ThingsboardException {
         return null;
     }
 
@@ -979,6 +1000,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @return 设备开关信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public DeviceSwitchVO updateOrSaveDiceDeviceSwitches(TenantId tenantId, DeviceSwitchVO deviceSwitchVO) {
         return null;
     }
