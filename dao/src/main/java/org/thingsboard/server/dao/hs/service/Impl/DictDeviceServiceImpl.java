@@ -962,7 +962,17 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public PageData<DictDeviceSwitchDeviceVO> listDictDeviceSwitchDevicesByQuery(FactoryDeviceQuery query, TenantId tenantId, PageLink pageLink) {
-        return null;
+        var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
+        if (devicePageData.getData().isEmpty())
+            return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+
+        return new PageData<>(devicePageData.getData().stream().map(v -> DictDeviceSwitchDeviceVO.builder()
+                .deviceId(v.getId().getId())
+                .deviceName(v.getRename())
+                .factoryName(v.getFactoryName())
+                .workshopName(v.getWorkshopName())
+                .productionLineName(v.getProductionLineName())
+                .build()).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
     }
 
@@ -977,7 +987,22 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException {
-        return null;
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId)).map(DictDeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
+
+        return this.toPageDataByList(this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().filter(v -> StringUtils.isBlank(q) || v.getTitle().toLowerCase(Locale.ROOT).contains(q))
+                .map(v -> DictDevicePropertySwitchVO.builder()
+                        .id(v.getId())
+                        .deviceId(toUUID(deviceId))
+                        .dictDeviceId(toUUID(dictDevice.getId()))
+                        .propertyId(v.getId())
+                        .propertyName(v.getName())
+                        .propertyUnit(v.getUnit())
+                        .propertyType(v.getPropertyType())
+                        .propertyTitle(v.getTitle())
+                        .propertySwitch(this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData)
+                                .map(DictDeviceSwitch::getPropertySwitch).orElse(DictDevicePropertySwitchEnum.SHOW))
+                        .build()).collect(Collectors.toList()), pageLink);
     }
 
     /**
@@ -989,7 +1014,21 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      */
     @Override
     public List<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId) throws ThingsboardException {
-        return null;
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId)).map(DictDeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
+        var dictDeviceSwitches = DaoUtil.convertDataList(new ArrayList<>(this.switchRepository.findAllByDeviceId(toUUID(deviceId))));
+        return this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().map(v -> DictDevicePropertySwitchVO.builder()
+                .id(v.getId())
+                .deviceId(toUUID(deviceId))
+                .dictDeviceId(toUUID(dictDevice.getId()))
+                .propertyId(v.getId())
+                .propertyName(v.getName())
+                .propertyUnit(v.getUnit())
+                .propertyType(v.getPropertyType())
+                .propertyTitle(v.getTitle())
+                .propertySwitch(dictDeviceSwitches.stream().filter(p -> p.getPropertyId().equals(v.getId()) && p.getPropertyType().equals(v.getPropertyType()))
+                        .findAny().map(DictDeviceSwitch::getPropertySwitch).orElse(DictDevicePropertySwitchEnum.SHOW))
+                .build()).collect(Collectors.toList());
     }
 
     /**
@@ -1002,7 +1041,25 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DeviceSwitchVO updateOrSaveDiceDeviceSwitches(TenantId tenantId, DeviceSwitchVO deviceSwitchVO) {
-        return null;
+        if (deviceSwitchVO.getPropertySwitches().isEmpty())
+            return deviceSwitchVO;
+        for (DictDevicePropertySwitchVO propertySwitchVO : deviceSwitchVO.getPropertySwitches()) {
+            DictDeviceSwitchEntity dictDeviceSwitchEntity;
+            if (propertySwitchVO.getId() != null) {
+                dictDeviceSwitchEntity = this.switchRepository.findById(propertySwitchVO.getId()).get();
+                dictDeviceSwitchEntity.setSwitchValue(propertySwitchVO.getPropertySwitch().getCode());
+            } else {
+                dictDeviceSwitchEntity = new DictDeviceSwitchEntity();
+                dictDeviceSwitchEntity.setDeviceId(deviceSwitchVO.getDeviceId());
+                dictDeviceSwitchEntity.setDictDeviceId(deviceSwitchVO.getDictDeviceId());
+                dictDeviceSwitchEntity.setPropertyId(propertySwitchVO.getPropertyId());
+                dictDeviceSwitchEntity.setPropertyType(propertySwitchVO.getPropertyType().getCode());
+                dictDeviceSwitchEntity.setSwitchValue(propertySwitchVO.getPropertySwitch().getCode());
+            }
+            this.switchRepository.save(dictDeviceSwitchEntity);
+            propertySwitchVO.setId(dictDeviceSwitchEntity.getId());
+        }
+        return deviceSwitchVO;
     }
 
     /**
