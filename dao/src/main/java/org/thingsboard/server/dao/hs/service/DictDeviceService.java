@@ -13,6 +13,7 @@ import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
 
@@ -277,7 +278,7 @@ public interface DictDeviceService {
      * @param pageLink 分页参数
      * @return 数据过滤-参数管理列表
      */
-    PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException;
+    PageData<DictDevicePropertySwitchNewVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException;
 
     /**
      * 数据过滤-参数管理列表

@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.BasePO;
-import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
 
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DictDevicePropertySwitchVO extends BasePO {
+public class DictDevicePropertySwitchNewVO extends BasePO {
 
     private static final long serialVersionUID = 4134987555236813704L;
 
@@ -81,5 +80,5 @@ public class DictDevicePropertySwitchVO extends BasePO {
      * 属性开关
      */
     @ApiModelProperty(value = "属性开关", required = true)
-    private DictDevicePropertySwitchEnum propertySwitch;
+    private Integer propertySwitch;
 }
