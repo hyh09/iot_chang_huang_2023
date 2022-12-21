@@ -72,6 +72,12 @@ public class DictDevicePropertySwitchVO extends BasePO {
     private String propertyUnit;
 
     /**
+     * 属性内容
+     */
+    @ApiModelProperty(value = "属性内容", notes = "仅用于展示")
+    private String propertyContent;
+
+    /**
      * 属性开关
      */
     @ApiModelProperty(value = "属性开关", required = true)
