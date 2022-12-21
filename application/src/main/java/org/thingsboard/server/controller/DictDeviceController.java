@@ -32,6 +32,7 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -355,7 +356,8 @@ public class DictDeviceController extends BaseController {
 
         PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
         validatePageLink(pageLink);
-        return this.dictDeviceService.listDictDeviceSwitches(getTenantId(), deviceId, q);
+        q = StringUtils.isNotBlank(q) ? q.toLowerCase(Locale.ROOT).trim() : q;
+        return this.dictDeviceService.listDictDeviceSwitches(getTenantId(), deviceId, q, pageLink);
     }
 
     /**

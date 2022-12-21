@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hsms.entity.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
 import org.thingsboard.server.dao.hs.entity.po.BasePO;
 import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
 
@@ -21,6 +22,12 @@ import java.util.UUID;
 public class DictDevicePropertySwitchVO extends BasePO {
 
     private static final long serialVersionUID = 4134987555236813704L;
+
+    /**
+     * 开关数据库主键Id
+     */
+    @ApiModelProperty(value = "开关数据库主键Id", notes = "修改传；新增不传")
+    private UUID id;
 
     /**
      * 设备Id
@@ -44,7 +51,25 @@ public class DictDevicePropertySwitchVO extends BasePO {
      * 属性类型
      */
     @ApiModelProperty(value = "属性类型", required = true)
-    private String propertyType;
+    private DictDevicePropertyTypeEnum propertyType;
+
+    /**
+     * 属性名称
+     */
+    @ApiModelProperty(value = "属性名称", notes = "仅用于展示")
+    private String propertyName;
+
+    /**
+     * 属性标题
+     */
+    @ApiModelProperty(value = "属性标题", notes = "仅用于展示")
+    private String propertyTitle;
+
+    /**
+     * 属性单位
+     */
+    @ApiModelProperty(value = "属性单位", notes = "仅用于展示")
+    private String propertyUnit;
 
     /**
      * 属性开关
