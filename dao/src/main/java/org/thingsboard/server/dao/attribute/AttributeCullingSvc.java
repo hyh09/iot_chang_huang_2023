@@ -2,10 +2,12 @@ package org.thingsboard.server.dao.attribute;
 
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.dao.attribute.vo.AttributeKeyVo;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -19,4 +21,6 @@ import java.util.UUID;
 public interface AttributeCullingSvc {
 
     List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList , TenantId tenantId, UUID deviceId) throws ThingsboardException;
+
+     Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map,TenantId tenantId, UUID deviceId);
 }

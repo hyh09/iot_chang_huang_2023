@@ -631,8 +631,11 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         Map<String, List<DictDeviceDataVo>> map1 = devicePropertiesList.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
         map.putAll(map1);
         map.put("部件", filterAlreadyExistsInTheChart(chartDataList, partsList));
-        return map;
+        return attributeCullingSvc.toMakeToMap(map,tenantId,deviceId);
     }
+
+
+
 
 
     /**
