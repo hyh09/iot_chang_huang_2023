@@ -35,6 +35,7 @@ import org.thingsboard.server.dao.hsms.entity.po.DictDeviceSwitch;
 import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
@@ -986,8 +987,14 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @return 数据过滤-参数管理列表
      */
     @Override
+    @SuppressWarnings("all")
     public PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException {
-        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId)).map(DictDeviceEntity::toData)
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备不存在！", ThingsboardErrorCode.GENERAL));
+        if (device.getDictDeviceId() == null)
+            throw new ThingsboardException("设备未绑定设备字典！", ThingsboardErrorCode.GENERAL);
+
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), device.getDictDeviceId()).map(DictDeviceEntity::toData)
                 .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
 
         return this.toPageDataByList(this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().filter(v -> StringUtils.isBlank(q) || v.getTitle().toLowerCase(Locale.ROOT).contains(q))
@@ -1013,9 +1020,16 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * @return 数据过滤-参数管理列表
      */
     @Override
+    @SuppressWarnings("all")
     public List<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId) throws ThingsboardException {
-        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId)).map(DictDeviceEntity::toData)
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备不存在！", ThingsboardErrorCode.GENERAL));
+        if (device.getDictDeviceId() == null)
+            throw new ThingsboardException("设备未绑定设备字典！", ThingsboardErrorCode.GENERAL);
+
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), device.getDictDeviceId()).map(DictDeviceEntity::toData)
                 .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
+
         var dictDeviceSwitches = DaoUtil.convertDataList(new ArrayList<>(this.switchRepository.findAllByDeviceId(toUUID(deviceId))));
         return this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().map(v -> DictDevicePropertySwitchVO.builder()
                 .id(v.getId())
