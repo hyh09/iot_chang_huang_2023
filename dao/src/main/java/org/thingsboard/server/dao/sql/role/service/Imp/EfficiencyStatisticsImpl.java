@@ -46,6 +46,7 @@ import org.thingsboard.server.common.data.vo.resultvo.energy.AppDeviceEnergyVo;
 import org.thingsboard.server.common.data.vo.resultvo.energy.ResultEnergyAppVo;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.PageUtil;
+import org.thingsboard.server.dao.attribute.AttributeCullingSvc;
 import org.thingsboard.server.dao.factory.FactoryDao;
 import org.thingsboard.server.dao.hs.dao.*;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGraphPropertyVO;
@@ -132,6 +133,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
     private KanbanInervalCapacityRepository kanbanInervalCapacityRepository;
     @Autowired
     private PerformanceAnalysisListSvc performanceAnalysisListSvc;
+    @Autowired
+    private AttributeCullingSvc attributeCullingSvc;
 
 
     private final static String HEADER_0 = "设备名称";
@@ -307,7 +310,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
         List<EnergyEffciencyNewEntity> entityList1 = effciencyAnalysisRepository.queryCapacityALL(vo, pageLink);
-      List<EnergyEffciencyNewEntity> entityList = orderByCapPacityValue(entityList1);
+        List<EnergyEffciencyNewEntity> entityList = orderByCapPacityValue(entityList1);
         Page<EnergyEffciencyNewEntity> page = PageUtil.createPageFromList(entityList, pageLink);
         List<EnergyEffciencyNewEntity> pageList = page.getContent();
         //将查询的结果返回原接口返回的对象
@@ -329,7 +332,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             vo.setFactoryId(getFirstFactory(tenantId));
         }
         List<EnergyEffciencyNewEntity> entityList1 = performanceAnalysisListSvc.yieldList(vo);
-       List<EnergyEffciencyNewEntity> entityList = orderByCapPacityValue(entityList1);
+        List<EnergyEffciencyNewEntity> entityList = orderByCapPacityValue(entityList1);
         Page<EnergyEffciencyNewEntity> page = PageUtil.createPageFromList(entityList, pageLink);
         List<EnergyEffciencyNewEntity> pageList = page.getContent();
         //将查询的结果返回原接口返回的对象
@@ -340,14 +343,14 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
 
     private List<EnergyEffciencyNewEntity> orderByCapPacityValue(List<EnergyEffciencyNewEntity> entityList1) {
         //将负数改为改为0;
-      return   entityList1.stream().sorted((s1, s2) -> strToBigDecimal(s2.getCapacityAddedValue()).compareTo(strToBigDecimal(s1.getCapacityAddedValue()))).collect(Collectors.toList());
+        return entityList1.stream().sorted((s1, s2) -> strToBigDecimal(s2.getCapacityAddedValue()).compareTo(strToBigDecimal(s1.getCapacityAddedValue()))).collect(Collectors.toList());
 
     }
 
 
     private List<EnergyEffciencyNewEntity> orderByAllValue(List<EnergyEffciencyNewEntity> entityList1) {
         //将负数改为改为0;
-        return   entityList1.stream()
+        return entityList1.stream()
                 .sorted((s1, s2) -> strToBigDecimal(s2.getCapacityAddedValue()).compareTo(strToBigDecimal(s1.getCapacityAddedValue())))
                 .sorted((s1, s2) -> strToBigDecimal(s2.getGasAddedValue()).compareTo(strToBigDecimal(s1.getGasAddedValue())))
                 .sorted((s1, s2) -> strToBigDecimal(s2.getElectricAddedValue()).compareTo(strToBigDecimal(s1.getElectricAddedValue())))
@@ -361,8 +364,8 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         if (StringUtils.isEmpty(str)) {
             return new BigDecimal("0");
         }
-        BigDecimal value =  new BigDecimal(str);
-        if(value.signum() == -1){
+        BigDecimal value = new BigDecimal(str);
+        if (value.signum() == -1) {
             return new BigDecimal("0");
         }
         return new BigDecimal(str);
@@ -422,7 +425,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<EnergyEffciencyNewEntity> pageList = page.getContent();
         List<EfficiencyEntityInfo> efficiencyEntityInfoList = this.resultProcessingByEnergyPcNew(pageList);
         //将查询的结果返回原接口返回的对象
-        EfficiencyTotalValue efficiencyTotalValue= getTotalValueNewMethodnew(entityList1);
+        EfficiencyTotalValue efficiencyTotalValue = getTotalValueNewMethodnew(entityList1);
         return new PageDataAndTotalValue<EfficiencyEntityInfo>(efficiencyTotalValue, efficiencyEntityInfoList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
 
     }
@@ -655,7 +658,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<DictDeviceDataVo> partsList = getParts(tenantId, deviceInfo.getDictDeviceId());
         dictDeviceDataVos.addAll(partsList);
         List<RunningStateVo> resultList = filterOutSaved(dictDeviceDataVos, graphVOS);
-        return resultList;
+        return attributeCullingSvc.queryKeyToSwitch(resultList, tenantId, deviceId);
     }
 
 
