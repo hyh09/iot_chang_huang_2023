@@ -25,6 +25,7 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -345,7 +346,7 @@ public class DictDeviceController extends BaseController {
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
     })
     @GetMapping("/dict/device/switches")
-    public PageData<DictDevicePropertySwitchVO> listDictDeviceSwitches(
+    public PageData<DictDevicePropertySwitchNewVO> listDictDeviceSwitches(
             @RequestParam int page,
             @RequestParam int pageSize,
             @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,

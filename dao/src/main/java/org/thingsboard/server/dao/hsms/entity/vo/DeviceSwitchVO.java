@@ -25,23 +25,9 @@ public class DeviceSwitchVO extends BasePO {
     private static final long serialVersionUID = 4134987555236813704L;
 
     /**
-     * 设备Id
-     */
-    @NotNull
-    @ApiModelProperty(value = "设备Id", required = true)
-    private UUID deviceId;
-
-    /**
-     * 设备字典Id
-     */
-    @NotNull
-    @ApiModelProperty(value = "设备字典Id", required = true)
-    private UUID dictDeviceId;
-
-    /**
      * 属性开关列表
      */
     @Valid
     @ApiModelProperty(value = "属性开关列表", required = true)
-    private List<DictDevicePropertySwitchVO> propertySwitches;
+    private List<DictDevicePropertySwitchNewVO> propertySwitches;
 }

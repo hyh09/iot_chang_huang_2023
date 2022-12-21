@@ -27,7 +27,12 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
     @Query("delete from DictDeviceGroupPropertyEntity d where d.dictDeviceId = :dictDeviceId")
     void deleteByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 
-    @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceGroupId in (?1) order by t.sort asc")
+    /**
+     * 查询分组属性，并且状态是开启的（不存在的状态也查询出来）
+     * @param groupIdList
+     * @return
+     */
+    @Query(value = "SELECT t.* FROM hs_dict_device_group_property t LEFT JOIN hs_dict_device_switch t1 ON t.ID = t1.property_id where t.dict_device_group_id in (?1) AND (t1.switch = 1  or t1.switch is null)  order by t.sort asc",nativeQuery = true)
     List<DictDeviceGroupPropertyEntity> findAllInDictDeviceGroupId(List<UUID> groupIdList);
 
     @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
