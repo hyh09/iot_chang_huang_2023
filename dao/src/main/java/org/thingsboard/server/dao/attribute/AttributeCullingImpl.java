@@ -7,15 +7,13 @@ import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
 import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,11 +55,59 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         return resultList3;
     }
 
+    /**
+     * 1.优先由 attributeNames 来判断，
+     * 2.再由name 来判断
+     *
+     * @param map
+     * @param tenantId
+     * @param deviceId
+     * @return
+     */
+    @Override
+    public Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map, TenantId tenantId, UUID deviceId) {
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
+        if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
+            return map;
+        }
+
+        Map<String, DictDevicePropertySwitchEnum> map1 = devicePropertySwitchVOList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getPropertyName()))
+                .filter(m1 -> m1.getPropertySwitch() != null)
+                .collect(Collectors.toMap(DictDevicePropertySwitchVO::getPropertyName, DictDevicePropertySwitchVO::getPropertySwitch));
+        Map<String, List<DictDeviceDataVo>> result = new HashMap<>();
+        map.forEach((k1, v1) -> {
+            List<DictDeviceDataVo> deviceDataVoList = v1;
+            List<DictDeviceDataVo> resultList3 = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(deviceDataVoList)) {
+                for (DictDeviceDataVo vo : deviceDataVoList) {
+                    List<String> keysNameS = vo.getAttributeNames();
+
+                    if (CollectionUtils.isNotEmpty(keysNameS)) {
+                        if (isAddList(keysNameS, map1)) {
+                            resultList3.add(vo);
+                        }
+                    }
+
+                    if (StringUtils.isNotEmpty(vo.getName())) {
+                        if(isAddListStr(vo.getName(),map1)){
+                            resultList3.add(vo);
+                        }
+                    }
+                }
+            }
+            result.put(k1,resultList3);
+        });
+
+        return  result;
+
+    }
+
 
     private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId) {
         List<DictDevicePropertySwitchVO> list = new ArrayList<>();
         try {
-         list = dictDeviceService.listDictDeviceSwitches(tenantId, deviceId.toString());
+            list = dictDeviceService.listDictDeviceSwitches(tenantId, deviceId.toString());
         } catch (ThingsboardException e1) {
             log.info("查询[dictDeviceService.listDictDeviceSwitches]接口异常异常日志:{}", e1);
         } catch (Exception e2) {
@@ -80,6 +126,19 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
                 return false;
             }
         }
+        return true;
+
+    }
+
+
+    private boolean isAddListStr(String st1, Map<String, DictDevicePropertySwitchEnum> map1) {
+        if (StringUtils.isEmpty(st1)) {
+            return true;
+        }
+        if (map1.get(st1) == DictDevicePropertySwitchEnum.HIDE) {
+            return false;
+        }
+
         return true;
 
     }

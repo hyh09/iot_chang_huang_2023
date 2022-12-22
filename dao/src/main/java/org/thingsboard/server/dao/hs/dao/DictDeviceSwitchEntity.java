@@ -1,14 +1,11 @@
-package org.thingsboard.server.dao.hsms.dao;
+package org.thingsboard.server.dao.hs.dao;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.thingsboard.server.dao.hs.dao.BasePgEntity;
-import org.thingsboard.server.dao.hs.dao.HsModelConstants;
 import org.thingsboard.server.dao.hs.entity.enums.DictDevicePropertyTypeEnum;
-import org.thingsboard.server.dao.hs.entity.po.DictDeviceGraphItem;
 import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
 import org.thingsboard.server.dao.hsms.entity.po.DictDeviceSwitch;
 import org.thingsboard.server.dao.model.ToData;
