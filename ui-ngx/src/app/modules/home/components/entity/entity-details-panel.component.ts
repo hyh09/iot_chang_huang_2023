@@ -158,6 +158,7 @@ export class EntityDetailsPanelComponent extends PageComponent implements AfterV
   }
 
   buildEntityComponent() {
+    if (!this.entitiesTableConfig.entityComponent) return;
     this.clearSubscriptions();
     if (this.entityComponentRef) {
       this.entityComponentRef.destroy();

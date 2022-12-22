@@ -204,3 +204,22 @@ export interface ProdCalendar extends BaseData<any> {
   start?: Date;
   end?: Date;
 }
+
+export interface DeviceDataAuth extends BaseData<any> {
+  deviceId: string;
+  deviceName: string;
+  factoryName: string;
+  productionLineName: string;
+  workshopName: string;
+}
+
+export interface DeviceAuthProp extends BaseData<any> {
+  deviceId: string;
+  dictDeviceId: string;
+  propertyId: string;
+  propertyName: string;
+  propertyTitle: string;
+  propertySwitch: 0 | 1;
+  propertyType: 'DEVICE' | 'COMPONENT';
+  propertyUnit: string;
+} 
