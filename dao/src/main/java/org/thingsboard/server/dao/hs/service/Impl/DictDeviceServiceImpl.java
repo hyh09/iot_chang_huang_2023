@@ -1050,17 +1050,16 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * 数据过滤-属性开关更新或新增
      *
      * @param tenantId       租户Id
-     * @param deviceSwitchVO 设备开关信息
-     * @return 设备开关信息
+     * @param propertySwitches 设备开关信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public DeviceSwitchVO updateOrSaveDiceDeviceSwitches(TenantId tenantId, DeviceSwitchVO deviceSwitchVO) {
-        if (deviceSwitchVO.getPropertySwitches().isEmpty())
-            return deviceSwitchVO;
-        var deviceId = deviceSwitchVO.getPropertySwitches().get(0).getDeviceId();
-        var dictDeviceId = deviceSwitchVO.getPropertySwitches().get(0).getDictDeviceId();
-        for (DictDevicePropertySwitchNewVO propertySwitchVO : deviceSwitchVO.getPropertySwitches()) {
+    public void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches) {
+        if (propertySwitches.isEmpty())
+            return ;
+        var deviceId = propertySwitches.get(0).getDeviceId();
+        var dictDeviceId = propertySwitches.get(0).getDictDeviceId();
+        for (DictDevicePropertySwitchNewVO propertySwitchVO : propertySwitches) {
             DictDeviceSwitchEntity dictDeviceSwitchEntity;
             if (propertySwitchVO.getId() != null) {
                 dictDeviceSwitchEntity = this.switchRepository.findById(propertySwitchVO.getId()).get();
@@ -1076,7 +1075,6 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             this.switchRepository.save(dictDeviceSwitchEntity);
             propertySwitchVO.setId(dictDeviceSwitchEntity.getId());
         }
-        return deviceSwitchVO;
     }
 
     /**

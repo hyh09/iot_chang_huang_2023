@@ -293,8 +293,7 @@ public interface DictDeviceService {
      * 数据过滤-属性开关更新或新增
      *
      * @param tenantId       租户Id
-     * @param deviceSwitchVO 设备开关信息
-     * @return 设备开关信息
+     * @param propertySwitches 设备开关信息
      */
-    DeviceSwitchVO updateOrSaveDiceDeviceSwitches(TenantId tenantId, DeviceSwitchVO deviceSwitchVO);
+    void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches);
 }
