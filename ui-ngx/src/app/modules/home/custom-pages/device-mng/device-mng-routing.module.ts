@@ -4,6 +4,8 @@ import { EntitiesTableComponent } from '../../components/entity/entities-table.c
 import { UserMngTableConfigResolver } from '../auth-mng/user-mng/user-mng-table-config.resolver';
 import { ChartSettingsTableConfigResolver } from './chart-settings/chart-settings-table-config.resolver';
 import { ChartsTableConfigResolver } from './chart-settings/charts-table-config.resolver';
+import { DataAuthTableConfigResolver } from './data-auth/data-auth-table-config.resolver';
+import { DevicePropTableConfigResolver } from './data-auth/device-prop-table-config.resolver';
 import { DataDictionaryTableConfigResolver } from './data-dictionary/data-dictionary-table-config.resolver';
 import { DeviceDictionaryTableConfigResolver } from './device-dictionary/device-dictionary-table-config.resolver';
 import { FactoryMngComponent } from './factory-mng/factory-mng.component';
@@ -131,6 +133,42 @@ const routes: Routes = [
         ]
       },
       {
+        path: 'dataAuth',
+        data: {
+          breadcrumb: {
+            label: 'device-mng.data-auth',
+            icon: 'mdi:data-auth'
+          }
+        },
+        children: [
+          {
+            path: '',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.data-auth'
+            },
+            resolve: {
+              entitiesTableConfig: DataAuthTableConfigResolver
+            }
+          },
+          {
+            path: ':deviceId/properties',
+            component: EntitiesTableComponent,
+            data: {
+              title: 'device-mng.mng-prop-auth',
+              breadcrumb: {
+                label: 'device-mng.mng-prop-auth',
+                icon: 'mdi:switch-settings',
+                isMdiIcon: true
+              }
+            },
+            resolve: {
+              entitiesTableConfig: DevicePropTableConfigResolver
+            }
+          }
+        ]
+      },
+      {
         path: 'prodManagement',
         data: {
           breadcrumb: {
@@ -180,7 +218,9 @@ const routes: Routes = [
     ChartSettingsTableConfigResolver,
     ChartsTableConfigResolver,
     ProdMngTableConfigResolver,
-    MngCalendarTableConfigResolver
+    MngCalendarTableConfigResolver,
+    DataAuthTableConfigResolver,
+    DevicePropTableConfigResolver
   ]
 })
 export class DeviceMngRoutingModule { }

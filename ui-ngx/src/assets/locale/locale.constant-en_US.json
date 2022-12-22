@@ -3811,7 +3811,13 @@
     "start-time-required": "Start time is required.",
     "end-time-required": "End time is required.",
     "delete-prod-calendar-title": "Are you sure you want to delete this shift?",
-    "delete-prod-calendar-titles": "Are you sure you want to delete {{count}} shifts?"
+    "delete-prod-calendar-titles": "Are you sure you want to delete {{count}} shifts?",
+    "data-auth": "Data authorization",
+    "mng-prop-auth": "Manage property autherization",
+    "property-type": "Property type",
+    "device-property": "Device property",
+    "component-property": "Component property",
+    "visible-to-factory": "Visible to factory"
   },
   "menu-mng": {
     "menu-mng": "Menu management",

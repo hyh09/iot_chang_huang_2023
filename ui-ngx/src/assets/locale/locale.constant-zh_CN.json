@@ -3708,7 +3708,13 @@
     "start-time-required": "开始时间必填",
     "end-time-required": "结束时间必填",
     "delete-prod-calendar-title": "确认删除该班次吗？删除后不可撤销。",
-    "delete-prod-calendar-titles": "确认删除这{{count}}个班次吗？删除后不可撤销。"
+    "delete-prod-calendar-titles": "确认删除这{{count}}个班次吗？删除后不可撤销。",
+    "data-auth": "数据权限",
+    "mng-prop-auth": "管理参数权限",
+    "property-type": "参数类型",
+    "device-property": "设备参数",
+    "component-property": "部件参数",
+    "visible-to-factory": "工厂可见"
   },
   "menu-mng": {
     "menu-mng": "菜单运维",
