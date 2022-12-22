@@ -23,6 +23,8 @@ import { ChartSettingsFiltersComponent } from './chart-settings/chart-settings-f
 import { ChartsComponent } from './chart-settings/charts.component';
 import { ProdMngFiltersComponent } from './prod-mng/prod-mng-filters.component';
 import { MngCalendarComponent } from './prod-mng/mng-calendar.component';
+import { DataAuthFiltersComponent } from './data-auth/data-auth-filters.component';
+import { DevicePropFiltersComponent } from './data-auth/device-prop-filters.component';
 
 @NgModule({
   imports: [
@@ -51,7 +53,9 @@ import { MngCalendarComponent } from './prod-mng/mng-calendar.component';
     ChartSettingsFiltersComponent,
     ChartsComponent,
     ProdMngFiltersComponent,
-    MngCalendarComponent
+    MngCalendarComponent,
+    DataAuthFiltersComponent,
+    DevicePropFiltersComponent
   ]
 })
 export class DeviceManagementModule { }
