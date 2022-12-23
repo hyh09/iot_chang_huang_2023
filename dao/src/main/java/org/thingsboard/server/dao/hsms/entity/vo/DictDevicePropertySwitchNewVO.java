@@ -80,5 +80,5 @@ public class DictDevicePropertySwitchNewVO extends BasePO {
      * 属性开关
      */
     @ApiModelProperty(value = "属性开关", required = true)
-    private Integer propertySwitch;
+    private Boolean propertySwitch;
 }

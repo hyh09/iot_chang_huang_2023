@@ -969,14 +969,15 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
         return new PageData<>(devicePageData.getData().stream().map(v -> {
-                var deviceBaseDTO = this.clientService.getFactoryBaseInfoByQuery(tenantId, new FactoryDeviceQuery(UUIDToString(v.getFactoryId()), UUIDToString(v.getWorkshopId()), UUIDToString(v.getProductionLineId()), v.getId().toString()));
-                return DictDeviceSwitchDeviceVO.builder()
-                .deviceId(v.getId().getId())
-                .deviceName(v.getRename())
-                .factoryName(deviceBaseDTO.getFactory().getName())
-                .workshopName(deviceBaseDTO.getWorkshop().getName())
-                .productionLineName(deviceBaseDTO.getProductionLine().getName())
-                .build();}).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+            var deviceBaseDTO = this.clientService.getFactoryBaseInfoByQuery(tenantId, new FactoryDeviceQuery(UUIDToString(v.getFactoryId()), UUIDToString(v.getWorkshopId()), UUIDToString(v.getProductionLineId()), v.getId().toString()));
+            return DictDeviceSwitchDeviceVO.builder()
+                    .deviceId(v.getId().getId())
+                    .deviceName(v.getRename())
+                    .factoryName(deviceBaseDTO.getFactory().getName())
+                    .workshopName(deviceBaseDTO.getWorkshop().getName())
+                    .productionLineName(deviceBaseDTO.getProductionLine().getName())
+                    .build();
+        }).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
     }
 
@@ -1010,8 +1011,8 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                         .propertyUnit(v.getUnit())
                         .propertyType(v.getPropertyType())
                         .propertyTitle(v.getTitle())
-                        .propertySwitch(this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData)
-                                .map(DictDeviceSwitch::getPropertySwitch).map(f->f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()))
+                        .propertySwitch(1 == this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData)
+                                .map(DictDeviceSwitch::getPropertySwitch).map(f -> f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()) ? Boolean.TRUE : Boolean.FALSE)
                         .build()).collect(Collectors.toList()), pageLink);
     }
 
@@ -1051,28 +1052,28 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     /**
      * 数据过滤-属性开关更新或新增
      *
-     * @param tenantId       租户Id
+     * @param tenantId         租户Id
      * @param propertySwitches 设备开关信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches) {
         if (propertySwitches.isEmpty())
-            return ;
+            return;
         var deviceId = propertySwitches.get(0).getDeviceId();
         var dictDeviceId = propertySwitches.get(0).getDictDeviceId();
         for (DictDevicePropertySwitchNewVO propertySwitchVO : propertySwitches) {
             DictDeviceSwitchEntity dictDeviceSwitchEntity;
             if (propertySwitchVO.getId() != null) {
                 dictDeviceSwitchEntity = this.switchRepository.findById(propertySwitchVO.getId()).get();
-                dictDeviceSwitchEntity.setSwitchValue(propertySwitchVO.getPropertySwitch());
+                dictDeviceSwitchEntity.setSwitchValue(Boolean.TRUE.equals(propertySwitchVO.getPropertySwitch()) ? 1 : 0);
             } else {
                 dictDeviceSwitchEntity = new DictDeviceSwitchEntity();
                 dictDeviceSwitchEntity.setDeviceId(deviceId);
                 dictDeviceSwitchEntity.setDictDeviceId(dictDeviceId);
                 dictDeviceSwitchEntity.setPropertyId(propertySwitchVO.getPropertyId());
                 dictDeviceSwitchEntity.setPropertyType(propertySwitchVO.getPropertyType().getCode());
-                dictDeviceSwitchEntity.setSwitchValue(propertySwitchVO.getPropertySwitch());
+                dictDeviceSwitchEntity.setSwitchValue(Boolean.TRUE.equals(propertySwitchVO.getPropertySwitch()) ? 1 : 0);
             }
             this.switchRepository.save(dictDeviceSwitchEntity);
             propertySwitchVO.setId(dictDeviceSwitchEntity.getId());
