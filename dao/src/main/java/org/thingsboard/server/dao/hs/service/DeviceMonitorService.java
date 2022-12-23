@@ -296,4 +296,21 @@ public interface DeviceMonitorService {
      * @return 部件名称
      */
     String getRtMonitorDeviceComponentName(TenantId tenantId, UUID deviceId, UUID componentId);
+
+    /**
+     * 数据筛选过滤
+     *
+     * @param deviceDetailResult 设备详情数据
+     * @param tenantId           租户Id
+     */
+    DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult) throws ThingsboardException;
+
+    /**
+     * 数据筛选过滤
+     *
+     * @param properties 属性列表
+     * @param tenantId   租户Id
+     * @param deviceId   设备Id
+     */
+    List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties) throws ThingsboardException;
 }
