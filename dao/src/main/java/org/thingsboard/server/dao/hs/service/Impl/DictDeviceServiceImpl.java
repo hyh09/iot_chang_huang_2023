@@ -1002,18 +1002,21 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
 
         return this.toPageDataByList(this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().filter(v -> StringUtils.isBlank(q) || v.getTitle().toLowerCase(Locale.ROOT).contains(q))
-                .map(v -> DictDevicePropertySwitchNewVO.builder()
-                        .id(v.getId())
-                        .deviceId(toUUID(deviceId))
-                        .dictDeviceId(toUUID(dictDevice.getId()))
-                        .propertyId(v.getId())
-                        .propertyName(v.getName())
-                        .propertyUnit(v.getUnit())
-                        .propertyType(v.getPropertyType())
-                        .propertyTitle(v.getTitle())
-                        .propertySwitch(1 == this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData)
-                                .map(DictDeviceSwitch::getPropertySwitch).map(f -> f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()) ? Boolean.TRUE : Boolean.FALSE)
-                        .build()).collect(Collectors.toList()), pageLink);
+                .map(v -> {
+                    var dictDeviceSwitch = this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData);
+                    var data = DictDevicePropertySwitchNewVO.builder()
+                            .deviceId(toUUID(deviceId))
+                            .dictDeviceId(toUUID(dictDevice.getId()))
+                            .propertyId(v.getId())
+                            .propertyName(v.getName())
+                            .propertyUnit(v.getUnit())
+                            .propertyType(v.getPropertyType())
+                            .propertyTitle(v.getTitle())
+                            .propertySwitch(1 ==dictDeviceSwitch.map(DictDeviceSwitch::getPropertySwitch).map(f -> f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()) ? Boolean.TRUE : Boolean.FALSE)
+                            .build();
+                    dictDeviceSwitch.ifPresent(f->data.setId(f.getId()));
+                    return data;
+                }).collect(Collectors.toList()), pageLink);
     }
 
     /**
