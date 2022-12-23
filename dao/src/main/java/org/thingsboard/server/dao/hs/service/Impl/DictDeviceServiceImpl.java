@@ -968,13 +968,15 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         if (devicePageData.getData().isEmpty())
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
-        return new PageData<>(devicePageData.getData().stream().map(v -> DictDeviceSwitchDeviceVO.builder()
+        return new PageData<>(devicePageData.getData().stream().map(v -> {
+                var deviceBaseDTO = this.clientService.getFactoryBaseInfoByQuery(tenantId, new FactoryDeviceQuery(UUIDToString(v.getFactoryId()), UUIDToString(v.getWorkshopId()), UUIDToString(v.getProductionLineId()), v.getId().toString()));
+                return DictDeviceSwitchDeviceVO.builder()
                 .deviceId(v.getId().getId())
                 .deviceName(v.getRename())
-                .factoryName(v.getFactoryName())
-                .workshopName(v.getWorkshopName())
-                .productionLineName(v.getProductionLineName())
-                .build()).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+                .factoryName(deviceBaseDTO.getFactory().getName())
+                .workshopName(deviceBaseDTO.getWorkshop().getName())
+                .productionLineName(deviceBaseDTO.getProductionLine().getName())
+                .build();}).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
     }
 
