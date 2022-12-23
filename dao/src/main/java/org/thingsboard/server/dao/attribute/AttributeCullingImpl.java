@@ -12,6 +12,8 @@ import org.thingsboard.server.common.data.vo.device.RunningStateVo;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
+import org.thingsboard.server.dao.kanban.vo.inside.ComponentDataDTO;
+import org.thingsboard.server.dao.kanban.vo.inside.DataDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +56,7 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         }
         return resultList3;
     }
+
 
     /**
      * 1.优先由 attributeNames 来判断，
@@ -99,10 +102,44 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
             result.put(k1,resultList3);
         });
 
+
         return  result;
 
     }
 
+
+    /**
+     *
+     * @param componentDataDTOList
+     * @param tenantId
+     * @param deviceId
+     * @return
+     */
+    @Override
+    public List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId) {
+        if(CollectionUtils.isEmpty(componentDataDTOList)){
+            return componentDataDTOList;
+        }
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
+        if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
+            return componentDataDTOList;
+        }
+        Map<String, DictDevicePropertySwitchEnum> map1 = devicePropertySwitchVOList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getPropertyName()))
+                .filter(m1 -> m1.getPropertySwitch() != null)
+                .collect(Collectors.toMap(DictDevicePropertySwitchVO::getPropertyName, DictDevicePropertySwitchVO::getPropertySwitch));
+
+        List<ComponentDataDTO> componentDataDTOListResults  =new ArrayList<>();
+        for(ComponentDataDTO v1: componentDataDTOList){
+            List<DataDTO> dataDTOList = v1.getData();
+            if(CollectionUtils.isNotEmpty(dataDTOList)){
+                if(isAddListStr3(v1,map1)){
+                    componentDataDTOListResults.add(v1);
+                }
+            }
+        }
+        return componentDataDTOListResults;
+    }
 
     private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId) {
         List<DictDevicePropertySwitchVO> list = new ArrayList<>();
@@ -136,6 +173,22 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
             return true;
         }
         if (map1.get(st1) == DictDevicePropertySwitchEnum.HIDE) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+
+
+
+
+    private boolean isAddListStr3(ComponentDataDTO v1, Map<String, DictDevicePropertySwitchEnum> map1) {
+        if(v1 ==  null){
+            return  true;
+        }
+        if (map1.get(v1.getName()) == DictDevicePropertySwitchEnum.HIDE) {
             return false;
         }
 
