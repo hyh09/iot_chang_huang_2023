@@ -33,7 +33,9 @@ export class DevicePropTableConfigResolver implements Resolve<EntityTableConfig<
       ({propertyType}) => propertyType === 'DEVICE' ? this.translate.instant('device-mng.device-property') : propertyType === 'COMPONENT' ? this.translate.instant('device-mng.component-property') : ''),
       new EntityTableColumn<DeviceAuthProp>('propertySwitch', 'device-mng.visible-to-factory', '150px', () => (''), () => ({ overflow: 'visible' }), false, () => ({}),
       () => undefined, false, null, () => false, true, (entity) => {
-        this.factoryMngService.switchDevicePropFactoryVisible([entity]).subscribe();
+        this.factoryMngService.switchDevicePropFactoryVisible([entity]).subscribe(() => {
+          this.config.table.updateData();
+        });
       })
     );
   }
