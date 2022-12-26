@@ -85,29 +85,7 @@ import java.util.Objects;
         return new JdbcTemplate(dataSource2);
     }
 
-//
-//    @Bean("entityManagerSqlServer")
-//    public EntityManager entityManagerSqlServer(EntityManagerFactoryBuilder builder) {
-//        return Objects.requireNonNull(localContainerEntityManagerFactoryBean(builder).getObject()).createEntityManager();
-//    }
-//
-//    @Bean("entityManagerFactorySqlServer")
-//    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(EntityManagerFactoryBuilder builder) {
-//        return builder.dataSource(masterDataSource())
-//                .properties(getVendorProperties())
-//                //设置实体类所在目录
-//                .packages("org.thingsboard.server.dao.sqlserver.jpa.entity")
-//                //持久化单元名称，当存在多个EntityManagerFactory时，需要制定此名称
-//                .persistenceUnit("entityManagerFactorySqlServer")
-//                .build();
-//    }
-//
-//    private Map<String, Object> getVendorProperties() {
-//        return hibernateProperties.determineHibernateProperties(
-//                jpaProperties.getProperties(),
-//                new HibernateSettings()
-//        );
-//    }
+
 
 
 
