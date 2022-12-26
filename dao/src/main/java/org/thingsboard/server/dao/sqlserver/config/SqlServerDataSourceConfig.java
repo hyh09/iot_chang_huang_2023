@@ -37,16 +37,15 @@ import java.util.Objects;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "entityManagerFactoryMaster",//配置连接工厂 entityManagerFactory
-        transactionManagerRef = "transactionManagerMaster", //配置事物管理器  transactionManager
+        entityManagerFactoryRef = "entityManagerFactorySqlServer",//配置连接工厂 entityManagerFactory
+        transactionManagerRef = "transactionManagerSqlServer", //配置事物管理器  transactionManager
         basePackages = {"org.thingsboard.server.dao.sqlserver.jpa.dao"} //配置主dao(repository)所在目录
 )public class SqlServerDataSourceConfig {
     @Autowired
     private Environment env;
     @Autowired
     private JpaProperties jpaProperties;
-    @Autowired
-    private HibernateProperties hibernateProperties;
+
 
 
     @Primary
@@ -70,7 +69,7 @@ import java.util.Objects;
 
     @Bean(name = "sqlserverDataSource")
     @ConfigurationProperties("spring.sqlserver")
-    public DataSource masterDataSource() {
+    public DataSource sqlserverDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(env.getProperty("spring.sqlserver.url"));
         dataSource.setUsername(env.getProperty("spring.sqlserver.username"));
@@ -83,6 +82,33 @@ import java.util.Objects;
     @Bean(name ="sqlServerTemplate")
     public JdbcTemplate sqlServerTemplate(@Qualifier("sqlserverDataSource") DataSource dataSource2) {
         return new JdbcTemplate(dataSource2);
+    }
+
+
+
+
+
+    @Bean("entityManagerFactorySqlServer")
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(EntityManagerFactoryBuilder builder) {
+        return builder.dataSource(sqlserverDataSource())
+                .properties(getVendorProperties())
+                .packages("org.thingsboard.server.dao.sqlserver.jpa.entity")
+                .build();
+    }
+
+
+    @Bean("entityManagerSqlServer")
+    public EntityManager entityManager(EntityManagerFactoryBuilder builder) {
+        return localContainerEntityManagerFactoryBean(builder).getObject().createEntityManager();
+    }
+
+    @Bean("transactionManagerSqlServer")
+    public PlatformTransactionManager transactionManager(EntityManagerFactoryBuilder builder) {
+        return new JpaTransactionManager(localContainerEntityManagerFactoryBean(builder).getObject());
+    }
+
+    private Map getVendorProperties() {
+        return jpaProperties.getProperties();
     }
 
 
