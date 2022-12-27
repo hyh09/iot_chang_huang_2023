@@ -1,11 +1,14 @@
 package org.thingsboard.server.dao;
 
 
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.vo.resultvo.cap.AppDeviceCapVo;
 import org.thingsboard.server.dao.model.ToData;
 
 import java.util.ArrayList;
@@ -35,6 +38,12 @@ public interface PageUtil {
 
         int endOfPage = Math.min(startOfPage + pageable.getPageSize(), list.size());
         return new PageImpl<>(list.subList(startOfPage, endOfPage), pageable, list.size());
+    }
+
+
+   static PageData<T> createPageDataFromList(List<T> list, PageLink pageLink) {
+      Page page= createPageFromList(list,pageLink);
+       return new PageData<>(page.getContent(), page.getTotalPages(),page.getTotalElements(),page.hasNext());
     }
 
 
