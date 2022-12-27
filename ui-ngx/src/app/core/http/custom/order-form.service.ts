@@ -95,4 +95,22 @@ export class OrderFormService {
     return this.http.post(`/api/order/${orderId}/done`, {}, defaultHttpOptionsFromConfig(config));
   }
 
+  // 获取订单进度列表
+  public getOrderProgress(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<OrderForm>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取流程卡进度列表
+  public getprocessCardProgress(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<OrderForm>> {
+  let queryStr: string[] = [];
+  Object.keys(filterParams).forEach(key => {
+    queryStr.push(`${key}=${filterParams[key]}`);
+  });
+  return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+}
+
 }
