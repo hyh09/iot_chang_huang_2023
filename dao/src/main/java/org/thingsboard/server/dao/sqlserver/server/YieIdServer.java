@@ -51,8 +51,7 @@ public class YieIdServer extends  BaseRunSqlServer{
      */
     public  PageData<QueryYieIdVo> query(QueryYieIdVo queryYieIdVo, Pageable pageable){
         StringBuffer sql = new StringBuffer();
-        sql.append("select row_number() " +
-                "over(order by B.tFactStartTime asc) as rownumber ," +
+        sql.append("select "+
                 "D.sWorkingProcedureNo as workOrderNumber,D.sWorkingProcedureName as workingProcedureName," +
                 "C.sWorkerGroupName as workerGroupName," +
                 "C.sWorkerNameList as workerNameList,C.nTrackQty as nTrackQty,A.sUnit as unit,A.sCardNo as cardNo,E.sMaterialNo as materialNo,F.sColorName as colorName," +
@@ -83,7 +82,6 @@ public class YieIdServer extends  BaseRunSqlServer{
         //班组名称 workerGroupName
         if(StringUtils.isNotEmpty(queryYieIdVo.getWorkerGroupName())){
             sql.append(" and C.sWorkerGroupName like  ").append("\'%").append(queryYieIdVo.getWorkerGroupName()).append("%\'");;
-//            list.add("\'%"+queryYieIdVo.getWorkerGroupName()+"%\'");
         }
 
         return pageQuery(sql.toString(),list,pageable,QueryYieIdVo.class);
