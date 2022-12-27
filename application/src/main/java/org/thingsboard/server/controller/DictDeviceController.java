@@ -366,7 +366,7 @@ public class DictDeviceController extends BaseController {
      */
     @ApiOperation(value = "数据过滤-属性开关更新或新增")
     @PostMapping("/dict/device/switches")
-    public DeviceSwitchVO updateOrSaveDiceDeviceSwitches(@RequestBody @Valid DeviceSwitchVO deviceSwitchVO) throws ThingsboardException {
-        return this.dictDeviceService.updateOrSaveDiceDeviceSwitches(getTenantId(), deviceSwitchVO);
+    public void updateOrSaveDiceDeviceSwitches(@RequestBody @Valid List<DictDevicePropertySwitchNewVO> propertySwitches) throws ThingsboardException {
+        this.dictDeviceService.updateOrSaveDiceDeviceSwitches(getTenantId(), propertySwitches);
     }
 }

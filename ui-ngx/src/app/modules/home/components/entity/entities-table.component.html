@@ -190,6 +190,7 @@
                 </ng-container>
                 <ng-container *ngIf="column.isSwitchColumn">
                   <mat-slide-toggle
+                    [disableRipple]="true"
                     [(ngModel)]="entity[column.key]"
                     (change)="column.onSwitch(entity, $event.checked)"
                     (click)="$event.stopPropagation()"
