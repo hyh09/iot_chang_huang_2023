@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { OrderCapacityTableConfigResolver } from './capacity/order-capacity-table-config.resolver';
 import { OrderTableConfigResolver } from './orders/orders-table-config.resolver';
+import { OrdersProgressTableConfigResolver } from './order-progress/order-progress-table-config.resolver';
+import { ProcessCardProgressTableConfigResolver } from './process-card-progress/process-card-progress-table-config.resolver';
 
 const routes: Routes = [
   {
@@ -40,6 +42,34 @@ const routes: Routes = [
         resolve: {
           entitiesTableConfig: OrderCapacityTableConfigResolver
         }
+      },
+      {
+        path: 'ordersProgress',
+        component: EntitiesTableComponent,
+        data: {
+          title: 'order.orders-progress',
+          breadcrumb: {
+            label: 'order.orders-progress',
+            icon: 'mdi:order-capacity'
+          }
+        },
+        resolve: {
+          entitiesTableConfig: OrdersProgressTableConfigResolver
+        }
+      },
+      {
+        path: 'processCardProgress',
+        component: EntitiesTableComponent,
+        data: {
+          title: 'order.process-card-progress',
+          breadcrumb: {
+            label: 'order.process-card-progress',
+            icon: 'mdi:order-capacity'
+          }
+        },
+        resolve: {
+          entitiesTableConfig: ProcessCardProgressTableConfigResolver
+        }
       }
     ]
   }
@@ -50,7 +80,9 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     OrderTableConfigResolver,
-    OrderCapacityTableConfigResolver
+    OrderCapacityTableConfigResolver,
+    OrdersProgressTableConfigResolver,
+    ProcessCardProgressTableConfigResolver
   ]
 })
 export class OrderFormRoutingModule { }
