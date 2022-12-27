@@ -37,14 +37,11 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class YieIdServer {
-    @Autowired
-    @Qualifier("sqlServerTemplate")
-    private JdbcTemplate jdbcTemplate;
+public class YieIdServer extends  BaseRunSqlServer{
 
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate01;
+
+
 
     /**
      * 搜索条件
@@ -92,16 +89,6 @@ public class YieIdServer {
         return pageQuery(sql.toString(),list,pageable,QueryYieIdVo.class);
     }
 
-    public <T> PageData<T> pageQuery( String sql,List list , Pageable pageable,Class<T> mappedClass) {
-        String sqlCount = "select count(*) from (" + sql + ") t_count_0";
-        Integer count = jdbcTemplate.queryForObject(sqlCount, list.toArray(), Integer.class);
-        StringBuffer  sqlQuery = new StringBuffer();
-        sqlQuery.append(" select ").append(" top(").append(pageable.getPageSize()).append(" ) *").append(" from  ( ")
-                .append(sql).append(" ) temp where rownumber > ").append((pageable.getPageNumber())*pageable.getPageSize());
-        List<T> mapList = jdbcTemplate.query(sqlQuery.toString(), list.toArray(), new BeanPropertyRowMapper<>(mappedClass));
-        Page<T> page = new PageImpl<T>(mapList, pageable, count);
-        return new PageData<T>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
-    }
 
 
 }
