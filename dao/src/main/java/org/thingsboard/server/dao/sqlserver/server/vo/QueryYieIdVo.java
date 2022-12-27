@@ -63,6 +63,10 @@ public class QueryYieIdVo extends  RownumberDto{
      * 时长
      */
     private String duration;
+    /**
+     * 机台
+     */
+    private String sEquipmentNo;
 
 
 

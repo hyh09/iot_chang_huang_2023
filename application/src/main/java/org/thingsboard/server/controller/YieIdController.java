@@ -1,6 +1,5 @@
 package org.thingsboard.server.controller;
 
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +10,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.sqlserver.server.YieIdServer;
-import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdEntryVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
-import org.thingsboard.server.entity.productioncalender.dto.ProductionCalenderPageQry;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 /**

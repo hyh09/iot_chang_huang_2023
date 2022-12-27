@@ -2,30 +2,14 @@ package org.thingsboard.server.dao.sqlserver.server;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.stereotype.Service;
-import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.common.data.productioncalender.ProductionCalender;
-import org.thingsboard.server.dao.PageUtil;
-import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdEntryVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
 import org.thingsboard.server.dao.util.CommonUtils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Project Name: thingsboard
@@ -55,13 +39,14 @@ public class YieIdServer extends  BaseRunSqlServer{
                 "D.sWorkingProcedureNo as workOrderNumber,D.sWorkingProcedureName as workingProcedureName," +
                 "C.sWorkerGroupName as workerGroupName," +
                 "C.sWorkerNameList as workerNameList,C.nTrackQty as nTrackQty,A.sUnit as unit,A.sCardNo as cardNo,E.sMaterialNo as materialNo,F.sColorName as colorName," +
-                "B.tFactStartTime as factStartTime,B.tFactEndTime as factEndTime,dbo.fnMESGetDiffTimeStr(B.tFactStartTime,B.tFactEndTime) as 时长 \n" +
+                "B.tFactStartTime as factStartTime,B.tFactEndTime as factEndTime,dbo.fnMESGetDiffTimeStr(B.tFactStartTime,B.tFactEndTime) as duration,G.sEquipmentNo as sEquipmentNo  \n" +
                 "FROM dbo.psWorkFlowCard A(NOLOCK)\n" +
                 "JOIN dbo.ppTrackJob B(NOLOCK) ON B.upsWorkFlowCardGUID = A.uGUID\n" +
                 "JOIN dbo.ppTrackOutput C(NOLOCK) ON C.uppTrackJobGUID = B.uGUID\n" +
                 "JOIN dbo.pbWorkingProcedure D(NOLOCK) ON D.uGUID=B.upbWorkingProcedureGUID\n" +
                 "JOIN dbo.mmMaterial E(NOLOCK) ON E.uGUID = A.ummMaterialGUID\n" +
-                "JOIN dbo.tmColor F(NOLOCK) ON F.uGUID = A.utmColorGUID where 1=1 ");
+                "JOIN dbo.tmColor F(NOLOCK) ON F.uGUID = A.utmColorGUID" +
+                " LEFT JOIN emEquipment G(NOLOCK) ON G.uGUID =C.uemEquipmentGUID  where 1=1 ");
         List list = new ArrayList();
         if(queryYieIdVo.getCreatedTime()!=null){
             sql.append(" and B.tFactStartTime >= ?");
@@ -83,6 +68,12 @@ public class YieIdServer extends  BaseRunSqlServer{
         if(StringUtils.isNotEmpty(queryYieIdVo.getWorkerGroupName())){
             sql.append(" and C.sWorkerGroupName like  ").append("\'%").append(queryYieIdVo.getWorkerGroupName()).append("%\'");;
         }
+        //机台号
+        if(StringUtils.isNotEmpty(queryYieIdVo.getSEquipmentNo())){
+            sql.append(" and G.sEquipmentNo like  ").append("\'%").append(queryYieIdVo.getSEquipmentNo()).append("%\'");;
+
+        }
+
 
         return pageQuery("B.tFactStartTime",sql.toString(),list,pageable,QueryYieIdVo.class);
     }
