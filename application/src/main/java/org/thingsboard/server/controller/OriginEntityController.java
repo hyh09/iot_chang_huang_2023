@@ -61,17 +61,33 @@ public class OriginEntityController extends BaseController {
      * 工厂数据接口
      */
     @ApiOperation(value = "工厂数据接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query", required = false),
+            @ApiImplicitParam(name = "startTime", value = "开始时间", paramType = "query", required = false),
+            @ApiImplicitParam(name = "endTime", value = "结束时间", paramType = "query", required = false),
+    })
     @GetMapping("/factory/data")
     @SuppressWarnings("all")
-    public Map<String, Object> listBoardCapacityMonitorOrders() throws ThingsboardException {
+    public Map<String, Object> listBoardCapacityMonitorOrders(@RequestParam(value = "startTime", required = false) Long startTime,
+                                                              @RequestParam(value = "endTime", required = false) Long endTime,
+                                                              @RequestParam(value = "factoryId", required = false) UUID factoryId) throws ThingsboardException {
         Map<String, Object> dataMap = Maps.newHashMap();
-        var factories = this.clientService.listFactories();
+        var factories = this.clientService.listFactories(getTenantId());
         List<Map<String, Object>> dataList = Lists.newArrayList();
 
-        var todayStartTime = CommonUtil.getTodayStartTime();
-        var todayCurrentTime = CommonUtil.getTodayCurrentTime();
+        var todayCurrentTime = endTime;
+        var todayStartTime = startTime;
+
+        if (startTime == null || startTime == 0L) {
+            todayStartTime = CommonUtil.getTodayStartTime();
+        }
+        if (endTime == null || endTime == 0L) {
+            todayCurrentTime = CommonUtil.getTodayCurrentTime();
+        }
 
         for (Factory factory : factories) {
+            if (factoryId != null && !factory.getId().equals(factory))
+                continue;
             Map<String, Object> factoryDataMap = Maps.newHashMap();
             factoryDataMap.put("Name", factory.getName());
             factoryDataMap.put("FactoryID", factory.getId());
@@ -82,14 +98,14 @@ public class OriginEntityController extends BaseController {
             capDataMap.put("ProductionToday", cap.getTodayValue());
             capDataMap.put("ProductuinTotal", cap.getSectionValue());
             capDataMap.put("HistoryProductionTotal", cap.getTodayValue());
-            factoryDataMap.put("TotalProduction",capDataMap);
+            factoryDataMap.put("TotalProduction", capDataMap);
 
             //设备综合
             Map<String, String> viewDataMap = Maps.newHashMap();
             var status = this.rtMonitorBoardController.getDeviceOnlineStatusStatistics(factory.getId().toString(), null, null, null);
             viewDataMap.put("EquipmentOnline", String.valueOf(status.getOnLineDeviceCount()));
             viewDataMap.put("EquipmentOffline", String.valueOf(status.getOffLineDeviceCount()));
-            factoryDataMap.put("EquipmentOverview",viewDataMap);
+            factoryDataMap.put("EquipmentOverview", viewDataMap);
 
             //生产监控
             ProductionMonitorListQry productionMonitorListQry = new ProductionMonitorListQry();
@@ -99,7 +115,7 @@ public class OriginEntityController extends BaseController {
             productionMonitorListQry.setWorkshopId(null);
             var productionMonitorenantList = this.productionCalenderController.getProductionMonitorenantList(productionMonitorListQry);
             List<Map<String, String>> proDataMapList = Lists.newArrayList();
-            if (!Collections.isEmpty(productionMonitorenantList)){
+            if (!Collections.isEmpty(productionMonitorenantList)) {
                 for (ProductionMonitorListVo productionMonitorListVo : productionMonitorenantList) {
                     Map<String, String> proDataMap = Maps.newHashMap();
                     proDataMap.put("Name", productionMonitorListVo.getFactoryName());
@@ -111,31 +127,31 @@ public class OriginEntityController extends BaseController {
             }
             Map<String, Object> productionMonitorMap = Maps.newHashMap();
             productionMonitorMap.put("ProductionMonitor", proDataMapList);
-            factoryDataMap.put("ProductionMonitor",productionMonitorMap);
+            factoryDataMap.put("ProductionMonitor", productionMonitorMap);
 
             //订单监控
             var orderCustomCapacityResults = this.orderController.listBoardCapacityMonitorOrders(todayStartTime, todayCurrentTime, factory.getId(), null);
             List<Map<String, String>> orderDataMapList = Lists.newArrayList();
-            if (!Collections.isEmpty(orderCustomCapacityResults)){
+            if (!Collections.isEmpty(orderCustomCapacityResults)) {
                 for (OrderCustomCapacityResult orderCustomCapacityResult : orderCustomCapacityResults) {
                     Map<String, String> orderDataMap = Maps.newHashMap();
                     orderDataMap.put("Id", orderCustomCapacityResult.getOrderNo());
                     orderDataMap.put("CompletedDividedByTotal", orderCustomCapacityResult.getCompletedCapacities().stripTrailingZeros().toPlainString() + "/" + orderCustomCapacityResult.getTotal().stripTrailingZeros().toPlainString());
                     orderDataMap.put("FactoryName", orderCustomCapacityResult.getFactoryName());
                     orderDataMap.put("CompletedPercentage", orderCustomCapacityResult.getCompleteness().stripTrailingZeros().toPlainString());
-                    orderDataMap.put("IsOvertime", Boolean.TRUE.equals(orderCustomCapacityResult.getIsOvertime()) ? "1":"0");
+                    orderDataMap.put("IsOvertime", Boolean.TRUE.equals(orderCustomCapacityResult.getIsOvertime()) ? "1" : "0");
                     orderDataMapList.add(orderDataMap);
                 }
             }
             Map<String, Object> orderMonitorMap = Maps.newHashMap();
             orderMonitorMap.put("OrderMonitor", orderDataMapList);
-            factoryDataMap.put("OrderMonitor",orderMonitorMap);
+            factoryDataMap.put("OrderMonitor", orderMonitorMap);
 
 
             //车间数据
             List<Map<String, Object>> workshopDataMapList = Lists.newArrayList();
-            var workshops = this.clientService.listWorkshopsByFactoryId(new TenantId(factory.getTenantId()), factory.getId());
-            for (Workshop workshop: workshops) {
+            var workshops = this.clientService.listWorkshopsByFactoryId(getTenantId(), factory.getId());
+            for (Workshop workshop : workshops) {
                 Map<String, Object> workshopDataMap = Maps.newHashMap();
                 workshopDataMap.put("Name", workshop.getName());
                 workshopDataMap.put("WorkshopID", workshop.getId());
@@ -145,7 +161,7 @@ public class OriginEntityController extends BaseController {
                 var statusWorkshop = this.rtMonitorBoardController.getDeviceOnlineStatusStatistics(null, workshop.getId().toString(), null, null);
                 viewWorkshopDataMap.put("EquipmentOnline", String.valueOf(statusWorkshop.getOnLineDeviceCount()));
                 viewWorkshopDataMap.put("EquipmentOffline", String.valueOf(statusWorkshop.getOffLineDeviceCount()));
-                workshopDataMap.put("EquipmentOverview",viewWorkshopDataMap);
+                workshopDataMap.put("EquipmentOverview", viewWorkshopDataMap);
 
                 //生产监控
                 ProductionMonitorListQry workshopProductionMonitorListQry = new ProductionMonitorListQry();
@@ -155,7 +171,7 @@ public class OriginEntityController extends BaseController {
                 workshopProductionMonitorListQry.setWorkshopId(workshop.getId());
                 var workshopProductionMonitorenantList = this.productionCalenderController.getProductionMonitorenantList(workshopProductionMonitorListQry);
                 List<Map<String, String>> workshopProDataMapList = Lists.newArrayList();
-                if (!Collections.isEmpty(workshopProductionMonitorenantList)){
+                if (!Collections.isEmpty(workshopProductionMonitorenantList)) {
                     for (ProductionMonitorListVo productionMonitorListVo : workshopProductionMonitorenantList) {
                         Map<String, String> proDataMap = Maps.newHashMap();
                         proDataMap.put("Name", productionMonitorListVo.getFactoryName());
@@ -167,44 +183,44 @@ public class OriginEntityController extends BaseController {
                 }
                 Map<String, Object> workshopProductionMonitorMap = Maps.newHashMap();
                 workshopProductionMonitorMap.put("ProductionMonitor", workshopProDataMapList);
-                workshopDataMap.put("ProductionMonitor",workshopProductionMonitorMap);
+                workshopDataMap.put("ProductionMonitor", workshopProductionMonitorMap);
 
                 //订单监控
                 var workshopOrderCustomCapacityResults = this.orderController.listBoardCapacityMonitorOrders(todayStartTime, todayCurrentTime, null, workshop.getId());
                 List<Map<String, String>> workshopOrderDataMapList = Lists.newArrayList();
-                if (!Collections.isEmpty(workshopOrderCustomCapacityResults)){
+                if (!Collections.isEmpty(workshopOrderCustomCapacityResults)) {
                     for (OrderCustomCapacityResult orderCustomCapacityResult : workshopOrderCustomCapacityResults) {
                         Map<String, String> orderDataMap = Maps.newHashMap();
                         orderDataMap.put("Id", orderCustomCapacityResult.getOrderNo());
                         orderDataMap.put("CompletedDividedByTotal", orderCustomCapacityResult.getCompletedCapacities().stripTrailingZeros().toPlainString() + "/" + orderCustomCapacityResult.getTotal().stripTrailingZeros().toPlainString());
                         orderDataMap.put("FactoryName", orderCustomCapacityResult.getFactoryName());
                         orderDataMap.put("CompletedPercentage", orderCustomCapacityResult.getCompleteness().stripTrailingZeros().toPlainString());
-                        orderDataMap.put("IsOvertime", Boolean.TRUE.equals(orderCustomCapacityResult.getIsOvertime()) ? "1":"0");
+                        orderDataMap.put("IsOvertime", Boolean.TRUE.equals(orderCustomCapacityResult.getIsOvertime()) ? "1" : "0");
                         workshopOrderDataMapList.add(orderDataMap);
                     }
                 }
                 Map<String, Object> workshopOrderMonitorMap = Maps.newHashMap();
                 workshopOrderMonitorMap.put("OrderMonitor", workshopOrderDataMapList);
-                workshopDataMap.put("OrderMonitor",workshopOrderMonitorMap);
+                workshopDataMap.put("OrderMonitor", workshopOrderMonitorMap);
 
                 // 设备数据
-                List<Map<String, Object>> deviceDataMapList = Lists.newArrayList();
-                var devices = this.clientService.listSimpleDevicesByQuery(new TenantId(workshop.getTenantId()), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
+                List<Map<String, String>> deviceDataMapList = Lists.newArrayList();
+                var devices = this.clientService.listSimpleDevicesByQuery(getTenantId(), new FactoryDeviceQuery().setWorkshopId(workshop.getId().toString()));
                 for (Device device : devices) {
                     var deviceKeyParametersResult = this.rtMonitorBoardController.getDeviceKeyParameters(device.getId().getId());
-                    Map<String, Object> deviceDataMap = Maps.newHashMap();
+                    Map<String, String> deviceDataMap = Maps.newHashMap();
                     deviceDataMap.put("EquipmentID", deviceKeyParametersResult.getId());
                     deviceDataMap.put("EquipmentName", deviceKeyParametersResult.getName());
-                    deviceDataMap.put("Data1", deviceKeyParametersResult.getOperationRate());
-                    deviceDataMap.put("Data2", deviceKeyParametersResult.getCapacityEfficiency());
-                    deviceDataMap.put("Data3", deviceKeyParametersResult.getStartingUpDuration());
-                    deviceDataMap.put("Data4", deviceKeyParametersResult.getShutdownDuration());
-                    deviceDataMap.put("Data5", deviceKeyParametersResult.getMaintenanceDuration());
-                    deviceDataMap.put("Data6", deviceKeyParametersResult.getShiftDuration());
-                    deviceDataMap.put("Data7", deviceKeyParametersResult.getOutput());
-                    deviceDataMap.put("Data8", deviceKeyParametersResult.getOee());
-                    deviceDataMap.put("Data9", deviceKeyParametersResult.getQualityRate());
-                    deviceDataMap.put("Data10", deviceKeyParametersResult.getInQualityNum());
+                    deviceDataMap.put("Data1", String.valueOf(deviceKeyParametersResult.getOperationRate()));
+                    deviceDataMap.put("Data2", String.valueOf(deviceKeyParametersResult.getCapacityEfficiency()));
+                    deviceDataMap.put("Data3", String.valueOf(deviceKeyParametersResult.getStartingUpDuration()));
+                    deviceDataMap.put("Data4", String.valueOf(deviceKeyParametersResult.getShutdownDuration()));
+                    deviceDataMap.put("Data5", String.valueOf(deviceKeyParametersResult.getMaintenanceDuration()));
+                    deviceDataMap.put("Data6", String.valueOf(deviceKeyParametersResult.getShiftDuration()));
+                    deviceDataMap.put("Data7", String.valueOf(deviceKeyParametersResult.getOutput()));
+                    deviceDataMap.put("Data8", String.valueOf(deviceKeyParametersResult.getOee()));
+                    deviceDataMap.put("Data9", String.valueOf(deviceKeyParametersResult.getQualityRate()));
+                    deviceDataMap.put("Data10", String.valueOf(deviceKeyParametersResult.getInQualityNum()));
                     deviceDataMapList.add(deviceDataMap);
                 }
                 workshopDataMap.put("EquipmentData", deviceDataMapList);
@@ -213,7 +229,7 @@ public class OriginEntityController extends BaseController {
                 workshopDataMapList.add(workshopDataMap);
             }
 
-            factoryDataMap.put("WorkshopData",workshopDataMapList);
+            factoryDataMap.put("WorkshopData", workshopDataMapList);
             dataList.add(factoryDataMap);
         }
 

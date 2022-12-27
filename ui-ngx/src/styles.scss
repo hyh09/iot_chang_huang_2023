@@ -821,14 +821,14 @@ mat-label {
 
   mat-drawer.tb-details-drawer {
     z-index: 59 !important;
-    width: 100% !important;
+    width: 1000px;
     max-width: 100% !important;
-    @media #{$mat-gt-sm} {
-      width: 80% !important;
-    }
-    @media #{$mat-gt-md} {
-      width: 65% !important;
-    }
+    // @media #{$mat-gt-sm} {
+    //   width: 80% !important;
+    // }
+    // @media #{$mat-gt-md} {
+    //   width: 65% !important;
+    // }
   }
 
   .mat-card-subtitle, .mat-card-content {

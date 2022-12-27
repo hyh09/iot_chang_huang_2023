@@ -28,6 +28,15 @@ import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.hs.dao.DictDeviceSwitchEntity;
+import org.thingsboard.server.dao.hs.dao.DictDeviceSwitchRepository;
+import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
+import org.thingsboard.server.dao.hsms.entity.po.DictDeviceSwitch;
+import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
+import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 
@@ -95,6 +104,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
     // 图表属性Repository
     DictDeviceGraphItemRepository graphItemRepository;
+
+    // 设备字典属性开关Repository
+    DictDeviceSwitchRepository switchRepository;
 
     /**
      * 获得当前可用设备字典编码
@@ -874,7 +886,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     public DictDevice findById(UUID dictDeviceId) {
         Optional<DictDeviceEntity> byId = dictDeviceRepository.findById(dictDeviceId);
-        if (!byId.isEmpty() && byId.get() != null){
+        if (!byId.isEmpty() && byId.get() != null) {
             return byId.get().toData();
         }
         return null;
@@ -940,6 +952,135 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
         if (!properties.isEmpty())
             this.componentPropertyRepository.saveAll(properties.stream().map(DictDeviceComponentPropertyEntity::new).collect(Collectors.toList()));
+    }
+
+    /**
+     * 数据过滤-设备列表
+     *
+     * @param query    设备查询参数
+     * @param tenantId 租户Id
+     * @param pageLink 分页参数
+     * @return 数据过滤-设备列表
+     */
+    @Override
+    public PageData<DictDeviceSwitchDeviceVO> listDictDeviceSwitchDevicesByQuery(FactoryDeviceQuery query, TenantId tenantId, PageLink pageLink) {
+        var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
+        if (devicePageData.getData().isEmpty())
+            return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+
+        return new PageData<>(devicePageData.getData().stream().map(v -> {
+            var deviceBaseDTO = this.clientService.getFactoryBaseInfoByQuery(tenantId, new FactoryDeviceQuery(UUIDToString(v.getFactoryId()), UUIDToString(v.getWorkshopId()), UUIDToString(v.getProductionLineId()), v.getId().toString()));
+            return DictDeviceSwitchDeviceVO.builder()
+                    .deviceId(v.getId().getId())
+                    .deviceName(v.getRename())
+                    .factoryName(deviceBaseDTO.getFactory().getName())
+                    .workshopName(deviceBaseDTO.getWorkshop().getName())
+                    .productionLineName(deviceBaseDTO.getProductionLine().getName())
+                    .build();
+        }).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
+
+    }
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param q        查询参数
+     * @param pageLink 分页参数
+     * @return 数据过滤-参数管理列表
+     */
+    @Override
+    @SuppressWarnings("all")
+    public PageData<DictDevicePropertySwitchNewVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException {
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备不存在！", ThingsboardErrorCode.GENERAL));
+        if (device.getDictDeviceId() == null)
+            throw new ThingsboardException("设备未绑定设备字典！", ThingsboardErrorCode.GENERAL);
+
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), device.getDictDeviceId()).map(DictDeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
+
+        return this.toPageDataByList(this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().filter(v -> StringUtils.isBlank(q) || v.getTitle().toLowerCase(Locale.ROOT).contains(q))
+                .map(v -> {
+                    var dictDeviceSwitch = this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData);
+                    var data = DictDevicePropertySwitchNewVO.builder()
+                            .deviceId(toUUID(deviceId))
+                            .dictDeviceId(toUUID(dictDevice.getId()))
+                            .propertyId(v.getId())
+                            .propertyName(v.getName())
+                            .propertyUnit(v.getUnit())
+                            .propertyType(v.getPropertyType())
+                            .propertyTitle(v.getTitle())
+                            .propertySwitch(1 ==dictDeviceSwitch.map(DictDeviceSwitch::getPropertySwitch).map(f -> f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()) ? Boolean.TRUE : Boolean.FALSE)
+                            .build();
+                    dictDeviceSwitch.ifPresent(f->data.setId(f.getId()));
+                    return data;
+                }).collect(Collectors.toList()), pageLink);
+    }
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 数据过滤-参数管理列表
+     */
+    @Override
+    @SuppressWarnings("all")
+    public List<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId) throws ThingsboardException {
+        var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(deviceId))).map(DeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备不存在！", ThingsboardErrorCode.GENERAL));
+        if (device.getDictDeviceId() == null)
+            throw new ThingsboardException("设备未绑定设备字典！", ThingsboardErrorCode.GENERAL);
+
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), device.getDictDeviceId()).map(DictDeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
+
+        var dictDeviceSwitches = DaoUtil.convertDataList(new ArrayList<>(this.switchRepository.findAllByDeviceId(toUUID(deviceId))));
+        return this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().map(v -> DictDevicePropertySwitchVO.builder()
+                .id(v.getId())
+                .deviceId(toUUID(deviceId))
+                .dictDeviceId(toUUID(dictDevice.getId()))
+                .propertyId(v.getId())
+                .propertyName(v.getName())
+                .propertyUnit(v.getUnit())
+                .propertyType(v.getPropertyType())
+                .propertyTitle(v.getTitle())
+                .propertySwitch(dictDeviceSwitches.stream().filter(p -> p.getPropertyId().equals(v.getId()) && p.getPropertyType().equals(v.getPropertyType()))
+                        .findAny().map(DictDeviceSwitch::getPropertySwitch).orElse(DictDevicePropertySwitchEnum.SHOW))
+                .build()).collect(Collectors.toList());
+    }
+
+    /**
+     * 数据过滤-属性开关更新或新增
+     *
+     * @param tenantId         租户Id
+     * @param propertySwitches 设备开关信息
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches) {
+        if (propertySwitches.isEmpty())
+            return;
+        var deviceId = propertySwitches.get(0).getDeviceId();
+        var dictDeviceId = propertySwitches.get(0).getDictDeviceId();
+        for (DictDevicePropertySwitchNewVO propertySwitchVO : propertySwitches) {
+            DictDeviceSwitchEntity dictDeviceSwitchEntity;
+            if (propertySwitchVO.getId() != null) {
+                dictDeviceSwitchEntity = this.switchRepository.findById(propertySwitchVO.getId()).get();
+                dictDeviceSwitchEntity.setSwitchValue(Boolean.TRUE.equals(propertySwitchVO.getPropertySwitch()) ? 1 : 0);
+            } else {
+                dictDeviceSwitchEntity = new DictDeviceSwitchEntity();
+                dictDeviceSwitchEntity.setDeviceId(deviceId);
+                dictDeviceSwitchEntity.setDictDeviceId(dictDeviceId);
+                dictDeviceSwitchEntity.setPropertyId(propertySwitchVO.getPropertyId());
+                dictDeviceSwitchEntity.setPropertyType(propertySwitchVO.getPropertyType().getCode());
+                dictDeviceSwitchEntity.setSwitchValue(Boolean.TRUE.equals(propertySwitchVO.getPropertySwitch()) ? 1 : 0);
+            }
+            this.switchRepository.save(dictDeviceSwitchEntity);
+            propertySwitchVO.setId(dictDeviceSwitchEntity.getId());
+        }
     }
 
     /**
@@ -1107,5 +1248,10 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Autowired
     public void setDictDataRepository(DictDataRepository dictDataRepository) {
         this.dictDataRepository = dictDataRepository;
+    }
+
+    @Autowired
+    public void setSwitchRepository(DictDeviceSwitchRepository switchRepository) {
+        this.switchRepository = switchRepository;
     }
 }

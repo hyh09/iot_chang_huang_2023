@@ -1,0 +1,29 @@
+<mat-form-field>
+  <mat-label>{{ 'device-mng.factory-belong' | translate }}</mat-label>
+  <mat-select
+    [(ngModel)]="entitiesTableConfig.componentsData.factoryId"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  >
+    <mat-option value="">{{ 'common.all' | translate }}</mat-option>
+    <mat-option
+      *ngFor="let factory of factoryList"
+      [value]="factory.id"
+    >{{ factory.name || '-' }}</mat-option>
+  </mat-select>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'device-mng.device-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.deviceName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.deviceName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('deviceName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

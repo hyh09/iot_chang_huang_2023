@@ -93,7 +93,7 @@ public class AbstractStatisticalDataEntity extends TenantBaseEntity{
      *中文描述: 产能的增量值
      */
     @Column(name="capacity_added_value")
-    protected String capacityAddedValue;
+    protected String capacityAddedValue="0";
 
     @Column(name="capacity_first_value")
     protected  String capacityFirstValue;

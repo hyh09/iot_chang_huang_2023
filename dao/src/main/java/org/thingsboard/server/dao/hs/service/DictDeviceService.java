@@ -12,6 +12,10 @@ import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
 
 import java.io.IOException;
 import java.util.List;
@@ -254,4 +258,42 @@ public interface DictDeviceService {
      * @param file              文件
      */
     void saveDictDevicesFromFile(TenantId tenantId, UserId userId, String checksum, ChecksumAlgorithm checksumAlgorithm, MultipartFile file) throws IOException, ThingsboardException;
+
+    /**
+     * 数据过滤-设备列表
+     *
+     * @param query    设备查询参数
+     * @param tenantId 租户Id
+     * @param pageLink 分页参数
+     * @return 数据过滤-设备列表
+     */
+    PageData<DictDeviceSwitchDeviceVO> listDictDeviceSwitchDevicesByQuery(FactoryDeviceQuery query, TenantId tenantId, PageLink pageLink);
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @param q        查询参数
+     * @param pageLink 分页参数
+     * @return 数据过滤-参数管理列表
+     */
+    PageData<DictDevicePropertySwitchNewVO> listDictDeviceSwitches(TenantId tenantId, String deviceId, String q, PageLink pageLink) throws ThingsboardException;
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param tenantId 租户Id
+     * @param deviceId 设备Id
+     * @return 数据过滤-参数管理列表
+     */
+    List<DictDevicePropertySwitchVO> listDictDeviceSwitches(TenantId tenantId, String deviceId) throws ThingsboardException;
+
+    /**
+     * 数据过滤-属性开关更新或新增
+     *
+     * @param tenantId       租户Id
+     * @param propertySwitches 设备开关信息
+     */
+    void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches);
 }

@@ -15,8 +15,17 @@ import java.util.List;
  */
 public interface PerformanceAnalysisListSvc {
 
+    List<EnergyEffciencyNewEntity> getAddValue(QueryTsKvVo queryTsKvVo, String keyName);
+
     /**
-     * 产量历史
+     * 产量列表
      */
    List<EnergyEffciencyNewEntity> yieldList(QueryTsKvVo queryTsKvVo);
+
+    /**
+     * 能耗的列表的： 水 电 气 产量
+     * @param queryTsKvVo
+     * @return
+     */
+   List<EnergyEffciencyNewEntity> queryEnergyListAll(QueryTsKvVo queryTsKvVo);
 }

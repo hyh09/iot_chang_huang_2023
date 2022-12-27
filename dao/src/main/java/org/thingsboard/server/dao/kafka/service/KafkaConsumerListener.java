@@ -30,7 +30,7 @@ import java.util.UUID;
  * @create: 2022-03-10 16:25
  **/
 @Slf4j
-@Component
+//@Component
 public class KafkaConsumerListener extends BaseAbstractSqlTimeseriesDao {
 
     @Autowired

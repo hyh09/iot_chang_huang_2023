@@ -10,7 +10,7 @@ variables:
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
 
 before_script:
-  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL
+  - docker login -u $HUANSI_YL_USER -p $HUANSI_YL_PASSWORD $HUANSI_REGISTRY_URL_NET
   - export GRADLE_USER_HOME=`pwd`/.gradle
 
 # 打包并构建镜像
@@ -22,6 +22,7 @@ package:
       - .gradle/wrapper
       - .gradle/caches
       - ui-ngx/node_modules
+      - msa/web-ui/node_modules
     # keep cache across branch
     key: "${CI_COMMIT_REF_SLUG}"
   image: 47.110.145.204:8084/buildenv/jdk11-mvn-node-docker
@@ -37,7 +38,7 @@ package:
     - test
   after_script:
     - echo "镜像打包完毕,镜像如下:"
-    - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
+    - docker images | grep ${HUANSI_REGISTRY_URL_NET}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
     - echo "删除无用镜像"
     - docker rmi -f `docker images |grep "thingsboard"|grep "<none>"|awk '{print $3}'`
 
@@ -49,13 +50,13 @@ push:
     - hz-k8s-iot-test
   script:
     - echo "推送镜像"
-    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
-    - docker push ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
+    - docker push ${HUANSI_REGISTRY_URL_NET}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-node:latest
+    - docker push ${HUANSI_REGISTRY_URL_NET}/${HUANSI_YL_REGISTRY_NAME}/thingsboard/tb-web-ui:latest
   only:
     - test
   after_script:
     - echo "镜像打包完毕,镜像如下:"
-    - docker images | grep ${HUANSI_REGISTRY_URL}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
+    - docker images | grep ${HUANSI_REGISTRY_URL_NET}/${HUANSI_YL_REGISTRY_NAME}/thingsboard
 
 # 部署到测试环境
 deploy:

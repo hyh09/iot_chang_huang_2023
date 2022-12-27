@@ -366,4 +366,6 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao {
 
     List<Device>  findAllBy();
 
+    public List<DeviceEntity> findAllByEntity(DeviceEntity userExtension);
+
 }

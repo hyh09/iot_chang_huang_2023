@@ -2,9 +2,10 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { Factory, FactoryMngList, FactoryTreeList, ProdDevice, ProdLine, WorkShop } from "@app/shared/models/custom/factory-mng.models";
-import { BaseData, HasId } from "@app/shared/public-api";
+import { BaseData, HasId, PageData, PageLink } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
+import { DeviceAuthProp, DeviceDataAuth } from "@app/shared/models/custom/device-mng.models";
 
 interface FetchListFilter {
   name?: string,
@@ -186,6 +187,27 @@ export class FactoryMngService {
   public getFactoryGatewayIds(config?: RequestConfig): Observable<{factoryId: string; gatewayDeviceIds: string[]}[]> {
     return this.http.get<{factoryId: string; gatewayDeviceIds: string[]}[]>(
       `/api/deviceMonitor/rtMonitor/factory/gateway/devices`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 数据权限-查询设备列表
+  public getDataAuthDevices(pageLink: PageLink, filterParams: { factoryId: string; deviceName: string; }, config?: RequestConfig): Observable<PageData<DeviceDataAuth>> {
+    return this.http.get<PageData<DeviceDataAuth>>(
+      `/api/dict/device/switch/devices${pageLink.toQuery()}&factoryId=${filterParams.factoryId}&deviceName=${encodeURIComponent(filterParams.deviceName)}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
+  // 数据权限-查询设备属性列表
+  public getDeviceProperties(pageLink: PageLink, filterParams: { deviceId: string; propertyTitle: string; }, config?: RequestConfig): Observable<PageData<DeviceAuthProp>> {
+    return this.http.get<PageData<DeviceAuthProp>>(
+      `/api/dict/device/switches${pageLink.toQuery()}&deviceId=${filterParams.deviceId}&q=${encodeURIComponent(filterParams.propertyTitle)}`,
+      defaultHttpOptionsFromConfig(config)
+    );
+  }
+
+  // 数据权限-设置设备属性对工厂是否可见
+  public switchDevicePropFactoryVisible(props: DeviceAuthProp[], config?: RequestConfig): Observable<any> {
+    return this.http.post(`/api/dict/device/switches`, props, defaultHttpOptionsFromConfig(config));
   }
 
 }

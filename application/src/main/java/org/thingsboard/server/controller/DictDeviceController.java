@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.thingsboard.server.common.data.EntityType;
+import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
@@ -21,11 +24,16 @@ import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import static org.thingsboard.server.dao.service.Validator.validatePageLink;
@@ -281,5 +289,84 @@ public class DictDeviceController extends BaseController {
 
         ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm.valueOf(checksumAlgorithmStr.toUpperCase());
         this.dictDeviceService.saveDictDevicesFromFile(getTenantId(), getCurrentUser().getId(), checksum, checksumAlgorithm, file);
+    }
+
+    /**
+     * 数据过滤-设备列表
+     *
+     * @param pageSize     每页大小
+     * @param page         页数
+     * @param sortProperty 排序属性
+     * @param sortOrder    排序顺序
+     * @return 数据过滤列表
+     */
+    @ApiOperation(value = "数据过滤-设备列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "deviceName", value = "名称", paramType = "query"),
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "query"),
+    })
+    @GetMapping("/dict/device/switch/devices")
+    public PageData<DictDeviceSwitchDeviceVO> listDictDeviceSwitchDevices(
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam(required = false) String deviceName,
+            @RequestParam(required = false) String factoryId
+    ) throws ThingsboardException {
+
+        PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
+        validatePageLink(pageLink);
+        var query = new FactoryDeviceQuery(factoryId, deviceName);
+        if (StringUtils.isBlank(factoryId) && StringUtils.isBlank(deviceName))
+            query = FactoryDeviceQuery.newQueryAllEntity();
+        return this.dictDeviceService.listDictDeviceSwitchDevicesByQuery(query, getTenantId(), pageLink);
+    }
+
+    /**
+     * 数据过滤-参数管理列表
+     *
+     * @param pageSize     每页大小
+     * @param page         页数
+     * @param sortProperty 排序属性
+     * @param sortOrder    排序顺序
+     * @return 数据过滤列表
+     */
+    @ApiOperation(value = "数据过滤-参数管理列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页数", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页大小", dataType = "integer", paramType = "query", required = true),
+            @ApiImplicitParam(name = "sortProperty", value = "排序属性", paramType = "query", defaultValue = "createdTime"),
+            @ApiImplicitParam(name = "sortOrder", value = "排序顺序", paramType = "query", defaultValue = "desc"),
+            @ApiImplicitParam(name = "q", value = "参数描述", paramType = "query"),
+            @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query"),
+    })
+    @GetMapping("/dict/device/switches")
+    public PageData<DictDevicePropertySwitchNewVO> listDictDeviceSwitches(
+            @RequestParam int page,
+            @RequestParam int pageSize,
+            @RequestParam(required = false, defaultValue = "createdTime") String sortProperty,
+            @RequestParam(required = false, defaultValue = "desc") String sortOrder,
+            @RequestParam(required = false) String deviceId,
+            @RequestParam(required = false) String q
+    ) throws ThingsboardException {
+
+        PageLink pageLink = createPageLink(pageSize, page, "", sortProperty, sortOrder);
+        validatePageLink(pageLink);
+        q = StringUtils.isNotBlank(q) ? q.toLowerCase(Locale.ROOT).trim() : q;
+        return this.dictDeviceService.listDictDeviceSwitches(getTenantId(), deviceId, q, pageLink);
+    }
+
+    /**
+     * 数据过滤-属性开关更新或新增
+     */
+    @ApiOperation(value = "数据过滤-属性开关更新或新增")
+    @PostMapping("/dict/device/switches")
+    public void updateOrSaveDiceDeviceSwitches(@RequestBody @Valid List<DictDevicePropertySwitchNewVO> propertySwitches) throws ThingsboardException {
+        this.dictDeviceService.updateOrSaveDiceDeviceSwitches(getTenantId(), propertySwitches);
     }
 }

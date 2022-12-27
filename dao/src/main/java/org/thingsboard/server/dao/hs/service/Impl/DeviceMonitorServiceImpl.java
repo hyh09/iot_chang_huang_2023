@@ -45,6 +45,8 @@ import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
+import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.dao.model.sql.AlarmEntity;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
 import org.thingsboard.server.dao.model.sql.DeviceProfileEntity;
@@ -1159,7 +1161,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                             }),
 
                             CompletableFuture.runAsync(() -> {
-                                var device = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId).toData();
+                                var deviceEntity = this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId);
+                                var device = deviceEntity.toData();
                                 result.setId(device.getId().toString());
                                 result.setName(device.getRename());
                                 result.setRename(device.getRename());
@@ -1208,6 +1211,62 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Override
     public String getRtMonitorDeviceComponentName(TenantId tenantId, UUID deviceId, UUID componentId) {
         return this.componentRepository.findById(componentId).map(DictDeviceComponentEntity::toData).map(DictDeviceComponent::getName).orElse("");
+    }
+
+    /**
+     * 数据筛选过滤
+     *
+     * @param deviceDetailResult 设备详情数据
+     * @param tenantId           租户Id
+     */
+    @Override
+    public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult) throws ThingsboardException {
+        var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceDetailResult.getId())
+                .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
+                .map(DictDevicePropertySwitchVO::getPropertyName)
+                .collect(Collectors.toSet());
+
+        if (propertyShowSet.isEmpty())
+            return deviceDetailResult;
+        else {
+            deviceDetailResult.getResultList().removeIf(v->!propertyShowSet.contains(v.getName()));
+            this.recursionFilterComponentData(deviceDetailResult.getComponentList(), propertyShowSet);
+        }
+        return deviceDetailResult;
+    }
+
+    /**
+     * 数据筛选过滤
+     *
+     * @param tenantId   租户Id
+     * @param properties 属性列表
+     * @param deviceId   设备Id
+     */
+    @Override
+    public List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties) throws ThingsboardException {
+        var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceId)
+                .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
+                .map(DictDevicePropertySwitchVO::getPropertyName)
+                .collect(Collectors.toSet());
+        properties.removeIf(v->!propertyShowSet.contains(v.getName()));
+        return properties;
+    }
+
+    /**
+     * 过滤部件属性数据
+     *
+     * @param componentList   部件列表
+     * @param propertyShowSet 属性集合
+     */
+    public void recursionFilterComponentData(List<DictDeviceComponentVO> componentList, Set<String> propertyShowSet) {
+        for (DictDeviceComponentVO componentVO : componentList) {
+            componentVO.getPropertyList().removeIf(dictDeviceComponentPropertyVO -> !propertyShowSet.contains(dictDeviceComponentPropertyVO.getName()));
+
+            if (componentVO.getComponentList() == null || componentVO.getComponentList().isEmpty()) {
+                continue;
+            }
+            this.recursionFilterComponentData(componentVO.getComponentList(), propertyShowSet);
+        }
     }
 
     /**

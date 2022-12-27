@@ -68,6 +68,7 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<AppDeviceCapVo> queryPCCapAppNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
+    PageDataAndTotalValue<AppDeviceCapVo> queryCapacityOnSecondLeve(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink);
 
 
     /**
@@ -81,6 +82,7 @@ public interface EfficiencyStatisticsSvc {
     PageDataAndTotalValue<Map> queryEntityByKeysNewMethod(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
     PageDataAndTotalValue<EfficiencyEntityInfo> queryEntityByKeysNew(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
+    PageDataAndTotalValue<EfficiencyEntityInfo> queryEntityByKeysNewOnSecondLeve(QueryTsKvVo queryTsKvVo, TenantId tenantId, PageLink pageLink) throws JsonProcessingException;
 
 
 
