@@ -2,7 +2,6 @@ package org.thingsboard.server.dao.sqlserver.server.vo;
 
 import lombok.Data;
 import lombok.ToString;
-import org.thingsboard.server.dao.util.CommonUtils;
 
 import java.time.LocalDateTime;
 
@@ -57,17 +56,7 @@ public class QueryYieIdVo extends  RownumberDto{
      * 色名
      */
     private String colorName;
-    /**
-     * 开始时间
-     */
-    private  LocalDateTime  factStartTime;
-    private Long createdTime;
 
-    /**
-     * 结束时间
-     */
-    private LocalDateTime factEndTime;
-    private Long  updatedTime;
 
 
     /**

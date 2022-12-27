@@ -2,6 +2,8 @@ package org.thingsboard.server.dao.sqlserver.server.vo;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @Project Name: thingsboard
  * @File Name: RownumberDto
@@ -14,4 +16,20 @@ import lombok.Data;
 public class RownumberDto {
 
     protected Integer rownumber;
+
+    /**
+     * 开始时间
+     */
+    protected LocalDateTime factStartTime;
+
+    /**
+     * 结束时间
+     */
+    protected LocalDateTime factEndTime;
+
+    protected Long createdTime;
+
+    protected Long  updatedTime;
+
+
 }

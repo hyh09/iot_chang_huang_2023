@@ -84,7 +84,7 @@ public class YieIdServer extends  BaseRunSqlServer{
             sql.append(" and C.sWorkerGroupName like  ").append("\'%").append(queryYieIdVo.getWorkerGroupName()).append("%\'");;
         }
 
-        return pageQuery(sql.toString(),list,pageable,QueryYieIdVo.class);
+        return pageQuery("B.tFactStartTime",sql.toString(),list,pageable,QueryYieIdVo.class);
     }
 
 
