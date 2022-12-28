@@ -48,4 +48,17 @@ public class BaseRunSqlServer {
         return new PageData<T>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
     }
 
+    public <T > PageData<T> pageQuery02(String orderBY ,String sql, List list, Pageable pageable, Class<T> mappedClass) {
+        sql=  sql.replaceFirst("select"," select row_number() over(order by "+orderBY+" asc) as rownumber ,");
+        String sqlCount = "select count(*) from (" + sql + ") t_count_0";
+        Integer count = jdbcTemplate.queryForObject(sqlCount, list.toArray(), Integer.class);
+        StringBuffer sqlQuery = new StringBuffer();
+        sqlQuery.append(" select ").append(" top(").append(pageable.getPageSize()).append(" ) *").append(" from  ( ")
+                .append(sql).append(" ) temp where rownumber > ").append((pageable.getPageNumber()) * pageable.getPageSize());
+        List<T> mapList = jdbcTemplate.query(sqlQuery.toString(), list.toArray(), new BeanPropertyRowMapper<>(mappedClass));
+        Page<T> page = new PageImpl<T>(mapList, pageable, count);
+        return new PageData<T>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
+
+
 }
