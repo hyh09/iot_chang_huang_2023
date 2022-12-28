@@ -96,7 +96,7 @@ public class ProcessAnalysisServer extends BaseRunSqlServer {
     private String getTimeOut(ProcessAnalysisVo m1) {
         BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(1, RoundingMode.HALF_UP);
         String result = bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime()).toPlainString();
-        return result;
+        return BigDecimalUtil.INSTANCE.equalBigNum2(result,"0")?result:"0";
     }
 
     private String getRatio(ProcessAnalysisVo m1) {
@@ -104,7 +104,9 @@ public class ProcessAnalysisServer extends BaseRunSqlServer {
         BigDecimal bigDecimal = bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime());
         BigDecimal multiplicationResult = bigDecimalUtil.divide(bigDecimal, m1.getActualTime());
         String result = BigDecimalUtil.INSTANCE.multiply(multiplicationResult, "100").toPlainString();
-        return result+"%";
+        String result02= BigDecimalUtil.INSTANCE.equalBigNum2(result,"0")?result:"0";
+        return result02+"%";
+
     }
 
 
