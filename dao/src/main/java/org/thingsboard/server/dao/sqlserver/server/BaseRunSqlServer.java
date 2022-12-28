@@ -31,7 +31,7 @@ public class BaseRunSqlServer {
     private JdbcTemplate jdbcTemplate;
 
     public <T extends RownumberDto> PageData<T> pageQuery(String orderBY ,String sql, List list, Pageable pageable, Class<T> mappedClass) {
-        sql=  sql.replace("select"," select row_number() over(order by "+orderBY+" asc) as rownumber ,");
+        sql=  sql.replaceFirst("select"," select row_number() over(order by "+orderBY+" asc) as rownumber ,");
         String sqlCount = "select count(*) from (" + sql + ") t_count_0";
         Integer count = jdbcTemplate.queryForObject(sqlCount, list.toArray(), Integer.class);
         StringBuffer sqlQuery = new StringBuffer();

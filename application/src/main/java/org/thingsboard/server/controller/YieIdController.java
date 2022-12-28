@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.sqlserver.server.ProcessAnalysisServer;
 import org.thingsboard.server.dao.sqlserver.server.YieIdServer;
 import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
+import org.thingsboard.server.dao.sqlserver.server.vo.process.ProcessAnalysisVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 /**
@@ -30,18 +33,35 @@ public class YieIdController extends BaseController {
 
     @Autowired
     private YieIdServer yieIdServer;
+    @Autowired
+    private ProcessAnalysisServer processAnalysisServer;
 
 
-    @RequestMapping("/query")
-    public Object query(@RequestParam int pageSize, @RequestParam int page,
-                        @RequestParam(required = false) String sortProperty,
-                        @RequestParam(required = false)  String sortOrder,
-                        QueryYieIdVo queryYieIdVo) throws ThingsboardException {
+    @RequestMapping("/teamQuery")
+    public PageData<QueryYieIdVo> teamQuery(@RequestParam int pageSize, @RequestParam int page,
+                            @RequestParam(required = false) String sortProperty,
+                            @RequestParam(required = false) String sortOrder,
+                            QueryYieIdVo queryYieIdVo) throws ThingsboardException {
         try {
             PageLink pageLink = createPageLink(pageSize, page, null, null, null);
             return yieIdServer.query(queryYieIdVo, DaoUtil.toPageable(pageLink));
-        }catch (Exception e){
-            log.info("打印异常日志:{}",e);
+        } catch (Exception e) {
+            log.info("打印异常日志:{}", e);
+            return null;
+        }
+    }
+
+
+    @RequestMapping("/processQuery")
+    public PageData<ProcessAnalysisVo> processQuery(@RequestParam int pageSize, @RequestParam int page,
+                                                    @RequestParam(required = false) String sortProperty,
+                                                    @RequestParam(required = false) String sortOrder,
+                                                    ProcessAnalysisVo queryYieIdVo) throws ThingsboardException {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return processAnalysisServer.query(queryYieIdVo, DaoUtil.toPageable(pageLink));
+        } catch (Exception e) {
+            log.info("打印异常日志:{}", e);
             return null;
         }
     }

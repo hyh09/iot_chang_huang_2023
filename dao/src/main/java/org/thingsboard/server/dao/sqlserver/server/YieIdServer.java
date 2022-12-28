@@ -71,10 +71,7 @@ public class YieIdServer extends  BaseRunSqlServer{
         //机台号
         if(StringUtils.isNotEmpty(queryYieIdVo.getSEquipmentNo())){
             sql.append(" and G.sEquipmentNo like  ").append("\'%").append(queryYieIdVo.getSEquipmentNo()).append("%\'");;
-
         }
-
-
         return pageQuery("B.tFactStartTime",sql.toString(),list,pageable,QueryYieIdVo.class);
     }
 
