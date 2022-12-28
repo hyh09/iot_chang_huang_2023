@@ -367,6 +367,9 @@ public class CommonUtils {
      * @return
      */
     public static long getTimestampOfDateTime(LocalDateTime localDateTime) {
+        if(localDateTime ==null){
+            return 0L;
+        }
         ZoneId zone = ZoneId.systemDefault();
         Instant instant = localDateTime.atZone(zone).toInstant();
         return instant.toEpochMilli();

@@ -7,6 +7,8 @@ import { OrderFormComponent } from './orders/order-form.component';
 import { OrdersFiltersComponent } from './orders/orders-filters.component';
 import { OrderDeviceFormComponent } from './orders/order-device-form.component';
 import { ImportOrderDialogComponent } from './orders/import-order-dialog.component';
+import { OrdersProgressFiltersComponent } from './order-progress/orders-progress-filters.component';
+import { ProcessCardProgressFiltersComponent } from './process-card-progress/process-card-progress-filters.component';
 
 @NgModule({
   imports: [
@@ -19,7 +21,9 @@ import { ImportOrderDialogComponent } from './orders/import-order-dialog.compone
     OrderFormComponent,
     OrdersFiltersComponent,
     OrderDeviceFormComponent,
-    ImportOrderDialogComponent
+    ImportOrderDialogComponent,
+    OrdersProgressFiltersComponent,
+    ProcessCardProgressFiltersComponent
   ]
 })
 export class OrderFormModule { }

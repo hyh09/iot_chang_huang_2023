@@ -509,6 +509,11 @@ spring:
     password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
     hikari:
       maximumPoolSize: "${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:50}"
+  sqlserver:
+    driverClassName: "${SPRING_SQLSERVER_CLASS_NAME:com.microsoft.sqlserver.jdbc.SQLServerDriver}"
+    url: "${SPRING_SQLSERVER_URL:jdbc:sqlserver://122.224.36.54:14330;DatabaseName=HSDyeingerp;trustServerCertificate=true}"
+    username: "${SPRING_SQLSERVER_USERNAME:saas-dev}"
+    password: "${SPRING_SQLSERVER_PASSWORD:HS@2021@saaA}"
 
 # Audit log parameters
 audit-log:

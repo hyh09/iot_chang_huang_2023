@@ -92,7 +92,7 @@ public abstract class AbstractTenantMenuEntity<T extends TenantMenu> extends Bas
     @Column(name = "path")
     private String path;
 
-    @ApiModelProperty("has_Children")
+    @Column(name="has_Children")
     private Boolean hasChildren;
 
     @CreatedDate

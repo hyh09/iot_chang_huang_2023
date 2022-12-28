@@ -1,0 +1,67 @@
+
+<nz-range-picker nzShowTime [(ngModel)]="entitiesTableConfig.componentsData.time" [nzAllowClear]="false"></nz-range-picker>
+<mat-form-field>
+  <mat-label>{{ 'order.order-no' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.orderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.orderNo"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('orderNo')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'order.colour' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.colour" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.colour"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('colour')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'order.customer-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.customerName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.customerName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('customerName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+
+<mat-form-field>
+  <mat-label>{{ 'order.process-card-no' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.processCardNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.processCardNo"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('processCardNo')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+
+<mat-form-field>
+  <mat-label>{{ 'order.product-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.productName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.productName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('productName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
+  </button>
+</div>

@@ -20,7 +20,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * spring 工具类
@@ -67,6 +70,11 @@ public class SpringUtil implements ApplicationContextAware {
 			return null;
 		}
 		return context;
+	}
+
+
+	public static <T> Map<String, T> getApplicationByType(@Nullable Class<T> type) {
+		return context.getBeansOfType(type);
 	}
 
 
