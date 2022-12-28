@@ -31,7 +31,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     private dialogService: DialogService
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
-    this.config.entityComponent = OrderFormComponent;
+    // this.config.entityComponent = OrderFormComponent;
     this.config.filterComponent = OrdersFiltersComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER_FORM);
     this.config.entityResources = entityTypeResources.get(EntityType.ORDER_FORM);
