@@ -135,10 +135,16 @@ public class BigDecimalUtil {
             return BigDecimal.ZERO;
         }
 
+        if(isItZero(number2)){
+            return BigDecimal.ZERO;
+        }
 
         BigDecimal result = new BigDecimal(number1.toString()).divide(new BigDecimal(number2.toString()), scale, roundingMode);
         for (Object number : numberArr) {
             if (number == null) {
+                return BigDecimal.ZERO;
+            }
+            if(isItZero(number)){
                 return BigDecimal.ZERO;
             }
             result = result.divide((new BigDecimal(number.toString())), scale, roundingMode);
@@ -210,5 +216,12 @@ public class BigDecimalUtil {
         return new BigDecimal(number1.toString()).compareTo(new BigDecimal(number2.toString())) == 1 ? true : false;
     }
 
+
+    public Boolean isItZero(Object number1) {
+        if (number1 == null) {
+            return true;
+        }
+        return new BigDecimal(number1.toString()).compareTo(BigDecimal.ZERO) == 0 ? true : false;
+    }
 
 }
