@@ -10,9 +10,11 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.sqlserver.server.OrderAnalysisServer;
 import org.thingsboard.server.dao.sqlserver.server.ProcessAnalysisServer;
 import org.thingsboard.server.dao.sqlserver.server.YieIdServer;
 import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
+import org.thingsboard.server.dao.sqlserver.server.vo.order.OrderAnalysisVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.process.ProcessAnalysisVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -35,6 +37,8 @@ public class YieIdController extends BaseController {
     private YieIdServer yieIdServer;
     @Autowired
     private ProcessAnalysisServer processAnalysisServer;
+    @Autowired
+    private OrderAnalysisServer orderAnalysisServer;
 
 
     @RequestMapping("/teamQuery")
@@ -60,6 +64,21 @@ public class YieIdController extends BaseController {
         try {
             PageLink pageLink = createPageLink(pageSize, page, null, null, null);
             return processAnalysisServer.query(queryYieIdVo, DaoUtil.toPageable(pageLink));
+        } catch (Exception e) {
+            log.info("打印异常日志:{}", e);
+            return null;
+        }
+    }
+
+
+    @RequestMapping("/orderQuery")
+    public  PageData<OrderAnalysisVo> orderQuery(@RequestParam int pageSize, @RequestParam int page,
+                                                    @RequestParam(required = false) String sortProperty,
+                                                    @RequestParam(required = false) String sortOrder,
+                                                  OrderAnalysisVo vo) throws ThingsboardException {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return orderAnalysisServer.queryPage(vo, DaoUtil.toPageable(pageLink));
         } catch (Exception e) {
             log.info("打印异常日志:{}", e);
             return null;

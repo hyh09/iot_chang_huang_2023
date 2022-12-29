@@ -28,7 +28,7 @@ import java.util.List;
 public class BaseRunSqlServer {
     @Autowired
     @Qualifier("sqlServerTemplate")
-    private JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
 
     public <T extends RownumberDto> PageData<T> pageQuery(String orderBY ,String sql, List list, Pageable pageable, Class<T> mappedClass) {
         sql=  sql.replaceFirst("select"," select row_number() over(order by "+orderBY+" asc) as rownumber ,");
