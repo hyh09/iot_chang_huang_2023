@@ -15,12 +15,26 @@
  */
 package org.thingsboard.server.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+import java.util.Map;
 
 @Configuration
 @EnableAutoConfiguration
@@ -42,6 +56,35 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 )
 @EnableTransactionManagement
 public class JpaDaoConfig {
+
+    @Autowired
+    private DataSource dataSourceMaster;
+    @Autowired
+    private JpaProperties jpaProperties;
+
+    @Bean("entityManager")
+    @Primary
+    public EntityManager entityManager(EntityManagerFactoryBuilder builder) {
+        return entityManagerFactory(builder).getObject().createEntityManager();
+    }
+    @Bean("entityManagerFactory")
+    @Primary
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder) {
+        return builder.dataSource(dataSourceMaster)
+                .properties(getVendorProperties())
+                .packages("org.thingsboard.server.dao.model", "org.thingsboard.server.dao.hs","org.thingsboard.server.dao.sql.*.entity","org.thingsboard.server.dao.hsms.dao")
+                .persistenceUnit("masterPersistenceUnit")
+                .build();
+
+    }
+    private Map<String,String> getVendorProperties() {
+        return jpaProperties.getProperties();
+    }
+    @Bean("transactionManager")
+    @Primary
+    public PlatformTransactionManager transactionManager(EntityManagerFactoryBuilder builder) {
+        return new JpaTransactionManager(entityManagerFactory(builder).getObject());
+    }
 
 }
 

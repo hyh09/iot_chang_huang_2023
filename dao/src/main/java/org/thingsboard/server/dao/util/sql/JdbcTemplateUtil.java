@@ -2,12 +2,14 @@ package org.thingsboard.server.dao.util.sql;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
+import org.thingsboard.server.common.data.page.PageData;
 
 import java.util.List;
 
@@ -45,6 +47,9 @@ public class JdbcTemplateUtil {
         return  results.get(0);
 
     }
+
+
+
 
 
 }
