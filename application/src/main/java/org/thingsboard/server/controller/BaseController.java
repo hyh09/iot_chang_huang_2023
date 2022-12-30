@@ -77,6 +77,7 @@ import org.thingsboard.server.dao.device.ClaimDevicesService;
 import org.thingsboard.server.dao.device.DeviceCredentialsService;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.device.DeviceService;
+import org.thingsboard.server.dao.deviceoeeeveryhour.DeviceOeeEveryHourService;
 import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
@@ -102,7 +103,6 @@ import org.thingsboard.server.dao.sql.role.service.*;
 import org.thingsboard.server.dao.sql.role.userrole.RoleMenuSvc;
 import org.thingsboard.server.dao.sql.role.userrole.UserRoleMemuSvc;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
-import org.thingsboard.server.dao.deviceoeeeveryhour.DeviceOeeEveryHourService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.dao.tenant.TenantProfileService;
 import org.thingsboard.server.dao.tenant.TenantService;
@@ -115,7 +115,6 @@ import org.thingsboard.server.dao.widget.WidgetsBundleService;
 import org.thingsboard.server.dao.workshop.WorkshopService;
 import org.thingsboard.server.entity.menu.dto.AddMenuDto;
 import org.thingsboard.server.entity.tenantmenu.dto.AddTenantMenuDto;
-import org.thingsboard.server.excel.po.AppDeviceCapPo;
 import org.thingsboard.server.excel.util.EasyExcelCustomCellWriteHandler;
 import org.thingsboard.server.exception.ThingsboardErrorResponseHandler;
 import org.thingsboard.server.queue.discovery.PartitionService;
@@ -427,7 +426,7 @@ public abstract class BaseController {
         return UUID.fromString(id);
     }
 
-    PageLink createPageLink(int pageSize, int page, String textSearch, String sortProperty, String sortOrder) throws ThingsboardException {
+    public PageLink createPageLink(int pageSize, int page, String textSearch, String sortProperty, String sortOrder) throws ThingsboardException {
         if (!StringUtils.isEmpty(sortProperty)) {
             SortOrder.Direction direction = SortOrder.Direction.ASC;
             if (!StringUtils.isEmpty(sortOrder)) {
