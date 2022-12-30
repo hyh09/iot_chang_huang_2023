@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeComponentsModule } from '../../components/home-components.module';
 import { PotencyRoutingModule } from './potency-routing.module';
-import { ProductionCapacityOverviewComponent } from './production-capacity/production-capacity-overview.component';
+import { ProductionCapacityOverviewComponent } from './production-capacity/factory/production-capacity-overview.component';
 import { EnergyConsumptionOverviewComponent } from './energy-consumption/energy-consumption-overview.component';
 import { RunningStateComponent } from './running-state/running-state.component';
 import { RunningStateChartComponent } from './running-state/running-state-chart.component';

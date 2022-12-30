@@ -1,4 +1,4 @@
-import { DeviceCapacity } from './../../../../../shared/models/custom/potency.models';
+import { DeviceCapacity } from '../../../../../../shared/models/custom/potency.models';
 import { Injectable } from "@angular/core";
 import { Resolve, Router } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";
@@ -47,7 +47,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       timePageLink: null
     }
 
-    this.config.tableTitle = this.translate.instant('potency.device-capacity');
+    this.config.tableTitle = this.translate.instant('potency.factory');
     this.config.addEnabled = false;
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
@@ -79,7 +79,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       name: this.translate.instant('potency.go-to-history'),
       mdiIcon: 'mdi:history-data',
       isEnabled: () => (true),
-      onAction: ($event, entity) => this.router.navigate([`/potency/deviceCapacity/${entity.deviceId}/history`], {
+      onAction: ($event, entity) => this.router.navigate([`/potency/outputAnalysis/factory/${entity.deviceId}/history`], {
         queryParams: {
           deviceName: encodeURIComponent(entity.rename)
         }
