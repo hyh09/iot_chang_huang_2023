@@ -17,6 +17,11 @@ import org.thingsboard.server.dao.sqlserver.server.vo.RownumberDto;
 public class OrderAnalysisVo extends RownumberDto {
 
     /**
+     * 卡片号，只用于前端搜索使用
+     */
+    private String sCardNo;
+
+    /**
      * 订单号
      */
     private String orderNo;
