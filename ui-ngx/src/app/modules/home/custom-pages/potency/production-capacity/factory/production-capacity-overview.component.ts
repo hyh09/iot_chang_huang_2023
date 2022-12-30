@@ -14,8 +14,8 @@ import { viewPortResize, getTheStartOfDay, getTheEndOfDay } from '@app/core/util
   selector: 'tb-production-capacity-overview',
   templateUrl: './production-capacity-overview.component.html',
   styleUrls: [
-    '../energy-consumption/energy-consumption-overview.component.scss',
-    '../energy-consumption/energy-history-filter.component.scss'
+    '../../energy-consumption/energy-consumption-overview.component.scss',
+    '../../energy-consumption/energy-history-filter.component.scss'
   ]
 })
 export class ProductionCapacityOverviewComponent extends EntityTableHeaderComponent<DeviceCapacity> {

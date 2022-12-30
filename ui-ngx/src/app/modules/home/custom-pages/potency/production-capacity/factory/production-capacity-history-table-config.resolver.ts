@@ -1,4 +1,4 @@
-import { DeviceCapacity } from './../../../../../shared/models/custom/potency.models';
+import { DeviceCapacity } from '../../../../../../shared/models/custom/potency.models';
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, Resolve } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";

@@ -3491,7 +3491,7 @@
     },
     "potency": {
     "potency": "效能分析",
-    "device-capacity": "产量分析",
+    "output-analysis": "产量分析",
     "energy-consumption": "能耗分析",
     "energy-consumption-history": "能耗历史",
     "running-state": "运行状态",
