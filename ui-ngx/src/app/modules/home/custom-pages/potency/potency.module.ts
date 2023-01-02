@@ -8,6 +8,7 @@ import { EnergyConsumptionOverviewComponent } from './energy-consumption/energy-
 import { RunningStateComponent } from './running-state/running-state.component';
 import { RunningStateChartComponent } from './running-state/running-state-chart.component';
 import { EnergyHistoryFilterComponent } from './energy-consumption/energy-history-filter.component';
+import { GroupProductionFilterComponent } from './production-capacity/group/group-production-filter.component';
 
 @NgModule({
   imports: [
@@ -21,7 +22,8 @@ import { EnergyHistoryFilterComponent } from './energy-consumption/energy-histor
     EnergyConsumptionOverviewComponent,
     RunningStateComponent,
     RunningStateChartComponent,
-    EnergyHistoryFilterComponent
+    EnergyHistoryFilterComponent,
+    GroupProductionFilterComponent
   ]
 })
 export class PotencyModule { }

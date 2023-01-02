@@ -3977,7 +3977,17 @@
     "electric": "Electric (KWH)",
     "gas": "Gas (T)",
     "interval-energy-consumption": "Interval energy consumption of {{deviceName}}",
-    "interval-capacity": "Internal output of {{deviceName}}"
+    "interval-capacity": "Internal output of {{deviceName}}",
+    "process-no": "Process No",
+    "process-name": "Process name",
+    "team-name": "Team name",
+    "team-members": "Team member",
+    "output": "Output",
+    "unit": "Unit",
+    "card-no": "Card No",
+    "material-no": "Material No",
+    "color-name": "Color name",
+    "duration": "Duration"
   },
   "order": {
     "next-process":"Next process",

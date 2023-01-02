@@ -5,6 +5,7 @@ import { EnergyConsumptionTableConfigResolver } from './energy-consumption/energ
 import { EnergyHistoryTableConfigResolver } from './energy-consumption/energy-history-table-config.resolver';
 import { ProductionHistoryCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-history-table-config.resolver';
 import { ProductionCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-table-config.resolver';
+import { GroupProductionTableConfigResolver } from './production-capacity/group/group-production-table-config.resolver';
 import { RunningStateComponent } from './running-state/running-state.component';
 
 const routes: Routes = [
@@ -61,6 +62,27 @@ const routes: Routes = [
                 },
                 resolve: {
                   entitiesTableConfig: ProductionHistoryCapacityTableConfigResolver
+                }
+              }
+            ]
+          },
+          {
+            path: 'group',
+            data: {
+              breadcrumb: {
+                label: 'potency.group',
+                icon: 'mdi:factory'
+              }
+            },
+            children: [
+              {
+                path: '',
+                component: EntitiesTableComponent,
+                data: {
+                  title: 'potency.group'
+                },
+                resolve: {
+                  entitiesTableConfig: GroupProductionTableConfigResolver
                 }
               }
             ]
@@ -124,7 +146,8 @@ const routes: Routes = [
     ProductionCapacityTableConfigResolver,
     EnergyConsumptionTableConfigResolver,
     EnergyHistoryTableConfigResolver,
-    ProductionHistoryCapacityTableConfigResolver
+    ProductionHistoryCapacityTableConfigResolver,
+    GroupProductionTableConfigResolver
   ]
 })
 export class PotencyRoutingModule { }
