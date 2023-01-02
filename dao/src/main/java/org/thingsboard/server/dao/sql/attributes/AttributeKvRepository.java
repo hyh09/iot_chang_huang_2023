@@ -99,7 +99,7 @@ public interface AttributeKvRepository extends CrudRepository<AttributeKvEntity,
                                                                                               @Param("entityType") EntityType entityType,
                                                                                               @Param("entityId") List<UUID> entityId,
                                                                                               @Param("attributeKey") String key);
-
+    List<AttributeKvEntity> findAllByIdAttributeKey(String attributeKey);
 }
 
 

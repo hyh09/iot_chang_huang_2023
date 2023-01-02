@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
+
 /**
  * 实时监控设备数据
  *
@@ -51,4 +53,16 @@ public class RTMonitorDeviceResult {
      */
     @ApiModelProperty("是否在线")
     private Boolean isOnLine;
+
+    @ApiModelProperty("开机率")
+    private BigDecimal operationRate;
+
+    @ApiModelProperty("当前卡号")
+    private String card;
+
+    @ApiModelProperty("产品名称")
+    private String p;
+
+    @ApiModelProperty("当前班组")
+    private String d;
 }
