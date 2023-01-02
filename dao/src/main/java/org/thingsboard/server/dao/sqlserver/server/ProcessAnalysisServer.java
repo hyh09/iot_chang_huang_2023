@@ -82,11 +82,11 @@ public class ProcessAnalysisServer extends BaseRunSqlServer {
         PageData<ProcessAnalysisVo> pageData = pageQuery("B.tFactStartTime", sql.toString(), list, pageable, ProcessAnalysisVo.class);
         List<ProcessAnalysisVo> processAnalysisVos = pageData.getData();
         convertData(processAnalysisVos);
-       return new PageData<ProcessAnalysisVo>(processAnalysisVos, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
+        return new PageData<ProcessAnalysisVo>(processAnalysisVos, pageData.getTotalPages(), pageData.getTotalElements(), pageData.hasNext());
 
     }
 
-    private void  convertData(List<ProcessAnalysisVo> processAnalysisVos) {
+    private void convertData(List<ProcessAnalysisVo> processAnalysisVos) {
         processAnalysisVos.stream().forEach(m1 -> {
             m1.setTimeoutMinutes(getTimeOut(m1));
             m1.setOverTimeRatio(getRatio(m1));
@@ -95,14 +95,18 @@ public class ProcessAnalysisServer extends BaseRunSqlServer {
 
     private String getTimeOut(ProcessAnalysisVo m1) {
         BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(1, RoundingMode.HALF_UP);
-        return bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime()).toPlainString();
+        String result = bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime()).toPlainString();
+        return BigDecimalUtil.INSTANCE.equalBigNum2(result,"0")?result:"0";
     }
 
     private String getRatio(ProcessAnalysisVo m1) {
         BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
-        BigDecimal  bigDecimal = bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime());
-        BigDecimal  multiplicationResult = bigDecimalUtil.divide(bigDecimal,m1.getActualTime());
-       return BigDecimalUtil.INSTANCE.multiply(multiplicationResult,"100").toPlainString();
+        BigDecimal bigDecimal = bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime());
+        BigDecimal multiplicationResult = bigDecimalUtil.divide(bigDecimal, m1.getActualTime());
+        String result = BigDecimalUtil.INSTANCE.multiply(multiplicationResult, "100").toPlainString();
+        String result02= BigDecimalUtil.INSTANCE.equalBigNum2(result,"0")?result:"0";
+        return result02+"%";
+
     }
 
 

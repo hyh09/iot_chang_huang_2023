@@ -481,9 +481,10 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
     if (this.displayPagination) {
       this.paginator.pageIndex = 0;
     }
-    const sortable = this.sort.sortables.get(this.entitiesTableConfig.defaultSortOrder.property);
+
+    const sortable = this.sort.sortables.get(this.entitiesTableConfig.defaultSortOrder?.property || '');
     this.sort.active = sortable ? sortable.id : '';
-    this.sort.direction = this.entitiesTableConfig.defaultSortOrder.direction === Direction.ASC ? 'asc' : 'desc';
+    this.sort.direction = this.entitiesTableConfig.defaultSortOrder?.direction === Direction.ASC ? 'asc' : 'desc';
     if (update) {
       this.updateData();
     }

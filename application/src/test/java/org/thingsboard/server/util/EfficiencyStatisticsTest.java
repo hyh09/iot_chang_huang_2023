@@ -8,11 +8,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.thingsboard.server.ThingsboardServerApplication;
 import org.thingsboard.server.common.data.vo.DeviceCapacityVo;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
+import org.thingsboard.server.dao.sqlserver.server.OrderAnalysisServer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @program: thingsboard
@@ -45,6 +45,15 @@ public class EfficiencyStatisticsTest  {
         deviceCapacityVoList.add(vo);
         Map<UUID,String>   map =  bulletinBoardSvc.queryCapacityValueByDeviceIdAndTime(deviceCapacityVoList);
         System.out.println("打印结果:"+map);
+    }
+
+
+    @Autowired  private OrderAnalysisServer orderAnalysisServer;
+
+    @Test
+    public  void  testquery(){
+        List<String>  list =  Stream.of("42D7A05D-3D8A-4818-BCEA-AACB00F10F53", "1C86F6EB-33C8-43CA-B21E-AACB00F10F53").collect(Collectors.toList());
+        orderAnalysisServer.queryWaterAndElectricity(list);
     }
 
 

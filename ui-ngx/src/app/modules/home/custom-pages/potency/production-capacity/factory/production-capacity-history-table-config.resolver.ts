@@ -1,4 +1,4 @@
-import { DeviceCapacity } from './../../../../../shared/models/custom/potency.models';
+import { DeviceCapacity } from '../../../../../../shared/models/custom/potency.models';
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, Resolve } from "@angular/router";
 import { PotencyService } from "@app/core/http/custom/potency.service";
@@ -39,7 +39,7 @@ export class ProductionHistoryCapacityTableConfigResolver implements Resolve<Ent
     this.config.columns.push(
       new EntityTableColumn<DeviceCapacity>('rename', 'potency.device-name', '50%', (entity) => (entity.rename || ''), () => ({}), false),
       new EntityTableColumn<DeviceCapacity>('value', 'potency.capacity', '50%'),
-      new DateEntityTableColumn<DeviceCapacity>('createdTime', 'potency.created-time', this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false),
+      new DateEntityTableColumn<DeviceCapacity>('createdTime', 'potency.created-time', this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false)
     );
   }
 
