@@ -46,8 +46,7 @@ export class ProductionCapacityTableConfigResolver implements Resolve<EntityTabl
       factroryChange$: new BehaviorSubject<string>(''),
       timePageLink: null
     }
-
-    this.config.tableTitle = this.translate.instant('potency.factory');
+    this.config.titleVisible = false;
     this.config.addEnabled = false;
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
