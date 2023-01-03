@@ -173,4 +173,10 @@ export class ProductionCapacityOverviewComponent extends EntityTableHeaderCompon
     }
   }
 
+  onTabClick(name: string) {
+    if (name) {
+      this.router.navigateByUrl(`/potency/outputAnalysis/${name}`);
+    }
+  }
+
 }

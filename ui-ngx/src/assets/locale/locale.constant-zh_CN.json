@@ -3875,7 +3875,17 @@
     "electric": "电 (KWH)",
     "gas": "气 (T)",
     "interval-energy-consumption": "{{deviceName}}区间能耗",
-    "interval-capacity": "{{deviceName}}区间产量"
+    "interval-capacity": "{{deviceName}}区间产量",
+    "process-no": "工序编号",
+    "process-name": "工序名称",
+    "team-name": "班组名称",
+    "team-members": "班组成员",
+    "output": "产出数量",
+    "unit": "计算单位",
+    "card-no": "卡号",
+    "material-no": "布种",
+    "color-name": "色名",
+    "duration": "时长"
   },
   "order": {
     "next-process":"下道工序",
