@@ -150,7 +150,7 @@ public class DictDeviceController extends BaseController {
     @GetMapping("/dict/device/{id}")
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
-        return this.dictDeviceService.getDictDeviceDetail(id, getTenantId());
+        return this.dictDeviceService.getOpenDictDeviceDetail(id, getTenantId());
     }
 
     /**

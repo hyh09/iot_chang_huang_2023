@@ -303,4 +303,6 @@ public interface DictDeviceService {
      * @param propertySwitches 设备开关信息
      */
     void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches);
+
+    DictDeviceVO getOpenDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException;
 }

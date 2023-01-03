@@ -165,6 +165,46 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
 
+        var groupVOList = this.listDictDeviceGroups(toUUID(dictDevice.getId()));
+
+        var rList = this.listDictDeviceComponents(toUUID(dictDevice.getId()));
+
+        DictDeviceVO dictDeviceVO = DictDeviceVO.builder()
+                .standardPropertyList(standardPropertyList)
+                .propertyList(propertyList)
+                .groupList(groupVOList)
+                .componentList(rList).build();
+        BeanUtils.copyProperties(dictDevice, dictDeviceVO);
+
+        Optional.ofNullable(this.fileService.getFileInfoByScopeAndEntityId(tenantId, FileScopeEnum.DICT_DEVICE_MODEL, toUUID(dictDevice.getId())))
+                .ifPresent(e -> dictDeviceVO.setFileId(e.getId()).setFileName(e.getFileName()));
+
+        return dictDeviceVO;
+    }
+
+
+    /**
+     * 获得设备字典详情
+     *
+     * @param id       设备字典id
+     * @param tenantId 租户Id
+     * @return 设备字典详情
+     */
+    @Override
+    public DictDeviceVO getOpenDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException {
+        var dictDevice = this.dictDeviceRepository.findByTenantIdAndId(tenantId.getId(), toUUID(id)).map(DictDeviceEntity::toData)
+                .orElseThrow(() -> new ThingsboardException("设备字典不存在！", ThingsboardErrorCode.GENERAL));
+
+        var standardPropertyList = DaoUtil.convertDataList(this.standardPropertyRepository.findAllByDictDeviceIdOrderBySortAsc(toUUID(dictDevice.getId()))).stream()
+                .map(e -> {
+                    DictDeviceStandardPropertyVO vo = new DictDeviceStandardPropertyVO();
+                    BeanUtils.copyProperties(e, vo);
+                    return vo;
+                }).collect(Collectors.toList());
+
+        var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
+                .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
+
         var groupVOList = this.listOpenDictDeviceGroups(toUUID(dictDevice.getId()));
 
         var rList = this.listDictDeviceComponents(toUUID(dictDevice.getId()));
