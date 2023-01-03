@@ -302,15 +302,17 @@ public interface DeviceMonitorService {
      *
      * @param deviceDetailResult 设备详情数据
      * @param tenantId           租户Id
+     * @param isFactoryUser      是否工厂用户
      */
-    DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult) throws ThingsboardException;
+    DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult, Boolean isFactoryUser) throws ThingsboardException;
 
     /**
      * 数据筛选过滤
      *
-     * @param properties 属性列表
-     * @param tenantId   租户Id
-     * @param deviceId   设备Id
+     * @param properties    属性列表
+     * @param tenantId      租户Id
+     * @param deviceId      设备Id
+     * @param isFactoryUser 是否工厂用户
      */
-    List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties) throws ThingsboardException;
+    List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties, Boolean isFactoryUser) throws ThingsboardException;
 }
