@@ -1224,9 +1224,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      *
      * @param deviceDetailResult 设备详情数据
      * @param tenantId           租户Id
+     * @param isFactoryUser      是否工厂用户
      */
     @Override
-    public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult) throws ThingsboardException {
+    public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult, Boolean isFactoryUser) throws ThingsboardException {
+        if (!isFactoryUser)
+            return deviceDetailResult;
         var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceDetailResult.getId())
                 .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
                 .map(DictDevicePropertySwitchVO::getPropertyName)
@@ -1235,7 +1238,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         if (propertyShowSet.isEmpty())
             return deviceDetailResult;
         else {
-            deviceDetailResult.getResultList().removeIf(v->!propertyShowSet.contains(v.getName()));
+            deviceDetailResult.getResultList().removeIf(v -> !propertyShowSet.contains(v.getName()));
             this.recursionFilterComponentData(deviceDetailResult.getComponentList(), propertyShowSet);
         }
         return deviceDetailResult;
@@ -1244,17 +1247,20 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 数据筛选过滤
      *
-     * @param tenantId   租户Id
-     * @param properties 属性列表
-     * @param deviceId   设备Id
+     * @param tenantId      租户Id
+     * @param properties    属性列表
+     * @param deviceId      设备Id
+     * @param isFactoryUser 是否工厂用户
      */
     @Override
-    public List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties) throws ThingsboardException {
+    public List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties, Boolean isFactoryUser) throws ThingsboardException {
+        if (!isFactoryUser)
+            return properties;
         var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceId)
                 .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
                 .map(DictDevicePropertySwitchVO::getPropertyName)
                 .collect(Collectors.toSet());
-        properties.removeIf(v->!propertyShowSet.contains(v.getName()));
+        properties.removeIf(v -> !propertyShowSet.contains(v.getName()));
         return properties;
     }
 

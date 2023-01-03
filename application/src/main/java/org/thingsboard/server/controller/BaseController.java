@@ -1279,6 +1279,11 @@ public abstract class BaseController {
     }
 
 
-
-
+    /**
+     * 判断是否是工厂用户
+     * @return 是否是工厂用户
+     */
+    public boolean isFactoryUser() throws ThingsboardException {
+        return getCurrentUser().getUserLevel() != UserLeveEnums.TENANT_ADMIN.getCode();
+    }
 }
