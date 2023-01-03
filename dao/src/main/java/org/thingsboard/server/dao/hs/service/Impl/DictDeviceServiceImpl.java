@@ -28,11 +28,8 @@ import org.thingsboard.server.dao.hs.entity.po.*;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
-import org.thingsboard.server.dao.hs.dao.DictDeviceSwitchEntity;
-import org.thingsboard.server.dao.hs.dao.DictDeviceSwitchRepository;
 import org.thingsboard.server.dao.hsms.entity.enums.DictDevicePropertySwitchEnum;
 import org.thingsboard.server.dao.hsms.entity.po.DictDeviceSwitch;
-import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
@@ -168,7 +165,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
         var propertyList = DaoUtil.convertDataList(this.propertyRepository.findAllByDictDeviceId(toUUID(dictDevice.getId())))
                 .stream().map(e -> DictDevicePropertyVO.builder().name(e.getName()).content(e.getContent()).build()).collect(Collectors.toList());
 
-        var groupVOList = this.listDictDeviceGroups(toUUID(dictDevice.getId()));
+        var groupVOList = this.listOpenDictDeviceGroups(toUUID(dictDevice.getId()));
 
         var rList = this.listDictDeviceComponents(toUUID(dictDevice.getId()));
 
@@ -420,6 +417,36 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             groupPropertyList = new ArrayList<>();
         } else {
             groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findAllInDictDeviceGroupId(groupUUIDList));
+        }
+        var groupPropertyMap = groupPropertyList.stream()
+                .collect(Collectors.groupingBy(DictDeviceGroupProperty::getDictDeviceGroupId));
+        return groupList.stream().reduce(new ArrayList<>(), (r, e) -> {
+            List<DictDeviceGroupPropertyVO> groupPropertyVOList = new ArrayList<>();
+            if (groupPropertyMap.containsKey(e.getId())) {
+                groupPropertyVOList = groupPropertyMap.get(e.getId()).stream()
+                        .map(g -> DictDeviceGroupPropertyVO.builder()
+                                .id(g.getId()).name(g.getName()).content(g.getContent()).dictDataId(g.getDictDataId()).title(g.getTitle()).createdTime(g.getCreatedTime())
+                                .build()).collect(Collectors.toList());
+            }
+            r.add(DictDeviceGroupVO.builder().id(e.getId()).name(e.getName()).groupPropertyList(groupPropertyVOList).build());
+            return r;
+        }, (a, b) -> null);
+    }
+
+    /**
+     * 获得开启设备字典分组及分组属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceGroupVO> listOpenDictDeviceGroups(UUID dictDeviceId) {
+        var groupList = DaoUtil.convertDataList(this.groupRepository.findAllByDictDeviceId(dictDeviceId));
+        var groupUUIDList = groupList.stream().map(e -> toUUID(e.getId())).collect(Collectors.toList());
+        List<DictDeviceGroupProperty> groupPropertyList;
+        if (groupUUIDList.isEmpty()) {
+            groupPropertyList = new ArrayList<>();
+        } else {
+            groupPropertyList = DaoUtil.convertDataList(this.groupPropertyRepository.findOpenInDictDeviceGroupId(groupUUIDList));
         }
         var groupPropertyMap = groupPropertyList.stream()
                 .collect(Collectors.groupingBy(DictDeviceGroupProperty::getDictDeviceGroupId));
@@ -1012,9 +1039,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                             .propertyUnit(v.getUnit())
                             .propertyType(v.getPropertyType())
                             .propertyTitle(v.getTitle())
-                            .propertySwitch(1 ==dictDeviceSwitch.map(DictDeviceSwitch::getPropertySwitch).map(f -> f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()) ? Boolean.TRUE : Boolean.FALSE)
+                            .propertySwitch(1 == dictDeviceSwitch.map(DictDeviceSwitch::getPropertySwitch).map(f -> f.getCode()).orElse(DictDevicePropertySwitchEnum.SHOW.getCode()) ? Boolean.TRUE : Boolean.FALSE)
                             .build();
-                    dictDeviceSwitch.ifPresent(f->data.setId(f.getId()));
+                    dictDeviceSwitch.ifPresent(f -> data.setId(f.getId()));
                     return data;
                 }).collect(Collectors.toList()), pageLink);
     }
