@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.top.FactoryEnergyTop;
+
+import java.util.List;
 
 /**
  * @Project Name: thingsboard
@@ -22,5 +25,9 @@ public interface FactoryEnergySvc {
      * @return
      */
     CurrentUtilitiesVo queryCurrentEnergy(QueryTsKvVo queryTsKvVo, TenantId tenantId) throws JsonProcessingException;
+
+
+    List<FactoryEnergyTop> queryCurrentTop(QueryTsKvVo queryTsKvVo,TenantId tenantId);
+
 
 }
