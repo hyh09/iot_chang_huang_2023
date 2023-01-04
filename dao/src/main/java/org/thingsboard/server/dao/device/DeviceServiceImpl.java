@@ -337,7 +337,9 @@ public class DeviceServiceImpl extends AbstractEntityService implements DeviceSe
             //设备名称要存到rename
             device.setRename(device.getName());
             //name作为唯一编码使用
-            device.setName(Uuids.timeBased().toString());
+            if(device.getName().isBlank()){
+                device.setName(Uuids.timeBased().toString());
+            }
         }else {
             //查询编码
             DeviceInfo deviceInfoById = deviceDao.findDeviceInfoById(device.getTenantId(), device.getId().getId());
