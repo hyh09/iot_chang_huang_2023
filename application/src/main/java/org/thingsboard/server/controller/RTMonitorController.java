@@ -262,7 +262,7 @@ public class RTMonitorController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        return this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id));
+        return this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id), isFactoryUser());
     }
 
     /**
@@ -312,7 +312,7 @@ public class RTMonitorController extends BaseController {
     @GetMapping("/rtMonitor/device/history/header")
     public List<DictDeviceGroupPropertyVO> listRTMonitorHistory(@RequestParam String deviceId, @RequestParam(value = "isShowAttributes", defaultValue = "false") boolean isShowAttributes) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("deviceId", deviceId);
-        return this.deviceMonitorService.filterDictDeviceProperties(getTenantId(), deviceId, this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId, isShowAttributes));
+        return this.deviceMonitorService.filterDictDeviceProperties(getTenantId(), deviceId, this.deviceMonitorService.listDeviceTelemetryHistoryTitles(getTenantId(), deviceId, isShowAttributes), isFactoryUser());
     }
 
     /**

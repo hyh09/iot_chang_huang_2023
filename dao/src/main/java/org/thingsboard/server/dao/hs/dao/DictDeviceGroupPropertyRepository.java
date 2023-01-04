@@ -28,12 +28,22 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
     void deleteByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 
     /**
-     * 查询分组属性，并且状态是开启的（不存在的状态也查询出来）
+     * 查询分组属性
+     *
      * @param groupIdList
      * @return
      */
-    @Query(value = "SELECT t.* FROM hs_dict_device_group_property t LEFT JOIN hs_dict_device_switch t1 ON t.ID = t1.property_id where t.dict_device_group_id in (?1) AND (t1.switch = 1  or t1.switch is null)  order by t.sort asc",nativeQuery = true)
+    @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceGroupId in (?1) order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllInDictDeviceGroupId(List<UUID> groupIdList);
+
+    /**
+     * 查询分组属性，并且状态是开启的（不存在的状态也查询出来）
+     *
+     * @param groupIdList
+     * @return
+     */
+    @Query(value = "SELECT t.* FROM hs_dict_device_group_property t LEFT JOIN hs_dict_device_switch t1 ON t.ID = t1.property_id where t.dict_device_group_id in (?1) AND (t1.switch = 1  or t1.switch is null)  order by t.sort asc", nativeQuery = true)
+    List<DictDeviceGroupPropertyEntity> findOpenInDictDeviceGroupId(List<UUID> groupIdList);
 
     @Query("select t from DictDeviceGroupPropertyEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
@@ -41,7 +51,7 @@ public interface DictDeviceGroupPropertyRepository extends PagingAndSortingRepos
     @Query("select t from DictDeviceGroupPropertyEntity t, DictDeviceGroupEntity t1 where  t.dictDeviceGroupId= t1.id   and t1.name =:name   order by t.sort asc")
     List<DictDeviceGroupPropertyEntity> findAllByName(@Param("name") String name);
 
-//    @Query("select new org.thingsboard.server.common.data.vo.device.DictDeviceDataVo(t1.name,t.name,t.title,) from DictDeviceGroupPropertyEntity t, DictDeviceGroupEntity t1 where  t.dictDeviceGroupId= t1.id   and t1.dictDeviceId =:dictDeviceId   order by t.sort,t1.sort asc")
+    //    @Query("select new org.thingsboard.server.common.data.vo.device.DictDeviceDataVo(t1.name,t.name,t.title,) from DictDeviceGroupPropertyEntity t, DictDeviceGroupEntity t1 where  t.dictDeviceGroupId= t1.id   and t1.dictDeviceId =:dictDeviceId   order by t.sort,t1.sort asc")
     @Query(value = "select  new org.thingsboard.server.common.data.vo.device.DictDeviceDataVo(t1.name,t.name,t.title,h2.unit)" +
             "   from  DictDeviceGroupPropertyEntity t " +
             " left join   DictDeviceGroupEntity  t1  on   t.dictDeviceGroupId= t1.id " +

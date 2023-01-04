@@ -477,12 +477,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return key: 遥测数据的key
      */
     @Override
-    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId) throws CustomException, ThingsboardException {
+    public List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId tenantId,boolean isFactoryUser) throws CustomException, ThingsboardException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}", parameterVo, tenantId.getId());
         List<OutRunningStateVo> resultVo = new ArrayList<>();
         List<RunningStateVo> runningStateVoList = parameterVo.getAttributeParameterList();
         if (CollectionUtils.isEmpty(runningStateVoList)) {
-            List<RunningStateVo> propertiesVos = queryDictDevice(parameterVo.getDeviceId(), tenantId);
+            List<RunningStateVo> propertiesVos = queryDictDevice(parameterVo.getDeviceId(), tenantId,isFactoryUser);
             runningStateVoList = propertiesVos.stream().limit(1).collect(Collectors.toList());
             parameterVo.setAttributeParameterList(runningStateVoList);
         }
@@ -520,12 +520,12 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @throws Exception
      */
     @Override
-    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink) throws Exception {
+    public List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId tenantId, PageLink pageLink,boolean isFactoryUser) throws Exception {
         //1.优化将app端的入参转换pc端入参;
         InputRunningSateVo runningSateVo = new InputRunningSateVo().toInputRunningSateVoByAppQuery(parameterVo);
         if (CollectionUtils.isEmpty(parameterVo.getAttributes())) {
             //首次加载的时候
-            List<RunningStateVo> propertiesVos = queryDictDevice(parameterVo.getDeviceId(), tenantId);
+            List<RunningStateVo> propertiesVos = queryDictDevice(parameterVo.getDeviceId(), tenantId,isFactoryUser);
             propertiesVos = propertiesVos.stream().limit(1).collect(Collectors.toList());
             runningSateVo.setAttributeParameterList(propertiesVos);
         }
@@ -533,7 +533,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
             //分页取不到了;
             return new ArrayList<>();
         }
-        List<OutRunningStateVo> pcResultVo = queryPcTheRunningStatusByDevice(runningSateVo, tenantId);
+        List<OutRunningStateVo> pcResultVo = queryPcTheRunningStatusByDevice(runningSateVo, tenantId,isFactoryUser);
         return pcResultVoToApp(pcResultVo);
     }
 
@@ -545,10 +545,10 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId tenantId, PageLink pageLink) throws ThingsboardException {
+    public Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId tenantId, PageLink pageLink,boolean isFactoryUser) throws ThingsboardException {
         log.debug("查询当前设备的运行状态入参:{}租户id{}", vo, tenantId.getId());
 
-        List<RunningStateVo> propertiesVos = queryDictDevice(vo.getDeviceId(), tenantId);
+        List<RunningStateVo> propertiesVos = queryDictDevice(vo.getDeviceId(), tenantId,isFactoryUser);
         log.debug("查询到的当前设备{}的配置的属性条数:{}", vo.getDeviceId(), propertiesVos.size());
 
         Map<String, RunningStateVo> translateMap = propertiesVos.stream().collect(Collectors.toMap(RunningStateVo::getName, a -> a, (k1, k2) -> k1));
@@ -606,7 +606,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @return
      */
     @Override
-    public Object queryGroupDict(UUID deviceId, TenantId tenantId) {
+    public Object queryGroupDict(UUID deviceId, TenantId tenantId,boolean isFactoryUser) {
         DeviceEntity deviceInfo = deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId);
         if (deviceInfo == null) {
             throw new CustomException(ActivityException.FAILURE_ERROR.getCode(), "查询不到此设备!");
@@ -631,7 +631,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         Map<String, List<DictDeviceDataVo>> map1 = devicePropertiesList.stream().collect(Collectors.groupingBy(DictDeviceDataVo::getGroupName));
         map.putAll(map1);
         map.put("部件", filterAlreadyExistsInTheChart(chartDataList, partsList));
-        return attributeCullingSvc.toMakeToMap(map,tenantId,deviceId);
+        return attributeCullingSvc.toMakeToMap(map,tenantId,deviceId,isFactoryUser);
     }
 
 
@@ -645,7 +645,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
      * @throws ThingsboardException
      */
     @Override
-    public List<RunningStateVo> queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException {
+    public List<RunningStateVo> queryDictDevice(UUID deviceId, TenantId tenantId,boolean isFactoryUser) throws ThingsboardException {
         List<RunningStateVo> deviceDictionaryPropertiesVos = new ArrayList<>();
         DeviceEntity deviceInfo = deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId);
         if (deviceInfo == null) {
@@ -661,7 +661,7 @@ public class EfficiencyStatisticsImpl implements EfficiencyStatisticsSvc {
         List<DictDeviceDataVo> partsList = getParts(tenantId, deviceInfo.getDictDeviceId());
         dictDeviceDataVos.addAll(partsList);
         List<RunningStateVo> resultList = filterOutSaved(dictDeviceDataVos, graphVOS);
-        return attributeCullingSvc.queryKeyToSwitch(resultList, tenantId, deviceId);
+        return attributeCullingSvc.queryKeyToSwitch(resultList, tenantId, deviceId,isFactoryUser);
     }
 
 

@@ -10,8 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.thingsboard.server.common.data.EntityType;
-import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
@@ -24,10 +22,8 @@ import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
 import org.thingsboard.server.dao.hs.service.DictDeviceService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
-import org.thingsboard.server.dao.hsms.entity.vo.DeviceSwitchVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
 import org.thingsboard.server.dao.hsms.entity.vo.DictDeviceSwitchDeviceVO;
-import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchVO;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import javax.validation.Valid;
@@ -151,6 +147,21 @@ public class DictDeviceController extends BaseController {
     public DictDeviceVO getDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
         return this.dictDeviceService.getDictDeviceDetail(id, getTenantId());
+    }
+
+
+    /**
+     * 获得打开的设备字典详情
+     *
+     * @param id 设备字典id
+     */
+    @ApiOperation(value = "设备开启的字典-详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true)})
+    @GetMapping("/dict/openDevice/{id}")
+    public DictDeviceVO getOpenDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
+        checkParameter("id", id);
+        return this.dictDeviceService.getOpenDictDeviceDetail(id, getTenantId());
     }
 
     /**
@@ -282,8 +293,8 @@ public class DictDeviceController extends BaseController {
     })
     @PostMapping(value = "/dict/device/import")
     public void dictDeviceImport(@RequestParam(required = false) String checksum,
-                            @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
-                            @RequestBody MultipartFile file) throws ThingsboardException, IOException {
+                                 @RequestParam(required = false, defaultValue = "MD5") String checksumAlgorithmStr,
+                                 @RequestBody MultipartFile file) throws ThingsboardException, IOException {
         if (file == null || file.isEmpty())
             throw new ThingsboardException("文件不能为空！", ThingsboardErrorCode.GENERAL);
 

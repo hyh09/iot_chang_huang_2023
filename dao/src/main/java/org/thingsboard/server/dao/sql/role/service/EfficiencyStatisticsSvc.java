@@ -118,10 +118,10 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return 返回的是 key:name ,
      */
-    List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId  tenantId) throws Exception;
+    List<OutRunningStateVo> queryPcTheRunningStatusByDevice(InputRunningSateVo parameterVo, TenantId  tenantId,boolean isFactoryUser) throws Exception;
 
 
-    List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId  tenantId, PageLink pageLink) throws Exception;
+    List<OutAppRunnigStateVo> queryAppTheRunningStatusByDevice(AppQueryRunningStatusVo parameterVo, TenantId  tenantId, PageLink pageLink,boolean isFactoryUser) throws Exception;
 
     /**
      * app端的返回的是描述字段 【老接口】
@@ -129,11 +129,11 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId  tenantId,PageLink pageLink) throws ThingsboardException;
+    Map<String, List<ResultRunStatusByDeviceVo>> queryTheRunningStatusByDevice(AppQueryRunningStatusVo vo, TenantId  tenantId,PageLink pageLink,boolean isFactoryUser) throws ThingsboardException;
 
 
     //查询当前的分组-分组属性
-    Object   queryGroupDict(UUID deviceId,TenantId tenantId);
+    Object   queryGroupDict(UUID deviceId,TenantId tenantId,boolean isFactoryUser);
 
     /**
      * 用于pc端的下拉选的 name 和 title
@@ -141,7 +141,7 @@ public interface EfficiencyStatisticsSvc {
      * @param tenantId
      * @return
      */
-    List<RunningStateVo>  queryDictDevice(UUID deviceId, TenantId tenantId) throws ThingsboardException;
+    List<RunningStateVo>  queryDictDevice(UUID deviceId, TenantId tenantId,boolean isFactoryUser) throws ThingsboardException;
 
 
     /*********

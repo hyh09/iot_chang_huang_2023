@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,10 +60,7 @@ import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -899,19 +897,24 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Override
     @SuppressWarnings("all")
     public PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
-        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
+//        var uuids = this.clientService.listSimpleDevicesByQuery(tenantId, query).stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList());
         var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
         if (devicePageData.getData().isEmpty())
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
-
-        return CompletableFuture.supplyAsync(() -> {
+        //查询设备id对应的设备字典Future
+        CompletableFuture<HashMap<String, DictDevice>> hashMapCompletableFuture = CompletableFuture.supplyAsync(() -> {
             var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
             if (dictDeviceIds.isEmpty())
                 return new HashMap<String, DictDevice>();
             else
                 return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
                         .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
-        }).thenCombineAsync(CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList()))),
+        });
+        //查询设备状态Future
+        CompletableFuture<Map<String, Boolean>> mapCompletableFuture = CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())));
+        //查询时长
+        LocalTime.now().getMinute();
+        return hashMapCompletableFuture.thenCombineAsync(mapCompletableFuture,
                 (dictDeviceMap, activeStatusMap) -> devicePageData.getData().stream().map(e -> {
                     var idStr = e.getId().toString();
                     return RTMonitorDeviceResult.builder()
@@ -924,6 +927,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                 }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
     }
 
+    public static void main(String[] args) {
+        System.out.println( LocalTime.now().getMinute());
+    }
     /**
      * 获得实时监控数据列表-设备在线状态
      *
@@ -1218,9 +1224,12 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      *
      * @param deviceDetailResult 设备详情数据
      * @param tenantId           租户Id
+     * @param isFactoryUser      是否工厂用户
      */
     @Override
-    public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult) throws ThingsboardException {
+    public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult, Boolean isFactoryUser) throws ThingsboardException {
+        if (!isFactoryUser)
+            return deviceDetailResult;
         var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceDetailResult.getId())
                 .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
                 .map(DictDevicePropertySwitchVO::getPropertyName)
@@ -1229,7 +1238,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         if (propertyShowSet.isEmpty())
             return deviceDetailResult;
         else {
-            deviceDetailResult.getResultList().removeIf(v->!propertyShowSet.contains(v.getName()));
+            deviceDetailResult.getResultList().forEach(v->v.getGroupPropertyList().removeIf(f->!propertyShowSet.contains(f.getName())));
             this.recursionFilterComponentData(deviceDetailResult.getComponentList(), propertyShowSet);
         }
         return deviceDetailResult;
@@ -1238,17 +1247,20 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     /**
      * 数据筛选过滤
      *
-     * @param tenantId   租户Id
-     * @param properties 属性列表
-     * @param deviceId   设备Id
+     * @param tenantId      租户Id
+     * @param properties    属性列表
+     * @param deviceId      设备Id
+     * @param isFactoryUser 是否工厂用户
      */
     @Override
-    public List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties) throws ThingsboardException {
+    public List<DictDeviceGroupPropertyVO> filterDictDeviceProperties(TenantId tenantId, String deviceId, List<DictDeviceGroupPropertyVO> properties, Boolean isFactoryUser) throws ThingsboardException {
+        if (!isFactoryUser)
+            return properties;
         var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceId)
                 .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
                 .map(DictDevicePropertySwitchVO::getPropertyName)
                 .collect(Collectors.toSet());
-        properties.removeIf(v->!propertyShowSet.contains(v.getName()));
+        properties.removeIf(v -> !propertyShowSet.contains(v.getName()));
         return properties;
     }
 

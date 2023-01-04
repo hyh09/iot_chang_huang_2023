@@ -50,4 +50,6 @@ public interface TsKvLatestRepository extends CrudRepository<TsKvLatestEntity, T
 
     @Query("select new TsKvLatestEntity(t.entityId, max(t.ts)) from TsKvLatestEntity t where t.entityId in :entityIds group by t.entityId")
     List<TsKvLatestEntity> findAllLatestByEntityIds(@Param("entityIds") List<UUID> entityIds);
+
+    List<TsKvLatestEntity> findAllByKeyEquals(int key);
 }

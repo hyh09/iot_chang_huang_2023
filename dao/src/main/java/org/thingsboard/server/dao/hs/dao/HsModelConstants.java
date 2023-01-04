@@ -201,4 +201,15 @@ public class HsModelConstants {
     public static final String DICT_DEVICE_SWITCH_PROPERTY_ID = "property_id";
     public static final String DICT_DEVICE_SWITCH_PROPERTY_TYPE = "property_type";
     public static final String DICT_DEVICE_SWITCH_SWITCH = "switch";
+
+    /**
+     * 开机时长记录表
+     */
+    public static final String TREP_DAY_STA_DETAIL_TABLE_NAME = "trep_day_sta_detail";
+    public static final String TREP_HSTA_DETAILL_TABLE_NAME = "trep_hsta_detail";
+    public static final String TREP_STA_ENTITY_ID = "entity_id";
+    public static final String TREP_STA_TENANT_ID = "tenant_id";
+    public static final String TREP_STA_TOTAL_TIME = "total_time";
+    public static final String TREP_STA_START_TIME = "start_time";
+    public static final String TREP_STA_END_TIME = "end_time";
 }

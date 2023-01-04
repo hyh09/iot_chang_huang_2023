@@ -3,8 +3,11 @@ package org.thingsboard.server.dao.attribute;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.device.DictDeviceDataVo;
@@ -34,11 +37,11 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
 
 
     @Override
-    public List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList, TenantId tenantId, UUID deviceId) {
+    public List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList, TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
         if (CollectionUtils.isEmpty(resultList)) {
             return resultList;
         }
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId,isFactoryUser);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return resultList;
         }
@@ -68,8 +71,8 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
      * @return
      */
     @Override
-    public Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map, TenantId tenantId, UUID deviceId) {
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
+    public Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map, TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId,isFactoryUser);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return map;
         }
@@ -116,11 +119,11 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
      * @return
      */
     @Override
-    public List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId) {
+    public List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
         if(CollectionUtils.isEmpty(componentDataDTOList)){
             return componentDataDTOList;
         }
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId,isFactoryUser);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return componentDataDTOList;
         }
@@ -141,8 +144,17 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         return componentDataDTOListResults;
     }
 
-    private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId) {
+    /**
+     * 2023-1-4 新增  工厂账号不显示这些参数，租户还是要全部显得
+     * @param tenantId
+     * @param deviceId
+     * @return
+     */
+    private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
         List<DictDevicePropertySwitchVO> list = new ArrayList<>();
+        if(!isFactoryUser){
+           return list;
+        }
         try {
             list = dictDeviceService.listDictDeviceSwitches(tenantId, deviceId.toString());
         } catch (ThingsboardException e1) {
@@ -152,6 +164,8 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         }
         return list;
     }
+
+
 
 
     private boolean isAddList(List<String> keysNameS, Map<String, DictDevicePropertySwitchEnum> map1) {

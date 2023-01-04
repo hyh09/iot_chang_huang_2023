@@ -3,8 +3,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { EnergyConsumptionTableConfigResolver } from './energy-consumption/energy-consumption-table-config.resolver';
 import { EnergyHistoryTableConfigResolver } from './energy-consumption/energy-history-table-config.resolver';
-import { ProductionHistoryCapacityTableConfigResolver } from './production-capacity/production-capacity-history-table-config.resolver';
-import { ProductionCapacityTableConfigResolver } from './production-capacity/production-capacity-table-config.resolver';
+import { ProductionHistoryCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-history-table-config.resolver';
+import { ProductionCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-table-config.resolver';
+import { GroupProductionTableConfigResolver } from './production-capacity/group/group-production-table-config.resolver';
 import { RunningStateComponent } from './running-state/running-state.component';
 
 const routes: Routes = [
@@ -13,41 +14,78 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'deviceCapacity',
+        redirectTo: 'outputAnalysis',
         pathMatch: 'full'
       },
       {
-        path: 'deviceCapacity',
+        path: 'outputAnalysis',
         data: {
           breadcrumb: {
-            label: 'potency.device-capacity',
+            label: 'potency.output-analysis',
             icon: 'mdi:capacity'
           }
         },
         children: [
           {
             path: '',
-            component: EntitiesTableComponent,
-            data: {
-              title: 'potency.device-capacity',
-            },
-            resolve: {
-              entitiesTableConfig: ProductionCapacityTableConfigResolver
-            }
+            redirectTo: 'factory',
+            pathMatch: 'full'
           },
           {
-            path: ':deviceId/history',
-            component: EntitiesTableComponent,
+            path: 'factory',
             data: {
-              title: 'potency.device-capacity-history',
               breadcrumb: {
-                label: 'potency.device-capacity-history',
-                icon: 'mdi:history-data'
+                label: 'potency.factory',
+                icon: 'mdi:factory'
               }
             },
-            resolve: {
-              entitiesTableConfig: ProductionHistoryCapacityTableConfigResolver
-            }
+            children: [
+              {
+                path: '',
+                component: EntitiesTableComponent,
+                data: {
+                  title: 'potency.factory',
+                },
+                resolve: {
+                  entitiesTableConfig: ProductionCapacityTableConfigResolver
+                }
+              },
+              {
+                path: ':deviceId/history',
+                component: EntitiesTableComponent,
+                data: {
+                  title: 'potency.device-capacity-history',
+                  breadcrumb: {
+                    label: 'potency.device-capacity-history',
+                    icon: 'mdi:history-data'
+                  }
+                },
+                resolve: {
+                  entitiesTableConfig: ProductionHistoryCapacityTableConfigResolver
+                }
+              }
+            ]
+          },
+          {
+            path: 'group',
+            data: {
+              breadcrumb: {
+                label: 'potency.group',
+                icon: 'mdi:factory'
+              }
+            },
+            children: [
+              {
+                path: '',
+                component: EntitiesTableComponent,
+                data: {
+                  title: 'potency.group'
+                },
+                resolve: {
+                  entitiesTableConfig: GroupProductionTableConfigResolver
+                }
+              }
+            ]
           }
         ]
       },
@@ -108,7 +146,8 @@ const routes: Routes = [
     ProductionCapacityTableConfigResolver,
     EnergyConsumptionTableConfigResolver,
     EnergyHistoryTableConfigResolver,
-    ProductionHistoryCapacityTableConfigResolver
+    ProductionHistoryCapacityTableConfigResolver,
+    GroupProductionTableConfigResolver
   ]
 })
 export class PotencyRoutingModule { }

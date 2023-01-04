@@ -137,7 +137,7 @@ public class RTMonitorBoardController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        return this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id));
+        return this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id), isFactoryUser());
     }
 
     /**

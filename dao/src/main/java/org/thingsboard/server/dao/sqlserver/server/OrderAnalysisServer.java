@@ -74,6 +74,14 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
             sql.append(" and D.sMaterialName like  ").append("\'%").append(vo.getMaterialName()).append("%\'");
         }
         //卡片号的查询
+        if(StringUtils.isNotEmpty(vo.getSCardNo())){
+            sql.append("and  B.uGUID in (  SELECT B1.usdOrderDtlGUID\n" +
+                    "FROM dbo.psWorkFlowCard A1 (NOLOCK)\n" +
+                    "JOIN dbo.sdOrderLot B1 (NOLOCK) ON B1.uGUID=A1.usdOrderLotGUID\n" +
+                    "where A1.sCardNo =? GROUP BY B1.usdOrderDtlGUID\n" +
+                    ")");
+            list.add(vo.getSCardNo());
+        }
         PageData<OrderAnalysisVo> pageData = pageQuery02("A.tCreateTime", sql.toString(), list, pageable, OrderAnalysisVo.class);
         List<OrderAnalysisVo> processAnalysisVoList = pageData.getData();
         convert(processAnalysisVoList);

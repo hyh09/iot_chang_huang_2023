@@ -17,6 +17,21 @@ export interface DeviceCapacityList {
   totalPages: number;
 }
 
+export interface GroupProduction {
+  workOrderNumber: string;
+  workingProcedureName: string;
+  workerGroupName: string;
+  workerNameList: string;
+  ntrackQty: string;
+  unit: string;
+  cardNo: string;
+  materialNo: string;
+  colorName: string;
+  createdTime: number;
+  updatedTime: number;
+  duration: string;
+}
+
 export interface DeviceEnergyConsumption extends BaseData<any> {
   deviceId?: string;
   rename: string;

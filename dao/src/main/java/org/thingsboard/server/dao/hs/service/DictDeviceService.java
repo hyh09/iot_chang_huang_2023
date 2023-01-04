@@ -81,6 +81,13 @@ public interface DictDeviceService {
     List<DictDeviceGroupVO> listDictDeviceGroups(UUID dictDeviceId);
 
     /**
+     * 获得开启设备字典分组及分组属性
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceGroupVO> listOpenDictDeviceGroups(UUID dictDeviceId);
+
+    /**
      * 获得设备字典部件
      *
      * @param dictDeviceId 设备字典Id
@@ -296,4 +303,6 @@ public interface DictDeviceService {
      * @param propertySwitches 设备开关信息
      */
     void updateOrSaveDiceDeviceSwitches(TenantId tenantId, List<DictDevicePropertySwitchNewVO> propertySwitches);
+
+    DictDeviceVO getOpenDictDeviceDetail(String id, TenantId tenantId) throws ThingsboardException;
 }
