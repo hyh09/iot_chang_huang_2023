@@ -1238,7 +1238,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         if (propertyShowSet.isEmpty())
             return deviceDetailResult;
         else {
-            deviceDetailResult.getResultList().removeIf(v -> !propertyShowSet.contains(v.getName()));
+            deviceDetailResult.getResultList().forEach(v->v.getGroupPropertyList().removeIf(f->!propertyShowSet.contains(f.getName())));
             this.recursionFilterComponentData(deviceDetailResult.getComponentList(), propertyShowSet);
         }
         return deviceDetailResult;

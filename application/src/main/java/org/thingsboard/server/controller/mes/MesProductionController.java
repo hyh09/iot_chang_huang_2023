@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller.mes;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +22,11 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/mes")
+@RequestMapping("/api/mes/production")
+@Api(value="mes生产管理Controller",tags={"mes生产管理接口"})
 public class MesProductionController extends BaseController {
     @Autowired
-    private MesProductionService clusterRepository;
+    private MesProductionService mesProductionService;
 
 
     @ApiOperation("查询生产班组列表")
@@ -34,7 +36,7 @@ public class MesProductionController extends BaseController {
     public PageData<MesProductionPlanVo> findPlanList(@RequestParam int pageSize, @RequestParam int page, MesProductionPlanDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return clusterRepository.findPlanList(dto,pageLink);
+            return mesProductionService.findPlanList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产班组列表异常{}",e);
             throw new RuntimeException(e);
@@ -48,7 +50,7 @@ public class MesProductionController extends BaseController {
     public PageData<MesProductionWorkVo> findWorkList(@RequestParam int pageSize, @RequestParam int page, MesProductionWorkDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return clusterRepository.findWorkList(dto,pageLink);
+            return mesProductionService.findWorkList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产报工列表异常{}",e);
             throw new RuntimeException(e);
@@ -63,7 +65,7 @@ public class MesProductionController extends BaseController {
     public PageData<MesProductionMonitorVo> findMonitorList(@RequestParam int pageSize, @RequestParam int page, MesProductionMonitorDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return clusterRepository.findMonitorList(dto,pageLink);
+            return mesProductionService.findMonitorList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产监控列表异常{}",e);
             throw new RuntimeException(e);
@@ -75,7 +77,7 @@ public class MesProductionController extends BaseController {
     @ResponseBody
     public List<String> findWorkingProcedureNameList(){
         try {
-            return clusterRepository.findWorkingProcedureNameList();
+            return mesProductionService.findWorkingProcedureNameList();
         } catch (Exception e) {
             log.error("查询生产工序名称列表异常{}",e);
             throw new RuntimeException(e);
