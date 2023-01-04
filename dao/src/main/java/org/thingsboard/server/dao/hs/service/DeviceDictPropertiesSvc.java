@@ -26,26 +26,29 @@ public interface DeviceDictPropertiesSvc {
     /**
      * 2021-11-29 15:22
      * 查询初始化得数据 分组属性
+     *
      * @return
      */
     List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name);
 
     /**
-     *初始化的数据的
+     * 初始化的数据的
+     *
      * @return
      */
-    Map<String,DictDeviceGroupPropertyVO> getMapPropertyVo();
+    Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo();
 
     /**
-     *通过标题取数据
+     * 通过标题取数据
      */
-    Map<String,DictDeviceGroupPropertyVO> getMapPropertyVoByTitle();
+    Map<String, DictDeviceGroupPropertyVO> getMapPropertyVoByTitle();
 
     /**
      * 获取初始化Title
+     *
      * @return
      */
-    Map<String,String> getUnit();
+    Map<String, String> getUnit();
 
 
     List<DictDeviceDataVo> findGroupNameAndName(UUID dictDeviceId);

@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
 
-    @Autowired private   DictDeviceRepository dictDeviceRepository;
-    @Autowired private DictDeviceGroupPropertyRepository groupPropertyRepository;
+    @Autowired
+    private DictDeviceRepository dictDeviceRepository;
+    @Autowired
+    private DictDeviceGroupPropertyRepository groupPropertyRepository;
     @Autowired
     DictDeviceService dictDeviceService;
 
@@ -38,17 +40,15 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
      */
     @Override
     public List<String> findAllByName(UUID dictDeviceId, String name) {
-        List<String> nameList  = new ArrayList<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
-        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
-        {
-            if(vos.getName().equals(name))
-            {
-                nameList =  vos.getGroupPropertyList().stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
+        List<String> nameList = new ArrayList<>();
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getDictDeviceGroupInitData();
+        for (DictDeviceGroupVO vos : dictDeviceGroupVOS) {
+            if (vos.getName().equals(name)) {
+                nameList = vos.getGroupPropertyList().stream().map(DictDeviceGroupPropertyVO::getName).collect(Collectors.toList());
             }
         }
 
-        return  nameList;
+        return nameList;
 //        List<DictDeviceGroupPropertyEntity> entities = this.groupPropertyRepository.findAllByName(name);
 //        List<String> nameList = entities.stream().map(DictDeviceGroupPropertyEntity::getName).collect(Collectors.toList());
 //        return nameList;
@@ -56,48 +56,43 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
 
     @Override
     public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVoByTitle() {
-        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
-        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
-        {
-            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
-            voList.stream().forEach(vo1->{
-                nameMap.put(vo1.getTitle(),vo1);
+        Map<String, DictDeviceGroupPropertyVO> nameMap = new HashMap<>();
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getDictDeviceGroupInitData();
+        for (DictDeviceGroupVO vo : dictDeviceGroupVOS) {
+            List<DictDeviceGroupPropertyVO> voList = vo.getGroupPropertyList();
+            voList.stream().forEach(vo1 -> {
+                nameMap.put(vo1.getTitle(), vo1);
             });
         }
-        return  nameMap;
+        return nameMap;
     }
 
 
     @Override
     public Map<String, DictDeviceGroupPropertyVO> getMapPropertyVo() {
-        Map<String, DictDeviceGroupPropertyVO>  nameMap = new HashMap<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
-        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
-        {
-            List<DictDeviceGroupPropertyVO>  voList=  vo.getGroupPropertyList();
-            voList.stream().forEach(vo1->{
-                nameMap.put(vo1.getName(),vo1);
+        Map<String, DictDeviceGroupPropertyVO> nameMap = new HashMap<>();
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getDictDeviceGroupInitData();
+        for (DictDeviceGroupVO vo : dictDeviceGroupVOS) {
+            List<DictDeviceGroupPropertyVO> voList = vo.getGroupPropertyList();
+            voList.stream().forEach(vo1 -> {
+                nameMap.put(vo1.getName(), vo1);
             });
         }
-        return  nameMap;
+        return nameMap;
     }
 
 
     /**
-     *
      * @return
      */
     @Override
-    public  Map<String,String> getUnit()
-    {
+    public Map<String, String> getUnit() {
         Map<String, String> map = new HashMap<>();
 
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
-        log.info("打印当前的数据:{}",dictDeviceGroupVOS);
-        for(DictDeviceGroupVO  vo:dictDeviceGroupVOS)
-        {
-            Map map1=   vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName,DictDeviceGroupPropertyVO::getTitle));
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getDictDeviceGroupInitData();
+        log.info("打印当前的数据:{}", dictDeviceGroupVOS);
+        for (DictDeviceGroupVO vo : dictDeviceGroupVOS) {
+            Map map1 = vo.getGroupPropertyList().stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName, DictDeviceGroupPropertyVO::getTitle));
             map.putAll(map1);
         }
         return map;
@@ -105,18 +100,16 @@ public class DeviceDictPropertiesImpl implements DeviceDictPropertiesSvc {
     }
 
     @Override
-    public List<DictDeviceGroupPropertyVO>  findAllDictDeviceGroupVO(String name) {
-        List<DictDeviceGroupPropertyVO>  voList  = new ArrayList<>();
-        List<DictDeviceGroupVO>  dictDeviceGroupVOS  = dictDeviceService.getDictDeviceGroupInitData();
-        for(DictDeviceGroupVO  vos :dictDeviceGroupVOS)
-        {
-            if(vos.getName().equals(name))
-            {
+    public List<DictDeviceGroupPropertyVO> findAllDictDeviceGroupVO(String name) {
+        List<DictDeviceGroupPropertyVO> voList = new ArrayList<>();
+        List<DictDeviceGroupVO> dictDeviceGroupVOS = dictDeviceService.getDictDeviceGroupInitData();
+        for (DictDeviceGroupVO vos : dictDeviceGroupVOS) {
+            if (vos.getName().equals(name)) {
                 voList.addAll(vos.getGroupPropertyList());
             }
         }
 
-        return  voList;
+        return voList;
     }
 
     @Override
