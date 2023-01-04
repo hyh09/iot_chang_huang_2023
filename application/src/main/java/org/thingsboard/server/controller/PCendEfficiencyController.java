@@ -552,7 +552,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ResponseBody
     public List<OutRunningStateVo> queryTheRunningStatusByDevice(@RequestBody InputRunningSateVo queryTsKvVo) throws ThingsboardException {
         try {
-            return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId());
+            return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId(),isFactoryUser());
         } catch (Exception e) {
             log.error("【PC端查询当前设备的运行状态】异常信息:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
