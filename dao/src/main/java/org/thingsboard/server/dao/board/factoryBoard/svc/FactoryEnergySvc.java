@@ -1,5 +1,8 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
+import org.thingsboard.server.common.data.vo.QueryTsKvVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
+
 /**
  * @Project Name: thingsboard
  * @File Name: FactoryEnergySvc
@@ -9,4 +12,12 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
  * Copyright (c) 2023,All Rights Reserved.
  */
 public interface FactoryEnergySvc {
+
+    /**
+     * 当日的耗电量-耗水量-耗气量
+     * @param queryTsKvVo
+     * @return
+     */
+    CurrentUtilitiesVo queryCurrentEnergy(QueryTsKvVo queryTsKvVo);
+
 }
