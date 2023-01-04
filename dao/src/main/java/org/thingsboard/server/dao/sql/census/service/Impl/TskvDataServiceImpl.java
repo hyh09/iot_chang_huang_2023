@@ -67,7 +67,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
             return null;
         }
         dataVo.setLastTime(tsKvEntityEnd.getTs());
-        String lastValue=tsKvEntityEnd.getValue() != null ? StringUtilToll.roundUp(tsKvEntityEnd.getValueAsString()) : "0";
+        String lastValue = tsKvEntityEnd.getValue() != null ? StringUtilToll.roundUp(tsKvEntityEnd.getValueAsString()) : "0";
         dataVo.setLastValue(lastValue);
         if (StringUtilToll.isNotZero(firstValue)) {
             dataVo.setAddValue(StringUtilToll.sub(tsKvEntityEnd.getValueAsString(), firstValue));
@@ -89,6 +89,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
 
     /**
      * 将水电气产量 转换最后入库对象
+     *
      * @param waterVo
      * @param electricVo
      * @param gasVo
@@ -96,18 +97,17 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
      * @return
      */
     @Override
-    public StatisticalDataEntity StaticalDataVoToStatisticalDataEntity(StatisticalDataEntity statisticalDataEntity,StaticalDataVo waterVo,
+    public StatisticalDataEntity StaticalDataVoToStatisticalDataEntity(StatisticalDataEntity statisticalDataEntity, StaticalDataVo waterVo,
                                                                        StaticalDataVo electricVo,
                                                                        StaticalDataVo gasVo,
                                                                        StaticalDataVo capacitiesVo
-                                                                      ) {
+    ) {
 
-        if(statisticalDataEntity.getId() == null)
-        {
-            statisticalDataEntity.setDate(getLocalDateByVo(waterVo,electricVo,gasVo,capacitiesVo));
+        if (statisticalDataEntity.getId() == null) {
+            statisticalDataEntity.setDate(getLocalDateByVo(waterVo, electricVo, gasVo, capacitiesVo));
         }
         //水
-        if(waterVo != null) {
+        if (waterVo != null) {
             statisticalDataEntity.setWaterFirstTime(waterVo.getFirstTime());
             statisticalDataEntity.setWaterFirstValue(waterVo.getFirstValue());
             statisticalDataEntity.setWaterLastTime(waterVo.getLastTime());
@@ -117,7 +117,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
         }
 
         //电
-        if(electricVo != null) {
+        if (electricVo != null) {
             statisticalDataEntity.setElectricFirstTime(electricVo.getFirstTime());
             statisticalDataEntity.setElectricFirstValue(electricVo.getFirstValue());
             statisticalDataEntity.setElectricLastTime(electricVo.getLastTime());
@@ -127,7 +127,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
         }
 
         //气
-        if(gasVo != null) {
+        if (gasVo != null) {
             statisticalDataEntity.setGasFirstTime(gasVo.getFirstTime());
             statisticalDataEntity.setGasFirstValue(gasVo.getFirstValue());
             statisticalDataEntity.setGasLastTime(gasVo.getLastTime());
@@ -137,7 +137,7 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
         }
 
         //产量
-        if(capacitiesVo != null) {
+        if (capacitiesVo != null) {
             statisticalDataEntity.setCapacityFirstTime(capacitiesVo.getFirstTime());
             statisticalDataEntity.setCapacityFirstValue(capacitiesVo.getFirstValue());
             statisticalDataEntity.setCapacityLastTime(capacitiesVo.getLastTime());
@@ -150,20 +150,19 @@ public class TskvDataServiceImpl extends BaseAbstractSqlTimeseriesDao implements
     }
 
 
-    private LocalDate  getLocalDateByVo(StaticalDataVo waterVo,
-                                        StaticalDataVo electricVo,
-                                        StaticalDataVo gasVo,
-                                        StaticalDataVo capacitiesVo)
-    {
-        if(waterVo != null && StringUtilToll.isNotZero(waterVo.getLastTime()+"") ) {
-          return   CommonUtils.getLocalDateByLong(waterVo.getLastTime());
+    private LocalDate getLocalDateByVo(StaticalDataVo waterVo,
+                                       StaticalDataVo electricVo,
+                                       StaticalDataVo gasVo,
+                                       StaticalDataVo capacitiesVo) {
+        if (waterVo != null && StringUtilToll.isNotZero(waterVo.getLastTime() + "")) {
+            return CommonUtils.getLocalDateByLong(waterVo.getLastTime());
         }
-        if(electricVo != null && StringUtilToll.isNotZero(electricVo.getLastTime()+"") ) {
-            return   CommonUtils.getLocalDateByLong(electricVo.getLastTime());
+        if (electricVo != null && StringUtilToll.isNotZero(electricVo.getLastTime() + "")) {
+            return CommonUtils.getLocalDateByLong(electricVo.getLastTime());
         }
-        if(gasVo!= null && StringUtilToll.isNotZero(gasVo.getLastTime()+"") ) {
-            return   CommonUtils.getLocalDateByLong(gasVo.getLastTime());
+        if (gasVo != null && StringUtilToll.isNotZero(gasVo.getLastTime() + "")) {
+            return CommonUtils.getLocalDateByLong(gasVo.getLastTime());
         }
-            return   CommonUtils.getLocalDateByLong(capacitiesVo.getLastTime());
+        return CommonUtils.getLocalDateByLong(capacitiesVo.getLastTime());
     }
 }

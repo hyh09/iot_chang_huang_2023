@@ -1,5 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
 
@@ -15,9 +17,10 @@ public interface FactoryEnergySvc {
 
     /**
      * 当日的耗电量-耗水量-耗气量
+     *
      * @param queryTsKvVo
      * @return
      */
-    CurrentUtilitiesVo queryCurrentEnergy(QueryTsKvVo queryTsKvVo);
+    CurrentUtilitiesVo queryCurrentEnergy(QueryTsKvVo queryTsKvVo, TenantId tenantId) throws JsonProcessingException;
 
 }

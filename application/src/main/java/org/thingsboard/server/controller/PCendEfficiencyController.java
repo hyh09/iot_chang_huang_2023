@@ -308,7 +308,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     @RequestMapping(value = "/excelEntityByKeysNew", method = RequestMethod.GET)
     @ResponseBody
-    public void  excelEntityByKeysNew(
+    public void excelEntityByKeysNew(
             @RequestParam int pageSize,
             @RequestParam int page,
             @RequestParam(required = false) String textSearch,
@@ -322,17 +322,17 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID factoryId,
             HttpServletResponse response
     ) throws ThingsboardException, IOException {
-        PageDataAndTotalValue<EfficiencyEntityInfo> pageDataAndTotalValue= this.queryEntityByKeysNew(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId,productionLineId,workshopId,factoryId);
-        List<EfficiencyEntityInfo> list= pageDataAndTotalValue.getData();
-      List<EfficiencyEntityInfoPo> poList= list.stream().map(vo->
-                 EfficiencyEntityInfoPo.builder()
-                         .rename(vo.getRename())
-                         .waterConsumption(vo.getWaterConsumption()).unitWaterConsumption(vo.getUnitWaterConsumption())
-                         .electricConsumption(vo.getElectricConsumption()).unitElectricConsumption(vo.getUnitElectricConsumption())
-                         .gasConsumption(vo.getGasConsumption()).unitGasConsumption(vo.getUnitGasConsumption())
-                         .capacityConsumption(vo.getCapacityConsumption())
-                .build()).collect(Collectors.toList());
-        easyExcel(response,"能耗分析","",poList,EfficiencyEntityInfoPo.class);
+        PageDataAndTotalValue<EfficiencyEntityInfo> pageDataAndTotalValue = this.queryEntityByKeysNew(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime, deviceId, productionLineId, workshopId, factoryId);
+        List<EfficiencyEntityInfo> list = pageDataAndTotalValue.getData();
+        List<EfficiencyEntityInfoPo> poList = list.stream().map(vo ->
+                EfficiencyEntityInfoPo.builder()
+                        .rename(vo.getRename())
+                        .waterConsumption(vo.getWaterConsumption()).unitWaterConsumption(vo.getUnitWaterConsumption())
+                        .electricConsumption(vo.getElectricConsumption()).unitElectricConsumption(vo.getUnitElectricConsumption())
+                        .gasConsumption(vo.getGasConsumption()).unitGasConsumption(vo.getUnitGasConsumption())
+                        .capacityConsumption(vo.getCapacityConsumption())
+                        .build()).collect(Collectors.toList());
+        easyExcel(response, "能耗分析", "", poList, EfficiencyEntityInfoPo.class);
     }
 
     @ApiOperation("效能分析-能耗历史的表头数据返回-无参请求")
@@ -453,9 +453,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             @RequestParam(required = false) UUID deviceId,
             HttpServletResponse response
     ) throws ThingsboardException, IOException {
-        PageDataWithNextPage<EfficiencyHistoryDataVo>  pageDataWithNextPage= this.queryEnergyHistoryNew(pageSize,page,textSearch,sortProperty,sortOrder,startTime,endTime,deviceId);
-        List<EfficiencyHistoryDataPo> poList= getEfficiencyHistoryPo(pageDataWithNextPage);
-        easyExcel(response,"能耗历史","",poList,EfficiencyHistoryDataPo.class);
+        PageDataWithNextPage<EfficiencyHistoryDataVo> pageDataWithNextPage = this.queryEnergyHistoryNew(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime, deviceId);
+        List<EfficiencyHistoryDataPo> poList = getEfficiencyHistoryPo(pageDataWithNextPage);
+        easyExcel(response, "能耗历史", "", poList, EfficiencyHistoryDataPo.class);
     }
 
 
@@ -513,8 +513,8 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
             HttpServletResponse response
     ) throws ThingsboardException, IOException {
         PageDataWithNextPage<CapacityHistoryVo> pageData = queryCapacityHistory(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime, deviceId);
-        List<CapacityHistoryPo> list=  getCapacityHistoryPo(pageData);
-        easyExcel(response, "产量历史", "",list, CapacityHistoryPo.class);
+        List<CapacityHistoryPo> list = getCapacityHistoryPo(pageData);
+        easyExcel(response, "产量历史", "", list, CapacityHistoryPo.class);
     }
 
 
@@ -533,9 +533,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ResponseBody
     public List<RunningStateVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         try {
-            SecurityUser  securityUser =  getCurrentUser();
+            SecurityUser securityUser = getCurrentUser();
 
-            return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId(),isFactoryUser());
+            return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId(), isFactoryUser());
         } catch (Exception e) {
             e.printStackTrace();
             log.info("====>:{}", e);
@@ -552,7 +552,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ResponseBody
     public List<OutRunningStateVo> queryTheRunningStatusByDevice(@RequestBody InputRunningSateVo queryTsKvVo) throws ThingsboardException {
         try {
-            return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId(),isFactoryUser());
+            return efficiencyStatisticsSvc.queryPcTheRunningStatusByDevice(queryTsKvVo, getTenantId(), isFactoryUser());
         } catch (Exception e) {
             log.error("【PC端查询当前设备的运行状态】异常信息:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.FAIL_VIOLATION);
@@ -586,6 +586,7 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     /**
      * 如果是一条返回是0
+     *
      * @param pageData
      * @return
      */
@@ -596,13 +597,12 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
         if (CollectionUtils.isEmpty(voList)) {
             return capacityHistoryPoList;
         }
-        CapacityHistoryVo lastData= pageData.getNextData();
-        for(int i=0;i<voList.size();i++)
-        {
-            if((i+1)<voList.size()) {
-                capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
-            }else {
-                capacityHistoryPoList.add( getCapacityHistoryPoByCurrentVoAndNex(voList.get(i),lastData));
+        CapacityHistoryVo lastData = pageData.getNextData();
+        for (int i = 0; i < voList.size(); i++) {
+            if ((i + 1) < voList.size()) {
+                capacityHistoryPoList.add(getCapacityHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
+            } else {
+                capacityHistoryPoList.add(getCapacityHistoryPoByCurrentVoAndNex(voList.get(i), lastData));
             }
 
 
@@ -611,15 +611,13 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     }
 
-    private  CapacityHistoryPo  getCapacityHistoryPoByCurrentVoAndNex(CapacityHistoryVo currentVo,CapacityHistoryVo nexVo)
-    {
-        CapacityHistoryPo po = new  CapacityHistoryPo();
+    private CapacityHistoryPo getCapacityHistoryPoByCurrentVoAndNex(CapacityHistoryVo currentVo, CapacityHistoryVo nexVo) {
+        CapacityHistoryPo po = new CapacityHistoryPo();
         po.setCreatedTime(CommonUtils.stampToDate(currentVo.getCreatedTime()));
         po.setDeviceName(currentVo.getDeviceName());
-        if(nexVo!= null)
-        {
-           po.setValue(StringUtilToll.sub(currentVo.getValue(),nexVo.getValue()));
-           return  po;
+        if (nexVo != null) {
+            po.setValue(StringUtilToll.sub(currentVo.getValue(), nexVo.getValue()));
+            return po;
         }
         po.setValue("0");
         return po;
@@ -628,24 +626,24 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     /**
      * 如果是一条返回是0
+     *
      * @param pageData
      * @return
      */
-    private List<EfficiencyHistoryDataPo> getEfficiencyHistoryPo(PageDataWithNextPage<EfficiencyHistoryDataVo>  pageData) {
+    private List<EfficiencyHistoryDataPo> getEfficiencyHistoryPo(PageDataWithNextPage<EfficiencyHistoryDataVo> pageData) {
 
         List<EfficiencyHistoryDataPo> poList = new ArrayList<>();
         List<EfficiencyHistoryDataVo> voList = pageData.getData();
         if (CollectionUtils.isEmpty(voList)) {
             return poList;
         }
-        EfficiencyHistoryDataVo lastData1= pageData.getNextData();
+        EfficiencyHistoryDataVo lastData1 = pageData.getNextData();
 
-        for(int i=0;i<voList.size();i++)
-        {
-            if((i+1)<voList.size()) {
-                poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
-            }else {
-                poList.add( geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i),lastData1));
+        for (int i = 0; i < voList.size(); i++) {
+            if ((i + 1) < voList.size()) {
+                poList.add(geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i), voList.get(i + 1)));
+            } else {
+                poList.add(geEfficiencyHistoryPoByCurrentVoAndNex(voList.get(i), lastData1));
             }
 
 
@@ -654,24 +652,21 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
 
     }
 
-    private  EfficiencyHistoryDataPo  geEfficiencyHistoryPoByCurrentVoAndNex(EfficiencyHistoryDataVo currentVo,EfficiencyHistoryDataVo nexVo)
-    {
-        EfficiencyHistoryDataPo po = new  EfficiencyHistoryDataPo();
+    private EfficiencyHistoryDataPo geEfficiencyHistoryPoByCurrentVoAndNex(EfficiencyHistoryDataVo currentVo, EfficiencyHistoryDataVo nexVo) {
+        EfficiencyHistoryDataPo po = new EfficiencyHistoryDataPo();
         po.setCreatedTime(CommonUtils.stampToDateByLong(currentVo.getCreatedTime()));
         po.setDeviceName(currentVo.getDeviceName());
-        if(nexVo!= null)
-        {
-           po.setWater(StringUtilToll.sub(currentVo.getWater(),nexVo.getWater()));
-           po.setGas(StringUtilToll.sub(currentVo.getGas(),nexVo.getGas()));
-           po.setElectric(StringUtilToll.sub(currentVo.getElectric(),nexVo.getElectric()));
-            return  po;
+        if (nexVo != null) {
+            po.setWater(StringUtilToll.sub(currentVo.getWater(), nexVo.getWater()));
+            po.setGas(StringUtilToll.sub(currentVo.getGas(), nexVo.getGas()));
+            po.setElectric(StringUtilToll.sub(currentVo.getElectric(), nexVo.getElectric()));
+            return po;
         }
         po.setWater("0");
         po.setGas("0");
         po.setElectric("0");
         return po;
     }
-
 
 
 }
