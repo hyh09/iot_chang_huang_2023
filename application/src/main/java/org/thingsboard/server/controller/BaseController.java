@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -150,13 +150,13 @@ import static org.thingsboard.server.dao.service.Validator.validateId;
 @TbCoreComponent
 public abstract class BaseController {
 
-    protected  static  final  Boolean IS_TEST=true; //本地自测方便使用
+    protected static final Boolean IS_TEST = true; //本地自测方便使用
 
     public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
     protected static final String DEFAULT_DASHBOARD = "defaultDashboardId";
     protected static final String HOME_DASHBOARD = "homeDashboardId";
 
-    protected static  final String CREATE_TIME_COLUMN="createdTime";
+    protected static final String CREATE_TIME_COLUMN = "createdTime";
 
     private static final int DEFAULT_PAGE_SIZE = 1000;
 
@@ -312,7 +312,7 @@ public abstract class BaseController {
     @Autowired
     protected DeviceOeeEveryHourService deviceOeeEveryHourService;
     @Autowired
-    protected AdminSettingsService  adminSettingsService;
+    protected AdminSettingsService adminSettingsService;
 
     @Autowired
     protected AuditLogRepository auditLogRepository;
@@ -331,16 +331,26 @@ public abstract class BaseController {
     @Getter
     protected boolean edgesEnabled;
 
-    @Autowired protected CheckSvc checkSvc;
-    @Autowired protected UserMenuRoleService userMenuRoleService;
-    @Autowired protected TenantMenuRoleService tenantMenuRoleService;
-    @Autowired protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
-    @Autowired  protected TenantSysRoleService tenantSysRoleService;
-    @Autowired  protected UserRoleMemuSvc userRoleMemuSvc;
-    @Autowired  protected UserLanguageSvc userLanguageSvc;
-    @Autowired protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
-    @Autowired  protected  UserRoleMenuSvc  userRoleSvc;
-    @Autowired  protected EffciencyAnalysisRepository effciencyAnalysisRepository;
+    @Autowired
+    protected CheckSvc checkSvc;
+    @Autowired
+    protected UserMenuRoleService userMenuRoleService;
+    @Autowired
+    protected TenantMenuRoleService tenantMenuRoleService;
+    @Autowired
+    protected EfficiencyStatisticsSvc efficiencyStatisticsSvc;
+    @Autowired
+    protected TenantSysRoleService tenantSysRoleService;
+    @Autowired
+    protected UserRoleMemuSvc userRoleMemuSvc;
+    @Autowired
+    protected UserLanguageSvc userLanguageSvc;
+    @Autowired
+    protected DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired
+    protected UserRoleMenuSvc userRoleSvc;
+    @Autowired
+    protected EffciencyAnalysisRepository effciencyAnalysisRepository;
 
 
     @ExceptionHandler(ThingsboardException.class)
@@ -394,19 +404,22 @@ public abstract class BaseController {
             throw new ThingsboardException("Parameter '" + name + "' can't be empty!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
         }
     }
+
     void checkParameter(String name, Object param) throws ThingsboardException {
-        if(param == null || StringUtils.isBlank(param.toString())){
+        if (param == null || StringUtils.isBlank(param.toString())) {
             throw new ThingsboardException("Parameter '" + name + "' can't be empty!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
 
         }
     }
+
     void checkParameterChinees(String name, String param) throws ThingsboardException {
         if (StringUtils.isEmpty(param)) {
             throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
         }
     }
+
     void checkParameterChinees(String name, Object param) throws ThingsboardException {
-        if(param == null || StringUtils.isBlank(param.toString())){
+        if (param == null || StringUtils.isBlank(param.toString())) {
             throw new ThingsboardException("参数 '" + name + "' 不能为空!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
 
         }
@@ -521,28 +534,30 @@ public abstract class BaseController {
             throw handleException(e, false);
         }
     }
-    Menu checkAddMenuList(AddMenuDto addMenuDto) throws ThingsboardException{
-        if(addMenuDto == null){
+
+    Menu checkAddMenuList(AddMenuDto addMenuDto) throws ThingsboardException {
+        if (addMenuDto == null) {
             throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         return checkMenu(addMenuDto.toMenu());
     }
-    Menu checkMenu(Menu menu) throws ThingsboardException{
+
+    Menu checkMenu(Menu menu) throws ThingsboardException {
         checkNotNull(menu);
-        checkParameter("level",menu.getLevel());
-        checkParameter("menuType",menu.getMenuType());
+        checkParameter("level", menu.getLevel());
+        checkParameter("menuType", menu.getMenuType());
         return menu;
     }
 
-    void checkTenantMenuList(List<TenantMenu> tenantMenu) throws ThingsboardException{
-        if(CollectionUtils.isEmpty(tenantMenu)){
+    void checkTenantMenuList(List<TenantMenu> tenantMenu) throws ThingsboardException {
+        if (CollectionUtils.isEmpty(tenantMenu)) {
             throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
-        tenantMenu.forEach(i->{
+        tenantMenu.forEach(i -> {
             try {
                 checkTenantMenu(i);
-                if(i.getId() != null && i.getId() != null &&
-                        tenantMenuService.findById(i.getId()) != null){
+                if (i.getId() != null && i.getId() != null &&
+                        tenantMenuService.findById(i.getId()) != null) {
                     throw new ThingsboardException("菜单已存在请勿重复添加！", ThingsboardErrorCode.ITEM_NOT_FOUND);
                 }
             } catch (ThingsboardException e) {
@@ -550,12 +565,13 @@ public abstract class BaseController {
             }
         });
     }
-    List<TenantMenu> checkAddTenantMenuList(List<AddTenantMenuDto> addTenantMenuDtos) throws ThingsboardException{
-        if(CollectionUtils.isEmpty(addTenantMenuDtos)){
+
+    List<TenantMenu> checkAddTenantMenuList(List<AddTenantMenuDto> addTenantMenuDtos) throws ThingsboardException {
+        if (CollectionUtils.isEmpty(addTenantMenuDtos)) {
             throw new ThingsboardException("Requested item wasn't found!", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
         List<TenantMenu> tenantMenu = new ArrayList<>();
-        addTenantMenuDtos.forEach(i->{
+        addTenantMenuDtos.forEach(i -> {
             try {
                 checkTenantMenu(i);
                 TenantMenu tenantMenu1 = i.toTenantMenu();
@@ -571,27 +587,28 @@ public abstract class BaseController {
     void checkTenantMenu(TenantMenu tenantMenu) throws ThingsboardException {
         try {
             checkNotNull(tenantMenu);
-            checkParameter("tenant",tenantMenu.getTenantId());
-            checkParameter("sysMenuId",tenantMenu.getSysMenuId());
-            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
-            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
-            checkParameter("tenantMenuName",tenantMenu.getTenantMenuName());
-            checkParameter("level",tenantMenu.getLevel());
-            checkParameter("menuType",tenantMenu.getMenuType());
+            checkParameter("tenant", tenantMenu.getTenantId());
+            checkParameter("sysMenuId", tenantMenu.getSysMenuId());
+            checkParameter("sysMenuCode", tenantMenu.getSysMenuCode());
+            checkParameter("sysMenuCode", tenantMenu.getSysMenuCode());
+            checkParameter("tenantMenuName", tenantMenu.getTenantMenuName());
+            checkParameter("level", tenantMenu.getLevel());
+            checkParameter("menuType", tenantMenu.getMenuType());
         } catch (Exception e) {
             throw handleException(e, false);
         }
     }
+
     void checkTenantMenu(AddTenantMenuDto tenantMenu) throws ThingsboardException {
         try {
             checkNotNull(tenantMenu);
-            checkParameter("tenant",tenantMenu.getTenantId());
-            checkParameter("sysMenuId",tenantMenu.getSysMenuId());
-            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
-            checkParameter("sysMenuCode",tenantMenu.getSysMenuCode());
-            checkParameter("tenantMenuName",tenantMenu.getTenantMenuName());
-            checkParameter("level",tenantMenu.getLevel());
-            checkParameter("menuType",tenantMenu.getMenuType());
+            checkParameter("tenant", tenantMenu.getTenantId());
+            checkParameter("sysMenuId", tenantMenu.getSysMenuId());
+            checkParameter("sysMenuCode", tenantMenu.getSysMenuCode());
+            checkParameter("sysMenuCode", tenantMenu.getSysMenuCode());
+            checkParameter("tenantMenuName", tenantMenu.getTenantMenuName());
+            checkParameter("level", tenantMenu.getLevel());
+            checkParameter("menuType", tenantMenu.getMenuType());
         } catch (Exception e) {
             throw handleException(e, false);
         }
@@ -1055,7 +1072,7 @@ public abstract class BaseController {
         PageDataIterableByTenantIdEntityId<EdgeId> relatedEdgeIdsIterator =
                 new PageDataIterableByTenantIdEntityId<>(edgeService::findRelatedEdgeIdsByEntityId, tenantId, entityId, DEFAULT_PAGE_SIZE);
         List<EdgeId> result = new ArrayList<>();
-        for(EdgeId edgeId : relatedEdgeIdsIterator) {
+        for (EdgeId edgeId : relatedEdgeIdsIterator) {
             result.add(edgeId);
         }
         return result;
@@ -1095,7 +1112,7 @@ public abstract class BaseController {
      */
     public void checkSameLevelNameRepetition(AddMenuDto addMenuDto) throws ThingsboardException {
         Boolean sameLevelNameRepetition = menuService.findSameLevelNameRepetition(addMenuDto.getId(), addMenuDto.getParentId(), addMenuDto.getName());
-        if(sameLevelNameRepetition){
+        if (sameLevelNameRepetition) {
             log.warn("名称重复");
             throw new ThingsboardException("名称重复", ThingsboardErrorCode.ITEM_NOT_FOUND);
         }
@@ -1105,14 +1122,14 @@ public abstract class BaseController {
      * 校验工厂名称是否重复
      * @param name
      */
-    public void checkFactoryName(UUID id,String name) throws ThingsboardException {
+    public void checkFactoryName(UUID id, String name) throws ThingsboardException {
         List<Factory> byName = factoryService.findByName(name, this.getCurrentUser().getTenantId().getId());
-        if(org.apache.commons.collections.CollectionUtils.isNotEmpty(byName)){
-            if(id == null){
+        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(byName)) {
+            if (id == null) {
                 log.warn("工厂名称重复");
                 throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
-            }else {
-                if(!byName.get(0).getId().toString().equals(id.toString())){
+            } else {
+                if (!byName.get(0).getId().toString().equals(id.toString())) {
                     log.warn("工厂名称重复");
                     throw new ThingsboardException("工厂名称重复", ThingsboardErrorCode.FAIL_VIOLATION);
                 }
@@ -1127,9 +1144,9 @@ public abstract class BaseController {
      * @return
      * @throws ThingsboardException
      */
-    public  String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
-         String message=   userLanguageSvc.getLanguageByUserLang(enums,getCurrentUser().getTenantId(),new UserId(getCurrentUser().getUuidId()));
-        return  message;
+    public String getMessageByUserId(ErrorMessageEnums enums) throws ThingsboardException {
+        String message = userLanguageSvc.getLanguageByUserLang(enums, getCurrentUser().getTenantId(), new UserId(getCurrentUser().getUuidId()));
+        return message;
     }
 
     /***
@@ -1137,17 +1154,16 @@ public abstract class BaseController {
      * @param queryParam
      * @throws ThingsboardException
      */
-    public  void setParametersByUserLevel (Map<String, Object> queryParam) throws ThingsboardException {
-        SecurityUser  securityUser=   getCurrentUser();
-        if(securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()
+    public void setParametersByUserLevel(Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser securityUser = getCurrentUser();
+        if (securityUser.getUserLevel() == UserLeveEnums.TENANT_ADMIN.getCode()
                 || securityUser.getUserLevel() == UserLeveEnums.USER_SYSTEM_ADMIN.getCode()
                 || securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()
-        )
-        {   //租户管理员：
-            List<Integer> userLeve= new ArrayList<>();
+        ) {   //租户管理员：
+            List<Integer> userLeve = new ArrayList<>();
             userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
             userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
-            queryParam.put("userLevelIn",userLeve);
+            queryParam.put("userLevelIn", userLeve);
         }
     }
 
@@ -1158,14 +1174,13 @@ public abstract class BaseController {
      * @param queryParam
      * @throws ThingsboardException
      */
-    public  void setParametersByRoleLevel (Map<String, Object> queryParam) throws ThingsboardException {
-        SecurityUser  securityUser=   getCurrentUser();
-        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
-        {   //租户管理员：
-            List<Integer> userLeve= new ArrayList<>();
+    public void setParametersByRoleLevel(Map<String, Object> queryParam) throws ThingsboardException {
+        SecurityUser securityUser = getCurrentUser();
+        if (securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()) {   //租户管理员：
+            List<Integer> userLeve = new ArrayList<>();
             userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
             userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
-            queryParam.put("userLevelList",userLeve);
+            queryParam.put("userLevelList", userLeve);
         }
     }
 
@@ -1174,16 +1189,15 @@ public abstract class BaseController {
      *   租户管理员创建的角色
      * @throws ThingsboardException
      */
-    public   List<Integer>  setParametersByRoleLevel () throws ThingsboardException {
-        SecurityUser  securityUser=   getCurrentUser();
-        if(securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode() )
-        {   //租户管理员：
-            List<Integer> userLeve= new ArrayList<>();
+    public List<Integer> setParametersByRoleLevel() throws ThingsboardException {
+        SecurityUser securityUser = getCurrentUser();
+        if (securityUser.getUserLevel() == UserLeveEnums.DEFAULT_VALUE.getCode()) {   //租户管理员：
+            List<Integer> userLeve = new ArrayList<>();
             userLeve.add(UserLeveEnums.DEFAULT_VALUE.getCode());//普通用户
             userLeve.add(UserLeveEnums.USER_SYSTEM_ADMIN.getCode());//用户系统管理员
-           return  userLeve;
+            return userLeve;
         }
-        return  null;
+        return null;
     }
 
 
@@ -1194,13 +1208,13 @@ public abstract class BaseController {
             auditLogEntity.setId(Uuids.timeBased());
             auditLogEntity.setTenantId(securityUser.getTenantId().getId());
             auditLogEntity.setCustomerId(CustomerId.NULL_UUID);
-            auditLogEntity.setEntityId(entityId == null ? EntityId.NULL_UUID: entityId);
+            auditLogEntity.setEntityId(entityId == null ? EntityId.NULL_UUID : entityId);
             auditLogEntity.setEntityType(entityType);
             auditLogEntity.setEntityName(entityName);
             auditLogEntity.setUserId(securityUser.getId().getId());
             auditLogEntity.setUserName(securityUser.getUserName());
             auditLogEntity.setActionType(actionType);
-            auditLogEntity.setActionData(actionData != null?JacksonUtil.toJsonNode(new Gson().toJson(actionData)): null);
+            auditLogEntity.setActionData(actionData != null ? JacksonUtil.toJsonNode(new Gson().toJson(actionData)) : null);
             auditLogEntity.setActionFailureDetails(null);
             auditLogEntity.setActionStatus(ActionStatus.SUCCESS);
             auditLogEntity.setCreatedTime(System.currentTimeMillis());
@@ -1211,8 +1225,7 @@ public abstract class BaseController {
     }
 
 
-
-    protected  void easyExcel(HttpServletResponse response,String excelName,String sheetName,Collection<?> data,Class cls) throws IOException {
+    protected void easyExcel(HttpServletResponse response, String excelName, String sheetName, Collection<?> data, Class cls) throws IOException {
         try {
             if (StringUtils.isEmpty(sheetName)) {
                 sheetName = "sheet";
@@ -1227,9 +1240,8 @@ public abstract class BaseController {
                     .autoCloseStream(Boolean.FALSE).sheet(sheetName)
                     .registerWriteHandler(new EasyExcelCustomCellWriteHandler())
                     .doWrite(data);
-        }catch (Exception e)
-        {
-            log.error("打印下载excel错误的日志:{}",e);
+        } catch (Exception e) {
+            log.error("打印下载excel错误的日志:{}", e);
             response.reset();
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
@@ -1241,8 +1253,7 @@ public abstract class BaseController {
     }
 
 
-
-    protected   void easyExcelAndHeadWrite(HttpServletResponse response,String excelName,String sheetName,List<List<String>> heads,List<List<String>> data) throws IOException {
+    protected void easyExcelAndHeadWrite(HttpServletResponse response, String excelName, String sheetName, List<List<String>> heads, List<List<String>> data) throws IOException {
         try {
             if (StringUtils.isEmpty(sheetName)) {
                 sheetName = "sheet";
@@ -1259,15 +1270,14 @@ public abstract class BaseController {
                     .sheet(sheetName)
                     .registerWriteHandler(new EasyExcelCustomCellWriteHandler())
                     .doWrite(data);
-        }catch (Exception e)
-        {
-            log.error("打印下载excel错误的日志:{}",e);
-            excelMsg(response,"下载文件失败！");
+        } catch (Exception e) {
+            log.error("打印下载excel错误的日志:{}", e);
+            excelMsg(response, "下载文件失败！");
         }
     }
 
 
-    private  void excelMsg(HttpServletResponse response,String msgs) throws IOException {
+    private void excelMsg(HttpServletResponse response, String msgs) throws IOException {
         response.reset();
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
