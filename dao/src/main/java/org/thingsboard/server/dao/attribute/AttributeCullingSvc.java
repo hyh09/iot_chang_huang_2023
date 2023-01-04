@@ -21,9 +21,10 @@ import java.util.UUID;
  */
 public interface AttributeCullingSvc {
 
-    List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList , TenantId tenantId, UUID deviceId) throws ThingsboardException;
+    List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList , TenantId tenantId, UUID deviceId,boolean isFactoryUser) throws ThingsboardException;
 
-     Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map,TenantId tenantId, UUID deviceId);
+     Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map,TenantId tenantId, UUID deviceId,boolean isFactoryUser);
 
-    List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId);
+
+    List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId,boolean isFactoryUser);
 }

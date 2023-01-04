@@ -104,7 +104,7 @@ public class EfficiencyStatisticsController extends BaseController {
             }
             PageLink pageLink = createPageLink(queryTsKvVo.getPageSize(), queryTsKvVo.getPage(), queryTsKvVo.getTextSearch(), queryTsKvVo.getSortProperty(), queryTsKvVo.getSortOrder());
 
-            return efficiencyStatisticsSvc.queryAppTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink);
+            return efficiencyStatisticsSvc.queryAppTheRunningStatusByDevice(queryTsKvVo, getTenantId(),pageLink,isFactoryUser());
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -124,7 +124,7 @@ public class EfficiencyStatisticsController extends BaseController {
     @ResponseBody
    public  Object queryDictDevice(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         log.info("打印当前的入参:{}",deviceId);
-     return  efficiencyStatisticsSvc.queryGroupDict(deviceId,getTenantId());
+     return  efficiencyStatisticsSvc.queryGroupDict(deviceId,getTenantId(),isFactoryUser());
 
     }
 

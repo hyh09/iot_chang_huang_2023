@@ -533,7 +533,9 @@ public class PCendEfficiencyController extends BaseController implements AnswerE
     @ResponseBody
     public List<RunningStateVo> queryDictName(@RequestParam("deviceId") UUID deviceId) throws ThingsboardException {
         try {
-            return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId());
+            SecurityUser  securityUser =  getCurrentUser();
+
+            return efficiencyStatisticsSvc.queryDictDevice(deviceId, getTenantId(),isFactoryUser());
         } catch (Exception e) {
             e.printStackTrace();
             log.info("====>:{}", e);
