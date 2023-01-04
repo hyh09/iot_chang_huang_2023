@@ -3989,6 +3989,12 @@
     "color-name": "Color name",
     "duration": "Duration"
   },
+  "production-mng": {
+    "production-mng": "Production management",
+    "prod-schedual": "Schedual",
+    "prod-report": "Report",
+    "prod-monitor": "Monitor"
+  },
   "order": {
     "next-process":"Next process",
     "operation-finished-qty":"Operation Finished Qty",
