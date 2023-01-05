@@ -3851,6 +3851,7 @@
     "energy-consumption-history": "能耗历史",
     "factory": "工厂分析",
     "group": "班组分析",
+    "team":"班组",
     "process": "工序分析",
     "running-state": "运行状态",
     "device-name": "设备名称",
@@ -3868,6 +3869,8 @@
     "unit-gas-consumption": "单位能耗耗气量 (T/M)",
     "go-to-history": "查看历史数据",
     "created-time": "上报时间",
+    "planned-quantity":"计划数量",
+    "actual-quantity":"实际数量",
     "property": "参数",
     "today-energy-consumption-top10": "今日设备能耗排行",
     "today-capacity-top10": "今日设备产量排行",
@@ -3883,9 +3886,15 @@
     "output": "产出数量",
     "unit": "计算单位",
     "card-no": "卡号",
+    "production-order-no":"生产单号",
+    "color-number":"色号",
     "material-no": "布种",
     "color-name": "色名",
-    "duration": "时长"
+    "duration": "时长",
+    "production-output":"生产产量",
+    "production-machine":"生产机台",
+    "delivery-date":"交期",
+    "total-quantity":"合计数量"
   },
   "production-mng": {
     "production-mng": "生产管理",
@@ -3894,6 +3903,8 @@
     "prod-monitor": "生产监控"
   },
   "order": {
+    "reasons-for-dullness":"呆滞原因",
+    "dead-time":"呆滞时长",
     "next-process":"下道工序",
     "operation-finished-qty":"工序完工数量",
     "current-operation":"当前工序",
@@ -3936,6 +3947,8 @@
     "customer-name":"客户名称",
     "process-card-no":"流程卡号",
     "intended-complete-date": "计划完工日期",
+    "completion-process":"完工工序",
+    "process-to-be-produced":"待生产工序",
     "intended-complete-date-required": "计划完工日期必填",
     "order-type": "订单类型",
     "intended-time": "计划时间",

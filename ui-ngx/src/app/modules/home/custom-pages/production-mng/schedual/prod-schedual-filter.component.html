@@ -1,21 +1,21 @@
 <mat-form-field><!--班组名称查询控件，参数名和翻译名自行替换-->
   <mat-label>{{ 'potency.team-name' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workerGroupName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sWorkerGroupName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
-    *ngIf="entitiesTableConfig.componentsData.workerGroupName"
+    *ngIf="entitiesTableConfig.componentsData.sWorkerGroupName"
     matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('workerGroupName')"
+    (click)="onClear('sWorkerGroupName')"
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
 <mat-form-field><!--当前工序查询控件，参数名和翻译名自行替换-->
-  <mat-label>{{ 'potency.team-members' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workerNameList" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <mat-label>{{ 'order.current-operation' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sWorkingProcedureName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
-    *ngIf="entitiesTableConfig.componentsData.workerNameList"
+    *ngIf="entitiesTableConfig.componentsData.sWorkingProcedureName"
     matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('workerNameList')"
+    (click)="onClear('sWorkingProcedureName')"
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>
@@ -33,5 +33,8 @@
 <div class="action-btns" style="margin-left: 5px; position: relative; top: -1px;">
   <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
     {{ 'action.search' | translate }}
+  </button>
+    <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
   </button>
 </div>
