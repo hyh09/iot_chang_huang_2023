@@ -3849,9 +3849,9 @@
     "no-device-capacity-history": "未找到产量历史",
     "energy-consumption": "能耗分析",
     "energy-consumption-history": "能耗历史",
-    "factory": "工厂分析",
-    "group": "班组分析",
-    "process": "工序分析",
+    "factory": "工厂",
+    "group": "班组",
+    "procedure": "工序",
     "running-state": "运行状态",
     "device-name": "设备名称",
     "total-capacity": "总产量：",
@@ -3884,8 +3884,18 @@
     "unit": "计算单位",
     "card-no": "卡号",
     "material-no": "布种",
-    "color-name": "色名",
-    "duration": "时长"
+    "color-name": "颜色",
+    "duration": "时长",
+    "order-no": "订单号",
+    "customer": "客户",
+    "material-name": "品名",
+    "color": "颜色",
+    "card-count": "卡数量",
+    "arrangement-requirements": "整理要求",
+    "theoretical-time-cost": "理论用时",
+    "actual-time-cost": "实际用时",
+    "timeout-on-minutes": "超时（分）",
+    "timeout-on-ratio": "超时（%）"
   },
   "production-mng": {
     "production-mng": "生产管理",
@@ -3894,7 +3904,7 @@
     "prod-monitor": "生产监控"
   },
   "order": {
-    "next-process":"下道工序",
+    "next-procedure":"下道工序",
     "operation-finished-qty":"工序完工数量",
     "current-operation":"当前工序",
     "number-of-cards":"卡数量",

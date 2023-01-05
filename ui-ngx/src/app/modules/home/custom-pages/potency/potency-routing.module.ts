@@ -6,6 +6,7 @@ import { EnergyHistoryTableConfigResolver } from './energy-consumption/energy-hi
 import { ProductionHistoryCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-history-table-config.resolver';
 import { ProductionCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-table-config.resolver';
 import { GroupProductionTableConfigResolver } from './production-capacity/group/group-production-table-config.resolver';
+import { ProcedureProductionTableConfigResolver } from './production-capacity/procedure/procedure-production-table-config.resolver';
 import { RunningStateComponent } from './running-state/running-state.component';
 
 const routes: Routes = [
@@ -71,7 +72,7 @@ const routes: Routes = [
             data: {
               breadcrumb: {
                 label: 'potency.group',
-                icon: 'mdi:factory'
+                icon: 'mdi:group'
               }
             },
             children: [
@@ -83,6 +84,27 @@ const routes: Routes = [
                 },
                 resolve: {
                   entitiesTableConfig: GroupProductionTableConfigResolver
+                }
+              }
+            ]
+          },
+          {
+            path: 'procedure',
+            data: {
+              breadcrumb: {
+                label: 'potency.procedure',
+                icon: 'mdi:procedure'
+              }
+            },
+            children: [
+              {
+                path: '',
+                component: EntitiesTableComponent,
+                data: {
+                  title: 'potency.procedure'
+                },
+                resolve: {
+                  entitiesTableConfig: ProcedureProductionTableConfigResolver
                 }
               }
             ]
@@ -147,7 +169,8 @@ const routes: Routes = [
     EnergyConsumptionTableConfigResolver,
     EnergyHistoryTableConfigResolver,
     ProductionHistoryCapacityTableConfigResolver,
-    GroupProductionTableConfigResolver
+    GroupProductionTableConfigResolver,
+    ProcedureProductionTableConfigResolver
   ]
 })
 export class PotencyRoutingModule { }

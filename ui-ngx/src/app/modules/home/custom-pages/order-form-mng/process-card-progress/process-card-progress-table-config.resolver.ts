@@ -41,7 +41,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
       new EntityTableColumn<OrderForm>('orderNo5', 'order.number-of-cards', '150px'),
       new EntityTableColumn<OrderForm>('orderNo7', 'order.current-operation', '150px'),
       new EntityTableColumn<OrderForm>('orderNo8', 'order.operation-finished-qty', '150px'),
-      new EntityTableColumn<OrderForm>('orderNo9', 'order.next-process', '150px'),
+      new EntityTableColumn<OrderForm>('orderNo9', 'order.next-procedure', '150px'),
     );
   }
   resolve(): EntityTableConfig<OrderForm> {

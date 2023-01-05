@@ -18,6 +18,8 @@ import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProducti
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionWorkVo;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -36,6 +38,8 @@ public class MesProductionController extends BaseController {
     public PageData<MesProductionPlanVo> findPlanList(@RequestParam int pageSize, @RequestParam int page, MesProductionPlanDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
+            dto.setTTrackTimeStart(this.getDateStr(dto.getTTrackTimeStart()));
+            dto.setTTrackTimeEnd(this.getDateStr(dto.getTTrackTimeEnd()));
             return mesProductionService.findPlanList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产班组列表异常{}",e);
@@ -50,6 +54,8 @@ public class MesProductionController extends BaseController {
     public PageData<MesProductionWorkVo> findWorkList(@RequestParam int pageSize, @RequestParam int page, MesProductionWorkDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
+            dto.setTFactEndTime(this.getDateStr(dto.getTFactEndTime()));
+            dto.setTFactStartTime(this.getDateStr(dto.getTFactStartTime()));
             return mesProductionService.findWorkList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产报工列表异常{}",e);
@@ -82,6 +88,19 @@ public class MesProductionController extends BaseController {
             log.error("查询生产工序名称列表异常{}",e);
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 时间戳字符串转日期字符串
+     * @param longString
+     * @return
+     */
+    private String getDateStr(String longString){
+        if (!longString.isBlank()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return sdf.format(new Date(Long.parseLong(String.valueOf(longString))));
+        }
+        return "";
     }
 
 }
