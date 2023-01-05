@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
@@ -108,11 +109,11 @@ public class FactoryEnergyImpl implements FactoryEnergySvc {
         return  deduplicationResut;
     }
 
+
     @Override
-    public ChartResultVo queryTrendChart() {
+    public ChartResultVo queryTrendChart(QueryTsKvVo queryTsKvVo, ChartDateEnums dateEnums) {
         return null;
     }
-
 
     private EnergyUnitVo getEnergyUnitVo(String value, DictDeviceGroupPropertyVO deviceGroupPropertyVO) {
         EnergyUnitVo energyUnitVo = new EnergyUnitVo();

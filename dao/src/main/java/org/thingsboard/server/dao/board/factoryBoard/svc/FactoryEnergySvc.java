@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
 
@@ -36,7 +37,7 @@ public interface FactoryEnergySvc {
     List<FactoryEnergyTop> queryCurrentTop(QueryTsKvVo queryTsKvVo,TenantId tenantId);
 
 
-    ChartResultVo queryTrendChart();
+    ChartResultVo queryTrendChart(QueryTsKvVo queryTsKvVo, ChartDateEnums dateEnums );
 
 
 }
