@@ -6,6 +6,7 @@ import { DeviceMonitorModule } from './device-monitor/device-monitor.module';
 import { PotencyModule } from './potency/potency.module';
 import { FactoryVersionModule } from './system-mng/system-mng.module';
 import { OrderFormModule } from './order-form-mng/order-form-mng.module';
+import { ProductionMngModule } from './production-mng/production-mng.module';
 
 @NgModule({
   exports: [
@@ -15,7 +16,8 @@ import { OrderFormModule } from './order-form-mng/order-form-mng.module';
     DeviceMonitorModule,
     PotencyModule,
     FactoryVersionModule,
-    OrderFormModule
+    OrderFormModule,
+    ProductionMngModule
   ]
 })
 export class CustomPagesModule { }

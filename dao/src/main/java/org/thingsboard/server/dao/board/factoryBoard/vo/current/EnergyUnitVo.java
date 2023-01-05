@@ -12,23 +12,24 @@ import lombok.ToString;
  * Copyright (c) 2023,All Rights Reserved.
  */
 @Data
+//@Builder
 @ToString
 public class EnergyUnitVo {
 
     /**
      * 单位
      */
-    private  String unit;
+    private String unit;
 
     /**
      * key中文描述
      */
-    private  String name;
+    private String name;
 
     /**
      * 实际值
      */
-    private  String actualValue;
+    private String actualValue;
 
     /**
      * 自定义key
