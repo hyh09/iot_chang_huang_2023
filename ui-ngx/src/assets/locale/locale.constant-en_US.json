@@ -3997,7 +3997,9 @@
     "theoretical-time-cost": "Theoretical time cost",
     "actual-time-cost": "Actual time cost",
     "timeout-on-minutes": "Timeout(min)",
-    "timeout-on-ratio": "Timeout(%)"
+    "timeout-on-ratio": "Timeout(%)",
+    "no-groups-text": "No groups were found.",
+    "no-procedures-text": "No procedures were found."
   },
   "production-mng": {
     "production-mng": "Production management",
