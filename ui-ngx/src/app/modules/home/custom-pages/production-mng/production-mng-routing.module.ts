@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
 import { ProdSchedualTableConfigResolver } from './schedual/prod-schedual-table-config.resolver';
+import { ProdReportTableConfigResolver } from './report/production-report-table-config.resolver';
+import { ProdMonitorTableConfigResolver } from './monitor/production-monitor-table-config.resolver';
 
 const routes: Routes = [
   {
@@ -36,9 +38,9 @@ const routes: Routes = [
             icon: 'mdi:report'
           }
         },
-        // resolve: {
-        //   entitiesTableConfig: ProdReportTableConfigResolver
-        // }
+        resolve: {
+          entitiesTableConfig: ProdReportTableConfigResolver
+        }
       },
       {
         path: 'monitor',
@@ -50,9 +52,9 @@ const routes: Routes = [
             icon: 'mdi:monitor'
           }
         },
-        // resolve: {
-        //   entitiesTableConfig: ProdMonitorTableConfigResolver
-        // }
+        resolve: {
+          entitiesTableConfig: ProdMonitorTableConfigResolver
+        }
       }
     ]
   }
@@ -63,8 +65,8 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     ProdSchedualTableConfigResolver,
-    // ProdReportTableConfigResolver,
-    // ProdMonitorTableConfigResolver
+    ProdReportTableConfigResolver,
+    ProdMonitorTableConfigResolver
   ]
 })
 export class ProductionMngRoutingModule { }
