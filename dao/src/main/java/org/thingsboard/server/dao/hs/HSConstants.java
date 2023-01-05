@@ -21,4 +21,6 @@ public class HSConstants {
     public static final String ATTR_DEVICE_ID = "attrDeviceId";
     public static final String FILE_STR = "file";
     public static final String TEMP_STR = "temp";
+
+    public static final Long DAY_TIME = 86400000L;
 }

@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.board.factoryBoard.vo.current;
+package org.thingsboard.server.dao.board.factoryBoard.vo.energy.current;
 
 import lombok.Data;
 import lombok.ToString;

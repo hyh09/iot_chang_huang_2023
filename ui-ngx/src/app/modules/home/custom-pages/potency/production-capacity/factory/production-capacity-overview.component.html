@@ -3,7 +3,7 @@
     <nav mat-tab-nav-bar>
       <a mat-tab-link (click)="onTabClick('factory')" [active]="true"> {{ 'potency.factory' | translate }} </a>
       <a mat-tab-link (click)="onTabClick('group')" [active]="false"> {{ 'potency.group' | translate }} </a>
-      <a mat-tab-link (click)="onTabClick('process')" [active]="false"> {{ 'potency.process' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('procedure')" [active]="false"> {{ 'potency.procedure' | translate }} </a>
     </nav>
     <div *ngIf="top10.length > 0" class="title">{{ 'potency.today-capacity-top10' | translate }}</div>
   </div>
