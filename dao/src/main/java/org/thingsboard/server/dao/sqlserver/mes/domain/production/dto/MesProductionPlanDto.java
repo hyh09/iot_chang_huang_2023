@@ -5,10 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel("MesProductionPlanDto")
+@ApiModel(value = "MesProductionPlanDto",description = "生产班组")
 public class MesProductionPlanDto {
-    @ApiModelProperty("日期")
-    private String tTrackTime;
+    @ApiModelProperty("日期搜索开始")
+    private String tTrackTimeStart;
+    @ApiModelProperty("日期搜索结束")
+    private String tTrackTimeEnd;
     @ApiModelProperty("班组")
     private String sWorkerGroupName;
     @ApiModelProperty("工序")
