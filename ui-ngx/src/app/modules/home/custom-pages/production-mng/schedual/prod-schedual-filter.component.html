@@ -1,0 +1,37 @@
+<mat-form-field><!--班组名称查询控件，参数名和翻译名自行替换-->
+  <mat-label>{{ 'potency.team-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workerGroupName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.workerGroupName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('workerGroupName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field><!--当前工序查询控件，参数名和翻译名自行替换-->
+  <mat-label>{{ 'potency.team-members' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workerNameList" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.workerNameList"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('workerNameList')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<!--时间区间控件不需要动，dateRange在resolver的fetch方法中处理成接口需要的长整型时间戳-->
+<nz-range-picker
+  nzFormat="yyyy/MM/dd HH:mm:ss"
+  nzShowTime
+  nzSize="large"
+  [nzDisabledDate]="disabledDate"
+  [nzAllowClear]="false"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+  (ngModelChange)="onTimeChange()"
+></nz-range-picker>
+<div class="action-btns" style="margin-left: 5px; position: relative; top: -1px;">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

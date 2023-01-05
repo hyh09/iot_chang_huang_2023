@@ -361,9 +361,13 @@ public class MesProductionServiceImpl implements MesProductionService {
         sql.append(sqlPlan);
 
         if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getTTrackTime())){
-                sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) = ? ");
-                params.add(dto.getTTrackTime());
+            if(StringUtils.isNotEmpty(dto.getTTrackTimeStart())){
+                sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) >= ? ");
+                params.add(dto.getTTrackTimeStart());
+            }
+            if(StringUtils.isNotEmpty(dto.getTTrackTimeEnd())){
+                sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) <= ? ");
+                params.add(dto.getTTrackTimeEnd());
             }
 
             if(StringUtils.isNotEmpty(dto.getSWorkerGroupName())){
@@ -397,11 +401,14 @@ public class MesProductionServiceImpl implements MesProductionService {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer(sqlPlanCount);
         if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getTTrackTime())){
-                sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) = ? ");
-                params.add(dto.getTTrackTime());
+            if(StringUtils.isNotEmpty(dto.getTTrackTimeStart())){
+                sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) >= ? ");
+                params.add(dto.getTTrackTimeStart());
             }
-
+            if(StringUtils.isNotEmpty(dto.getTTrackTimeEnd())){
+                sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) <= ? ");
+                params.add(dto.getTTrackTimeEnd());
+            }
             if(StringUtils.isNotEmpty(dto.getSWorkerGroupName())){
                 sql.append("and C.sWorkerGroupName =? ");
                 params.add(dto.getSWorkerGroupName());
