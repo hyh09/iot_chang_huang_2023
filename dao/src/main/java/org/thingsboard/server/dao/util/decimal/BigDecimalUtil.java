@@ -97,8 +97,17 @@ public class BigDecimalUtil {
      * <p>number1 - number2 - ... - number(n)</p>
      */
     public BigDecimal subtract(Object number1, Object number2, Object... numberArr) {
+        if (number1 == null) {
+            number1 = "0";
+        }
+        if (number2 == null) {
+            number2 = "0";
+        }
         BigDecimal result = new BigDecimal(number1.toString()).subtract(new BigDecimal(number2.toString()));
         for (Object number : numberArr) {
+            if (number == null) {
+                number = "0";
+            }
             result = result.subtract((new BigDecimal(number.toString())));
         }
         return result.setScale(scale, roundingMode).stripTrailingZeros();
