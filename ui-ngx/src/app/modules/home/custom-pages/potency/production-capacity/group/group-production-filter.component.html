@@ -3,11 +3,11 @@
     <nav mat-tab-nav-bar>
       <a mat-tab-link (click)="onTabClick('factory')" [active]="false"> {{ 'potency.factory' | translate }} </a>
       <a mat-tab-link (click)="onTabClick('group')" [active]="true"> {{ 'potency.group' | translate }} </a>
-      <a mat-tab-link (click)="onTabClick('process')" [active]="false"> {{ 'potency.process' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('procedure')" [active]="false"> {{ 'potency.procedure' | translate }} </a>
     </nav>
   </div>
   <mat-form-field>
-    <mat-label>{{ 'potency.process-name' | translate }}</mat-label>
+    <mat-label>{{ 'potency.procedure' | translate }}</mat-label>
     <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workingProcedureName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
     <button
       *ngIf="entitiesTableConfig.componentsData.workingProcedureName"
@@ -51,6 +51,9 @@
   <div class="action-btns">
     <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
       {{ 'action.search' | translate }}
+    </button>
+    <button mat-flat-button color="primary" [disabled]="isLoading$ | async">
+      {{ 'action.export' | translate }}
     </button>
   </div>
 </div>

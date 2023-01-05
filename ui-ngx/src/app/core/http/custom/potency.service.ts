@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, PageLink, TimePageLink } from '@app/shared/public-api';
 import { Observable } from 'rxjs';
-import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, PotencyInterval, PotencyTop10, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, PotencyInterval, PotencyTop10, ProcessProduction, RunningState } from '@app/shared/models/custom/potency.models';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { map, tap } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
@@ -18,6 +18,11 @@ interface FilterParams {
   workingProcedureName?: string;
   workerNameList?: string;
   workerGroupName?: string;
+  colorName?: string;
+  materialName?: string;
+  customer?: string;
+  orderNo?: string;
+  cardNo?: string;
 }
 
 @Injectable({
@@ -92,6 +97,15 @@ export class PotencyService {
       queryStr.push(`${key}=${filterParams[key]}`);
     });
     return this.http.get<PageData<GroupProduction>>(`/api/yieId/teamQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 查询产量分析-工序分析列表
+  public getProcedureProductionList(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<ProcessProduction>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<ProcessProduction>>(`/api/yieId/processQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取能耗分析数据列表
