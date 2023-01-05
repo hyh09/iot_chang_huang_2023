@@ -3,8 +3,9 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
 
 import java.util.List;
 
@@ -26,8 +27,16 @@ public interface FactoryEnergySvc {
      */
     CurrentUtilitiesVo queryCurrentEnergy(QueryTsKvVo queryTsKvVo, TenantId tenantId) throws JsonProcessingException;
 
-
+    /**
+     * top5
+     * @param queryTsKvVo
+     * @param tenantId
+     * @return
+     */
     List<FactoryEnergyTop> queryCurrentTop(QueryTsKvVo queryTsKvVo,TenantId tenantId);
+
+
+    ChartResultVo queryTrendChart();
 
 
 }

@@ -3,7 +3,6 @@ package org.thingsboard.server.dao.board.factoryBoard.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
@@ -15,12 +14,12 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.current.EnergyUnitVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
-import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
@@ -107,6 +106,11 @@ public class FactoryEnergyImpl implements FactoryEnergySvc {
                         Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(FactoryEnergyTop::getDeviceId))), ArrayList::new)
         );
         return  deduplicationResut;
+    }
+
+    @Override
+    public ChartResultVo queryTrendChart() {
+        return null;
     }
 
 

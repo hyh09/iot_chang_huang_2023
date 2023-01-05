@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
