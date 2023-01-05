@@ -95,8 +95,6 @@ public class GatewayTimeTask {
 
     }
 
-    private Map map = new ConcurrentHashMap<UUID, TrepDayStaDetailEntity>();
-
     @Resource
     private TsKvLatestRepository tsKvLatestRepository;
 
