@@ -91,17 +91,12 @@ import java.util.UUID;
                                 targetClass = EnergyEffciencyNewEntity.class,
                                 columns = {
                                         @ColumnResult(name = "entity_id", type = UUID.class),
-//                         //                                   //水
+                                        @ColumnResult(name="deviceName",type = String.class),
                                         @ColumnResult(name = "water_added_value",type = String.class),
-                                        //电
                                         @ColumnResult(name = "electric_added_value",type = String.class),
-                                        //气
                                         @ColumnResult(name = "gas_added_value",type = String.class),
-
                                         @ColumnResult(name = "capacity_added_value",type = String.class),
                                         @ColumnResult(name = "ts",type = Long.class),
-
-
                                 }
                         )
                 }
@@ -225,12 +220,14 @@ public class EnergyEffciencyNewEntity extends AbstractStatisticalDataEntity {
     //看板的今日排行榜
     public EnergyEffciencyNewEntity(
             UUID entityId,
+            String deviceName,
             String waterAddedValue,
             String electricAddedValue,
             String gasAddedValue,String capacityAddedValue,
             Long ts
     ) {
         this.entityId = entityId;
+        this.deviceName =deviceName;
         this.waterAddedValue = waterAddedValue;
         this.electricAddedValue = electricAddedValue;
         this.gasAddedValue = gasAddedValue;

@@ -161,7 +161,7 @@ public class EffciencyAnalysisRepository extends JpaSqlTool {
         sqlPartOnDevice(queryTsKvVo, sonSql01, param);
         StringBuffer sql = new StringBuffer();
         sql.append("  select ")
-                .append(" d1.id as entity_id,sum(to_number(tb.water_added_value,'99999999999999999999999999.9999')) as water_added_value,")
+                .append(" d1.id as entity_id,max(d1.\"rename\") as deviceName,sum(to_number(tb.water_added_value,'99999999999999999999999999.9999')) as water_added_value,")
                 .append(" sum(to_number(tb.electric_added_value,'99999999999999999999999999.9999')) as electric_added_value, ")
                 .append(" sum(to_number(tb.gas_added_value,'99999999999999999999999999.9999')) as gas_added_value, ")
                 .append(" sum(to_number(tb.capacity_added_value,'99999999999999999999999999.9999')) as capacity_added_value, ")
