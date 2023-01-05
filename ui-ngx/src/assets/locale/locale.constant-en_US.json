@@ -3953,7 +3953,7 @@
     "energy-consumption-history": "Energy consumption history",
     "factory": "Factory",
     "group": "Group",
-    "process": "Process",
+    "procedure": "Procedure",
     "running-state": "Running state",
     "device-name": "Device name",
     "total-capacity": "Total: ",
@@ -3987,7 +3987,17 @@
     "card-no": "Card No",
     "material-no": "Material No",
     "color-name": "Color name",
-    "duration": "Duration"
+    "duration": "Duration",
+    "order-no": "Order No",
+    "customer": "Customer",
+    "material-name": "Material name",
+    "color": "Color",
+    "card-count": "Amount",
+    "arrangement-requirements": "Arrangement requirements",
+    "theoretical-time-cost": "Theoretical time cost",
+    "actual-time-cost": "Actual time cost",
+    "timeout-on-minutes": "Timeout(min)",
+    "timeout-on-ratio": "Timeout(%)"
   },
   "production-mng": {
     "production-mng": "Production management",
@@ -3996,7 +4006,7 @@
     "prod-monitor": "Monitor"
   },
   "order": {
-    "next-process":"Next process",
+    "next-procedure":"Next procedure",
     "operation-finished-qty":"Operation Finished Qty",
     "current-operation":"Current Operation",
     "number-of-cards":"Number of cards",
