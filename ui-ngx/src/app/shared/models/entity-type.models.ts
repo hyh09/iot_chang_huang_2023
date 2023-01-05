@@ -49,6 +49,8 @@ export enum EntityType {
   ALARM_RULES = 'ALARM_RULES',
   DEVICE_HISTORY = 'DEVICE_HISTORY',
   POTENCY = 'POTENCY',
+  POTENCY_GROUP = 'POTENCY_GROUP',
+  POTENCY_PROCEDURE = 'POTENCY_PROCEDURE',
   POTENCY_HISTORY = 'POTENCY_HISTORY',
   FACTORY_VERSION = 'FACTORY_VERSION',
   PROD_CAPACITY_SETTINGS = 'PROD_CAPACITY_SETTINGS',
@@ -449,6 +451,18 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       EntityType.POTENCY,
       {
         noEntities: 'device.no-devices-text'
+      }
+    ],
+    [
+      EntityType.POTENCY_GROUP,
+      {
+        noEntities: 'potency.no-groups-text'
+      }
+    ],
+    [
+      EntityType.POTENCY_PROCEDURE,
+      {
+        noEntities: 'potency.no-procedures-text'
       }
     ],
     [
