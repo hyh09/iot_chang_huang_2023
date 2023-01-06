@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.board.factoryBoard.vo.top;
+package org.thingsboard.server.dao.board.factoryBoard.vo.energy.top;
 
 import lombok.Data;
 import lombok.ToString;

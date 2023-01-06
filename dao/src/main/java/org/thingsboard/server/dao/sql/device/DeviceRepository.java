@@ -348,4 +348,6 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     List<DeviceEntity> findAllBy();
 
 
+    @Query("select new DeviceEntity(t.id, t.tenantId) from DeviceEntity t")
+    List<DeviceEntity> getTenantIdAll();
 }

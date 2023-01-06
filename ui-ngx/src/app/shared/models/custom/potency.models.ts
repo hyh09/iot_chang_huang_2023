@@ -32,6 +32,25 @@ export interface GroupProduction {
   duration: string;
 }
 
+export interface ProcessProduction {
+  cardNo: string;
+  orderNo: string;
+  customerName: string;
+  materialName: string;
+  colorName: string;
+  numberOfCards: string;
+  sremark: string;
+  workingProcedureName: string;
+  ntrackQty: string;
+  theoreticalTime: string;
+  actualTime: string;
+  timeoutMinutes: string;
+  overTimeRatio: string;
+  workerGroupName: string;
+  createdTime: number;
+  updatedTime: number;
+}
+
 export interface DeviceEnergyConsumption extends BaseData<any> {
   deviceId?: string;
   rename: string;

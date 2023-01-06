@@ -9,6 +9,7 @@ import { RunningStateComponent } from './running-state/running-state.component';
 import { RunningStateChartComponent } from './running-state/running-state-chart.component';
 import { EnergyHistoryFilterComponent } from './energy-consumption/energy-history-filter.component';
 import { GroupProductionFilterComponent } from './production-capacity/group/group-production-filter.component';
+import { ProcedureProductionFilterComponent } from './production-capacity/procedure/procedure-production-filter.component';
 
 @NgModule({
   imports: [
@@ -23,7 +24,8 @@ import { GroupProductionFilterComponent } from './production-capacity/group/grou
     RunningStateComponent,
     RunningStateChartComponent,
     EnergyHistoryFilterComponent,
-    GroupProductionFilterComponent
+    GroupProductionFilterComponent,
+    ProcedureProductionFilterComponent
   ]
 })
 export class PotencyModule { }

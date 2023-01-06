@@ -3,8 +3,7 @@ package org.thingsboard.server.dao.board.factoryBoard.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.effciency.EfficiencyEntityInfo;
@@ -14,13 +13,17 @@ import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
+import org.thingsboard.server.dao.board.factoryBoard.dto.ChartByChartEnumsDto;
+import org.thingsboard.server.dao.board.factoryBoard.impl.base.ChartByChartDateEnumServer;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.current.CurrentUtilitiesVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.current.EnergyUnitVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
-import org.thingsboard.server.dao.model.sql.UserEntity;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
@@ -38,14 +41,18 @@ import java.util.stream.Collectors;
  * Copyright (c) 2023,All Rights Reserved.
  */
 @Service
-public class FactoryEnergyImpl implements FactoryEnergySvc {
+public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements FactoryEnergySvc {
 
-    @Autowired
     private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
-    @Autowired
     private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
-    @Autowired
     private EffciencyAnalysisRepository effciencyAnalysisRepository;
+
+    public FactoryEnergyImpl(JdbcTemplate jdbcTemplate, EfficiencyStatisticsSvc efficiencyStatisticsSvc, DeviceDictPropertiesSvc deviceDictPropertiesSvc, EffciencyAnalysisRepository effciencyAnalysisRepository, JdbcTemplate jdbcTemplate1) {
+        super(jdbcTemplate);
+        this.efficiencyStatisticsSvc = efficiencyStatisticsSvc;
+        this.deviceDictPropertiesSvc = deviceDictPropertiesSvc;
+        this.effciencyAnalysisRepository = effciencyAnalysisRepository;
+    }
 
     /**
      * 查询
@@ -106,9 +113,15 @@ public class FactoryEnergyImpl implements FactoryEnergySvc {
                 Collectors.collectingAndThen(
                         Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(FactoryEnergyTop::getDeviceId))), ArrayList::new)
         );
-        return  deduplicationResut;
+        return deduplicationResut;
     }
 
+
+    @Override
+    public ChartResultVo queryTrendChart(QueryTsKvVo queryTsKvVo, ChartDateEnums dateEnums) {
+        List<ChartByChartEnumsDto> chartByChartEnumsDtos = super.queryChartEnums(queryTsKvVo, dateEnums);
+        return convertData(chartByChartEnumsDtos, dateEnums);
+    }
 
     private EnergyUnitVo getEnergyUnitVo(String value, DictDeviceGroupPropertyVO deviceGroupPropertyVO) {
         EnergyUnitVo energyUnitVo = new EnergyUnitVo();
@@ -135,5 +148,35 @@ public class FactoryEnergyImpl implements FactoryEnergySvc {
             }).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+
+    private ChartResultVo convertData(List<ChartByChartEnumsDto> chartByChartEnumsDtos, ChartDateEnums chartDateEnums) {
+        ChartResultVo vo = new ChartResultVo();
+        if (CollectionUtils.isEmpty(chartByChartEnumsDtos)) {
+            return vo;
+        }
+        vo.setWater(chartByChartEnumsDtos.stream().map(m1 -> {
+                    ChartDataVo v1 = new ChartDataVo();
+                    v1.setTime(chartDateEnums.forMartTime(m1.getLocalDateTime()));
+                    v1.setValue(m1.getWaterValue());
+                    return v1;
+                }).collect(Collectors.toList())
+        );
+        vo.setElectricity(chartByChartEnumsDtos.stream().map(m1 -> {
+                    ChartDataVo v1 = new ChartDataVo();
+                    v1.setTime(chartDateEnums.forMartTime(m1.getLocalDateTime()));
+                    v1.setValue(m1.getElectricValue());
+                    return v1;
+                }).collect(Collectors.toList())
+        );
+        vo.setGas(chartByChartEnumsDtos.stream().map(m1 -> {
+                    ChartDataVo v1 = new ChartDataVo();
+                    v1.setTime(chartDateEnums.forMartTime(m1.getLocalDateTime()));
+                    v1.setValue(m1.getGasValue());
+                    return v1;
+                }).collect(Collectors.toList())
+        );
+        return vo;
     }
 }
