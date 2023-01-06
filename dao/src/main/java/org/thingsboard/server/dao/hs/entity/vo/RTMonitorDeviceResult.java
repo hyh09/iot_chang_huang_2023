@@ -58,11 +58,11 @@ public class RTMonitorDeviceResult {
     private BigDecimal operationRate;
 
     @ApiModelProperty("当前卡号")
-    private String card;
+    private String cardNo;
 
     @ApiModelProperty("产品名称")
-    private String p;
+    private String materialName;
 
     @ApiModelProperty("当前班组")
-    private String d;
+    private String workerGroupName;
 }

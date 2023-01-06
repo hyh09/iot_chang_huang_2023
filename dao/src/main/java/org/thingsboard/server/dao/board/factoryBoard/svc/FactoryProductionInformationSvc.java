@@ -1,5 +1,11 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
+
+import java.util.List;
+import java.util.UUID;
+
 /**
  * @Project Name: thingsboard
  * @File Name: FactoryProductionInformationSvc
@@ -9,4 +15,12 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
  * Copyright (c) 2023,All Rights Reserved.
  */
 public interface FactoryProductionInformationSvc {
+
+    /**
+     * 查询车间的信息
+     * @param tenantId 租户id
+     * @param factoryId 工厂id
+     * @return
+     */
+   List<WorkshopAndRunRateVo> queryWorkshopAndRunRate(TenantId tenantId, UUID factoryId);
 }
