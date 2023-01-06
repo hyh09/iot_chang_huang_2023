@@ -2,12 +2,14 @@ package org.thingsboard.server.dao.sqlserver.mes.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationRepository;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesOrderListDto;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesOrderProgressListDto;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesProductionCardListDto;
@@ -27,6 +29,8 @@ import java.util.List;
 public class MesOrderServiceImpl implements MesOrderService {
     @Resource(name = "sqlServerTemplate")
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private MesDeviceRelationRepository mesDeviceRelationRepository;
 
     /**
      * 查询订单列表
@@ -64,8 +68,11 @@ public class MesOrderServiceImpl implements MesOrderService {
             "JOIN dbo.tmColor F(NOLOCK)ON F.uGUID=B.utmColorGUID" +
             " WHERE 1=1  " ;
 
-    private String sqlProductionCard =" SELECT row_number () OVER (ORDER BY B.dDeliveryDat ASC) AS rownumber ," +
-            " A.sCardNo,A.sOrderNo,B.dDeliveryDate,E.sCustomerName,F.sMaterialName,C.sColorName,C.sFinishingMethod,A.nPlanOutputQty,H.sWorkingProcedureName,J.sWorkingProcedureName " +
+    /**
+     * 生产卡查询
+     */
+    private String sqlProductionCard =" SELECT row_number () OVER (ORDER BY B.dDeliveryDate ASC) AS rownumber ," +
+            " A.sCardNo,A.sOrderNo,B.dDeliveryDate,E.sCustomerName,F.sMaterialName,C.sColorName,C.sFinishingMethod,A.nPlanOutputQty,H.sWorkingProcedureName,J.sWorkingProcedureName as sWorkingProcedureNameNext " +
             "FROM dbo.psWorkFlowCard A(NOLOCK) " +
             "JOIN dbo.sdOrderLot B(NOLOCK)ON B.uGUID=A.usdOrderLotGUID " +
             "JOIN dbo.sdOrderDtl C(NOLOCK)ON C.uGUID=B.usdOrderDtlGUID " +
@@ -89,6 +96,26 @@ public class MesOrderServiceImpl implements MesOrderService {
             "LEFT JOIN dbo.ppTrackJob I(NOLOCK)ON I.upsWorkFlowCardGUID=A.uGUID AND I.iOrderProcedure=G.iOrderProcedure+1 " +
             "LEFT JOIN dbo.pbWorkingProcedure J(NOLOCK)ON J.uGUID=I.upbWorkingProcedureGUID "+
             " WHERE 1=1  " ;
+
+    /**
+     * 生产进度查询
+     */
+    private String sqlProductionProgress =" SELECT row_number () OVER (ORDER BY B.tFactEndTime ASC) AS rownumber ," +
+            " E.sWorkingProcedureNo,E.sWorkingProcedureName,B.tFactStartTime,B.tFactEndTime,D.sEquipmentName,C.nTrackQty,C.nPercentValue,B.sLocation,C.sWorkerGroupName,C.sWorkerNameList " +
+            "FROM dbo.psWorkFlowCard A(NOLOCK) " +
+            "JOIN dbo.ppTrackJob B(NOLOCK)ON B.upsWorkFlowCardGUID=A.uGUID " +
+            "JOIN dbo.pbWorkingProcedure E(NOLOCK)ON E.uGUID=B.upbWorkingProcedureGUID " +
+            "LEFT JOIN dbo.ppTrackOutput C(NOLOCK)ON C.uppTrackJobGUID=B.uGUID " +
+            "LEFT JOIN dbo.emEquipment D(NOLOCK)ON D.uGUID=C.uemEquipmentGUID "+
+            " WHERE 1=1  " ;
+    private String sqlProductionProgressCount ="SELECT count(1) "+
+            "FROM dbo.psWorkFlowCard A(NOLOCK) " +
+            "JOIN dbo.ppTrackJob B(NOLOCK)ON B.upsWorkFlowCardGUID=A.uGUID " +
+            "JOIN dbo.pbWorkingProcedure E(NOLOCK)ON E.uGUID=B.upbWorkingProcedureGUID " +
+            "LEFT JOIN dbo.ppTrackOutput C(NOLOCK)ON C.uppTrackJobGUID=B.uGUID " +
+            "LEFT JOIN dbo.emEquipment D(NOLOCK)ON D.uGUID=C.uemEquipmentGUID "+
+            " WHERE 1=1  " ;
+
     @Override
     public PageData<MesOrderListVo> findOrderList(MesOrderListDto dto, PageLink pageLink) {
         try {
@@ -97,6 +124,8 @@ public class MesOrderServiceImpl implements MesOrderService {
             int total = this.queryOrderListTotal(dto);
             //queryRecordList方法查询并转换实体类List
             List<MesOrderListVo> recordList = this.queryOrderListRecordList(dto,pageLink.getPageSize(),rowNumber);
+            //查询工厂
+
             PageData<MesOrderListVo> resultPage = new PageData<>();
             resultPage = new PageData<MesOrderListVo>(recordList,total/pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
             return resultPage;
@@ -142,7 +171,74 @@ public class MesOrderServiceImpl implements MesOrderService {
 
     @Override
     public PageData<MesProductionProgressListVo> findProductionProgressList(MesProductionProgressListDto dto, PageLink pageLink) {
-        return null;
+        try {
+            int rowNumber = (pageLink.getPage() - 1) * pageLink.getPageSize();
+            //queryTotal方法统计总数
+            int total = this.queryProductionProgressListTotal(dto);
+            //queryRecordList方法查询并转换实体类List
+            List<MesProductionProgressListVo> recordList = this.queryProductionProgressListRecordList(dto,pageLink.getPageSize(),rowNumber);
+            PageData<MesProductionProgressListVo> resultPage = new PageData<>();
+            resultPage = new PageData<MesProductionProgressListVo>(recordList,total/pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+            return resultPage;
+        } catch (Exception e) {
+            log.error("异常信息{}", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 订单进度列表查询数量sql拼接
+     * @param dto
+     * @return
+     */
+    private Integer queryProductionProgressListTotal(MesProductionProgressListDto dto) {
+        List<Object> params = new ArrayList<Object>();
+        StringBuffer sql = new StringBuffer(sqlProductionProgressCount);
+        if(dto != null){
+            if(StringUtils.isNotEmpty(dto.getSOrderNo())){
+                sql.append("and A.sOrderNo =? ");
+                params.add(dto.getSOrderNo());
+            }
+        }
+
+        Object[] para = params.toArray(new Object[params.size()]);
+
+        log.info(">>>>>>>>>sql.toString()" + sql.toString());
+        return this.jdbcTemplate.queryForObject(sql.toString(), para, Integer.class);
+    }
+
+    /**
+     * 订单进度列表查询sql拼接
+     * @param dto
+     * @param pageSize
+     * @param rowNumber
+     * @return
+     */
+    private List<MesProductionProgressListVo> queryProductionProgressListRecordList(MesProductionProgressListDto dto, Integer pageSize, Integer rowNumber) {
+        List<Object> params = new ArrayList<Object>();
+        StringBuffer sql = new StringBuffer();
+
+        if(pageSize != null){
+            sql.append("SELECT TOP(?) * FROM ( ");
+            params.add(pageSize);
+        }
+        sql.append(sqlProductionProgress);
+        if(dto != null){
+            if(StringUtils.isNotEmpty(dto.getSOrderNo())){
+                sql.append("and A.sOrderNo =? ");
+                params.add(dto.getSOrderNo());
+            }
+        }
+        if(rowNumber != null){
+            sql.append(" )temp_row where rownumber >? ");
+            params.add(rowNumber);
+        }
+
+        Object[] para = params.toArray(new Object[params.size()]);
+
+        log.info(">>>>>>>>>sql.toString()" + sql.toString());
+
+        return this.jdbcTemplate.query(sql.toString(), para, new BeanPropertyRowMapper(MesProductionProgressListVo.class));
     }
 
     /**
