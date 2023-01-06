@@ -47,11 +47,11 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
                 " JOIN dbo.mmMaterial D(NOLOCK) ON D.uGUID=B.ummMaterialGUID\n" +
                 " JOIN dbo.tmColor E(NOLOCK) ON E.uGUID=B.utmColorGUID where 1=1 ");
         if (vo.getCreatedTime() != null) {
-            sql.append(" and A.tCreateTime >= ?");
+            sql.append(" and A.tCreateTime >= ? ");
             list.add(CommonUtils.longToDateTime(vo.getCreatedTime()));
         }
         if (vo.getUpdatedTime() != null) {
-            sql.append(" and A.tCreateTime < ?");
+            sql.append(" and A.tCreateTime < ? ");
             list.add(CommonUtils.longToDateTime(vo.getUpdatedTime()));
         }
         if (StringUtils.isNotEmpty(vo.getOrderNo())) {
@@ -69,12 +69,11 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
         }
         //卡片号的查询
         if (StringUtils.isNotEmpty(vo.getSCardNo())) {
-            sql.append("and  B.uGUID in (  SELECT B1.usdOrderDtlGUID\n" +
+            sql.append("  and  B.uGUID in (  SELECT B1.usdOrderDtlGUID\n" +
                     "FROM dbo.psWorkFlowCard A1 (NOLOCK)\n" +
                     "JOIN dbo.sdOrderLot B1 (NOLOCK) ON B1.uGUID=A1.usdOrderLotGUID\n" +
-                    "where A1.sCardNo =? GROUP BY B1.usdOrderDtlGUID\n" +
-                    ")");
-            list.add(vo.getSCardNo());
+                    "where A1.sCardNo = \'").append(vo.getSCardNo()).append("\'  GROUP BY B1.usdOrderDtlGUID\n" +
+                    ")  ");
         }
         PageData<OrderAnalysisVo> pageData = pageQuery02("A.tCreateTime", sql.toString(), list, pageable, OrderAnalysisVo.class);
         List<OrderAnalysisVo> processAnalysisVoList = pageData.getData();
