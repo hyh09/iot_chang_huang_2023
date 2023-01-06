@@ -42,7 +42,7 @@ export class DataAuthTableConfigResolver implements Resolve<EntityTableConfig<De
     this.config.refreshEnabled = false;
     this.config.deleteEnabled = () => false;
     this.config.entitiesDeleteEnabled = false;
-    this.config.detailsReadonly = () => false;
+    this.config.detailsPanelEnabled = false;
 
     this.config.entitiesFetchFunction = (pageLink) => this.factoryMngService.getDataAuthDevices(pageLink, this.config.componentsData);
 
