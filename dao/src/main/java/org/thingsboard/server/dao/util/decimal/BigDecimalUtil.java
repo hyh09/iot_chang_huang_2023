@@ -144,7 +144,7 @@ public class BigDecimalUtil {
             return BigDecimal.ZERO;
         }
 
-        if(isItZero(number2)){
+        if (isItZero(number2)) {
             return BigDecimal.ZERO;
         }
 
@@ -153,7 +153,7 @@ public class BigDecimalUtil {
             if (number == null) {
                 return BigDecimal.ZERO;
             }
-            if(isItZero(number)){
+            if (isItZero(number)) {
                 return BigDecimal.ZERO;
             }
             result = result.divide((new BigDecimal(number.toString())), scale, roundingMode);
