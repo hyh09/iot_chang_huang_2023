@@ -42,7 +42,8 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
 
     this.config.componentsData = {
       sOrderNo:'',
-      dateRange:[]
+      dateRange:[],
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-report');
@@ -52,6 +53,11 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
     this.config.detailsPanelEnabled = false;
     this.config.entitiesDeleteEnabled = false;
     this.config.selectionEnabled = false;
+
+     // 导出功能
+     this.config.componentsData.exportTableData = () => {
+      this.productionMngService.exportProdReportRecords().subscribe();
+    }
 
     this.config.entitiesFetchFunction = pageLink => {
       let startTime: number, endTime: number;

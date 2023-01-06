@@ -15,4 +15,6 @@
     {{ 'action.export' | translate }}
   </button>
 </div>
-<div style="display: inline;font-weight: bold;margin-left: 10px;">{{ 'potency.total-quantity' | translate }} : {{entitiesTableConfig.componentsData.totalquantity}}</div>
+<div  class="data-overview">
+  <div class="overview-item">{{ 'potency.total-capacity' | translate }}{{ entitiesTableConfig.componentsData.totalquantity }}</div>
+</div>

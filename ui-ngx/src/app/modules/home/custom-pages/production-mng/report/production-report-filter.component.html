@@ -23,4 +23,7 @@
   <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
     {{ 'action.search' | translate }}
   </button>
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
+  </button>
 </div>

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
-import { OrderForm } from '@app/shared/models/custom/order-form-mng.models';
+import { OrderProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { environment } from '@env/environment';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'app-orders-progress-filters',
   templateUrl: './orders-progress-filters.component.html',
 })
-export class OrdersProgressFiltersComponent extends EntityTableHeaderComponent<OrderForm> {
+export class OrdersProgressFiltersComponent extends EntityTableHeaderComponent<OrderProgress> {
 
   env = environment;
 
