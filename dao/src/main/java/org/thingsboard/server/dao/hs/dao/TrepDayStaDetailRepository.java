@@ -18,4 +18,6 @@ import java.util.UUID;
 public interface TrepDayStaDetailRepository extends PagingAndSortingRepository<TrepDayStaDetailEntity, UUID>, JpaSpecificationExecutor<TrepDayStaDetailEntity> {
 
     List<TrepDayStaDetailEntity> findAllByBdateEqualsOrStartTimeIsNotNull(Date bdate);
+
+    List<TrepDayStaDetailEntity> findAllByBdateEqualsAndEntityIdIn(Date bdate,List<UUID> entityIdList);
 }

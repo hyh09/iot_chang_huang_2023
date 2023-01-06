@@ -18,7 +18,6 @@ package org.thingsboard.server.dao.sqlts.latest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.thingsboard.server.dao.hs.entity.dto.LatestKvDTO;
 import org.thingsboard.server.dao.model.sqlts.latest.TsKvLatestCompositeKey;
 import org.thingsboard.server.dao.model.sqlts.latest.TsKvLatestEntity;
 
@@ -51,5 +50,6 @@ public interface TsKvLatestRepository extends CrudRepository<TsKvLatestEntity, T
     @Query("select new TsKvLatestEntity(t.entityId, max(t.ts)) from TsKvLatestEntity t where t.entityId in :entityIds group by t.entityId")
     List<TsKvLatestEntity> findAllLatestByEntityIds(@Param("entityIds") List<UUID> entityIds);
 
-    List<TsKvLatestEntity> findAllByKeyEquals(int key);
+    @Query("select new TsKvLatestEntity(t.entityId,t.key,t.booleanValue,t.ts,t.longValue) from TsKvLatestEntity t where t.key=:key")
+    List<TsKvLatestEntity> findAllByKeyEquals(@Param("key") int key);
 }

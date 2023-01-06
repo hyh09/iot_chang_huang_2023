@@ -96,4 +96,12 @@ public final class TsKvLatestEntity extends AbstractTsKvEntity {
         this.jsonValue = jsonValue;
         this.strKey = strKey;
     }
+
+    public TsKvLatestEntity(UUID entityId, Integer key, Boolean boolValue, Long ts, Long longValue) {
+        this.entityId = entityId;
+        this.key = key;
+        this.ts = ts;
+        this.booleanValue = boolValue;
+        this.longValue = longValue;
+    }
 }

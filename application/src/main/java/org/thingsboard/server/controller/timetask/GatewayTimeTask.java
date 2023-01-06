@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.kv.BaseAttributeKvEntry;
 import org.thingsboard.server.common.data.kv.BooleanDataEntry;
@@ -35,7 +36,6 @@ import org.thingsboard.server.utils.DateUtils;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -95,8 +95,6 @@ public class GatewayTimeTask {
 
     }
 
-    private Map map = new ConcurrentHashMap<UUID, TrepDayStaDetailEntity>();
-
     @Resource
     private TsKvLatestRepository tsKvLatestRepository;
 
@@ -121,17 +119,26 @@ public class GatewayTimeTask {
      */
     @Scheduled(cron = "0/10 * * * * ?")
     public void recordDuration() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("findByKey");
         //查询设备对应的switch状态
         Optional<TsKvDictionary> aSwitch = tsKvDictionaryRepository.findByKey("switch");
         if (aSwitch.isEmpty()) {
             return;
         }
+        stopWatch.stop();
         //获取所有的设备的在线状态
+        stopWatch.start("findAllByIdAttributeKey");
         List<AttributeKvEntity> allByAttributeKeyEquals = attributeKvRepository.findAllByIdAttributeKey("active");
+        stopWatch.stop();
         TsKvDictionary tsKvDictionary = aSwitch.get();
         int keyId = tsKvDictionary.getKeyId();
+        stopWatch.start("findAllByKeyEquals");
         List<TsKvLatestEntity> allByKeyEquals = tsKvLatestRepository.findAllByKeyEquals(keyId);
-        Iterable<DeviceEntity> all = deviceRepository.findAll();
+        stopWatch.stop();
+        stopWatch.start("findAll");
+        Iterable<DeviceEntity> all = deviceRepository.getTenantIdAll();
+        stopWatch.stop();
         Map<UUID, DeviceEntity> deviceEntityMap = Lists.newArrayList(all).stream().collect(Collectors.toMap(DeviceEntity::getId, Function.identity()));
         //最后一次采集的map
         Map<UUID, TsKvLatestEntity> latestEntityMap = allByKeyEquals.stream().collect(Collectors.toMap(TsKvLatestEntity::getEntityId, Function.identity()));
@@ -141,7 +148,10 @@ public class GatewayTimeTask {
         List<TrepHstaDetailEntity> allByUpdateTimeIsNull = getTrepHstaDetailEntities(latestEntityMap, startUpList);
         //获取天的上机数据
         List<TrepDayStaDetailEntity> nowList = getTrepDayStaDetailEntities(allByUpdateTimeIsNull);
+        stopWatch.start("addOrUpdate");
         addOrUpdate(allByUpdateTimeIsNull, nowList);
+        stopWatch.stop();
+        log.info("请求耗时: {}", stopWatch.prettyPrint());
     }
 
     /**
@@ -162,17 +172,21 @@ public class GatewayTimeTask {
             UUID entityId = e.getEntityId();
             UUID tenantId = e.getTenantId();
             Long startTime = e.getStartTime();
-            Long endTime = e.getEndTime();
             Date startTimeDate = new Date(startTime);
-            Date endTimeDate = new Date(endTime);
             String startTimeStr = DateUtils.dateTime(startTimeDate);
-            String endTimeStr = DateUtils.dateTime(endTimeDate);
+            Long endTime = e.getEndTime();
+            Date endTimeDate;
+            String endTimeStr = null;
+            if (endTime != null) {
+                endTimeDate = new Date(endTime);
+                endTimeStr = DateUtils.dateTime(endTimeDate);
+            }
             TrepDayStaDetailEntity trepDayStaDetailEntity = dayMap.get(entityId + startTimeStr + tenantId);
             //新增的天统计数据
             TrepDayStaDetailEntity addEntity = new TrepDayStaDetailEntity();
             addEntity.setEntityId(entityId);
             addEntity.setBdate(now);
-            addEntity.setStartTime(now.getTime() - e.getStartTime());
+            addEntity.setStartTime(now.getTime() - startTime);
             addEntity.setTotalTime(0L);
             addEntity.setTenantId(tenantId);
             //新增
@@ -183,8 +197,8 @@ public class GatewayTimeTask {
             if (trepDayStaDetailEntity != null) {
                 Date bdate = trepDayStaDetailEntity.getBdate();
                 if (!nowStr.equals(DateUtils.dateTime(bdate))) {
-                    trepDayStaDetailEntity.setStartTime(null);
-                    if (endTime == null || !endTimeStr.equals(nowStr)) {
+                    trepDayStaDetailEntity.setStartTime(0L);
+                    if (endTime == null || !nowStr.equals(endTimeStr)) {
                         Date dayMax = DateUtils.getDayMax(startTimeDate);
                         trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + dayMax.getTime() - startTime);
                         addEntity.setStartTime(endTime - DateUtils.getDayMin(now).getTime());
@@ -196,8 +210,8 @@ public class GatewayTimeTask {
                 if (endTime == null) {
                     trepDayStaDetailEntity.setStartTime(now.getTime() - startTime);
                 } else {
-                    trepDayStaDetailEntity.setStartTime(null);
-                    trepDayStaDetailEntity.setStartTime(endTime - startTime);
+                    trepDayStaDetailEntity.setStartTime(0L);
+                    trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
                 }
             }
         });
@@ -223,6 +237,7 @@ public class GatewayTimeTask {
             if (!startUpIdList.contains(entityId)) {
                 Long ts = latestEntityMap.get(entityId).getTs();
                 e.setEndTime(ts);
+                e.setTotalTime(e.getEndTime() - e.getStartTime());
                 updateList.add(e);
             }
         });
@@ -255,8 +270,8 @@ public class GatewayTimeTask {
             DeviceEntity deviceEntity = deviceEntityMap.get(entityId);
             if (BooleanUtils.isTrue(e.getBooleanValue()) && deviceEntity != null) {
                 TsKvLatestEntity tsKvLatestEntity = latestEntityMap.get(entityId);
-                Long ts = tsKvLatestEntity.getTs();
-                if (tsKvLatestEntity.getLongValue() == 1L) {
+                if (tsKvLatestEntity != null && tsKvLatestEntity.getLongValue() == 1L) {
+                    Long ts = tsKvLatestEntity.getTs();
                     TrepHstaDetailEntity trepHstaDetailEntity = new TrepHstaDetailEntity();
                     trepHstaDetailEntity.setEntityId(e.getId().getEntityId());
                     trepHstaDetailEntity.setStartTime(ts);

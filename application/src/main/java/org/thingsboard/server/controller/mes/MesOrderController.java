@@ -2,6 +2,7 @@ package org.thingsboard.server.controller.mes;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,17 +22,19 @@ import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProducti
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
 
 @Slf4j
+@Api(value="mes订单管理Controller",tags={"mes订单管理接口"})
 @RestController
 @RequestMapping("/api/mes/order")
-@Api(value="mes订单管理Controller",tags={"mes订单管理接口"})
 public class MesOrderController extends BaseController {
 
     @Autowired
     private MesOrderService mesOrderService;
 
     @ApiOperation("查询订单列表")
-    @ApiImplicitParam(name = "MesOrderListDto", value = "入参实体", dataType = "MesOrderListDto", paramType = "dto")
-    @RequestMapping(value = "/findOrderList", method = RequestMethod.GET)
+    @RequestMapping(value = "/findOrderList",params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })
     @ResponseBody
     public PageData<MesOrderListVo> findOrderList(@RequestParam int pageSize, @RequestParam int page, MesOrderListDto dto) {
         try {
@@ -44,8 +47,10 @@ public class MesOrderController extends BaseController {
     }
 
     @ApiOperation("查询订单进度列表")
-    @ApiImplicitParam(name = "MesOrderProgressListDto", value = "入参实体", dataType = "MesOrderProgressListDto", paramType = "dto")
-    @RequestMapping(value = "/findOrderProgressList", method = RequestMethod.GET)
+    @RequestMapping(value = "/findOrderProgressList",params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })
     @ResponseBody
     public PageData<MesOrderProgressListVo> findOrderProgressList(@RequestParam int pageSize, @RequestParam int page, MesOrderProgressListDto dto) {
         try {
@@ -58,10 +63,12 @@ public class MesOrderController extends BaseController {
     }
 
     @ApiOperation("查询生产卡列表")
-    @ApiImplicitParam(name = "MesProductionCardListDto", value = "入参实体", dataType = "MesProductionCardListDto", paramType = "dto")
-    @RequestMapping(value = "/findProductionCardList", method = RequestMethod.GET)
+    @RequestMapping(value = "/findProductionCardList", params = {"pageSize", "page"},method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })
     @ResponseBody
-    public PageData<MesProductionCardListVo> findProductionCardList(@RequestParam int pageSize, @RequestParam int page, MesProductionCardListDto dto) {
+    public PageData<MesProductionCardListVo> findProductionCardList(@RequestParam int pageSize, @RequestParam int page,MesProductionCardListDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
             return mesOrderService.findProductionCardList(dto,pageLink);
@@ -73,8 +80,10 @@ public class MesOrderController extends BaseController {
 
 
     @ApiOperation("查询生产进度列表")
-    @ApiImplicitParam(name = "MesProductionProgressListDto", value = "入参实体", dataType = "MesProductionProgressListDto", paramType = "dto")
-    @RequestMapping(value = "/findProductionProgressList", method = RequestMethod.GET)
+    @RequestMapping(value = "/findProductionProgressList",params = {"pageSize", "page"}, method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })
     @ResponseBody
     public PageData<MesProductionProgressListVo> findProductionProgressList(@RequestParam int pageSize, @RequestParam int page, MesProductionProgressListDto dto) {
         try {
