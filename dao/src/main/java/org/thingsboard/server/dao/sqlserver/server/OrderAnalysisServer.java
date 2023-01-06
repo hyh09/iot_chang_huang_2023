@@ -2,27 +2,21 @@ package org.thingsboard.server.dao.sqlserver.server;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyEnums;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyVo;
+import org.thingsboard.server.dao.sqlserver.server.vo.order.HwExpandVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.OrderAnalysisVo;
-import org.thingsboard.server.dao.sqlserver.server.vo.process.ProcessAnalysisVo;
 import org.thingsboard.server.dao.util.CommonUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -74,7 +68,7 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
             sql.append(" and D.sMaterialName like  ").append("\'%").append(vo.getMaterialName()).append("%\'");
         }
         //卡片号的查询
-        if(StringUtils.isNotEmpty(vo.getSCardNo())){
+        if (StringUtils.isNotEmpty(vo.getSCardNo())) {
             sql.append("and  B.uGUID in (  SELECT B1.usdOrderDtlGUID\n" +
                     "FROM dbo.psWorkFlowCard A1 (NOLOCK)\n" +
                     "JOIN dbo.sdOrderLot B1 (NOLOCK) ON B1.uGUID=A1.usdOrderLotGUID\n" +
@@ -96,13 +90,17 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
         }
         List<String> idList = processAnalysisVoList.stream().filter(m1 -> StringUtils.isNotEmpty(m1.getUGuid())).map(OrderAnalysisVo::getUGuid).collect(Collectors.toList());
         List<HwEnergyVo> hwEnergyVoList = queryWaterAndElectricity(idList);
+        List<HwExpandVo> expandVoList = queryExpandVo(idList);
         processAnalysisVoList.stream().forEach(m1 -> {
             m1.setCreatedTime(CommonUtils.getTimestampOfDateTime(m1.getFactStartTime()));
-            m1.setWater(filterOutData(hwEnergyVoList, HwEnergyEnums.WATER,m1.getUGuid()));
-            m1.setElectricity(filterOutData(hwEnergyVoList, HwEnergyEnums.ELECTRICITY,m1.getUGuid()));
-            m1.setGas(filterOutData(hwEnergyVoList, HwEnergyEnums.GAS,m1.getUGuid()));
-
+            m1.setWater(filterOutData(hwEnergyVoList, HwEnergyEnums.WATER, m1.getUGuid()));
+            m1.setElectricity(filterOutData(hwEnergyVoList, HwEnergyEnums.ELECTRICITY, m1.getUGuid()));
+            m1.setGas(filterOutData(hwEnergyVoList, HwEnergyEnums.GAS, m1.getUGuid()));
+            HwExpandVo hwExpandVo = filterOutExpandData(expandVoList, m1.getUGuid());
+            m1.setSremark(hwExpandVo.getSRemark());
+            m1.setDuration(hwExpandVo.getDuration());
         });
+
     }
 
 
@@ -131,13 +129,42 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
 
     }
 
+    public List<HwExpandVo> queryExpandVo(List<String> uGUIDList) {
+        if (CollectionUtils.isEmpty(uGUIDList)) {
+            return new ArrayList<>();
+        }
+        String sql = "select  C2.usdOrderDtlGUID as usdOrderDtlGUID,dbo.fnMESGetDiffTimeStr(B.tFactStartTime,B.tFactEndTime) as duration,\n" +
+                "I.sRemark as sRemark\n" +
+                "                FROM \n" +
+                "                 dbo.psWorkFlowCard A(NOLOCK) \n" +
+                "                 JOIN dbo.ppTrackJob B(NOLOCK) ON B.upsWorkFlowCardGUID = A.uGUID\n" +
+                "                JOIN dbo.sdOrderLot C2(NOLOCK) ON C2.uGUID=A.usdOrderLotGUID\n" +
+                "                LEFT JOIN dbo.psWPP I(NOLOCK) ON I.upsWorkFlowCardGUID=A.uGUID \n" +
+                "                where C2.usdOrderDtlGUID in (:uGUIDList)";
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("uGUIDList", uGUIDList);
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        List<HwExpandVo> data = givenParamJdbcTemp.query(sql, parameters, new BeanPropertyRowMapper<>(HwExpandVo.class));
+        return data;
 
-    private String filterOutData(List<HwEnergyVo> hwEnergyVoList,HwEnergyEnums enums,String uGuid ){
-        String value= hwEnergyVoList.stream().filter(m1->m1.getName().equals(enums.getChineseField()))
-                .filter(m1->m1.getUsdOrderDtlGUID().equals(uGuid))
+    }
+
+
+    private String filterOutData(List<HwEnergyVo> hwEnergyVoList, HwEnergyEnums enums, String uGuid) {
+        String value = hwEnergyVoList.stream().filter(m1 -> m1.getName().equals(enums.getChineseField()))
+                .filter(m1 -> m1.getUsdOrderDtlGUID().equals(uGuid))
                 .findFirst()
                 .map(HwEnergyVo::getUseValue)
                 .orElse(null);
+        return value;
+    }
+
+
+    private HwExpandVo filterOutExpandData(List<HwExpandVo> expandVoList, String uGuid) {
+        HwExpandVo value = expandVoList.stream()
+                .filter(m1 -> m1.getUsdOrderDtlGUID().equals(uGuid))
+                .findFirst()
+                .orElse(new HwExpandVo());
         return value;
     }
 

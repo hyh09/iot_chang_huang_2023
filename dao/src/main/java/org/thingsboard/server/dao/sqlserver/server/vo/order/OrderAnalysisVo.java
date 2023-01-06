@@ -61,7 +61,15 @@ public class OrderAnalysisVo extends RownumberDto {
 
     private String gas;
 
+    /**
+     * 整理要求
+     */
+    private String sremark;
 
+    /**
+     * 时长
+     */
+    private String duration;
 
 
 }
