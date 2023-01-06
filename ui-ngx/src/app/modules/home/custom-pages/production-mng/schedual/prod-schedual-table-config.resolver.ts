@@ -25,28 +25,27 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
 
     this.config.defaultSortOrder = null;
 
-    this.config.columns.push( // TODO 自行修改
-      // new EntityTableColumn<ProdSchedual>('workOrderNumber', 'potency.process-no', '100px', (entity) => (entity.workOrderNumber || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('workingProcedureName', 'potency.process-name', '100px', (entity) => (entity.workingProcedureName || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('workerGroupName', 'potency.team-name', '100px', (entity) => (entity.workerGroupName || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('workerNameList', 'potency.team-members', '150px', (entity) => (entity.workerNameList || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('ntrackQty', 'potency.output', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('unit', 'potency.unit', '60px', (entity) => (entity.unit || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('cardNo', 'potency.card-no', '100px', (entity) => (entity.cardNo || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('materialNo', 'potency.material-no', '150px', (entity) => (entity.materialNo || ''), () => ({}), false),
-      // new EntityTableColumn<ProdSchedual>('colorName', 'potency.color-name', '100px', (entity) => (entity.colorName || ''), () => ({}), false),
-      // new DateEntityTableColumn<ProdSchedual>('createdTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false),
-      // new DateEntityTableColumn<ProdSchedual>('updatedTime', 'common.end-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false),
-      // new EntityTableColumn<ProdSchedual>('duration', 'potency.duration', '80px', (entity) => (entity.duration || ''), () => ({}), false)
+    this.config.columns.push(
+      new DateEntityTableColumn<ProdSchedual>('ttrackTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd', false),
+      new EntityTableColumn<ProdSchedual>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '100px', (entity) => (entity.sworkerNameList  || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '150px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('scardNo', 'potency.card-no', '60px', (entity) => (entity.scardNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('tplanEndTime', 'order.intended-complete-date', '100px', (entity) => (entity.tplanEndTime || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('nplanOutputQty', 'potency.planned-quantity', '150px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('ntrackQty', 'potency.actual-quantity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('timeout', 'admin.timeout-msec', '100px', (entity) => (entity.timeout || ''), () => ({}), false),
     );
   }
 
   resolve(): EntityTableConfig<ProdSchedual> {
 
     this.config.componentsData = {
-      dateRange: [],
-      // TODO 请求参数 - 班组名称
-      // TODO 请求参数 - 当前工序
+      sWorkerGroupName:'',
+      sWorkingProcedureName:'',
+      dateRange:[],
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-schedual');
@@ -64,10 +63,17 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
         startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
         endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
-      const {  } = this.config.componentsData; // TODO 取出班组名称和当前工序
+      const { sWorkerGroupName, sWorkingProcedureName } = this.config.componentsData;
       return this.productionMngService.getProdSchedualList(pageLink, {
-        startTime: startTime || '', endTime: endTime || '', // TODO 加上上面取出的班组名称和当前工序
+        sWorkerGroupName:  sWorkerGroupName || '',
+        sWorkingProcedureName: sWorkingProcedureName || '',
+        tTrackTimeStart: startTime || '', tTrackTimeEnd:  endTime || ''
       });
+    }
+    
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      this.productionMngService.exportProdSchedulRecords().subscribe();
     }
 
     return this.config;

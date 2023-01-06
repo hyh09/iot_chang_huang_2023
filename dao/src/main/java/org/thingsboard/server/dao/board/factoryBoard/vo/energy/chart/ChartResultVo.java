@@ -1,6 +1,9 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart;
 
 import lombok.Data;
+import lombok.ToString;
+
+import java.util.List;
 
 /**
  * @Project Name: thingsboard
@@ -11,12 +14,19 @@ import lombok.Data;
  * Copyright (c) 2023,All Rights Reserved.
  */
 @Data
+@ToString
 public class ChartResultVo {
 
-    private ChartDataVo  water;
+    /**
+     * 水的趋势线
+     */
+    private List<ChartDataVo> water;
 
-    private ChartDataVo electricity;
+    /**
+     *
+     */
+    private List<ChartDataVo> electricity;
 
-    private ChartDataVo gas;
+    private List<ChartDataVo> gas;
 
 }

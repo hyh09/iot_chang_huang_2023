@@ -1,5 +1,8 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
+
 /**
  * @Project Name: thingsboard
  * @File Name: FactoryCollectionInformationSvc
@@ -9,4 +12,10 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
  * Copyright (c) 2023,All Rights Reserved.
  */
 public interface FactoryCollectionInformationSvc {
+
+
+    /**
+     * 查询 设备数（设备总数，在线，离线）在线率%
+     */
+    DeviceStatusNumVo queryDeviceStatusNum(TenantId tenantId,String factoryId);
 }

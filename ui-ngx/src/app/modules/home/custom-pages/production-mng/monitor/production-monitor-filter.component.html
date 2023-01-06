@@ -1,0 +1,18 @@
+<mat-form-field>
+  <mat-label>{{ 'order.current-operation' | translate }}</mat-label>
+  <mat-select [(ngModel)]="entitiesTableConfig.componentsData.sWorkingProcedureName"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    <mat-option value="">{{ 'common.all' | translate }}</mat-option>
+    <mat-option *ngFor="let option of entitiesTableConfig.componentsData.operationList" [value]="option">{{ option |
+      translate }}</mat-option>
+  </mat-select>
+</mat-form-field>
+<div class="action-btns" style="margin-left: 5px; position: relative; top: -1px;">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
+  </button>
+</div>
+<div style="display: inline;font-weight: bold;margin-left: 10px;">{{ 'potency.total-quantity' | translate }} : {{entitiesTableConfig.componentsData.totalquantity}}</div>
