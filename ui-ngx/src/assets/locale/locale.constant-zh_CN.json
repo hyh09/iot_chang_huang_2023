@@ -3852,6 +3852,7 @@
     "factory": "工厂",
     "group": "班组",
     "procedure": "工序",
+    "order": "订单",
     "running-state": "运行状态",
     "device-name": "设备名称",
     "total-capacity": "总产量：",
@@ -3894,8 +3895,8 @@
     "arrangement-requirements": "整理要求",
     "theoretical-time-cost": "理论用时",
     "actual-time-cost": "实际用时",
-    "timeout-on-minutes": "超时（分）",
-    "timeout-on-ratio": "超时（%）",
+    "timeout-on-minutes": "超时 (分)",
+    "timeout-on-ratio": "超时 (%)",
     "no-groups-text": "没有找到班组",
     "no-procedures-text": "没有找到工序"
   },
