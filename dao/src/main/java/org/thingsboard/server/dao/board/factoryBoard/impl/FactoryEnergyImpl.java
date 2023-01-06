@@ -14,6 +14,7 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.dao.board.factoryBoard.dto.ChartByChartEnumsDto;
+import org.thingsboard.server.dao.board.factoryBoard.impl.base.ChartByChartDateEnumServer;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;

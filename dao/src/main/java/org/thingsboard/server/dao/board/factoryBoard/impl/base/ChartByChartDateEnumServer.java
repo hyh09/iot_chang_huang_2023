@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.board.factoryBoard.impl;
+package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
