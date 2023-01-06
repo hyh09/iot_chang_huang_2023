@@ -2,6 +2,7 @@ package org.thingsboard.server.controller.mes;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,9 @@ public class MesProductionController extends BaseController {
 
 
     @ApiOperation("查询生产班组列表")
-    @ApiImplicitParam(name = "MesProductionPlanDto", value = "入参实体", dataType = "MesProductionPlanDto", paramType = "dto")
-    @RequestMapping(value = "/findPlanList", method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })    @RequestMapping(value = "/findPlanList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<MesProductionPlanVo> findPlanList(@RequestParam int pageSize, @RequestParam int page, MesProductionPlanDto dto) {
         try {
@@ -48,8 +50,9 @@ public class MesProductionController extends BaseController {
     }
 
     @ApiOperation("查询生产报工列表")
-    @ApiImplicitParam(name = "MesProductionWorkDto", value = "入参实体", dataType = "MesProductionWorkDto", paramType = "dto")
-    @RequestMapping(value = "/findWorkList", method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })    @RequestMapping(value = "/findWorkList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<MesProductionWorkVo> findWorkList(@RequestParam int pageSize, @RequestParam int page, MesProductionWorkDto dto) {
         try {
@@ -65,8 +68,9 @@ public class MesProductionController extends BaseController {
 
 
     @ApiOperation("查询生产监控列表")
-    @ApiImplicitParam(name = "MesProductionMonitorDto", value = "入参实体", dataType = "MesProductionMonitorDto", paramType = "dto")
-    @RequestMapping(value = "/findMonitorList", method = RequestMethod.GET)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })    @RequestMapping(value = "/findMonitorList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody
     public PageData<MesProductionMonitorVo> findMonitorList(@RequestParam int pageSize, @RequestParam int page, MesProductionMonitorDto dto) {
         try {

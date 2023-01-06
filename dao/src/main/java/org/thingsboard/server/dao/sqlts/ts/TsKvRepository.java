@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,17 +36,17 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs  order by  tskv.ts asc ")
     List<TsKvEntity> findAllByKeysAndEntityIdAndStartTimeAndEndTime(@Param("entityId") UUID entityId,
-                                                     @Param("entityKeys") List<Integer> key,
-                                      @Param("startTs") long startTs,
-                                      @Param("endTs") long endTs
+                                                                    @Param("entityKeys") List<Integer> key,
+                                                                    @Param("startTs") long startTs,
+                                                                    @Param("endTs") long endTs
     );
 
     @Query("SELECT count(1) FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts < :endTs   ")
-    long  countByKeysAndEntityIdAndStartTimeAndEndTime(@Param("entityId") UUID entityId,
-                                                                    @Param("entityKeys") List<Integer> key,
-                                                                    @Param("startTs") long startTs,
-                                                                    @Param("endTs") long endTs
+    long countByKeysAndEntityIdAndStartTimeAndEndTime(@Param("entityId") UUID entityId,
+                                                      @Param("entityKeys") List<Integer> key,
+                                                      @Param("startTs") long startTs,
+                                                      @Param("endTs") long endTs
     );
 
 
@@ -63,10 +63,10 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key in (:entityKeys)  ")
     List<TsKvEntity> findAllByKeysAndEntityIdAndTime(@Param("entityId") UUID entityId,
-                                      @Param("entityKeys") List<Integer> key
+                                                     @Param("entityKeys") List<Integer> key
 //                                      @Param("startTs") long startTs,
 //                                      @Param("endTs") long endTs
-                                      );
+    );
 
 
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
@@ -103,9 +103,9 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
             "'MAX') FROM TsKvEntity tskv " +
             "WHERE tskv.entityId = :entityId AND tskv.key = :entityKey AND tskv.ts >= :startTs AND tskv.ts < :endTs")
     CompletableFuture<TsKvEntity> findNumericMax(@Param("entityId") UUID entityId,
-                                          @Param("entityKey") int entityKey,
-                                          @Param("startTs") long startTs,
-                                          @Param("endTs") long endTs);
+                                                 @Param("entityKey") int entityKey,
+                                                 @Param("startTs") long startTs,
+                                                 @Param("endTs") long endTs);
 
 
     @Async
@@ -113,9 +113,9 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
             "WHERE tskv.strValue IS NOT NULL " +
             "AND tskv.entityId = :entityId AND tskv.key = :entityKey AND tskv.ts >= :startTs AND tskv.ts < :endTs")
     CompletableFuture<TsKvEntity> findStringMin(@Param("entityId") UUID entityId,
-                                          @Param("entityKey") int entityKey,
-                                          @Param("startTs") long startTs,
-                                          @Param("endTs") long endTs);
+                                                @Param("entityKey") int entityKey,
+                                                @Param("startTs") long startTs,
+                                                @Param("endTs") long endTs);
 
     @Async
     @Query("SELECT new TsKvEntity(MIN(COALESCE(tskv.longValue, 9223372036854775807)), " +
@@ -125,10 +125,10 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
             "'MIN') FROM TsKvEntity tskv " +
             "WHERE tskv.entityId = :entityId AND tskv.key = :entityKey AND tskv.ts >= :startTs AND tskv.ts < :endTs")
     CompletableFuture<TsKvEntity> findNumericMin(
-                                          @Param("entityId") UUID entityId,
-                                          @Param("entityKey") int entityKey,
-                                          @Param("startTs") long startTs,
-                                          @Param("endTs") long endTs);
+            @Param("entityId") UUID entityId,
+            @Param("entityKey") int entityKey,
+            @Param("startTs") long startTs,
+            @Param("endTs") long endTs);
 
     @Async
     @Query("SELECT new TsKvEntity(SUM(CASE WHEN tskv.booleanValue IS NULL THEN 0 ELSE 1 END), " +
@@ -204,16 +204,16 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts asc")
     List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsAsc(@Param("entityId") UUID entityId,
-                                              @Param("entityKeys") Set<Integer> keys,
-                                              @Param("startTs") long startTs,
-                                              @Param("endTs") long endTs);
+                                                          @Param("entityKeys") Set<Integer> keys,
+                                                          @Param("startTs") long startTs,
+                                                          @Param("endTs") long endTs);
 
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key in (:entityKeys) AND tskv.ts >= :startTs AND tskv.ts <= :endTs order by tskv.ts desc")
     List<TsKvEntity> findAllByStartTsAndEndTsOrderByTsDesc(@Param("entityId") UUID entityId,
-                                              @Param("entityKeys") Set<Integer> keys,
-                                              @Param("startTs") long startTs,
-                                              @Param("endTs") long endTs);
+                                                           @Param("entityKeys") Set<Integer> keys,
+                                                           @Param("startTs") long startTs,
+                                                           @Param("endTs") long endTs);
 
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key = :entityKey AND tskv.ts >= :startTs AND tskv.ts < :endTs")
@@ -227,26 +227,26 @@ public interface TsKvRepository extends CrudRepository<TsKvEntity, TsKvComposite
     @Query("SELECT tskv FROM TsKvEntity tskv WHERE tskv.entityId = :entityId " +
             "AND tskv.key = :entityKey  AND tskv.ts = :time ")
     TsKvEntity findAllByTsAndEntityIdAndKey(@Param("entityId") UUID entityId,
-                                                          @Param("entityKey") int entityKey,
-                                                          @Param("time") long time
-                                                         );
+                                            @Param("entityKey") int entityKey,
+                                            @Param("time") long time
+    );
 
 
     @Query(value = "select  max(ts) from  ts_kv  where  ts< :time and  entity_id= :entityId and key= :entityKey " +
-            " and  concat(long_v,dbl_v,str_v) <>'0'",nativeQuery = true)
+            " and  concat(long_v,dbl_v,str_v) <>'0'", nativeQuery = true)
     Long findAllMaxTime(@Param("entityId") UUID entityId,
-                                                    @Param("entityKey") int entityKey,
-                                                    @Param("time") long time
+                        @Param("entityKey") int entityKey,
+                        @Param("time") long time
     );
 
-    @Query(value ="SELECT  * FROM ts_kv tskv WHERE tskv.entity_id = :entityId "+
-           "  AND tskv.key = :entityKey  and  tskv.ts in (select  min(tskv1.ts)  from ts_kv tskv1 WHERE tskv1.entity_id = :entityId  AND tskv1.key = :entityKey " +
-            "  AND tskv1.ts >= :startTime AND tskv1.ts < :endTime )  ",nativeQuery = true)
-    TsKvEntity  findAllTodayFirstData(@Param("entityId") UUID entityId,@Param("entityKey") int entityKey,@Param("startTime") long startTime,@Param("endTime") long endTime);
+    @Query(value = "SELECT  * FROM ts_kv tskv WHERE tskv.entity_id = :entityId " +
+            "  AND tskv.key = :entityKey  and  tskv.ts in (select  min(tskv1.ts)  from ts_kv tskv1 WHERE tskv1.entity_id = :entityId  AND tskv1.key = :entityKey " +
+            "  AND tskv1.ts >= :startTime AND tskv1.ts < :endTime )  ", nativeQuery = true)
+    TsKvEntity findAllTodayFirstData(@Param("entityId") UUID entityId, @Param("entityKey") int entityKey, @Param("startTime") long startTime, @Param("endTime") long endTime);
 
-    @Query(value ="SELECT  * FROM ts_kv tskv WHERE tskv.entity_id = :entityId "+
+    @Query(value = "SELECT  * FROM ts_kv tskv WHERE tskv.entity_id = :entityId " +
             "  AND tskv.key = :entityKey  and  tskv.ts in (select  max(tskv1.ts)  from ts_kv tskv1 WHERE tskv1.entity_id = :entityId  AND tskv1.key = :entityKey " +
-            "  AND tskv1.ts >= :startTime AND tskv1.ts < :endTime )  ",nativeQuery = true)
-    TsKvEntity  findAllTodayLastData(@Param("entityId") UUID entityId,@Param("entityKey") int entityKey,@Param("startTime") long startTime,@Param("endTime") long endTime);
+            "  AND tskv1.ts >= :startTime AND tskv1.ts < :endTime )  ", nativeQuery = true)
+    TsKvEntity findAllTodayLastData(@Param("entityId") UUID entityId, @Param("entityKey") int entityKey, @Param("startTime") long startTime, @Param("endTime") long endTime);
 
 }
