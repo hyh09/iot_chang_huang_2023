@@ -5,6 +5,8 @@ import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { RequestConfig, defaultHttpOptionsFromConfig } from "../http-utils";
 import { map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
 // 查询生产排班列表接口请求参数接口
 interface FilterParams {
@@ -32,7 +34,8 @@ interface ProdMonitorFilterParams {
 export class ProductionMngService {
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private translate: TranslateService
   ) { }
 
   // 获取生产排班列表
@@ -43,6 +46,40 @@ export class ProductionMngService {
     });
     return this.http.get<PageData<ProdSchedual>>(`/api/mes/production/findPlanList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
+
+  
+  // 导出生产排版列表
+  public exportProdSchedulRecords() {
+    return this.http.get(
+      `/api/deviceMonitor/excelAlarmRecord`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+        var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+        var link = document.createElement('a');
+        var href = window.URL.createObjectURL(blob);
+        link.href = href;
+        link.download = this.translate.instant('device-monitor.alarm-record');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(href);
+      }));
+  }
+
+    // 导出生产监控列表
+    public exportProdMonitorRecords() {
+      return this.http.get(
+        `/api/deviceMonitor/excelAlarmRecord`, { responseType: 'arraybuffer' }).pipe(tap(res => {
+          var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+          var link = document.createElement('a');
+          var href = window.URL.createObjectURL(blob);
+          link.href = href;
+          link.download = this.translate.instant('device-monitor.alarm-record');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(href);
+        }));
+    }
+
 
   // 获取生产报工列表
   public getProdReportList(pageLink: PageLink, filterParams: ProdReportFilterParams, config?: RequestConfig): Observable<PageData<ProdReport>> {

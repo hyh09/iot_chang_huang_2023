@@ -45,7 +45,8 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
     this.config.componentsData = {
       sWorkingProcedureName: '',
       operationList: [],
-      totalquantity: 0
+      totalquantity: 0,
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-monitor');
@@ -59,6 +60,11 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
     this.productionMngService.getProcedureName().subscribe(res => {
       this.config.componentsData.operationList = res;
     });
+
+      // 导出功能
+      this.config.componentsData.exportTableData = () => {
+        this.productionMngService.exportProdMonitorRecords().subscribe();
+      }
 
     // 获取合计数量
     this.productionMngService.getTotalQuantity({
