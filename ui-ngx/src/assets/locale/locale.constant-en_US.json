@@ -3960,6 +3960,7 @@
     "color-number":"Color number",
     "process": "Process",
     "procedure": "Procedure",
+    "order": "Order",
     "running-state": "Running state",
     "device-name": "Device name",
     "total-capacity": "Total: ",
@@ -4006,8 +4007,8 @@
     "arrangement-requirements": "Arrangement requirements",
     "theoretical-time-cost": "Theoretical time cost",
     "actual-time-cost": "Actual time cost",
-    "timeout-on-minutes": "Timeout(min)",
-    "timeout-on-ratio": "Timeout(%)",
+    "timeout-on-minutes": "Timeout (min)",
+    "timeout-on-ratio": "Timeout (%)",
     "no-groups-text": "No groups were found.",
     "no-procedures-text": "No procedures were found."
   },
