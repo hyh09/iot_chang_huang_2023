@@ -36,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
-@RequestMapping("/api/factoryEnergy")
+@RequestMapping("/api/factoryCollectionInformation")
 public class FactoryCollectionInformationController extends BaseController {
     @Autowired
     private FactoryCollectionInformationSvc factoryCollectionInformationSvc;
