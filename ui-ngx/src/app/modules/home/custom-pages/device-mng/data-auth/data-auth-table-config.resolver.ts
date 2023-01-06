@@ -28,8 +28,8 @@ export class DataAuthTableConfigResolver implements Resolve<EntityTableConfig<De
     this.config.columns.push(
       new EntityTableColumn<DeviceDataAuth>('deviceName', 'device-mng.device-name', '200px', ({deviceName}) => deviceName || '', () => ({}), false),
       new EntityTableColumn<DeviceDataAuth>('factoryName', 'device-mng.factory', '200px', ({factoryName}) => factoryName || '', () => ({}), false),
-      new EntityTableColumn<DeviceDataAuth>('productionLineName', 'device-mng.work-shop', '200px', ({productionLineName}) => productionLineName || '', () => ({}), false),
-      new EntityTableColumn<DeviceDataAuth>('workshopName', 'device-mng.prod-line', '200px', ({workshopName}) => workshopName || '', () => ({}), false)
+      new EntityTableColumn<DeviceDataAuth>('workshopName', 'device-mng.work-shop', '200px', ({workshopName}) => workshopName || '', () => ({}), false),
+      new EntityTableColumn<DeviceDataAuth>('productionLineName', 'device-mng.prod-line', '200px', ({productionLineName}) => productionLineName || '', () => ({}), false)
     );
   }
 
