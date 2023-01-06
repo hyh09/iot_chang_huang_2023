@@ -1168,6 +1168,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
                 predicates.add(cb.equal(root.<UUID>get("id"), toUUID(t.getDeviceId())));
             } else if (!StringUtils.isBlank(t.getDeviceName())) {
                 predicates.add(cb.like(root.get("rename"), "%" + t.getDeviceName().trim() + "%"));
+
+                if (!StringUtils.isBlank(t.getFactoryId())) 
+                    predicates.add(cb.equal(root.<UUID>get("factoryId"), toUUID(t.getFactoryId())));
+
             } else if (!StringUtils.isBlank(t.getProductionLineId())) {
                 predicates.add(cb.equal(root.<UUID>get("productionLineId"), toUUID(t.getProductionLineId())));
             } else if (!StringUtils.isBlank(t.getWorkshopId())) {
