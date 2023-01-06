@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.EntityType;
@@ -914,19 +915,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     @Override
     @SuppressWarnings("all")
     public PageData<RTMonitorDeviceResult> getRTMonitorSimplificationData(TenantId tenantId, FactoryDeviceQuery query, PageLink pageLink) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("1");
         var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
         if (devicePageData.getData().isEmpty())
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
-        //查询时长
-        var deviceIds = devicePageData.getData().stream().map(e->e.getId().getId()).filter(Objects::nonNull).collect(Collectors.toList());
-        List<TrepDayStaDetailEntity> allByBdateEqualsAndEntityIdIn = trepDayStaDetailRepository.findAllByBdateEqualsAndEntityIdIn(new Date(), deviceIds);
-        Map<UUID, Long> id2timeMap = allByBdateEqualsAndEntityIdIn.stream().collect(Collectors.toMap(TrepDayStaDetailEntity::getEntityId, e -> e.getTotalTime() + e.getStartTime()));
-        //查询当前卡号、当前班组、产品
-        List<MesDeviceRelationEntity> deviceRelationEntityList = mesDeviceRelationRepository.findAllByDeviceIdIn(deviceIds);
-        Map<UUID, UUID> id2mesIdMap = deviceRelationEntityList.stream().collect(Collectors.toMap(MesDeviceRelationEntity::getDeviceId, MesDeviceRelationEntity::getMesDeviceId));
-        List<UUID> equipmentIds = deviceRelationEntityList.stream().map(MesDeviceRelationEntity::getMesDeviceId).collect(Collectors.toList());
-        List<MesEquipmentProcedureVo> equipmentProcedure = mesProductionService.findEquipmentProcedure(equipmentIds);
-        Map<String, MesEquipmentProcedureVo> id2voMap = equipmentProcedure.stream().collect(Collectors.toMap(MesEquipmentProcedureVo::getMesDeviceId, Function.identity(), (v1, v2) -> v1));
         //查询设备id对应的设备字典Future
         CompletableFuture<HashMap<String, DictDevice>> hashMapCompletableFuture = CompletableFuture.supplyAsync(() -> {
             var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
@@ -939,25 +932,42 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         //查询设备状态Future
         MesEquipmentProcedureVo defaulVo = new MesEquipmentProcedureVo();
         CompletableFuture<Map<String, Boolean>> mapCompletableFuture = CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())));
-        return hashMapCompletableFuture.thenCombineAsync(mapCompletableFuture,
+        stopWatch.stop();
+        stopWatch.start("2");
+        //查询时长
+        var deviceIds = devicePageData.getData().stream().map(e -> e.getId().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+        List<TrepDayStaDetailEntity> allByBdateEqualsAndEntityIdIn = trepDayStaDetailRepository.findAllByBdateEqualsAndEntityIdIn(new Date(), deviceIds);
+        Map<UUID, Long> id2timeMap = allByBdateEqualsAndEntityIdIn.stream().collect(Collectors.toMap(TrepDayStaDetailEntity::getEntityId, e -> e.getTotalTime() + e.getStartTime()));
+        //查询当前卡号、当前班组、产品
+        List<MesDeviceRelationEntity> deviceRelationEntityList = mesDeviceRelationRepository.findAllByDeviceIdIn(deviceIds);
+        Map<UUID, UUID> id2mesIdMap = deviceRelationEntityList.stream().collect(Collectors.toMap(MesDeviceRelationEntity::getDeviceId, MesDeviceRelationEntity::getMesDeviceId));
+        List<UUID> equipmentIds = deviceRelationEntityList.stream().map(MesDeviceRelationEntity::getMesDeviceId).collect(Collectors.toList());
+        List<MesEquipmentProcedureVo> equipmentProcedure = mesProductionService.findEquipmentProcedure(equipmentIds);
+        Map<String, MesEquipmentProcedureVo> id2voMap = equipmentProcedure.stream().collect(Collectors.toMap(MesEquipmentProcedureVo::getMesDeviceId, Function.identity(), (v1, v2) -> v1));
+        stopWatch.stop();
+        stopWatch.start("3");
+        PageData<RTMonitorDeviceResult> result = hashMapCompletableFuture.thenCombineAsync(mapCompletableFuture,
                 (dictDeviceMap, activeStatusMap) -> devicePageData.getData().stream().map(e -> {
                     UUID id = e.getId().getId();
                     Long timeLong = id2timeMap.getOrDefault(id, 0L);
                     var idStr = e.getId().toString();
                     UUID mesDid = id2mesIdMap.get(id);
-                    MesEquipmentProcedureVo mesEquipmentProcedureVo = id2voMap.getOrDefault(mesDid,defaulVo);
+                    MesEquipmentProcedureVo mesEquipmentProcedureVo = id2voMap.getOrDefault(mesDid, defaulVo);
                     return RTMonitorDeviceResult.builder()
                             .id(idStr)
                             .name(e.getRename())
                             .rename(e.getRename())
                             .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
-                            .operationRate(BigDecimalUtil.INSTANCE.divide(timeLong,"86400000"))
+                            .operationRate(BigDecimalUtil.INSTANCE.divide(timeLong, "86400000"))
                             .cardNo(mesEquipmentProcedureVo.getCardNo())
                             .materialName(mesEquipmentProcedureVo.getMaterialName())
                             .workerGroupName(mesEquipmentProcedureVo.getWorkerGroupName())
                             .build();
                 }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
+        stopWatch.stop();
+        log.info("请求耗时: {}", stopWatch.prettyPrint());
+        return result;
     }
 
     /**
