@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,8 @@ import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.dao.util.mapping.JsonBinaryType;
 import org.thingsboard.server.dao.util.mapping.JsonStringType;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Data
@@ -42,7 +43,6 @@ import java.util.UUID;
 public class DeviceEntity extends AbstractDeviceEntity<Device> {
 
 
-
     public DeviceEntity() {
         super();
     }
@@ -50,25 +50,32 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
     public DeviceEntity(Device device) {
         super(device);
     }
-    public DeviceEntity (Factory factory){
+
+    public DeviceEntity(Factory factory) {
         this.setName(factory.getWorkshopName());
         this.setTenantId(factory.getTenantId());
     }
 
-    public DeviceEntity (UUID id, String name){
+    public DeviceEntity(UUID id, String name) {
         super();
         this.id = id;
         this.setName(name);
     }
 
-    public DeviceEntity (UUID id, String name, String rename){
+    public DeviceEntity(UUID id, UUID tenantId) {
+        super();
+        this.id = id;
+        this.setTenantId(tenantId);
+    }
+
+    public DeviceEntity(UUID id, String name, String rename) {
         super();
         this.id = id;
         this.setName(name);
         this.setRename(rename);
     }
 
-    public DeviceEntity (UUID id, String name, String rename, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
+    public DeviceEntity(UUID id, String name, String rename, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo) throws JsonProcessingException {
         super();
         this.id = id;
         this.setName(name);
@@ -78,10 +85,11 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         this.setProductionLineId(productionLineId);
         try {
             this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
-        } catch (Exception ignore){}
+        } catch (Exception ignore) {
+        }
     }
 
-    public DeviceEntity (UUID id, String name, String rename, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo, Integer sort) throws JsonProcessingException {
+    public DeviceEntity(UUID id, String name, String rename, UUID factoryId, UUID workshopId, UUID productionLineId, Object additionalInfo, Integer sort) throws JsonProcessingException {
         super();
         this.id = id;
         this.setName(name);
@@ -92,10 +100,11 @@ public class DeviceEntity extends AbstractDeviceEntity<Device> {
         this.setSort(sort);
         try {
             this.setAdditionalInfo(new ObjectMapper().readValue(additionalInfo.toString(), JsonNode.class));
-        } catch (Exception ignore){}
+        } catch (Exception ignore) {
+        }
     }
 
-    public DeviceEntity (UUID tenantId){
+    public DeviceEntity(UUID tenantId) {
         this.setTenantId(tenantId);
     }
 

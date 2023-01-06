@@ -952,7 +952,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                             .rename(e.getRename())
                             .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
-                            .operationRate(BigDecimalUtil.INSTANCE.divide(timeLong,"86400"))
+                            .operationRate(BigDecimalUtil.INSTANCE.divide(timeLong,"86400000"))
                             .cardNo(mesEquipmentProcedureVo.getCardNo())
                             .materialName(mesEquipmentProcedureVo.getMaterialName())
                             .workerGroupName(mesEquipmentProcedureVo.getWorkerGroupName())
