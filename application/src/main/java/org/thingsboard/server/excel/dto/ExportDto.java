@@ -19,4 +19,11 @@ public class ExportDto {
     @ApiModelProperty("导出地址")
     private String path;
 
+
+    public ExportDto(){}
+    public ExportDto(List<List<String>> dataList, String title, String path) {
+        this.dataList = dataList;
+        this.title = title;
+        this.path = path;
+    }
 }
