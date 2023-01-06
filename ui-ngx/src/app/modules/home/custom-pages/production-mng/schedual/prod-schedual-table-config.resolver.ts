@@ -44,7 +44,8 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     this.config.componentsData = {
       sWorkerGroupName:'',
       sWorkingProcedureName:'',
-      dateRange:[]
+      dateRange:[],
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-schedual');
@@ -62,12 +63,17 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
         startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
         endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
-      const { sWorkerGroupName, sWorkingProcedureName } = this.config.componentsData; // TODO 取出班组名称和当前工序
+      const { sWorkerGroupName, sWorkingProcedureName } = this.config.componentsData;
       return this.productionMngService.getProdSchedualList(pageLink, {
         sWorkerGroupName:  sWorkerGroupName || '',
         sWorkingProcedureName: sWorkingProcedureName || '',
         tTrackTimeStart: startTime || '', tTrackTimeEnd:  endTime || ''
       });
+    }
+    
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      this.productionMngService.exportProdSchedulRecords().subscribe();
     }
 
     return this.config;
