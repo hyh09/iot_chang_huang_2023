@@ -14,11 +14,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.factory.Factory;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
 import org.thingsboard.server.common.data.ota.ChecksumAlgorithm;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.productionline.ProductionLine;
+import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.*;
@@ -1040,9 +1043,9 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
             return DictDeviceSwitchDeviceVO.builder()
                     .deviceId(v.getId().getId())
                     .deviceName(v.getRename())
-                    .factoryName(deviceBaseDTO.getFactory().getName())
-                    .workshopName(deviceBaseDTO.getWorkshop().getName())
-                    .productionLineName(deviceBaseDTO.getProductionLine().getName())
+                    .factoryName(Optional.ofNullable(deviceBaseDTO.getFactory()).map(Factory::getName).orElse(""))
+                    .workshopName(Optional.ofNullable(deviceBaseDTO.getWorkshop()).map(Workshop::getName).orElse(""))
+                    .productionLineName(Optional.ofNullable(deviceBaseDTO.getProductionLine()).map(ProductionLine::getName).orElse(""))
                     .build();
         }).collect(Collectors.toList()), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
 
