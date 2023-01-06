@@ -18,6 +18,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResult
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -36,7 +37,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
-@RequestMapping("/api/factoryEnergy")
+@RequestMapping("/api/factoryCollectionInformation")
 public class FactoryCollectionInformationController extends BaseController {
     @Autowired
     private FactoryCollectionInformationSvc factoryCollectionInformationSvc;
@@ -49,7 +50,9 @@ public class FactoryCollectionInformationController extends BaseController {
     public DeviceStatusNumVo queryDeviceStatusNum( @RequestParam(required = false,name = "factoryId") String factoryId) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
-            return factoryCollectionInformationSvc.queryDeviceStatusNum(tenantId, factoryId);
+            FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
+            factoryDeviceQuery.setFactoryId(factoryId);
+            return factoryCollectionInformationSvc.queryDeviceStatusNum(tenantId, factoryDeviceQuery);
         } catch (Exception e) {
             log.error("[工厂看板-采集信息-设备在线率].queryCurrentEnergy方法异常入参:{}", factoryId);
             log.error("[工厂看板-采集信息-设备在线率].queryCurrentEnergy方法异常:{}", e);

@@ -34,10 +34,8 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
     }
 
     @Override
-    public DeviceStatusNumVo queryDeviceStatusNum(TenantId tenantId, String factoryId) {
-        FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
-        factoryDeviceQuery.setFactoryId(factoryId);
-        DeviceOnlineStatusResult deviceOnlineStatusResult = deviceMonitorService.getDeviceOnlineStatusData(tenantId, factoryDeviceQuery);
+    public DeviceStatusNumVo queryDeviceStatusNum(TenantId tenantId,    FactoryDeviceQuery factoryDeviceQuery) {
+         DeviceOnlineStatusResult deviceOnlineStatusResult = deviceMonitorService.getDeviceOnlineStatusData(tenantId, factoryDeviceQuery);
         DeviceStatusNumVo deviceStatusNumVo = JacksonUtil.convertValue(deviceOnlineStatusResult, DeviceStatusNumVo.class);
         BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);//保留4位小数
         BigDecimal deviceAfterResult = bigDecimalUtil.divide(deviceOnlineStatusResult.getOnLineDeviceCount(), deviceOnlineStatusResult.getAllDeviceCount());
