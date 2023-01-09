@@ -20,4 +20,6 @@ public interface TrepDayStaDetailRepository extends PagingAndSortingRepository<T
     List<TrepDayStaDetailEntity> findAllByBdateEqualsOrStartTimeIsNotNull(Date bdate);
 
     List<TrepDayStaDetailEntity> findAllByBdateEqualsAndEntityIdIn(Date bdate,List<UUID> entityIdList);
+
+    List<TrepDayStaDetailEntity> findAllByBdateEqualsAndEntityId(Date bdate,UUID entityIdList);
 }

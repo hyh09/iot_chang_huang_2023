@@ -1,6 +1,5 @@
 package org.thingsboard.server.controller;
 
-import com.github.xiaoymin.knife4j.annotations.ApiSort;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
@@ -9,7 +8,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.ehcache.core.util.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -22,12 +20,14 @@ import org.thingsboard.server.common.data.vo.user.enums.CreatorTypeEnum;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.manager.TrepDayStaDetailManager;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
@@ -56,6 +56,9 @@ public class RTMonitorController extends BaseController {
 
     @Autowired
     ClientService clientService;
+
+    @Resource
+    private TrepDayStaDetailManager trepDayStaDetailManager;
 
     /**
      * 根据当前登录人获得工厂层级-适配
@@ -262,7 +265,9 @@ public class RTMonitorController extends BaseController {
     @GetMapping("/rtMonitor/device/{id}")
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
-        return this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id), isFactoryUser());
+        DeviceDetailResult deviceDetailResult = this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id), isFactoryUser());
+        trepDayStaDetailManager.setRate(deviceDetailResult, new Date(), e -> UUID.fromString(e.getId()), DeviceDetailResult::setOperationRate);
+        return deviceDetailResult;
     }
 
     /**
@@ -363,7 +368,6 @@ public class RTMonitorController extends BaseController {
     }
 
 
-
     @ApiOperation(value = "导出设备历史数据", notes = "默认倒序，不允许排序")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "deviceId", value = "设备Id", paramType = "query", required = true),
@@ -374,7 +378,7 @@ public class RTMonitorController extends BaseController {
             @ApiImplicitParam(name = "isShowAttributes", value = "是否显示属性", paramType = "query", defaultValue = "false")
     })
     @GetMapping("/rtMonitor/device/excelHistory")
-    public void  excelHistory(
+    public void excelHistory(
             @RequestParam String deviceId,
             @RequestParam int page,
             @RequestParam int pageSize,
@@ -390,28 +394,28 @@ public class RTMonitorController extends BaseController {
         }
         TimePageLink pageLink = createTimePageLink(pageSize, page, null, HSConstants.TS, "desc", startTime, endTime);
         validatePageLink(pageLink);
-        PageData<Map<String, Object>> pageData =   this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
-        List<Map<String,Object>> mapList= pageData.getData();
+        PageData<Map<String, Object>> pageData = this.deviceMonitorService.listPageDeviceTelemetryHistories(getTenantId(), deviceId, isShowAttributes, pageLink);
+        List<Map<String, Object>> mapList = pageData.getData();
 
-        List<DictDeviceGroupPropertyVO>  header = this.listRTMonitorHistory(deviceId,false);
-        Map<String,String> headMap=header.stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName, DictDeviceGroupPropertyVO::getTitle));
-        headMap.put(CREATE_TIME_COLUMN,"创建时间");
+        List<DictDeviceGroupPropertyVO> header = this.listRTMonitorHistory(deviceId, false);
+        Map<String, String> headMap = header.stream().collect(Collectors.toMap(DictDeviceGroupPropertyVO::getName, DictDeviceGroupPropertyVO::getTitle));
+        headMap.put(CREATE_TIME_COLUMN, "创建时间");
 
-        List<String>  stringList = new ArrayList<>();
-        List<List<String>> headList =new ArrayList<>();
-        header.stream().forEach(vo->{
-          List<String> head01 = new ArrayList<>();
-          if(vo.getTitle().equals(CREATE_TIME_COLUMN)){
-                head01.add("创建时间");
-            }else {
-                head01.add(vo.getTitle());
-            }
+        List<String> stringList = new ArrayList<>();
+        List<List<String>> headList = new ArrayList<>();
+        header.stream().forEach(vo -> {
+                    List<String> head01 = new ArrayList<>();
+                    if (vo.getTitle().equals(CREATE_TIME_COLUMN)) {
+                        head01.add("创建时间");
+                    } else {
+                        head01.add(vo.getTitle());
+                    }
                     headList.add(head01);
                     stringList.add(vo.getName());
-        }
-      );
+                }
+        );
 
-        easyExcelAndHeadWrite(response,"设备历史数据","",headList,getExcelData(mapList,stringList));
+        easyExcelAndHeadWrite(response, "设备历史数据", "", headList, getExcelData(mapList, stringList));
     }
 
     /**
@@ -476,21 +480,16 @@ public class RTMonitorController extends BaseController {
     }
 
 
-    private  List<List<String>>  getExcelData( List<Map<String,Object>> mapList,List<String> stringList)
-    {
-        List<List<String>> data  = new ArrayList<>();
+    private List<List<String>> getExcelData(List<Map<String, Object>> mapList, List<String> stringList) {
+        List<List<String>> data = new ArrayList<>();
 
-        if(CollectionUtils.isNotEmpty(mapList))
-        {
-            for(Map<String,Object> map:mapList)
-            {
-                List<String>  dataColumn= new ArrayList<>();
-                for(String st1: stringList)
-                {
-                    if(CREATE_TIME_COLUMN.equals(st1))
-                    {
-                        dataColumn.add( CommonUtils.stampToDate(map.get(CREATE_TIME_COLUMN).toString()));
-                    }else {
+        if (CollectionUtils.isNotEmpty(mapList)) {
+            for (Map<String, Object> map : mapList) {
+                List<String> dataColumn = new ArrayList<>();
+                for (String st1 : stringList) {
+                    if (CREATE_TIME_COLUMN.equals(st1)) {
+                        dataColumn.add(CommonUtils.stampToDate(map.get(CREATE_TIME_COLUMN).toString()));
+                    } else {
                         Object obj = map.get(st1);
                         dataColumn.add(obj != null ? obj.toString() : "");
                     }
