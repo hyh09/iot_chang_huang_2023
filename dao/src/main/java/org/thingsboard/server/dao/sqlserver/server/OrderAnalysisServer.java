@@ -92,7 +92,7 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
         List list = new ArrayList();
         sql.append("SELECT   C2.usdOrderDtlGUID as uGuid,A2.sEquipmentNo as deviceNo,A2.sEquipmentName as deviceName ,A2.sCardNo as sCardNo," +
                 "A2.sMaterialNo as materialNo,A2.sMaterialName as materialName,\n" +
-                "A2.sColorNo as colorNo,t1.sColorName ,A2.sWorkerGroupNo as workerGroupNo,A2.sWorkerGroupName as workerGroupName,A2.sWorkerNo as workerNo,\n" +
+                "A2.sColorNo as colorNo,t1.sColorName as colorName ,A2.sWorkerGroupNo as workerGroupNo,A2.sWorkerGroupName as workerGroupName,A2.sWorkerNo as workerNo,\n" +
                 "A2.sWorkerName AS workerName,A2.nTrackQty as nTrackQty,A2.tCreateTime  as tCreateTime,B2.sRemark  as sRemark\n" +
                 "FROM dbo.mnProducted A2(NOLOCK)\n" +
                 "JOIN dbo.psWorkFlowCard B2(NOLOCK) ON B2.sCardNo = A2.sCardNo\n" +
