@@ -1268,8 +1268,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult, Boolean isFactoryUser) throws ThingsboardException {
-        if (!isFactoryUser)
+        if (!isFactoryUser) {
+            log.info("非工厂用户，不过滤数据");
             return deviceDetailResult;
+        }
+        log.info("工厂用户，过滤数据");
         var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceDetailResult.getId())
                 .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
                 .map(DictDevicePropertySwitchVO::getPropertyName)
