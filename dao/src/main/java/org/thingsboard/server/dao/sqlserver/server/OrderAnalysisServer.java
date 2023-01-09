@@ -9,10 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyEnums;
-import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyVo;
-import org.thingsboard.server.dao.sqlserver.server.vo.order.HwExpandVo;
-import org.thingsboard.server.dao.sqlserver.server.vo.order.OrderAnalysisVo;
+import org.thingsboard.server.dao.sqlserver.server.vo.order.*;
 import org.thingsboard.server.dao.util.CommonUtils;
 
 import java.util.ArrayList;
@@ -82,6 +79,75 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
 
     }
 
+
+    /**
+     * 2023-01-09 新增接口
+     * 查询卡片维度的数据
+     * @param vo
+     * @param pageable
+     * @return
+     */
+    public PageData<OrderCarNoVo> queryCarNoPage(OrderCarNoVo vo, Pageable pageable){
+        StringBuffer sql = new StringBuffer();
+        List list = new ArrayList();
+        sql.append("SELECT   C2.usdOrderDtlGUID as uGuid,A2.sEquipmentNo as deviceNo,A2.sEquipmentName as deviceName ,A2.sCardNo as sCardNo," +
+                "A2.sMaterialNo as materialNo,A2.sMaterialName as materialName,\n" +
+                "A2.sColorNo as colorNo,t1.sColorName ,A2.sWorkerGroupNo as workerGroupNo,A2.sWorkerGroupName as workerGroupName,A2.sWorkerNo as workerNo,\n" +
+                "A2.sWorkerName AS workerName,A2.nTrackQty as nTrackQty,A2.tCreateTime  as tCreateTime,B2.sRemark  as sRemark\n" +
+                "FROM dbo.mnProducted A2(NOLOCK)\n" +
+                "JOIN dbo.psWorkFlowCard B2(NOLOCK) ON B2.sCardNo = A2.sCardNo\n" +
+                "JOIN dbo.sdOrderLot C2(NOLOCK) ON C2.uGUID=B2.usdOrderLotGUID\n" +
+                "JOIN dbo.mnProductedExpend E2(NOLOCK) ON E2.umnProductedGUID=A2.uGUID\n" +
+                "JOIN dbo.hwEnergy F2(NOLOCK) ON F2.sCode=E2.sEngCode\n" +
+                " LEFT JOIN tmColor t1  (NOLOCK) ON t1.sColorNo  =A2.sColorNo  WHERE 1=1 ");
+        if(StringUtils.isNotEmpty(vo.getUGuid())){
+            sql.append(" and C2.usdOrderDtlGUID =  ").append("\'").append(vo.getUGuid()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getDeviceNo())){
+            sql.append(" and A2.sEquipmentNo =  ").append("\'").append(vo.getDeviceNo()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getDeviceName())){
+            sql.append(" and A2.sEquipmentName =  ").append("\'%").append(vo.getDeviceName()).append("%\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getSCardNo())){
+            sql.append(" and A2.sCardNo =  ").append("\'").append(vo.getSCardNo()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getSCardNo())){
+            sql.append(" and A2.sMaterialNo =  ").append("\'").append(vo.getMaterialNo()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getMaterialName())){
+            sql.append(" and A2.sMaterialName =  ").append("\'%").append(vo.getMaterialName()).append("%\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getColorNo())){
+            sql.append(" and A2.sColorNo =  ").append("\'").append(vo.getColorNo()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getColorName())){
+            sql.append(" and A2.sColorName =  ").append("\'%").append(vo.getColorName()).append("%\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getWorkerGroupNo())){
+            sql.append(" and A2.sWorkerGroupNo =  ").append("\'").append(vo.getWorkerGroupNo()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getWorkerGroupName())){
+            sql.append(" and A2.sWorkerGroupName =  ").append("\'%").append(vo.getWorkerGroupName()).append("%\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getWorkerNo())){
+            sql.append(" and A2.sWorkerNo =  ").append("\'%").append(vo.getWorkerNo()).append("%\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getWorkerName())){
+            sql.append(" and A2.sWorkerName =  ").append("\'%").append(vo.getWorkerName()).append("%\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getNTrackQty())){
+            sql.append(" and A2.nTrackQty =  ").append("\'").append(vo.getNTrackQty()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getTCreateTime())){
+            sql.append(" and A2.tCreateTime =  ").append("\'").append(vo.getTCreateTime()).append("\'");
+        }
+        if(StringUtils.isNotEmpty(vo.getSRemark())){
+            sql.append(" and B2.sRemark =  ").append("\'").append(vo.getSRemark()).append("\'");
+        }
+        PageData<OrderCarNoVo> pageData = pageQuery("A2.tCreateTime", sql.toString(), list, pageable, OrderCarNoVo.class);
+        return  pageData;
+    }
 
     private void convert(List<OrderAnalysisVo> processAnalysisVoList) {
         if (CollectionUtils.isEmpty(processAnalysisVoList)) {
