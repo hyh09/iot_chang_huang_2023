@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { OrderCapacity, OrderForm, OrderProgress,processCardProgress } from "@app/shared/models/custom/order-form-mng.models";
+import { OrderCapacity, OrderForm, OrderProgress,processCardProgress, ProdProgress} from "@app/shared/models/custom/order-form-mng.models";
 import { ChecksumAlgorithm } from "@app/shared/models/ota-package.models";
 import { PageLink, PageData, HasUUID } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
@@ -20,6 +20,10 @@ interface FetchOrderProgressListFilter {
   sColorName?: string,
   dDeliveryDateBegin?: string | number,
   dDeliveryDateEnd?: string | number,
+}
+
+interface FetchProdProgressListFilter {
+  sOrderNo?: string
 }
 
 @Injectable({
@@ -121,5 +125,14 @@ export class OrderFormService {
     });
     return this.http.get<PageData<processCardProgress>>(`/api/mes/order/findProductionCardList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
+
+    // 获取生产进度根据生产编号
+    public getProdProgressBySorderNo(pageLink: PageLink, filterParams: FetchProdProgressListFilter, config?: RequestConfig): Observable<PageData<ProdProgress>> {
+      let queryStr: string[] = [];
+      Object.keys(filterParams).forEach(key => {
+        queryStr.push(`${key}=${filterParams[key]}`);
+      });
+      return this.http.post<PageData<ProdProgress>>(`/api/mes/order/findProductionProgressList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    }
 
 }
