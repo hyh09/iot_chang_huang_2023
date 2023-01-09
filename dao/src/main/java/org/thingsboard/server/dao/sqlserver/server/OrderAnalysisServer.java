@@ -83,17 +83,18 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
     /**
      * 2023-01-09 新增接口
      * 查询卡片维度的数据
+     *
      * @param vo
      * @param pageable
      * @return
      */
-    public PageData<OrderCarNoVo> queryCarNoPage(OrderCarNoVo vo, Pageable pageable){
+    public PageData<OrderCarNoVo> queryCarNoPage(OrderCarNoVo vo, Pageable pageable) {
         StringBuffer sql = new StringBuffer();
         List list = new ArrayList();
-        sql.append("SELECT   C2.usdOrderDtlGUID as uGuid,A2.sEquipmentNo as deviceNo,A2.sEquipmentName as deviceName ,A2.sCardNo as sCardNo," +
+        sql.append("select    C2.usdOrderDtlGUID as uGuid,A2.sEquipmentNo as deviceNo,A2.sEquipmentName as deviceName ,A2.sCardNo as sCardNo," +
                 "A2.sMaterialNo as materialNo,A2.sMaterialName as materialName,\n" +
-                "A2.sColorNo as colorNo,t1.sColorName as colorName ,A2.sWorkerGroupNo as workerGroupNo,A2.sWorkerGroupName as workerGroupName,A2.sWorkerNo as workerNo,\n" +
-                "A2.sWorkerName AS workerName,A2.nTrackQty as nTrackQty,A2.tCreateTime  as tCreateTime,B2.sRemark  as sRemark\n" +
+                "A2.sColorNo as colorNo,t1.sColorName ,A2.sWorkerGroupNo as workerGroupNo,A2.sWorkerGroupName as workerGroupName,A2.sWorkerNo as workerNo,\n" +
+                "A2.sWorkerName AS workerName,A2.nTrackQty as nTrackQty,A2.tCreateTime  as factStartTime,B2.sRemark  as sRemark\n" +
                 "FROM dbo.mnProducted A2(NOLOCK)\n" +
                 "JOIN dbo.psWorkFlowCard B2(NOLOCK) ON B2.sCardNo = A2.sCardNo\n" +
                 "JOIN dbo.sdOrderLot C2(NOLOCK) ON C2.uGUID=B2.usdOrderLotGUID\n" +
@@ -137,14 +138,14 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
         if(StringUtils.isNotEmpty(vo.getNTrackQty())){
             sql.append(" and A2.nTrackQty =  ").append("\'").append(vo.getNTrackQty()).append("\'");
         }
-        if(StringUtils.isNotEmpty(vo.getTCreateTime())){
-            sql.append(" and A2.tCreateTime =  ").append("\'").append(vo.getTCreateTime()).append("\'");
+        if ((vo.getCreatedTime()) != null) {
+            sql.append(" and A2.tCreateTime =  ").append("\'").append(vo.getCreatedTime()).append("\'");
         }
-        if(StringUtils.isNotEmpty(vo.getSRemark())){
+        if (StringUtils.isNotEmpty(vo.getSRemark())) {
             sql.append(" and B2.sRemark =  ").append("\'").append(vo.getSRemark()).append("\'");
         }
         PageData<OrderCarNoVo> pageData = pageQuery("A2.tCreateTime", sql.toString(), list, pageable, OrderCarNoVo.class);
-        return  pageData;
+        return pageData;
     }
 
     private void convert(List<OrderAnalysisVo> processAnalysisVoList) {
