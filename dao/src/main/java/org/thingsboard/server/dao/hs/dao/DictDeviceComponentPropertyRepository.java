@@ -33,6 +33,9 @@ public interface DictDeviceComponentPropertyRepository extends PagingAndSortingR
     @Query("select t from DictDeviceComponentPropertyEntity t where t.dictDeviceId = :dictDeviceId order by t.sort asc")
     List<DictDeviceComponentPropertyEntity> findAllByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
 
+    @Query(value = "SELECT t.* from hs_dict_device_component_property t LEFT JOIN hs_dict_device_switch t1 ON t.ID = t1.property_id where t.dict_device_id = :dictDeviceId AND (t1.switch = 1  or t1.switch is null) order by t.sort asc",nativeQuery = true)
+    List<DictDeviceComponentPropertyEntity> findOpenByDictDeviceId(@Param("dictDeviceId") UUID dictDeviceId);
+
     List<DictDeviceComponentPropertyEntity> findAllByDictDataId(UUID toUUID);
 
     Optional<DictDeviceComponentPropertyEntity> findByDictDeviceIdAndName(UUID dictDeviceId, String tsPropertyName);
