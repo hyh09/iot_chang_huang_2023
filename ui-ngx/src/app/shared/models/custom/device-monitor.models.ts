@@ -44,6 +44,10 @@ export interface DeviceItem {
   name: string;
   image: string;
   isOnLine: boolean;
+  operationRate: number;
+  cardNo: string;
+  materialName: string;
+  workerGroupName: string;
 }
 
 export interface DevicePageData {

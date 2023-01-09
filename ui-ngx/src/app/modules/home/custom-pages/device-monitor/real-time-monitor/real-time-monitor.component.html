@@ -6,12 +6,41 @@
     <div fxLayout="row" class="device-list" [class.empty]="deviceList.length === 0">
       <div *ngFor="let device of deviceList" class="device-item-wrapper">
         <div class="device-item" [title]="device.name" (click)="goToDetail(device.id)">
-          <div class="device-name">{{ device.name }}</div>
+          <div class="device-name">
+            <div class="scroll-wrap">
+              <div class="scroll-item">{{ device.name }}</div>
+            </div>
+          </div>
           <div class="device-status-bg" [class.off-line]="!device.isOnLine"></div>
           <div class="device-status">
             {{ (device.isOnLine ? 'device-monitor.on-line' : 'device-monitor.off-line') | translate }}
           </div>
           <img [src]="device.image ? device.image : '../../../../../../assets/device-image-empty.svg'" />
+          <div class="operation-rate">{{ 'device-monitor.operation-ratio-24h' | translate }}{{ (device.operationRate || 0) * 100 + '%' }}</div>
+          <div class="sub-info">
+            <div class="title">{{ 'device-monitor.current-card-no' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ device.cardNo || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="sub-info">
+            <div class="title">{{ 'device-monitor.material-name' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ device.materialName || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="sub-info">
+            <div class="title">{{ 'device-monitor.current-team' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ device.workerGroupName || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <nz-empty
