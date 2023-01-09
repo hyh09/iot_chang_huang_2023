@@ -3487,6 +3487,7 @@
     "no-system-version": "未找到版本信息"
   },
   "device-mng": {
+    "production-progress":"生产进度",
     "device-mng": "设备管理",
     "data-dic": "数据字典",
     "device-dic": "设备字典",
@@ -3843,6 +3844,10 @@
     "param-not-config": "未指定参数"
   },
   "potency": {
+    "staff-on-duty":"当班员工",
+    "production-team":"生产班组",
+    "cloth-car-number":"布车号",
+    "completion-rate":"完工率",
     "potency": "效能分析",
     "output-analysis": "产量分析",
     "device-capacity-history": "产量历史",
@@ -3855,6 +3860,7 @@
     "group": "班组",
     "procedure": "工序",
     "order": "订单",
+    "production-quantity":"生产数量",
     "running-state": "运行状态",
     "device-name": "设备名称",
     "total-capacity": "总产量：",

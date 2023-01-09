@@ -37,7 +37,6 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       new EntityTableColumn<OrderProgress>('scolorName', 'order.colour', '150px'),
       new EntityTableColumn<OrderProgress>('nqty', 'order.order-quantity', '150px'),
       new EntityTableColumn<OrderProgress>('sfinishingMethod', 'order.arrangement-requirements', '150px'),
-
       new EntityTableColumn<OrderProgress>('orderNo7', 'order.turnover-cloth', '150px'),
       new EntityTableColumn<OrderProgress>('orderNo8', 'order.billet-setting', '150px'),
       new EntityTableColumn<OrderProgress>('orderNo9', 'order.dyeing', '100px'),
