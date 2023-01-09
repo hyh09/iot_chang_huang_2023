@@ -72,3 +72,25 @@ export interface OrderCapacity extends BaseData<OrderFormId> {
   total: number;
   totalAmount: number;
 }
+
+export interface OrderProgress extends BaseData<any> {
+  ddeliveryDate: string;
+  nqty: string;
+  scolorName: string;
+  scustomerName: string;
+  sfinishingMethod: string;
+  smaterialName: string;
+  sorderNo: string;
+}
+
+export interface processCardProgress extends BaseData<any> {
+  ddeliveryDate: string;
+  nqty: string;
+  scolorName: string;
+  scustomerName: string;
+  sfinishingMethod: string;
+  smaterialName: string;
+  sorderNo: string;
+  sworkingProcedureName: string;
+  sworkingProcedureNameNext: string;
+}

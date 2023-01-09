@@ -43,6 +43,7 @@ import org.thingsboard.server.dao.hs.entity.po.DictData;
 import org.thingsboard.server.dao.hs.entity.po.DictDevice;
 import org.thingsboard.server.dao.hs.entity.po.DictDeviceComponent;
 import org.thingsboard.server.dao.hs.entity.vo.*;
+import org.thingsboard.server.dao.hs.manager.TrepDayStaDetailManager;
 import org.thingsboard.server.dao.hs.service.*;
 import org.thingsboard.server.dao.hs.utils.CommonComponent;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
@@ -60,7 +61,6 @@ import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationReposit
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesEquipmentProcedureVo;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
-import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 
 import javax.annotation.Resource;
 import javax.persistence.criteria.Predicate;
@@ -144,6 +144,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
     @Resource
     private MesProductionService mesProductionService;
+
+    @Resource
+    private TrepDayStaDetailManager trepDayStaDetailManager;
 
     /**
      * 获得设备配置列表
@@ -934,11 +937,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         CompletableFuture<Map<String, Boolean>> mapCompletableFuture = CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())));
         stopWatch.stop();
         stopWatch.start("2");
-        //查询时长
-        var deviceIds = devicePageData.getData().stream().map(e -> e.getId().getId()).filter(Objects::nonNull).collect(Collectors.toList());
-        List<TrepDayStaDetailEntity> allByBdateEqualsAndEntityIdIn = trepDayStaDetailRepository.findAllByBdateEqualsAndEntityIdIn(new Date(), deviceIds);
-        Map<UUID, Long> id2timeMap = allByBdateEqualsAndEntityIdIn.stream().collect(Collectors.toMap(TrepDayStaDetailEntity::getEntityId, e -> e.getTotalTime() + e.getStartTime()));
         //查询当前卡号、当前班组、产品
+        var deviceIds = devicePageData.getData().stream().map(e -> e.getId().getId()).filter(Objects::nonNull).collect(Collectors.toList());
         List<MesDeviceRelationEntity> deviceRelationEntityList = mesDeviceRelationRepository.findAllByDeviceIdIn(deviceIds);
         Map<UUID, UUID> id2mesIdMap = deviceRelationEntityList.stream().collect(Collectors.toMap(MesDeviceRelationEntity::getDeviceId, MesDeviceRelationEntity::getMesDeviceId));
         List<UUID> equipmentIds = deviceRelationEntityList.stream().map(MesDeviceRelationEntity::getMesDeviceId).collect(Collectors.toList());
@@ -949,7 +949,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         PageData<RTMonitorDeviceResult> result = hashMapCompletableFuture.thenCombineAsync(mapCompletableFuture,
                 (dictDeviceMap, activeStatusMap) -> devicePageData.getData().stream().map(e -> {
                     UUID id = e.getId().getId();
-                    Long timeLong = id2timeMap.getOrDefault(id, 0L);
                     var idStr = e.getId().toString();
                     UUID mesDid = id2mesIdMap.get(id);
                     MesEquipmentProcedureVo mesEquipmentProcedureVo = id2voMap.getOrDefault(mesDid, defaulVo);
@@ -959,13 +958,14 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                             .rename(e.getRename())
                             .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
-                            .operationRate(BigDecimalUtil.INSTANCE.divide(timeLong, "86400000"))
                             .cardNo(mesEquipmentProcedureVo.getCardNo())
                             .materialName(mesEquipmentProcedureVo.getMaterialName())
                             .workerGroupName(mesEquipmentProcedureVo.getWorkerGroupName())
                             .build();
                 }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
         stopWatch.stop();
+        List<RTMonitorDeviceResult> data = result.getData();
+        trepDayStaDetailManager.setRateBatch(data, new Date(), e -> UUID.fromString(e.getId()), RTMonitorDeviceResult::setOperationRate);
         log.info("请求耗时: {}", stopWatch.prettyPrint());
         return result;
     }
@@ -1268,8 +1268,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      */
     @Override
     public DeviceDetailResult filterDeviceDetailResult(TenantId tenantId, DeviceDetailResult deviceDetailResult, Boolean isFactoryUser) throws ThingsboardException {
-        if (!isFactoryUser)
+        if (!isFactoryUser) {
+            log.info("非工厂用户，不过滤数据");
             return deviceDetailResult;
+        }
+        log.info("工厂用户，过滤数据");
         var propertyShowSet = this.dictDeviceService.listDictDeviceSwitches(tenantId, deviceDetailResult.getId())
                 .stream().filter(v -> DictDevicePropertySwitchEnum.SHOW.equals(v.getPropertySwitch()))
                 .map(DictDevicePropertySwitchVO::getPropertyName)
