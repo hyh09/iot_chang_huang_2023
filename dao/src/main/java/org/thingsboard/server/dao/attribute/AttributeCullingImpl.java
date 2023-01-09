@@ -138,6 +138,7 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
                 dataDTOList.forEach(m1 -> {
                     m1.setFlg(isAddListStr3(m1, map1));
                 });
+                v1.setData(dataDTOList);
                 componentDataDTOListResults.add(v1);
             }
 
