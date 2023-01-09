@@ -97,8 +97,6 @@ public class OrderAnalysisServer extends BaseRunSqlServer {
                 "FROM dbo.mnProducted A2(NOLOCK)\n" +
                 "JOIN dbo.psWorkFlowCard B2(NOLOCK) ON B2.sCardNo = A2.sCardNo\n" +
                 "JOIN dbo.sdOrderLot C2(NOLOCK) ON C2.uGUID=B2.usdOrderLotGUID\n" +
-                "JOIN dbo.mnProductedExpend E2(NOLOCK) ON E2.umnProductedGUID=A2.uGUID\n" +
-                "JOIN dbo.hwEnergy F2(NOLOCK) ON F2.sCode=E2.sEngCode\n" +
                 " LEFT JOIN tmColor t1  (NOLOCK) ON t1.sColorNo  =A2.sColorNo  WHERE 1=1 ");
         if(StringUtils.isNotEmpty(vo.getUGuid())){
             sql.append(" and C2.usdOrderDtlGUID =  ").append("\'").append(vo.getUGuid()).append("\'");
