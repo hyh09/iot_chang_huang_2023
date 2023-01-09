@@ -37,11 +37,11 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
 
 
     @Override
-    public List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList, TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
+    public List<RunningStateVo> queryKeyToSwitch(List<RunningStateVo> resultList, TenantId tenantId, UUID deviceId, boolean isFactoryUser) {
         if (CollectionUtils.isEmpty(resultList)) {
             return resultList;
         }
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId,isFactoryUser);
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId, isFactoryUser);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return resultList;
         }
@@ -71,8 +71,8 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
      * @return
      */
     @Override
-    public Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map, TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId,isFactoryUser);
+    public Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map, TenantId tenantId, UUID deviceId, boolean isFactoryUser) {
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId, isFactoryUser);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return map;
         }
@@ -96,34 +96,33 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
                     }
 
                     if (StringUtils.isNotEmpty(vo.getName())) {
-                        if(isAddListStr(vo.getName(),map1)){
+                        if (isAddListStr(vo.getName(), map1)) {
                             resultList3.add(vo);
                         }
                     }
                 }
             }
-            result.put(k1,resultList3);
+            result.put(k1, resultList3);
         });
 
 
-        return  result;
+        return result;
 
     }
 
 
     /**
-     *
      * @param componentDataDTOList
      * @param tenantId
      * @param deviceId
      * @return
      */
     @Override
-    public List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
-        if(CollectionUtils.isEmpty(componentDataDTOList)){
+    public List<ComponentDataDTO> componentData(List<ComponentDataDTO> componentDataDTOList, TenantId tenantId, UUID deviceId, boolean isFactoryUser) {
+        if (CollectionUtils.isEmpty(componentDataDTOList)) {
             return componentDataDTOList;
         }
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId,isFactoryUser);
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId, isFactoryUser);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return componentDataDTOList;
         }
@@ -132,28 +131,31 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
                 .filter(m1 -> m1.getPropertySwitch() != null)
                 .collect(Collectors.toMap(DictDevicePropertySwitchVO::getPropertyName, DictDevicePropertySwitchVO::getPropertySwitch));
 
-        List<ComponentDataDTO> componentDataDTOListResults  =new ArrayList<>();
-        for(ComponentDataDTO v1: componentDataDTOList){
+        List<ComponentDataDTO> componentDataDTOListResults = new ArrayList<>();
+        for (ComponentDataDTO v1 : componentDataDTOList) {
             List<DataDTO> dataDTOList = v1.getData();
-            if(CollectionUtils.isNotEmpty(dataDTOList)){
-                if(isAddListStr3(v1,map1)){
-                    componentDataDTOListResults.add(v1);
-                }
+            if (CollectionUtils.isNotEmpty(dataDTOList)) {
+                dataDTOList.forEach(m1 -> {
+                    m1.setFlg(isAddListStr3(m1, map1));
+                });
+                componentDataDTOListResults.add(v1);
             }
+
         }
         return componentDataDTOListResults;
     }
 
     /**
      * 2023-1-4 新增  工厂账号不显示这些参数，租户还是要全部显得
+     *
      * @param tenantId
      * @param deviceId
      * @return
      */
-    private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId,boolean isFactoryUser) {
+    private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId, boolean isFactoryUser) {
         List<DictDevicePropertySwitchVO> list = new ArrayList<>();
-        if(!isFactoryUser){
-           return list;
+        if (!isFactoryUser) {
+            return list;
         }
         try {
             list = dictDeviceService.listDictDeviceSwitches(tenantId, deviceId.toString());
@@ -164,8 +166,6 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         }
         return list;
     }
-
-
 
 
     private boolean isAddList(List<String> keysNameS, Map<String, DictDevicePropertySwitchEnum> map1) {
@@ -195,14 +195,11 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
     }
 
 
-
-
-
-    private boolean isAddListStr3(ComponentDataDTO v1, Map<String, DictDevicePropertySwitchEnum> map1) {
-        if(v1 ==  null){
-            return  true;
+    private boolean isAddListStr3(DataDTO d1, Map<String, DictDevicePropertySwitchEnum> map1) {
+        if (d1 == null) {
+            return true;
         }
-        if (map1.get(v1.getName()) == DictDevicePropertySwitchEnum.HIDE) {
+        if (map1.get(d1.getKey()) == DictDevicePropertySwitchEnum.HIDE) {
             return false;
         }
 
