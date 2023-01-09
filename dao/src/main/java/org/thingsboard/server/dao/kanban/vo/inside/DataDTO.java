@@ -23,4 +23,8 @@ public class DataDTO {
     @ApiModelProperty(value = "部件参数值")
     @JsonProperty("Value")
     private String value;
+
+    @ApiModelProperty(value = "属性开关; true 开， false 关")
+    @JsonProperty("flg")
+    private Boolean flg;
 }
