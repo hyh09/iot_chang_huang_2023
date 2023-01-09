@@ -23,7 +23,7 @@ public interface DictDeviceSwitchRepository extends PagingAndSortingRepository<D
 
     void deleteByPropertyIdAndPropertyType(UUID propertyId, String propertyType);
 
-    Optional<DictDeviceSwitchEntity> findByPropertyIdAndPropertyType(UUID propertyId, String propertyType);
+    Optional<DictDeviceSwitchEntity> findByDeviceIdAndPropertyIdAndPropertyType(UUID deviceId, UUID propertyId, String propertyType);
 
     List<DictDeviceSwitchEntity> findAllByDeviceId(UUID deviceId);
 
