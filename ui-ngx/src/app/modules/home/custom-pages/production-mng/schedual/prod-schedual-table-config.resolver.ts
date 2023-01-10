@@ -78,7 +78,8 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     this.config.componentsData.exportTableData = () => {
       this.config.componentsData.tableList.subscribe((res) => {
         console.log(res.data)
-        this.productionMngService.exportPort('生产排班', res.data).subscribe();
+       // this.productionMngService.exportPort('生产排班', res.data).subscribe();
+        this.productionMngService.exportProdSchedulRecords().subscribe();
       })
     }
 
