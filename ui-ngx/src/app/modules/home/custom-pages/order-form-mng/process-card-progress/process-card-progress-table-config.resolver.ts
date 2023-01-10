@@ -89,7 +89,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
     const actions: Array<CellActionDescriptor<processCardProgress>> = [];
     actions.push({
       name: this.translate.instant('device-mng.production-progress'),
-      mdiIcon: 'mdi:pwd-key',
+      icon: 'more_horiz',
       isEnabled: () => true,
       onAction: ($event, entity) => this.selectProdCard($event, entity.sorderNo)
     });
@@ -97,7 +97,6 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
   }
 
   selectProdCard($event: Event, sorderNo: string): void {
-    console.log('哈哈哈哈')
     if ($event) {
       $event.stopPropagation();
     }
