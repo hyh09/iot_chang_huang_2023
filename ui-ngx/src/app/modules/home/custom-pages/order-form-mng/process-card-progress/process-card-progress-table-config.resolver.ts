@@ -1,11 +1,13 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
+import { EntityTableColumn, EntityTableConfig, CellActionDescriptor } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { processCardProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { ProcessCardProgressFiltersComponent } from './process-card-progress-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
+import { MatDialog } from "@angular/material/dialog";
+import { SelectProdProgressComponent } from "./prod-progress.component";
 
 @Injectable()
 export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTableConfig<processCardProgress>> {
@@ -15,6 +17,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
   constructor(
     private translate: TranslateService,
     private processCardProgressService: OrderFormService,
+    public dialog: MatDialog
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
     this.config.filterComponent = ProcessCardProgressFiltersComponent;
@@ -38,8 +41,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
       new EntityTableColumn<processCardProgress>('smaterialName', 'order.product-name', '200px', (entity) => (entity.smaterialName || ''), () => ({}), false),
       new EntityTableColumn<processCardProgress>('scolorName', 'order.colour', '150px'),
       new EntityTableColumn<processCardProgress>('sfinishingMethod', 'order.arrangement-requirements', '150px'),
-
-      new EntityTableColumn<processCardProgress>('nPlanOutputQty', 'order.number-of-cards', '150px'),
+      new EntityTableColumn<processCardProgress>('nplanOutputQty', 'order.number-of-cards', '150px'),
       new EntityTableColumn<processCardProgress>('sworkingProcedureName', 'order.current-operation', '150px'),
       new EntityTableColumn<processCardProgress>('wu', 'order.operation-finished-qty', '150px'),
       new EntityTableColumn<processCardProgress>('sworkingProcedureNameNext', 'order.next-procedure', '150px'),
@@ -55,11 +57,13 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
     }
 
     this.config.tableTitle = this.translate.instant('order.process-card-progress');
+    this.config.detailsPanelEnabled = false;
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
     this.config.afterResolved = () => {
       this.config.addEnabled = false;
       this.config.entitiesDeleteEnabled = false;
+      this.config.cellActionDescriptors = this.configureCellActions();
     }
 
     this.config.entitiesFetchFunction = pageLink => {
@@ -79,5 +83,28 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
       });
     }
     return this.config;
+  }
+
+  configureCellActions(): Array<CellActionDescriptor<processCardProgress>> {
+    const actions: Array<CellActionDescriptor<processCardProgress>> = [];
+    actions.push({
+      name: this.translate.instant('device-mng.production-progress'),
+      mdiIcon: 'mdi:pwd-key',
+      isEnabled: () => true,
+      onAction: ($event, entity) => this.selectProdCard($event, entity.sorderNo)
+    });
+    return actions;
+  }
+
+  selectProdCard($event: Event, sorderNo: string): void {
+    console.log('哈哈哈哈')
+    if ($event) {
+      $event.stopPropagation();
+    }
+    this.dialog.open<SelectProdProgressComponent, string>(SelectProdProgressComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: sorderNo
+    });
   }
 }
