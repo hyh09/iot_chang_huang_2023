@@ -151,17 +151,20 @@ public class DictDeviceController extends BaseController {
 
 
     /**
-     * 获得打开的设备字典详情
+     * 获得打开的设备字典详情,租户用户获取全部
      *
      * @param id 设备字典id
      */
-    @ApiOperation(value = "设备开启的字典-详情")
+    @ApiOperation(value = "设备开启的字典-详情-租户用户获取全部")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "设备字典id", paramType = "path", required = true)})
     @GetMapping("/dict/openDevice/{id}")
     public DictDeviceVO getOpenDictDeviceDetail(@PathVariable("id") String id) throws ThingsboardException {
         checkParameter("id", id);
-        return this.dictDeviceService.getOpenDictDeviceDetail(id, getTenantId());
+        if (isFactoryUser()) {
+            return this.dictDeviceService.getOpenDictDeviceDetail(id, getTenantId());
+        }
+        return this.dictDeviceService.getDictDeviceDetail(id, getTenantId());
     }
 
     /**
