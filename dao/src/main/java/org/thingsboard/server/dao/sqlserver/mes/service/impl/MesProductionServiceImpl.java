@@ -240,7 +240,7 @@ public class MesProductionServiceImpl implements MesProductionService {
                 "\t) C ON C.uemEquipmentGUID= A.uGUID\n" +
                 "\tLEFT JOIN dbo.mmMaterial D ( NOLOCK ) ON D.uGUID= B.ummMaterialGUID WHERE A.uGUID IN (");
         equipmentIds.forEach(e -> {
-            sqlBuffer.append("'?',");
+            sqlBuffer.append("?,");
             params.add(e);
         });
         String sql = sqlBuffer.substring(0, sqlBuffer.length() - 1) + ")";

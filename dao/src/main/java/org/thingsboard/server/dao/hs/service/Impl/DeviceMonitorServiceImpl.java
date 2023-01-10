@@ -57,6 +57,7 @@ import org.thingsboard.server.dao.sql.alarm.AlarmRepository;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceProfileRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
+import org.thingsboard.server.dao.sql.mesdevicerelation.JpaMesDeviceRelationDao;
 import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationRepository;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesEquipmentProcedureVo;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
@@ -137,9 +138,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     DictDeviceComponentRepository componentRepository;
 
     @Resource
-    private TrepDayStaDetailRepository trepDayStaDetailRepository;
-
-    @Resource
     private MesDeviceRelationRepository mesDeviceRelationRepository;
 
     @Resource
@@ -147,7 +145,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
     @Resource
     private TrepDayStaDetailManager trepDayStaDetailManager;
-
     /**
      * 获得设备配置列表
      *
