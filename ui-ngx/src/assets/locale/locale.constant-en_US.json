@@ -3591,6 +3591,7 @@
     "no-system-version": "No system version found."
   },
   "device-mng": {
+    "production-progress":"Production progress",
     "device-mng": "Device management",
     "data-dic": "Data dictionary",
     "device-dic": "Device dictionary",
@@ -3945,6 +3946,11 @@
     "param-not-config": "No parameters specified"
   },
   "potency": {
+    "staff-on-duty":"Staff on duty",
+    "production-team":"Production team",
+    "cloth-car-number":"Cloth car number",
+    "completion-rate":"Completion rate",
+    "production-quantity":"Production quantity",
     "potency": "Efficiency analysis",
     "output-analysis": "Output analysis",
     "device-capacity-history": "Output history",

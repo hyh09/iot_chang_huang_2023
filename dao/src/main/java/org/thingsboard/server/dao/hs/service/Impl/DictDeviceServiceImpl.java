@@ -1104,7 +1104,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
         return this.toPageDataByList(this.listDictDeviceProperties(tenantId, toUUID(dictDevice.getId())).stream().filter(v -> StringUtils.isBlank(q) || v.getTitle().toLowerCase(Locale.ROOT).contains(q))
                 .map(v -> {
-                    var dictDeviceSwitch = this.switchRepository.findByPropertyIdAndPropertyType(v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData);
+                    var dictDeviceSwitch = this.switchRepository.findByDeviceIdAndPropertyIdAndPropertyType(toUUID(deviceId), v.getId(), v.getPropertyType().getCode()).map(DictDeviceSwitchEntity::toData);
                     var data = DictDevicePropertySwitchNewVO.builder()
                             .deviceId(toUUID(deviceId))
                             .dictDeviceId(toUUID(dictDevice.getId()))

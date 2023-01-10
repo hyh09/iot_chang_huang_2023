@@ -47,12 +47,30 @@ export class ProductionMngService {
     return this.http.get<PageData<ProdSchedual>>(`/api/mes/production/findPlanList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 导出
+  public exportPort(title, dataList) {
+    var formData = new FormData();
+    formData.append('path', '/Users/zhaosiming/Desktop/qq')
+    formData.append('title', title)
+    formData.append('dataList', dataList)
+    return this.http.post(`/api/excel/export`, formData, { responseType: 'arraybuffer' }).pipe(tap(res => {
+      var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
+      var link = document.createElement('a');
+      var href = window.URL.createObjectURL(blob);
+      link.href = href;
+      link.download = this.translate.instant(title === '生产管理' ? 'production-mng.prod-schedual' : title === '生产监控' ? 'production-mng.prod-monitor' : title === '生产报工' ? 'production-mng.prod-report' : '报表');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(href);
+    }));
+  }
 
-  // 导出生产排版列表
+  // 导出生产管理列表
   public exportProdSchedulRecords() {
     var formData = new FormData();
-    formData.append('path','/Users/zhaosiming/Desktop/qq')
-    return this.http.post(`/api/mes/production/exportPlan`, formData,{responseType: 'arraybuffer'}).pipe(tap(res => {
+    formData.append('path', '/Users/zhaosiming/Desktop/qq')
+    return this.http.post(`/api/mes/production/exportPlan`, formData, { responseType: 'arraybuffer' }).pipe(tap(res => {
       var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
       var link = document.createElement('a');
       var href = window.URL.createObjectURL(blob);
@@ -68,8 +86,8 @@ export class ProductionMngService {
   // 导出生产监控列表
   public exportProdMonitorRecords() {
     var formData = new FormData();
-    formData.append('path','/Users/zhaosiming/Desktop/qq')
-    return this.http.post(`/api/mes/production/exportMonitor`, formData,{responseType: 'arraybuffer'}).pipe(tap(res => {
+    formData.append('path', '/Users/zhaosiming/Desktop/qq')
+    return this.http.post(`/api/mes/production/exportMonitor`, formData, { responseType: 'arraybuffer' }).pipe(tap(res => {
       var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
       var link = document.createElement('a');
       var href = window.URL.createObjectURL(blob);
@@ -82,22 +100,22 @@ export class ProductionMngService {
     }));
   }
 
-    // 导出生产报工列表
-    public exportProdReportRecords() {
-      var formData = new FormData();
-      formData.append('path','/Users/zhaosiming/Desktop/qq')
-      return this.http.post(`/api/mes/production/exportWork`, formData,{responseType: 'arraybuffer'}).pipe(tap(res => {
-        var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
-        var link = document.createElement('a');
-        var href = window.URL.createObjectURL(blob);
-        link.href = href;
-        link.download = this.translate.instant('production-mng.prod-report');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(href);
-      }));
-    }
+  // 导出生产报工列表
+  public exportProdReportRecords() {
+    var formData = new FormData();
+    formData.append('path', '/Users/zhaosiming/Desktop/qq')
+    return this.http.post(`/api/mes/production/exportWork`, formData, { responseType: 'arraybuffer' }).pipe(tap(res => {
+      var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
+      var link = document.createElement('a');
+      var href = window.URL.createObjectURL(blob);
+      link.href = href;
+      link.download = this.translate.instant('production-mng.prod-report');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(href);
+    }));
+  }
 
 
   // 获取生产报工列表
