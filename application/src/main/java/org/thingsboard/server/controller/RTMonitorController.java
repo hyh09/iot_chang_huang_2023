@@ -24,6 +24,7 @@ import org.thingsboard.server.dao.hs.manager.TrepDayStaDetailManager;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.sql.mesdevicerelation.JpaMesDeviceRelationDao;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesEquipmentProcedureVo;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
 import org.thingsboard.server.dao.util.CommonUtils;
@@ -64,6 +65,9 @@ public class RTMonitorController extends BaseController {
 
     @Resource
     private MesProductionService mesProductionService;
+
+    @Resource
+    private JpaMesDeviceRelationDao jpaMesDeviceRelationDao;
 
     /**
      * 根据当前登录人获得工厂层级-适配
@@ -274,10 +278,13 @@ public class RTMonitorController extends BaseController {
         //设置开机率
         trepDayStaDetailManager.setRate(deviceDetailResult, new Date(), e -> UUID.fromString(e.getId()), DeviceDetailResult::setOperationRate);
         //设置当前卡号、产品名称、当前班组
-        MesEquipmentProcedureVo equipmentProcedure = mesProductionService.findEquipmentProcedureOrDefault(UUID.fromString(deviceDetailResult.getId()),new MesEquipmentProcedureVo());
-        deviceDetailResult.setCardNo(equipmentProcedure.getCardNo());
-        deviceDetailResult.setMaterialName(equipmentProcedure.getMaterialName());
-        deviceDetailResult.setWorkerGroupName(equipmentProcedure.getWorkerGroupName());
+        UUID mesIdByDeviceId = jpaMesDeviceRelationDao.getMesIdByDeviceId(UUID.fromString(deviceDetailResult.getId()));
+        if (mesIdByDeviceId != null) {
+            MesEquipmentProcedureVo equipmentProcedure = mesProductionService.findEquipmentProcedureOrDefault(mesIdByDeviceId, new MesEquipmentProcedureVo());
+            deviceDetailResult.setCardNo(equipmentProcedure.getCardNo());
+            deviceDetailResult.setMaterialName(equipmentProcedure.getMaterialName());
+            deviceDetailResult.setWorkerGroupName(equipmentProcedure.getWorkerGroupName());
+        }
         return deviceDetailResult;
     }
 
