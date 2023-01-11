@@ -113,16 +113,6 @@ public class MesOrderServiceImpl implements MesOrderService {
             "LEFT JOIN dbo.emEquipment D(NOLOCK)ON D.uGUID=C.uemEquipmentGUID " +
             " WHERE 1=1  ";
 
-    private String sqlOrderCardCount = "SELECT COUNT(*) \n" +
-            "FROM\n" +
-            "\tpsWorkFlowCard a WITH ( NOLOCK )\n" +
-            "\tJOIN sdOrderLot b WITH ( NOLOCK ) ON a.usdOrderLotGUID= b.uGUID\n" +
-            "\tJOIN sdOrderDtl c WITH ( NOLOCK ) ON b.usdOrderDtlGUID= c.uGUID\n" +
-            "\tJOIN sdOrderHdr d WITH ( NOLOCK ) ON c.usdOrderHdrGUID= d.uGUID\n" +
-            "\tJOIN mmMaterial e WITH ( NOLOCK ) ON a.ummMaterialGUID= e.uGUID\n" +
-            "\tJOIN tmColor f WITH ( NOLOCK ) ON a.utmColorGUID= f.uGUID" +
-            " WHERE 1=1  ";
-
     private String sqlOrderCardList = "SELECT\n" +
             "  a.sCardNo,\n" +
             "  d.sOrderNo,\n" +
@@ -182,7 +172,7 @@ public class MesOrderServiceImpl implements MesOrderService {
                         params.add(dto.getSColorName());
                     }
                 }
-            }, dto, MesOrderProgressListVo.class, sqlOrderProgressListCount, sqlOrderProgressList, pageLink);
+            }, dto, MesOrderProgressListVo.class, sqlOrderProgressList, pageLink);
             Integer total = pagePair.getLeft();
             List<MesOrderProgressListVo> recordList = pagePair.getRight();
             return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
@@ -254,7 +244,7 @@ public class MesOrderServiceImpl implements MesOrderService {
                     sql.append("order by a.tCreateTime desc ");
                 }
             }
-        }, dto, MesOrderCardListVo.class, sqlOrderCardCount, sqlOrderCardList, pageLink);
+        }, dto, MesOrderCardListVo.class, sqlOrderCardList, pageLink);
         Integer total = pagePair.getLeft();
         List<MesOrderCardListVo> recordList = pagePair.getRight();
         return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
