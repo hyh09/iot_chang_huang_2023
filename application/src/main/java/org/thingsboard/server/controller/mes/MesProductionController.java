@@ -129,7 +129,6 @@ public class MesProductionController extends BaseController {
         try {
             PageLink pageLink = createPageLink(Integer.MAX_VALUE, 0,null,null,null);
             PageData<MesProductionMonitorVo> monitorList = mesProductionService.findMonitorList(null, pageLink);
-            ExportDto dto = new ExportDto();
             fileService.downloadExcel(this.getExportDtoFromMonitor(monitorList.getData(),path), response);
         } catch (Exception e) {
             log.error("导出excel异常", e);

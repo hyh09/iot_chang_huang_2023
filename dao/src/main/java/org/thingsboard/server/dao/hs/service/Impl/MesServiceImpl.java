@@ -1,29 +1,20 @@
 package org.thingsboard.server.dao.hs.service.Impl;
 
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.MesService;
-import org.thingsboard.server.dao.hs.utils.CommonUtil;
-import org.thingsboard.server.dao.hsms.entity.bo.DeviceHutBO;
 import org.thingsboard.server.dao.hsms.entity.vo.*;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
-public class MesServiceImpl implements MesService , CommonService {
+public class MesServiceImpl implements MesService, CommonService {
 
     @Autowired
     private ClientService clientService;
