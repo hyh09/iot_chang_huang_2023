@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { OrderProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { OrdersProgressFiltersComponent } from './orders-progress-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
+import { ProductionMngService } from '@app/core/http/custom/production-mng.service';
 
 @Injectable()
 export class OrdersProgressTableConfigResolver implements Resolve<EntityTableConfig<OrderProgress>> {
@@ -15,6 +16,7 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
   constructor(
     private translate: TranslateService,
     private OrderProgressService: OrderFormService,
+    private productionMngService: ProductionMngService,
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
     this.config.filterComponent = OrdersProgressFiltersComponent;
@@ -26,7 +28,9 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       sCustomerName: '',
       sMaterialName: '',
       sColorName: '',
-      dateRange:[]
+      dateRange:[],
+      exportTableData: null,
+      tableList: []
     }
 
     this.config.columns.push(
@@ -37,14 +41,15 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       new EntityTableColumn<OrderProgress>('scolorName', 'order.colour', '150px'),
       new EntityTableColumn<OrderProgress>('nqty', 'order.order-quantity', '150px'),
       new EntityTableColumn<OrderProgress>('sfinishingMethod', 'order.arrangement-requirements', '150px'),
-      new EntityTableColumn<OrderProgress>('orderNo7', 'order.turnover-cloth', '150px'),
-      new EntityTableColumn<OrderProgress>('orderNo8', 'order.billet-setting', '150px'),
-      new EntityTableColumn<OrderProgress>('orderNo9', 'order.dyeing', '100px'),
-      new EntityTableColumn<OrderProgress>('orderNo10', 'order.Chengding', '100px'),
+      new EntityTableColumn<OrderProgress>('wu1', 'order.turnover-cloth', '150px'),
+      new EntityTableColumn<OrderProgress>('wu2', 'order.billet-setting', '150px'),
+      new EntityTableColumn<OrderProgress>('wu3', 'order.dyeing', '100px'),
+      new EntityTableColumn<OrderProgress>('wu4', 'order.Chengding', '100px'),
       new EntityTableColumn<OrderProgress>('emergencyDegree', 'order.cloth-checking', '100px'),
       new EntityTableColumn<OrderProgress>('merchandiser', 'order.warehousing', '100px'),
     );
   }
+  
 
   resolve(): EntityTableConfig<OrderProgress> {
     this.config.componentsData = {
@@ -63,6 +68,22 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       this.config.entitiesDeleteEnabled = false;
     }
 
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      this.config.componentsData.tableList.subscribe((res) => {
+        let dataList = []
+        let titleList = ['订单号', '客户', '交货日期', '品名', '颜色', '订单数量', '整理要求', '翻布', '坯定', '染色', '成定','验布','入库']
+        dataList.push(titleList)
+        if (res.data.length > 0) {
+          res.data.forEach(item => {
+            let itemList = [item.sorderNo, item.scustomerName, item.ddeliveryDate, item.smaterialName, item.scolorName, item.nqty, item.sfinishingMethod, '', '', '', '', item.emergencyDegree, item.merchandiser]
+            dataList.push(itemList)
+          });
+        }
+        this.productionMngService.exportPort('订单进度', dataList).subscribe();
+      })
+    }
+
     this.config.entitiesFetchFunction = pageLink => {
       let startTime: number, endTime: number;
       const dateRange = this.config.componentsData.dateRange;
@@ -71,13 +92,15 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
         endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
       const { sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      return this.OrderProgressService.getOrderProgress(pageLink, {
+      let tableList = this.OrderProgressService.getOrderProgress(pageLink, {
         sOrderNo: sOrderNo || '',
         sCustomerName: sCustomerName || '',
         sMaterialName: sMaterialName || '',
         sColorName: sColorName || '',
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       });
+      this.config.componentsData.tableList = tableList
+      return tableList
     }
     return this.config;
   }

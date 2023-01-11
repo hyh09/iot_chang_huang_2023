@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { processCardProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { ProcessCardProgressFiltersComponent } from './process-card-progress-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
+import { ProductionMngService } from '@app/core/http/custom/production-mng.service';
 import { MatDialog } from "@angular/material/dialog";
 import { SelectProdProgressComponent } from "./prod-progress.component";
 
@@ -17,6 +18,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
   constructor(
     private translate: TranslateService,
     private processCardProgressService: OrderFormService,
+    private productionMngService: ProductionMngService,
     public dialog: MatDialog
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
@@ -25,12 +27,12 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
     this.config.entityResources = entityTypeResources.get(EntityType.ORDER_FORM);
 
     this.config.componentsData = {
-      time:'',
+      time: '',
       orderNo: '',
       colour: '',
       customerName: '',
       processCardNo: '',
-      productName:''
+      productName: ''
     }
 
     this.config.columns.push(
@@ -52,8 +54,10 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
       sOrderNo: '',
       sCustomerName: '',
       sMaterialName: '',
-      sColorName: '',  
-      dateRange:[]
+      sColorName: '',
+      exportTableData: null,
+      dateRange: [],
+      tableList: []
     }
 
     this.config.tableTitle = this.translate.instant('order.process-card-progress');
@@ -66,6 +70,23 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
       this.config.cellActionDescriptors = this.configureCellActions();
     }
 
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      this.config.componentsData.tableList.subscribe((res) => {
+        let dataList = []
+        let titleList = ['卡号', '订单号', '交货日期', '客户', '品名', '颜色', '整理要求', '卡数量', '当前工序', '工序完工数量', '下道工序']
+        dataList.push(titleList)
+        if (res.data.length > 0) {
+          res.data.forEach(item => {
+            let itemList = [item.scardNo, item.sorderNo, item.ddeliveryDate, item.scustomerName, item.smaterialName, item.scolorName, item.sfinishingMethod, item.nplanOutputQty, item.sworkingProcedureName, '', item.sworkingProcedureNameNext]
+            dataList.push(itemList)
+          });
+        }
+        this.productionMngService.exportPort('流程卡进度', dataList).subscribe();
+        console.log(dataList)
+      })
+    }
+
     this.config.entitiesFetchFunction = pageLink => {
       let startTime: number, endTime: number;
       const dateRange = this.config.componentsData.dateRange;
@@ -74,16 +95,20 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
         endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
       const { sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      return this.processCardProgressService.getprocessCardProgress(pageLink, {
+      let tableList =  this.processCardProgressService.getprocessCardProgress(pageLink, {
         sOrderNo: sOrderNo || '',
         sCustomerName: sCustomerName || '',
         sMaterialName: sMaterialName || '',
         sColorName: sColorName || '',
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       });
+
+      this.config.componentsData.tableList = tableList
+      return tableList
     }
     return this.config;
   }
+
 
   configureCellActions(): Array<CellActionDescriptor<processCardProgress>> {
     const actions: Array<CellActionDescriptor<processCardProgress>> = [];
@@ -106,4 +131,6 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
       data: sorderNo
     });
   }
+
+
 }
