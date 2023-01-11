@@ -12,6 +12,7 @@ public interface ConditionFunction<k> {
      * @param dto
      * @param params
      * @param sql
+     * @param orderFlag 判断是否排序
      */
-    void sqlWrapper(k dto, List<Object> params, StringBuffer sql);
+    void sqlWrapper(k dto, List<Object> params, StringBuffer sql,Boolean orderFlag);
 }

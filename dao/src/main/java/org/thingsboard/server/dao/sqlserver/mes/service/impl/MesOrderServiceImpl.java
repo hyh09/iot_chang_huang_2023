@@ -65,7 +65,6 @@ public class MesOrderServiceImpl implements MesOrderService {
             "JOIN dbo.mmMaterial E(NOLOCK)ON E.uGUID=B.ummMaterialGUID " +
             "JOIN dbo.tmColor F(NOLOCK)ON F.uGUID=B.utmColorGUID" +
             " WHERE 1=1  ";
-
     /**
      * 生产卡查询
      */
@@ -124,6 +123,20 @@ public class MesOrderServiceImpl implements MesOrderService {
             "\tJOIN tmColor f WITH ( NOLOCK ) ON a.utmColorGUID= f.uGUID" +
             " WHERE 1=1  ";
 
+    private String sqlOrderCardList = "SELECT\n" +
+            "  a.sCardNo,\n" +
+            "  d.sOrderNo,\n" +
+            "  e.sMaterialName,\n" +
+            "  f.sColorName \n" +
+            "FROM\n" +
+            "  psWorkFlowCard a WITH (NOLOCK)\n" +
+            "  JOIN sdOrderLot b WITH (NOLOCK) ON a.usdOrderLotGUID= b.uGUID\n" +
+            "  JOIN sdOrderDtl c WITH (NOLOCK) ON b.usdOrderDtlGUID= c.uGUID\n" +
+            "  JOIN sdOrderHdr d WITH (NOLOCK) ON c.usdOrderHdrGUID= d.uGUID\n" +
+            "  JOIN mmMaterial e WITH (NOLOCK) ON a.ummMaterialGUID= e.uGUID\n" +
+            "  JOIN tmColor f WITH (NOLOCK) ON a.utmColorGUID= f.uGUID" +
+            " WHERE 1=1  ";
+
     @Override
     public PageData<MesOrderListVo> findOrderList(MesOrderListDto dto, PageLink pageLink) {
         try {
@@ -146,9 +159,7 @@ public class MesOrderServiceImpl implements MesOrderService {
     @Override
     public PageData<MesOrderProgressListVo> findOrderProgressList(MesOrderProgressListDto dto, PageLink pageLink) {
         try {
-            int rowNumber = (pageLink.getPage() - 1) * pageLink.getPageSize();
-            Pair<Integer, List<MesOrderProgressListVo>> pagePair = pageJdbcUtil.queryPageList((dtoBean, params, sql) -> {
-                sql.append(sqlOrderProgressList);
+            Pair<Integer, List<MesOrderProgressListVo>> pagePair = pageJdbcUtil.queryPageList((dtoBean, params, sql, orderFlag) -> {
                 if (dto != null) {
                     if (StringUtils.isNotEmpty(dto.getDDeliveryDateBegin())) {
                         sql.append("and C.dDeliveryDate >=? ");
@@ -171,7 +182,7 @@ public class MesOrderServiceImpl implements MesOrderService {
                         params.add(dto.getSColorName());
                     }
                 }
-            }, dto, new MesOrderProgressListVo(), sqlProductionCardCount, sqlOrderProgressList, pageLink.getPageSize(), rowNumber);
+            }, dto, MesOrderProgressListVo.class, sqlOrderProgressListCount, sqlOrderProgressList, pageLink);
             Integer total = pagePair.getLeft();
             List<MesOrderProgressListVo> recordList = pagePair.getRight();
             return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
@@ -217,10 +228,33 @@ public class MesOrderServiceImpl implements MesOrderService {
 
     @Override
     public PageData<MesOrderCardListVo> findOrderCardList(MesOrderCardListDto dto, PageLink pageLink) {
-        int rowNumber = (pageLink.getPage() - 1) * pageLink.getPageSize();
-        Pair<Integer, List<MesOrderCardListVo>> pagePair = pageJdbcUtil.queryPageList((dtoBean, params, sql) -> {
-
-        }, dto, new MesOrderCardListVo(), "sql", "", pageLink.getPageSize(), rowNumber);
+        Pair<Integer, List<MesOrderCardListVo>> pagePair = pageJdbcUtil.queryPageList((dtoBean, params, sql, orderFlag) -> {
+            if (dto != null) {
+                if (StringUtils.isNotEmpty(dto.getDateBegin())) {
+                    sql.append("and a.tCreateTime >=? ");
+                    params.add(dto.getDateBegin());
+                }
+                if (StringUtils.isNotEmpty(dto.getDateEnd())) {
+                    sql.append("and a.tCreateTime <=? ");
+                    params.add(dto.getDateEnd());
+                }
+                if (StringUtils.isNotEmpty(dto.getSCardNo())) {
+                    sql.append("and a.sCardNo =? ");
+                    params.add(dto.getSCardNo());
+                }
+                if (StringUtils.isNotEmpty(dto.getSOrderNo())) {
+                    sql.append("and d.sOrderNo =? ");
+                    params.add(dto.getSOrderNo());
+                }
+                if (StringUtils.isNotEmpty(dto.getSMaterialName())) {
+                    sql.append("and e.sMaterialName =? ");
+                    params.add(dto.getSMaterialName());
+                }
+                if (orderFlag) {
+                    sql.append("order by a.tCreateTime desc ");
+                }
+            }
+        }, dto, MesOrderCardListVo.class, sqlOrderCardCount, sqlOrderCardList, pageLink);
         Integer total = pagePair.getLeft();
         List<MesOrderCardListVo> recordList = pagePair.getRight();
         return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));

@@ -11,14 +11,8 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.controller.BaseController;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesOrderListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesOrderProgressListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesProductionCardListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesProductionProgressListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesOrderListVo;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesOrderProgressListVo;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionCardListVo;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionProgressListVo;
+import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
+import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
 
 @Slf4j
@@ -89,6 +83,22 @@ public class MesOrderController extends BaseController {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
             return mesOrderService.findProductionProgressList(dto,pageLink);
+        } catch (ThingsboardException e) {
+            log.error("查询生产进度列表异常{}",e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @ApiOperation("查询生产卡列表")
+    @RequestMapping(value = "/findOrderCardList",params = {"pageSize", "page"}, method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+    })
+    @ResponseBody
+    public PageData<MesOrderCardListVo> findOrderCardList(@RequestParam int pageSize, @RequestParam int page, MesOrderCardListDto dto) {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page,null,null,null);
+            return mesOrderService.findOrderCardList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产进度列表异常{}",e);
             throw new RuntimeException(e);
