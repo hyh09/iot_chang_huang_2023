@@ -58,7 +58,7 @@ public class TrepDayStaDetailManager {
             return;
         }
         //获得设备的开机时长
-        List<UUID> entityIdList = new ArrayList<>();
+        List<UUID> entityIdList = new ArrayList<>(data.size());
         for (K record : data) {
             // 获取设备id
             UUID entityId = entityIdFunc.apply(record);
