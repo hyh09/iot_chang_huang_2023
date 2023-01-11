@@ -120,4 +120,7 @@ public class DeviceDetailResult {
 
     @ApiModelProperty("当前班组")
     private String workerGroupName;
+
+    @ApiModelProperty("机台状态")
+    private Integer state;
 }
