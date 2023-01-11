@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -20,6 +21,9 @@ import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesOrderPro
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionCardListVo;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionProgressListVo;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Slf4j
 @Api(value="mes订单管理Controller",tags={"mes订单管理接口"})
@@ -55,6 +59,8 @@ public class MesOrderController extends BaseController {
     public PageData<MesOrderProgressListVo> findOrderProgressList(@RequestParam int pageSize, @RequestParam int page, MesOrderProgressListDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
+            dto.setDDeliveryDateBegin(this.getDateStr(dto.getDDeliveryDateBegin()));
+            dto.setDDeliveryDateEnd(this.getDateStr(dto.getDDeliveryDateEnd()));
             return mesOrderService.findOrderProgressList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询订单进度列表异常{}",e);
@@ -71,6 +77,8 @@ public class MesOrderController extends BaseController {
     public PageData<MesProductionCardListVo> findProductionCardList(@RequestParam int pageSize, @RequestParam int page,MesProductionCardListDto dto) {
         try {
             PageLink pageLink = createPageLink(pageSize, page,null,null,null);
+            dto.setDDeliveryDateBegin(this.getDateStr(dto.getDDeliveryDateBegin()));
+            dto.setDDeliveryDateEnd(this.getDateStr(dto.getDDeliveryDateEnd()));
             return mesOrderService.findProductionCardList(dto,pageLink);
         } catch (ThingsboardException e) {
             log.error("查询生产卡列表异常{}",e);
@@ -94,4 +102,18 @@ public class MesOrderController extends BaseController {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * 时间戳字符串转日期字符串
+     * @param longString
+     * @return
+     */
+    private String getDateStr(String longString){
+        if (StringUtils.isNotEmpty(longString)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return sdf.format(new Date(Long.parseLong(String.valueOf(longString))));
+        }
+        return "";
+    }
+
 }

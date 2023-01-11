@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -153,7 +154,7 @@ public class MesProductionController extends BaseController {
      * @return
      */
     private String getDateStr(String longString){
-        if (!longString.isBlank()) {
+        if (StringUtils.isNotEmpty(longString)) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             return sdf.format(new Date(Long.parseLong(String.valueOf(longString))));
         }
