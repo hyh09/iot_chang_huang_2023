@@ -19,6 +19,7 @@ import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class MesProductionServiceImpl implements MesProductionService {
     /**
      * 查询生产排班
      */
-    private String sqlPlanCount = "SELECT count(1) "+
+    private String sqlPlanCount = "SELECT count(1) " +
             " FROM dbo.psWorkFlowCard A(NOLOCK)" +
             " JOIN dbo.ppTrackJob B ( NOLOCK ) ON B.upsWorkFlowCardGUID= A.uGUID " +
             " JOIN dbo.ppTrackOutput C ( NOLOCK ) ON C.uppTrackJobGUID= B.uGUID " +
@@ -48,12 +49,12 @@ public class MesProductionServiceImpl implements MesProductionService {
             " JOIN dbo.ppTrackOutput C ( NOLOCK ) ON C.uppTrackJobGUID= B.uGUID " +
             " JOIN dbo.pbWorkingProcedure D ( NOLOCK ) ON D.uGUID= B.upbWorkingProcedureGUID " +
             " LEFT JOIN dbo.psWPP E ( NOLOCK ) ON E.upsWorkFlowCardGUID= A.uGUID AND E.upbWorkingProcedureGUID= B.upbWorkingProcedureGUID " +
-            " WHERE 1=1  " ;
+            " WHERE 1=1  ";
 
     /**
      * 查询生产报工
      */
-    private String sqlWorkCount = "SELECT count(1) "+
+    private String sqlWorkCount = "SELECT count(1) " +
             "FROM dbo.psWorkFlowCard A(NOLOCK) " +
             "JOIN dbo.ppTrackJob B(NOLOCK) ON B.upsWorkFlowCardGUID=A.uGUID " +
             "JOIN dbo.ppTrackOutput C(NOLOCK)ON C.uppTrackJobGUID=B.uGUID " +
@@ -68,12 +69,12 @@ public class MesProductionServiceImpl implements MesProductionService {
             "JOIN dbo.ppTrackOutput C(NOLOCK)ON C.uppTrackJobGUID=B.uGUID " +
             "JOIN dbo.tmColor D(NOLOCK)ON D.uGUID=A.utmColorGUID " +
             "JOIN dbo.emEquipment E(NOLOCK)ON E.uGUID=C.uemEquipmentGUID " +
-            " WHERE 1=1  " ;
+            " WHERE 1=1  ";
 
     /**
      * 查询生产监控
      */
-    private String sqlMonitorCount = "SELECT count(1) "+
+    private String sqlMonitorCount = "SELECT count(1) " +
             "FROM dbo.sdOrderHdr A(NOLOCK) " +
             "JOIN dbo.sdOrderDtl B(NOLOCK)ON B.usdOrderHdrGUID=A.uGUID " +
             "JOIN dbo.sdOrderLot C(NOLOCK)ON C.usdOrderDtlGUID=B.uGUID " +
@@ -122,7 +123,7 @@ public class MesProductionServiceImpl implements MesProductionService {
             "WHERE A3.bIsComplete=1 " +
             ")B2 ON B2.upbWorkingProcedureGUID=A2.uGUID AND B2.iIndex=1 " +
             ")I ON I.upsWorkFlowCardGUID=D.uGUID " +
-            " WHERE 1=1  " ;
+            " WHERE 1=1  ";
 
     /**
      * 查询所有工序名称
@@ -130,9 +131,9 @@ public class MesProductionServiceImpl implements MesProductionService {
     private String sqlWorkingProcedureName = "SELECT A.sWorkingProcedureName FROM pbWorkingProcedure A ";
 
 
-
     /**
      * 查询生产班组列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -144,9 +145,9 @@ public class MesProductionServiceImpl implements MesProductionService {
             //queryTotal方法统计总数
             int total = queryPlanTotal(dto);
             //queryRecordList方法查询并转换实体类List
-            List<MesProductionPlanVo> recordList = queryPlanRecordList(dto,pageLink.getPageSize(),rowNumber);
+            List<MesProductionPlanVo> recordList = queryPlanRecordList(dto, pageLink.getPageSize(), rowNumber);
             PageData<MesProductionPlanVo> resultPage = new PageData<>();
-            resultPage = new PageData<MesProductionPlanVo>(recordList,total/pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+            resultPage = new PageData<MesProductionPlanVo>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
             return resultPage;
         } catch (Exception e) {
             log.error("异常信息{}", e);
@@ -157,6 +158,7 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 查询生产报工列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -168,9 +170,9 @@ public class MesProductionServiceImpl implements MesProductionService {
             //queryTotal方法统计总数
             int total = this.queryWorkTotal(dto);
             //queryRecordList方法查询并转换实体类List
-            List<MesProductionWorkVo> recordList = this.queryWorkRecordList(dto,pageLink.getPageSize(),rowNumber);
+            List<MesProductionWorkVo> recordList = this.queryWorkRecordList(dto, pageLink.getPageSize(), rowNumber);
             PageData<MesProductionWorkVo> resultPage = new PageData<>();
-            resultPage = new PageData<MesProductionWorkVo>(recordList,total/pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+            resultPage = new PageData<MesProductionWorkVo>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
             return resultPage;
         } catch (Exception e) {
             log.error("异常信息{}", e);
@@ -180,6 +182,7 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 查询生产监控列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -191,9 +194,9 @@ public class MesProductionServiceImpl implements MesProductionService {
             //queryTotal方法统计总数
             int total = this.queryMonitorTotal(dto);
             //queryRecordList方法查询并转换实体类List
-            List<MesProductionMonitorVo> recordList = this.queryMonitorRecordList(dto,pageLink.getPageSize(),rowNumber);
+            List<MesProductionMonitorVo> recordList = this.queryMonitorRecordList(dto, pageLink.getPageSize(), rowNumber);
             PageData<MesProductionMonitorVo> resultPage = new PageData<>();
-            resultPage = new PageData<MesProductionMonitorVo>(recordList,total/pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+            resultPage = new PageData<MesProductionMonitorVo>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
             return resultPage;
         } catch (Exception e) {
             log.error("异常信息{}", e);
@@ -203,6 +206,7 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 查询工序名称下拉
+     *
      * @return
      */
     @Override
@@ -216,7 +220,7 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     @Override
     public List<MesEquipmentProcedureVo> findEquipmentProcedure(List<UUID> equipmentIds) {
-        if(CollectionUtils.isEmpty(equipmentIds)){
+        if (CollectionUtils.isEmpty(equipmentIds)) {
             return new ArrayList<>();
         }
         List<Object> params = new ArrayList<Object>();
@@ -235,17 +239,30 @@ public class MesProductionServiceImpl implements MesProductionService {
                 "\t\tA1.uemEquipmentGUID \n" +
                 "\t) C ON C.uemEquipmentGUID= A.uGUID\n" +
                 "\tLEFT JOIN dbo.mmMaterial D ( NOLOCK ) ON D.uGUID= B.ummMaterialGUID WHERE A.uGUID IN (");
-        equipmentIds.forEach(e->{
-            sqlBuffer.append("'?',");
+        equipmentIds.forEach(e -> {
+            sqlBuffer.append("?,");
             params.add(e);
         });
-        String sql = sqlBuffer.substring(0, sqlBuffer.length() - 1)+")";
+        String sql = sqlBuffer.substring(0, sqlBuffer.length() - 1) + ")";
         Object[] para = params.toArray(new Object[params.size()]);
         return this.jdbcTemplate.query(sql, para, new BeanPropertyRowMapper(MesEquipmentProcedureVo.class));
     }
 
+    @Override
+    public MesEquipmentProcedureVo findEquipmentProcedureOrDefault(UUID equipmentId, MesEquipmentProcedureVo vo) {
+        if (equipmentId == null) {
+            return vo;
+        }
+        List<MesEquipmentProcedureVo> equipmentProcedureList = this.findEquipmentProcedure(Arrays.asList(equipmentId));
+        if (CollectionUtils.isEmpty(equipmentProcedureList)) {
+            return vo;
+        }
+        return equipmentProcedureList.get(0);
+    }
+
     /**
      * 生产监控查询sql拼接
+     *
      * @param dto
      * @param pageSize
      * @param rowNumber
@@ -255,18 +272,18 @@ public class MesProductionServiceImpl implements MesProductionService {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer();
 
-        if(pageSize != null){
+        if (pageSize != null) {
             sql.append("SELECT TOP(?) * FROM ( ");
             params.add(pageSize);
         }
         sql.append(sqlMonitor);
-        if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getSWorkingProcedureName())){
+        if (dto != null) {
+            if (StringUtils.isNotEmpty(dto.getSWorkingProcedureName())) {
                 sql.append("and I.sWorkingProcedureName =? ");
                 params.add(dto.getSWorkingProcedureName());
             }
         }
-        if(rowNumber != null){
+        if (rowNumber != null) {
             sql.append(" )temp_row where rownumber >? ");
             params.add(rowNumber);
         }
@@ -280,14 +297,15 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 生产监控查询数量sql拼接
+     *
      * @param dto
      * @return
      */
     private Integer queryMonitorTotal(MesProductionMonitorDto dto) {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer(sqlMonitorCount);
-        if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getSWorkingProcedureName())){
+        if (dto != null) {
+            if (StringUtils.isNotEmpty(dto.getSWorkingProcedureName())) {
                 sql.append("and I.sWorkingProcedureName =? ");
                 params.add(dto.getSWorkingProcedureName());
             }
@@ -301,6 +319,7 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 生产报工查询sql拼接
+     *
      * @param dto
      * @param pageSize
      * @param rowNumber
@@ -310,28 +329,28 @@ public class MesProductionServiceImpl implements MesProductionService {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer();
 
-        if(pageSize != null){
+        if (pageSize != null) {
             sql.append("SELECT TOP(?) * FROM ( ");
             params.add(pageSize);
         }
         sql.append(sqlWork);
-        if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getTFactStartTime())){
+        if (dto != null) {
+            if (StringUtils.isNotEmpty(dto.getTFactStartTime())) {
                 sql.append("and B.tFactStartTime >= ? ");
                 params.add(dto.getTFactStartTime());
             }
 
-            if(StringUtils.isNotEmpty(dto.getTFactEndTime())){
+            if (StringUtils.isNotEmpty(dto.getTFactEndTime())) {
                 sql.append("and B.tFactEndTime <=? ");
                 params.add(dto.getTFactEndTime());
             }
 
-            if(StringUtils.isNotEmpty(dto.getSOrderNo())){
+            if (StringUtils.isNotEmpty(dto.getSOrderNo())) {
                 sql.append("and A.sOrderNo =?");
                 params.add(dto.getSOrderNo());
             }
         }
-        if(rowNumber != null){
+        if (rowNumber != null) {
             sql.append(" )temp_row where rownumber >? ");
             params.add(rowNumber);
         }
@@ -345,24 +364,25 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 生产报工查询数量sql拼接
+     *
      * @param dto
      * @return
      */
     private Integer queryWorkTotal(MesProductionWorkDto dto) {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer(sqlWorkCount);
-        if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getTFactStartTime())){
+        if (dto != null) {
+            if (StringUtils.isNotEmpty(dto.getTFactStartTime())) {
                 sql.append("and B.tFactStartTime >= ? ");
                 params.add(dto.getTFactStartTime());
             }
 
-            if(StringUtils.isNotEmpty(dto.getTFactEndTime())){
+            if (StringUtils.isNotEmpty(dto.getTFactEndTime())) {
                 sql.append("and B.tFactEndTime <=? ");
                 params.add(dto.getTFactEndTime());
             }
 
-            if(StringUtils.isNotEmpty(dto.getSOrderNo())){
+            if (StringUtils.isNotEmpty(dto.getSOrderNo())) {
                 sql.append("and A.sOrderNo =?");
                 params.add(dto.getSOrderNo());
             }
@@ -377,6 +397,7 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 生产排班查询sql拼接
+     *
      * @param dto
      * @param pageSize
      * @param rowNumber
@@ -386,33 +407,33 @@ public class MesProductionServiceImpl implements MesProductionService {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer();
 
-        if(pageSize != null){
+        if (pageSize != null) {
             sql.append("SELECT TOP(?) * FROM ( ");
             params.add(pageSize);
         }
         sql.append(sqlPlan);
 
-        if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getTTrackTimeStart())){
+        if (dto != null) {
+            if (StringUtils.isNotEmpty(dto.getTTrackTimeStart())) {
                 sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) >= ? ");
                 params.add(dto.getTTrackTimeStart());
             }
-            if(StringUtils.isNotEmpty(dto.getTTrackTimeEnd())){
+            if (StringUtils.isNotEmpty(dto.getTTrackTimeEnd())) {
                 sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) <= ? ");
                 params.add(dto.getTTrackTimeEnd());
             }
 
-            if(StringUtils.isNotEmpty(dto.getSWorkerGroupName())){
+            if (StringUtils.isNotEmpty(dto.getSWorkerGroupName())) {
                 sql.append("and C.sWorkerGroupName =? ");
                 params.add(dto.getSWorkerGroupName());
             }
 
-            if(StringUtils.isNotEmpty(dto.getSWorkingProcedureName())){
+            if (StringUtils.isNotEmpty(dto.getSWorkingProcedureName())) {
                 sql.append("and D.sWorkingProcedureName =? ");
                 params.add(dto.getSWorkingProcedureName());
             }
         }
-        if(rowNumber != null){
+        if (rowNumber != null) {
             sql.append(" )temp_row where rownumber >? ");
             params.add(rowNumber);
         }
@@ -426,27 +447,28 @@ public class MesProductionServiceImpl implements MesProductionService {
 
     /**
      * 生产排班查询sql拼接
+     *
      * @param dto
      * @return
      */
     private Integer queryPlanTotal(MesProductionPlanDto dto) {
         List<Object> params = new ArrayList<Object>();
         StringBuffer sql = new StringBuffer(sqlPlanCount);
-        if(dto != null){
-            if(StringUtils.isNotEmpty(dto.getTTrackTimeStart())){
+        if (dto != null) {
+            if (StringUtils.isNotEmpty(dto.getTTrackTimeStart())) {
                 sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) >= ? ");
                 params.add(dto.getTTrackTimeStart());
             }
-            if(StringUtils.isNotEmpty(dto.getTTrackTimeEnd())){
+            if (StringUtils.isNotEmpty(dto.getTTrackTimeEnd())) {
                 sql.append("and CONVERT(NVARCHAR(10),C.tTrackTime,120) <= ? ");
                 params.add(dto.getTTrackTimeEnd());
             }
-            if(StringUtils.isNotEmpty(dto.getSWorkerGroupName())){
+            if (StringUtils.isNotEmpty(dto.getSWorkerGroupName())) {
                 sql.append("and C.sWorkerGroupName =? ");
                 params.add(dto.getSWorkerGroupName());
             }
 
-            if(StringUtils.isNotEmpty(dto.getSWorkingProcedureName())){
+            if (StringUtils.isNotEmpty(dto.getSWorkingProcedureName())) {
                 sql.append("and D.sWorkingProcedureName =? ");
                 params.add(dto.getSWorkingProcedureName());
             }

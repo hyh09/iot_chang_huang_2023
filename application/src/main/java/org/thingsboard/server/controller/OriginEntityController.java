@@ -236,4 +236,7 @@ public class OriginEntityController extends BaseController {
         dataMap.put("FactoryData", dataList);
         return dataMap;
     }
+
+
+
 }

@@ -1,5 +1,6 @@
 import { BaseData } from "../base-data";
 import { OrderFormId } from "../id/custom/order-form-id";
+import { ProdCardId } from "../id/custom/prod-card-id";
 
 export interface OrderForm extends OrderCapacity {
   orderNo: string;
@@ -71,4 +72,39 @@ export interface OrderCapacity extends BaseData<OrderFormId> {
   salesman: string;
   total: number;
   totalAmount: number;
+}
+
+export interface OrderProgress extends BaseData<any> {
+  ddeliveryDate: string;
+  nqty: string;
+  scolorName: string;
+  scustomerName: string;
+  sfinishingMethod: string;
+  smaterialName: string;
+  sorderNo: string;
+}
+
+export interface processCardProgress extends BaseData<ProdCardId> {
+  ddeliveryDate: string;
+  nqty: string;
+  scolorName: string;
+  scustomerName: string;
+  sfinishingMethod: string;
+  smaterialName: string;
+  sorderNo: string;
+  sworkingProcedureName: string;
+  sworkingProcedureNameNext: string;
+}
+
+export interface ProdProgress extends BaseData<any> {
+  npercentValue: string;
+  ntrackQty: string;
+  sequipmentName: string;
+  slocation: string;
+  sworkerGroupName: string;
+  sworkerNameList: string;
+  sworkingProcedureName: string;
+  sworkingProcedureNo: string;
+  tfactEndTime: string;
+  tfactStartTime: string;
 }

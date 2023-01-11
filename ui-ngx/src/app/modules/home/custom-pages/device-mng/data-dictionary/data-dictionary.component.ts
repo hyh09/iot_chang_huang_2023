@@ -12,7 +12,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   templateUrl: './data-dictionary.component.html'
 })
 export class DataDictionaryComponent extends EntityComponent<DataDictionary> {
-
   constructor(
     protected store: Store<AppState>,
     protected translate: TranslateService,

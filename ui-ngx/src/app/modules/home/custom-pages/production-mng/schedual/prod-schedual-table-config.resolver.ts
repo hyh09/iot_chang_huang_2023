@@ -28,7 +28,7 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     this.config.columns.push(
       new DateEntityTableColumn<ProdSchedual>('ttrackTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd', false),
       new EntityTableColumn<ProdSchedual>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '100px', (entity) => (entity.sworkerNameList  || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '100px', (entity) => (entity.sworkerNameList || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '150px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('scardNo', 'potency.card-no', '60px', (entity) => (entity.scardNo || ''), () => ({}), false),
@@ -42,10 +42,11 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
   resolve(): EntityTableConfig<ProdSchedual> {
 
     this.config.componentsData = {
-      sWorkerGroupName:'',
-      sWorkingProcedureName:'',
-      dateRange:[],
-      exportTableData: null
+      sWorkerGroupName: '',
+      sWorkingProcedureName: '',
+      dateRange: [],
+      exportTableData: null,
+      tableList: []
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-schedual');
@@ -64,16 +65,22 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
         endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
       }
       const { sWorkerGroupName, sWorkingProcedureName } = this.config.componentsData;
-      return this.productionMngService.getProdSchedualList(pageLink, {
-        sWorkerGroupName:  sWorkerGroupName || '',
+      let tableList = this.productionMngService.getProdSchedualList(pageLink, {
+        sWorkerGroupName: sWorkerGroupName || '',
         sWorkingProcedureName: sWorkingProcedureName || '',
-        tTrackTimeStart: startTime || '', tTrackTimeEnd:  endTime || ''
-      });
+        tTrackTimeStart: startTime || '', tTrackTimeEnd: endTime || ''
+      })
+      this.config.componentsData.tableList = tableList
+      return tableList
     }
-    
+
     // 导出功能
     this.config.componentsData.exportTableData = () => {
-      this.productionMngService.exportProdSchedulRecords().subscribe();
+      this.config.componentsData.tableList.subscribe((res) => {
+        console.log(res.data)
+       // this.productionMngService.exportPort('生产排班', res.data).subscribe();
+        this.productionMngService.exportProdSchedulRecords().subscribe();
+      })
     }
 
     return this.config;

@@ -48,8 +48,8 @@ public class FactoryProductionInformationController extends BaseController {
             TenantId tenantId = getTenantId();
             return factoryProductionInformationSvc.queryWorkshopAndRunRate(tenantId, UUID.fromString(factoryId));
         } catch (Exception e) {
-            log.error("[工厂看板-采集信息-设备在线率].queryCurrentEnergy方法异常入参:{}", factoryId);
-            log.error("[工厂看板-采集信息-设备在线率].queryCurrentEnergy方法异常:{}", e);
+            log.error("[工厂看板-查询车间的信息].queryDeviceStatusNum方法异常入参:{}", factoryId);
+            log.error("[工厂看板-查询车间的信息].queryDeviceStatusNum方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }

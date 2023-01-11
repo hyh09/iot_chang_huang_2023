@@ -23,4 +23,6 @@ public class HSConstants {
     public static final String TEMP_STR = "temp";
 
     public static final Long DAY_TIME = 86400000L;
+
+    public static final String VERSION = "20220109";
 }

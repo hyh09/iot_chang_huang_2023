@@ -51,4 +51,11 @@ public interface MesProductionService {
      * @return
      */
     List<MesEquipmentProcedureVo> findEquipmentProcedure(List<UUID> equipmentIds);
+
+    /**
+     * 查询机台的生产信息
+     * @param equipmentId
+     * @return
+     */
+    MesEquipmentProcedureVo findEquipmentProcedureOrDefault(UUID equipmentId,MesEquipmentProcedureVo vo);
 }

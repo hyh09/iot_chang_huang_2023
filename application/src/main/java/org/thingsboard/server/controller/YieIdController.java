@@ -15,6 +15,7 @@ import org.thingsboard.server.dao.sqlserver.server.ProcessAnalysisServer;
 import org.thingsboard.server.dao.sqlserver.server.YieIdServer;
 import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.OrderAnalysisVo;
+import org.thingsboard.server.dao.sqlserver.server.vo.order.OrderCarNoVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.process.ProcessAnalysisVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -79,6 +80,21 @@ public class YieIdController extends BaseController {
         try {
             PageLink pageLink = createPageLink(pageSize, page, null, null, null);
             return orderAnalysisServer.queryPage(vo, DaoUtil.toPageable(pageLink));
+        } catch (Exception e) {
+            log.info("打印异常日志:{}", e);
+            return null;
+        }
+    }
+
+
+    @RequestMapping("/queryCartPage")
+    public  PageData<OrderCarNoVo> queryCartPage(@RequestParam int pageSize, @RequestParam int page,
+                                                 @RequestParam(required = false) String sortProperty,
+                                                 @RequestParam(required = false) String sortOrder,
+                                                    OrderCarNoVo vo) throws ThingsboardException {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return orderAnalysisServer.queryCarNoPage(vo, DaoUtil.toPageable(pageLink));
         } catch (Exception e) {
             log.info("打印异常日志:{}", e);
             return null;

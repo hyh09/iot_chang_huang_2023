@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { OrderCapacity, OrderForm } from "@app/shared/models/custom/order-form-mng.models";
+import { OrderCapacity, OrderForm, OrderProgress,processCardProgress, ProdProgress} from "@app/shared/models/custom/order-form-mng.models";
 import { ChecksumAlgorithm } from "@app/shared/models/ota-package.models";
 import { PageLink, PageData, HasUUID } from "@app/shared/public-api";
 import { TranslateService } from "@ngx-translate/core";
@@ -11,6 +11,19 @@ import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 interface FetchListFilter {
   orderNo: string;
   factoryName: string;
+}
+
+interface FetchOrderProgressListFilter {
+  sOrderNo?: string,
+  sCustomerName?: string,
+  sMaterialName?: string,
+  sColorName?: string,
+  dDeliveryDateBegin?: string | number,
+  dDeliveryDateEnd?: string | number,
+}
+
+interface FetchProdProgressListFilter {
+  sOrderNo?: string
 }
 
 @Injectable({
@@ -69,7 +82,7 @@ export class OrderFormService {
   // 下载订单导入模板
   public downloadOrderTemplate() {
     return this.http.get(`/api/order/template`, { responseType: 'arraybuffer' }).pipe(tap(res => {
-      var blob = new Blob([res], {type: 'application/vnd.ms-excel;'});
+      var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
       var link = document.createElement('a');
       var href = window.URL.createObjectURL(blob);
       link.href = href;
@@ -96,21 +109,30 @@ export class OrderFormService {
   }
 
   // 获取订单进度列表
-  public getOrderProgress(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<OrderForm>> {
+  public getOrderProgress(pageLink: PageLink, filterParams: FetchOrderProgressListFilter, config?: RequestConfig): Observable<PageData<OrderProgress>> {
     let queryStr: string[] = [];
     Object.keys(filterParams).forEach(key => {
       queryStr.push(`${key}=${filterParams[key]}`);
     });
-    return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<PageData<OrderProgress>>(`/api/mes/order/findOrderProgressList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取流程卡进度列表
-  public getprocessCardProgress(pageLink: PageLink, filterParams: FetchListFilter, config?: RequestConfig): Observable<PageData<OrderForm>> {
-  let queryStr: string[] = [];
-  Object.keys(filterParams).forEach(key => {
-    queryStr.push(`${key}=${filterParams[key]}`);
-  });
-  return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
-}
+  public getprocessCardProgress(pageLink: PageLink, filterParams: FetchOrderProgressListFilter, config?: RequestConfig): Observable<PageData<processCardProgress>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<processCardProgress>>(`/api/mes/order/findProductionCardList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+    // 获取生产进度根据生产编号
+    public getProdProgressBySorderNo(pageLink: PageLink, filterParams: FetchProdProgressListFilter, config?: RequestConfig): Observable<PageData<ProdProgress>> {
+      let queryStr: string[] = [];
+      Object.keys(filterParams).forEach(key => {
+        queryStr.push(`${key}=${filterParams[key]}`);
+      });
+      return this.http.post<PageData<ProdProgress>>(`/api/mes/order/findProductionProgressList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    }
 
 }
