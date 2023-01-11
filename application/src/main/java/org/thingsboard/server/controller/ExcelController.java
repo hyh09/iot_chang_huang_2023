@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 @Api(value="通用导出excelController",tags={"通用导出excel接口"})
 @RestController
 @Slf4j
-@RequestMapping("/excel")
+@RequestMapping("/api/excel")
 public class ExcelController {
 
     @Autowired
