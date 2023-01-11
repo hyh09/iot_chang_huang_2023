@@ -122,5 +122,5 @@ public class DeviceDetailResult {
     private String workerGroupName;
 
     @ApiModelProperty("机台状态")
-    private String state;
+    private Integer state;
 }

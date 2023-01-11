@@ -26,7 +26,7 @@ public class TsKvLatestDaoManager {
     public <K> void setState(K r,
                              final Function<K, UUID> entityIdFunc,
                              final Function<K, Boolean> isOnLineFunc,
-                             final BiConsumer<K, String> stateConsumer) {
+                             final BiConsumer<K, Integer> stateConsumer) {
         if (r == null) {
             return;
         }
@@ -41,7 +41,7 @@ public class TsKvLatestDaoManager {
     public <K> void setState(List<K> data,
                              final Function<K, UUID> entityIdFunc,
                              final Function<K, Boolean> isOnLineFunc,
-                             final BiConsumer<K, String> stateConsumer) {
+                             final BiConsumer<K, Integer> stateConsumer) {
         if (CollectionUtils.isEmpty(data)) {
             return;
         }
@@ -57,7 +57,7 @@ public class TsKvLatestDaoManager {
                 switchData.add(record);
             } else {
                 //离线
-                stateConsumer.accept(record, "离线");
+                stateConsumer.accept(record, 1);
             }
         }
         Map<UUID, Long> aSwitch = tsKvLatestDao.getSwitch(entityIdList);
@@ -66,11 +66,11 @@ public class TsKvLatestDaoManager {
             UUID entityId = entityIdFunc.apply(record);
             Long aLong = aSwitch.get(entityId);
             if (aLong == 1L) {
-                stateConsumer.accept(record, "生产中");
+                stateConsumer.accept(record, 2);
             } else if (aLong == 0L) {
-                stateConsumer.accept(record, "停机");
+                stateConsumer.accept(record, 3);
             } else {
-                stateConsumer.accept(record, "在线");
+                stateConsumer.accept(record, 4);
             }
         }
     }
