@@ -48,9 +48,9 @@ const routes: Routes = [
         path: 'ordersProgress',
         component: EntitiesTableComponent,
         data: {
-          title: 'order.orders-progress',
+          title: 'order.order-progress',
           breadcrumb: {
-            label: 'order.orders-progress',
+            label: 'order.order-progress',
             icon: 'mdi:order-capacity'
           }
         },
