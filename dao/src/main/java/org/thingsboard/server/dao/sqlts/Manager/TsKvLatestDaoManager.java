@@ -30,7 +30,7 @@ public class TsKvLatestDaoManager {
         if (r == null) {
             return;
         }
-        this.setState(Arrays.asList(r), entityIdFunc, isOnLineFunc, stateConsumer);
+        this.setStateBatch(Arrays.asList(r), entityIdFunc, isOnLineFunc, stateConsumer);
     }
 
 
@@ -38,10 +38,10 @@ public class TsKvLatestDaoManager {
      * 已有在线离线状态的情况下设置状态
      * 离线>生产中/停机(switch)->在线
      */
-    public <K> void setState(List<K> data,
-                             final Function<K, UUID> entityIdFunc,
-                             final Function<K, Boolean> isOnLineFunc,
-                             final BiConsumer<K, Integer> stateConsumer) {
+    public <K> void setStateBatch(List<K> data,
+                                  final Function<K, UUID> entityIdFunc,
+                                  final Function<K, Boolean> isOnLineFunc,
+                                  final BiConsumer<K, Integer> stateConsumer) {
         if (CollectionUtils.isEmpty(data)) {
             return;
         }
