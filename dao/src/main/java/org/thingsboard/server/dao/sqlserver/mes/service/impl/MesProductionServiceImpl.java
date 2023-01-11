@@ -130,6 +130,21 @@ public class MesProductionServiceImpl implements MesProductionService {
      */
     private String sqlWorkingProcedureName = "SELECT A.sWorkingProcedureName FROM pbWorkingProcedure A ";
 
+    private String sqlEquipmentProcedure = "SELECT\n" +
+            "mesDeviceId= A.uGUID,cardNo= B.sCardNo,materialName= D.sMaterialName,workerGroupName= C.sWorkerGroupName \n" +
+            "FROM\n" +
+            "\tdbo.emEquipment A ( NOLOCK )\n" +
+            "\tLEFT JOIN dbo.mnProducting B ( NOLOCK ) ON B.uemEquipmentGUID= A.uGUID\n" +
+            "\tLEFT JOIN (\n" +
+            "\tSELECT\n" +
+            "\t\tA1.uemEquipmentGUID,\n" +
+            "\t\tsWorkerGroupName = ( SELECT '' + sWorkerGroupName FROM mnEquipmentWorkerRelation WHERE uemEquipmentGUID = A1.uemEquipmentGUID FOR xml path ( '' ) ) \n" +
+            "\tFROM\n" +
+            "\t\tdbo.mnEquipmentWorkerRelation A1 ( NOLOCK ) \n" +
+            "\tGROUP BY\n" +
+            "\t\tA1.uemEquipmentGUID \n" +
+            "\t) C ON C.uemEquipmentGUID= A.uGUID\n" +
+            "\tLEFT JOIN dbo.mmMaterial D ( NOLOCK ) ON D.uGUID= B.ummMaterialGUID WHERE A.uGUID IN (";
 
     /**
      * 查询生产班组列表
@@ -224,21 +239,7 @@ public class MesProductionServiceImpl implements MesProductionService {
             return new ArrayList<>();
         }
         List<Object> params = new ArrayList<Object>();
-        StringBuffer sqlBuffer = new StringBuffer("SELECT\n" +
-                "mesDeviceId= A.uGUID,cardNo= B.sCardNo,materialName= D.sMaterialName,workerGroupName= C.sWorkerGroupName \n" +
-                "FROM\n" +
-                "\tdbo.emEquipment A ( NOLOCK )\n" +
-                "\tLEFT JOIN dbo.mnProducting B ( NOLOCK ) ON B.uemEquipmentGUID= A.uGUID\n" +
-                "\tLEFT JOIN (\n" +
-                "\tSELECT\n" +
-                "\t\tA1.uemEquipmentGUID,\n" +
-                "\t\tsWorkerGroupName = ( SELECT '' + sWorkerGroupName FROM mnEquipmentWorkerRelation WHERE uemEquipmentGUID = A1.uemEquipmentGUID FOR xml path ( '' ) ) \n" +
-                "\tFROM\n" +
-                "\t\tdbo.mnEquipmentWorkerRelation A1 ( NOLOCK ) \n" +
-                "\tGROUP BY\n" +
-                "\t\tA1.uemEquipmentGUID \n" +
-                "\t) C ON C.uemEquipmentGUID= A.uGUID\n" +
-                "\tLEFT JOIN dbo.mmMaterial D ( NOLOCK ) ON D.uGUID= B.ummMaterialGUID WHERE A.uGUID IN (");
+        StringBuffer sqlBuffer = new StringBuffer(sqlEquipmentProcedure);
         equipmentIds.forEach(e -> {
             sqlBuffer.append("?,");
             params.add(e);
