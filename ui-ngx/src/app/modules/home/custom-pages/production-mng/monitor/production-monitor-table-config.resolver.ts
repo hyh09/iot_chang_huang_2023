@@ -46,7 +46,8 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
       sWorkingProcedureName: '',
       operationList: [],
       totalquantity: 0,
-      exportTableData: null
+      exportTableData: null,
+      tableList: []
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-monitor');
@@ -61,18 +62,29 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
       this.config.componentsData.operationList = res;
     });
 
-      // 导出功能
-      this.config.componentsData.exportTableData = () => {
-        this.productionMngService.exportProdMonitorRecords().subscribe();
-      }
-
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      this.config.componentsData.tableList.subscribe((res) => {
+        let dataList = []
+        let titleList = ['卡号', '生产单号', '客户', '交期', '品名', '颜色', '卡数量', '完工工序', '待生产工序', '呆滞时长']
+        dataList.push(titleList)
+        if (res.data.length > 0) {
+          res.data.forEach(item => {
+            let itemList = [item.scardNo, item.sorderNo, item.scustomerName, item.ddeliveryDate, item.smaterialName, item.scolorName, item.nplanOutputQty, item.sworkingProcedureNameFinish, item.sWorkingProcedureName, item.fnMESGetDiffTimeStr]
+            dataList.push(itemList)
+          });
+        }
+        this.productionMngService.exportPort('生产监控', dataList).subscribe();
+        console.log(dataList)
+      })
+    }
     // 获取合计数量
     this.productionMngService.getTotalQuantity({
       page: 0,
       pageSize: 10000000
     }).subscribe((res) => {
       let totalquantity = 0;
-      res.data.forEach((item)=> {
+      res.data.forEach((item) => {
         totalquantity += parseFloat(item.nplanOutputQty)
       })
       this.config.componentsData.totalquantity = totalquantity;
@@ -81,13 +93,12 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
     this.config.entitiesFetchFunction = pageLink => {
       console.log(pageLink)
       const { sWorkingProcedureName } = this.config.componentsData;
-      return this.productionMngService.getProdMonitorList(pageLink, {
+      let tableList = this.productionMngService.getProdMonitorList(pageLink, {
         sWorkingProcedureName: sWorkingProcedureName || ''
       });
+      this.config.componentsData.tableList = tableList
+      return tableList
     }
-
     return this.config;
-
   }
-
 }

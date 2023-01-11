@@ -77,12 +77,20 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     // 导出功能
     this.config.componentsData.exportTableData = () => {
       this.config.componentsData.tableList.subscribe((res) => {
-        console.log(res.data)
-       // this.productionMngService.exportPort('生产排班', res.data).subscribe();
-        this.productionMngService.exportProdSchedulRecords().subscribe();
+        //this.productionMngService.exportProdSchedulRecords().subscribe();
+        let dataList = []
+        let titleList = ['开始时间', '班组名称', '班组成员', '工序名称', '订单号', '卡号', '计划完工日期', '计划数量', '实际数量', '超时（ms）']
+        dataList.push(titleList)
+        if (res.data.length > 0) {
+          res.data.forEach(item => {
+              let itemList = [item.ttrackTime,item.sworkerGroupName,item.sworkerNameList,item.sworkingProcedureName,item.sorderNo,item.scardNo,item.tplanEndTime,item.nplanOutputQty,item.ntrackQty,item.timeout]
+              dataList.push(itemList)
+            });
+        }
+        this.productionMngService.exportPort('生产排班', dataList).subscribe();
+        console.log(dataList)
       })
     }
-
     return this.config;
 
   }
