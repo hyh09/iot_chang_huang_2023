@@ -13,9 +13,9 @@
           </div>
           <div class="device-status-bg" [class.off-line]="!device.isOnLine"></div>
           <div class="device-status">
-            {{ (device.isOnLine ? 'device-monitor.on-line' : 'device-monitor.off-line') | translate }}
+            {{ (device.isOnLine ? 'device-monitor.online' : 'device-monitor.offline') | translate }}
           </div>
-          <img [src]="device.image ? device.image : '../../../../../../assets/device-image-empty.svg'" />
+          <img [src]="device.image ? device.image : '../../../../../../assets/device-image-empty.png'" />
           <div class="operation-rate">{{ 'device-monitor.operation-ratio-24h' | translate }}{{ (device.operationRate || 0) * 100 + '%' }}</div>
           <div class="sub-info">
             <div class="title">{{ 'device-monitor.current-card-no' | translate }}</div>

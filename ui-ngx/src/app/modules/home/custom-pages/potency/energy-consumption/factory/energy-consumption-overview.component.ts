@@ -1,4 +1,5 @@
 import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { AppState } from '@app/core/core.state';
 import { PotencyService } from '@app/core/http/custom/potency.service';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
@@ -22,7 +23,8 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
   constructor(
     protected store: Store<AppState>,
     private potencyService: PotencyService,
-    protected cd: ChangeDetectorRef
+    protected cd: ChangeDetectorRef,
+    private router: Router
   ) {
     super(store);
   }
@@ -57,6 +59,12 @@ export class EnergyConsumptionOverviewComponent extends EntityTableHeaderCompone
   onTimeChange() {
     this.entitiesTableConfig.table.resetSortAndFilter(true);
     this.getTop10();
+  }
+
+  onTabClick(name: string) {
+    if (name) {
+      this.router.navigateByUrl(`/potency/energyConsumption/${name}`);
+    }
   }
 
 }
