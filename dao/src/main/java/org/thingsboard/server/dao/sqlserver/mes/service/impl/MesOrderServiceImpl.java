@@ -127,6 +127,19 @@ public class MesOrderServiceImpl implements MesOrderService {
             "  JOIN tmColor f WITH (NOLOCK) ON a.utmColorGUID= f.uGUID" +
             " WHERE 1=1  ";
 
+    private String sqlProducted = "SELECT\n" +
+            "\ta.sWorkingProcedureNo,\n" +
+            "\ta.sWorkingProcedureName,\n" +
+            "\ta.sWorkerGroupName,\n" +
+            "\ta.sWorkerName,\n" +
+            "\ta.nTrackQty,\n" +
+            "\ta.tStartTime,\n" +
+            "\ta.tEndTime \n" +
+            "FROM\n" +
+            "\tdbo.mnProducted a ( NOLOCK ) \n" +
+            "WHERE\n" +
+            "\ta.sCardNo = ?";
+
     @Override
     public PageData<MesOrderListVo> findOrderList(MesOrderListDto dto, PageLink pageLink) {
         try {
@@ -248,6 +261,17 @@ public class MesOrderServiceImpl implements MesOrderService {
         Integer total = pagePair.getLeft();
         List<MesOrderCardListVo> recordList = pagePair.getRight();
         return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+    }
+
+    @Override
+    public List<MesProductedVo> findProductedList(String cardNo) {
+        if (StringUtils.isEmpty(cardNo)) {
+            return new ArrayList<>();
+        }
+        List<Object> params = new ArrayList<>();
+        params.add(cardNo);
+        Object[] para = params.toArray(new Object[params.size()]);
+        return this.jdbcTemplate.query(sqlProducted, para, new BeanPropertyRowMapper(MesProductedVo.class));
     }
 
 
