@@ -5,10 +5,13 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 
+import java.util.List;
+
 public interface MesOrderService {
 
     /**
      * 查询订单列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -17,6 +20,7 @@ public interface MesOrderService {
 
     /**
      * 查询订单进度列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -25,6 +29,7 @@ public interface MesOrderService {
 
     /**
      * 查询生产卡列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -33,6 +38,7 @@ public interface MesOrderService {
 
     /**
      * 查询生产进度列表
+     *
      * @param dto
      * @param pageLink
      * @return
@@ -42,9 +48,17 @@ public interface MesOrderService {
 
     /**
      * 查询生产卡列表
+     *
      * @param dto
      * @param pageLink
      * @return
      */
     PageData<MesOrderCardListVo> findOrderCardList(MesOrderCardListDto dto, PageLink pageLink);
+
+    /**
+     * 工序选择
+     * @param cardNo
+     * @return
+     */
+    List<MesProductedVo> findProductedList(String cardNo);
 }

@@ -31,11 +31,11 @@ public class PageJdbcUtil {
     private JdbcTemplate jdbcTemplate;
 
     private <K> int queryTotal(ConditionFunction<K> t, K dto, String sql) {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuffer sqlBuffer = new StringBuffer(sql);
         t.sqlWrapper(dto, params, sqlBuffer, false);
         Object[] para = params.toArray(new Object[params.size()]);
-        log.info(">>>>>>>>>sql.toString()" + sqlBuffer.toString());
+        log.info(">>>>>>>>>sql.toString()" + sqlBuffer);
         return this.jdbcTemplate.queryForObject(sqlBuffer.toString(), para, Integer.class);
     }
 
@@ -59,7 +59,7 @@ public class PageJdbcUtil {
             rowNumber = 0;
         }
         //转为为count(*) sql
-        Select select = null;
+        Select select;
         try {
             select = (Select) CCJSqlParserUtil.parse(listSql);
         } catch (JSQLParserException e) {
