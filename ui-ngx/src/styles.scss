@@ -1232,3 +1232,44 @@ nz-time-picker {
   padding: 0 11px;
   height: 36px;
 }
+
+// 自定义样式
+
+/**
+ * 当内容超出时，使内容自动来回滚动的样式
+ * box为自定义的容器，允许在box上自定义样式
+ * <div class="box">
+ *   <div class="scroll-wrap">
+ *     <div class="scroll-item">滚动的内容</div>
+ *   </div>
+ * </div>
+ **/
+ .scroll-wrap {
+  max-width: 100%;
+  display: inline-block;
+  vertical-align: top;
+  overflow: hidden;
+  white-space: nowrap;
+  .scroll-item {
+    animation: scroll linear 4s alternate infinite;
+    float: left;
+  }
+}
+@keyframes scroll {
+  0% {
+    margin-left: 0;
+    transform: translateX(0);
+  }
+  10% {
+    margin-left: 0;
+    transform: translateX(0);
+  }
+  90% {
+    margin-left: 100%;
+    transform: translateX(-100%);
+  }
+  100% {
+    margin-left: 100%;
+    transform: translateX(-100%);
+  }
+}

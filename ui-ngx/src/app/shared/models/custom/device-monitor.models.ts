@@ -44,6 +44,10 @@ export interface DeviceItem {
   name: string;
   image: string;
   isOnLine: boolean;
+  operationRate: number;
+  cardNo: string;
+  materialName: string;
+  workerGroupName: string;
 }
 
 export interface DevicePageData {
@@ -71,6 +75,12 @@ export interface DeviceBaseInfo {
   factoryName?: string;
   workShopName?: string;
   productionLineName?: string;
+  operationRate?: number;
+  cardNo?: string;
+  materialName?: string;
+  workerGroupName?: string;
+  teamLeader?: string;
+  state?: 1 | 2 | 3 | 4; // 1: 离线  2: 生产钟  3:停机  4: 在线
 }
 
 export interface DeviceProp {

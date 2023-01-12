@@ -2,7 +2,7 @@ import { Router } from '@angular/router';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
-import { ProcessProduction } from '@app/shared/models/custom/potency.models';
+import { ProcedureProduction } from '@app/shared/models/custom/potency.models';
 import { Store } from '@ngrx/store';
 import { differenceInCalendarDays } from 'date-fns';
 
@@ -10,10 +10,10 @@ import { differenceInCalendarDays } from 'date-fns';
   selector: 'tb-procedure-production-filter',
   templateUrl: './procedure-production-filter.component.html',
   styleUrls: [
-    '../../energy-consumption/energy-consumption-overview.component.scss'
+    '../../energy-consumption/factory/energy-consumption-overview.component.scss'
   ]
 })
-export class ProcedureProductionFilterComponent extends EntityTableHeaderComponent<ProcessProduction> {
+export class ProcedureProductionFilterComponent extends EntityTableHeaderComponent<ProcedureProduction> {
 
   today = new Date();
 
