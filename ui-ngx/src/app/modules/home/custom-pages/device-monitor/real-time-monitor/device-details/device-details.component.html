@@ -1,16 +1,56 @@
 <div fxLayout="row" fxLayoutGap="16px" class="device-details-wrapper">
   <div fxFlex fxLayout="column" fxLayoutGap="16px" class="left-content">
     <div class="base-info">
-      <div class="title">{{ 'device-monitor.base-info' | translate }}</div>
+      <div fxLayout="row" fxLayoutGap="8px">
+        <div class="title">{{ baseInfo.name || ('device-monitor.base-info' | translate) }}</div>
+        <div *ngIf="baseInfo.name" class="attribution">({{ baseInfo.factoryName }} / {{ baseInfo.workShopName }} / {{ baseInfo.productionLineName }})</div>
+      </div>
       <div fxLayout="row" fxLayoutGap="16px">
         <div class="image-wrapper">
-          <img [src]="baseInfo.picture ? baseInfo.picture : '../../../../../../../assets/device-image-empty.svg'" />
+          <img [src]="baseInfo.picture ? baseInfo.picture : '../../../../../../../assets/device-image-empty.png'" />
+          <div *ngIf="baseInfo.state" class="status" [ngClass]="statusMap[baseInfo.state]">{{ 'device-monitor.' + statusMap[baseInfo.state] | translate }}</div>
         </div>
         <div fxFlex class="description">
-          <div class="desc-item">{{ 'device-monitor.device-name-with-suffix' | translate }}{{ baseInfo.name }}</div>
-          <div class="desc-item">{{ 'device-mng.factory-belong' | translate }}{{ baseInfo.factoryName }}</div>
-          <div class="desc-item">{{ 'device-mng.work-shop-belong' | translate }}{{ baseInfo.workShopName }}</div>
-          <div class="desc-item">{{ 'device-mng.prod-line-belong' | translate }}{{ baseInfo.productionLineName }}</div>
+          <div class="desc-item">
+            <div>{{ 'device-monitor.operation-ratio-24h' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ (baseInfo.operationRate || 0) * 100 + '%' }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc-item">
+            <div>{{ 'device-monitor.current-card-no' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ baseInfo.cardNo || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc-item">
+            <div>{{ 'device-monitor.material-name' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ baseInfo.materialName || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc-item">
+            <div>{{ 'device-monitor.current-team' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ baseInfo.workerGroupName || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc-item">
+            <div>{{ 'device-monitor.team-leader' | translate }}</div>
+            <div class="content">
+              <div class="scroll-wrap">
+                <div class="scroll-item">{{ baseInfo.teamLeader || ('common.none' | translate) }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
