@@ -18,6 +18,7 @@ import org.thingsboard.server.common.data.kv.BooleanDataEntry;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.config.RedisMessagePublish;
 import org.thingsboard.server.dao.device.DeviceCredentialsDao;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.TrepDayStaDetailEntity;
 import org.thingsboard.server.dao.hs.dao.TrepDayStaDetailRepository;
 import org.thingsboard.server.dao.hs.dao.TrepHstaDetailEntity;
@@ -122,14 +123,14 @@ public class GatewayTimeTask {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("findByKey");
         //查询设备对应的switch状态
-        Optional<TsKvDictionary> aSwitch = tsKvDictionaryRepository.findByKey("switch");
+        Optional<TsKvDictionary> aSwitch = tsKvDictionaryRepository.findByKey(HSConstants.ATTR_SWITCH);
         if (aSwitch.isEmpty()) {
             return;
         }
         stopWatch.stop();
         //获取所有的设备的在线状态
         stopWatch.start("findAllByIdAttributeKey");
-        List<AttributeKvEntity> allByAttributeKeyEquals = attributeKvRepository.findAllByIdAttributeKey("active");
+        List<AttributeKvEntity> allByAttributeKeyEquals = attributeKvRepository.findAllByIdAttributeKey(HSConstants.ATTR_ACTIVE);
         stopWatch.stop();
         TsKvDictionary tsKvDictionary = aSwitch.get();
         int keyId = tsKvDictionary.getKeyId();

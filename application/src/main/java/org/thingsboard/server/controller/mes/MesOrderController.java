@@ -113,7 +113,7 @@ public class MesOrderController extends BaseController {
     }
 
 
-    @ApiOperation("查询生产卡列表")
+    @ApiOperation("生产卡选择列表")
     @RequestMapping(value = "/findOrderCardList", params = {"pageSize", "page"}, method = RequestMethod.POST)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dto", value = "其他条件", paramType = "query")
@@ -124,7 +124,7 @@ public class MesOrderController extends BaseController {
             PageLink pageLink = createPageLink(pageSize, page, null, null, null);
             return mesOrderService.findOrderCardList(dto, pageLink);
         } catch (ThingsboardException e) {
-            log.error("查询生产卡列表异常{}", e);
+            log.error("生产卡选择列表异常{}", e);
             throw new RuntimeException(e);
         }
     }
