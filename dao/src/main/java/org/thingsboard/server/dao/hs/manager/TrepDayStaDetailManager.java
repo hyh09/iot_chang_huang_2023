@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.hs.manager;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.dao.TrepDayStaDetailEntity;
 import org.thingsboard.server.dao.hs.dao.TrepDayStaDetailRepository;
 import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
@@ -71,7 +72,7 @@ public class TrepDayStaDetailManager {
             // 获取创建人
             UUID entityId = entityIdFunc.apply(record);
             Long timeLong = id2timeMap.get(entityId);
-            rateConsumer.accept(record, BigDecimalUtil.INSTANCE.divide(timeLong, "86400000"));
+            rateConsumer.accept(record, BigDecimalUtil.INSTANCE.divide(timeLong, HSConstants.DAY_TIME));
         }
     }
 }
