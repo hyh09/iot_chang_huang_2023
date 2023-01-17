@@ -1,34 +1,56 @@
 package org.thingsboard.server.dao.sqlserver.mes.service.impl;
 
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.kv.Aggregation;
+import org.thingsboard.server.common.data.kv.BaseReadTsKvQuery;
+import org.thingsboard.server.common.data.kv.ReadTsKvQuery;
+import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
+import org.thingsboard.server.dao.hs.service.CommonService;
+import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
+import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
+import org.thingsboard.server.dao.sql.mesdevicerelation.JpaMesDeviceRelationDao;
 import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationRepository;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
 import org.thingsboard.server.dao.sqlserver.utils.PageJdbcUtil;
+import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class MesOrderServiceImpl implements MesOrderService {
+public class MesOrderServiceImpl implements MesOrderService, CommonService {
     @Resource(name = "sqlServerTemplate")
     private JdbcTemplate jdbcTemplate;
     @Resource
     private PageJdbcUtil pageJdbcUtil;
+    @Resource
+    private JpaMesDeviceRelationDao jpaMesDeviceRelationDao;
     @Autowired
     private MesDeviceRelationRepository mesDeviceRelationRepository;
+    @Resource
+    private AttributeKvRepository attributeKvRepository;
+    @Resource
+    private TimeseriesService timeseriesService;
 
     /**
      * 查询订单列表
@@ -135,6 +157,7 @@ public class MesOrderServiceImpl implements MesOrderService {
             "\ta.nTrackQty,\n" +
             "\ta.tStartTime,\n" +
             "\ta.tEndTime \n" +
+            "\ta.uemEquipmentGUID \n" +
             "FROM\n" +
             "\tdbo.mnProducted a ( NOLOCK ) \n" +
             "WHERE\n" +
@@ -162,7 +185,7 @@ public class MesOrderServiceImpl implements MesOrderService {
     @Override
     public PageData<MesOrderProgressListVo> findOrderProgressList(MesOrderProgressListDto dto, PageLink pageLink) {
         try {
-            Pair<Integer, List<MesOrderProgressListVo>> pagePair = pageJdbcUtil.queryPageList((dtoBean, params, sql, orderFlag) -> {
+            return pageJdbcUtil.queryList((dtoBean, params, sql, orderFlag) -> {
                 if (dto != null) {
                     if (StringUtils.isNotEmpty(dto.getDDeliveryDateBegin())) {
                         sql.append("and C.dDeliveryDate >=? ");
@@ -186,9 +209,6 @@ public class MesOrderServiceImpl implements MesOrderService {
                     }
                 }
             }, dto, MesOrderProgressListVo.class, sqlOrderProgressList, pageLink);
-            Integer total = pagePair.getLeft();
-            List<MesOrderProgressListVo> recordList = pagePair.getRight();
-            return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
         } catch (Exception e) {
             log.error("异常信息{}", e);
             throw new RuntimeException(e);
@@ -231,7 +251,7 @@ public class MesOrderServiceImpl implements MesOrderService {
 
     @Override
     public PageData<MesOrderCardListVo> findOrderCardList(MesOrderCardListDto dto, PageLink pageLink) {
-        Pair<Integer, List<MesOrderCardListVo>> pagePair = pageJdbcUtil.queryPageList((dtoBean, params, sql, orderFlag) -> {
+        return pageJdbcUtil.queryList((dtoBean, params, sql, orderFlag) -> {
             if (dto != null) {
                 if (StringUtils.isNotEmpty(dto.getDateBegin())) {
                     sql.append("and a.tCreateTime >=? ");
@@ -258,9 +278,6 @@ public class MesOrderServiceImpl implements MesOrderService {
                 }
             }
         }, dto, MesOrderCardListVo.class, sqlOrderCardList, pageLink);
-        Integer total = pagePair.getLeft();
-        List<MesOrderCardListVo> recordList = pagePair.getRight();
-        return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
     }
 
     @Override
@@ -272,6 +289,66 @@ public class MesOrderServiceImpl implements MesOrderService {
         params.add(cardNo);
         Object[] para = params.toArray(new Object[params.size()]);
         return this.jdbcTemplate.query(sqlProducted, para, new BeanPropertyRowMapper(MesProductedVo.class));
+    }
+
+    @Override
+    public List<MesChartVo> getChart(MesChartDto dto) {
+        //根据mesId获取deviceId
+        UUID deviceId = jpaMesDeviceRelationDao.getDeviceIdByMesId(UUID.fromString(dto.getUemEquipmentGUID()));
+        if (deviceId == null) {
+            return null;
+        }
+        List<AttributeKvEntity> allByIdEntityId = attributeKvRepository.findAllByIdEntityId(deviceId);
+        List<MesChartVo> result = allByIdEntityId.stream().map(e -> {
+            MesChartVo mesChartVo = new MesChartVo();
+            mesChartVo.setKey(e.getId().getAttributeKey());
+            return mesChartVo;
+        }).collect(Collectors.toList());
+        MesChartVo mesChartVo = result.get(0);
+        mesChartVo.setTsKvs(this.listTsKvs(dto.getTenantId(), new DeviceId(deviceId), mesChartVo.getKey(), dto.getTStartTime().getTime(), dto.getTEndTime().getTime()));
+        return result;
+    }
+
+    @Override
+    public List<HistoryGraphPropertyTsKvVO> getParamChart(MesChartDto dto) {
+        UUID deviceId = dto.getDeviceId();
+        return listTsKvs(dto.getTenantId(), new DeviceId(deviceId), dto.getKey(), dto.getTStartTime().getTime(), dto.getTEndTime().getTime());
+    }
+
+    /**
+     * 获得遥测时序数据
+     *
+     * @param tenantId  租户Id
+     * @param deviceId  设备Id
+     * @param name      名称
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    @SuppressWarnings("all")
+    public List<HistoryGraphPropertyTsKvVO> listTsKvs(TenantId tenantId, DeviceId deviceId, String name, Long startTime, Long endTime) {
+        try {
+            List<String> keyList = new ArrayList<>() {{
+                add(name);
+            }};
+            List<ReadTsKvQuery> tempQueries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, 1, Aggregation.COUNT, "desc"))
+                    .collect(Collectors.toList());
+
+            var tempResult = this.timeseriesService.findAll(tenantId, deviceId, tempQueries).get()
+                    .stream().collect(Collectors.toMap(TsKvEntry::getKey, Function.identity()));
+            if (tempResult.isEmpty())
+                return Lists.newArrayList();
+            int count = Integer.parseInt(String.valueOf(tempResult.get(name).getValue()));
+            List<ReadTsKvQuery> queries = keyList.stream().map(key -> new BaseReadTsKvQuery(key, startTime, endTime, endTime - startTime, count, Aggregation.NONE, "desc"))
+                    .collect(Collectors.toList());
+
+            return this.timeseriesService.findAll(tenantId, deviceId, queries).get()
+                    .stream().sorted(Comparator.comparing(TsKvEntry::getTs).reversed()).map(e -> HistoryGraphPropertyTsKvVO.builder()
+                            .ts(e.getTs())
+                            .value(this.formatKvEntryValue(e))
+                            .build()).collect(Collectors.toList());
+        } catch (Exception ignore) {
+            return Lists.newArrayList();
+        }
     }
 
 

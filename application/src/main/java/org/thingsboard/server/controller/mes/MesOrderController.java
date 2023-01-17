@@ -6,12 +6,14 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.controller.BaseController;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
@@ -134,5 +136,30 @@ public class MesOrderController extends BaseController {
     @ResponseBody
     public List<MesProductedVo> findProductedList(String cardNo) {
         return mesOrderService.findProductedList(cardNo);
+    }
+
+    @ApiOperation("参数趋势图")
+    @PostMapping(value = "/getChart")
+    @ResponseBody
+    public List<MesChartVo> getChart(@Validated MesChartDto dto) throws ThingsboardException {
+        if (StringUtils.isEmpty(dto.getUemEquipmentGUID())) {
+            throw new RuntimeException("设备id不能为空");
+        }
+        dto.setTenantId(getTenantId());
+        return mesOrderService.getChart(dto);
+    }
+
+    @ApiOperation("参数折线图")
+    @PostMapping(value = "/getParamChart")
+    @ResponseBody
+    public List<HistoryGraphPropertyTsKvVO> getParamChart(@Validated MesChartDto dto) throws ThingsboardException {
+        if (dto.getDeviceId() == null) {
+            throw new RuntimeException("设备id不能为空");
+        }
+        if (StringUtils.isEmpty(dto.getKey())) {
+            throw new RuntimeException("参数不能为空");
+        }
+        dto.setTenantId(getTenantId());
+        return mesOrderService.getParamChart(dto);
     }
 }

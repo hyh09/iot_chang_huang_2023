@@ -8,11 +8,13 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 
 import javax.annotation.Resource;
@@ -49,7 +51,7 @@ public class PageJdbcUtil {
      * @param <C>      返回的vo
      * @return
      */
-    public <K, C> Pair<Integer, List<C>> queryPageList(ConditionFunction<K> t, K dto, Class<C> voClass, String listSql, PageLink pageLink) {
+    private <K, C> Pair<Integer, List<C>> queryPageList(ConditionFunction<K> t, K dto, Class<C> voClass, String listSql, PageLink pageLink) {
         int pageSize = pageLink.getPageSize();
         if (pageSize < 1) {
             throw new RuntimeException("页码大小不能小于1");
@@ -98,7 +100,7 @@ public class PageJdbcUtil {
      * @param <C>      返回的vo
      * @return
      */
-    public <K, C> Pair<Integer, List<C>> queryPageList(ConditionFunction<K> t, K dto, Class<C> voClass, String countSql, String listSql, PageLink pageLink) {
+    private <K, C> Pair<Integer, List<C>> queryPageList(ConditionFunction<K> t, K dto, Class<C> voClass, String countSql, String listSql, PageLink pageLink) {
         int pageSize = pageLink.getPageSize();
         if (pageSize < 1) {
             throw new RuntimeException("页码大小不能小于1");
@@ -124,6 +126,42 @@ public class PageJdbcUtil {
         return ImmutablePair.of(total, queryList);
     }
 
+    /**
+     * @param t
+     * @param dto
+     * @param voClass
+     * @param listSql
+     * @param pageLink
+     * @param <K>
+     * @param <C>
+     * @return
+     */
+    public <K, C> PageData<C> queryList(ConditionFunction<K> t, K dto, Class<C> voClass, String listSql, PageLink pageLink) {
+        Pair<Integer, List<C>> pagePair = this.queryPageList(t, dto, voClass, listSql, pageLink);
+        Integer total = pagePair.getLeft();
+        List<C> recordList = pagePair.getRight();
+        return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+    }
+
+    /**
+     * 转换count(*)失败的时候使用
+     *
+     * @param t
+     * @param dto
+     * @param voClass
+     * @param countSql
+     * @param listSql
+     * @param pageLink
+     * @param <K>
+     * @param <C>
+     * @return
+     */
+    public <K, C> PageData<C> queryList(ConditionFunction<K> t, K dto, Class<C> voClass, String countSql, String listSql, PageLink pageLink) {
+        Pair<Integer, List<C>> pagePair = this.queryPageList(t, dto, voClass, countSql, listSql, pageLink);
+        Integer total = pagePair.getLeft();
+        List<C> recordList = pagePair.getRight();
+        return new PageData<>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
+    }
 
     protected static final List<SelectItem> COUNT_SELECT_ITEM = Collections.singletonList(defaultCountSelectItem());
 

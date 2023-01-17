@@ -20,7 +20,8 @@ public class JpaMesDeviceRelationDao implements MesDeviceRelationDao {
     private MesDeviceRelationRepository mesDeviceRelationRepository;
 
     /**
-     * 返回对应的mes设备id
+     * 返回DeviceI对应的mes设备id
+     *
      * @param deviceIds
      * @return
      */
@@ -29,13 +30,40 @@ public class JpaMesDeviceRelationDao implements MesDeviceRelationDao {
         return deviceRelationEntityList.stream().map(MesDeviceRelationEntity::getMesDeviceId).collect(Collectors.toList());
     }
 
+
     /**
-     * 返回对应的mes设备id
+     * 返回mes对应的DeviceId设备id
+     *
+     * @param mesIds
+     * @return
+     */
+    public List<UUID> getDeviceIdsByMesIds(List<UUID> mesIds) {
+        List<MesDeviceRelationEntity> deviceRelationEntityList = mesDeviceRelationRepository.findAllByMesDeviceIdIn(mesIds);
+        return deviceRelationEntityList.stream().map(MesDeviceRelationEntity::getDeviceId).collect(Collectors.toList());
+    }
+
+    /**
+     * 返回DeviceI对应的mes设备id
+     *
      * @param deviceId
      * @return
      */
     public UUID getMesIdByDeviceId(UUID deviceId) {
         List<UUID> deviceRelationEntityList = this.getMesIdsByDeviceIds(Arrays.asList(deviceId));
+        if (CollectionUtils.isEmpty(deviceRelationEntityList)) {
+            return null;
+        }
+        return deviceRelationEntityList.get(0);
+    }
+
+    /**
+     * 返回mes对应的DeviceId设备id
+     *
+     * @param mesId
+     * @return
+     */
+    public UUID getDeviceIdByMesId(UUID mesId) {
+        List<UUID> deviceRelationEntityList = this.getDeviceIdsByMesIds(Arrays.asList(mesId));
         if (CollectionUtils.isEmpty(deviceRelationEntityList)) {
             return null;
         }
