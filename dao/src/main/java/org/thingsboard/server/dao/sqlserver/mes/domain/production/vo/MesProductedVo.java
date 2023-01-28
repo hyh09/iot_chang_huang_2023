@@ -17,6 +17,9 @@ import java.util.Date;
 @Data
 @ApiModel(value = "MesProductedVo", description = "工序选择列表")
 public class MesProductedVo {
+    @JsonProperty("uemEquipmentGUID")
+    @ApiModelProperty("工序编号")
+    private String uemEquipmentGUID;
 
     @JsonProperty("sWorkingProcedureNo")
     @ApiModelProperty("工序编号")
