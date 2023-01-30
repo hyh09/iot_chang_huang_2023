@@ -3,7 +3,7 @@ package org.thingsboard.server.dao.board.factoryBoard.dto;
 import lombok.Data;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * @Project Name: long-win-iot
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @ToString
 public class ChartByChartEnumsDto {
 
-    private LocalDateTime localDateTime;
+    private LocalDate localDateTime;
 
     private String waterValue;
 
