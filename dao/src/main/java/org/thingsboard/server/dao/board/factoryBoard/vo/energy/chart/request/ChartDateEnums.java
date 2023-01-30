@@ -30,9 +30,8 @@ public enum ChartDateEnums {
         if (dateTime == null) {
             return "";
         }
-        LocalDate date = LocalDate.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern(this.getPattern());
-        String dateStr = date.format(fmt);
+        String dateStr = dateTime.format(fmt);
         return dateStr;
 
     }
