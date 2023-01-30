@@ -66,6 +66,6 @@ public class RTMonitorDeviceResult {
     @ApiModelProperty("当前班组")
     private String workerGroupName;
 
-    @ApiModelProperty("机台状态")
+    @ApiModelProperty("机台状态:1离线2生产中3停机4在线")
     private Integer state;
 }

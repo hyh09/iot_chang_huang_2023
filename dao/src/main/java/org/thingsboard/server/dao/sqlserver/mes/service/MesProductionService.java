@@ -55,6 +55,7 @@ public interface MesProductionService {
     /**
      * 查询机台的生产信息
      * @param equipmentId
+     * @param vo 找不到的时候返回的vo
      * @return
      */
     MesEquipmentProcedureVo findEquipmentProcedureOrDefault(UUID equipmentId,MesEquipmentProcedureVo vo);

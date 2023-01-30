@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.sqlserver.mes.service;
 
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 
@@ -61,4 +62,8 @@ public interface MesOrderService {
      * @return
      */
     List<MesProductedVo> findProductedList(String cardNo);
+
+    List<MesChartVo> getChart(MesChartDto dto);
+
+    List<HistoryGraphPropertyTsKvVO> getParamChart(MesChartDto dto);
 }
