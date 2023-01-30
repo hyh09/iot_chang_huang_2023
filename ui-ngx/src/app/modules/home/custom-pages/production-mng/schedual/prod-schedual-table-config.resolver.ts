@@ -26,16 +26,16 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     this.config.defaultSortOrder = null;
 
     this.config.columns.push(
-      new DateEntityTableColumn<ProdSchedual>('ttrackTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd', false),
       new EntityTableColumn<ProdSchedual>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '100px', (entity) => (entity.sworkerNameList || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '150px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('scardNo', 'potency.card-no', '60px', (entity) => (entity.scardNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('tplanEndTime', 'order.intended-complete-date', '100px', (entity) => (entity.tplanEndTime || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('nplanOutputQty', 'potency.planned-quantity', '150px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sorderNo', 'order.order-no', '80px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('scardNo', 'potency.card-no', '80px', (entity) => (entity.scardNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('nplanOutputQty', 'potency.planned-quantity', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('ntrackQty', 'potency.actual-quantity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('timeout', 'admin.timeout-msec', '100px', (entity) => (entity.timeout || ''), () => ({}), false),
+      new DateEntityTableColumn<ProdSchedual>('ttrackTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd', false),
+      new EntityTableColumn<ProdSchedual>('tplanEndTime', 'order.intended-complete-date', '100px', (entity) => (entity.tplanEndTime || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('timeout', 'potency.timeout', '100px', (entity) => (entity.timeout || ''), () => ({}), false)
     );
   }
 
