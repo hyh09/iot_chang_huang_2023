@@ -34,6 +34,8 @@ public class JacksonUtil {
 
     public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
         try {
+            OBJECT_MAPPER.registerModule(new JavaTimeModule());
+
             return fromValue != null ? OBJECT_MAPPER.convertValue(fromValue, toValueType) : null;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("The given object value: "
@@ -42,16 +44,6 @@ public class JacksonUtil {
     }
 
 
-    public static <T> T convertValueJDK8(Object fromValue, Class<T> toValueType) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
-            return fromValue != null ? OBJECT_MAPPER.convertValue(fromValue, toValueType) : null;
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("The given object value: "
-                    + fromValue + " cannot be converted to " + toValueType, e);
-        }
-    }
 
     public static <T> T convertValue(Object fromValue, TypeReference<T> toValueTypeRef) {
         try {
