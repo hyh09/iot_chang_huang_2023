@@ -18,6 +18,7 @@ import org.thingsboard.server.dao.board.factoryBoard.impl.base.ChartByChartDateE
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.CostRatioVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
@@ -27,6 +28,9 @@ import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
 import org.thingsboard.server.dao.sql.role.entity.EnergyEffciencyNewEntity;
 import org.thingsboard.server.dao.sql.role.service.EfficiencyStatisticsSvc;
+import org.thingsboard.server.dao.sqlserver.jdbc.server.HwEnergyService;
+import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyEnums;
+import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -46,12 +50,16 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
     private EfficiencyStatisticsSvc efficiencyStatisticsSvc;
     private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
     private EffciencyAnalysisRepository effciencyAnalysisRepository;
+    private HwEnergyService hwEnergyService;
 
-    public FactoryEnergyImpl(JdbcTemplate jdbcTemplate, EfficiencyStatisticsSvc efficiencyStatisticsSvc, DeviceDictPropertiesSvc deviceDictPropertiesSvc, EffciencyAnalysisRepository effciencyAnalysisRepository, JdbcTemplate jdbcTemplate1) {
+    public FactoryEnergyImpl(JdbcTemplate jdbcTemplate, EfficiencyStatisticsSvc efficiencyStatisticsSvc,
+                             DeviceDictPropertiesSvc deviceDictPropertiesSvc, EffciencyAnalysisRepository effciencyAnalysisRepository,
+                             HwEnergyService hwEnergyService) {
         super(jdbcTemplate);
         this.efficiencyStatisticsSvc = efficiencyStatisticsSvc;
         this.deviceDictPropertiesSvc = deviceDictPropertiesSvc;
         this.effciencyAnalysisRepository = effciencyAnalysisRepository;
+        this.hwEnergyService = hwEnergyService;
     }
 
     /**
@@ -120,7 +128,8 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
     @Override
     public ChartResultVo queryTrendChart(QueryTsKvVo queryTsKvVo, ChartDateEnums dateEnums) {
         List<ChartByChartEnumsDto> chartByChartEnumsDtos = super.queryChartEnums(queryTsKvVo, dateEnums);
-        return convertData(chartByChartEnumsDtos, dateEnums);
+        ChartResultVo chartResultVo = convertData(chartByChartEnumsDtos, dateEnums);
+        return calculateTheCostRatio(chartResultVo);
     }
 
     private EnergyUnitVo getEnergyUnitVo(String value, DictDeviceGroupPropertyVO deviceGroupPropertyVO) {
@@ -178,5 +187,33 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
                 }).collect(Collectors.toList())
         );
         return vo;
+    }
+
+    private ChartResultVo calculateTheCostRatio(ChartResultVo chartResultVo) {
+        BigDecimal water = getTotalValue(chartResultVo.getWater(), HwEnergyEnums.WATER);
+        BigDecimal electricity = getTotalValue(chartResultVo.getElectricity(), HwEnergyEnums.ELECTRICITY);
+        BigDecimal gas = getTotalValue(chartResultVo.getGas(), HwEnergyEnums.GAS);
+        BigDecimal denominator = BigDecimalUtil.INSTANCE.add(water, electricity, gas);
+        CostRatioVo vo = new CostRatioVo(getPercentage(water, denominator), getPercentage(electricity, denominator), getPercentage(gas, denominator), denominator);
+        chartResultVo.setCostRatioVo(vo);
+        return chartResultVo;
+
+    }
+
+
+    private BigDecimal getTotalValue(List<ChartDataVo> voList, HwEnergyEnums hwEnergyEnums) {
+        Map<String, BigDecimal> map = hwEnergyService.queryUnitPrice();
+        List<String> finalValueList = voList.stream().map(ChartDataVo::getValue).collect(Collectors.toList());
+        BigDecimal total = BigDecimalUtil.INSTANCE.accumulator(finalValueList);
+        BigDecimal price = map.get(hwEnergyEnums.getChineseField());
+        return BigDecimalUtil.INSTANCE.multiply(total, price != null ? price : "1");
+
+    }
+
+    private String getPercentage(BigDecimal currentValue, BigDecimal totalValue) {
+        String valueRatio = BigDecimalUtil.INSTANCE.divide(currentValue, totalValue).toPlainString();
+        BigDecimalUtil bigDecimalUtil = BigDecimalUtil.INSTANCE;
+        String v01 = bigDecimalUtil.multiply(valueRatio, 100).toPlainString();
+        return v01 + "%";
     }
 }

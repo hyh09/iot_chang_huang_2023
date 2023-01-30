@@ -8,6 +8,8 @@ import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.dto.ChartByChartEnumsDto;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 /**
@@ -38,6 +40,7 @@ public abstract class ChartByChartDateEnumServer {
         StringBuffer sqlAll = new StringBuffer(" SELECT ").append(selectField).append(sql);
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         structureSQL(queryTsKvVo, sqlAll, parameters);
+        sqlSetDate(dateEnums, sqlAll, parameters);
         sqlAll.append(" GROUP BY ").append(selectField);
         NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
         List<ChartByChartEnumsDto> data = givenParamJdbcTemp.query(sqlAll.toString(), parameters, new BeanPropertyRowMapper<>(ChartByChartEnumsDto.class));
@@ -76,6 +79,23 @@ public abstract class ChartByChartDateEnumServer {
 
     private String groupByField(ChartDateEnums dateEnums) {
         return (new StringBuffer("date_trunc(\'")).append(dateEnums.getPrecision()).append("\' ,h1.\"date\")").toString();
+    }
+
+
+    private void sqlSetDate(ChartDateEnums enums, StringBuffer sonSql01, MapSqlParameterSource param) {
+        LocalDateTime date = LocalDateTime.now();
+        LocalDateTime firstday = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDateTime lastDay = date.with(TemporalAdjusters.lastDayOfMonth());
+        if (enums == ChartDateEnums.YEARS) {
+            firstday = date.with(TemporalAdjusters.firstDayOfYear());
+            lastDay = date.with(TemporalAdjusters.lastDayOfYear());
+        }
+        sonSql01.append(" and h1.date >= :firstParam");
+        param.addValue("firstParam", firstday);
+        sonSql01.append(" and h1.date <= :lastParam");
+        param.addValue("lastParam", lastDay);
+
+
     }
 
 

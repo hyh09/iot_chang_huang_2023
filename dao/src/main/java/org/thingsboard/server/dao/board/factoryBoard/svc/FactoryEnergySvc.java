@@ -40,4 +40,10 @@ public interface FactoryEnergySvc {
     ChartResultVo queryTrendChart(QueryTsKvVo queryTsKvVo, ChartDateEnums dateEnums );
 
 
+
+
+
+
+
+
 }
