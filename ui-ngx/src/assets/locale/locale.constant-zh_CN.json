@@ -2072,6 +2072,7 @@
     "type-order": "订单",
     "type-orders": "订单",
     "type-order-plan": "订单计划",
+    "type-process-card": "流程卡",
     "type-tenant-menu-role": "租户菜单角色",
     "type-user-menu-role": "用户菜单角色",
     "type-user-credentials": "用户令牌",
@@ -3878,10 +3879,10 @@
     "water-consumption": "耗水量 (t)",
     "electric-consumption": "耗电量 (kwh)",
     "gas-consumption": "耗气量 (t)",
-    "capacity": "产量 (M)",
-    "unit-water-consumption": "单位能耗耗水量 (T/M)",
-    "unit-electric-consumption": "单位能耗耗电量 (KWH/M)",
-    "unit-gas-consumption": "单位能耗耗气量 (T/M)",
+    "capacity": "产量 (m)",
+    "unit-water-consumption": "单位能耗耗水量 (t/m)",
+    "unit-electric-consumption": "单位能耗耗电量 (kwh/m)",
+    "unit-gas-consumption": "单位能耗耗气量 (t/m)",
     "go-to-history": "查看历史数据",
     "created-time": "上报时间",
     "planned-quantity":"计划数量",
@@ -3922,7 +3923,9 @@
     "timeout-on-minutes": "超时 (分钟)",
     "timeout-on-ratio": "超时 (%)",
     "no-groups-text": "没有找到班组",
-    "no-procedures-text": "没有找到工序"
+    "no-procedures-text": "没有找到工序",
+    "process-card-no": "流程卡号",
+    "order-process-cards": "订单流程卡"
   },
   "production-mng": {
     "production-mng": "生产管理",
@@ -4025,6 +4028,7 @@
     "import-template-name": "订单导入模板.xlsx",
     "intended-capacity": "计划产量",
     "actual-capacity": "实际产量",
-    "maintain-time": "维护时间"
+    "maintain-time": "维护时间",
+    "no-process-cards": "没有找到流程卡"
   }
 }

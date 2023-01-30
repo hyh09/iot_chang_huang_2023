@@ -26,15 +26,15 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
     this.config.defaultSortOrder = null;
 
     this.config.columns.push(
-      new EntityTableColumn<ProdReport>('sorderNo', 'potency.production-order-no', '60px', (entity) => (entity.sorderNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('scardNo', 'potency.card-no', '60px', (entity) => (entity.scardNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('sorderNo', 'potency.production-order-no', '80px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('scardNo', 'potency.card-no', '80px', (entity) => (entity.scardNo || ''), () => ({}), false),
       new EntityTableColumn<ProdReport>('scolorNo', 'potency.color-number', '60px', (entity) => (entity.scolorNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('tfactStartTime', 'alarm.start-time', '100px', (entity) => (entity.tfactStartTime || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('tfactEndTime', 'alarm.end-time', '100px', (entity) => (entity.tfactEndTime || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('fnMESGetDiffTimeStr', 'potency.duration', '150px', (entity) => (entity.fnMESGetDiffTimeStr || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('ntrackQty', 'potency.production-output', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('fnMESGetDiffTimeStr', 'potency.duration', '80px', (entity) => (entity.fnMESGetDiffTimeStr || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('ntrackQty', 'potency.capacity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
       new EntityTableColumn<ProdReport>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('sequipmentName', 'potency.production-machine', '150px', (entity) => (entity.sequipmentName || ''), () => ({}), false)
+      new EntityTableColumn<ProdReport>('sequipmentName', 'potency.device-name', '150px', (entity) => (entity.sequipmentName || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('tfactStartTime', 'alarm.start-time', '100px', (entity) => (entity.tfactStartTime || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('tfactEndTime', 'alarm.end-time', '100px', (entity) => (entity.tfactEndTime || ''), () => ({}), false)
     );
   }
 

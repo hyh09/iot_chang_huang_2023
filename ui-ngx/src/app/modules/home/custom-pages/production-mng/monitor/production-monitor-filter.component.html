@@ -7,14 +7,11 @@
       translate }}</mat-option>
   </mat-select>
 </mat-form-field>
-<div class="action-btns" style="margin-left: 5px; position: relative; top: -1px;">
-  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
-    {{ 'action.search' | translate }}
-  </button>
+<div class="action-btns">
   <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
     {{ 'action.export' | translate }}
   </button>
 </div>
-<div  class="data-overview">
+<div class="data-overview" style="margin-top: 0;">
   <div class="overview-item">{{ 'potency.total-capacity' | translate }}{{ entitiesTableConfig.componentsData.totalquantity }}</div>
 </div>

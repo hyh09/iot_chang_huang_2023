@@ -2095,7 +2095,8 @@
     "list-of-role": "{ count, plural, 1 {One role} other {List of # roles} }",
     "type-order": "Order",
     "type-orders": "Orders",
-    "type-order-plan": "Order plan",
+    "type-order-plan": "Order Plan",
+    "type-process-card": "Process Card",
     "type-tenant-menu-role": "Tenant menus and roles",
     "type-user-menu-role": "User menus and roles",
     "type-user-credentials": "User Credentials",
@@ -3984,10 +3985,10 @@
     "water-consumption": "Water (t)",
     "electric-consumption": "Electric (kwh)",
     "gas-consumption": "Gas (t)",
-    "capacity": "Output (M)",
-    "unit-water-consumption": "Water consumption / output (T/M)",
-    "unit-electric-consumption": "Electric consumption / output (KWH/M)",
-    "unit-gas-consumption": "Gas consumption / output (T/M)",
+    "capacity": "Output (m)",
+    "unit-water-consumption": "Water consumption / output (t/m)",
+    "unit-electric-consumption": "Electric consumption / output (kwh/m)",
+    "unit-gas-consumption": "Gas consumption / output (t/m)",
     "go-to-history": "View history",
     "created-time": "Reporting time",
     "property": "Parameter",
@@ -4024,7 +4025,9 @@
     "timeout-on-minutes": "Timeout (min)",
     "timeout-on-ratio": "Timeout (%)",
     "no-groups-text": "No groups were found.",
-    "no-procedures-text": "No procedures were found."
+    "no-procedures-text": "No procedures were found.",
+    "process-card-no": "Process Card No",
+    "order-process-cards": "Order Process Cards"
   },
   "production-mng": {
     "production-mng": "Production management",
@@ -4126,6 +4129,7 @@
     "import-template-name": "Order import template.xlsx",
     "intended-capacity": "Intended output",
     "actual-capacity": "Actual output",
-    "maintain-time": "Maintenance time"
+    "maintain-time": "Maintenance time",
+    "no-process-cards": "No process cards were found"
   }
 }
