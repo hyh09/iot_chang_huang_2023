@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, PageLink, TimePageLink } from '@app/shared/public-api';
 import { Observable } from 'rxjs';
-import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, OrderConsumption, PotencyInterval, PotencyTop10, ProcedureProduction, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, OrderConsumption, OrderProcessCard, PotencyInterval, PotencyTop10, ProcedureProduction, RunningState } from '@app/shared/models/custom/potency.models';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { map, tap } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
@@ -24,6 +24,8 @@ interface FilterParams {
   orderNo?: string;
   cardNo?: string;
   customerName?: string;
+  sCardNo?: string;
+  uGuid?: string;
 }
 
 @Injectable({
@@ -180,6 +182,15 @@ export class PotencyService {
       queryStr.push(`${key}=${filterParams[key]}`);
     });
     return this.http.get<PageData<OrderConsumption>>(`/api/yieId/orderQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 查询能耗分析-订单流程卡列表
+  public getOrderProcessCards(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<OrderProcessCard>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<OrderProcessCard>>(`/api/yieId/queryCartPage${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备的参数

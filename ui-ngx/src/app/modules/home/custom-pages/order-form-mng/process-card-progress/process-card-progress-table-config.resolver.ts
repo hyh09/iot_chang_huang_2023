@@ -21,10 +21,10 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
     private productionMngService: ProductionMngService,
     public dialog: MatDialog
   ) {
-    this.config.entityType = EntityType.ORDER_FORM;
+    this.config.entityType = EntityType.PROCESS_CARD;
     this.config.filterComponent = ProcessCardProgressFiltersComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER_FORM);
-    this.config.entityResources = entityTypeResources.get(EntityType.ORDER_FORM);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.PROCESS_CARD);
+    this.config.entityResources = entityTypeResources.get(EntityType.PROCESS_CARD);
 
     this.config.componentsData = {
       time: '',

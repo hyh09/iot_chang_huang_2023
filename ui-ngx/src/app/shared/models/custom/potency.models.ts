@@ -83,6 +83,18 @@ export interface OrderConsumption extends BaseData<any> {
   water: string;
   electricity: string;
   gas: string;
+  uguid: string;
+}
+
+export interface OrderProcessCard extends BaseData<any> {
+  deviceName: string;
+  scardNo: string;
+  materialName: string;
+  colorName: string;
+  workerGroupName: string;
+  workerName: string;
+  nTrackQty: string;
+  sRemark: string;
 }
 
 export interface RunningState {

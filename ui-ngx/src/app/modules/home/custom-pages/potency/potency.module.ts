@@ -11,6 +11,7 @@ import { EnergyHistoryFilterComponent } from './energy-consumption/factory/energ
 import { GroupProductionFilterComponent } from './production-capacity/group/group-production-filter.component';
 import { ProcedureProductionFilterComponent } from './production-capacity/procedure/procedure-production-filter.component';
 import { OrderConsumptionFilterComponent } from './energy-consumption/order/order-consumption-filter.component';
+import { ProcessCardsComponent } from './energy-consumption/order/process-cards.component';
 
 @NgModule({
   imports: [
@@ -27,7 +28,8 @@ import { OrderConsumptionFilterComponent } from './energy-consumption/order/orde
     EnergyHistoryFilterComponent,
     GroupProductionFilterComponent,
     ProcedureProductionFilterComponent,
-    OrderConsumptionFilterComponent
+    OrderConsumptionFilterComponent,
+    ProcessCardsComponent
   ]
 })
 export class PotencyModule { }
