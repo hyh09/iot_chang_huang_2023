@@ -56,7 +56,7 @@ public abstract class ChartByChartDateEnumServer {
         sqlAll.append(" GROUP BY ").append(selectField);
         NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
         List<ChartByChartEnumsDto> data = givenParamJdbcTemp.query(sqlAll.toString(), parameters, new BeanPropertyRowMapper<>(ChartByChartEnumsDto.class));
-        return completeData(dateEnums,data,beginDate,endDate);
+        return completeData(dateEnums, data, beginDate, endDate);
     }
 
 
@@ -102,20 +102,21 @@ public abstract class ChartByChartDateEnumServer {
     }
 
 
-    private List<ChartByChartEnumsDto> completeData(ChartDateEnums dateEnums,List<ChartByChartEnumsDto> sourceDataList, LocalDate begin, LocalDate end) {
-        List<LocalDate> timeLine = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums,begin, end);
+    private List<ChartByChartEnumsDto> completeData(ChartDateEnums dateEnums, List<ChartByChartEnumsDto> sourceDataList, LocalDate begin, LocalDate end) {
+        List<LocalDate> timeLine = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums, begin, end);
         return timeLine.stream().map(t1 -> {
             ChartByChartEnumsDto dto = new ChartByChartEnumsDto();
             Optional<ChartByChartEnumsDto> dto1 = sourceDataList.stream().filter(m1 -> m1.getLocalDateTime().equals(t1)).findFirst();
             if (dto1.isPresent()) {
                 dto = JacksonUtil.convertValue(dto1.get(), ChartByChartEnumsDto.class);
                 return dto;
+            } else {
+                dto.setLocalDateTime(t1);
+                dto.setElectricValue("0");
+                dto.setWaterValue("0");
+                dto.setGasValue("0");
+                return dto;
             }
-            dto.setLocalDateTime(t1);
-            dto.setElectricValue("0");
-            dto.setWaterValue("0");
-            dto.setGasValue("0");
-            return dto;
 
         }).collect(Collectors.toList());
 
