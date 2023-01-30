@@ -19,6 +19,7 @@ import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.CostRatioVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.UserEveryYearCostVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
@@ -132,6 +133,14 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         return calculateTheCostRatio(chartResultVo);
     }
 
+
+    @Override
+    public List<UserEveryYearCostVo> queryUserEveryYearCost(QueryTsKvVo queryTsKvVo, TenantId tenantId) {
+        List<ChartByChartEnumsDto> chartByChartEnumsDtos = super.queryChartEnums(queryTsKvVo, ChartDateEnums.YEARS);
+        Map<String, BigDecimal> map = hwEnergyService.queryUnitPrice();
+        return calculateMonthlyCostOnAnnulTrend(chartByChartEnumsDtos,map);
+    }
+
     private EnergyUnitVo getEnergyUnitVo(String value, DictDeviceGroupPropertyVO deviceGroupPropertyVO) {
         EnergyUnitVo energyUnitVo = new EnergyUnitVo();
         energyUnitVo.setActualValue(value);
@@ -216,4 +225,23 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         String v01 = bigDecimalUtil.multiply(valueRatio, 100).toPlainString();
         return v01 + "%";
     }
+
+    private List<UserEveryYearCostVo>  calculateMonthlyCostOnAnnulTrend(List<ChartByChartEnumsDto> chartByChartEnumsDtos, Map<String, BigDecimal> map ){
+       return chartByChartEnumsDtos.stream().map(m1->{
+            UserEveryYearCostVo  v1 = new UserEveryYearCostVo();
+            v1.setTime(ChartDateEnums.YEARS.forMartTime(m1.getLocalDateTime()));
+            v1.setValue(calculateAggregatedValues(m1,map));
+            return v1;
+        }).collect(Collectors.toList());
+
+    }
+
+    private String calculateAggregatedValues(ChartByChartEnumsDto m1,Map<String, BigDecimal> map){
+        BigDecimal water =   BigDecimalUtil.INSTANCE.multiply(m1.getWaterValue(),map.get( HwEnergyEnums.WATER));
+        BigDecimal e02 =   BigDecimalUtil.INSTANCE.multiply(m1.getElectricValue(),map.get( HwEnergyEnums.ELECTRICITY));
+        BigDecimal gas =   BigDecimalUtil.INSTANCE.multiply(m1.getWaterValue(),map.get( HwEnergyEnums.GAS));
+       return BigDecimalUtil.INSTANCE.add(water,e02,gas).toPlainString();
+
+    }
+
 }
