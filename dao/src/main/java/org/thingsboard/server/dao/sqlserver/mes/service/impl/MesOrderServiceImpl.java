@@ -185,7 +185,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     @Override
     public PageData<MesOrderProgressListVo> findOrderProgressList(MesOrderProgressListDto dto, PageLink pageLink) {
         try {
-            return pageJdbcUtil.queryList((dtoBean, params, sql, orderFlag) -> {
+            return pageJdbcUtil.queryList((params, sql, orderFlag) -> {
                 if (dto != null) {
                     if (StringUtils.isNotEmpty(dto.getDDeliveryDateBegin())) {
                         sql.append("and C.dDeliveryDate >=? ");
@@ -208,7 +208,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                         params.add(dto.getSColorName());
                     }
                 }
-            }, dto, MesOrderProgressListVo.class, sqlOrderProgressList, pageLink);
+            }, MesOrderProgressListVo.class, sqlOrderProgressList, pageLink);
         } catch (Exception e) {
             log.error("异常信息{}", e);
             throw new RuntimeException(e);
@@ -251,7 +251,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
 
     @Override
     public PageData<MesOrderCardListVo> findOrderCardList(MesOrderCardListDto dto, PageLink pageLink) {
-        return pageJdbcUtil.queryList((dtoBean, params, sql, orderFlag) -> {
+        return pageJdbcUtil.queryList((params, sql, orderFlag) -> {
             if (dto != null) {
                 if (StringUtils.isNotEmpty(dto.getDateBegin())) {
                     sql.append("and a.tCreateTime >=? ");
@@ -277,7 +277,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                     sql.append("order by a.tCreateTime desc ");
                 }
             }
-        }, dto, MesOrderCardListVo.class, sqlOrderCardList, pageLink);
+        }, MesOrderCardListVo.class, sqlOrderCardList, pageLink);
     }
 
     @Override
