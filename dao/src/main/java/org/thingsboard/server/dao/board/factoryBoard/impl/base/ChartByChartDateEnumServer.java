@@ -12,9 +12,9 @@ import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @Project Name: long-win-iot
@@ -104,22 +104,23 @@ public abstract class ChartByChartDateEnumServer {
 
     private List<ChartByChartEnumsDto> completeData(ChartDateEnums dateEnums, List<ChartByChartEnumsDto> sourceDataList, LocalDate begin, LocalDate end) {
         List<LocalDate> timeLine = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums, begin, end);
-        return timeLine.stream().map(t1 -> {
+        List<ChartByChartEnumsDto> finalResultList = new ArrayList<>();
+        for (LocalDate t1 : timeLine) {
             ChartByChartEnumsDto dto = new ChartByChartEnumsDto();
             Optional<ChartByChartEnumsDto> dto1 = sourceDataList.stream().filter(m1 -> m1.getLocalDateTime().equals(t1)).findFirst();
             if (dto1.isPresent()) {
                 dto = JacksonUtil.convertValue(dto1.get(), ChartByChartEnumsDto.class);
-                return dto;
+                finalResultList.add(dto);
             } else {
                 dto.setLocalDateTime(t1);
                 dto.setElectricValue("0");
                 dto.setWaterValue("0");
                 dto.setGasValue("0");
-                return dto;
+                finalResultList.add(dto);
             }
 
-        }).collect(Collectors.toList());
-
+        }
+        return finalResultList;
     }
 
 
