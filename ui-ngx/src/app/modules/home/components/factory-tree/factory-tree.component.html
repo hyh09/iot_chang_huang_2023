@@ -28,7 +28,7 @@
         fxLayout="row" fxLayoutGap="4px" fxLayoutAlign="start center"
       >
         <div class="node-title">{{ node.title }}</div>
-        <div *ngIf="!origin.isOnLine" class="node-off-line">{{ 'device-monitor.off-line' | translate }}</div>
+        <div *ngIf="!origin.isOnLine" class="node-off-line">{{ 'device-monitor.offline' | translate }}</div>
       </div>
       <ng-template #defaultNode>
         <div class="node-title">{{ node.title }}</div>

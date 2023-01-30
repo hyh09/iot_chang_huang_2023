@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, PageLink, TimePageLink } from '@app/shared/public-api';
 import { Observable } from 'rxjs';
-import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, PotencyInterval, PotencyTop10, ProcessProduction, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, OrderConsumption, PotencyInterval, PotencyTop10, ProcedureProduction, RunningState } from '@app/shared/models/custom/potency.models';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { map, tap } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
@@ -23,6 +23,7 @@ interface FilterParams {
   customer?: string;
   orderNo?: string;
   cardNo?: string;
+  customerName?: string;
 }
 
 @Injectable({
@@ -100,12 +101,12 @@ export class PotencyService {
   }
 
   // 查询产量分析-工序分析列表
-  public getProcedureProductionList(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<ProcessProduction>> {
+  public getProcedureProductionList(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<ProcedureProduction>> {
     let queryStr: string[] = [];
     Object.keys(filterParams).forEach(key => {
       queryStr.push(`${key}=${filterParams[key]}`);
     });
-    return this.http.get<PageData<ProcessProduction>>(`/api/yieId/processQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<PageData<ProcedureProduction>>(`/api/yieId/processQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取能耗分析数据列表
@@ -170,6 +171,15 @@ export class PotencyService {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(href);
       }));
+  }
+
+  // 查询能耗分析-订单分析列表
+  public getOrderConsumptionList(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<OrderConsumption>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<OrderConsumption>>(`/api/yieId/orderQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取设备的参数

@@ -20,7 +20,7 @@ public class TsKvLatestDaoManager {
     private TsKvLatestDao tsKvLatestDao;
 
     /**
-     * 已有在线离线状态的情况下设置状态
+     * 已有在线离线状态的情况下设置状态:1离线2生产中3停机4在线
      * 离线>生产中/停机(switch)->在线
      */
     public <K> void setState(K r,
@@ -35,7 +35,7 @@ public class TsKvLatestDaoManager {
 
 
     /**
-     * 已有在线离线状态的情况下设置状态
+     * 已有在线离线状态的情况下设置状态:1离线2生产中3停机4在线
      * 离线>生产中/停机(switch)->在线
      */
     public <K> void setStateBatch(List<K> data,

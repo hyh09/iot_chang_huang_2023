@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EntitiesTableComponent } from '../../components/entity/entities-table.component';
-import { EnergyConsumptionTableConfigResolver } from './energy-consumption/energy-consumption-table-config.resolver';
-import { EnergyHistoryTableConfigResolver } from './energy-consumption/energy-history-table-config.resolver';
+import { EnergyConsumptionTableConfigResolver } from './energy-consumption/factory/energy-consumption-table-config.resolver';
+import { EnergyHistoryTableConfigResolver } from './energy-consumption/factory/energy-history-table-config.resolver';
+import { OrderConsumptionTableConfigResolver } from './energy-consumption/order/order-consumption-table-config.resolver';
 import { ProductionHistoryCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-history-table-config.resolver';
 import { ProductionCapacityTableConfigResolver } from './production-capacity/factory/production-capacity-table-config.resolver';
 import { GroupProductionTableConfigResolver } from './production-capacity/group/group-production-table-config.resolver';
@@ -122,27 +123,58 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            component: EntitiesTableComponent,
-            data: {
-              title: 'potency.energy-consumption'
-            },
-            resolve: {
-              entitiesTableConfig: EnergyConsumptionTableConfigResolver
-            }
+            redirectTo: 'factory',
+            pathMatch: 'full'
           },
           {
-            path: ':deviceId/history',
-            component: EntitiesTableComponent,
+            path: 'factory',
             data: {
-              title: 'potency.energy-consumption-history',
               breadcrumb: {
-                label: 'potency.energy-consumption-history',
-                icon: 'mdi:history-data'
+                label: 'potency.factory',
+                icon: 'mdi:factory'
               }
             },
-            resolve: {
-              entitiesTableConfig: EnergyHistoryTableConfigResolver
-            }
+            children: [
+              {
+                path: '',
+                component: EntitiesTableComponent,
+                resolve: {
+                  entitiesTableConfig: EnergyConsumptionTableConfigResolver
+                }
+              },
+              {
+                path: ':deviceId/history',
+                component: EntitiesTableComponent,
+                data: {
+                  title: 'potency.energy-consumption-history',
+                  breadcrumb: {
+                    label: 'potency.energy-consumption-history',
+                    icon: 'mdi:history-data'
+                  }
+                },
+                resolve: {
+                  entitiesTableConfig: EnergyHistoryTableConfigResolver
+                }
+              }
+            ]
+          },
+          {
+            path: 'order',
+            data: {
+              breadcrumb: {
+                label: 'potency.order',
+                icon: 'mdi:order'
+              }
+            },
+            children: [
+              {
+                path: '',
+                component: EntitiesTableComponent,
+                resolve: {
+                  entitiesTableConfig: OrderConsumptionTableConfigResolver
+                }
+              }
+            ]
           }
         ]
       },
@@ -170,7 +202,8 @@ const routes: Routes = [
     EnergyHistoryTableConfigResolver,
     ProductionHistoryCapacityTableConfigResolver,
     GroupProductionTableConfigResolver,
-    ProcedureProductionTableConfigResolver
+    ProcedureProductionTableConfigResolver,
+    OrderConsumptionTableConfigResolver
   ]
 })
 export class PotencyRoutingModule { }
