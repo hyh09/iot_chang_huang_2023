@@ -17,9 +17,7 @@ import java.math.BigDecimal;
 @ToString
 public class HwEnergyDto {
 
-    /**
-     * 主键id
-     */
+
     private String uGUID;
 
     private String sCode;
@@ -28,14 +26,10 @@ public class HwEnergyDto {
 
     private String sClass;
 
-    /**
-     * 单价
-     */
+
     private BigDecimal nCurrPrice;
 
-    /**
-     * 单位名称
-     */
+
     private String sUnitName;
 
     private String nCalcCoefficient;
