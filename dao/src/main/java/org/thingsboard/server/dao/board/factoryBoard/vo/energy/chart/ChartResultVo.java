@@ -17,6 +17,8 @@ import java.util.List;
 @ToString
 public class ChartResultVo {
 
+    private CostRatioVo costRatioVo;
+
     /**
      * 水的趋势线
      */
