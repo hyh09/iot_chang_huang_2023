@@ -37,7 +37,7 @@ public class DateLocaDateAndTimeUtil {
         List<LocalDate> list = new ArrayList<>();
         long distance = ChronoUnit.MONTHS.between(startDate, endDate);
         if (distance < 1) {
-            list.forEach(li -> System.out.println(li));
+            list.add(startDate);
         }
         Stream.iterate(startDate, d -> d.plusMonths(1)).limit(distance + 1).forEach(f -> {
             list.add(f);
@@ -50,7 +50,7 @@ public class DateLocaDateAndTimeUtil {
         List<LocalDate> list = new ArrayList<>();
         long distance = ChronoUnit.DAYS.between(startDate, endDate);
         if (distance < 1) {
-            list.forEach(li -> System.out.println(li));
+            list.add(startDate);
         }
         Stream.iterate(startDate, d -> d.plusDays(1)).limit(distance + 1).forEach(f -> {
             list.add(f);
