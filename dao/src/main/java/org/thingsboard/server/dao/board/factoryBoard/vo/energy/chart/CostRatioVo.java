@@ -1,7 +1,11 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.math.BigDecimal;
 
 /**
  * @Project Name: thingsboard
@@ -13,6 +17,8 @@ import lombok.ToString;
  */
 @ToString
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CostRatioVo {
 
     /**
@@ -31,7 +37,7 @@ public class CostRatioVo {
     /**
      * 总费用（水+电+气)
      */
-    private String totalCost;
+    private BigDecimal totalCost;
 
 
 }

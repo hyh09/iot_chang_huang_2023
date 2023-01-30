@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.dao.sqlserver.jdbc.dto.HwEnergyDto;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyEnums;
-import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyVo;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -38,20 +37,19 @@ public class HwEnergyService {
 
     /**
      * 获取水 电 气的单价
+     *
      * @return
      */
-    public Map<String, BigDecimal> queryUnitPrice(){
-        List<HwEnergyDto> hwEnergyDtoList =  this.queryHwEnergyDto();
-        if(CollectionUtils.isNotEmpty(hwEnergyDtoList)){
-          return   hwEnergyDtoList.stream().collect(Collectors.toMap(HwEnergyDto::getSName,HwEnergyDto::getNCurrPrice));
+    public Map<String, BigDecimal> queryUnitPrice() {
+        List<HwEnergyDto> hwEnergyDtoList = this.queryHwEnergyDto();
+        if (CollectionUtils.isNotEmpty(hwEnergyDtoList)) {
+            return hwEnergyDtoList.stream().collect(Collectors.toMap(HwEnergyDto::getSName, HwEnergyDto::getNCurrPrice));
         }
-        return  new HashMap<>();
+        return new HashMap<>();
     }
 
 
-
-
-    public List<HwEnergyDto> queryHwEnergyDto(){
+    public List<HwEnergyDto> queryHwEnergyDto() {
         String sql = "select A1.uGUID,A1.sCode,A1.sName,A1.sClass,A1.nCurrPrice,A1.sUnitName,A1.nCalcCoefficient,A1.isort from dbo.hwEnergy A1 WHERE A1.sName in (:sNameList)  ";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("sNameList", Stream.of(HwEnergyEnums.values()).map(HwEnergyEnums::getChineseField).collect(Collectors.toList()));
