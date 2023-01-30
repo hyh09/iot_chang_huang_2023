@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,6 +34,18 @@ public class JacksonUtil {
 
     public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
         try {
+            return fromValue != null ? OBJECT_MAPPER.convertValue(fromValue, toValueType) : null;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("The given object value: "
+                    + fromValue + " cannot be converted to " + toValueType, e);
+        }
+    }
+
+
+    public static <T> T convertValueJDK8(Object fromValue, Class<T> toValueType) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
             return fromValue != null ? OBJECT_MAPPER.convertValue(fromValue, toValueType) : null;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("The given object value: "
