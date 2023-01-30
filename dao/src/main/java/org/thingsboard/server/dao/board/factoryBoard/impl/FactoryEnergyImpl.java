@@ -206,7 +206,7 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         List<String> finalValueList = voList.stream().map(ChartDataVo::getValue).collect(Collectors.toList());
         BigDecimal total = BigDecimalUtil.INSTANCE.accumulator(finalValueList);
         BigDecimal price = map.get(hwEnergyEnums.getChineseField());
-        return BigDecimalUtil.INSTANCE.multiply(total, price);
+        return BigDecimalUtil.INSTANCE.multiply(total, price!=null?price:"1");
 
     }
 
