@@ -60,6 +60,7 @@ import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationRepository;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesEquipmentProcedureVo;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
+import org.thingsboard.server.dao.sqlts.Manager.TsKvLatestDaoManager;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.annotation.Resource;
@@ -137,9 +138,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
     DictDeviceComponentRepository componentRepository;
 
     @Resource
-    private TrepDayStaDetailRepository trepDayStaDetailRepository;
-
-    @Resource
     private MesDeviceRelationRepository mesDeviceRelationRepository;
 
     @Resource
@@ -147,6 +145,9 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
 
     @Resource
     private TrepDayStaDetailManager trepDayStaDetailManager;
+
+    @Resource
+    private TsKvLatestDaoManager tsKvLatestDaoManager;
 
     /**
      * 获得设备配置列表
@@ -966,6 +967,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         stopWatch.stop();
         List<RTMonitorDeviceResult> data = result.getData();
         trepDayStaDetailManager.setRateBatch(data, new Date(), e -> UUID.fromString(e.getId()), RTMonitorDeviceResult::setOperationRate);
+        tsKvLatestDaoManager.setStateBatch(data, e -> UUID.fromString(e.getId()), RTMonitorDeviceResult::getIsOnLine, RTMonitorDeviceResult::setState);
         log.info("请求耗时: {}", stopWatch.prettyPrint());
         return result;
     }

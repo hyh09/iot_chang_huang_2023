@@ -6,23 +6,24 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.controller.BaseController;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesOrderListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesOrderProgressListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesProductionCardListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.MesProductionProgressListDto;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesOrderListVo;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesOrderProgressListVo;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionCardListVo;
-import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesProductionProgressListVo;
+import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
+import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
+import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 @Slf4j
-@Api(value="mes订单管理Controller",tags={"mes订单管理接口"})
+@Api(value = "mes订单管理Controller", tags = {"mes订单管理接口"})
 @RestController
 @RequestMapping("/api/mes/order")
 public class MesOrderController extends BaseController {
@@ -31,67 +32,134 @@ public class MesOrderController extends BaseController {
     private MesOrderService mesOrderService;
 
     @ApiOperation("查询订单列表")
-    @RequestMapping(value = "/findOrderList",params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/findOrderList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+            @ApiImplicitParam(name = "dto", value = "其他条件", paramType = "query")
     })
     @ResponseBody
     public PageData<MesOrderListVo> findOrderList(@RequestParam int pageSize, @RequestParam int page, MesOrderListDto dto) {
         try {
-            PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return mesOrderService.findOrderList(dto,pageLink);
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return mesOrderService.findOrderList(dto, pageLink);
         } catch (ThingsboardException e) {
-            log.error("查询生产班组列表异常{}",e);
+            log.error("查询生产班组列表异常{}", e);
             throw new RuntimeException(e);
         }
     }
 
     @ApiOperation("查询订单进度列表")
-    @RequestMapping(value = "/findOrderProgressList",params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/findOrderProgressList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+            @ApiImplicitParam(name = "dto", value = "其他条件", paramType = "query")
     })
     @ResponseBody
     public PageData<MesOrderProgressListVo> findOrderProgressList(@RequestParam int pageSize, @RequestParam int page, MesOrderProgressListDto dto) {
         try {
-            PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return mesOrderService.findOrderProgressList(dto,pageLink);
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            dto.setDDeliveryDateBegin(this.getDateStr(dto.getDDeliveryDateBegin()));
+            dto.setDDeliveryDateEnd(this.getDateStr(dto.getDDeliveryDateEnd()));
+            return mesOrderService.findOrderProgressList(dto, pageLink);
         } catch (ThingsboardException e) {
-            log.error("查询订单进度列表异常{}",e);
+            log.error("查询订单进度列表异常{}", e);
             throw new RuntimeException(e);
         }
     }
 
     @ApiOperation("查询生产卡列表")
-    @RequestMapping(value = "/findProductionCardList", params = {"pageSize", "page"},method = RequestMethod.GET)
+    @RequestMapping(value = "/findProductionCardList", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+            @ApiImplicitParam(name = "dto", value = "其他条件", paramType = "query")
     })
     @ResponseBody
-    public PageData<MesProductionCardListVo> findProductionCardList(@RequestParam int pageSize, @RequestParam int page,MesProductionCardListDto dto) {
+    public PageData<MesProductionCardListVo> findProductionCardList(@RequestParam int pageSize, @RequestParam int page, MesProductionCardListDto dto) {
         try {
-            PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return mesOrderService.findProductionCardList(dto,pageLink);
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            dto.setDDeliveryDateBegin(this.getDateStr(dto.getDDeliveryDateBegin()));
+            dto.setDDeliveryDateEnd(this.getDateStr(dto.getDDeliveryDateEnd()));
+            return mesOrderService.findProductionCardList(dto, pageLink);
         } catch (ThingsboardException e) {
-            log.error("查询生产卡列表异常{}",e);
+            log.error("查询生产卡列表异常{}", e);
             throw new RuntimeException(e);
         }
     }
 
 
     @ApiOperation("查询生产进度列表")
-    @RequestMapping(value = "/findProductionProgressList",params = {"pageSize", "page"}, method = RequestMethod.POST)
+    @RequestMapping(value = "/findProductionProgressList", params = {"pageSize", "page"}, method = RequestMethod.POST)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "dto", value = "其他条件",paramType = "query")
+            @ApiImplicitParam(name = "dto", value = "其他条件", paramType = "query")
     })
     @ResponseBody
     public PageData<MesProductionProgressListVo> findProductionProgressList(@RequestParam int pageSize, @RequestParam int page, MesProductionProgressListDto dto) {
         try {
-            PageLink pageLink = createPageLink(pageSize, page,null,null,null);
-            return mesOrderService.findProductionProgressList(dto,pageLink);
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return mesOrderService.findProductionProgressList(dto, pageLink);
         } catch (ThingsboardException e) {
-            log.error("查询生产进度列表异常{}",e);
+            log.error("查询生产进度列表异常{}", e);
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 时间戳字符串转日期字符串
+     *
+     * @param longString
+     * @return
+     */
+    private String getDateStr(String longString) {
+        if (StringUtils.isNotEmpty(longString)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return sdf.format(new Date(Long.parseLong(String.valueOf(longString))));
+        }
+        return "";
+    }
+
+
+    @ApiOperation("生产卡选择列表")
+    @RequestMapping(value = "/findOrderCardList", params = {"pageSize", "page"}, method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "dto", value = "其他条件", paramType = "query")
+    })
+    @ResponseBody
+    public PageData<MesOrderCardListVo> findOrderCardList(@RequestParam int pageSize, @RequestParam int page, MesOrderCardListDto dto) {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return mesOrderService.findOrderCardList(dto, pageLink);
+        } catch (ThingsboardException e) {
+            log.error("生产卡选择列表异常{}", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @ApiOperation("工序选择")
+    @PostMapping(value = "/findProductedList")
+    @ResponseBody
+    public List<MesProductedVo> findProductedList(String cardNo) {
+        return mesOrderService.findProductedList(cardNo);
+    }
+
+    @ApiOperation("参数趋势图")
+    @PostMapping(value = "/getChart")
+    @ResponseBody
+    public List<MesChartVo> getChart(@Validated MesChartDto dto) throws ThingsboardException {
+        if (StringUtils.isEmpty(dto.getUemEquipmentGUID())) {
+            throw new RuntimeException("设备id不能为空");
+        }
+        dto.setTenantId(getTenantId());
+        return mesOrderService.getChart(dto);
+    }
+
+    @ApiOperation("参数折线图")
+    @PostMapping(value = "/getParamChart")
+    @ResponseBody
+    public List<HistoryGraphPropertyTsKvVO> getParamChart(@Validated MesChartDto dto) throws ThingsboardException {
+        if (dto.getDeviceId() == null) {
+            throw new RuntimeException("设备id不能为空");
+        }
+        if (StringUtils.isEmpty(dto.getKey())) {
+            throw new RuntimeException("参数不能为空");
+        }
+        dto.setTenantId(getTenantId());
+        return mesOrderService.getParamChart(dto);
     }
 }

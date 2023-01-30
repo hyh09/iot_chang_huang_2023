@@ -94,6 +94,14 @@ public interface DictDeviceService {
      */
     List<DictDeviceComponentVO> listDictDeviceComponents(UUID dictDeviceId);
 
+
+    /**
+     * 获得设备字典部件
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    List<DictDeviceComponentVO> listOpenDictDeviceComponents(UUID dictDeviceId);
+
     /**
      * 获得设备字典分组属性，不包含分组
      *

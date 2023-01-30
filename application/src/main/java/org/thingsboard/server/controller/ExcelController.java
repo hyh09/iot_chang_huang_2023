@@ -1,5 +1,6 @@
 package org.thingsboard.server.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +10,10 @@ import org.thingsboard.server.excel.dto.ExportDto;
 import org.thingsboard.server.utils.ExcelUtil;
 
 import javax.servlet.http.HttpServletResponse;
-
+@Api(value="通用导出excelController",tags={"通用导出excel接口"})
 @RestController
 @Slf4j
-@RequestMapping("/excel")
+@RequestMapping("/api/excel")
 public class ExcelController {
 
     @Autowired
@@ -23,8 +24,8 @@ public class ExcelController {
      * @param dto
      * @param response
      */
-    @RequestMapping("/export")
     @ApiOperation("导出excel")
+    @RequestMapping(value = "/export", method = RequestMethod.POST)
     @ApiImplicitParam(name = "ExportDto", value = "入参实体", dataType = "ExportDto", paramType = "dto")
     @ResponseBody
     public void downloadExcel(@RequestBody ExportDto dto, HttpServletResponse response) {

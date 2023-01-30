@@ -39,8 +39,8 @@ export class RunStateChartComponent implements AfterViewInit, OnChanges {
 
   init() {
     if (!this.chart) return;
-    const online = this.translate.instant('device-monitor.on-line-device');
-    const offline = this.translate.instant('device-monitor.off-line-device');
+    const online = this.translate.instant('device-monitor.online-device');
+    const offline = this.translate.instant('device-monitor.offline-device');
     const chartData = [
       { value: this.data.onLineDeviceCount || 0, name: online },
       { value: this.data.offLineDeviceCount || 0, name: offline }

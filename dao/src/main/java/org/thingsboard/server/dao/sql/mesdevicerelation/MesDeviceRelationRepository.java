@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface MesDeviceRelationRepository extends PagingAndSortingRepository<MesDeviceRelationEntity, UUID>, JpaSpecificationExecutor<MesDeviceRelationEntity> {
     List<MesDeviceRelationEntity> findAllByDeviceIdIn(List<UUID> deviceIds);
+
+    List<MesDeviceRelationEntity> findAllByMesDeviceIdIn(List<UUID> mesIds);
 }

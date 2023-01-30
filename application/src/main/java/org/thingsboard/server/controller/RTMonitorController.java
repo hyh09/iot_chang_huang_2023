@@ -24,6 +24,10 @@ import org.thingsboard.server.dao.hs.manager.TrepDayStaDetailManager;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.hs.utils.CommonUtil;
+import org.thingsboard.server.dao.sql.mesdevicerelation.JpaMesDeviceRelationDao;
+import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.MesEquipmentProcedureVo;
+import org.thingsboard.server.dao.sqlserver.mes.service.MesProductionService;
+import org.thingsboard.server.dao.sqlts.Manager.TsKvLatestDaoManager;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
@@ -59,6 +63,15 @@ public class RTMonitorController extends BaseController {
 
     @Resource
     private TrepDayStaDetailManager trepDayStaDetailManager;
+
+    @Resource
+    private TsKvLatestDaoManager tsKvLatestDaoManager;
+
+    @Resource
+    private MesProductionService mesProductionService;
+
+    @Resource
+    private JpaMesDeviceRelationDao jpaMesDeviceRelationDao;
 
     /**
      * 根据当前登录人获得工厂层级-适配
@@ -266,7 +279,19 @@ public class RTMonitorController extends BaseController {
     public DeviceDetailResult getRtMonitorDeviceDetail(@PathVariable("id") String id) throws ThingsboardException, ExecutionException, InterruptedException {
         checkParameter("id", id);
         DeviceDetailResult deviceDetailResult = this.deviceMonitorService.filterDeviceDetailResult(getTenantId(), this.deviceMonitorService.getRTMonitorDeviceDetail(getTenantId(), id), isFactoryUser());
+        //设置开机率
         trepDayStaDetailManager.setRate(deviceDetailResult, new Date(), e -> UUID.fromString(e.getId()), DeviceDetailResult::setOperationRate);
+        //设置当前卡号、产品名称、当前班组
+        UUID deviceId = UUID.fromString(deviceDetailResult.getId());
+        UUID mesIdByDeviceId = jpaMesDeviceRelationDao.getMesIdByDeviceId(deviceId);
+        if (mesIdByDeviceId != null) {
+            MesEquipmentProcedureVo equipmentProcedure = mesProductionService.findEquipmentProcedureOrDefault(mesIdByDeviceId, new MesEquipmentProcedureVo());
+            deviceDetailResult.setCardNo(equipmentProcedure.getCardNo());
+            deviceDetailResult.setMaterialName(equipmentProcedure.getMaterialName());
+            deviceDetailResult.setWorkerGroupName(equipmentProcedure.getWorkerGroupName());
+        }
+        //设置状态
+        tsKvLatestDaoManager.setState(deviceDetailResult, e -> UUID.fromString(e.getId()), DeviceDetailResult::getIsOnLine, DeviceDetailResult::setState);
         return deviceDetailResult;
     }
 

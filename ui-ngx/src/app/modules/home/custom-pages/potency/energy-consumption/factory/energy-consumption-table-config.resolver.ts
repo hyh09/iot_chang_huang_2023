@@ -49,7 +49,7 @@ export class EnergyConsumptionTableConfigResolver implements Resolve<EntityTable
   }
 
   resolve(): EntityTableConfig<DeviceEnergyConsumption> {
-    this.config.tableTitle = this.translate.instant('potency.energy-consumption');
+    this.config.titleVisible = false;
     this.config.addEnabled = false;
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;

@@ -10,7 +10,7 @@ import { differenceInCalendarDays } from 'date-fns';
   selector: 'tb-group-production-filter',
   templateUrl: './group-production-filter.component.html',
   styleUrls: [
-    '../../energy-consumption/energy-consumption-overview.component.scss'
+    '../../energy-consumption/factory/energy-consumption-overview.component.scss'
   ]
 })
 export class GroupProductionFilterComponent extends EntityTableHeaderComponent<GroupProduction> {

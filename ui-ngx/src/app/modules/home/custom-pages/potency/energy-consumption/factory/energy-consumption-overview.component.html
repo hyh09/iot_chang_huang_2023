@@ -1,11 +1,17 @@
-<div *ngIf="top10.length > 0" class="top10">
-  <div fxLayout="row" fxLayoutAlign="space-between center" class="header">
-    <div class="title">{{ 'potency.today-energy-consumption-top10' | translate }}</div>
-    <nz-radio-group [(ngModel)]="keyNum" nzSize="small" (ngModelChange)="getTop10()">
-      <label nz-radio-button nzValue="1">{{ 'potency.water' | translate }}</label>
-      <label nz-radio-button nzValue="2">{{ 'potency.electric' | translate }}</label>
-      <label nz-radio-button nzValue="3">{{ 'potency.gas' | translate }}</label>
-    </nz-radio-group>
+<div class="top10">
+  <div class="header">
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link (click)="onTabClick('factory')" [active]="true"> {{ 'potency.factory' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('order')" [active]="false"> {{ 'potency.order' | translate }} </a>
+    </nav>
+    <div *ngIf="top10.length > 0" fxLayout="row" fxLayoutAlign="space-between center">
+      <div class="title">{{ 'potency.today-energy-consumption-top10' | translate }}</div>
+      <nz-radio-group [(ngModel)]="keyNum" nzSize="small" (ngModelChange)="getTop10()">
+        <label nz-radio-button nzValue="1">{{ 'potency.water' | translate }}</label>
+        <label nz-radio-button nzValue="2">{{ 'potency.electric' | translate }}</label>
+        <label nz-radio-button nzValue="3">{{ 'potency.gas' | translate }}</label>
+      </nz-radio-group>
+    </div>
   </div>
   <div class="bar-wrapper">
     <div *ngFor="let item of top10; let $index = index" class="bar-item">

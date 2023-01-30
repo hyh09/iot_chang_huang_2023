@@ -210,7 +210,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
 
         var groupVOList = this.listOpenDictDeviceGroups(toUUID(dictDevice.getId()));
 
-        var rList = this.listDictDeviceComponents(toUUID(dictDevice.getId()));
+        var rList = this.listOpenDictDeviceComponents(toUUID(dictDevice.getId()));
 
         DictDeviceVO dictDeviceVO = DictDeviceVO.builder()
                 .standardPropertyList(standardPropertyList)
@@ -524,6 +524,37 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                 }).collect(Collectors.toList());
         var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
         var componentPropertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentPropertyVOList = componentPropertyList.stream()
+                .map(e -> {
+                    DictDeviceComponentPropertyVO vo = new DictDeviceComponentPropertyVO();
+                    BeanUtils.copyProperties(e, vo);
+                    return vo;
+                }).collect(Collectors.toList());
+        var cMap = componentPropertyVOList.stream().collect(Collectors.groupingBy(DictDeviceComponentPropertyVO::getComponentId));
+
+        this.recursionPackageComponent(rList, pMap, cMap, HSConstants.NULL_STR);
+        return rList;
+    }
+
+
+    /**
+     * 获得设备字典部件
+     *
+     * @param dictDeviceId 设备字典Id
+     */
+    @Override
+    public List<DictDeviceComponentVO> listOpenDictDeviceComponents(UUID dictDeviceId) {
+        List<DictDeviceComponentVO> rList = new ArrayList<>();
+        var componentList = DaoUtil.convertDataList(this.componentRepository.findAllByDictDeviceId(dictDeviceId));
+        var componentVOList = componentList.stream()
+                .map(e -> {
+                    DictDeviceComponentVO vo = new DictDeviceComponentVO();
+                    BeanUtils.copyProperties(e, vo);
+                    vo.setComponentList(new ArrayList<>());
+                    return vo;
+                }).collect(Collectors.toList());
+        var pMap = componentVOList.stream().collect(Collectors.groupingBy(e -> Optional.ofNullable(e.getParentId()).orElse(HSConstants.NULL_STR)));
+        var componentPropertyList = DaoUtil.convertDataList(this.componentPropertyRepository.findOpenByDictDeviceId(dictDeviceId));
         var componentPropertyVOList = componentPropertyList.stream()
                 .map(e -> {
                     DictDeviceComponentPropertyVO vo = new DictDeviceComponentPropertyVO();

@@ -111,4 +111,16 @@ public class DeviceDetailResult {
 
     @ApiModelProperty("开机率")
     private BigDecimal operationRate;
+
+    @ApiModelProperty("当前卡号")
+    private String cardNo;
+
+    @ApiModelProperty("产品名称")
+    private String materialName;
+
+    @ApiModelProperty("当前班组")
+    private String workerGroupName;
+
+    @ApiModelProperty("机台状态:1离线2生产中3停机4在线")
+    private Integer state;
 }

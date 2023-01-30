@@ -52,4 +52,7 @@ public interface TsKvLatestRepository extends CrudRepository<TsKvLatestEntity, T
 
     @Query("select new TsKvLatestEntity(t.entityId,t.key,t.booleanValue,t.ts,t.longValue) from TsKvLatestEntity t where t.key=:key")
     List<TsKvLatestEntity> findAllByKeyEquals(@Param("key") int key);
+
+    @Query("select new TsKvLatestEntity(t.entityId,t.key,t.booleanValue,t.ts,t.longValue) from TsKvLatestEntity t where t.key=:key and t.entityId in :entityIds")
+    List<TsKvLatestEntity> findAllByKeyEqualsAAndEntityIdIn(@Param("key") int key,@Param("entityIds") List<UUID> entityIds);
 }

@@ -35,6 +35,12 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   propMap: { [name: string]: DeviceProp } = {};
   mapOfExpandedComp: { [code: string]: DeviceCompTreeNode[] } = {};
   showRealTimeChart: boolean;
+  statusMap = {
+    1: 'offline',
+    2: 'in-production',
+    3: 'stopped',
+    4: 'online'
+  };
 
   constructor(
     @Inject('RealTimeMonitorService') private realTimeMonitorService: RealTimeMonitorService,
@@ -58,8 +64,8 @@ export class DeviceDetailsComponent implements OnInit, OnDestroy {
   fetchData(isMqtt?: boolean) {
     if (this.deviceId) {
       this.realTimeMonitorService.getDeviceDetails(this.deviceId).subscribe(res => {
-        const { picture, name, factoryName, workShopName, productionLineName } = res;
-        this.baseInfo = { picture, name, factoryName, workShopName, productionLineName };
+        const { picture, name, factoryName, workShopName, productionLineName, operationRate, cardNo, materialName, workerGroupName, teamLeader, state } = res;
+        this.baseInfo = { picture, name, factoryName, workShopName, productionLineName, operationRate, cardNo, materialName, workerGroupName, teamLeader, state };
         this.deviceName = name;
         this.alarmTimesList = res.alarmTimesList || [];
 

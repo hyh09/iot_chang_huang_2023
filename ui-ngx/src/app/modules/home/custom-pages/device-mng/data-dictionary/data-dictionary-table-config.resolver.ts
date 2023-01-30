@@ -82,7 +82,6 @@ export class DataDictionaryTableConfigResolver implements Resolve<EntityTableCon
     });
 
     this.setAvailableCode();
-
     this.config.tableTitle = this.translate.instant('device-mng.data-dic');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;

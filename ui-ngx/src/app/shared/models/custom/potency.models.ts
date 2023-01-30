@@ -32,7 +32,7 @@ export interface GroupProduction {
   duration: string;
 }
 
-export interface ProcessProduction {
+export interface ProcedureProduction {
   cardNo: string;
   orderNo: string;
   customerName: string;
@@ -69,6 +69,20 @@ export interface DeviceEnergyConsumptionList extends PageData<DeviceEnergyConsum
     totalElectricConsumption: string;
     totalGasConsumption: string;
   }
+}
+
+export interface OrderConsumption extends BaseData<any> {
+  orderNo: string;
+  customerName: string;
+  materialName: string;
+  colorName: string;
+  numberOfOrder: string;
+  numberOfCards: string;
+  sremark: string;
+  duration: string;
+  water: string;
+  electricity: string;
+  gas: string;
 }
 
 export interface RunningState {
