@@ -13,6 +13,7 @@ import org.thingsboard.server.dao.sqlserver.jdbc.dto.HwEnergyDto;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyEnums;
 import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyVo;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class HwEnergyService {
      * 获取水 电 气的单价
      * @return
      */
-    public Map<String,String> queryUnitPrice(){
+    public Map<String, BigDecimal> queryUnitPrice(){
         List<HwEnergyDto> hwEnergyDtoList =  this.queryHwEnergyDto();
         if(CollectionUtils.isNotEmpty(hwEnergyDtoList)){
           return   hwEnergyDtoList.stream().collect(Collectors.toMap(HwEnergyDto::getSName,HwEnergyDto::getNCurrPrice));

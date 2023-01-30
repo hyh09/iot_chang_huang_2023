@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.sqlserver.jdbc.dto;
 import lombok.Data;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+
 /**
  * @Project Name: thingsboard
  * @File Name: HwEnergyDto
@@ -18,25 +20,25 @@ public class HwEnergyDto {
     /**
      * 主键id
      */
-    private String  uGUID;
+    private String uGUID;
 
     private String sCode;
 
-    private  String sName;
+    private String sName;
 
-    private  String sClass;
+    private String sClass;
 
     /**
      * 单价
      */
-    private String nCurrPrice;
+    private BigDecimal nCurrPrice;
 
     /**
      * 单位名称
      */
     private String sUnitName;
 
-    private  String nCalcCoefficient;
+    private String nCalcCoefficient;
 
     private String isort;
 
