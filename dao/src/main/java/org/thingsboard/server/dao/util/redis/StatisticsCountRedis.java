@@ -37,6 +37,7 @@ public class StatisticsCountRedis implements StatisticsCountRedisSvc {
         String keyPre = getKey(entityId.getId(), tsKvEntry.getTs());
         String value = tsKvEntry.getKey() + tsKvEntry.getTs();
         redisTemplateUtil.pfadd(keyPre, value);
+        redisTemplateUtil.expireDays(keyPre,3);//保存3天的量;
     }
 
     @Override

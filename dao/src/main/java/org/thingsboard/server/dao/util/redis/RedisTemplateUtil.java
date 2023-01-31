@@ -38,6 +38,18 @@ public class RedisTemplateUtil {
         }
     }
 
+    public boolean expireDays(String key, long time) {
+        try {
+            if (time > 0) {
+                redisTemplate.expire(key, time, TimeUnit.DAYS);
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * 根据 key 获取过期时间
      *
