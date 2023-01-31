@@ -12,7 +12,7 @@ public interface ConditionFunction {
      *
      * @param params
      * @param sql
-     * @param orderFlag 判断是否排序
+     * @param orderFlag 判断是否排序,需要加上排序字段不然导致分页失败
      */
     void sqlWrapper(List<Object> params, StringBuffer sql, Boolean orderFlag);
 }

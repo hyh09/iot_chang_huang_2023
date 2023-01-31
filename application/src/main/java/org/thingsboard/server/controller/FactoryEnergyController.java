@@ -82,10 +82,10 @@ public class FactoryEnergyController extends BaseController {
                                          QueryTsKvVo queryTsKvVo) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
-            if (queryTsKvVo.getStartTime() == null) {
-                queryTsKvVo.setStartTime(CommonUtils.getZero());
-                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
-            }
+//            if (queryTsKvVo.getStartTime() == null) {
+//                queryTsKvVo.setStartTime(CommonUtils.getZero());
+//                queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+//            }
             queryTsKvVo.setTenantId(tenantId.getId());
             ChartDateEnums chartDateEnums = ChartDateEnums.valueOf(dimension);
             ChartResultVo vo = factoryEnergySvc.queryTrendChart(queryTsKvVo, chartDateEnums);

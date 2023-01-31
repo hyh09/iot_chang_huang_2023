@@ -70,7 +70,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     /**
      * 查询订单进度
      */
-    private String sqlOrderProgressList = " SELECT row_number () OVER (ORDER BY A.tCreateTime  DESC) AS rownumber ," +
+    private String sqlOrderProgressList = " SELECT " +
             " A.sOrderNo,D.sCustomerName,C.dDeliveryDate,E.sMaterialName,F.sColorName,B.nQty,B.sFinishingMethod " +
             "FROM dbo.sdOrderHdr A(NOLOCK) " +
             "JOIN dbo.sdOrderDtl B(NOLOCK)ON B.usdOrderHdrGUID=A.uGUID " +
@@ -207,6 +207,9 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                         sql.append("and F.sColorName =? ");
                         params.add(dto.getSColorName());
                     }
+                    if (orderFlag) {
+                        sql.append("order by a.tCreateTime desc ");
+                    }
                 }
             }, MesOrderProgressListVo.class, sqlOrderProgressList, pageLink);
         } catch (Exception e) {
@@ -262,15 +265,15 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                     params.add(dto.getDateEnd());
                 }
                 if (StringUtils.isNotEmpty(dto.getSCardNo())) {
-                    sql.append("and a.sCardNo =? ");
+                    sql.append("and a.sCardNo LIKE CONCAT('%',?, '%') ");
                     params.add(dto.getSCardNo());
                 }
                 if (StringUtils.isNotEmpty(dto.getSOrderNo())) {
-                    sql.append("and d.sOrderNo =? ");
+                    sql.append("and d.sOrderNo LIKE CONCAT('%',?, '%') ");
                     params.add(dto.getSOrderNo());
                 }
                 if (StringUtils.isNotEmpty(dto.getSMaterialName())) {
-                    sql.append("and e.sMaterialName =? ");
+                    sql.append("and e.sMaterialName LIKE CONCAT('%',?, '%') ");
                     params.add(dto.getSMaterialName());
                 }
                 if (orderFlag) {
