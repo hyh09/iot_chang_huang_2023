@@ -4,6 +4,7 @@ import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -16,7 +17,7 @@ import java.util.UUID;
  */
 public interface StatisticsCountRedisSvc {
 
-    void  writeCount(EntityId entityId, TsKvEntry tsKvEntry);
+    void writeCount(EntityId entityId, TsKvEntry tsKvEntry);
 
-    public Long readCount(UUID entityId, LocalDateTime localDateTime);
+    Long readCount(List<UUID> uuidList, LocalDateTime localDateTime);
 }

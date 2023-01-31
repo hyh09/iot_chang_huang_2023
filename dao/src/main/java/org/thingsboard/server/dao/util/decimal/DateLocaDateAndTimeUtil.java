@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.util.decimal;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +27,11 @@ public class DateLocaDateAndTimeUtil {
      * @param end   结束日期
      * @return 开始与结束之间的所以日期，包括起止
      */
-    public List<LocalDate> getMiddleDate(ChartDateEnums dateEnums,LocalDate begin, LocalDate end) {
-        if(dateEnums == ChartDateEnums.MONTHS){
-            return  getBetweenDay(begin,end);
+    public List<LocalDate> getMiddleDate(ChartDateEnums dateEnums, LocalDate begin, LocalDate end) {
+        if (dateEnums == ChartDateEnums.MONTHS) {
+            return getBetweenDay(begin, end);
         }
-        return getBetweenMonth(begin,end);
+        return getBetweenMonth(begin, end);
     }
 
     public List<LocalDate> getBetweenMonth(LocalDate startDate, LocalDate endDate) {
@@ -53,6 +54,19 @@ public class DateLocaDateAndTimeUtil {
             list.add(startDate);
         }
         Stream.iterate(startDate, d -> d.plusDays(1)).limit(distance + 1).forEach(f -> {
+            list.add(f);
+        });
+        return list;
+    }
+
+
+    public List<LocalDateTime> getBetweenHour(LocalDateTime startDate, LocalDateTime endDate) {
+        List<LocalDateTime> list = new ArrayList<>();
+        long distance = ChronoUnit.HOURS.between(startDate, endDate);
+        if (distance < 1) {
+            list.add(startDate);
+        }
+        Stream.iterate(startDate, d -> d.plusHours(1)).limit(distance + 1).forEach(f -> {
             list.add(f);
         });
         return list;

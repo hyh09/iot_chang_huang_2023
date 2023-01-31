@@ -6,9 +6,13 @@ import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.kv.TsKvEntry;
 import org.thingsboard.server.dao.util.CommonUtils;
+import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @Project Name: thingsboard
@@ -36,9 +40,9 @@ public class StatisticsCountRedis implements StatisticsCountRedisSvc {
     }
 
     @Override
-    public Long readCount(UUID entityId, LocalDateTime localDateTime) {
-        String keyPre = getKey(entityId, CommonUtils.getTimestampOfDateTime(localDateTime));
-        Long count = redisTemplateUtil.pfcount(keyPre);
+    public Long readCount(List<UUID> uuidList, LocalDateTime localDateTime) {
+        List<String> keyList = uuidList.stream().map(m1 -> getKey(m1, CommonUtils.getTimestampOfDateTime(localDateTime))).collect(Collectors.toList());
+        Long count = keyList.stream().map(str1 -> redisTemplateUtil.pfcount(str1)).map(l1 -> BigDecimalUtil.INSTANCE.formatByObject(l1)).reduce(BigDecimal.ZERO, BigDecimal::add).longValue();
         return count;
     }
 
