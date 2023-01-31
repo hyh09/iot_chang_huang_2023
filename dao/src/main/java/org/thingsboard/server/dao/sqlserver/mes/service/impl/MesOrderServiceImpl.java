@@ -139,7 +139,8 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             "  a.sCardNo,\n" +
             "  d.sOrderNo,\n" +
             "  e.sMaterialName,\n" +
-            "  f.sColorName \n" +
+            "  f.sColorName, \n" +
+            " a.tCreateTime " +
             "FROM\n" +
             "  psWorkFlowCard a WITH (NOLOCK)\n" +
             "  JOIN sdOrderLot b WITH (NOLOCK) ON a.usdOrderLotGUID= b.uGUID\n" +
@@ -307,8 +308,6 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             mesChartVo.setKey(e.getId().getAttributeKey());
             return mesChartVo;
         }).collect(Collectors.toList());
-        MesChartVo mesChartVo = result.get(0);
-        mesChartVo.setTsKvs(this.listTsKvs(dto.getTenantId(), new DeviceId(deviceId), mesChartVo.getKey(), dto.getTStartTime().getTime(), dto.getTEndTime().getTime()));
         return result;
     }
 

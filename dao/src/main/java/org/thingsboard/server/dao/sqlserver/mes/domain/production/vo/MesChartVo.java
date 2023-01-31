@@ -22,7 +22,4 @@ public class MesChartVo {
 
     @ApiModelProperty("iot设备id")
     private UUID deviceId;
-
-    @ApiModelProperty(value = "时序数据列表")
-    List<HistoryGraphPropertyTsKvVO> tsKvs;
 }
