@@ -924,15 +924,6 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         var devicePageData = this.clientService.listPageDevicesPageByQuery(tenantId, query, pageLink);
         if (devicePageData.getData().isEmpty())
             return new PageData<>(Lists.newArrayList(), devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext());
-        //查询设备id对应的设备字典Future
-        CompletableFuture<HashMap<String, DictDevice>> hashMapCompletableFuture = CompletableFuture.supplyAsync(() -> {
-            var dictDeviceIds = devicePageData.getData().stream().map(Device::getDictDeviceId).filter(Objects::nonNull).collect(Collectors.toList());
-            if (dictDeviceIds.isEmpty())
-                return new HashMap<String, DictDevice>();
-            else
-                return DaoUtil.convertDataList(this.dictDeviceRepository.findAllByTenantIdAndIdIn(tenantId.getId(), dictDeviceIds)).stream()
-                        .collect(Collectors.toMap(DictDevice::getId, Function.identity(), (a, b) -> a, HashMap::new));
-        });
         //查询设备状态Future
         MesEquipmentProcedureVo defaulVo = new MesEquipmentProcedureVo();
         CompletableFuture<Map<String, Boolean>> mapCompletableFuture = CompletableFuture.supplyAsync(() -> this.clientService.listDevicesOnlineStatus(devicePageData.getData().stream().map(Device::getId).map(DeviceId::getId).collect(Collectors.toList())));
@@ -947,8 +938,8 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
         Map<String, MesEquipmentProcedureVo> id2voMap = equipmentProcedure.stream().collect(Collectors.toMap(MesEquipmentProcedureVo::getMesDeviceId, Function.identity(), (v1, v2) -> v1));
         stopWatch.stop();
         stopWatch.start("3");
-        PageData<RTMonitorDeviceResult> result = hashMapCompletableFuture.thenCombineAsync(mapCompletableFuture,
-                (dictDeviceMap, activeStatusMap) -> devicePageData.getData().stream().map(e -> {
+        PageData<RTMonitorDeviceResult> result = mapCompletableFuture.thenApply(
+                activeStatusMap -> devicePageData.getData().stream().map(e -> {
                     UUID id = e.getId().getId();
                     var idStr = e.getId().toString();
                     UUID mesDid = id2mesIdMap.get(id);
@@ -957,7 +948,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                             .id(idStr)
                             .name(e.getRename())
                             .rename(e.getRename())
-                            .image(Optional.ofNullable(e.getDictDeviceId()).map(UUID::toString).map(dictDeviceMap::get).map(DictDevice::getPicture).orElse(null))
+                            .image(e.getPicture())
                             .isOnLine(calculateValueInMap(activeStatusMap, idStr))
                             .cardNo(mesEquipmentProcedureVo.getCardNo())
                             .materialName(mesEquipmentProcedureVo.getMaterialName())
