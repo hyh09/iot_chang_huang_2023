@@ -56,7 +56,8 @@ public class PageJdbcUtil {
         if (pageSize < 1) {
             throw new RuntimeException("页码大小不能小于1");
         }
-        int rowNumber = (pageLink.getPage() - 1) * pageSize;
+        //0是第一页1是第二页
+        int rowNumber = pageLink.getPage() * pageSize;
         if (rowNumber < 0) {
             rowNumber = 0;
         }
