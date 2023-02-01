@@ -64,7 +64,7 @@ public class TsKvLatestDaoManager {
         for (K record : switchData) {
             // 获取设备id
             UUID entityId = entityIdFunc.apply(record);
-            Long aLong = aSwitch.get(entityId);
+            Long aLong = aSwitch.getOrDefault(entityId, -1L);
             if (aLong == 1L) {
                 stateConsumer.accept(record, 2);
             } else if (aLong == 0L) {
