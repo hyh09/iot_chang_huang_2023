@@ -44,6 +44,7 @@ import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
+import org.thingsboard.server.dao.util.redis.StatisticsCountRedisSvc;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -106,6 +107,8 @@ public class BaseTimeseriesService implements TimeseriesService {
     private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
     @Autowired
     private KafkaProducerService kafkaProducerService;
+    @Autowired
+    private StatisticsCountRedisSvc statisticsCountRedisSvc;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -161,6 +164,7 @@ public class BaseTimeseriesService implements TimeseriesService {
             throw new IncorrectParameterException("Key value entry can't be null");
         }
         List<ListenableFuture<Integer>> futures = Lists.newArrayListWithExpectedSize(INSERTS_PER_ENTRY);
+        statisticsCountRedisSvc.writeCount(entityId, tsKvEntry);
         saveAndRegisterFutures(tenantId, futures, entityId, tsKvEntry, 0L);
         return Futures.transform(Futures.allAsList(futures), SUM_ALL_INTEGERS, MoreExecutors.directExecutor());
     }
@@ -209,6 +213,7 @@ public class BaseTimeseriesService implements TimeseriesService {
 
     /**
      * 异步执行更新设备名称
+     *
      * @param entityId
      * @param tsKvEntry
      */
