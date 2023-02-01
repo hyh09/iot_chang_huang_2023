@@ -965,9 +965,11 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
                             .build();
                 }).collect(Collectors.toList())).thenApplyAsync(resultList -> new PageData<>(resultList, devicePageData.getTotalPages(), devicePageData.getTotalElements(), devicePageData.hasNext())).join();
         stopWatch.stop();
+        stopWatch.start("4");
         List<RTMonitorDeviceResult> data = result.getData();
         trepDayStaDetailManager.setRateBatch(data, new Date(), e -> UUID.fromString(e.getId()), RTMonitorDeviceResult::setOperationRate);
         tsKvLatestDaoManager.setStateBatch(data, e -> UUID.fromString(e.getId()), RTMonitorDeviceResult::getIsOnLine, RTMonitorDeviceResult::setState);
+        stopWatch.stop();
         log.info("请求耗时: {}", stopWatch.prettyPrint());
         return result;
     }
