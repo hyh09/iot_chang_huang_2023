@@ -157,7 +157,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             "\ta.sWorkerName,\n" +
             "\ta.nTrackQty,\n" +
             "\ta.tStartTime,\n" +
-            "\ta.tEndTime \n" +
+            "\ta.tEndTime, \n" +
             "\ta.uemEquipmentGUID \n" +
             "FROM\n" +
             "\tdbo.mnProducted a ( NOLOCK ) \n" +
