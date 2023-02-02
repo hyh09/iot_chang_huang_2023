@@ -191,7 +191,7 @@ public class MesOrderController extends BaseController {
 
 
     /**
-     * 处理生产卡要导出的数据
+     * 处理生产卡要导出的数据内容
      *
      * @param list
      * @param path
