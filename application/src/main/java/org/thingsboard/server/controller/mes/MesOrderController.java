@@ -158,10 +158,16 @@ public class MesOrderController extends BaseController {
     }
 
     @ApiOperation("工序选择")
-    @PostMapping(value = "/findProductedList")
+    @RequestMapping(value = "/findProductedList", params = {"pageSize", "page"}, method = RequestMethod.POST)
     @ResponseBody
-    public List<MesProductedVo> findProductedList(String cardNo) {
-        return mesOrderService.findProductedList(cardNo);
+    public PageData<MesProductedVo> findProductedList(@RequestParam int pageSize, @RequestParam int page, @RequestParam String cardNo) {
+        try {
+            PageLink pageLink = createPageLink(pageSize, page, null, null, null);
+            return mesOrderService.findProductedList(cardNo, pageLink);
+        } catch (Exception e) {
+            log.error("导出excel异常", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @ApiOperation("参数趋势图")

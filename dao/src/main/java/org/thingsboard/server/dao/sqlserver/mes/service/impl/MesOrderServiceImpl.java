@@ -285,14 +285,16 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     }
 
     @Override
-    public List<MesProductedVo> findProductedList(String cardNo) {
+    public PageData<MesProductedVo> findProductedList(String cardNo, PageLink pageLink) {
         if (StringUtils.isEmpty(cardNo)) {
-            return new ArrayList<>();
+            return new PageData<>();
         }
-        List<Object> params = new ArrayList<>();
-        params.add(cardNo);
-        Object[] para = params.toArray(new Object[params.size()]);
-        return this.jdbcTemplate.query(sqlProducted, para, new BeanPropertyRowMapper(MesProductedVo.class));
+        return pageJdbcUtil.queryList((params, sql, orderFlag) -> {
+            params.add(cardNo);
+            if (orderFlag) {
+                sql.append("order by a.tCreateTime desc ");
+            }
+        }, MesProductedVo.class, sqlProducted, pageLink);
     }
 
     @Override

@@ -58,10 +58,11 @@ public interface MesOrderService {
 
     /**
      * 工序选择
+     *
      * @param cardNo
      * @return
      */
-    List<MesProductedVo> findProductedList(String cardNo);
+    PageData<MesProductedVo> findProductedList(String cardNo, PageLink pageLink);
 
     List<MesChartVo> getChart(MesChartDto dto);
 
