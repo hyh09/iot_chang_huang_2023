@@ -162,7 +162,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             "FROM\n" +
             "\tdbo.mnProducted a ( NOLOCK ) \n" +
             "WHERE\n" +
-            "\ta.sCardNo = ?";
+            "\ta.sCardNo = ? ";
 
     @Override
     public PageData<MesOrderListVo> findOrderList(MesOrderListDto dto, PageLink pageLink) {
