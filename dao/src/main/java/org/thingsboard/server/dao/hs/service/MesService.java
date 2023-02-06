@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hs.service;
 
+import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hsms.entity.vo.*;
 
@@ -22,6 +23,16 @@ public interface MesService {
      * @return 车间下全部产线
      */
     List<MesBoarProductionLineVO> listProductionLinesByWorkshopId(TenantId tenantId, UUID workshopId);
+
+
+    /**
+     * 工厂下全部车间
+     *
+     * @param tenantId   租户Id
+     * @param factoryId 工厂Id
+     * @return 工厂下全部车间
+     */
+    List<MesBoarWorkshopVO> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId);
 
     /**
      * 产线下全部设备
@@ -48,7 +59,7 @@ public interface MesService {
      * @param productionLineId 产线Id
      * @return 产量趋势
      */
-    List<MesBoarCapacityTrendItemVO> getCapacityTrend(TenantId tenantId, UUID productionLineId);
+    List<MesBoarCapacityTrendItemVO> getCapacityTrend(TenantId tenantId, UUID productionLineId) throws ThingsboardException;
 
     /**
      * 生产监控
@@ -57,7 +68,7 @@ public interface MesService {
      * @param productionLineId 产线Id
      * @return 生产监控
      */
-    List<MesBoarProductionMonitoringVO> getProductionMonitoring(TenantId tenantId, UUID productionLineId);
+    List<MesBoarProductionMonitoringVO> getProductionMonitoring(TenantId tenantId, UUID productionLineId) throws ThingsboardException;
 
     /**
      * 机台产量对比
@@ -66,7 +77,7 @@ public interface MesService {
      * @param productionLineId 产线Id
      * @return 机台产量对比
      */
-    List<MesBoarCapacityComparisonVO> getCapacityComparison(TenantId tenantId, UUID productionLineId);
+    List<MesBoarCapacityComparisonVO> getCapacityComparison(TenantId tenantId, UUID productionLineId) throws ThingsboardException;
 
     /**
      * 产量信息
@@ -75,7 +86,7 @@ public interface MesService {
      * @param productionLineId 产线Id
      * @return 产量信息
      */
-    MesBoarCapacityInfoVO getCapacityInfo(TenantId tenantId, UUID productionLineId);
+    MesBoarCapacityInfoVO getCapacityInfo(TenantId tenantId, UUID productionLineId) throws ThingsboardException;
 
     /**
      * 生产进度跟踪
@@ -84,7 +95,7 @@ public interface MesService {
      * @param productionLineId 产线Id
      * @return 生产进度跟踪
      */
-    List<MesBoardProductionProgressTrackingItemVO> getProductionProgressTracking(TenantId tenantId, UUID productionLineId);
+    List<MesBoardProductionProgressTrackingItemVO> getProductionProgressTracking(TenantId tenantId, UUID productionLineId) throws ThingsboardException;
 
     /**
      * 机台当前生产任务

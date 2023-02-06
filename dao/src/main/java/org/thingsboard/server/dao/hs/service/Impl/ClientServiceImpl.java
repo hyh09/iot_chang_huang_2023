@@ -60,6 +60,7 @@ import org.thingsboard.server.dao.model.sqlts.ts.TsKvEntity;
 import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.device.DeviceRepository;
 import org.thingsboard.server.dao.sql.factory.FactoryRepository;
+import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationRepository;
 import org.thingsboard.server.dao.sql.productioncalender.ProductionCalenderRepository;
 import org.thingsboard.server.dao.sql.productionline.ProductionLineRepository;
 import org.thingsboard.server.dao.sql.role.service.BulletinBoardSvc;
@@ -154,6 +155,29 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
 
     // FactoryDao
     FactoryDao factoryDao;
+
+    // MesDeviceRelationRepository
+    MesDeviceRelationRepository mesDeviceRelationRepository;
+
+    /**
+     * iot设备Id转换到MesId
+     *
+     * @param uuids id列表
+     */
+    @Override
+    public List<UUID> toMesDeviceIds(List<UUID> uuids) {
+        var cb = entityManager.getCriteriaBuilder();
+        var query = cb.createQuery(MesDeviceRelationEntity.class);
+        var root = query.from(MesDeviceRelationEntity.class);
+        List<Predicate> predicates = new ArrayList<>();
+        var in = cb.in(root.<UUID>get("device_id"));
+        uuids.forEach(in::value);
+        predicates.add(in);
+
+        query.where(predicates.toArray(new Predicate[0]));
+        return entityManager.createQuery(query).getResultList()
+                .stream().map(AbstractMesDeviceRelationEntity::getMesDeviceId).collect(Collectors.toList());
+    }
 
     /**
      * 查询单个设备是否在线
@@ -1311,5 +1335,10 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
     @Autowired
     public void setFactoryDao(FactoryDao factoryDao) {
         this.factoryDao = factoryDao;
+    }
+
+    @Autowired
+    public void setMesDeviceRelationRepository(MesDeviceRelationRepository mesDeviceRelationRepository) {
+        this.mesDeviceRelationRepository = mesDeviceRelationRepository;
     }
 }
