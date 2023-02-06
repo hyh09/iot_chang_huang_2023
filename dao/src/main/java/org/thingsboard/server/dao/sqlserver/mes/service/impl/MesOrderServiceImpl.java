@@ -374,7 +374,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
 
         Object[] para = params.toArray(new Object[params.size()]);
 
-        log.info(">>>>>>>>>sql.toString()" + sql.toString());
+        log.info(">>>>>>>>>sql.toString()" + sql);
         return this.jdbcTemplate.queryForObject(sql.toString(), para, Integer.class);
     }
 
