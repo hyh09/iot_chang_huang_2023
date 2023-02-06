@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 /**
- * 设备VO
+ * 产线VO
  *
  * @author wwj
  * @since 2021.10.21
@@ -18,7 +18,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarDeviceVO {
+public class MesBoarWorkshopVO {
 
     /**
      * Id
