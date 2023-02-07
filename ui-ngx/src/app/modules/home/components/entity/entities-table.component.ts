@@ -335,6 +335,9 @@ export class EntitiesTableComponent extends PageComponent implements AfterViewIn
       this.cellTooltipCache.length = 0;
       this.cellStyleCache.length = 0;
     }
+    if (this.entitiesTableConfig.dataLoaded) {
+      this.entitiesTableConfig.dataLoaded(col, row);
+    }
   }
 
   onSelectionChange() {

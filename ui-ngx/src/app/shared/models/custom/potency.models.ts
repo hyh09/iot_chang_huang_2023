@@ -98,10 +98,10 @@ export interface OrderProcessCard extends BaseData<any> {
 }
 
 export interface RunningState {
-  tableName: string;
+  tableName?: string;
   keyName?: string;
   chartId?: string;
-  properties: {
+  properties?: {
     title: string;
     name?: string;
     unit?: string;
@@ -127,3 +127,31 @@ export interface PotencyIntervalItem {
 }
 
 export type PotencyInterval = PotencyIntervalItem[];
+
+export interface ProcessCard extends BaseData<any> {
+  sCardNo: string;
+  sColorName: string;
+  sMaterialName: string;
+  sOrderNo: string;
+}
+
+export interface Procedure extends BaseData<any> {
+  sWorkingProcedureNo: string;
+  sWorkingProcedureName: string;
+  sWorkerGroupName: string;
+  sWorkerName: string;
+  nTrackQty: string;
+  tStartTime: string;
+  tEndTime: string;
+  uemEquipmentGUID: string;
+}
+
+export interface ProcedureParam {
+  deviceId: string;
+  key: string;
+}
+
+export type ProcedureParamChartData = {
+  ts: number;
+  value: string;
+}[]

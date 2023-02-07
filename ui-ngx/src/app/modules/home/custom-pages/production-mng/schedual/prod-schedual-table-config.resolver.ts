@@ -7,6 +7,7 @@ import { ProdSchedual } from '@app/shared/models/custom/production-mng.models';
 import { ProdSchedualFilterComponent } from './prod-schedual-filter.component';
 import { ProductionMngService } from '@app/core/http/custom/production-mng.service';
 import { TranslateService } from '@ngx-translate/core';
+import { FileService } from '@app/core/http/custom/file.service';
 
 @Injectable()
 export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfig<ProdSchedual>> {
@@ -15,6 +16,7 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
 
   constructor(
     private productionMngService: ProductionMngService,
+    private fileService: FileService,
     private datePipe: DatePipe,
     private translate: TranslateService
   ) {
@@ -66,8 +68,7 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
       }
       const { sWorkerGroupName, sWorkingProcedureName } = this.config.componentsData;
       let tableList = this.productionMngService.getProdSchedualList(pageLink, {
-        sWorkerGroupName: sWorkerGroupName || '',
-        sWorkingProcedureName: sWorkingProcedureName || '',
+        sWorkerGroupName, sWorkingProcedureName,
         tTrackTimeStart: startTime || '', tTrackTimeEnd: endTime || ''
       })
       this.config.componentsData.tableList = tableList
@@ -77,7 +78,6 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     // 导出功能
     this.config.componentsData.exportTableData = () => {
       this.config.componentsData.tableList.subscribe((res) => {
-        //this.productionMngService.exportProdSchedulRecords().subscribe();
         let dataList = []
         let titleList = ['开始时间', '班组名称', '班组成员', '工序名称', '订单号', '卡号', '计划完工日期', '计划数量', '实际数量', '超时（ms）']
         dataList.push(titleList)
@@ -87,8 +87,7 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
               dataList.push(itemList)
             });
         }
-        this.productionMngService.exportPort('生产排班', dataList).subscribe();
-        console.log(dataList)
+        this.fileService.exportTable('生产排班', dataList).subscribe();
       })
     }
     return this.config;

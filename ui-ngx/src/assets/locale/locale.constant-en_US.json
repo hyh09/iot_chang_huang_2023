@@ -2097,6 +2097,7 @@
     "type-orders": "Orders",
     "type-order-plan": "Order Plan",
     "type-process-card": "Process Card",
+    "type-procedure": "Procedure",
     "type-tenant-menu-role": "Tenant menus and roles",
     "type-user-menu-role": "User menus and roles",
     "type-user-credentials": "User Credentials",
@@ -3965,6 +3966,7 @@
     "no-device-capacity-history": "No output history found.",
     "energy-consumption": "Energy consumption analysis",
     "energy-consumption-history": "Energy consumption history",
+    "technology": "Technology",
     "factory": "Factory",
     "group": "Group",
     "team":"Team",
@@ -4007,7 +4009,6 @@
     "unit": "Unit",
     "card-no": "Card No",
     "material-no": "Material No",
-    "color-name": "Color name",
     "duration": "Duration",
     "production-output":"Production output",
     "production-machine":"Production machine",
@@ -4027,7 +4028,9 @@
     "no-groups-text": "No groups were found.",
     "no-procedures-text": "No procedures were found.",
     "process-card-no": "Process Card No",
-    "order-process-cards": "Order Process Cards"
+    "order-process-cards": "Order Process Cards",
+    "procedure-no": "Procedure No",
+    "procedure-name": "Procedure Name"
   },
   "production-mng": {
     "production-mng": "Production management",
@@ -4066,7 +4069,7 @@
     "merchandiser": "Merchandiser",
     "delivery-date":"Delivery date",
     "product-name":"Product Name",
-    "colour":"colour",
+    "color": "Color",
     "order-quantity":"Order quantity",
     "arrangement-requirements":"Arrangement requirements",
     "turnover-cloth":"Turnover cloth",
@@ -4130,6 +4133,7 @@
     "intended-capacity": "Intended output",
     "actual-capacity": "Actual output",
     "maintain-time": "Maintenance time",
-    "no-process-cards": "No process cards were found"
+    "no-process-cards": "No process cards were found",
+    "no-procedures": "No procedures were found"
   }
 }
