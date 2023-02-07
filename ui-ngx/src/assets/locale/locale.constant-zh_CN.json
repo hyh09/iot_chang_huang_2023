@@ -2073,6 +2073,7 @@
     "type-orders": "订单",
     "type-order-plan": "订单计划",
     "type-process-card": "流程卡",
+    "type-procedure": "工序",
     "type-tenant-menu-role": "租户菜单角色",
     "type-user-menu-role": "用户菜单角色",
     "type-user-credentials": "用户令牌",
@@ -3862,6 +3863,7 @@
     "no-device-capacity-history": "未找到产量历史",
     "energy-consumption": "能耗分析",
     "energy-consumption-history": "能耗历史",
+    "technology": "工艺分析",
     "team":"班组",
     "process": "工序分析",
     "factory": "工厂",
@@ -3905,7 +3907,6 @@
     "production-order-no":"生产单号",
     "color-number":"色号",
     "material-no": "布种",
-    "color-name": "色名",
     "duration": "时长",
     "production-output":"生产产量",
     "production-machine":"生产机台",
@@ -3925,7 +3926,9 @@
     "no-groups-text": "没有找到班组",
     "no-procedures-text": "没有找到工序",
     "process-card-no": "流程卡号",
-    "order-process-cards": "订单流程卡"
+    "order-process-cards": "订单流程卡",
+    "procedure-no": "工序编号",
+    "procedure-name": "工序名称"
   },
   "production-mng": {
     "production-mng": "生产管理",
@@ -3964,7 +3967,7 @@
     "merchandiser": "跟单员",
     "delivery-date":"交货日期",
     "product-name":"品名",
-    "colour":"颜色",
+    "color":"颜色",
     "order-quantity":"订单数量",
     "arrangement-requirements":"整理要求",
     "turnover-cloth":"翻布",
@@ -4029,6 +4032,7 @@
     "intended-capacity": "计划产量",
     "actual-capacity": "实际产量",
     "maintain-time": "维护时间",
-    "no-process-cards": "没有找到流程卡"
+    "no-process-cards": "没有找到流程卡",
+    "no-procedures": "没有找到工序"
   }
 }

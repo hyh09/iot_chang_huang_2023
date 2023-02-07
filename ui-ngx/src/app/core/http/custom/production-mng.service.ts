@@ -5,8 +5,6 @@ import { PageLink, PageData } from "@app/shared/public-api";
 import { Observable } from "rxjs";
 import { RequestConfig, defaultHttpOptionsFromConfig } from "../http-utils";
 import { map } from 'rxjs/operators';
-import { tap } from 'rxjs/operators';
-import { TranslateService } from '@ngx-translate/core';
 
 // 查询生产排班列表接口请求参数接口
 interface FilterParams {
@@ -34,8 +32,7 @@ interface ProdMonitorFilterParams {
 export class ProductionMngService {
 
   constructor(
-    private http: HttpClient,
-    private translate: TranslateService
+    private http: HttpClient
   ) { }
 
   // 获取生产排班列表
@@ -45,26 +42,6 @@ export class ProductionMngService {
       queryStr.push(`${key}=${filterParams[key]}`);
     });
     return this.http.get<PageData<ProdSchedual>>(`/api/mes/production/findPlanList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
-  }
-
-  // 共用导出
-  public exportPort(title, dataList) {
-    let formData = {
-      title: title,
-      dataList: dataList
-    }
-    return this.http.post(`/api/excel/export`, formData, { responseType: 'arraybuffer' }).pipe(tap(res => {
-      console.log(res)
-      var blob = new Blob([res], { type: 'application/vnd.ms-excel;' });
-      var link = document.createElement('a');
-      var href = window.URL.createObjectURL(blob);
-      link.href = href;
-      link.download = this.translate.instant(title === '生产管理' ? 'production-mng.prod-schedual' : title === '生产监控' ? 'production-mng.prod-monitor' : title === '生产报工' ? 'production-mng.prod-report' : title === '流程卡进度' ? 'order.process-card-progress' : title === '订单进度' ? 'order.order-progress' : '');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(href);
-    }));
   }
 
   // 获取生产报工列表
