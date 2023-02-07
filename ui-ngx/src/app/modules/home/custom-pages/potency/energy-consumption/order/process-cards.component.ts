@@ -48,7 +48,7 @@ export class ProcessCardsComponent extends DialogComponent<ProcessCardsComponent
       new EntityTableColumn<OrderProcessCard>('deviceName', 'potency.device-name', '120px', (entity) => (entity.deviceName || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('scardNo', 'potency.process-card-no', '120px', (entity) => (entity.scardNo || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('materialName', 'potency.material-name', '100px', (entity) => (entity.materialName || ''), () => ({}), false),
-      new EntityTableColumn<OrderProcessCard>('colorName', 'potency.color-name', '100px', (entity) => (entity.colorName || ''), () => ({}), false),
+      new EntityTableColumn<OrderProcessCard>('colorName', 'potency.color', '100px', (entity) => (entity.colorName || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('workerGroupName', 'potency.team-name', '120px', (entity) => (entity.workerGroupName || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('workerName', 'potency.team-members', '180px', (entity) => (entity.workerName || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('nTrackQty', 'potency.capacity', '120px', (entity) => (entity.nTrackQty || ''), () => ({}), false),

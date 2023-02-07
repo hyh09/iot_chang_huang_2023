@@ -51,7 +51,7 @@ const routes: Routes = [
           title: 'order.order-progress',
           breadcrumb: {
             label: 'order.order-progress',
-            icon: 'mdi:order-capacity'
+            icon: 'mdi:order-progress'
           }
         },
         resolve: {
@@ -66,7 +66,7 @@ const routes: Routes = [
           title: 'order.process-card-progress',
           breadcrumb: {
             label: 'order.process-card-progress',
-            icon: 'mdi:order-capacity'
+            icon: 'mdi:process-progress'
           }
         },
         resolve: {

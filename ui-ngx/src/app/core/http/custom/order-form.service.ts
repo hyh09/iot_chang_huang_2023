@@ -14,6 +14,7 @@ interface FetchListFilter {
 }
 
 interface FetchOrderProgressListFilter {
+  sCardNo?: string,
   sOrderNo?: string,
   sCustomerName?: string,
   sMaterialName?: string,

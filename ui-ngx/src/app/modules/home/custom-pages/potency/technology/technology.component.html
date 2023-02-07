@@ -1,0 +1,71 @@
+<div class="tb-absolute-fill mat-padding tb-entity-table">
+  <div fxLayout="column" class="tb-entity-table-content mat-elevation-z1">
+    <mat-toolbar class="mat-table-toolbar">
+      <div class="mat-toolbar-tools">
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayout.xs="column" fxLayoutAlign.xs="center start" class="title-container">
+          <span class="tb-entity-table-title">{{ 'potency.technology' | translate }}</span>
+        </div>
+      </div>
+    </mat-toolbar>
+    <div class="entity-filter-header">
+      <mat-form-field>
+        <mat-label>{{ 'potency.card-no' | translate }}</mat-label>
+        <input type="text" matInput [(ngModel)]="searchForm.sCardNo" (keyup.enter)="search()" />
+        <button *ngIf="searchForm.sCardNo" matSuffix mat-icon-button aria-label="Clear" (click)="onClear('sCardNo')">
+          <mat-icon class="material-icons">close</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'potency.order-no' | translate }}</mat-label>
+        <input type="text" matInput [(ngModel)]="searchForm.sOrderNo" (keyup.enter)="search()" />
+        <button *ngIf="searchForm.sOrderNo" matSuffix mat-icon-button aria-label="Clear" (click)="onClear('sOrderNo')">
+          <mat-icon class="material-icons">close</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'potency.material-name' | translate }}</mat-label>
+        <input type="text" matInput [(ngModel)]="searchForm.sMaterialName" (keyup.enter)="search()" />
+        <button *ngIf="searchForm.sMaterialName" matSuffix mat-icon-button aria-label="Clear" (click)="onClear('sMaterialName')">
+          <mat-icon class="material-icons">close</mat-icon>
+        </button>
+      </mat-form-field>
+      <nz-range-picker
+        nzFormat="yyyy/MM/dd HH:mm:ss"
+        nzShowTime
+        nzSize="large"
+        [nzDisabledDate]="disabledDate"
+        [nzAllowClear]="false"
+        [(ngModel)]="searchForm.dateRange"
+        (ngModelChange)="search()"
+      ></nz-range-picker>
+      <div class="action-btns">
+        <button mat-flat-button color="primary" (click)="search()">
+          {{ 'action.search' | translate }}
+        </button>
+        <button mat-flat-button color="primary" [disabled]="isLoading$ | async">
+          {{ 'action.export' | translate }}
+        </button>
+      </div>
+    </div>
+    <div fxFlex fxLayout="column" class="main-content">
+      <tb-entities-table fxFlex="50" [entitiesTableConfig]="ProcessCardTableConfig" class="table-wrapper"></tb-entities-table>
+      <div fxFlex="50" fxLayout="row" fxLayoutGap="16px" >
+        <tb-entities-table fxFlex="50" [entitiesTableConfig]="ProcedureTableConfig" class="table-wrapper"></tb-entities-table>
+        <div fxFlex="50" style="padding-bottom: 6px;">
+          <nz-tabset [(nzSelectedIndex)]="currentTabIndex" nzType="line" (nzSelectedIndexChange)="showProcedureParamLineChart()">
+            <nz-tab *ngFor="let param of procedureParams" [nzTitle]="param.key"></nz-tab>
+          </nz-tabset>
+          <tb-running-state-chart [data]="chartData"></tb-running-state-chart>
+
+          <!-- <tb-running-state-chart [data]="runningStateData[propName] || {}"></tb-running-state-chart>
+          <div *ngIf="displayedProps.length === 0" fxFlex fxLayoutAlign="center center">
+            <nz-empty
+              nzNotFoundImage="../../../../../../assets/data-empty.svg"
+              nzNotFoundContent="{{ 'common.data-empty' | translate }}"
+            ></nz-empty>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
