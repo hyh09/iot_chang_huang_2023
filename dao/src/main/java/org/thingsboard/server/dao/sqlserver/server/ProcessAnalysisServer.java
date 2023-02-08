@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.dao.sqlserver.server.vo.QueryYieIdVo;
 import org.thingsboard.server.dao.sqlserver.server.vo.process.ProcessAnalysisVo;
 import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
@@ -102,7 +101,7 @@ public class ProcessAnalysisServer extends BaseRunSqlServer {
     private String getRatio(ProcessAnalysisVo m1) {
         BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         BigDecimal bigDecimal = bigDecimalUtil.subtract(m1.getActualTime(), m1.getTheoreticalTime());
-        BigDecimal multiplicationResult = bigDecimalUtil.divide(bigDecimal, m1.getActualTime());
+        BigDecimal multiplicationResult = bigDecimalUtil.divide(bigDecimal, m1.getTheoreticalTime());
         String result = BigDecimalUtil.INSTANCE.multiply(multiplicationResult, "100").toPlainString();
         String result02= BigDecimalUtil.INSTANCE.equalBigNum2(result,"0")?result:"0";
         return result02+"%";
