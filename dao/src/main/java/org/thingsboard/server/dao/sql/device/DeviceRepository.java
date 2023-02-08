@@ -325,13 +325,6 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     @Query(value = "select d  from DeviceEntity d  where d.tenantId = :tenantId and d.rename =:name ")
     List<DeviceEntity> queryAllByTenantIdAndName(@Param("tenantId") UUID tenantId, @Param("name") String name);
 
-    /**
-     * 作者： 赵思明
-     * 创建时间: 2022-03-08
-     * 描述:  查询 该租户下的 网关设备
-     * @param tenantId
-     * @return
-     */
     @Query(nativeQuery = true, value = "select * from device d  where d.tenant_id = ?1 and position('\"gateway\":true' in d.additional_info)=0")
     List<DeviceEntity> findDeviceFilterGatewayByTenantId(UUID tenantId);
 
@@ -339,9 +332,7 @@ public interface DeviceRepository extends PagingAndSortingRepository<DeviceEntit
     long countAllByDictDeviceIdAndTenantId(UUID dictDeviceId, UUID tenantId);
 
     /**
-     * 作者： 赵思明
-     * 创建时间: 2022-03-08
-     * 描述:  查询 该factoryId 工厂的 网关设备
+     * 查询工厂下网关
      * @param factoryId
      * @return
      */
