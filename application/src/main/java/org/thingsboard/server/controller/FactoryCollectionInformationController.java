@@ -10,19 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
-import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
-import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-
-import java.util.List;
 
 /**
  * @Project Name: long-win-iot
@@ -56,6 +48,24 @@ public class FactoryCollectionInformationController extends BaseController {
         } catch (Exception e) {
             log.error("[工厂看板-采集信息-设备在线率].queryCurrentEnergy方法异常入参:{}", factoryId);
             log.error("[工厂看板-采集信息-设备在线率].queryCurrentEnergy方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
+
+    @ApiOperation("采集量-每小时")
+    @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
+    @GetMapping("/queryCollectionVolumeByHourly")
+    @ResponseBody
+    public HourlyTrendGraphOfCollectionVolumeVo queryCollectionVolumeByHourly(@RequestParam(required = false,name = "factoryId") String factoryId) throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
+            factoryDeviceQuery.setFactoryId(factoryId);
+            return factoryCollectionInformationSvc.queryCollectionVolumeByHourly(tenantId, factoryDeviceQuery);
+        } catch (Exception e) {
+            log.error("[工厂看板-采集信息-【采集量-每小时】]queryCollectionVolumeByHourly方法异常入参:{}", factoryId);
+            log.error("[工厂看板-采集信息-【采集量-每小时【].queryCollectionVolumeByHourly方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }

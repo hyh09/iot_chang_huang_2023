@@ -1,11 +1,11 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl;
 
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
 import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
@@ -42,5 +42,10 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
         String rate = BigDecimalUtil.INSTANCE.multiply(deviceAfterResult, "100").toPlainString() + "%";
         deviceStatusNumVo.setOnlineRate(rate);
         return deviceStatusNumVo;
+    }
+
+    @Override
+    public HourlyTrendGraphOfCollectionVolumeVo queryCollectionVolumeByHourly(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery) {
+        return null;
     }
 }
