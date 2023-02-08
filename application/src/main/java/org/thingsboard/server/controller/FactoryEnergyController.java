@@ -11,6 +11,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.UserEveryYearCostVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
@@ -96,6 +97,24 @@ public class FactoryEnergyController extends BaseController {
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }
+
+
+    @GetMapping("/queryUserEveryYearCost")
+    @ResponseBody
+    public List<UserEveryYearCostVo> queryUserEveryYearCost(
+                                         QueryTsKvVo queryTsKvVo) throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            queryTsKvVo.setTenantId(tenantId.getId());
+            List<UserEveryYearCostVo> vo = factoryEnergySvc.queryUserEveryYearCost(queryTsKvVo, tenantId);
+            return vo;
+        } catch (Exception e) {
+            log.error("[工厂看板-能耗信息].queryUserEveryYearCost方法异常入参:{}", queryTsKvVo);
+            log.error("[工厂看板-能耗信息].queryUserEveryYearCost方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
 
 
 }
