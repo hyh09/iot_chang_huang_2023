@@ -9,6 +9,7 @@ import { ProductionCapacityTableConfigResolver } from './production-capacity/fac
 import { GroupProductionTableConfigResolver } from './production-capacity/group/group-production-table-config.resolver';
 import { ProcedureProductionTableConfigResolver } from './production-capacity/procedure/procedure-production-table-config.resolver';
 import { RunningStateComponent } from './running-state/running-state.component';
+import { TechnologyComponent } from './technology/technology.component';
 
 const routes: Routes = [
   {
@@ -186,6 +187,17 @@ const routes: Routes = [
           breadcrumb: {
             label: 'potency.running-state',
             icon: 'mdi:running-state'
+          }
+        }
+      },
+      {
+        path: 'technology',
+        component: TechnologyComponent,
+        data: {
+          title: 'potency.technology',
+          breadcrumb: {
+            label: 'potency.technology',
+            icon: 'mdi:technology'
           }
         }
       }

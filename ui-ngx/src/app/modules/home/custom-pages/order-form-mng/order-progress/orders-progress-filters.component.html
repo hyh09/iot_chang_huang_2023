@@ -1,5 +1,4 @@
 
-<nz-range-picker nzShowTime [(ngModel)]="entitiesTableConfig.componentsData.dateRange" [nzAllowClear]="true"></nz-range-picker>
 <mat-form-field>
   <mat-label>{{ 'order.order-no' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sOrderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
@@ -12,7 +11,7 @@
   </button>
 </mat-form-field>
 <mat-form-field>
-  <mat-label>{{ 'order.colour' | translate }}</mat-label>
+  <mat-label>{{ 'order.color' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sColorName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.sColorName"
@@ -33,19 +32,6 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-
-<!-- <mat-form-field>
-  <mat-label>{{ 'order.process-card-no' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.processCardNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
-  <button
-    *ngIf="entitiesTableConfig.componentsData.processCardNo"
-    matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('processCardNo')"
-  >
-    <mat-icon class="material-icons">close</mat-icon>
-  </button>
-</mat-form-field> -->
-
 <mat-form-field>
   <mat-label>{{ 'order.product-name' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sMaterialName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
@@ -57,7 +43,11 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-<div class="action-btns">
+<nz-range-picker
+  [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" nzSize="large"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange" [nzAllowClear]="true"
+></nz-range-picker>
+<div class="action-btns" style="margin-left: 5px;">
   <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
     {{ 'action.search' | translate }}
   </button>

@@ -34,28 +34,40 @@ public class MesBoardController extends BaseController {
     @Autowired
     MesService mesService;
 
+//    /**
+//     * 车间下全部产线
+//     */
+//    @ApiOperation(value = "车间下全部产线", notes = "车间下全部产线")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "path", required = true),
+//    })
+//    @GetMapping(value = "/mes/board/workshop/{workshopId}/productionLines")
+//    public List<MesBoarProductionLineVO> listProductionLinesByWorkshopId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
+//        return this.mesService.listProductionLinesByWorkshopId(getTenantId(), workshopId);
+//    }
+
     /**
-     * 车间下全部产线
+     * 工厂下全部车间
      */
-    @ApiOperation(value = "车间下全部产线", notes = "车间下全部产线")
+    @ApiOperation(value = "工厂下全部车间", notes = "工厂下全部车间")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "path", required = true),
+            @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "path", required = true),
     })
-    @GetMapping(value = "/mes/board/workshop/{workshopId}/productionLines")
-    public List<MesBoarProductionLineVO> listProductionLinesByWorkshopId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
-        return this.mesService.listProductionLinesByWorkshopId(getTenantId(), workshopId);
+    @GetMapping(value = "/mes/board/factory/{factoryId}/workshops")
+    public List<MesBoarWorkshopVO> listWorkshopsByFactoryId(@PathVariable("factoryId") UUID factoryId) throws ThingsboardException {
+        return this.mesService.listWorkshopsByFactoryId(getTenantId(), factoryId);
     }
 
     /**
-     * 产线下全部设备
+     * 车间下全部设备
      */
-    @ApiOperation(value = "产线下全部设备", notes = "产线下全部设备")
+    @ApiOperation(value = "车间下全部设备", notes = "车间下全部设备")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "path", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "path", required = true),
     })
-    @GetMapping(value = "/mes/board/productionLine/{productionLineId}/devices")
-    public List<MesBoarDeviceVO> listDevicesByProductionLineId(@PathVariable("productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.listDevicesByProductionLineId(getTenantId(), productionLineId);
+    @GetMapping(value = "/mes/board/workshopId/{workshopId}/devices")
+    public List<MesBoarDeviceVO> listDevicesByProductionLineId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.listDevicesByProductionLineId(getTenantId(), workshopId);
     }
 
     /**
@@ -63,11 +75,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "开机率分析top", notes = "开机率分析top")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/device/operation/rate/top")
-    public List<MesBoarDeviceOperationRateVO> getDeviceOperationRateTop(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getDeviceOperationRateTop(getTenantId(), productionLineId);
+    public List<MesBoarDeviceOperationRateVO> getDeviceOperationRateTop(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getDeviceOperationRateTop(getTenantId(), workshopId);
     }
 
     /**
@@ -75,11 +87,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "产量趋势", notes = "产量趋势")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/trend")
-    public List<MesBoarCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getCapacityTrend(getTenantId(), productionLineId);
+    public List<MesBoarCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getCapacityTrend(getTenantId(), workshopId);
     }
 
     /**
@@ -87,11 +99,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "生产监控", notes = "生产监控")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/production/monitoring")
-    public List<MesBoarProductionMonitoringVO> getProductionMonitoring(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getProductionMonitoring(getTenantId(), productionLineId);
+    public List<MesBoarProductionMonitoringVO> getProductionMonitoring(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getProductionMonitoring(getTenantId(), workshopId);
     }
 
     /**
@@ -99,11 +111,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "机台产量对比", notes = "机台产量对比")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/comparison")
-    public List<MesBoarCapacityComparisonVO> getCapacityComparison(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getCapacityComparison(getTenantId(), productionLineId);
+    public List<MesBoarCapacityComparisonVO> getCapacityComparison(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getCapacityComparison(getTenantId(), workshopId);
     }
 
     /**
@@ -111,11 +123,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "产量信息", notes = "产量信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/info")
-    public MesBoarCapacityInfoVO getCapacityInfo(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getCapacityInfo(getTenantId(), productionLineId);
+    public MesBoarCapacityInfoVO getCapacityInfo(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getCapacityInfo(getTenantId(), workshopId);
     }
 
     /**
@@ -123,11 +135,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "生产进度跟踪", notes = "生产进度跟踪")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/production/progress/tracking")
-    public List<MesBoardProductionProgressTrackingItemVO> getProductionProgressTracking(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getProductionProgressTracking(getTenantId(), productionLineId);
+    public List<MesBoardProductionProgressTrackingItemVO> getProductionProgressTracking(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getProductionProgressTracking(getTenantId(), workshopId);
     }
 
     /**
@@ -135,11 +147,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "机台当前生产任务", notes = "机台当前生产任务")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/production/task")
-    public List<String> getProductionTask(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getProductionTask(getTenantId(), productionLineId);
+    public List<String> getProductionTask(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getProductionTask(getTenantId(), workshopId);
     }
 
     /**
@@ -147,11 +159,11 @@ public class MesBoardController extends BaseController {
      */
     @ApiOperation(value = "异常预警", notes = "异常预警")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "productionLineId", value = "产线Id", paramType = "query", required = true),
+            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/abnormal/warning")
-    public List<String> getAbnormalWarning(@RequestParam(value = "productionLineId") UUID productionLineId) throws ThingsboardException {
-        return this.mesService.getAbnormalWarning(getTenantId(), productionLineId);
+    public List<String> getAbnormalWarning(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+        return this.mesService.getAbnormalWarning(getTenantId(), workshopId);
     }
 
 }

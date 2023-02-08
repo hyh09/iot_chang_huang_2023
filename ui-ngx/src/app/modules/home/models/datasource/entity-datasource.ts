@@ -112,11 +112,15 @@ export class EntitiesDataSource<T extends BaseData<HasId>, P extends PageLink = 
     }
   }
 
-  isCurrentEntity(entity: T): boolean {
-    if (this.currentEntity && entity && this.currentEntity.id && entity.id) {
-      if (this.currentEntity.id === entity.id) {
+  selectEntity(entity: T) {
+    this.currentEntity = entity;
+  }
+
+  isCurrentEntity(entity: T, checkKey = 'id'): boolean {
+    if (this.currentEntity && entity && this.currentEntity[checkKey] && entity[checkKey]) {
+      if (this.currentEntity[checkKey] === entity[checkKey]) {
         return true;
-      } else if (this.currentEntity.id.id && entity.id.id && this.currentEntity.id.id === entity.id.id) {
+      } else if (checkKey === 'id' && this.currentEntity.id.id && entity.id.id && this.currentEntity.id.id === entity.id.id) {
         return true;
       }
       return false;

@@ -2,10 +2,13 @@ import { OrderConsumption } from '../../../../../../shared/models/custom/potency
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { PotencyService } from '@app/core/http/custom/potency.service';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
+import { CellActionDescriptor, DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
 import { EntityType, entityTypeTranslations, entityTypeResources } from '@app/shared/public-api';
 import { OrderConsumptionFilterComponent } from './order-consumption-filter.component';
 import { DatePipe } from '@angular/common';
+import { TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ProcessCardsComponent } from './process-cards.component';
 
 @Injectable()
 export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableConfig<OrderConsumption>> {
@@ -14,7 +17,9 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
 
   constructor(
     private potencyService: PotencyService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private translate: TranslateService,
+    public dialog: MatDialog
   ) {
     this.config.entityType = EntityType.POTENCY;
     this.config.filterComponent = OrderConsumptionFilterComponent;
@@ -71,8 +76,35 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
       });
     }
 
+    this.config.cellActionDescriptors = this.configureCellActions();
+
     return this.config;
 
+  }
+
+  configureCellActions(): Array<CellActionDescriptor<OrderConsumption>> {
+    const actions: Array<CellActionDescriptor<OrderConsumption>> = [];
+    actions.push({
+      name: this.translate.instant('potency.order-process-cards'),
+      mdiIcon: 'mdi:process',
+      isEnabled: (entity) => (!!(entity && entity.uguid)),
+      onAction: ($event, entity) => this.openProcessCardsDialog($event, entity)
+    });
+    return actions;
+  }
+
+  openProcessCardsDialog($event: Event, order: OrderConsumption): void {
+    if ($event) {
+      $event.stopPropagation();
+    }
+    if (!order || !order.uguid) {
+      return;
+    }
+    this.dialog.open<ProcessCardsComponent, OrderConsumption, void>(ProcessCardsComponent, {
+      disableClose: true,
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      data: order
+    })
   }
 
 }

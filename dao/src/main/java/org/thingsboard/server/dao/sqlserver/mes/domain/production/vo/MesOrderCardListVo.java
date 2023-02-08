@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * 生产卡列表
  *
@@ -30,4 +32,9 @@ public class MesOrderCardListVo {
     @JsonProperty("sColorName")
     @ApiModelProperty("颜色")
     private String sColorName;
+
+    @JsonProperty("tCreateTime")
+    @ApiModelProperty("创建时间")
+    private Date tCreateTime;
+
 }

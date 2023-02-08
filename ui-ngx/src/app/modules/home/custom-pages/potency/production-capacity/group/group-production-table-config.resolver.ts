@@ -31,7 +31,7 @@ export class GroupProductionTableConfigResolver implements Resolve<EntityTableCo
       new EntityTableColumn<GroupProduction>('ntrackQty', 'potency.capacity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
       new EntityTableColumn<GroupProduction>('cardNo', 'potency.card-no', '100px', (entity) => (entity.cardNo || ''), () => ({}), false),
       new EntityTableColumn<GroupProduction>('materialNo', 'potency.material-no', '150px', (entity) => (entity.materialNo || ''), () => ({}), false),
-      new EntityTableColumn<GroupProduction>('colorName', 'potency.color-name', '100px', (entity) => (entity.colorName || ''), () => ({}), false),
+      new EntityTableColumn<GroupProduction>('colorName', 'potency.color', '100px', (entity) => (entity.colorName || ''), () => ({}), false),
       new DateEntityTableColumn<GroupProduction>('createdTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false),
       new DateEntityTableColumn<GroupProduction>('updatedTime', 'common.end-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false),
       new EntityTableColumn<GroupProduction>('duration', 'potency.duration', '80px', (entity) => (entity.duration || ''), () => ({}), false)

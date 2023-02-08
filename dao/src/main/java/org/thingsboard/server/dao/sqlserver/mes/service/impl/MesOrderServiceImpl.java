@@ -70,7 +70,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     /**
      * 查询订单进度
      */
-    private String sqlOrderProgressList = " SELECT row_number () OVER (ORDER BY A.tCreateTime  DESC) AS rownumber ," +
+    private String sqlOrderProgressList = " SELECT " +
             " A.sOrderNo,D.sCustomerName,C.dDeliveryDate,E.sMaterialName,F.sColorName,B.nQty,B.sFinishingMethod " +
             "FROM dbo.sdOrderHdr A(NOLOCK) " +
             "JOIN dbo.sdOrderDtl B(NOLOCK)ON B.usdOrderHdrGUID=A.uGUID " +
@@ -139,7 +139,8 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             "  a.sCardNo,\n" +
             "  d.sOrderNo,\n" +
             "  e.sMaterialName,\n" +
-            "  f.sColorName \n" +
+            "  f.sColorName, \n" +
+            " a.tCreateTime " +
             "FROM\n" +
             "  psWorkFlowCard a WITH (NOLOCK)\n" +
             "  JOIN sdOrderLot b WITH (NOLOCK) ON a.usdOrderLotGUID= b.uGUID\n" +
@@ -156,12 +157,12 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             "\ta.sWorkerName,\n" +
             "\ta.nTrackQty,\n" +
             "\ta.tStartTime,\n" +
-            "\ta.tEndTime \n" +
+            "\ta.tEndTime, \n" +
             "\ta.uemEquipmentGUID \n" +
             "FROM\n" +
             "\tdbo.mnProducted a ( NOLOCK ) \n" +
             "WHERE\n" +
-            "\ta.sCardNo = ?";
+            "\ta.sCardNo = ? ";
 
     @Override
     public PageData<MesOrderListVo> findOrderList(MesOrderListDto dto, PageLink pageLink) {
@@ -206,6 +207,9 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                     if (StringUtils.isNotEmpty(dto.getSColorName())) {
                         sql.append("and F.sColorName =? ");
                         params.add(dto.getSColorName());
+                    }
+                    if (orderFlag) {
+                        sql.append("order by a.tCreateTime desc ");
                     }
                 }
             }, MesOrderProgressListVo.class, sqlOrderProgressList, pageLink);
@@ -262,15 +266,15 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                     params.add(dto.getDateEnd());
                 }
                 if (StringUtils.isNotEmpty(dto.getSCardNo())) {
-                    sql.append("and a.sCardNo =? ");
+                    sql.append("and a.sCardNo LIKE CONCAT('%',?, '%') ");
                     params.add(dto.getSCardNo());
                 }
                 if (StringUtils.isNotEmpty(dto.getSOrderNo())) {
-                    sql.append("and d.sOrderNo =? ");
+                    sql.append("and d.sOrderNo LIKE CONCAT('%',?, '%') ");
                     params.add(dto.getSOrderNo());
                 }
                 if (StringUtils.isNotEmpty(dto.getSMaterialName())) {
-                    sql.append("and e.sMaterialName =? ");
+                    sql.append("and e.sMaterialName LIKE CONCAT('%',?, '%') ");
                     params.add(dto.getSMaterialName());
                 }
                 if (orderFlag) {
@@ -281,14 +285,16 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     }
 
     @Override
-    public List<MesProductedVo> findProductedList(String cardNo) {
+    public PageData<MesProductedVo> findProductedList(String cardNo, PageLink pageLink) {
         if (StringUtils.isEmpty(cardNo)) {
-            return new ArrayList<>();
+            return new PageData<>();
         }
-        List<Object> params = new ArrayList<>();
-        params.add(cardNo);
-        Object[] para = params.toArray(new Object[params.size()]);
-        return this.jdbcTemplate.query(sqlProducted, para, new BeanPropertyRowMapper(MesProductedVo.class));
+        return pageJdbcUtil.queryList((params, sql, orderFlag) -> {
+            params.add(cardNo);
+            if (orderFlag) {
+                sql.append("order by a.tCreateTime desc ");
+            }
+        }, MesProductedVo.class, sqlProducted, pageLink);
     }
 
     @Override
@@ -304,8 +310,6 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             mesChartVo.setKey(e.getId().getAttributeKey());
             return mesChartVo;
         }).collect(Collectors.toList());
-        MesChartVo mesChartVo = result.get(0);
-        mesChartVo.setTsKvs(this.listTsKvs(dto.getTenantId(), new DeviceId(deviceId), mesChartVo.getKey(), dto.getTStartTime().getTime(), dto.getTEndTime().getTime()));
         return result;
     }
 
@@ -370,7 +374,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
 
         Object[] para = params.toArray(new Object[params.size()]);
 
-        log.info(">>>>>>>>>sql.toString()" + sql.toString());
+        log.info(">>>>>>>>>sql.toString()" + sql);
         return this.jdbcTemplate.queryForObject(sql.toString(), para, Integer.class);
     }
 

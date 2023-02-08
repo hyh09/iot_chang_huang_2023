@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
-import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
+import { EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
 import { EntityType, entityTypeTranslations, entityTypeResources } from '@app/shared/public-api';
-import { DatePipe } from '@angular/common';
 import { ProdReport } from '@app/shared/models/custom/production-mng.models';
 import { ProductionReportFilterComponent } from './production-report-filter.component';
 import { ProductionMngService } from '@app/core/http/custom/production-mng.service';
 import { TranslateService } from '@ngx-translate/core';
+import { FileService } from '@app/core/http/custom/file.service';
 
 @Injectable()
 export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<ProdReport>> {
@@ -15,7 +15,7 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
 
   constructor(
     private productionMngService: ProductionMngService,
-    private datePipe: DatePipe,
+    private fileService: FileService,
     private translate: TranslateService
   ) {
     this.config.entityType = EntityType.POTENCY;
@@ -26,15 +26,15 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
     this.config.defaultSortOrder = null;
 
     this.config.columns.push(
-      new EntityTableColumn<ProdReport>('sorderNo', 'potency.production-order-no', '60px', (entity) => (entity.sorderNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('scardNo', 'potency.card-no', '60px', (entity) => (entity.scardNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('sorderNo', 'potency.production-order-no', '80px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('scardNo', 'potency.card-no', '80px', (entity) => (entity.scardNo || ''), () => ({}), false),
       new EntityTableColumn<ProdReport>('scolorNo', 'potency.color-number', '60px', (entity) => (entity.scolorNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('tfactStartTime', 'alarm.start-time', '100px', (entity) => (entity.tfactStartTime || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('tfactEndTime', 'alarm.end-time', '100px', (entity) => (entity.tfactEndTime || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('fnMESGetDiffTimeStr', 'potency.duration', '150px', (entity) => (entity.fnMESGetDiffTimeStr || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('ntrackQty', 'potency.production-output', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('fnMESGetDiffTimeStr', 'potency.duration', '80px', (entity) => (entity.fnMESGetDiffTimeStr || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('ntrackQty', 'potency.capacity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
       new EntityTableColumn<ProdReport>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
-      new EntityTableColumn<ProdReport>('sequipmentName', 'potency.production-machine', '150px', (entity) => (entity.sequipmentName || ''), () => ({}), false)
+      new EntityTableColumn<ProdReport>('sequipmentName', 'potency.device-name', '150px', (entity) => (entity.sequipmentName || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('tfactStartTime', 'alarm.start-time', '100px', (entity) => (entity.tfactStartTime || ''), () => ({}), false),
+      new EntityTableColumn<ProdReport>('tfactEndTime', 'alarm.end-time', '100px', (entity) => (entity.tfactEndTime || ''), () => ({}), false)
     );
   }
 
@@ -58,7 +58,6 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
     // 导出功能
     this.config.componentsData.exportTableData = () => {
       this.config.componentsData.tableList.subscribe((res) => {
-        //this.productionMngService.exportProdSchedulRecords().subscribe();
         let dataList = []
         let titleList = ['生产单号', '卡号', '色号', '开始时间', '结束时间', '时长', '生产产量', '班组名称', '生产机台']
         dataList.push(titleList)
@@ -68,8 +67,7 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
             dataList.push(itemList)
           });
         }
-        this.productionMngService.exportPort('生产报工', dataList).subscribe();
-        console.log(dataList)
+        this.fileService.exportTable('生产报工', dataList).subscribe();
       })
     }
 

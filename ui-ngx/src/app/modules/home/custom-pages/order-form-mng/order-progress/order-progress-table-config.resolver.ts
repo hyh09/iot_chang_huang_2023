@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
-import { EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
-import { EntityType, entityTypeResources, entityTypeTranslations, HasId } from "@app/shared/public-api";
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from "@app/modules/home/models/entity/entities-table-config.models";
+import { EntityType, entityTypeResources, entityTypeTranslations, HasId, PageLink } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { OrderProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { OrdersProgressFiltersComponent } from './orders-progress-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
-import { ProductionMngService } from '@app/core/http/custom/production-mng.service';
+import { DatePipe } from "@angular/common";
+import { FileService } from "@app/core/http/custom/file.service";
 
 @Injectable()
 export class OrdersProgressTableConfigResolver implements Resolve<EntityTableConfig<OrderProgress>> {
@@ -16,7 +17,8 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
   constructor(
     private translate: TranslateService,
     private OrderProgressService: OrderFormService,
-    private productionMngService: ProductionMngService,
+    private fileService: FileService,
+    private datePipe: DatePipe
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
     this.config.filterComponent = OrdersProgressFiltersComponent;
@@ -29,24 +31,23 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       sMaterialName: '',
       sColorName: '',
       dateRange:[],
-      exportTableData: null,
-      tableList: []
+      exportTableData: null
     }
 
     this.config.columns.push(
-      new EntityTableColumn<OrderProgress>('sorderNo', 'order.order-no', '120px'),
-      new EntityTableColumn<OrderProgress>('scustomerName', 'order.customer', '120px'),
-      new EntityTableColumn<OrderProgress>('ddeliveryDate', 'order.delivery-date', '120px'),
-      new EntityTableColumn<OrderProgress>('smaterialName', 'order.product-name', '200px', (entity) => (entity.smaterialName || ''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('scolorName', 'order.colour', '150px'),
-      new EntityTableColumn<OrderProgress>('nqty', 'order.order-quantity', '150px'),
-      new EntityTableColumn<OrderProgress>('sfinishingMethod', 'order.arrangement-requirements', '150px'),
-      new EntityTableColumn<OrderProgress>('wu1', 'order.turnover-cloth', '150px'),
-      new EntityTableColumn<OrderProgress>('wu2', 'order.billet-setting', '150px'),
-      new EntityTableColumn<OrderProgress>('wu3', 'order.dyeing', '100px'),
-      new EntityTableColumn<OrderProgress>('wu4', 'order.Chengding', '100px'),
-      new EntityTableColumn<OrderProgress>('emergencyDegree', 'order.cloth-checking', '100px'),
-      new EntityTableColumn<OrderProgress>('merchandiser', 'order.warehousing', '100px'),
+      new EntityTableColumn<OrderProgress>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('scustomerName', 'order.customer', '120px', (entity) => (entity.scustomerName || ''), () => ({}), false),
+      new DateEntityTableColumn<OrderProgress>('ddeliveryDate', 'order.delivery-date', this.datePipe, '120px', 'yyyy-MM-dd HH:ss', false),
+      new EntityTableColumn<OrderProgress>('smaterialName', 'order.product-name', '300px', (entity) => (entity.smaterialName || ''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('scolorName', 'order.color', '120px', (entity) => (entity.scolorName || ''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('nqty', 'order.order-quantity', '120px', (entity) => (entity.nqty || ''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('sfinishingMethod', 'order.arrangement-requirements', '250px', (entity) => (entity.sfinishingMethod || ''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('wu1', 'order.turnover-cloth', '150px', (entity) => (''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('wu2', 'order.billet-setting', '150px', (entity) => (''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('wu3', 'order.dyeing', '100px', (entity) => (''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('wu4', 'order.Chengding', '100px', (entity) => (''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('wu5', 'order.cloth-checking', '100px', (entity) => (''), () => ({}), false),
+      new EntityTableColumn<OrderProgress>('wu6', 'order.warehousing', '100px', (entity) => (''), () => ({}), false)
     );
   }
   
@@ -70,17 +71,36 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
 
     // 导出功能
     this.config.componentsData.exportTableData = () => {
-      this.config.componentsData.tableList.subscribe((res) => {
-        let dataList = []
-        let titleList = ['订单号', '客户', '交货日期', '品名', '颜色', '订单数量', '整理要求', '翻布', '坯定', '染色', '成定','验布','入库']
-        dataList.push(titleList)
+      let startTime: number, endTime: number;
+      const dateRange = this.config.componentsData.dateRange;
+      if (dateRange && dateRange.length === 2) {
+        const startDate = this.config.componentsData.dateRange[0] as Date;
+        startDate.setSeconds(0);
+        startDate.setMilliseconds(0);
+        startTime = startDate.getTime();
+        const endDate = this.config.componentsData.dateRange[1] as Date;
+        endDate.setSeconds(59);
+        endDate.setMilliseconds(999);
+        endTime = endDate.getTime();
+      }
+      const { sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
+      this.OrderProgressService.getOrderProgress(new PageLink(999999, 0), {
+        sOrderNo, sCustomerName, sMaterialName, sColorName,
+        dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
+      }).subscribe((res) => {
+        const dataList = [];
         if (res.data.length > 0) {
+          const titleKeys = ['order.order-no', 'order.customer', 'order.delivery-date', 'order.product-name', 'order.color', 'order.order-quantity', 'order.arrangement-requirements', 'order.turnover-cloth', 'order.billet-setting', 'order.dyeing', 'order.Chengding', 'order.cloth-checking', 'order.warehousing'];
+          const titleNames = [];
+          titleKeys.forEach(key => {
+            titleNames.push(this.translate.instant(key));
+          });
+          dataList.push(titleNames);
           res.data.forEach(item => {
-            let itemList = [item.sorderNo, item.scustomerName, item.ddeliveryDate, item.smaterialName, item.scolorName, item.nqty, item.sfinishingMethod, '', '', '', '', item.emergencyDegree, item.merchandiser]
-            dataList.push(itemList)
+            dataList.push([item.sorderNo, item.scustomerName, this.datePipe.transform(item.ddeliveryDate, 'yyyy-MM-dd HH:mm'), item.smaterialName, item.scolorName, item.nqty, item.sfinishingMethod, '', '', '', '', '', '']);
           });
         }
-        this.productionMngService.exportPort('订单进度', dataList).subscribe();
+        this.fileService.exportTable(this.translate.instant('order.order-progress'), dataList).subscribe();
       })
     }
 
@@ -88,19 +108,20 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       let startTime: number, endTime: number;
       const dateRange = this.config.componentsData.dateRange;
       if (dateRange && dateRange.length === 2) {
-        startTime = (this.config.componentsData.dateRange[0] as Date).getTime();
-        endTime = (this.config.componentsData.dateRange[1] as Date).getTime();
+        const startDate = this.config.componentsData.dateRange[0] as Date;
+        startDate.setSeconds(0);
+        startDate.setMilliseconds(0);
+        startTime = startDate.getTime();
+        const endDate = this.config.componentsData.dateRange[1] as Date;
+        endDate.setSeconds(59);
+        endDate.setMilliseconds(999);
+        endTime = endDate.getTime();
       }
       const { sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      let tableList = this.OrderProgressService.getOrderProgress(pageLink, {
-        sOrderNo: sOrderNo || '',
-        sCustomerName: sCustomerName || '',
-        sMaterialName: sMaterialName || '',
-        sColorName: sColorName || '',
+      return this.OrderProgressService.getOrderProgress(pageLink, {
+        sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       });
-      this.config.componentsData.tableList = tableList
-      return tableList
     }
     return this.config;
   }
