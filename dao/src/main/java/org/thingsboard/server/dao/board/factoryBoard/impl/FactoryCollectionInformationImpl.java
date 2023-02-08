@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
@@ -11,6 +12,7 @@ import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
+import org.thingsboard.server.dao.util.redis.StatisticsCountRedisSvc;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,13 +27,13 @@ import java.math.RoundingMode;
  */
 @Slf4j
 @Service
+@AllArgsConstructor
 public class FactoryCollectionInformationImpl implements FactoryCollectionInformationSvc {
 
     private DeviceMonitorService deviceMonitorService;
+    private StatisticsCountRedisSvc statisticsCountRedisSvc;
 
-    public FactoryCollectionInformationImpl(DeviceMonitorService deviceMonitorService) {
-        this.deviceMonitorService = deviceMonitorService;
-    }
+
 
     @Override
     public DeviceStatusNumVo queryDeviceStatusNum(TenantId tenantId,    FactoryDeviceQuery factoryDeviceQuery) {
