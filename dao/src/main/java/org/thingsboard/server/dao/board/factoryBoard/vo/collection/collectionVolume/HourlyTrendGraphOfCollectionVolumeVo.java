@@ -1,7 +1,12 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
+
+import java.util.List;
 
 /**
  * @Project Name: thingsboard
@@ -13,5 +18,12 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class HourlyTrendGraphOfCollectionVolumeVo {
+
+    private List<ChartDataVo> yesterdayLine;
+
+    private List<ChartDataVo> todayLine;
+
 }

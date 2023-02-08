@@ -4,6 +4,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.Cha
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +72,33 @@ public class DateLocaDateAndTimeUtil {
         });
         return list;
     }
+
+    /**
+     * 当天0点
+     * @return
+     */
+    public LocalDateTime getTodayZeroTime() {
+        return LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+    }
+
+    /**
+     * 当天23点
+     * @return
+     */
+    public  LocalDateTime getTodayTwentyThreeTime(){
+        LocalTime localTime =  LocalTime.of(23,0);
+        return LocalDateTime.of(LocalDate.now(),localTime );
+    }
+
+    /**
+     * 当天0点
+     * @return
+     */
+    public LocalDateTime getYesterdayZeroTime() {
+        return LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+    }
+
+
 
 
 }
