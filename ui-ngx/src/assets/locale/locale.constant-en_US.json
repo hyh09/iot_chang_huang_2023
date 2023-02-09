@@ -3593,7 +3593,6 @@
     "no-system-version": "No system version found."
   },
   "device-mng": {
-    "production-progress":"Production progress",
     "device-mng": "Device management",
     "data-dic": "Data dictionary",
     "device-dic": "Device dictionary",
@@ -3955,8 +3954,6 @@
     "param-not-config": "No parameters specified"
   },
   "potency": {
-    "staff-on-duty":"Staff on duty",
-    "production-team":"Production team",
     "cloth-car-number":"Cloth car number",
     "completion-rate":"Completion rate",
     "production-quantity":"Production quantity",
@@ -4010,8 +4007,6 @@
     "card-no": "Card No",
     "material-no": "Material No",
     "duration": "Duration",
-    "production-output":"Production output",
-    "production-machine":"Production machine",
     "delivery-date":"Delivery date",
     "total-quantity":"Total quantity",
     "order-no":"Order No",
@@ -4029,8 +4024,10 @@
     "no-procedures-text": "No procedures were found.",
     "process-card-no": "Process Card No",
     "order-process-cards": "Order Process Cards",
+    "view-order-process-cards": "View Order Process Cards",
     "procedure-no": "Procedure No",
-    "procedure-name": "Procedure Name"
+    "procedure-name": "Procedure Name",
+    "order-no-template": " (Order No: {{ orderNo }})"
   },
   "production-mng": {
     "production-mng": "Production management",
@@ -4134,6 +4131,9 @@
     "actual-capacity": "Actual output",
     "maintain-time": "Maintenance time",
     "no-process-cards": "No process cards were found",
-    "no-procedures": "No procedures were found"
+    "no-procedures": "No procedures were found",
+    "production-progress":"Production progress",
+    "view-production-progress": "View Produciton progress",
+    "order-process-no-template": " (Order No: {{ orderNo }}, Process No: {{ processNo }})"
   }
 }
