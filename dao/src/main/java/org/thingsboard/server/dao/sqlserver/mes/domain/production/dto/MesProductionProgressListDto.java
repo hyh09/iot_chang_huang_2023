@@ -11,5 +11,7 @@ public class MesProductionProgressListDto {
 
     @ApiModelProperty("订单号")
     private String sOrderNo;
+    @ApiModelProperty("卡号")
+    private String sCardNo;
 
 }
