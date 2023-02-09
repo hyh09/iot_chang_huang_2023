@@ -16,10 +16,10 @@ export class ProcedureProductionTableConfigResolver implements Resolve<EntityTab
     private potencyService: PotencyService,
     private datePipe: DatePipe
   ) {
-    this.config.entityType = EntityType.POTENCY;
+    this.config.entityType = EntityType.PROCEDURE;
     this.config.filterComponent = ProcedureProductionFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.PROCEDURE);
+    this.config.entityResources = entityTypeResources.get(EntityType.PROCEDURE);
 
     this.config.defaultSortOrder = null;
 
@@ -37,7 +37,7 @@ export class ProcedureProductionTableConfigResolver implements Resolve<EntityTab
       new EntityTableColumn<ProcedureProduction>('actualTime', 'potency.actual-time-cost', '100px', (entity) => (entity.actualTime || ''), () => ({}), false),
       new EntityTableColumn<ProcedureProduction>('timeoutMinutes', 'potency.timeout-on-minutes', '100px', (entity) => (entity.timeoutMinutes || ''), () => ({}), false),
       new EntityTableColumn<ProcedureProduction>('overTimeRatio', 'potency.timeout-on-ratio', '100px', (entity) => (entity.overTimeRatio || ''), () => ({}), false),
-      new EntityTableColumn<ProcedureProduction>('workerGroupName', 'potency.color-name', '100px', (entity) => (entity.workerGroupName || ''), () => ({}), false),
+      new EntityTableColumn<ProcedureProduction>('workerGroupName', 'potency.team-name', '100px', (entity) => (entity.workerGroupName || ''), () => ({}), false),
       new DateEntityTableColumn<ProcedureProduction>('createdTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false),
       new DateEntityTableColumn<ProcedureProduction>('updatedTime', 'common.end-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false)
     );

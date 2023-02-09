@@ -85,11 +85,13 @@ export interface OrderProgress extends BaseData<any> {
 }
 
 export interface processCardProgress extends BaseData<ProdCardId> {
+  scardNo: string;
   ddeliveryDate: string;
   nqty: string;
   scolorName: string;
   scustomerName: string;
   sfinishingMethod: string;
+  nplanOutputQty: string;
   smaterialName: string;
   sorderNo: string;
   sworkingProcedureName: string;

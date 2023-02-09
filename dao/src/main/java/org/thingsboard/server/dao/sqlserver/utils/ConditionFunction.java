@@ -6,13 +6,13 @@ import java.util.List;
  * @author fwy
  * @date 2023/1/11 16:09设计模式
  */
-public interface ConditionFunction<k> {
+public interface ConditionFunction {
     /**
      * 条件拼接函数
-     * @param dto
+     *
      * @param params
      * @param sql
-     * @param orderFlag 判断是否排序
+     * @param orderFlag 判断是否排序,需要加上排序字段不然导致分页失败
      */
-    void sqlWrapper(k dto, List<Object> params, StringBuffer sql,Boolean orderFlag);
+    void sqlWrapper(List<Object> params, StringBuffer sql, Boolean orderFlag);
 }

@@ -53,10 +53,10 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
         animation: false
       }
     });
-    const unit = ((this.data.properties || [])[0] || {}).unit;
+    const unit = ((this.data.properties || [])[0] || {}).unit || '';
     const option = {
       title: {
-        text: this.data.tableName,
+        text: this.data.tableName || '',
         subtext: unit ? this.translate.instant('device-monitor.prop-unit', { unit }) : '',
         left: -5,
         textStyle: {

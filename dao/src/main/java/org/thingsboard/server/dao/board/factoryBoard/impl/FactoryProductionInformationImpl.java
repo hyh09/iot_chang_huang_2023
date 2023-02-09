@@ -7,7 +7,6 @@ import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
-import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
@@ -17,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -48,12 +45,11 @@ public class FactoryProductionInformationImpl implements FactoryProductionInform
         if (CollectionUtils.isEmpty(workshopList)) {
             return finalResultList;
         }
-        ExecutorService executor = Executors.newFixedThreadPool(Math.min(workshopList.size(), 10));
         List<CompletableFuture<WorkshopAndRunRateVo>> futures = workshopList.stream()
                 .map(t ->
                         CompletableFuture.supplyAsync(() ->
                                         (getVo(t, tenantId))
-                                , executor)
+                                )
 
 
                 ).collect(Collectors.toList());

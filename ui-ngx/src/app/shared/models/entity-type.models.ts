@@ -61,6 +61,8 @@ export enum EntityType {
   MNG_CALENDAR = 'MNG_CALENDAR',
   ORDER = 'ORDER',
   ORDER_PLAN = 'ORDER_PLAN',
+  PROCESS_CARD = 'PROCESS_CARD',
+  PROCEDURE = 'PROCEDURE',
   TENANT_MENU_ROLE = 'TENANT_MENU_ROLE',
   USER_MENU_ROLE = 'USER_MENU_ROLE',
   USER_CREDENTIALS = 'USER_CREDENTIALS',
@@ -546,6 +548,20 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       EntityType.ORDER_PLAN,
       {
         type: 'entity.type-order-plan'
+      }
+    ],
+    [
+      EntityType.PROCESS_CARD,
+      {
+        type: 'entity.process-card',
+        noEntities: 'order.no-process-cards',
+      }
+    ],
+    [
+      EntityType.PROCEDURE,
+      {
+        type: 'entity.procedure',
+        noEntities: 'order.no-procedures',
       }
     ],
     [
