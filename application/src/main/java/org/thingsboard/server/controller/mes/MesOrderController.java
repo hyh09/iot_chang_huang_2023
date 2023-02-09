@@ -170,7 +170,7 @@ public class MesOrderController extends BaseController {
         }
     }
 
-    @ApiOperation("参数趋势图")
+    @ApiOperation("参数列表")
     @PostMapping(value = "/getChart")
     @ResponseBody
     public List<MesChartVo> getChart(@Validated MesChartDto dto) throws ThingsboardException {

@@ -308,6 +308,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
         List<MesChartVo> result = allByIdEntityId.stream().map(e -> {
             MesChartVo mesChartVo = new MesChartVo();
             mesChartVo.setKey(e.getId().getAttributeKey());
+            mesChartVo.setDeviceId(deviceId);
             return mesChartVo;
         }).collect(Collectors.toList());
         return result;
