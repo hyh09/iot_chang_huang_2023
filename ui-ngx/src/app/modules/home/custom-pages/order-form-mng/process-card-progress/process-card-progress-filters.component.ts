@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AppState } from '@app/core/core.state';
 import { EntityTableHeaderComponent } from '@app/modules/home/components/entity/entity-table-header.component';
-import { processCardProgress } from '@app/shared/models/custom/order-form-mng.models';
+import { ProcessCardProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { environment } from '@env/environment';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'app-process-card-progress-filters',
   templateUrl: './process-card-progress-filters.component.html',
 })
-export class ProcessCardProgressFiltersComponent extends EntityTableHeaderComponent<processCardProgress> {
+export class ProcessCardProgressFiltersComponent extends EntityTableHeaderComponent<ProcessCardProgress> {
 
   env = environment;
 

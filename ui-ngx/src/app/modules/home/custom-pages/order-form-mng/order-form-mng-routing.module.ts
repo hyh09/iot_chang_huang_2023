@@ -43,7 +43,6 @@ const routes: Routes = [
           entitiesTableConfig: OrderCapacityTableConfigResolver
         }
       },
-      // 订单进度
       {
         path: 'ordersProgress',
         component: EntitiesTableComponent,
@@ -58,7 +57,6 @@ const routes: Routes = [
           entitiesTableConfig: OrdersProgressTableConfigResolver
         }
       },
-      // 行程卡进度
       {
         path: 'processCardProgress',
         component: EntitiesTableComponent,

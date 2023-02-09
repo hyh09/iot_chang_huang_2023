@@ -25,6 +25,7 @@ interface FilterParams {
   cardNo?: string;
   customerName?: string;
   sCardNo?: string;
+  scardNo?: string;
   uGuid?: string;
   sMaterialName?: string;
   sOrderNo?: string;

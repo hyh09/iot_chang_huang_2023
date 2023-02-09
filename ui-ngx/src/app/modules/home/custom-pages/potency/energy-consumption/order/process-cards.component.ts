@@ -41,7 +41,7 @@ export class ProcessCardsComponent extends DialogComponent<ProcessCardsComponent
     this.config.entitiesDeleteEnabled = false;
 
     this.config.componentsData = {
-      sCardNo: ''
+      scardNo: ''
     }
 
     this.config.columns.push(
