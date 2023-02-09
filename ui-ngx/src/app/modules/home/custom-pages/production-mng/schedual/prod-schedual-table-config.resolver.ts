@@ -20,24 +20,24 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     private datePipe: DatePipe,
     private translate: TranslateService
   ) {
-    this.config.entityType = EntityType.POTENCY;
+    this.config.entityType = EntityType.ORDER;
     this.config.filterComponent = ProdSchedualFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER);
+    this.config.entityResources = entityTypeResources.get(EntityType.ORDER);
 
     this.config.defaultSortOrder = null;
 
     this.config.columns.push(
-      new EntityTableColumn<ProdSchedual>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '100px', (entity) => (entity.sworkerNameList || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('sorderNo', 'order.order-no', '80px', (entity) => (entity.sorderNo || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('scardNo', 'potency.card-no', '80px', (entity) => (entity.scardNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('nplanOutputQty', 'potency.planned-quantity', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('ntrackQty', 'potency.actual-quantity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
-      new DateEntityTableColumn<ProdSchedual>('ttrackTime', 'common.start-time', this.datePipe, '130px', 'yyyy-MM-dd', false),
+      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '100px', (entity) => (entity.sworkerNameList || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('nplanOutputQty', 'order.intended-capacity', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('ntrackQty', 'order.actual-capacity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
+      new DateEntityTableColumn<ProdSchedual>('ttrackTime', 'datetime.date-from', this.datePipe, '100px', 'yyyy-MM-dd', false),
       new EntityTableColumn<ProdSchedual>('tplanEndTime', 'order.intended-complete-date', '100px', (entity) => (entity.tplanEndTime || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('timeout', 'potency.timeout', '100px', (entity) => (entity.timeout || ''), () => ({}), false)
+      new EntityTableColumn<ProdSchedual>('timeout', 'potency.timeout-on-minutes', '100px', (entity) => (entity.timeout || ''), () => ({}), false)
     );
   }
 
