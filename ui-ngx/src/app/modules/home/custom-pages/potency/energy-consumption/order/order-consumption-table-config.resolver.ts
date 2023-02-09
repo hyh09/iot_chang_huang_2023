@@ -85,7 +85,7 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
   configureCellActions(): Array<CellActionDescriptor<OrderConsumption>> {
     const actions: Array<CellActionDescriptor<OrderConsumption>> = [];
     actions.push({
-      name: this.translate.instant('potency.order-process-cards'),
+      name: this.translate.instant('potency.view-order-process-cards'),
       mdiIcon: 'mdi:process',
       isEnabled: (entity) => (!!(entity && entity.uguid)),
       onAction: ($event, entity) => this.openProcessCardsDialog($event, entity)

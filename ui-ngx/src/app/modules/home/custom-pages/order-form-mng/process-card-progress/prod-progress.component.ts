@@ -6,8 +6,9 @@ import { AppState } from "@app/core/core.state";
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
 import { DialogComponent, EntityType, entityTypeResources, entityTypeTranslations } from "@app/shared/public-api";
 import { Store } from "@ngrx/store";
-import { ProdProgress } from '@app/shared/models/custom/order-form-mng.models';
-import { EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
+import { ProcessCardProgress, ProdProgress } from '@app/shared/models/custom/order-form-mng.models';
+import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'tb-select-users',
@@ -23,13 +24,14 @@ export class SelectProdProgressComponent extends DialogComponent<SelectProdProgr
     public dialogRef: MatDialogRef<SelectProdProgressComponent, ProdProgress[]>,
     protected OrderFormService: OrderFormService,
     protected translate: TranslateService,
-    @Inject(MAT_DIALOG_DATA) protected sorderNo: string
+    private datePipe: DatePipe,
+    @Inject(MAT_DIALOG_DATA) public processCard: ProcessCardProgress
   ) {
     super(store, router, dialogRef);
 
-    this.config.entityType = EntityType.USER_MNG;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.USER_MNG);
-    this.config.entityResources = entityTypeResources.get(EntityType.USER_MNG);
+    this.config.entityType = EntityType.PROCEDURE;
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.PROCEDURE);
+    this.config.entityResources = entityTypeResources.get(EntityType.PROCEDURE);
 
     this.config.addEnabled = false;
     this.config.searchEnabled = false;
@@ -43,19 +45,19 @@ export class SelectProdProgressComponent extends DialogComponent<SelectProdProgr
 
 
     this.config.columns.push(
-      new EntityTableColumn<ProdProgress>('sworkingProcedureNo', 'potency.process-no', '100px'),
-      new EntityTableColumn<ProdProgress>('sworkingProcedureName', 'potency.process-name', '100px'),
-      new EntityTableColumn<ProdProgress>('tfactStartTime', 'common.start-time',  '100px'),
-      new EntityTableColumn<ProdProgress>('tfactEndTime', 'common.end-time',  '100px'),
-      new EntityTableColumn<ProdProgress>('sequipmentName', 'potency.production-machine',  '100px'),
-      new EntityTableColumn<ProdProgress>('ntrackQty', 'potency.production-quantity',  '100px'),
-      new EntityTableColumn<ProdProgress>('npercentValue', 'potency.completion-rate',  '100px'),
-      new EntityTableColumn<ProdProgress>('slocation', 'potency.cloth-car-number',  '100px'),
-      new EntityTableColumn<ProdProgress>('sWorkerGroupName', 'potency.production-team',  '100px'),
-      new EntityTableColumn<ProdProgress>('sworkerNameList', 'potency.staff-on-duty',  '100px')
+      new EntityTableColumn<ProdProgress>('sworkingProcedureNo', 'potency.process-no', '100px', (entity) => (entity.sworkingProcedureNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('sworkingProcedureName', 'potency.process-name','100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new DateEntityTableColumn<ProdProgress>('tfactStartTime', 'common.start-time', this.datePipe, '120px', 'yyyy-MM-dd HH:mm:ss', false),
+      new DateEntityTableColumn<ProdProgress>('tfactEndTime', 'common.end-time', this.datePipe, '120px', 'yyyy-MM-dd HH:mm:ss', false),
+      new EntityTableColumn<ProdProgress>('sequipmentName', 'potency.device-name', '100px', (entity) => (entity.sequipmentName || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('ntrackQty', 'potency.production-quantity', '100px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('npercentValue', 'potency.completion-rate', '100px', (entity) => (entity.npercentValue || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('slocation', 'potency.cloth-car-number', '100px', (entity) => (entity.slocation || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('sworkerNameList', 'potency.team-members', '150px', (entity) => (entity.sworkerNameList || ''), () => ({}), false)
     );
     this.config.entitiesFetchFunction = pageLink => this.OrderFormService.getProdProgressBySorderNo(pageLink, {
-      sOrderNo: this.sorderNo
+      sCardNo: this.processCard.scardNo
     });
   }
 
