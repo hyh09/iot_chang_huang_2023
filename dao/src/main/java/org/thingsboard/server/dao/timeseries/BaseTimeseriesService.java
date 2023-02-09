@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,6 +44,7 @@ import org.thingsboard.server.dao.service.Validator;
 import org.thingsboard.server.dao.sql.energyTime.service.EneryTimeGapService;
 import org.thingsboard.server.dao.sql.trendChart.service.EnergyChartService;
 import org.thingsboard.server.dao.sql.tskv.svc.EnergyHistoryMinuteSvc;
+import org.thingsboard.server.dao.util.redis.StatisticsCountRedisSvc;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -57,11 +58,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Service
 @Slf4j
-public class BaseTimeseriesService implements TimeseriesService  {
+public class BaseTimeseriesService implements TimeseriesService {
 
-    private  Map<String, String> dataInitMap = new ConcurrentHashMap<>();
+    private Map<String, String> dataInitMap = new ConcurrentHashMap<>();
 
-    private  List<String> globalEneryList = new ArrayList<>();
+    private List<String> globalEneryList = new ArrayList<>();
 
     private static final int INSERTS_PER_ENTRY = 3;
     private static final int DELETES_PER_ENTRY = INSERTS_PER_ENTRY;
@@ -96,11 +97,18 @@ public class BaseTimeseriesService implements TimeseriesService  {
 
     @Autowired
     private EntityViewService entityViewService;
-    @Autowired private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
-    @Autowired private EneryTimeGapService eneryTimeGapService;
-    @Autowired private EnergyChartService energyChartService;
-    @Autowired private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
-    @Autowired  private KafkaProducerService kafkaProducerService;
+    @Autowired
+    private DeviceDictPropertiesSvc deviceDictPropertiesSvc;
+    @Autowired
+    private EneryTimeGapService eneryTimeGapService;
+    @Autowired
+    private EnergyChartService energyChartService;
+    @Autowired
+    private EnergyHistoryMinuteSvc energyHistoryMinuteSvc;
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+    @Autowired
+    private StatisticsCountRedisSvc statisticsCountRedisSvc;
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(TenantId tenantId, EntityId entityId, List<ReadTsKvQuery> queries) {
@@ -156,6 +164,7 @@ public class BaseTimeseriesService implements TimeseriesService  {
             throw new IncorrectParameterException("Key value entry can't be null");
         }
         List<ListenableFuture<Integer>> futures = Lists.newArrayListWithExpectedSize(INSERTS_PER_ENTRY);
+        statisticsCountRedisSvc.writeCount(entityId, tsKvEntry);
         saveAndRegisterFutures(tenantId, futures, entityId, tsKvEntry, 0L);
         return Futures.transform(Futures.allAsList(futures), SUM_ALL_INTEGERS, MoreExecutors.directExecutor());
     }
@@ -188,80 +197,14 @@ public class BaseTimeseriesService implements TimeseriesService  {
         if (entityId.getEntityType().equals(EntityType.ENTITY_VIEW)) {
             throw new IncorrectParameterException("Telemetry data can't be stored for entity view. Read only");
         }
-//        log.info("tsKvEntry打印当前的数据:tsKvEntry{}",tsKvEntry);
-//        log.info("tsKvEntry打印当前的数据:EntityId{}",entityId);
-        if(CollectionUtils.isEmpty(globalEneryList)) {
+        if (CollectionUtils.isEmpty(globalEneryList)) {
             List<String> keys1 = deviceDictPropertiesSvc.findAllByName(null, EfficiencyEnums.ENERGY_002.getgName());
             globalEneryList.addAll(keys1);
         }
-        if(CollectionUtils.isEmpty(dataInitMap))
-        {
-            Map<String,String>   map=  deviceDictPropertiesSvc.getUnit();
-            dataInitMap=map;
+        if (CollectionUtils.isEmpty(dataInitMap)) {
+            Map<String, String> map = deviceDictPropertiesSvc.getUnit();
+            dataInitMap = map;
         }
-
-////        log.info("打印能耗的saveAndRegisterFutures.keys1{}",globalEneryList);
-//       Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
-//        if(count>0) {
-//            ListenableFuture<TsKvEntry> tsKvEntryListenableFuture = timeseriesLatestDao.findLatest(tenantId, entityId, tsKvEntry.getKey());
-////            log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture{}", tsKvEntryListenableFuture);
-//            try {
-//                TsKvEntry tsKvEntry1 =   tsKvEntryListenableFuture.get();
-////                log.info("tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1{}", tsKvEntryListenableFuture);
-//                long  t1=  tsKvEntry.getTs();
-//                long  t2=  tsKvEntry1.getTs();//要避免夸天的相减
-//              if(CommonUtils.isItToday(t2)) {
-//                  long t3 = t1 - t2;
-////                  log.info("---tsKvEntry打印当前的数据:tsKvEntryListenableFuture.tsKvEntry1打印的数据-->{}", (t1 - t2));
-//                  if (t3 > ENERGY_TIME_GAP) {
-//                      EneryTimeGapEntity eneryTimeGapEntity = new EneryTimeGapEntity();
-//                      eneryTimeGapEntity.setEntityId(entityId.getId());
-//                      eneryTimeGapEntity.setTenantId(tenantId.getId());
-//                      eneryTimeGapEntity.setKeyName(tsKvEntry.getKey());
-//                      eneryTimeGapEntity.setValue(tsKvEntry.getValue().toString());
-//                      eneryTimeGapEntity.setTs(tsKvEntry.getTs());
-//                      eneryTimeGapEntity.setTimeGap(t3);
-//                      eneryTimeGapService.save(eneryTimeGapEntity);
-//                  }
-//              }
-//
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            }
-//
-//
-//        }
-
-         String  title =    dataInitMap.get(tsKvEntry.getKey());
-//        if(StringUtils.isNotBlank(title))
-//        {
-//            DataBodayVo  dataBodayVo =   DataBodayVo.toDataBodayVo(tenantId,entityId,tsKvEntry,title);
-//            try {
-////                log.info("===JsonUtils.objectToJson(dataBodayVo)=>{}",JsonUtils.objectToJson(dataBodayVo));
-////                kafkaProducerService.sendMessageSync("", JsonUtils.objectToJson(dataBodayVo));
-////                kafkaProducerService.sendMessageSync("hs_energy_chart_kafka", JsonUtils.objectToJson(dataBodayVo));
-////                kafkaProducerService.sendMessageSync("hs_energy_hour_kafka", JsonUtils.objectToJson(dataBodayVo));
-//
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            } catch (TimeoutException e) {
-//                e.printStackTrace();
-//            }
-////            log.info("打印当前的数据打印标题{}",title);
-////            statisticalDataService.todayDataProcessing( entityId,tsKvEntry,title);
-////            energyHistoryMinuteSvc.saveByMinute( entityId,tsKvEntry,title);
-////            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
-//
-//        }
-//        Long  count =  globalEneryList.stream().filter(str->str.equals(tsKvEntry.getKey())).count();
-//        if(count>0) {
-//            energyChartService.todayDataProcessing( entityId,tsKvEntry,title);
-//        }
-
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
         futures.add(timeseriesDao.save(tenantId, entityId, tsKvEntry, ttl));
@@ -270,14 +213,15 @@ public class BaseTimeseriesService implements TimeseriesService  {
 
     /**
      * 异步执行更新设备名称
+     *
      * @param entityId
      * @param tsKvEntry
      */
-    private void updateDevice(EntityId entityId, TsKvEntry tsKvEntry){
-        CompletableFuture.runAsync(()->{
-            if(RENAME.equals(tsKvEntry.getKey().toString()) && tsKvEntry.getValue() != null){
+    private void updateDevice(EntityId entityId, TsKvEntry tsKvEntry) {
+        CompletableFuture.runAsync(() -> {
+            if (RENAME.equals(tsKvEntry.getKey().toString()) && tsKvEntry.getValue() != null) {
                 Device device = deviceDao.findById(entityId.getId());
-                if(!tsKvEntry.getValue().toString().equals(device.getRename())){
+                if (!tsKvEntry.getValue().toString().equals(device.getRename())) {
                     device.setRename(tsKvEntry.getValue().toString());
                     deviceDao.saveOrUpdDevice(device);
                 }

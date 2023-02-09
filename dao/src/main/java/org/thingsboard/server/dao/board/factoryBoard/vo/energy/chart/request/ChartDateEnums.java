@@ -1,8 +1,6 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -28,13 +26,13 @@ public enum ChartDateEnums {
         this.precision = precision;
     }
 
-    public String forMartTime(LocalDateTime dateTime) {
+    public String forMartTime(LocalDate dateTime) {
         if (dateTime == null) {
             return "";
         }
-        ZonedDateTime zonedDateTime = dateTime.atZone(ZoneOffset.UTC);
-        String date = zonedDateTime.format(DateTimeFormatter.ofPattern(this.getPattern()));
-        return date;
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(this.getPattern());
+        String dateStr = dateTime.format(fmt);
+        return dateStr;
 
     }
 
