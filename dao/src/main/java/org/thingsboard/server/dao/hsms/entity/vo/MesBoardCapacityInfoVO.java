@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarCapacityInfoVO {
+public class MesBoardCapacityInfoVO {
 
     /**
      * 本月计划

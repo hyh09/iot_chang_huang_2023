@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarAbnormalWarningItemVO {
+public class MesBoardAbnormalWarningItemVO {
 
     /**
      * 预警信息
