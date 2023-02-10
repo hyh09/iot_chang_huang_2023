@@ -146,19 +146,23 @@ public class MesServiceImpl implements MesService, CommonService {
             "LEFT JOIN dbo.pbWorkingProcedure I(NOLOCK) ON I.uGUID=H.upbWorkingProcedureGUID   " +
             "ORDER BY B.tFactStartTime desc ";
 
-    /**
-     * 车间下全部产线
-     *
-     * @param tenantId   租户Id
-     * @param workshopId 车间Id
-     * @return 车间下全部产线
-     */
-    @Override
-    public List<MesBoarProductionLineVO> listProductionLinesByWorkshopId(TenantId tenantId, UUID workshopId) {
-        return this.clientService.listProductionLinesByWorkshopId(tenantId, workshopId).stream().map(v -> MesBoarProductionLineVO.builder()
-                .name(v.getName())
-                .id(v.getId()).build()).collect(Collectors.toList());
-    }
+    private static final String QUERY_PRODUCTION_TASK = "SELECT DISTINCT B.sEquipmentName " +
+            "FROM dbo.mnProducting A(NOLOCK) " +
+            "JOIN dbo.emEquipment B(NOLOCK) ON B.uGUID=A.uemEquipmentGUID AND B.upbWorkCentreGUID= ?";
+
+//    /**
+//     * 车间下全部产线
+//     *
+//     * @param tenantId   租户Id
+//     * @param workshopId 车间Id
+//     * @return 车间下全部产线
+//     */
+//    @Override
+//    public List<MesBoardProductionLineVO> listProductionLinesByWorkshopId(TenantId tenantId, UUID workshopId) {
+//        return this.clientService.listProductionLinesByWorkshopId(tenantId, workshopId).stream().map(v -> MesBoardProductionLineVO.builder()
+//                .name(v.getName())
+//                .id(v.getId()).build()).collect(Collectors.toList());
+//    }
 
     /**
      * 工厂下全部车间
@@ -168,10 +172,22 @@ public class MesServiceImpl implements MesService, CommonService {
      * @return 工厂下全部车间
      */
     @Override
-    public List<MesBoarWorkshopVO> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId) {
-        return this.clientService.listWorkshopsByFactoryId(tenantId, factoryId).stream().map(v -> MesBoarWorkshopVO.builder()
-                .name(v.getName())
-                .id(v.getId()).build()).collect(Collectors.toList());
+    public List<MesBoardWorkshopVO> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId) {
+        return this.clientService.listWorkshopsByFactoryId(tenantId, factoryId).stream().map(v -> {
+            MesWorkshopDTO mesWorkshopDTO = null;
+            try {
+                mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, v.getId());
+            } catch (ThingsboardException ignore) {
+            }
+            return MesBoardWorkshopVO.builder()
+                    .name(v.getName())
+                    .id(v.getId())
+                    .mesId(Optional.ofNullable(mesWorkshopDTO).map(MesWorkshopDTO::getId).map(this::toUUID).orElse(null))
+                    .mesName(Optional.ofNullable(mesWorkshopDTO).map(MesWorkshopDTO::getName).orElse(null))
+                    .build();
+
+                }
+        ).collect(Collectors.toList());
     }
 
     /**
@@ -182,10 +198,21 @@ public class MesServiceImpl implements MesService, CommonService {
      * @return 产线下全部设备
      */
     @Override
-    public List<MesBoarDeviceVO> listDevicesByProductionLineId(TenantId tenantId, UUID productionLineId) {
-        return this.clientService.listDevicesByQuery(tenantId, new FactoryDeviceQuery().setWorkshopId(productionLineId.toString())).stream().map(v -> MesBoarDeviceVO.builder()
-                .name(v.getRename())
-                .id(v.getId().getId()).build()).collect(Collectors.toList());
+    public List<MesBoardDeviceVO> listDevicesByProductionLineId(TenantId tenantId, UUID productionLineId) {
+        return this.clientService.listDevicesByQuery(tenantId, new FactoryDeviceQuery().setWorkshopId(productionLineId.toString())).stream().map(v -> {
+            MesDeviceDTO mesDeviceDTO = null;
+            try {
+                mesDeviceDTO = this.getMesDeviceByDeviceId(v.getId().getId());
+            } catch (ThingsboardException ignore) {
+            }
+            return MesBoardDeviceVO.builder()
+                    .id(v.getId().getId())
+                    .name(v.getRename())
+                    .mesId(Optional.ofNullable(mesDeviceDTO).map(MesDeviceDTO::getId).map(this::toUUID).orElse(null))
+                    .mesName(Optional.ofNullable(mesDeviceDTO).map(MesDeviceDTO::getName).orElse(null))
+                    .build();
+                }
+        ).collect(Collectors.toList());
     }
 
     /**
@@ -197,7 +224,7 @@ public class MesServiceImpl implements MesService, CommonService {
      */
     @Override
     @SuppressWarnings("all")
-    public List<MesBoarDeviceOperationRateVO> getDeviceOperationRateTop(TenantId tenantId, UUID productionLineId) {
+    public List<MesBoardDeviceOperationRateVO> getDeviceOperationRateTop(TenantId tenantId, UUID productionLineId) {
         var devices = this.listDevicesByProductionLineId(tenantId, productionLineId);
         if (devices.isEmpty())
             return Lists.newArrayList();
@@ -206,7 +233,7 @@ public class MesServiceImpl implements MesService, CommonService {
 
         List<DeviceHutBO> resultList = (List<DeviceHutBO>) this.entityManager.createNativeQuery(sqlString, DeviceHutBO.class)
                 .setParameter("tenantId", tenantId.getId())
-                .setParameter("deviceIds", devices.stream().map(MesBoarDeviceVO::getId).collect(Collectors.toList()))
+                .setParameter("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()))
                 .setParameter("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .getResultList();
 
@@ -220,12 +247,12 @@ public class MesServiceImpl implements MesService, CommonService {
             return t;
         }));
 
-        return devices.stream().map(v -> MesBoarDeviceOperationRateVO.builder()
+        return devices.stream().map(v -> MesBoardDeviceOperationRateVO.builder()
                 .id(v.getId())
                 .name(v.getName())
                 .time(map.getOrDefault(v.getId(), 0L))
                 .rate(this.calculatePercentage(new BigDecimal(map.getOrDefault(v.getId(), 0L)), new BigDecimal(HSConstants.DAY_TIME)))
-                .build()).sorted(Comparator.comparing(MesBoarDeviceOperationRateVO::getTime).reversed()).collect(Collectors.toList());
+                .build()).sorted(Comparator.comparing(MesBoardDeviceOperationRateVO::getTime).reversed()).collect(Collectors.toList());
 
     }
 
@@ -238,7 +265,7 @@ public class MesServiceImpl implements MesService, CommonService {
      */
     @Override
     @SuppressWarnings("all")
-    public List<MesBoarCapacityTrendItemVO> getCapacityTrend(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
+    public List<MesBoardCapacityTrendItemVO> getCapacityTrend(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
         var mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, productionLineId);
         if (mesWorkshopDTO == null)
             return Lists.newArrayList();
@@ -246,7 +273,7 @@ public class MesServiceImpl implements MesService, CommonService {
                 QUERY_CAPACITY_TREND,
                 new Object[]{mesWorkshopDTO.getId()},
                 (rs, rowNum) ->
-                        new MesBoarCapacityTrendItemVO(
+                        new MesBoardCapacityTrendItemVO(
                                 rs.getBigDecimal("产量"),
                                 rs.getString("日期")
                         )
@@ -262,7 +289,7 @@ public class MesServiceImpl implements MesService, CommonService {
      */
     @Override
     @SuppressWarnings("all")
-    public List<MesBoarProductionMonitoringVO> getProductionMonitoring(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
+    public List<MesBoardProductionMonitoringVO> getProductionMonitoring(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
         var mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, productionLineId);
         if (mesWorkshopDTO == null)
             return Lists.newArrayList();
@@ -280,12 +307,12 @@ public class MesServiceImpl implements MesService, CommonService {
         if (mesProductionMonitoringDTOList.isEmpty())
             return Lists.newArrayList();
 
-        LinkedHashMap<String, List<MesBoarProductionMonitoringItemVO>> map = Maps.newLinkedHashMap();
+        LinkedHashMap<String, List<MesBoardProductionMonitoringItemVO>> map = Maps.newLinkedHashMap();
         mesProductionMonitoringDTOList.forEach(v -> {
             map.compute(v.getDeviceName(), (x, y) -> {
                 if (y == null)
                     return Lists.newArrayList();
-                y.add(MesBoarProductionMonitoringItemVO.builder()
+                y.add(MesBoardProductionMonitoringItemVO.builder()
                         .xValue(v.getDate())
                         .yValue(v.getCapacity())
                         .build());
@@ -294,7 +321,7 @@ public class MesServiceImpl implements MesService, CommonService {
         });
 
         return map.entrySet().stream().map(entry -> {
-            return MesBoarProductionMonitoringVO.builder()
+            return MesBoardProductionMonitoringVO.builder()
                     .name(entry.getKey())
                     .items(entry.getValue())
                     .build();
@@ -310,7 +337,7 @@ public class MesServiceImpl implements MesService, CommonService {
      */
     @Override
     @SuppressWarnings("all")
-    public List<MesBoarCapacityComparisonVO> getCapacityComparison(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
+    public List<MesBoardCapacityComparisonVO> getCapacityComparison(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
         var mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, productionLineId);
         if (mesWorkshopDTO == null)
             return Lists.newArrayList();
@@ -328,12 +355,12 @@ public class MesServiceImpl implements MesService, CommonService {
         if (mesProductionMonitoringDTOList.isEmpty())
             return Lists.newArrayList();
 
-        LinkedHashMap<String, List<MesBoarCapacityComparisonItemVO>> map = Maps.newLinkedHashMap();
+        LinkedHashMap<String, List<MesBoardCapacityComparisonItemVO>> map = Maps.newLinkedHashMap();
         mesProductionMonitoringDTOList.forEach(v -> {
             map.compute(v.getDeviceName(), (x, y) -> {
                 if (y == null)
                     return Lists.newArrayList();
-                y.add(MesBoarCapacityComparisonItemVO.builder()
+                y.add(MesBoardCapacityComparisonItemVO.builder()
                         .xValue(v.getDate())
                         .yValue(v.getCapacity())
                         .build());
@@ -342,7 +369,7 @@ public class MesServiceImpl implements MesService, CommonService {
         });
 
         return map.entrySet().stream().map(entry -> {
-            return MesBoarCapacityComparisonVO.builder()
+            return MesBoardCapacityComparisonVO.builder()
                     .name(entry.getKey())
                     .items(entry.getValue())
                     .build();
@@ -358,11 +385,11 @@ public class MesServiceImpl implements MesService, CommonService {
      */
     @Override
     @SuppressWarnings("all")
-    public MesBoarCapacityInfoVO getCapacityInfo(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
+    public MesBoardCapacityInfoVO getCapacityInfo(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
         var mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, productionLineId);
         if (mesWorkshopDTO == null) {
             log.info("mes 车间信息查询为空 >>> 产量信息接口");
-            return new MesBoarCapacityInfoVO();
+            return new MesBoardCapacityInfoVO();
         }
 
         var monthCapacity = this.jdbcTemplate.queryForObject(
@@ -382,7 +409,7 @@ public class MesServiceImpl implements MesService, CommonService {
             rate = this.formatCapacity(this.calculatePercentage(monthCapacity, monthPlan));
         }
 
-        return MesBoarCapacityInfoVO.builder()
+        return MesBoardCapacityInfoVO.builder()
                 .monthCapacity(monthCapacity)
                 .monthPlan(monthPlan)
                 .productionNum(this.jdbcTemplate.queryForObject(
@@ -440,8 +467,15 @@ public class MesServiceImpl implements MesService, CommonService {
      * @return 机台当前生产任务
      */
     @Override
-    public List<String> getProductionTask(TenantId tenantId, UUID productionLineId) {
-        return null;
+    public List<String> getProductionTask(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
+        var mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, productionLineId);
+        if (mesWorkshopDTO == null)
+            return Lists.newArrayList();
+        return this.jdbcTemplate.query(
+                QUERY_PRODUCTION_TASK,
+                new Object[]{mesWorkshopDTO.getId()},
+                (rs, rowNum) -> rs.getString("sCardNo")
+        );
     }
 
     /**

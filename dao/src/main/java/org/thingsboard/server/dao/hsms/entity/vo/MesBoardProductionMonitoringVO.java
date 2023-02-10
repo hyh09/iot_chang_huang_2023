@@ -6,10 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.util.List;
 
 /**
- * 产线VO
+ * 生产监控VO
  *
  * @author wwj
  * @since 2021.10.21
@@ -18,29 +18,17 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarWorkshopVO {
+public class MesBoardProductionMonitoringVO {
 
     /**
-     * Id
+     * 图表数据列表
      */
-    @ApiModelProperty(value = "id")
-    private UUID id;
+    @ApiModelProperty(value = "图表数据列表")
+    private List<MesBoardProductionMonitoringItemVO> items;
 
     /**
      * 名称
      */
     @ApiModelProperty(value = "名称")
     private String name;
-
-    /**
-     * mes Id
-     */
-    @ApiModelProperty(value = "mes Id")
-    private UUID mesId;
-
-    /**
-     * mes 名称
-     */
-    @ApiModelProperty(value = "mes 名称")
-    private String mesName;
 }

@@ -1,12 +1,13 @@
 package org.thingsboard.server.dao.hsms.entity.dto;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-import org.thingsboard.server.dao.hs.entity.po.BasePO;
-import org.thingsboard.server.dao.hsms.entity.vo.DictDevicePropertySwitchNewVO;
 
-import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Mes 车间
@@ -33,4 +34,5 @@ public class MesWorkshopDTO {
      */
     @ApiModelProperty(value = "name")
     private String name;
+
 }
