@@ -187,10 +187,6 @@ export class TechnologyComponent extends PageComponent {
     this.potencyService.getProcedureParams({ uemEquipmentGUID, tStartTime, tEndTime }).subscribe(res => {
       this.currentTabIndex = 0;
       this.procedureParams = res || [];
-      this.procedureParams = [{
-        deviceId: '123',
-        key: '转速'
-      }];
       this.showProcedureParamLineChart();
     });
   }
@@ -201,7 +197,6 @@ export class TechnologyComponent extends PageComponent {
   showProcedureParamLineChart() {
     const { tStartTime, tEndTime } = this.currProcedure;
     const currProcedureParam = this.procedureParams[this.currentTabIndex];
-    return;
     if (currProcedureParam) {
       this.potencyService.getProcedureParamChartData({
         ...currProcedureParam, tStartTime, tEndTime

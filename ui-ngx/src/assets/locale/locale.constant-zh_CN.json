@@ -3931,7 +3931,8 @@
     "production-mng": "生产管理",
     "prod-schedual": "生产排班",
     "prod-report": "生产报工",
-    "prod-monitor": "生产监控"
+    "prod-monitor": "生产监控",
+    "start-date": "开工日期"
   },
   "order": {
     "reasons-for-dullness":"呆滞原因",
@@ -4026,8 +4027,8 @@
     "download-template": "下载模板",
     "drop-order": "拖拽excel文件或单击以选择要导入的excel文件。",
     "import-template-name": "订单导入模板.xlsx",
-    "intended-capacity": "计划产量",
-    "actual-capacity": "实际产量",
+    "intended-capacity": "计划产量 (m)",
+    "actual-capacity": "实际产量 (m)",
     "maintain-time": "维护时间",
     "no-process-cards": "没有找到流程卡",
     "no-procedures": "没有找到工序",
