@@ -21,11 +21,9 @@
   </button>
 </mat-form-field>
 <nz-range-picker
-  nzFormat="yyyy/MM/dd HH:mm:ss"
-  nzShowTime
+  nzFormat="yyyy/MM/dd"
   nzSize="large"
   [nzDisabledDate]="disabledDate"
-  [nzAllowClear]="false"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
   (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
