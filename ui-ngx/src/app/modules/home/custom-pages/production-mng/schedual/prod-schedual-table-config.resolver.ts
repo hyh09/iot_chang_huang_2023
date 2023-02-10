@@ -31,7 +31,7 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     this.config.columns.push(
       new EntityTableColumn<ProdSchedual>('sorderNo', 'order.order-no', '80px', (entity) => (entity.sorderNo || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('scardNo', 'potency.card-no', '80px', (entity) => (entity.scardNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.process-name', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProdSchedual>('sworkingProcedureName', 'potency.procedure-name', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('sworkerGroupName', 'potency.team-name', '100px', (entity) => (entity.sworkerGroupName || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('sworkerNameList ', 'potency.team-members', '120px', (entity) => (entity.sworkerNameList || ''), () => ({}), false),
       new EntityTableColumn<ProdSchedual>('nplanOutputQty', 'order.intended-capacity', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
@@ -88,7 +88,7 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
       }).subscribe((res) => {
         const dataList = [];
         if (res.data.length > 0) {
-          const titleKeys = ['order.order-no', 'potency.card-no', 'potency.process-name', 'potency.team-name', 'potency.team-members', 'order.intended-capacity', 'order.actual-capacity', 'production-mng.start-date', 'order.intended-complete-date', 'potency.timeout-on-minutes'];
+          const titleKeys = ['order.order-no', 'potency.card-no', 'potency.procedure-name', 'potency.team-name', 'potency.team-members', 'order.intended-capacity', 'order.actual-capacity', 'production-mng.start-date', 'order.intended-complete-date', 'potency.timeout-on-minutes'];
           const titleNames = [];
           titleKeys.forEach(key => {
             titleNames.push(this.translate.instant(key));
