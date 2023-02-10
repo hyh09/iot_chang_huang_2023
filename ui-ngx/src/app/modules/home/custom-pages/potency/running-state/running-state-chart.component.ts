@@ -66,6 +66,7 @@ export class RunningStateChartComponent implements AfterViewInit, OnChanges {
       },
       color: ['#0663ff', '#99D5D4', '#5FBC4D', '#C5DE66', '#FFE148', '#FBA341', '#FF6C6C', '#F14444', '#C19461', '#913030'],
       grid: {
+        top: 5 + ( this.data.tableName ? 30 : 0) + (unit ? 20 : 0),
         bottom: 9,
         right: 25,
         left: 0,
