@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
-import { EntityType, entityTypeTranslations, entityTypeResources } from '@app/shared/public-api';
+import { EntityType, entityTypeTranslations, entityTypeResources, PageLink } from '@app/shared/public-api';
 import { DatePipe } from '@angular/common';
 import { ProdMonitor } from '@app/shared/models/custom/production-mng.models';
 import { ProdMonitorFilterComponent } from './production-monitor-filter.component';
@@ -17,7 +17,8 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
   constructor(
     private productionMngService: ProductionMngService,
     private fileService: FileService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private datePipe: DatePipe
   ) {
     this.config.entityType = EntityType.POTENCY;
     this.config.filterComponent = ProdMonitorFilterComponent;
@@ -27,17 +28,16 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
     this.config.defaultSortOrder = null;
 
     this.config.columns.push(
-      new EntityTableColumn<ProdMonitor>('scardNo', 'potency.card-no', '100px', (entity) => (entity.scardNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('sorderNo', 'potency.production-order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('scustomerName', 'order.customer', '60px', (entity) => (entity.scustomerName || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('ddeliveryDate', 'potency.delivery-date', '120px', (entity) => (entity.ddeliveryDate || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('smaterialName', 'order.product-name', '200px', (entity) => (entity.smaterialName || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('scolorName', 'order.color', '100px', (entity) => (entity.scolorName || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('nplanOutputQty', 'order.number-of-cards', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('scardNo', 'potency.card-no', '80px', (entity) => (entity.scardNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('sorderNo', 'order.order-no', '80px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('scustomerName', 'order.customer', '80px', (entity) => (entity.scustomerName || ''), () => ({}), false),
+      new DateEntityTableColumn<ProdMonitor>('ddeliveryDate', 'potency.delivery-date', this.datePipe, '120px', 'yyyy-MM-dd HH:mm', false),
+      new EntityTableColumn<ProdMonitor>('smaterialName', 'order.product-name', '300px', (entity) => (entity.smaterialName || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('scolorName', 'order.color', '80px', (entity) => (entity.scolorName || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('nplanOutputQty', 'order.number-of-cards', '80px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('sworkingProcedureNameFinish', 'order.completion-process', '100px', (entity) => (entity.sworkingProcedureNameFinish || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('sWorkingProcedureName', 'order.process-to-be-produced', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('sworkingProcedureName', 'order.process-to-be-produced', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('fnMESGetDiffTimeStr', 'order.dead-time', '120px', (entity) => (entity.fnMESGetDiffTimeStr || ''), () => ({}), false)
-      // new EntityTableColumn<ProdMonitor>('sequipmentName', 'order.reasons-for-dullness', '150px', (entity) => (entity.sequipmentName || ''), () => ({}), false)
     );
   }
 
@@ -47,8 +47,7 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
       sWorkingProcedureName: '',
       operationList: [],
       totalquantity: 0,
-      exportTableData: null,
-      tableList: []
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('production-mng.prod-monitor');
@@ -63,42 +62,32 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
       this.config.componentsData.operationList = res;
     });
 
+    this.config.entitiesFetchFunction = pageLink => {
+      const { sWorkingProcedureName } = this.config.componentsData;
+      return this.productionMngService.getProdMonitorList(pageLink, { sWorkingProcedureName });
+    }
+
     // 导出功能
     this.config.componentsData.exportTableData = () => {
-      this.config.componentsData.tableList.subscribe((res) => {
-        let dataList = []
-        let titleList = ['卡号', '生产单号', '客户', '交期', '品名', '颜色', '卡数量', '完工工序', '待生产工序', '呆滞时长']
-        dataList.push(titleList)
+      const { sWorkingProcedureName } = this.config.componentsData;
+      this.productionMngService.getProdMonitorList(new PageLink(9999999, 0), { sWorkingProcedureName }).subscribe((res) => {
+        const dataList = [];
         if (res.data.length > 0) {
+          const titleKeys = ['order.order-no', 'potency.card-no', 'order.customer', 'potency.delivery-date', 'order.product-name', 'order.color', 'order.number-of-cards', 'order.completion-process', 'order.process-to-be-produced', 'order.dead-time'];
+          const titleNames = [];
+          titleKeys.forEach(key => {
+            titleNames.push(this.translate.instant(key));
+          });
+          dataList.push(titleNames);
           res.data.forEach(item => {
-            let itemList = [item.scardNo, item.sorderNo, item.scustomerName, item.ddeliveryDate, item.smaterialName, item.scolorName, item.nplanOutputQty, item.sworkingProcedureNameFinish, item.sWorkingProcedureName, item.fnMESGetDiffTimeStr]
-            dataList.push(itemList)
+            dataList.push([item.sorderNo, item.scardNo, item.scustomerName, this.datePipe.transform(item.ddeliveryDate, 'yyyy-MM-dd'), item.smaterialName, item.scolorName, item.nplanOutputQty, item.sworkingProcedureNameFinish, item.sworkingProcedureName, item.fnMESGetDiffTimeStr]);
           });
         }
-        this.fileService.exportTable('生产监控', dataList).subscribe();
+        this.fileService.exportTable(this.translate.instant('production-mng.prod-report'), dataList).subscribe();
       })
     }
-    // 获取合计数量
-    this.productionMngService.getTotalQuantity({
-      page: 0,
-      pageSize: 10000000
-    }).subscribe((res) => {
-      let totalquantity = 0;
-      res.data.forEach((item) => {
-        totalquantity += parseFloat(item.nplanOutputQty)
-      })
-      this.config.componentsData.totalquantity = totalquantity;
-    });
 
-    this.config.entitiesFetchFunction = pageLink => {
-      console.log(pageLink)
-      const { sWorkingProcedureName } = this.config.componentsData;
-      let tableList = this.productionMngService.getProdMonitorList(pageLink, {
-        sWorkingProcedureName: sWorkingProcedureName || ''
-      });
-      this.config.componentsData.tableList = tableList
-      return tableList
-    }
     return this.config;
+
   }
 }

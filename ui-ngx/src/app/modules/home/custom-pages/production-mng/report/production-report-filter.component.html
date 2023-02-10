@@ -1,5 +1,5 @@
 <mat-form-field><!--生产单号查询控件，参数名和翻译名自行替换-->
-  <mat-label>{{ 'potency.production-order-no' | translate }}</mat-label>
+  <mat-label>{{ 'order.order-no' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sOrderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
     *ngIf="entitiesTableConfig.componentsData.sOrderNo"
@@ -11,11 +11,10 @@
 </mat-form-field>
 <!--时间区间控件不需要动，dateRange在resolver的fetch方法中处理成接口需要的长整型时间戳-->
 <nz-range-picker
-  nzFormat="yyyy/MM/dd HH:mm:ss"
-  nzShowTime
+  nzFormat="yyyy/MM/dd HH:mm"
+  [nzShowTime]="{ nzFormat: 'HH:mm' }"
   nzSize="large"
   [nzDisabledDate]="disabledDate"
-  [nzAllowClear]="true"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
   (ngModelChange)="onTimeChange()"
 ></nz-range-picker>

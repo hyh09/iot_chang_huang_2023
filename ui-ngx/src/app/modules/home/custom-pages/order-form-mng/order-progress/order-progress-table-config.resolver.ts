@@ -16,7 +16,7 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
 
   constructor(
     private translate: TranslateService,
-    private OrderProgressService: OrderFormService,
+    private orderFormService: OrderFormService,
     private fileService: FileService,
     private datePipe: DatePipe
   ) {
@@ -84,7 +84,7 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
         endTime = endDate.getTime();
       }
       const { sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      this.OrderProgressService.getOrderProgress(new PageLink(999999, 0), {
+      this.orderFormService.getOrderProgress(new PageLink(9999999, 0), {
         sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       }).subscribe((res) => {
@@ -118,7 +118,7 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
         endTime = endDate.getTime();
       }
       const { sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      return this.OrderProgressService.getOrderProgress(pageLink, {
+      return this.orderFormService.getOrderProgress(pageLink, {
         sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       });

@@ -18,7 +18,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
 
   constructor(
     private translate: TranslateService,
-    private processCardProgressService: OrderFormService,
+    private orderFormService: OrderFormService,
     private fileService: FileService,
     public dialog: MatDialog,
     private datePipe: DatePipe
@@ -87,7 +87,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
         endTime = endDate.getTime();
       }
       const { sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      this.processCardProgressService.getprocessCardProgress(new PageLink(999999, 0), {
+      this.orderFormService.getprocessCardProgress(new PageLink(9999999, 0), {
         sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       }).subscribe((res) => {
@@ -121,7 +121,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
         endTime = endDate.getTime();
       }
       const { sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      return this.processCardProgressService.getprocessCardProgress(pageLink, {
+      return this.orderFormService.getprocessCardProgress(pageLink, {
         sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       });

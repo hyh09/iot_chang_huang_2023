@@ -3901,7 +3901,6 @@
     "output": "产出数量",
     "unit": "计算单位",
     "card-no": "卡号",
-    "production-order-no": "生产单号",
     "color-number":"色号",
     "material-no": "布种",
     "duration": "时长",
@@ -3932,7 +3931,8 @@
     "prod-schedual": "生产排班",
     "prod-report": "生产报工",
     "prod-monitor": "生产监控",
-    "start-date": "开工日期"
+    "start-date": "开工日期",
+    "total-quantity": "合计数量：{{ quantity }}"
   },
   "order": {
     "reasons-for-dullness":"呆滞原因",
