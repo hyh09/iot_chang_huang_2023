@@ -3997,8 +3997,6 @@
     "gas": "Gas (t)",
     "interval-energy-consumption": "Interval energy consumption of {{deviceName}}",
     "interval-capacity": "Internal output of {{deviceName}}",
-    "process-no": "Process No",
-    "process-name": "Process name",
     "team-name": "Team name",
     "team-members": "Team member",
     "output": "Output",
@@ -4026,7 +4024,10 @@
     "view-order-process-cards": "View Order Process Cards",
     "procedure-no": "Procedure No",
     "procedure-name": "Procedure Name",
-    "order-no-template": " (Order No: {{ orderNo }})"
+    "order-no-template": " (Order No: {{ orderNo }})",
+    "capacity-team": "Output analysis (team)",
+    "capacity-procedure": "Output analysis (procedure)",
+    "energy-consumption-order": "Energy consumption analysis (order)"
   },
   "production-mng": {
     "production-mng": "Production management",
@@ -4135,6 +4136,6 @@
     "no-procedures": "No procedures were found",
     "production-progress":"Production progress",
     "view-production-progress": "View Produciton progress",
-    "order-process-no-template": " (Order No: {{ orderNo }}, Process No: {{ processNo }})"
+    "order-procedure-no-template": " (Order No: {{ orderNo }}, Process No: {{ processNo }})"
   }
 }

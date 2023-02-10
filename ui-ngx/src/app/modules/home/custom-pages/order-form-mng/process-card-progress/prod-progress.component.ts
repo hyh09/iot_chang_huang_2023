@@ -45,8 +45,8 @@ export class SelectProdProgressComponent extends DialogComponent<SelectProdProgr
 
 
     this.config.columns.push(
-      new EntityTableColumn<ProdProgress>('sworkingProcedureNo', 'potency.process-no', '100px', (entity) => (entity.sworkingProcedureNo || ''), () => ({}), false),
-      new EntityTableColumn<ProdProgress>('sworkingProcedureName', 'potency.process-name','100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('sworkingProcedureNo', 'potency.procedure-no', '100px', (entity) => (entity.sworkingProcedureNo || ''), () => ({}), false),
+      new EntityTableColumn<ProdProgress>('sworkingProcedureName', 'potency.procedure-name','100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
       new DateEntityTableColumn<ProdProgress>('tfactStartTime', 'common.start-time', this.datePipe, '120px', 'yyyy-MM-dd HH:mm:ss', false),
       new DateEntityTableColumn<ProdProgress>('tfactEndTime', 'common.end-time', this.datePipe, '120px', 'yyyy-MM-dd HH:mm:ss', false),
       new EntityTableColumn<ProdProgress>('sequipmentName', 'potency.device-name', '100px', (entity) => (entity.sequipmentName || ''), () => ({}), false),

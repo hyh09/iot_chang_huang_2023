@@ -3894,8 +3894,6 @@
     "gas": "气 (t)",
     "interval-energy-consumption": "{{deviceName}}区间能耗",
     "interval-capacity": "{{deviceName}}区间产量",
-    "process-no": "工序编号",
-    "process-name": "工序名称",
     "team-name": "班组名称",
     "team-members": "班组成员",
     "output": "产出数量",
@@ -3924,7 +3922,10 @@
     "view-order-process-cards": "查看流程卡",
     "procedure-no": "工序编号",
     "procedure-name": "工序名称",
-    "order-no-template": "（订单号：{{ orderNo }}）"
+    "order-no-template": "（订单号：{{ orderNo }}）",
+    "capacity-team": "产量分析（班组）",
+    "capacity-procedure": "产量分析（工序）",
+    "energy-consumption-order": "能耗分析（订单）"
   },
   "production-mng": {
     "production-mng": "生产管理",
@@ -4034,6 +4035,6 @@
     "no-procedures": "没有找到工序",
     "production-progress": "生产进度",
     "view-production-progress": "查看生产进度",
-    "order-process-no-template": "（订单号：{{ orderNo }}，流程卡号：{{ processNo }}）"
+    "order-procedure-no-template": "（订单号：{{ orderNo }}，流程卡号：{{ processNo }}）"
   }
 }

@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { PotencyService } from '@app/core/http/custom/potency.service';
 import { CellActionDescriptor, DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
-import { EntityType, entityTypeTranslations, entityTypeResources } from '@app/shared/public-api';
+import { EntityType, entityTypeTranslations, entityTypeResources, PageLink } from '@app/shared/public-api';
 import { OrderConsumptionFilterComponent } from './order-consumption-filter.component';
 import { DatePipe } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProcessCardsComponent } from './process-cards.component';
+import { FileService } from '@app/core/public-api';
 
 @Injectable()
 export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableConfig<OrderConsumption>> {
@@ -19,7 +20,8 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
     private potencyService: PotencyService,
     private datePipe: DatePipe,
     private translate: TranslateService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private fileService: FileService
   ) {
     this.config.entityType = EntityType.POTENCY;
     this.config.filterComponent = OrderConsumptionFilterComponent;
@@ -77,6 +79,37 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
     }
 
     this.config.cellActionDescriptors = this.configureCellActions();
+
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      let createdTime: number, updatedTime: number;
+      const dateRange = this.config.componentsData.dateRange;
+      if (dateRange && dateRange.length === 2) {
+        createdTime = (this.config.componentsData.dateRange[0] as Date).getTime();
+        updatedTime = (this.config.componentsData.dateRange[1] as Date).getTime();
+      }
+      const params = JSON.parse(JSON.stringify(this.config.componentsData));
+      delete params.dateRange;
+      this.potencyService.getOrderConsumptionList(new PageLink(9999999, 0), {
+        ...params, createdTime: createdTime || '', updatedTime: updatedTime || ''
+      }).subscribe((res) => {
+        const dataList = [];
+        if (res.data.length > 0) {
+          const titleKeys = ['potency.customer', 'potency.material-name', 'potency.color', 'potency.order-count', 'potency.card-count','potency.arrangement-requirements',
+          'potency.duration', 'potency.water-consumption', 'potency.electric-consumption', 'potency.gas-consumption', 'common.created-time'];
+          const titleNames = [];
+          titleKeys.forEach(key => {
+            titleNames.push(this.translate.instant(key));
+          });
+          dataList.push(titleNames);
+          res.data.forEach(item => {
+            dataList.push([item.customerName, item.materialName, item.colorName, item.numberOfOrder, item.numberOfCards, item.sremark,
+            item.duration, item.water, item.electricity, item.gas, this.datePipe.transform(item.createdTime, 'yyyy-MM-dd HH:mm:ss')]);
+          });
+        }
+        this.fileService.exportTable(this.translate.instant('potency.energy-consumption-order'), dataList).subscribe();
+      })
+    }
 
     return this.config;
 
