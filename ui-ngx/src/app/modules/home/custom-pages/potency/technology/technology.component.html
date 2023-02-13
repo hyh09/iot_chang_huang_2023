@@ -51,19 +51,19 @@
       <tb-entities-table fxFlex="50" [entitiesTableConfig]="ProcessCardTableConfig" class="table-wrapper"></tb-entities-table>
       <div fxFlex="50" fxLayout="row" fxLayoutGap="16px" >
         <tb-entities-table fxFlex="50" [entitiesTableConfig]="ProcedureTableConfig" class="table-wrapper"></tb-entities-table>
-        <div fxFlex="50" style="padding-bottom: 6px;">
-          <nz-tabset [(nzSelectedIndex)]="currentTabIndex" nzType="line" (nzSelectedIndexChange)="showProcedureParamLineChart()">
-            <nz-tab *ngFor="let param of procedureParams" [nzTitle]="param.key"></nz-tab>
-          </nz-tabset>
-          <tb-running-state-chart [data]="chartData"></tb-running-state-chart>
-
-          <!-- <tb-running-state-chart [data]="runningStateData[propName] || {}"></tb-running-state-chart>
-          <div *ngIf="displayedProps.length === 0" fxFlex fxLayoutAlign="center center">
+        <div fxFlex="50" fxLayout="column">
+          <ng-container *ngIf="procedureParams.length > 0">
+            <nz-tabset [(nzSelectedIndex)]="currentTabIndex" nzType="line" (nzSelectedIndexChange)="showProcedureParamLineChart()">
+              <nz-tab *ngFor="let param of procedureParams" [nzTitle]="param.key"></nz-tab>
+            </nz-tabset>
+            <tb-running-state-chart fxFlex [data]="chartData" style="padding-bottom: 6px;"></tb-running-state-chart>
+          </ng-container>
+          <div *ngIf="procedureParams.length === 0" fxLayoutAlign="center center" style="height: 100%;">
             <nz-empty
               nzNotFoundImage="../../../../../../assets/data-empty.svg"
               nzNotFoundContent="{{ 'common.data-empty' | translate }}"
             ></nz-empty>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>

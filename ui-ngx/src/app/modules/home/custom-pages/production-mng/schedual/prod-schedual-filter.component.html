@@ -20,17 +20,14 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-<!--时间区间控件不需要动，dateRange在resolver的fetch方法中处理成接口需要的长整型时间戳-->
 <nz-range-picker
-  nzFormat="yyyy/MM/dd HH:mm:ss"
-  nzShowTime
+  nzFormat="yyyy/MM/dd"
   nzSize="large"
   [nzDisabledDate]="disabledDate"
-  [nzAllowClear]="false"
   [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
   (ngModelChange)="onTimeChange()"
 ></nz-range-picker>
-<div class="action-btns" style="margin-left: 5px; position: relative; top: -1px;">
+<div class="action-btns" style="margin-left: 5px;">
   <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
     {{ 'action.search' | translate }}
   </button>
