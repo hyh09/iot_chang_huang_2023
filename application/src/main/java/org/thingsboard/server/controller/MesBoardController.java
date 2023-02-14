@@ -57,11 +57,11 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/factory/{factoryId}/workshops")
     public List<MesBoardWorkshopVO> listWorkshopsByFactoryId(@PathVariable("factoryId") UUID factoryId) throws ThingsboardException {
-        // todo 临时修改
-        var factory = this.factoryService.findById(factoryId);
-        if (factory == null)
-            throw new ThingsboardException("工厂不存在", ThingsboardErrorCode.GENERAL);
-        return this.mesService.listWorkshopsByFactoryId(new TenantId(factory.getTenantId()), factoryId);
+//        // todo 临时修改
+//        var factory = this.factoryService.findById(factoryId);
+//        if (factory == null)
+//            throw new ThingsboardException("工厂不存在", ThingsboardErrorCode.GENERAL);
+        return this.mesService.listWorkshopsByFactoryId(getTenantId(), factoryId);
     }
 
     /**
