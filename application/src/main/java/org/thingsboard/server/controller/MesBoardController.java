@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.MesService;
 import org.thingsboard.server.dao.hsms.entity.vo.*;
@@ -55,7 +57,11 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/factory/{factoryId}/workshops")
     public List<MesBoardWorkshopVO> listWorkshopsByFactoryId(@PathVariable("factoryId") UUID factoryId) throws ThingsboardException {
-        return this.mesService.listWorkshopsByFactoryId(getTenantId(), factoryId);
+        // todo 临时修改
+        var factory = this.factoryService.findById(factoryId);
+        if (factory == null)
+            throw new ThingsboardException("工厂不存在", ThingsboardErrorCode.GENERAL);
+        return this.mesService.listWorkshopsByFactoryId(new TenantId(factory.getTenantId()), factoryId);
     }
 
     /**
