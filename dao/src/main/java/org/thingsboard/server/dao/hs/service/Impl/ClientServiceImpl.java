@@ -170,7 +170,7 @@ public class ClientServiceImpl extends AbstractEntityService implements ClientSe
         var query = cb.createQuery(MesDeviceRelationEntity.class);
         var root = query.from(MesDeviceRelationEntity.class);
         List<Predicate> predicates = new ArrayList<>();
-        var in = cb.in(root.<UUID>get("device_id"));
+        var in = cb.in(root.<UUID>get("deviceId"));
         uuids.forEach(in::value);
         predicates.add(in);
 
