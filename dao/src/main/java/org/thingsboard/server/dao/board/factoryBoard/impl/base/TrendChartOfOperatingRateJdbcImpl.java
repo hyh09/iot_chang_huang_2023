@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -28,7 +29,7 @@ public abstract class TrendChartOfOperatingRateJdbcImpl {
     private String SELECT_TIME_BY_MONTH = "SELECT   bdate, sum((total_time + start_time)) time01 FROM trep_day_sta_detail where bdate>=date_trunc( 'month', now() ) " +
             "and and entity_id in  (:deviceIdList) group by bdate";
 
-    private String SELECT_TIME_BY_YEAR= "SELECT   to_date(to_char(t1.bdate ,'yyyy-MM'),'yyyy-MM') as bdate, sum((total_time + start_time)) time01 FROM trep_day_sta_detail where bdate>=date_trunc( 'year', now() ) " +
+    private String SELECT_TIME_BY_YEAR = "SELECT   to_date(to_char(t1.bdate ,'yyyy-MM'),'yyyy-MM') as bdate, sum((total_time + start_time)) time01 FROM trep_day_sta_detail where bdate>=date_trunc( 'year', now() ) " +
             " and entity_id in  (:deviceIdList) group by to_char(t1.bdate ,'yyyy-MM')  ";
 
 
@@ -36,28 +37,27 @@ public abstract class TrendChartOfOperatingRateJdbcImpl {
      * 查询开机率的趋势图接口
      */
     public List<TrendChartRateDto> startTimeOfThisMonth(List<UUID> deviceIdList) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("deviceIdList", deviceIdList);
-        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
-        List<TrendChartRateDto> dtoList = givenParamJdbcTemp.query(SELECT_TIME_BY_MONTH, parameters, new BeanPropertyRowMapper<>(TrendChartRateDto.class));
-        return dtoList;
+        return getTrendChartRateDtos(deviceIdList, SELECT_TIME_BY_MONTH);
 
     }
-
-
 
     /**
      * 查询开机率的趋势图接口
      */
     public List<TrendChartRateDto> startTimeOfThisYear(List<UUID> deviceIdList) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("deviceIdList", deviceIdList);
-        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
-        List<TrendChartRateDto> dtoList = givenParamJdbcTemp.query(SELECT_TIME_BY_YEAR, parameters, new BeanPropertyRowMapper<>(TrendChartRateDto.class));
-        return dtoList;
+        return getTrendChartRateDtos(deviceIdList, SELECT_TIME_BY_YEAR);
 
     }
 
+
+    @NotNull
+    private List<TrendChartRateDto> getTrendChartRateDtos(List<UUID> deviceIdList, String select_time_by_month) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("deviceIdList", deviceIdList);
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        List<TrendChartRateDto> dtoList = givenParamJdbcTemp.query(select_time_by_month, parameters, new BeanPropertyRowMapper<>(TrendChartRateDto.class));
+        return dtoList;
+    }
 
 
 }
