@@ -89,7 +89,7 @@ public class MesServiceImpl implements MesService, CommonService {
             ") A " +
             "GROUP BY A.sDate,A.sEquipmentName";
 
-    private static final String QUERY_CAPACITY_INFO_MONTH_PLAN = "SUM(B.nPlanOutputQty)  " +
+    private static final String QUERY_CAPACITY_INFO_MONTH_PLAN = "SELECT 本月计划=SUM(B.nPlanOutputQty)  " +
             "FROM dbo.psWPP A(NOLOCK)  " +
             "JOIN dbo.psWorkFlowCard B(NOLOCK) ON B.uGUID = A.upsWorkFlowCardGUID  " +
             "WHERE A.tPlanStartTime>=DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE()),0) AND EXISTS(  " +
@@ -102,7 +102,7 @@ public class MesServiceImpl implements MesService, CommonService {
             "WHERE A1.upsWorkFlowCardGUID=B.uGUID  " +
             ")";
 
-    private static final String QUERY_CAPACITY_INFO_MONTH_CAPACITY = "SUM(A.nTrackQty)  " +
+    private static final String QUERY_CAPACITY_INFO_MONTH_CAPACITY = "SELECT 本月产量=SUM(A.nTrackQty) " +
             "FROM dbo.ppTrackOutput A(NOLOCK)  " +
             "JOIN dbo.emEquipment B(NOLOCK) ON B.uGUID=A.uemEquipmentGUID  " +
             "JOIN dbo.pbWorkCentre C(NOLOCK) ON C.uGUID = B.upbWorkCentreGUID AND C.uGUID= ?  " +
@@ -110,20 +110,16 @@ public class MesServiceImpl implements MesService, CommonService {
 
     private static final String QUERY_CAPACITY_INFO_RATE = ""; // 本月产量 / 本月计划
 
-    private static final String QUERY_CAPACITY_INFO_TODAY_CAPACITY = "SUM(A.nTrackQty)  " +
+    private static final String QUERY_CAPACITY_INFO_TODAY_CAPACITY = "SELECT 今日产量=SUM(A.nTrackQty)  " +
             "FROM dbo.ppTrackOutput A(NOLOCK)  " +
             "JOIN dbo.emEquipment B(NOLOCK) ON B.uGUID=A.uemEquipmentGUID  " +
             "JOIN dbo.pbWorkCentre C(NOLOCK) ON C.uGUID = B.upbWorkCentreGUID AND C.uGUID= ?  " +
             "WHERE A.tTrackTime>=CONVERT(NVARCHAR(10),GETDATE(),120)";
 
     private static final String QUERY_CAPACITY_INFO_TODAY_PRODUCTION_NUM = "SELECT 在产数量=COUNT(1) " +
-            "FROM ( " +
-            "SELECT DISTINCT B.uGUID " +
-            "FROM dbo.mnProducting A(NOLOCK) " +
-            "JOIN dbo.emEquipment B(NOLOCK) ON B.uGUID=A.uemEquipmentGUID AND B.upbWorkCentreGUID= ？ " +
-            ") A1";
+            "FROM ( SELECT DISTINCT B.uGUID FROM dbo.mnProducting A(NOLOCK) JOIN dbo.emEquipment B(NOLOCK) ON B.uGUID=A.uemEquipmentGUID AND B.upbWorkCentreGUID= ?) A1";
 
-    private static final String QUERY_CAPACITY_INFO_TODAY_REPAIR_NUM = "SUM(C.nTrackQty)  " +
+    private static final String QUERY_CAPACITY_INFO_TODAY_REPAIR_NUM = "SELECT 回修数量=SUM(C.nTrackQty)  " +
             "FROM dbo.psWorkFlowCard A(NOLOCK)  " +
             "JOIN dbo.ppTrackJob B(NOLOCK) ON B.upsWorkFlowCardGUID = A.uGUID  " +
             "JOIN dbo.ppTrackOutput C(NOLOCK) ON C.uppTrackJobGUID = B.uGUID AND C.tTrackTime>=CONVERT(NVARCHAR(10),GETDATE(),120)  " +
