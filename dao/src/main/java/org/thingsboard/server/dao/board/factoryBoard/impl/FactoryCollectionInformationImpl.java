@@ -75,6 +75,7 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
 
     @Override
     public List<ChartDataVo> queryTrendChartOfOperatingRate(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery, ChartDateEnums dateEnums) {
+        List<DeviceEntity> deviceEntityList = deviceDao.findAllByEntity(factoryDeviceQueryConvertDeviceEntity(factoryDeviceQuery));
         return null;
     }
 
