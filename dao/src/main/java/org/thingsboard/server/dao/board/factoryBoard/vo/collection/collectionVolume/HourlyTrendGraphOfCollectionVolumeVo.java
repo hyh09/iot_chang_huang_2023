@@ -22,8 +22,10 @@ import java.util.List;
 @NoArgsConstructor
 public class HourlyTrendGraphOfCollectionVolumeVo {
 
+    private List<ChartDataVo> todayLine;
+
+
     private List<ChartDataVo> yesterdayLine;
 
-    private List<ChartDataVo> todayLine;
 
 }
