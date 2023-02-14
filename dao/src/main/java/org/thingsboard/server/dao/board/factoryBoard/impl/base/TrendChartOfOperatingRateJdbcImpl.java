@@ -26,11 +26,11 @@ public class TrendChartOfOperatingRateJdbcImpl {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private String SELECT_TIME_BY_MONTH = "SELECT   bdate, sum((total_time + start_time)) bootTime FROM trep_day_sta_detail where bdate>=date_trunc( 'month', now() ) " +
+    private String SELECT_TIME_BY_MONTH = "SELECT   t1.bdate, sum((t1.total_time + t1.start_time)) bootTime FROM trep_day_sta_detail t1 where t1.bdate>=date_trunc( 'month', now() ) " +
             "and  entity_id in  (:deviceIdList) group by bdate";
 
-    private String SELECT_TIME_BY_YEAR = "SELECT   to_date(to_char(t1.bdate ,'yyyy-MM'),'yyyy-MM') as bdate, sum((total_time + start_time)) bootTime FROM trep_day_sta_detail where bdate>=date_trunc( 'year', now() ) " +
-            " and entity_id in  (:deviceIdList) group by to_char(t1.bdate ,'yyyy-MM')  ";
+    private String SELECT_TIME_BY_YEAR = "SELECT   to_date(to_char(t1.bdate ,'yyyy-MM'),'yyyy-MM') as bdate, sum((t1.total_time + t1.start_time)) bootTime FROM trep_day_sta_detail t1 where t1.bdate>=date_trunc( 'year', now() ) " +
+            " and t1.entity_id in  (:deviceIdList) group by to_char(t1.bdate ,'yyyy-MM')  ";
 
 
     /**
