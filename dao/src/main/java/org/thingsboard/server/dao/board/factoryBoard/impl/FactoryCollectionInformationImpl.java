@@ -11,6 +11,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVol
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnumsToLocalDateVo;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
@@ -76,6 +77,7 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
     @Override
     public List<ChartDataVo> queryTrendChartOfOperatingRate(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery, ChartDateEnums dateEnums) {
         List<DeviceEntity> deviceEntityList = deviceDao.findAllByEntity(factoryDeviceQueryConvertDeviceEntity(factoryDeviceQuery));
+        ChartDateEnumsToLocalDateVo chartDateEnumsToLocalDateVo = dateEnums.currentConvert();
         return null;
     }
 
