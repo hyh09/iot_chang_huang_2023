@@ -10,6 +10,7 @@ import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInform
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.device.DeviceDao;
 import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
@@ -70,6 +71,11 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
 
         return new HourlyTrendGraphOfCollectionVolumeVo(getHourData(todayTimeLine, deviceEntityList),
                 getHourData(yesterdayTimeLine, deviceEntityList));
+    }
+
+    @Override
+    public List<ChartDataVo> queryTrendChartOfOperatingRate(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery, ChartDateEnums dateEnums) {
+        return null;
     }
 
     private DeviceEntity factoryDeviceQueryConvertDeviceEntity(FactoryDeviceQuery factoryDeviceQuery) {

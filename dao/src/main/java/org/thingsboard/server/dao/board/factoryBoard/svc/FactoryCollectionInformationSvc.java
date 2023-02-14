@@ -3,7 +3,11 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
+
+import java.util.List;
 
 /**
  * @Project Name: thingsboard
@@ -22,5 +26,7 @@ public interface FactoryCollectionInformationSvc {
     DeviceStatusNumVo queryDeviceStatusNum(TenantId tenantId,   FactoryDeviceQuery factoryDeviceQuery);
 
     HourlyTrendGraphOfCollectionVolumeVo  queryCollectionVolumeByHourly(TenantId tenantId,   FactoryDeviceQuery factoryDeviceQuery);
+
+    List<ChartDataVo> queryTrendChartOfOperatingRate(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery, ChartDateEnums dateEnums);
 
 }
