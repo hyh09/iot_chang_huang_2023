@@ -5,6 +5,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.Cha
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,13 @@ import java.util.stream.Stream;
  */
 public class DateLocaDateAndTimeUtil {
     public final static DateLocaDateAndTimeUtil INSTANCE = new DateLocaDateAndTimeUtil();
+
+
+    public static String formatDate(LocalDate localDate) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(ChartDateEnums.YEARS.getPattern());
+        String dateStr = localDate.format(fmt);
+        return dateStr;
+    }
 
     /**
      * 返回时间轴
@@ -75,6 +83,7 @@ public class DateLocaDateAndTimeUtil {
 
     /**
      * 当天0点
+     *
      * @return
      */
     public LocalDateTime getTodayZeroTime() {
@@ -83,22 +92,22 @@ public class DateLocaDateAndTimeUtil {
 
     /**
      * 当天23点
+     *
      * @return
      */
-    public  LocalDateTime getTodayTwentyThreeTime(){
-        LocalTime localTime =  LocalTime.of(23,0);
-        return LocalDateTime.of(LocalDate.now(),localTime );
+    public LocalDateTime getTodayTwentyThreeTime() {
+        LocalTime localTime = LocalTime.of(23, 0);
+        return LocalDateTime.of(LocalDate.now(), localTime);
     }
 
     /**
      * 当天0点
+     *
      * @return
      */
     public LocalDateTime getYesterdayZeroTime() {
         return LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
     }
-
-
 
 
 }

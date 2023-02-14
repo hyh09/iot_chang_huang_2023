@@ -1,12 +1,15 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.board.factoryBoard.impl.base.TrendChartOfOperatingRateJdbcImpl;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.collection.chart.TrendChartRateDto;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
@@ -17,16 +20,20 @@ import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 import org.thingsboard.server.dao.util.redis.StatisticsCountRedisSvc;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,12 +47,19 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@AllArgsConstructor
-public class FactoryCollectionInformationImpl implements FactoryCollectionInformationSvc {
+public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJdbcImpl implements FactoryCollectionInformationSvc {
 
     private DeviceMonitorService deviceMonitorService;
     private StatisticsCountRedisSvc statisticsCountRedisSvc;
     private DeviceDao deviceDao;
+
+    public FactoryCollectionInformationImpl(JdbcTemplate jdbcTemplate, DeviceMonitorService deviceMonitorService, StatisticsCountRedisSvc statisticsCountRedisSvc, DeviceDao deviceDao) {
+        super(jdbcTemplate);
+        deviceMonitorService = deviceMonitorService;
+        statisticsCountRedisSvc = statisticsCountRedisSvc;
+        deviceDao = deviceDao;
+
+    }
 
 
     @Override
@@ -77,8 +91,12 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
     @Override
     public List<ChartDataVo> queryTrendChartOfOperatingRate(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery, ChartDateEnums dateEnums) {
         List<DeviceEntity> deviceEntityList = deviceDao.findAllByEntity(factoryDeviceQueryConvertDeviceEntity(factoryDeviceQuery));
-        ChartDateEnumsToLocalDateVo chartDateEnumsToLocalDateVo = dateEnums.currentConvert();
-        return null;
+        List<UUID> uuids = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(deviceEntityList)) {
+            uuids.addAll(deviceEntityList.stream().map(DeviceEntity::getUuid).collect(Collectors.toList()));
+        }
+        List<TrendChartRateDto> trendChartRateDtoList = (dateEnums == ChartDateEnums.YEARS) ? startTimeOfThisYear(uuids) : startTimeOfThisMonth(uuids);
+        return getRunRate(trendChartRateDtoList, dateEnums);
     }
 
     private DeviceEntity factoryDeviceQueryConvertDeviceEntity(FactoryDeviceQuery factoryDeviceQuery) {
@@ -106,6 +124,47 @@ public class FactoryCollectionInformationImpl implements FactoryCollectionInform
             vo.setValue(String.valueOf(value));
             return vo;
         }).collect(Collectors.toList());
+    }
+
+
+    private List<ChartDataVo> getRunRate(List<TrendChartRateDto> trendChartRateDtoList, ChartDateEnums dateEnums) {
+        ChartDateEnumsToLocalDateVo dateVoDate = dateEnums.currentConvert();
+        List<LocalDate> localDates = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums, dateVoDate.getBeginDate(), dateVoDate.getEndDate());
+        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
+        List<ChartDataVo> list =
+                localDates.stream().map(t1 -> {
+                    ChartDataVo v1 = new ChartDataVo();
+                    String timeStr = dateEnums.forMartTime(t1);
+                    v1.setTime(timeStr);
+                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1));
+                    v1.setValue(runRateCalculation(value,dateVoDate,trendChartRateDtoList));
+                    return v1;
+                }).collect(Collectors.toList());
+        return list;
+
+    }
+
+    /**
+     * 计算规则：   开机时长(毫秒数） / 可用时间 月 (开始-结束）  /设备数
+     *
+     * @param value
+     * @param dateVoDate
+     * @param trendChartRateDtoList
+     * @return
+     */
+    private String runRateCalculation(String value, ChartDateEnumsToLocalDateVo dateVoDate, List<TrendChartRateDto> trendChartRateDtoList) {
+        if (StringUtils.isEmpty(value)) {
+            return "0";
+        }
+        Integer  deviceSize = trendChartRateDtoList.size();
+        LocalDate startTime = dateVoDate.getBeginDate();
+        LocalDate endTime = dateVoDate.getEndDate();
+        Long startTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(startTime, LocalTime.parse("00:00:00")));
+        Long endTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(endTime, LocalTime.parse("00:00:00")));
+        BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong,startTimeOfLong);
+       return BigDecimalUtil.INSTANCE.divide(value,timeDifference,deviceSize).toPlainString();
+
+
     }
 
 }

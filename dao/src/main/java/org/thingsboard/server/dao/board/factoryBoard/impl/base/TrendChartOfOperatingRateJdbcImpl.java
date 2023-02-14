@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.chart.TrendChartRateDto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,7 +20,7 @@ import java.util.UUID;
  * 业务中文描述:
  * Copyright (c) 2023,All Rights Reserved.
  */
-public class TrendChartOfOperatingRateJdbcImpl {
+public abstract class TrendChartOfOperatingRateJdbcImpl {
 
     protected JdbcTemplate jdbcTemplate;
 
@@ -52,10 +54,16 @@ public class TrendChartOfOperatingRateJdbcImpl {
 
     @NotNull
     private List<TrendChartRateDto> getTrendChartRateDtos(List<UUID> deviceIdList, String select_time_by_month) {
+        if(CollectionUtils.isEmpty(deviceIdList)){
+            return  new ArrayList<>();
+        }
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("deviceIdList", deviceIdList);
         NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
         List<TrendChartRateDto> dtoList = givenParamJdbcTemp.query(select_time_by_month, parameters, new BeanPropertyRowMapper<>(TrendChartRateDto.class));
+        if(CollectionUtils.isEmpty(dtoList)){
+            return new ArrayList<TrendChartRateDto>();
+        }
         return dtoList;
     }
 

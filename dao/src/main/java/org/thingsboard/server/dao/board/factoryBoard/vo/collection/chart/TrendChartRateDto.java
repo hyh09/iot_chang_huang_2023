@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.board.factoryBoard.vo.collection.chart;
 
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 
 import java.time.LocalDate;
 
@@ -17,7 +18,14 @@ import java.time.LocalDate;
 @ToString
 public class TrendChartRateDto {
 
-    private LocalDate localDate;
+    private LocalDate bdate;
 
-    private  String bootTime;
+    private String bootTime;
+
+
+    public String getdateStr() {
+        return DateLocaDateAndTimeUtil.formatDate(this.bdate);
+    }
+
+
 }
