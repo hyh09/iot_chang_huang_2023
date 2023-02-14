@@ -18,7 +18,7 @@ import java.util.UUID;
  * 业务中文描述:
  * Copyright (c) 2023,All Rights Reserved.
  */
-public abstract class TrendChartOfOperatingRateJdbcImpl {
+public class TrendChartOfOperatingRateJdbcImpl {
 
     protected JdbcTemplate jdbcTemplate;
 
@@ -26,10 +26,10 @@ public abstract class TrendChartOfOperatingRateJdbcImpl {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private String SELECT_TIME_BY_MONTH = "SELECT   bdate, sum((total_time + start_time)) time01 FROM trep_day_sta_detail where bdate>=date_trunc( 'month', now() ) " +
-            "and and entity_id in  (:deviceIdList) group by bdate";
+    private String SELECT_TIME_BY_MONTH = "SELECT   bdate, sum((total_time + start_time)) bootTime FROM trep_day_sta_detail where bdate>=date_trunc( 'month', now() ) " +
+            "and  entity_id in  (:deviceIdList) group by bdate";
 
-    private String SELECT_TIME_BY_YEAR = "SELECT   to_date(to_char(t1.bdate ,'yyyy-MM'),'yyyy-MM') as bdate, sum((total_time + start_time)) time01 FROM trep_day_sta_detail where bdate>=date_trunc( 'year', now() ) " +
+    private String SELECT_TIME_BY_YEAR = "SELECT   to_date(to_char(t1.bdate ,'yyyy-MM'),'yyyy-MM') as bdate, sum((total_time + start_time)) bootTime FROM trep_day_sta_detail where bdate>=date_trunc( 'year', now() ) " +
             " and entity_id in  (:deviceIdList) group by to_char(t1.bdate ,'yyyy-MM')  ";
 
 
