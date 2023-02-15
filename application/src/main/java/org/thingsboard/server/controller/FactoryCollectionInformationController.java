@@ -80,7 +80,7 @@ public class FactoryCollectionInformationController extends BaseController {
     @GetMapping("/queryTrendChartOfOperatingRate")
     @ResponseBody
     public List<ChartDataVo> queryTrendChartOfOperatingRate(@RequestParam(required = false, name = "factoryId") String factoryId,
-                                                            @RequestParam(required = true, name = "dimension") String dimension) throws ThingsboardException {
+                                                            @RequestParam(required = false, name = "dimension") String dimension) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
