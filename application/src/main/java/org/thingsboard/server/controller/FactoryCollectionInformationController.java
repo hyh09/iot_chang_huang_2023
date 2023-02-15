@@ -108,8 +108,8 @@ public class FactoryCollectionInformationController extends BaseController {
             factoryDeviceQuery.setFactoryId(factoryId);
             return factoryCollectionInformationSvc.queryPieChart(tenantId, factoryDeviceQuery);
         } catch (Exception e) {
-            log.error("[工厂看板-采集信息-【开机率趋势图-月和年的维度】]queryTrendChartOfOperatingRate方法异常入参:{}", factoryId);
-            log.error("[工厂看板-采集信息-【开机率趋势图-月和年的维度].queryTrendChartOfOperatingRate方法异常:{}", e);
+            log.error("[工厂看板-采集信息-【饼状图接口异常】]queryPieChart方法异常入参:{}", factoryId);
+            log.error("[工厂看板-采集信息-【饼状图接口异常].queryPieChart方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }
