@@ -13,6 +13,7 @@ import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInform
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.chart.TrendChartRateDto;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.collection.piechart.RatePieChartVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnumsToLocalDateVo;
@@ -98,6 +99,12 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         List<TrendChartRateDto> trendChartRateDtoList = (dateEnums == ChartDateEnums.YEARS) ? startTimeOfThisYear(uuids) : startTimeOfThisMonth(uuids);
         return getRunRate(trendChartRateDtoList, dateEnums);
     }
+
+    @Override
+    public RatePieChartVo queryPieChart(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery) {
+        return null;
+    }
+
 
     private DeviceEntity factoryDeviceQueryConvertDeviceEntity(FactoryDeviceQuery factoryDeviceQuery) {
         DeviceEntity deviceEntity = new DeviceEntity();
