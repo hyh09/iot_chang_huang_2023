@@ -14,4 +14,8 @@ import lombok.ToString;
 @Data
 @ToString
 public class RatePieChartVo {
+
+    private String currentValue;
+
+    private String yesterdayValue;
 }
