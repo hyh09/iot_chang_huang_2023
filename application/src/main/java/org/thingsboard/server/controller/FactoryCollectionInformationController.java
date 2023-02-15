@@ -79,8 +79,8 @@ public class FactoryCollectionInformationController extends BaseController {
     @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
     @GetMapping("/queryTrendChartOfOperatingRate")
     @ResponseBody
-    public List<ChartDataVo> queryTrendChartOfOperatingRate(@RequestParam(required = false, name = "factoryId") String factoryId,
-                                                            @RequestParam(required = false, name = "dimension") String dimension) throws ThingsboardException {
+    public List<ChartDataVo> queryTrendChartOfOperatingRate(@RequestParam(name = "factoryId") String factoryId,
+                                                            @RequestParam(name = "dimension") String dimension) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
