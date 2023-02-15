@@ -13,8 +13,12 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.queue.util.TbCoreComponent;
+
+import java.util.List;
 
 /**
  * @Project Name: long-win-iot
@@ -39,7 +43,7 @@ public class FactoryCollectionInformationController extends BaseController {
     @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
     @GetMapping("/queryDeviceStatusNum")
     @ResponseBody
-    public DeviceStatusNumVo queryDeviceStatusNum( @RequestParam(required = false,name = "factoryId") String factoryId) throws ThingsboardException {
+    public DeviceStatusNumVo queryDeviceStatusNum(@RequestParam(required = false, name = "factoryId") String factoryId) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
@@ -57,7 +61,7 @@ public class FactoryCollectionInformationController extends BaseController {
     @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
     @GetMapping("/queryCollectionVolumeByHourly")
     @ResponseBody
-    public HourlyTrendGraphOfCollectionVolumeVo queryCollectionVolumeByHourly(@RequestParam(required = false,name = "factoryId") String factoryId) throws ThingsboardException {
+    public HourlyTrendGraphOfCollectionVolumeVo queryCollectionVolumeByHourly(@RequestParam(required = false, name = "factoryId") String factoryId) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
@@ -66,6 +70,27 @@ public class FactoryCollectionInformationController extends BaseController {
         } catch (Exception e) {
             log.error("[工厂看板-采集信息-【采集量-每小时】]queryCollectionVolumeByHourly方法异常入参:{}", factoryId);
             log.error("[工厂看板-采集信息-【采集量-每小时【].queryCollectionVolumeByHourly方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
+
+    @ApiOperation("开机率趋势图-月和年的维度")
+    @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
+    @GetMapping("/queryTrendChartOfOperatingRate")
+    @ResponseBody
+    public List<ChartDataVo> queryTrendChartOfOperatingRate(@RequestParam(required = false, name = "factoryId") String factoryId,
+                                                            @RequestParam(required = true, name = "dimension") String dimension) throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
+            factoryDeviceQuery.setFactoryId(factoryId);
+            ChartDateEnums chartDateEnums = ChartDateEnums.valueOf(dimension);
+
+            return factoryCollectionInformationSvc.queryTrendChartOfOperatingRate(tenantId, factoryDeviceQuery, chartDateEnums);
+        } catch (Exception e) {
+            log.error("[工厂看板-采集信息-【开机率趋势图-月和年的维度】]queryTrendChartOfOperatingRate方法异常入参:{}", factoryId);
+            log.error("[工厂看板-采集信息-【开机率趋势图-月和年的维度].queryTrendChartOfOperatingRate方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }
