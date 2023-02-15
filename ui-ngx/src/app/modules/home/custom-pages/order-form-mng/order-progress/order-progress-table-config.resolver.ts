@@ -54,7 +54,12 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
 
   resolve(): EntityTableConfig<OrderProgress> {
     this.config.componentsData = {
-      dateRange: [],
+      sOrderNo: '',
+      sCustomerName: '',
+      sMaterialName: '',
+      sColorName: '',
+      dateRange:[],
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('order.order-progress');
