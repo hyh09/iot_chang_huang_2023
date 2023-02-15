@@ -202,6 +202,10 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                         sql.append("and F.sColorName =? ");
                         params.add(dto.getSColorName());
                     }
+                    if (StringUtils.isNotEmpty(dto.getSMaterialName())) {
+                        sql.append("and E.sMaterialName =? ");
+                        params.add(dto.getSMaterialName());
+                    }
                     if (orderFlag) {
                         sql.append("order by a.tCreateTime desc ");
                     }
