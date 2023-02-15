@@ -51,11 +51,13 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             " FROM dbo.sdOrderHdr A(NOLOCK) " +
             "JOIN dbo.sdOrderDtl B(NOLOCK)ON B.usdOrderHdrGUID=A.uGUID " +
             "JOIN dbo.sdOrderLot C(NOLOCK)ON C.usdOrderDtlGUID=B.uGUID " +
+            "JOIN dbo.sdOrderType D(NOLOCK)ON A.sOrderType = D.sOrderType " +
             " WHERE 1=1 ";
     private String sqlOrderList = " SELECT row_number () OVER (ORDER BY A.tCreateTime  DESC) AS rownumber ," +
-            "A.sOrderNo,A.sCreator,A.tCreateTime FROM dbo.sdOrderHdr A(NOLOCK) " +
+            "A.sOrderNo,D.sOrderTypeName,A.sCreator,A.tCreateTime FROM dbo.sdOrderHdr A(NOLOCK) " +
             "JOIN dbo.sdOrderDtl B(NOLOCK)ON B.usdOrderHdrGUID=A.uGUID " +
             "JOIN dbo.sdOrderLot C(NOLOCK)ON C.usdOrderDtlGUID=B.uGUID " +
+            "JOIN dbo.sdOrderType D(NOLOCK)ON A.sOrderType = D.sOrderType " +
             " WHERE 1=1  ";
 
 
@@ -159,12 +161,12 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     @Override
     public PageData<MesOrderListVo> findOrderList(MesOrderListDto dto, PageLink pageLink) {
         try {
-            int rowNumber = (pageLink.getPage() - 1) * pageLink.getPageSize();
+            int rowNumber = (pageLink.getPage() ) * pageLink.getPageSize();
             //queryTotal方法统计总数
             int total = this.queryOrderListTotal(dto);
             //queryRecordList方法查询并转换实体类List
             List<MesOrderListVo> recordList = this.queryOrderListRecordList(dto, pageLink.getPageSize(), rowNumber);
-            //查询工厂
+            //查询工厂  （前端默认上海工厂）
 
             PageData<MesOrderListVo> resultPage = new PageData<>();
             resultPage = new PageData<MesOrderListVo>(recordList, total / pageLink.getPageSize(), total, CollectionUtils.isNotEmpty(recordList));
@@ -214,7 +216,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     @Override
     public PageData<MesProductionCardListVo> findProductionCardList(MesProductionCardListDto dto, PageLink pageLink) {
         try {
-            int rowNumber = (pageLink.getPage() - 1) * pageLink.getPageSize();
+            int rowNumber = (pageLink.getPage() ) * pageLink.getPageSize();
             //queryTotal方法统计总数
             int total = this.queryProductionCardListTotal(dto);
             //queryRecordList方法查询并转换实体类List
@@ -231,7 +233,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     @Override
     public PageData<MesProductionProgressListVo> findProductionProgressList(MesProductionProgressListDto dto, PageLink pageLink) {
         try {
-            int rowNumber = (pageLink.getPage() - 1) * pageLink.getPageSize();
+            int rowNumber = (pageLink.getPage() ) * pageLink.getPageSize();
             //queryTotal方法统计总数
             int total = this.queryProductionProgressListTotal(dto);
             //queryRecordList方法查询并转换实体类List
@@ -533,6 +535,10 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                 sql.append("and A.sOrderNo =? ");
                 params.add(dto.getSOrderNo());
             }
+            if (StringUtils.isNotEmpty(dto.getSOrderTypeName())) {
+                sql.append("and D.sOrderTypeName =? ");
+                params.add(dto.getSOrderTypeName());
+            }
         }
 
         Object[] para = params.toArray(new Object[params.size()]);
@@ -562,6 +568,10 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
             if (StringUtils.isNotEmpty(dto.getSOrderNo())) {
                 sql.append("and A.sOrderNo =? ");
                 params.add(dto.getSOrderNo());
+            }
+            if (StringUtils.isNotEmpty(dto.getSOrderTypeName())) {
+                sql.append("and D.sOrderTypeName =? ");
+                params.add(dto.getSOrderTypeName());
             }
         }
         if (rowNumber != null) {
