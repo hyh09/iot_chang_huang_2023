@@ -114,7 +114,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         List<TrendChartRateDto> yesterdayDto = startTimeOfThisDay(uuids, yesterday);
         RatePieChartVo vo = new RatePieChartVo();
         vo.setCurrentValue(runRateOne(todayDto));
-        vo.setCurrentValue(runRateOne(yesterdayDto));
+        vo.setYesterdayValue(runRateOne(yesterdayDto));
         return vo;
     }
 
