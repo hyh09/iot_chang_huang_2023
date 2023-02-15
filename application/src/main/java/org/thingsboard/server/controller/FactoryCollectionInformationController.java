@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.collectionVolume.HourlyTrendGraphOfCollectionVolumeVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.collection.piechart.RatePieChartVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
@@ -96,8 +97,22 @@ public class FactoryCollectionInformationController extends BaseController {
     }
 
 
-
-
+    @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
+    @GetMapping("/queryPieChart")
+    @ResponseBody
+    public RatePieChartVo queryPieChart(@RequestParam(name = "factoryId") String factoryId
+                                        ) throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
+            factoryDeviceQuery.setFactoryId(factoryId);
+            return factoryCollectionInformationSvc.queryPieChart(tenantId, factoryDeviceQuery);
+        } catch (Exception e) {
+            log.error("[工厂看板-采集信息-【开机率趋势图-月和年的维度】]queryTrendChartOfOperatingRate方法异常入参:{}", factoryId);
+            log.error("[工厂看板-采集信息-【开机率趋势图-月和年的维度].queryTrendChartOfOperatingRate方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
 
 
 }

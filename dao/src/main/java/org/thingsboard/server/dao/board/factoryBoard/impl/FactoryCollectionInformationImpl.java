@@ -18,6 +18,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnumsToLocalDateVo;
 import org.thingsboard.server.dao.device.DeviceDao;
+import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
@@ -102,7 +103,19 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
 
     @Override
     public RatePieChartVo queryPieChart(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery) {
-        return null;
+        List<DeviceEntity> deviceEntityList = deviceDao.findAllByEntity(factoryDeviceQueryConvertDeviceEntity(factoryDeviceQuery));
+        List<UUID> uuids = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(deviceEntityList)) {
+            uuids.addAll(deviceEntityList.stream().map(DeviceEntity::getUuid).collect(Collectors.toList()));
+        }
+        LocalDate localDate = LocalDate.now();
+        LocalDate yesterday = localDate.plusDays(-1);
+        List<TrendChartRateDto> todayDto = startTimeOfThisDay(uuids, LocalDate.now());
+        List<TrendChartRateDto> yesterdayDto = startTimeOfThisDay(uuids, yesterday);
+        RatePieChartVo vo = new RatePieChartVo();
+        vo.setCurrentValue(runRateOne(todayDto));
+        vo.setCurrentValue(runRateOne(yesterdayDto));
+        return vo;
     }
 
 
@@ -144,7 +157,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
                     String timeStr = dateEnums.forMartTime(t1);
                     v1.setTime(timeStr);
                     String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1));
-                    v1.setValue(runRateCalculation(value,dateVoDate,trendChartRateDtoList));
+                    v1.setValue(runRateCalculation(value, dateVoDate, trendChartRateDtoList));
                     return v1;
                 }).collect(Collectors.toList());
         return list;
@@ -163,14 +176,31 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         if (StringUtils.isEmpty(value)) {
             return "0";
         }
-        Integer  deviceSize = trendChartRateDtoList.size();
+        Integer deviceSize = trendChartRateDtoList.size();
         LocalDate startTime = dateVoDate.getBeginDate();
         LocalDate endTime = dateVoDate.getEndDate();
         Long startTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(startTime, LocalTime.parse("00:00:00")));
         Long endTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(endTime, LocalTime.parse("00:00:00")));
-        BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong,startTimeOfLong);
-       return BigDecimalUtil.INSTANCE.divide(value,timeDifference,deviceSize).toPlainString();
+        BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong, startTimeOfLong);
+        return BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
 
+
+    }
+
+
+    private String runRateOne(List<TrendChartRateDto> trendChartRateDtoList) {
+        if (CollectionUtils.isEmpty(trendChartRateDtoList)) {
+            return "0%";
+        }
+        TrendChartRateDto trendChartRateDto = trendChartRateDtoList.stream().findFirst().get();
+        String value = trendChartRateDto.getBootTime();
+        if (StringUtils.isEmpty(value)) {
+            return "0%";
+        }
+        BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
+        String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
+        String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr, 100).toPlainString();
+        return resultStr + "%";
 
     }
 
