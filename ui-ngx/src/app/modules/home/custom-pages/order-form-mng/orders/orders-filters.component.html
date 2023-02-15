@@ -1,26 +1,26 @@
 <mat-form-field>
   <mat-label>{{ 'order.order-no' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.orderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sorderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
-    *ngIf="entitiesTableConfig.componentsData.orderNo"
+    *ngIf="entitiesTableConfig.componentsData.sorderNo"
     matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('orderNo')"
+    (click)="onClear('sorderNo')"
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
 <mat-form-field>
   <mat-label>{{ 'order.order-type' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.type" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sOrderTypeName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
-    *ngIf="entitiesTableConfig.componentsData.type"
+    *ngIf="entitiesTableConfig.componentsData.sOrderTypeName"
     matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('type')"
+    (click)="onClear('sOrderTypeName')"
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>
 </mat-form-field>
-<mat-form-field *ngIf="env.loginPlatform === 0">
+<!-- <mat-form-field *ngIf="env.loginPlatform === 0">
   <mat-label>{{ 'order.factory-name' | translate }}</mat-label>
   <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.factoryName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
@@ -30,9 +30,12 @@
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-</mat-form-field>
+</mat-form-field> -->
 <div class="action-btns">
   <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
     {{ 'action.search' | translate }}
+  </button>
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
   </button>
 </div>

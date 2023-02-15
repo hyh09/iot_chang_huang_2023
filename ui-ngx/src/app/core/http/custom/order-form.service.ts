@@ -9,8 +9,10 @@ import { tap } from "rxjs/operators";
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 
 interface FetchListFilter {
-  orderNo: string;
-  factoryName: string;
+  sOrderNo?: string;
+  sOrderTypeName?: string;
+  orderNo?: string;
+  factoryName?: string;
 }
 
 interface FetchOrderProgressListFilter {
@@ -39,7 +41,7 @@ export class OrderFormService {
     Object.keys(filterParams).forEach(key => {
       queryStr.push(`${key}=${filterParams[key]}`);
     });
-    return this.http.get<PageData<OrderForm>>(`/api/orders${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+    return this.http.get<PageData<OrderForm>>(`/api/mes/order/findOrderList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
   // 获取订单产量列表
@@ -123,13 +125,13 @@ export class OrderFormService {
     return this.http.get<PageData<ProcessCardProgress>>(`/api/mes/order/findProductionCardList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
-    // 获取生产进度根据生产编号
-    public getProdProgressBySorderNo(pageLink: PageLink, filterParams: { sCardNo?: string }, config?: RequestConfig): Observable<PageData<ProdProgress>> {
-      let queryStr: string[] = [];
-      Object.keys(filterParams).forEach(key => {
-        queryStr.push(`${key}=${filterParams[key]}`);
-      });
-      return this.http.post<PageData<ProdProgress>>(`/api/mes/order/findProductionProgressList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
-    }
+  // 获取生产进度根据生产编号
+  public getProdProgressBySorderNo(pageLink: PageLink, filterParams: { sCardNo?: string }, config?: RequestConfig): Observable<PageData<ProdProgress>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.post<PageData<ProdProgress>>(`/api/mes/order/findProductionProgressList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
 
 }
