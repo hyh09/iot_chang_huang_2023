@@ -84,7 +84,7 @@ export interface OrderProgress extends BaseData<any> {
   sorderNo: string;
 }
 
-export interface processCardProgress extends BaseData<ProdCardId> {
+export interface ProcessCardProgress extends BaseData<ProdCardId> {
   scardNo: string;
   ddeliveryDate: string;
   nqty: string;

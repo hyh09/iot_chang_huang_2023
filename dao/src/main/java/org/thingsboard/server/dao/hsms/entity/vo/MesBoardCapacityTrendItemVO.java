@@ -7,9 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
- * 机台产量对比VO
+ * 产量趋势VO
  *
  * @author wwj
  * @since 2021.10.21
@@ -18,7 +19,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarCapacityComparisonItemVO {
+public class MesBoardCapacityTrendItemVO {
 
     /**
      * y轴数据,产量

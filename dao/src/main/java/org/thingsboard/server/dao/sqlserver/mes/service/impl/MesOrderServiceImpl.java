@@ -3,7 +3,6 @@ package org.thingsboard.server.dao.sqlserver.mes.service.impl;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -18,21 +17,16 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.dao.hs.entity.vo.HistoryGraphPropertyTsKvVO;
 import org.thingsboard.server.dao.hs.service.CommonService;
-import org.thingsboard.server.dao.model.sql.AttributeKvEntity;
-import org.thingsboard.server.dao.sql.attributes.AttributeKvRepository;
 import org.thingsboard.server.dao.sql.mesdevicerelation.JpaMesDeviceRelationDao;
-import org.thingsboard.server.dao.sql.mesdevicerelation.MesDeviceRelationRepository;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.dto.*;
 import org.thingsboard.server.dao.sqlserver.mes.domain.production.vo.*;
 import org.thingsboard.server.dao.sqlserver.mes.service.MesOrderService;
 import org.thingsboard.server.dao.sqlserver.utils.PageJdbcUtil;
+import org.thingsboard.server.dao.sqlts.latest.TsKvLatestRepository;
 import org.thingsboard.server.dao.timeseries.TimeseriesService;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,10 +39,8 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
     private PageJdbcUtil pageJdbcUtil;
     @Resource
     private JpaMesDeviceRelationDao jpaMesDeviceRelationDao;
-    @Autowired
-    private MesDeviceRelationRepository mesDeviceRelationRepository;
     @Resource
-    private AttributeKvRepository attributeKvRepository;
+    private TsKvLatestRepository tsKvLatestRepository;
     @Resource
     private TimeseriesService timeseriesService;
 
@@ -310,10 +302,10 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
         if (deviceId == null) {
             return null;
         }
-        List<AttributeKvEntity> allByIdEntityId = attributeKvRepository.findAllByIdEntityId(deviceId);
-        List<MesChartVo> result = allByIdEntityId.stream().map(e -> {
+        List<String> keyList = tsKvLatestRepository.findAllKeysByEntityIds(Arrays.asList(deviceId));
+        List<MesChartVo> result = keyList.stream().map(e -> {
             MesChartVo mesChartVo = new MesChartVo();
-            mesChartVo.setKey(e.getId().getAttributeKey());
+            mesChartVo.setKey(e);
             mesChartVo.setDeviceId(deviceId);
             return mesChartVo;
         }).collect(Collectors.toList());

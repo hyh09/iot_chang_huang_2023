@@ -164,7 +164,6 @@ public class BaseTimeseriesService implements TimeseriesService {
             throw new IncorrectParameterException("Key value entry can't be null");
         }
         List<ListenableFuture<Integer>> futures = Lists.newArrayListWithExpectedSize(INSERTS_PER_ENTRY);
-        statisticsCountRedisSvc.writeCount(entityId, tsKvEntry);
         saveAndRegisterFutures(tenantId, futures, entityId, tsKvEntry, 0L);
         return Futures.transform(Futures.allAsList(futures), SUM_ALL_INTEGERS, MoreExecutors.directExecutor());
     }
@@ -205,6 +204,7 @@ public class BaseTimeseriesService implements TimeseriesService {
             Map<String, String> map = deviceDictPropertiesSvc.getUnit();
             dataInitMap = map;
         }
+        statisticsCountRedisSvc.writeCount(entityId, tsKvEntry);
         futures.add(timeseriesDao.savePartition(tenantId, entityId, tsKvEntry.getTs(), tsKvEntry.getKey()));
         futures.add(Futures.transform(timeseriesLatestDao.saveLatest(tenantId, entityId, tsKvEntry), v -> 0, MoreExecutors.directExecutor()));
         futures.add(timeseriesDao.save(tenantId, entityId, tsKvEntry, ttl));

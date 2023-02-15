@@ -22,4 +22,5 @@ public class ChartDataVo {
     private String time;
 
 
+
 }

@@ -1,6 +1,6 @@
 <div>
   <mat-toolbar color="primary">
-    <h2>{{ 'potency.order-process-cards' | translate }}: {{ order.orderNo }}</h2>
+    <h2>{{ 'potency.order-process-cards' | translate }}{{ 'potency.order-no-template' | translate:{ orderNo: order.orderNo } }}</h2>
     <span fxFlex></span>
     <button mat-icon-button (click)="close()" type="button">
       <mat-icon class="material-icons">close</mat-icon>
@@ -9,7 +9,7 @@
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
-  <div mat-dialog-content style="position: relative; width: 1000px; height: 600px; padding: 0;">
-    <tb-entities-table #processCardsTable [entitiesTableConfig]="config"></tb-entities-table>
+  <div mat-dialog-content style="position: relative; width: 1000px; height: 652px; padding: 0;">
+    <tb-entities-table [entitiesTableConfig]="config"></tb-entities-table>
   </div>
 </div>

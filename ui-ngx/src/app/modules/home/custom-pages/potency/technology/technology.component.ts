@@ -197,16 +197,18 @@ export class TechnologyComponent extends PageComponent {
   showProcedureParamLineChart() {
     const { tStartTime, tEndTime } = this.currProcedure;
     const currProcedureParam = this.procedureParams[this.currentTabIndex];
-    this.potencyService.getProcedureParamChartData({
-      ...currProcedureParam, tStartTime, tEndTime
-    }).subscribe(res => {
-      this.chartData = {
-        properties: [{
-          title: currProcedureParam.key,
-          tsKvs: res || []
-        }]
-      }
-    });
+    if (currProcedureParam) {
+      this.potencyService.getProcedureParamChartData({
+        ...currProcedureParam, tStartTime, tEndTime
+      }).subscribe(res => {
+        this.chartData = {
+          properties: [{
+            title: currProcedureParam.key,
+            tsKvs: res || []
+          }]
+        }
+      });
+    }
   }
 
   /**

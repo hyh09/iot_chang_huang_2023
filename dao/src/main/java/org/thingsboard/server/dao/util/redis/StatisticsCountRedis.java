@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.util.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.id.EntityId;
@@ -37,11 +38,14 @@ public class StatisticsCountRedis implements StatisticsCountRedisSvc {
         String keyPre = getKey(entityId.getId(), tsKvEntry.getTs());
         String value = tsKvEntry.getKey() + tsKvEntry.getTs();
         redisTemplateUtil.pfadd(keyPre, value);
-        redisTemplateUtil.expireDays(keyPre,3);//保存3天的量;
+        redisTemplateUtil.expireDays(keyPre,3);
     }
 
     @Override
     public Long readCount(List<UUID> uuidList, LocalDateTime localDateTime) {
+        if(CollectionUtils.isEmpty(uuidList)){
+            return  0L;
+        }
         List<String> keyList = uuidList.stream().map(m1 -> getKey(m1, CommonUtils.getTimestampOfDateTime(localDateTime))).collect(Collectors.toList());
         Long count = keyList.stream().map(str1 -> redisTemplateUtil.pfcount(str1)).map(l1 -> BigDecimalUtil.INSTANCE.formatByObject(l1)).reduce(BigDecimal.ZERO, BigDecimal::add).longValue();
         return count;

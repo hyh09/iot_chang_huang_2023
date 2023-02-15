@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutionException;
  * @since 2021.11.1
  */
 public interface ClientService {
+
     /**
      * 查询用户
      *

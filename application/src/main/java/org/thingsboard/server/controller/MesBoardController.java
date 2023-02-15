@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.MesService;
 import org.thingsboard.server.dao.hsms.entity.vo.*;
@@ -42,7 +44,7 @@ public class MesBoardController extends BaseController {
 //            @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "path", required = true),
 //    })
 //    @GetMapping(value = "/mes/board/workshop/{workshopId}/productionLines")
-//    public List<MesBoarProductionLineVO> listProductionLinesByWorkshopId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
+//    public List<MesBoardProductionLineVO> listProductionLinesByWorkshopId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
 //        return this.mesService.listProductionLinesByWorkshopId(getTenantId(), workshopId);
 //    }
 
@@ -54,7 +56,11 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "factoryId", value = "工厂Id", paramType = "path", required = true),
     })
     @GetMapping(value = "/mes/board/factory/{factoryId}/workshops")
-    public List<MesBoarWorkshopVO> listWorkshopsByFactoryId(@PathVariable("factoryId") UUID factoryId) throws ThingsboardException {
+    public List<MesBoardWorkshopVO> listWorkshopsByFactoryId(@PathVariable("factoryId") UUID factoryId) throws ThingsboardException {
+//        // todo 临时修改
+//        var factory = this.factoryService.findById(factoryId);
+//        if (factory == null)
+//            throw new ThingsboardException("工厂不存在", ThingsboardErrorCode.GENERAL);
         return this.mesService.listWorkshopsByFactoryId(getTenantId(), factoryId);
     }
 
@@ -66,7 +72,7 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "path", required = true),
     })
     @GetMapping(value = "/mes/board/workshopId/{workshopId}/devices")
-    public List<MesBoarDeviceVO> listDevicesByProductionLineId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
+    public List<MesBoardDeviceVO> listDevicesByProductionLineId(@PathVariable("workshopId") UUID workshopId) throws ThingsboardException {
         return this.mesService.listDevicesByProductionLineId(getTenantId(), workshopId);
     }
 
@@ -78,7 +84,7 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/device/operation/rate/top")
-    public List<MesBoarDeviceOperationRateVO> getDeviceOperationRateTop(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+    public List<MesBoardDeviceOperationRateVO> getDeviceOperationRateTop(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
         return this.mesService.getDeviceOperationRateTop(getTenantId(), workshopId);
     }
 
@@ -90,7 +96,7 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/trend")
-    public List<MesBoarCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+    public List<MesBoardCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
         return this.mesService.getCapacityTrend(getTenantId(), workshopId);
     }
 
@@ -102,7 +108,7 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/production/monitoring")
-    public List<MesBoarProductionMonitoringVO> getProductionMonitoring(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+    public List<MesBoardProductionMonitoringVO> getProductionMonitoring(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
         return this.mesService.getProductionMonitoring(getTenantId(), workshopId);
     }
 
@@ -114,7 +120,7 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/comparison")
-    public List<MesBoarCapacityComparisonVO> getCapacityComparison(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+    public List<MesBoardCapacityComparisonVO> getCapacityComparison(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
         return this.mesService.getCapacityComparison(getTenantId(), workshopId);
     }
 
@@ -126,7 +132,7 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/info")
-    public MesBoarCapacityInfoVO getCapacityInfo(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+    public MesBoardCapacityInfoVO getCapacityInfo(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
         return this.mesService.getCapacityInfo(getTenantId(), workshopId);
     }
 
