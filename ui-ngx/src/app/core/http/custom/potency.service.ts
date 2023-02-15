@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { defaultHttpOptionsFromConfig, RequestConfig } from '../http-utils';
 import { PageData, PageLink, TimePageLink } from '@app/shared/public-api';
 import { Observable } from 'rxjs';
-import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, OrderConsumption, PotencyInterval, PotencyTop10, ProcedureProduction, RunningState } from '@app/shared/models/custom/potency.models';
+import { DeviceCapacityList, DeviceEnergyConsumption, DeviceEnergyConsumptionList, GroupProduction, OrderConsumption, OrderProcessCard, PotencyInterval, PotencyTop10, Procedure, ProcedureParam, ProcedureParamChartData, ProcedureProduction, ProcessCard, RunningState } from '@app/shared/models/custom/potency.models';
 import { DeviceProp } from '@app/shared/models/custom/device-monitor.models';
 import { map, tap } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
@@ -24,6 +24,16 @@ interface FilterParams {
   orderNo?: string;
   cardNo?: string;
   customerName?: string;
+  sCardNo?: string;
+  uGuid?: string;
+  sMaterialName?: string;
+  sOrderNo?: string;
+  dateBegin?: number | '';
+  dateEnd?: number | '';
+  uemEquipmentGUID?: string;
+  tStartTime?: string;
+  tEndTime?: string;
+  key?: string;
 }
 
 @Injectable({
@@ -182,6 +192,15 @@ export class PotencyService {
     return this.http.get<PageData<OrderConsumption>>(`/api/yieId/orderQuery${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
+  // 查询能耗分析-订单流程卡列表
+  public getOrderProcessCards(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<OrderProcessCard>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.get<PageData<OrderProcessCard>>(`/api/yieId/queryCartPage${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
   // 获取设备的参数
   public getDeviceProps(deviceId: string, config?: RequestConfig): Observable<DeviceProp[]> {
     return this.http.get<DeviceProp[]>(`/api/pc/efficiency/queryDictName?deviceId=${deviceId}`, defaultHttpOptionsFromConfig(config));
@@ -207,6 +226,42 @@ export class PotencyService {
   public getIntervalData(params: {deviceId: string; startTime: number; endTime: number; keyNum: '1' | '2' | '3' | ''; type: '0' | '1';}, config?: RequestConfig): Observable<PotencyInterval> {
     const { deviceId, startTime, endTime, keyNum, type } = params;
     return this.http.get<PotencyInterval>(`/api/capacityDevice/getDeviceCapacity?deviceId=${deviceId}&startTime=${startTime}&endTime=${endTime}&keyNum=${keyNum}&type=${type}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 查询工艺分析-流程卡列表
+  public getProcessCardList(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<ProcessCard>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.post<PageData<ProcessCard>>(`/api/mes/order/findOrderCardList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 查询工艺分析-工序列表
+  public getProcedureList(pageLink: PageLink, filterParams: FilterParams, config?: RequestConfig): Observable<PageData<Procedure>> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.post<PageData<Procedure>>(`/api/mes/order/findProductedList${pageLink.toQuery()}&${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 查询工艺分析-工序参数
+  public getProcedureParams(filterParams: FilterParams, config?: RequestConfig): Observable<ProcedureParam[]> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.post<ProcedureParam[]>(`/api/mes/order/getChart?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
+  }
+
+  // 获取工艺分析-工序参数曲线图数据
+  public getProcedureParamChartData(filterParams: FilterParams, config?: RequestConfig): Observable<ProcedureParamChartData> {
+    let queryStr: string[] = [];
+    Object.keys(filterParams).forEach(key => {
+      queryStr.push(`${key}=${filterParams[key]}`);
+    });
+    return this.http.post<ProcedureParamChartData>(`/api/mes/order/getParamChart?${queryStr.join('&')}`, defaultHttpOptionsFromConfig(config));
   }
 
 }

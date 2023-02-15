@@ -7,6 +7,7 @@ import { ProdMonitor } from '@app/shared/models/custom/production-mng.models';
 import { ProdMonitorFilterComponent } from './production-monitor-filter.component';
 import { ProductionMngService } from '@app/core/http/custom/production-mng.service';
 import { TranslateService } from '@ngx-translate/core';
+import { FileService } from '@app/core/http/custom/file.service';
 
 @Injectable()
 export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig<ProdMonitor>> {
@@ -15,7 +16,7 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
 
   constructor(
     private productionMngService: ProductionMngService,
-    private datePipe: DatePipe,
+    private fileService: FileService,
     private translate: TranslateService
   ) {
     this.config.entityType = EntityType.POTENCY;
@@ -31,7 +32,7 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
       new EntityTableColumn<ProdMonitor>('scustomerName', 'order.customer', '60px', (entity) => (entity.scustomerName || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('ddeliveryDate', 'potency.delivery-date', '120px', (entity) => (entity.ddeliveryDate || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('smaterialName', 'order.product-name', '200px', (entity) => (entity.smaterialName || ''), () => ({}), false),
-      new EntityTableColumn<ProdMonitor>('scolorName', 'order.colour', '100px', (entity) => (entity.scolorName || ''), () => ({}), false),
+      new EntityTableColumn<ProdMonitor>('scolorName', 'order.color', '100px', (entity) => (entity.scolorName || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('nplanOutputQty', 'order.number-of-cards', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('sworkingProcedureNameFinish', 'order.completion-process', '100px', (entity) => (entity.sworkingProcedureNameFinish || ''), () => ({}), false),
       new EntityTableColumn<ProdMonitor>('sWorkingProcedureName', 'order.process-to-be-produced', '100px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
@@ -74,8 +75,7 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
             dataList.push(itemList)
           });
         }
-        this.productionMngService.exportPort('生产监控', dataList).subscribe();
-        console.log(dataList)
+        this.fileService.exportTable('生产监控', dataList).subscribe();
       })
     }
     // 获取合计数量

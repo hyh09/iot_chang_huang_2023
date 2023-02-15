@@ -460,4 +460,11 @@ public interface ClientService {
      * @param deviceId 设备Id
      */
     Boolean isDeviceOnline(UUID deviceId);
+
+    /**
+     * iot设备Id转换到MesId
+     *
+     * @param uuids id列表
+     */
+    List<UUID> toMesDeviceIds(List<UUID> uuids);
 }

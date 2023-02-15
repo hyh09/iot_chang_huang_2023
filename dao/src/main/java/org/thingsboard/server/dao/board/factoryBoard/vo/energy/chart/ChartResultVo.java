@@ -1,5 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
@@ -15,7 +17,11 @@ import java.util.List;
  */
 @Data
 @ToString
+@ApiModel("趋势图对象")
 public class ChartResultVo {
+
+    @ApiModelProperty("费用占比对象")
+    private CostRatioVo costRatioVo;
 
     /**
      * 水的趋势线

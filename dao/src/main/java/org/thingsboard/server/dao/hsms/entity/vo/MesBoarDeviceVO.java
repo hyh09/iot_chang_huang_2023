@@ -31,4 +31,16 @@ public class MesBoarDeviceVO {
      */
     @ApiModelProperty(value = "名称")
     private String name;
+
+    /**
+     * mes Id
+     */
+    @ApiModelProperty(value = "mes Id")
+    private UUID mesId;
+
+    /**
+     * mes 名称
+     */
+    @ApiModelProperty(value = "mes 名称")
+    private String mesName;
 }
