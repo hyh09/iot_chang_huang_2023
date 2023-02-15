@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.board.factoryBoard.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
@@ -49,16 +50,15 @@ import java.util.stream.Collectors;
 @Service
 public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJdbcImpl implements FactoryCollectionInformationSvc {
 
+    @Autowired
     private DeviceMonitorService deviceMonitorService;
+    @Autowired
     private StatisticsCountRedisSvc statisticsCountRedisSvc;
+    @Autowired
     private DeviceDao deviceDao;
 
-    public FactoryCollectionInformationImpl(JdbcTemplate jdbcTemplate, DeviceMonitorService deviceMonitorService, StatisticsCountRedisSvc statisticsCountRedisSvc, DeviceDao deviceDao) {
+    public FactoryCollectionInformationImpl(@Autowired JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
-        deviceMonitorService = deviceMonitorService;
-        statisticsCountRedisSvc = statisticsCountRedisSvc;
-        deviceDao = deviceDao;
-
     }
 
 
