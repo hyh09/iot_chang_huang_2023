@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 
 /**
  * @Project Name: thingsboard
@@ -34,6 +35,17 @@ public enum ChartDateEnums {
         String dateStr = dateTime.format(fmt);
         return dateStr;
 
+    }
+
+    public ChartDateEnumsToLocalDateVo currentConvert() {
+        LocalDate date = LocalDate.now();
+        LocalDate beginDate = date.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate endDate = date.with(TemporalAdjusters.lastDayOfMonth());
+        if (this == ChartDateEnums.YEARS) {
+            beginDate = date.with(TemporalAdjusters.firstDayOfYear());
+            endDate = date.with(TemporalAdjusters.lastDayOfYear());
+        }
+        return new ChartDateEnumsToLocalDateVo(beginDate,endDate);
     }
 
 

@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { Resolve } from '@angular/router';
 import { CellActionDescriptor, DateEntityTableColumn, EntityTableColumn, EntityTableConfig, HeaderActionDescriptor } from "@app/modules/home/models/entity/entities-table-config.models";
-import { BaseData, EntityType, entityTypeResources, entityTypeTranslations, HasId } from "@app/shared/public-api";
+import { BaseData, EntityType, entityTypeResources, entityTypeTranslations, HasId, PageLink } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
-import { deepClone, DialogService, UtilsService } from '@app/core/public-api';
+import { deepClone, DialogService, FileService, UtilsService } from '@app/core/public-api';
 import { OrderForm } from '@app/shared/models/custom/order-form-mng.models';
 import { OrderFormComponent } from './order-form.component';
 import { OrdersFiltersComponent } from './orders-filters.component';
@@ -28,7 +28,8 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     private utils: UtilsService,
     private orderFormService: OrderFormService,
     private dialog: MatDialog,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private fileService: FileService
   ) {
     this.config.entityType = EntityType.ORDER_FORM;
     // this.config.entityComponent = OrderFormComponent;
@@ -39,10 +40,10 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.addDialogStyle = { width: '960px' };
 
     this.config.componentsData = {
-      orderNo: '',
-      factoryName: '',
-      type: '',
-      availableOrderNo: ''
+      sOrderNo: '',
+      sOrderTypeName: '',
+      exportTableData: null
+      // availableOrderNo: ''
     }
 
     this.config.deleteEntityTitle = order => this.translate.instant('order.delete-order-title', {orderNo: order.orderNo});
@@ -51,40 +52,47 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     this.config.deleteEntitiesContent = () => this.translate.instant('order.delete-orders-text');
 
     this.config.columns.push(
-      new EntityTableColumn<OrderForm>('orderNo', 'order.order-no', '50%'),
-      new EntityTableColumn<OrderForm>('factoryName', 'order.factory-name', '50%', (entity) => (entity.factoryName || ''), () => ({}), false),
-      new EntityTableColumn<OrderForm>('emergencyDegree', 'order.emergency-degree', '100px'),
-      new EntityTableColumn<OrderForm>('merchandiser', 'order.merchandiser', '100px'),
-      new DateEntityTableColumn<OrderForm>('intendedTime', 'order.intended-complete-date', this.datePipe, '150px', 'yyyy-MM-dd'),
-      new EntityTableColumn<OrderForm>('creator', 'common.creator', '100px', (entity) => (entity.creator || ''), () => ({}), false),
-      new DateEntityTableColumn<OrderForm>('createdTime', 'common.created-time', this.datePipe, '150px')
+      new EntityTableColumn<OrderForm>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<OrderForm>('sOrderTypeName', 'order.order-type', '100px', (entity) => (entity.sOrderTypeName || ''), () => ({}), false),
+      new EntityTableColumn<OrderForm>('factoryName', 'order.factory-name', '120px', () => ('上海长胜工厂'), () => ({}), false),
+      // new EntityTableColumn<OrderForm>('emergencyDegree', 'order.emergency-degree', '100px'),
+      // new EntityTableColumn<OrderForm>('merchandiser', 'order.merchandiser', '100px'),
+      // new DateEntityTableColumn<OrderForm>('intendedTime', 'order.intended-complete-date', this.datePipe, '150px', 'yyyy-MM-dd'),
+      new EntityTableColumn<OrderForm>('screator', 'common.creator', '100px', (entity) => (entity.screator || ''), () => ({}), false),
+      new DateEntityTableColumn<OrderForm>('tcreateTime', 'common.created-time', this.datePipe, '150px', 'yyyy-MM-dd HH:mm:ss', false)
     );
   }
 
   resolve(): EntityTableConfig<OrderForm> {
     this.config.componentsData = {
-      orderNo: '',
-      factoryName: '',
-      type: '',
-      availableOrderNo: ''
+      sOrderNo: '',
+      sOrderTypeName: '',
+      exportTableData: null
+      // availableOrderNo: ''
     }
 
-    this.setAvailableOrderNo();
+    // this.setAvailableOrderNo();
 
     this.config.tableTitle = this.translate.instant('order.orders');
     this.config.searchEnabled = false;
     this.config.refreshEnabled = false;
-    this.config.addActionDescriptors = this.configureAddActions();
-    this.config.afterResolved = () => {
-      this.config.cellActionDescriptors = this.configureCellActions();
-      this.config.addEnabled = this.utils.hasPermission('order.add-order');
-      this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
-      this.config.detailsReadonly = entity => {
-        return !this.utils.hasPermission('action.edit') || (this.lastFinishedOrder && this.lastFinishedOrder.id === entity?.id ? this.lastFinishedOrder.isDone : entity?.isDone)
-      };
-    }
+    this.config.detailsPanelEnabled = false;
+    this.config.entitiesDeleteEnabled = false;
+    this.config.addEnabled = false;
+    // this.config.addActionDescriptors = this.configureAddActions();
+    // this.config.afterResolved = () => {
+    //   this.config.cellActionDescriptors = this.configureCellActions();
+    //   this.config.addEnabled = this.utils.hasPermission('order.add-order');
+    //   this.config.entitiesDeleteEnabled = this.utils.hasPermission('action.delete');
+    //   this.config.detailsReadonly = entity => {
+    //     return !this.utils.hasPermission('action.edit') || (this.lastFinishedOrder && this.lastFinishedOrder.id === entity?.id ? this.lastFinishedOrder.isDone : entity?.isDone)
+    //   };
+    // }
 
-    this.config.entitiesFetchFunction = pageLink => this.orderFormService.getOrders(pageLink, this.config.componentsData);
+    this.config.entitiesFetchFunction = pageLink => {
+      const { sOrderNo, sOrderTypeName } = this.config.componentsData;
+      return this.orderFormService.getOrders(pageLink, { sOrderNo, sOrderTypeName });
+    }
     this.config.loadEntity = id => this.orderFormService.getOrderForm(id);
     this.config.saveEntity = orderForm => {
       const form = deepClone(orderForm);
@@ -98,9 +106,29 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
     };
     this.config.deleteEntity = id => {
       return this.orderFormService.deleteOrder(id).pipe(map(result => {
-        this.setAvailableOrderNo();
+        // this.setAvailableOrderNo();
         return result;
       }));
+    }
+
+    // 导出功能
+    this.config.componentsData.exportTableData = () => {
+      const { sOrderNo, sOrderTypeName } = this.config.componentsData;
+      this.orderFormService.getOrders(new PageLink(9999999, 0), { sOrderNo, sOrderTypeName }).subscribe((res) => {
+        const dataList = [];
+        if (res.data.length > 0) {
+          const titleKeys = ['order.order-no', 'order.order-type', 'order.factory-name', 'common.creator', 'common.created-time'];
+          const titleNames = [];
+          titleKeys.forEach(key => {
+            titleNames.push(this.translate.instant(key));
+          });
+          dataList.push(titleNames);
+          res.data.forEach(item => {
+            dataList.push([item.sorderNo, item.sOrderTypeName, item.factoryName, item.screator, this.datePipe.transform(item.tcreateTime, 'yyyy-MM-dd HH:mm:ss')]);
+          });
+        }
+        this.fileService.exportTable(this.translate.instant('order.orders'), dataList).subscribe();
+      })
     }
 
     return this.config;
@@ -147,7 +175,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
       }
     }).afterClosed().subscribe(res => {
       if (res) {
-        this.setAvailableOrderNo();
+        // this.setAvailableOrderNo();
         this.config.table.updateData();
       }
     });
@@ -159,7 +187,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
     }).afterClosed().subscribe(res => {
       if (res) {
-        this.setAvailableOrderNo();
+        // this.setAvailableOrderNo();
         this.config.table.updateData();
       }
     });
