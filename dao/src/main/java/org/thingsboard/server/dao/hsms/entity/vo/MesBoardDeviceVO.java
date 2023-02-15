@@ -6,11 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.List;
+import java.util.UUID;
 
 /**
- * 生产监控VO
+ * 设备VO
  *
  * @author wwj
  * @since 2021.10.21
@@ -19,17 +18,29 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarProductionMonitoringVO {
+public class MesBoardDeviceVO {
 
     /**
-     * 图表数据列表
+     * Id
      */
-    @ApiModelProperty(value = "图表数据列表")
-    private List<MesBoarProductionMonitoringItemVO> items;
+    @ApiModelProperty(value = "id")
+    private UUID id;
 
     /**
      * 名称
      */
     @ApiModelProperty(value = "名称")
     private String name;
+
+    /**
+     * mes Id
+     */
+    @ApiModelProperty(value = "mes Id")
+    private UUID mesId;
+
+    /**
+     * mes 名称
+     */
+    @ApiModelProperty(value = "mes 名称")
+    private String mesName;
 }

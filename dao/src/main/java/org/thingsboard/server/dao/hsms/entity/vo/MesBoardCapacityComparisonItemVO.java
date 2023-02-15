@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * 生产监控VO
+ * 机台产量对比VO
  *
  * @author wwj
  * @since 2021.10.21
@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarProductionMonitoringItemVO {
+public class MesBoardCapacityComparisonItemVO {
 
     /**
      * y轴数据,产量

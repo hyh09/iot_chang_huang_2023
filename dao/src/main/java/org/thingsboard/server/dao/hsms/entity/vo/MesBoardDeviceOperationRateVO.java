@@ -6,10 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * 设备VO
+ * 设备开机率分析VO
  *
  * @author wwj
  * @since 2021.10.21
@@ -18,13 +19,13 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarDeviceVO {
+public class MesBoardDeviceOperationRateVO {
 
     /**
-     * Id
+     * 开机率(百分比,保留两位小数)
      */
-    @ApiModelProperty(value = "id")
-    private UUID id;
+    @ApiModelProperty(value = "开机率(百分比,保留两位小数)")
+    private BigDecimal rate;
 
     /**
      * 名称
@@ -33,14 +34,14 @@ public class MesBoarDeviceVO {
     private String name;
 
     /**
-     * mes Id
+     * 开机时长
      */
-    @ApiModelProperty(value = "mes Id")
-    private UUID mesId;
+    @ApiModelProperty(value = "开机时长", notes = "不显示")
+    private Long time;
 
     /**
-     * mes 名称
+     * id
      */
-    @ApiModelProperty(value = "mes 名称")
-    private String mesName;
+    @ApiModelProperty(value = "id", notes = "不显示")
+    private UUID id;
 }

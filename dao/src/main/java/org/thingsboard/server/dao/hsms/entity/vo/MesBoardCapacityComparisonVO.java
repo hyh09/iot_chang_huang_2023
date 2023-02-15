@@ -18,13 +18,13 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MesBoarCapacityComparisonVO {
+public class MesBoardCapacityComparisonVO {
 
     /**
      * 图表数据列表
      */
     @ApiModelProperty(value = "图表数据列表")
-    private List<MesBoarCapacityComparisonItemVO> items;
+    private List<MesBoardCapacityComparisonItemVO> items;
 
     /**
      * 名称

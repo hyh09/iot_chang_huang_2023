@@ -3,7 +3,7 @@ import { Resolve } from '@angular/router';
 import { EntityTableColumn, EntityTableConfig, CellActionDescriptor, DateEntityTableColumn } from "@app/modules/home/models/entity/entities-table-config.models";
 import { EntityType, entityTypeResources, entityTypeTranslations, PageLink } from "@app/shared/public-api";
 import { TranslateService } from '@ngx-translate/core';
-import { processCardProgress } from '@app/shared/models/custom/order-form-mng.models';
+import { ProcessCardProgress } from '@app/shared/models/custom/order-form-mng.models';
 import { ProcessCardProgressFiltersComponent } from './process-card-progress-filters.component';
 import { OrderFormService } from '@app/core/http/custom/order-form.service';
 import { MatDialog } from "@angular/material/dialog";
@@ -12,13 +12,13 @@ import { DatePipe } from "@angular/common";
 import { FileService } from "@app/core/http/custom/file.service";
 
 @Injectable()
-export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTableConfig<processCardProgress>> {
+export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTableConfig<ProcessCardProgress>> {
 
-  private readonly config: EntityTableConfig<processCardProgress> = new EntityTableConfig<processCardProgress>();
+  private readonly config: EntityTableConfig<ProcessCardProgress> = new EntityTableConfig<ProcessCardProgress>();
 
   constructor(
     private translate: TranslateService,
-    private processCardProgressService: OrderFormService,
+    private orderFormService: OrderFormService,
     private fileService: FileService,
     public dialog: MatDialog,
     private datePipe: DatePipe
@@ -38,20 +38,20 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
     }
 
     this.config.columns.push(
-      new EntityTableColumn<processCardProgress>('scardNo', 'potency.process-card-no', '100px', (entity) => (entity.scardNo || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('scustomerName', 'order.customer', '120px', (entity) => (entity.scustomerName || ''), () => ({}), false),
-      new DateEntityTableColumn<processCardProgress>('ddeliveryDate', 'order.delivery-date', this.datePipe, '120px', 'yyyy-MM-dd HH:mm', false),
-      new EntityTableColumn<processCardProgress>('smaterialName', 'order.product-name', '300px', (entity) => (entity.smaterialName || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('scolorName', 'order.color', '120px', (entity) => (entity.scolorName || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('sfinishingMethod', 'order.arrangement-requirements', '250px', (entity) => (entity.sfinishingMethod || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('nplanOutputQty', 'order.number-of-cards', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('sworkingProcedureName', 'order.current-operation', '120px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('wu', 'order.operation-finished-qty', '150px', (entity) => (''), () => ({}), false),
-      new EntityTableColumn<processCardProgress>('sworkingProcedureNameNext', 'order.next-procedure', '120px', (entity) => (entity.sworkingProcedureNameNext || ''), () => ({}), false)
+      new EntityTableColumn<ProcessCardProgress>('scardNo', 'potency.process-card-no', '100px', (entity) => (entity.scardNo || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('scustomerName', 'order.customer', '120px', (entity) => (entity.scustomerName || ''), () => ({}), false),
+      new DateEntityTableColumn<ProcessCardProgress>('ddeliveryDate', 'order.delivery-date', this.datePipe, '120px', 'yyyy-MM-dd HH:mm', false),
+      new EntityTableColumn<ProcessCardProgress>('smaterialName', 'order.product-name', '300px', (entity) => (entity.smaterialName || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('scolorName', 'order.color', '120px', (entity) => (entity.scolorName || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('sfinishingMethod', 'order.arrangement-requirements', '250px', (entity) => (entity.sfinishingMethod || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('nplanOutputQty', 'order.number-of-cards', '100px', (entity) => (entity.nplanOutputQty || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('sworkingProcedureName', 'order.current-operation', '120px', (entity) => (entity.sworkingProcedureName || ''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('wu', 'order.operation-finished-qty', '150px', (entity) => (''), () => ({}), false),
+      new EntityTableColumn<ProcessCardProgress>('sworkingProcedureNameNext', 'order.next-procedure', '120px', (entity) => (entity.sworkingProcedureNameNext || ''), () => ({}), false)
     );
   }
-  resolve(): EntityTableConfig<processCardProgress> {
+  resolve(): EntityTableConfig<ProcessCardProgress> {
     this.config.componentsData = {
       sCardNo: '',
       sOrderNo: '',
@@ -87,7 +87,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
         endTime = endDate.getTime();
       }
       const { sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      this.processCardProgressService.getprocessCardProgress(new PageLink(999999, 0), {
+      this.orderFormService.getprocessCardProgress(new PageLink(9999999, 0), {
         sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       }).subscribe((res) => {
@@ -121,7 +121,7 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
         endTime = endDate.getTime();
       }
       const { sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName } = this.config.componentsData;
-      return this.processCardProgressService.getprocessCardProgress(pageLink, {
+      return this.orderFormService.getprocessCardProgress(pageLink, {
         sCardNo, sOrderNo, sCustomerName, sMaterialName, sColorName,
         dDeliveryDateBegin: startTime || '', dDeliveryDateEnd: endTime || ''
       });
@@ -130,25 +130,25 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
   }
 
 
-  configureCellActions(): Array<CellActionDescriptor<processCardProgress>> {
-    const actions: Array<CellActionDescriptor<processCardProgress>> = [];
+  configureCellActions(): Array<CellActionDescriptor<ProcessCardProgress>> {
+    const actions: Array<CellActionDescriptor<ProcessCardProgress>> = [];
     actions.push({
-      name: this.translate.instant('device-mng.production-progress'),
+      name: this.translate.instant('order.view-production-progress'),
       mdiIcon: 'mdi:progress',
       isEnabled: () => true,
-      onAction: ($event, entity) => this.selectProdCard($event, entity.sorderNo)
+      onAction: ($event, entity) => this.selectProdCard($event, entity)
     });
     return actions;
   }
 
-  selectProdCard($event: Event, sorderNo: string): void {
+  selectProdCard($event: Event, processCard: ProcessCardProgress): void {
     if ($event) {
       $event.stopPropagation();
     }
-    this.dialog.open<SelectProdProgressComponent, string>(SelectProdProgressComponent, {
+    this.dialog.open<SelectProdProgressComponent, ProcessCardProgress>(SelectProdProgressComponent, {
       disableClose: true,
       panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      data: sorderNo
+      data: processCard
     });
   }
 

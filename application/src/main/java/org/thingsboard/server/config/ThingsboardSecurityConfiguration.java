@@ -75,6 +75,7 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
     public static final String TOKEN_BASED_AUTH_ENTRY_POINT = "/api/**";
     public static final String WS_TOKEN_BASED_AUTH_ENTRY_POINT = "/api/ws/**";
     public static final String ORIGIN_INFO_POINTS = "/api/origin/info/**";
+    public static final String MES_BOARD_POINTS = "/api/mes/board/**";
 
     @Autowired private ThingsboardErrorResponseHandler restAccessDeniedHandler;
 
@@ -204,6 +205,7 @@ public class ThingsboardSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .antMatchers(TOKEN_REFRESH_ENTRY_POINT).permitAll() // Token refresh end-point
                 .antMatchers(NON_TOKEN_BASED_AUTH_ENTRY_POINTS).permitAll() // static resources, user activation and password reset end-points
                 .antMatchers(ORIGIN_INFO_POINTS).permitAll() // origin info
+//                .antMatchers(MES_BOARD_POINTS).permitAll() // mes board
                 .and()
                 .authorizeRequests()
                 .antMatchers(WS_TOKEN_BASED_AUTH_ENTRY_POINT).authenticated() // Protected WebSocket API End-points
