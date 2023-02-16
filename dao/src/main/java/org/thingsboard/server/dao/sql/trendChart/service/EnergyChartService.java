@@ -320,7 +320,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
      */
     private String getDateAndHours(long time){
         LocalDateTime localDateTime = CommonUtils.longToDateTime(time);
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH");
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00");
         return localDateTime.format(fmt);
     }
 
