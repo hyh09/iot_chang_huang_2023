@@ -299,7 +299,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
         }
         if(map != null){
             for(Map.Entry<String,Double> entry : map.entrySet()){
-                resultList.add(new CapacityDeviceHoursVo(entry.getKey() +":00",entry.getValue()));
+                resultList.add(new CapacityDeviceHoursVo(entry.getKey(),entry.getValue()));
             }
         }
 
