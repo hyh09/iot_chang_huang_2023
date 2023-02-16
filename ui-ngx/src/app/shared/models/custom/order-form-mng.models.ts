@@ -4,6 +4,7 @@ import { ProdCardId } from "../id/custom/prod-card-id";
 
 export interface OrderForm extends OrderCapacity {
   orderNo: string;
+  orderType: string;
   factoryName: string;
   emergencyDegree: string;
   merchandiser: string;
@@ -41,6 +42,10 @@ export interface OrderForm extends OrderCapacity {
   workshopId: string;
   workshopName: string;
   isDone: boolean;
+  sorderNo: string;
+  screator: string;
+  tcreateTime: string;
+  sOrderTypeName: string;
 }
 
 export interface OrderDevice {
