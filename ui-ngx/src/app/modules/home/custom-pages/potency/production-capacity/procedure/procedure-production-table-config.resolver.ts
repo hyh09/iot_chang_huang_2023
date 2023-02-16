@@ -54,7 +54,7 @@ export class ProcedureProductionTableConfigResolver implements Resolve<EntityTab
       workingProcedureName: '',
       colorName: '',
       materialName: '',
-      customer: '',
+      customerName: '',
       orderNo: '',
       cardNo: ''
     }
