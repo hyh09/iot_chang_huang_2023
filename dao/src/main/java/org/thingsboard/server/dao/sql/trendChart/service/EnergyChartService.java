@@ -10,7 +10,6 @@ import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.vo.device.CapacityDeviceHoursVo;
 import org.thingsboard.server.common.data.vo.enums.KeyTitleEnums;
-import org.thingsboard.server.dao.hs.utils.CommonUtil;
 import org.thingsboard.server.dao.kafka.vo.DataBodayVo;
 import org.thingsboard.server.dao.sql.trendChart.dao.EnergyChartDao;
 import org.thingsboard.server.dao.sql.trendChart.entity.EnergyChartEntity;
@@ -21,10 +20,8 @@ import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.StringUtilToll;
 import org.thingsboard.server.dao.util.sql.jpa.BaseSQLServiceImpl;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -302,7 +299,7 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
         }
         if(map != null){
             for(Map.Entry<String,Double> entry : map.entrySet()){
-                resultList.add(new CapacityDeviceHoursVo(entry.getKey() +":00",entry.getValue()));
+                resultList.add(new CapacityDeviceHoursVo(entry.getKey(),entry.getValue()));
             }
         }
 
@@ -322,13 +319,9 @@ public class EnergyChartService  extends BaseSQLServiceImpl<EnergyChartEntity, U
      * @return
      */
     private String getDateAndHours(long time){
-//        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH");
-//        return sdf.format(new Date(Long.parseLong(String.valueOf(time))));
-
-        LocalDateTime localDateTime= CommonUtils.longToDateTime(time);
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDateTime.atZone(zone).toInstant();
-        return instant.toEpochMilli()+"";
+        LocalDateTime localDateTime = CommonUtils.longToDateTime(time);
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00");
+        return localDateTime.format(fmt);
     }
 
 

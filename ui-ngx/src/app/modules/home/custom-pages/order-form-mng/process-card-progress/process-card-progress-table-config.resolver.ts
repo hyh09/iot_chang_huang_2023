@@ -29,12 +29,13 @@ export class ProcessCardProgressTableConfigResolver implements Resolve<EntityTab
     this.config.entityResources = entityTypeResources.get(EntityType.PROCESS_CARD);
 
     this.config.componentsData = {
-      time: '',
-      orderNo: '',
-      color: '',
-      customerName: '',
-      processCardNo: '',
-      productName: ''
+      sCardNo: '',
+      sOrderNo: '',
+      sCustomerName: '',
+      sMaterialName: '',
+      sColorName: '',
+      exportTableData: null,
+      dateRange: []
     }
 
     this.config.columns.push(

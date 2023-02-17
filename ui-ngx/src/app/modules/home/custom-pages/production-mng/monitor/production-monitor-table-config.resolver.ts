@@ -20,10 +20,10 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
     private translate: TranslateService,
     private datePipe: DatePipe
   ) {
-    this.config.entityType = EntityType.POTENCY;
+    this.config.entityType = EntityType.COMMON;
     this.config.filterComponent = ProdMonitorFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.COMMON);
+    this.config.entityResources = entityTypeResources.get(EntityType.COMMON);
 
     this.config.defaultSortOrder = null;
 
@@ -83,7 +83,7 @@ export class ProdMonitorTableConfigResolver implements Resolve<EntityTableConfig
             dataList.push([item.sorderNo, item.scardNo, item.scustomerName, this.datePipe.transform(item.ddeliveryDate, 'yyyy-MM-dd'), item.smaterialName, item.scolorName, item.nplanOutputQty, item.sworkingProcedureNameFinish, item.sworkingProcedureName, item.fnMESGetDiffTimeStr]);
           });
         }
-        this.fileService.exportTable(this.translate.instant('production-mng.prod-report'), dataList).subscribe();
+        this.fileService.exportTable(this.translate.instant('production-mng.prod-monitor'), dataList).subscribe();
       })
     }
 

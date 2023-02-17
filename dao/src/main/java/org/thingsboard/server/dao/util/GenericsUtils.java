@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thingsboard.server.common.data.vo.RowName;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
 import org.thingsboard.server.dao.util.anno.CustomValid;
 
 import java.lang.reflect.Field;
@@ -222,6 +223,24 @@ public class GenericsUtils {
         for (Field f : fields) {
             f.setAccessible(true);
             RowName rowName = f.getAnnotation(RowName.class);
+            if(rowName != null)
+            {
+                properties.put(f.getName(),rowName.value());
+            }
+
+        }
+        return  properties;
+
+    }
+
+
+    public static Hashtable<String,String> getRowNameHashSql(Class cls)
+    {
+        Hashtable<String,String> properties = new Hashtable<>();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field f : fields) {
+            f.setAccessible(true);
+            SqlOnFieldAnnotation rowName = f.getAnnotation(SqlOnFieldAnnotation.class);
             if(rowName != null)
             {
                 properties.put(f.getName(),rowName.value());

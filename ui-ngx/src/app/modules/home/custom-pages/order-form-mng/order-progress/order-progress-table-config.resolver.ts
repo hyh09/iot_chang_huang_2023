@@ -42,19 +42,24 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       new EntityTableColumn<OrderProgress>('scolorName', 'order.color', '120px', (entity) => (entity.scolorName || ''), () => ({}), false),
       new EntityTableColumn<OrderProgress>('nqty', 'order.order-quantity', '120px', (entity) => (entity.nqty || ''), () => ({}), false),
       new EntityTableColumn<OrderProgress>('sfinishingMethod', 'order.arrangement-requirements', '250px', (entity) => (entity.sfinishingMethod || ''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('wu1', 'order.turnover-cloth', '150px', (entity) => (''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('wu2', 'order.billet-setting', '150px', (entity) => (''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('wu3', 'order.dyeing', '100px', (entity) => (''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('wu4', 'order.Chengding', '100px', (entity) => (''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('wu5', 'order.cloth-checking', '100px', (entity) => (''), () => ({}), false),
-      new EntityTableColumn<OrderProgress>('wu6', 'order.warehousing', '100px', (entity) => (''), () => ({}), false)
+      // new EntityTableColumn<OrderProgress>('wu1', 'order.turnover-cloth', '150px', (entity) => (''), () => ({}), false),
+      // new EntityTableColumn<OrderProgress>('wu2', 'order.billet-setting', '150px', (entity) => (''), () => ({}), false),
+      // new EntityTableColumn<OrderProgress>('wu3', 'order.dyeing', '100px', (entity) => (''), () => ({}), false),
+      // new EntityTableColumn<OrderProgress>('wu4', 'order.Chengding', '100px', (entity) => (''), () => ({}), false),
+      // new EntityTableColumn<OrderProgress>('wu5', 'order.cloth-checking', '100px', (entity) => (''), () => ({}), false),
+      // new EntityTableColumn<OrderProgress>('wu6', 'order.warehousing', '100px', (entity) => (''), () => ({}), false)
     );
   }
   
 
   resolve(): EntityTableConfig<OrderProgress> {
     this.config.componentsData = {
-      dateRange: [],
+      sOrderNo: '',
+      sCustomerName: '',
+      sMaterialName: '',
+      sColorName: '',
+      dateRange:[],
+      exportTableData: null
     }
 
     this.config.tableTitle = this.translate.instant('order.order-progress');
@@ -90,14 +95,14 @@ export class OrdersProgressTableConfigResolver implements Resolve<EntityTableCon
       }).subscribe((res) => {
         const dataList = [];
         if (res.data.length > 0) {
-          const titleKeys = ['order.order-no', 'order.customer', 'order.delivery-date', 'order.product-name', 'order.color', 'order.order-quantity', 'order.arrangement-requirements', 'order.turnover-cloth', 'order.billet-setting', 'order.dyeing', 'order.Chengding', 'order.cloth-checking', 'order.warehousing'];
+          const titleKeys = ['order.order-no', 'order.customer', 'order.delivery-date', 'order.product-name', 'order.color', 'order.order-quantity', 'order.arrangement-requirements'];
           const titleNames = [];
           titleKeys.forEach(key => {
             titleNames.push(this.translate.instant(key));
           });
           dataList.push(titleNames);
           res.data.forEach(item => {
-            dataList.push([item.sorderNo, item.scustomerName, this.datePipe.transform(item.ddeliveryDate, 'yyyy-MM-dd HH:mm'), item.smaterialName, item.scolorName, item.nqty, item.sfinishingMethod, '', '', '', '', '', '']);
+            dataList.push([item.sorderNo, item.scustomerName, this.datePipe.transform(item.ddeliveryDate, 'yyyy-MM-dd HH:mm'), item.smaterialName, item.scolorName, item.nqty, item.sfinishingMethod]);
           });
         }
         this.fileService.exportTable(this.translate.instant('order.order-progress'), dataList).subscribe();
