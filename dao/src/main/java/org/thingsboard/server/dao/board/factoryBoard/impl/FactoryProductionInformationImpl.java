@@ -73,14 +73,14 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     }
 
     @Override
-    public OrderProductionVo getOrderProduction() {
+    public OrderProductionVo getOrderProduction() throws Exception {
         OrderProductionVo vo = new OrderProductionVo();
         super.executeSqlByObject(vo);
         return vo;
     }
 
     @Override
-    public OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() {
+    public OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() throws Exception {
         OrderCompletionRateAndYieldRateVo vo = new OrderCompletionRateAndYieldRateVo();
         super.executeSqlByObject(vo);
         return vo;
