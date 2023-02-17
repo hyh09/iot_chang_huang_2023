@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop;
 
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.dao.board.factoryBoard.impl.FiledNamePostfixMethodUtil;
 
 /**
  * @Project Name: thingsboard
@@ -15,7 +16,7 @@ import lombok.ToString;
 @ToString
 public class OrderCompletionRateAndYieldRateVo {
 
-    @SqlOnFieldAnnotation("SELECT CAST(SUM(ISNULL(D.nInQty,0))*100.0/SUM(C.nQty) AS NUMERIC(18,2))\n" +
+    @SqlOnFieldAnnotation(value = "SELECT CAST(SUM(ISNULL(D.nInQty,0))*100.0/SUM(C.nQty) AS NUMERIC(18,2))\n" +
             "FROM dbo.sdOrderHdr A(NOLOCK)\n" +
             "JOIN dbo.sdOrderDtl B(NOLOCK) ON B.usdOrderHdrGUID=A.uGUID\n" +
             "JOIN dbo.sdOrderLot C(NOLOCK) ON C.usdOrderDtlGUID = B.uGUID\n" +
@@ -24,10 +25,11 @@ public class OrderCompletionRateAndYieldRateVo {
             "FROM dbo.mmSTInHdr A1(NOLOCK) \n" +
             "JOIN dbo.mmSTInDtl B1(NOLOCK) ON B1.ummInHdrGUID = A1.uGUID\n" +
             "GROUP BY B1.usdOrderLotGUID\n" +
-            ") D ON D.usdOrderLotGUID = C.uGUID")
+            ") D ON D.usdOrderLotGUID = C.uGUID"
+            , postfixFlg = true,postTargetClass = FiledNamePostfixMethodUtil.class,postTargetMethod = "")
     private String orderCompletionRate;
 
-    @SqlOnFieldAnnotation("SELECT CAST((B.iCount-A.iCount)*100.0/B.iCount AS NUMERIC(18,2))\n" +
+    @SqlOnFieldAnnotation(value = "SELECT CAST((B.iCount-A.iCount)*100.0/B.iCount AS NUMERIC(18,2))\n" +
             "FROM (\n" +
             "SELECT iCount=COUNT(1)\n" +
             "FROM (\n" +
@@ -39,6 +41,8 @@ public class OrderCompletionRateAndYieldRateVo {
             ") A\n" +
             "JOIN (\n" +
             "SELECT iCount=COUNT(1) FROM dbo.sdOrderHdr A3(NOLOCK)\n" +
-            ") B ON 1=1")
+            ") B ON 1=1", postfixFlg = true,postTargetClass = FiledNamePostfixMethodUtil.class,postTargetMethod = "")
     private String yieldRate;
+
+
 }
