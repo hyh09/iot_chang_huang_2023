@@ -26,7 +26,7 @@ public class OrderCompletionRateAndYieldRateVo {
             "JOIN dbo.mmSTInDtl B1(NOLOCK) ON B1.ummInHdrGUID = A1.uGUID\n" +
             "GROUP BY B1.usdOrderLotGUID\n" +
             ") D ON D.usdOrderLotGUID = C.uGUID"
-            , postfixFlg = true,postTargetClass = FiledNamePostfixMethodUtil.class,postTargetMethod = "")
+            , postfixFlg = true,postTargetClass = FiledNamePostfixMethodUtil.class,postTargetMethod = "formatPercentage")
     private String orderCompletionRate;
 
     @SqlOnFieldAnnotation(value = "SELECT CAST((B.iCount-A.iCount)*100.0/B.iCount AS NUMERIC(18,2))\n" +
@@ -41,7 +41,7 @@ public class OrderCompletionRateAndYieldRateVo {
             ") A\n" +
             "JOIN (\n" +
             "SELECT iCount=COUNT(1) FROM dbo.sdOrderHdr A3(NOLOCK)\n" +
-            ") B ON 1=1", postfixFlg = true,postTargetClass = FiledNamePostfixMethodUtil.class,postTargetMethod = "")
+            ") B ON 1=1", postfixFlg = true,postTargetClass = FiledNamePostfixMethodUtil.class,postTargetMethod = "formatPercentage")
     private String yieldRate;
 
 
