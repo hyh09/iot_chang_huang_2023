@@ -370,7 +370,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                 params.add(dto.getSOrderNo());
             }
             if (StringUtils.isNotEmpty(dto.getSCardNo())) {
-                sql.append("and A.sCardNo= =? ");
+                sql.append("and A.sCardNo =? ");
                 params.add(dto.getSCardNo());
             }
         }
@@ -404,7 +404,7 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                 params.add(dto.getSOrderNo());
             }
             if (StringUtils.isNotEmpty(dto.getSCardNo())) {
-                sql.append("and A.sCardNo= =? ");
+                sql.append("and A.sCardNo=? ");
                 params.add(dto.getSCardNo());
             }
         }
