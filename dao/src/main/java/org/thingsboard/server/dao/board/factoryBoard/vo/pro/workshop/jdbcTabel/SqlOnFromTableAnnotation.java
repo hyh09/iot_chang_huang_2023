@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SqlOnFromTableAnnotation {
 
-    String value() default "";
+    String from() default "";
 
     String whereValue() default "";
 

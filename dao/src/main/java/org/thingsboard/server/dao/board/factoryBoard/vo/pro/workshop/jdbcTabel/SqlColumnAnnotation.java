@@ -20,4 +20,7 @@ public @interface SqlColumnAnnotation {
     String name() default "";
 
     String queryWhere() default "";
+
+    boolean ignoreField() default false;
+
 }
