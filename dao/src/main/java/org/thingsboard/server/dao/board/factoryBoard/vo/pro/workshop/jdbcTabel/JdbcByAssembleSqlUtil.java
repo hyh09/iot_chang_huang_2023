@@ -37,7 +37,14 @@ public class JdbcByAssembleSqlUtil {
     }
 
 
-    public <T> T updateByFiled(T t){
+    /**
+     *
+     * @param t 被更新的数据 排除nulL的字段，和剔除 args的字段
+     * @param arg  更新的条件
+     * @param <T>
+     * @return
+     */
+    public <T> T updateByFiledExcludeNull(T t, String ...arg){
         return  t;
     }
 
