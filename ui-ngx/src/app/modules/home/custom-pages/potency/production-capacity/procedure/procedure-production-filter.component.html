@@ -30,11 +30,11 @@
   </mat-form-field>
   <mat-form-field>
     <mat-label>{{ 'potency.customer' | translate }}</mat-label>
-    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.customer" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.customerName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
     <button
-      *ngIf="entitiesTableConfig.componentsData.customer"
+      *ngIf="entitiesTableConfig.componentsData.customerName"
       matSuffix mat-icon-button aria-label="Clear"
-      (click)="onClear('customer')"
+      (click)="onClear('customerName')"
     >
       <mat-icon class="material-icons">close</mat-icon>
     </button>

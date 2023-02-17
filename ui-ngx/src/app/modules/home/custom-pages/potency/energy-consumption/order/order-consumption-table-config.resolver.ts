@@ -23,10 +23,10 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
     public dialog: MatDialog,
     private fileService: FileService
   ) {
-    this.config.entityType = EntityType.POTENCY;
+    this.config.entityType = EntityType.ORDER_FORM;
     this.config.filterComponent = OrderConsumptionFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER_FORM);
+    this.config.entityResources = entityTypeResources.get(EntityType.ORDER_FORM);
 
     this.config.defaultSortOrder = null;
 

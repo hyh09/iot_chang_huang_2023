@@ -45,7 +45,7 @@ export interface OrderForm extends OrderCapacity {
   sorderNo: string;
   screator: string;
   tcreateTime: string;
-  sOrderTypeName: string;
+  sorderTypeName: string;
 }
 
 export interface OrderDevice {

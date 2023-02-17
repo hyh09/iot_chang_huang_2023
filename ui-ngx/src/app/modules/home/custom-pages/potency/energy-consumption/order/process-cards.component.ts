@@ -51,8 +51,8 @@ export class ProcessCardsComponent extends DialogComponent<ProcessCardsComponent
       new EntityTableColumn<OrderProcessCard>('colorName', 'potency.color', '100px', (entity) => (entity.colorName || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('workerGroupName', 'potency.team-name', '120px', (entity) => (entity.workerGroupName || ''), () => ({}), false),
       new EntityTableColumn<OrderProcessCard>('workerName', 'potency.team-members', '180px', (entity) => (entity.workerName || ''), () => ({}), false),
-      new EntityTableColumn<OrderProcessCard>('nTrackQty', 'potency.capacity', '120px', (entity) => (entity.nTrackQty || ''), () => ({}), false),
-      new EntityTableColumn<OrderProcessCard>('sRemark', 'order.remarks', '200px', (entity) => (entity.sRemark || ''), () => ({}), false)
+      new EntityTableColumn<OrderProcessCard>('ntrackQty', 'potency.capacity', '120px', (entity) => (entity.ntrackQty || ''), () => ({}), false),
+      new EntityTableColumn<OrderProcessCard>('sremark', 'order.remarks', '200px', (entity) => (entity.sremark || ''), () => ({}), false)
     );
 
     this.config.entitiesFetchFunction = pageLink => this.potencyService.getOrderProcessCards(pageLink, {

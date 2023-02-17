@@ -59,14 +59,14 @@ export enum EntityType {
   CHART = 'CHART',
   PROD_MNG = 'PROD_MNG',
   MNG_CALENDAR = 'MNG_CALENDAR',
-  ORDER = 'ORDER',
   ORDER_PLAN = 'ORDER_PLAN',
   PROCESS_CARD = 'PROCESS_CARD',
   PROCEDURE = 'PROCEDURE',
   TENANT_MENU_ROLE = 'TENANT_MENU_ROLE',
   USER_MENU_ROLE = 'USER_MENU_ROLE',
   USER_CREDENTIALS = 'USER_CREDENTIALS',
-  PRODUCTION_CALENDAR = 'PRODUCTION_CALENDAR'
+  PRODUCTION_CALENDAR = 'PRODUCTION_CALENDAR',
+  COMMON = 'COMMON'
 }
 
 export enum AliasEntityType {
@@ -539,12 +539,6 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
-      EntityType.ORDER,
-      {
-        type: 'entity.type-order'
-      }
-    ],
-    [
       EntityType.ORDER_PLAN,
       {
         type: 'entity.type-order-plan'
@@ -586,6 +580,12 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       EntityType.PRODUCTION_CALENDAR,
       {
         type: 'entity.type-prod-calendar'
+      }
+    ],
+    [
+      EntityType.COMMON,
+      {
+        noEntities: 'common.data-empty',
       }
     ]
   ]
