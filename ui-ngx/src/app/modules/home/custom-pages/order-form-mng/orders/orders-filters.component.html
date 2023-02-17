@@ -1,10 +1,10 @@
 <mat-form-field>
   <mat-label>{{ 'order.order-no' | translate }}</mat-label>
-  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sorderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sOrderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
   <button
-    *ngIf="entitiesTableConfig.componentsData.sorderNo"
+    *ngIf="entitiesTableConfig.componentsData.sOrderNo"
     matSuffix mat-icon-button aria-label="Clear"
-    (click)="onClear('sorderNo')"
+    (click)="onClear('sOrderNo')"
   >
     <mat-icon class="material-icons">close</mat-icon>
   </button>
