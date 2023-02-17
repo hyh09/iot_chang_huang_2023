@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 
 import java.util.Hashtable;
@@ -21,7 +22,7 @@ public abstract class SqlServerBascFactoryImpl {
 
     protected JdbcTemplate jdbcTemplate;
 
-    protected volatile ConcurrentMap<Class, Hashtable<String, String>> sqlMappingMap = new ConcurrentHashMap<>();
+    protected volatile ConcurrentMap<Class, Hashtable<String, SqlOnFieldAnnotation>> sqlMappingMap = new ConcurrentHashMap<>();
 
 
     public SqlServerBascFactoryImpl(JdbcTemplate jdbcTemplate) {
@@ -30,13 +31,14 @@ public abstract class SqlServerBascFactoryImpl {
 
 
     protected void executeSqlByObject(Object obj) {
-        Hashtable<String, String>  table= sqlMappingMap.get(obj.getClass());
+        Hashtable<String, SqlOnFieldAnnotation>  table= sqlMappingMap.get(obj.getClass());
         if(table.isEmpty()){
             return;
         }
-        for (Map.Entry<String, String> entry : table.entrySet()) {
+        for (Map.Entry<String, SqlOnFieldAnnotation> entry : table.entrySet()) {
             String fieldName = entry.getKey();
-            String sql = entry.getValue();
+            SqlOnFieldAnnotation annotation = entry.getValue();
+            String sql = annotation.value();
             String value = jdbcTemplate.queryForObject(sql, String.class);
             ReflectionUtils.setFieldValue(obj, fieldName, value);
         }

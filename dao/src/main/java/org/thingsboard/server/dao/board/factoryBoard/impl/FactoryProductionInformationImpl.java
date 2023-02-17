@@ -15,6 +15,7 @@ import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInform
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.GenericsUtils;
@@ -95,9 +96,9 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Hashtable<String, String> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
+        Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
         sqlMappingMap.put(OrderProductionVo.class,hashtable);
-        Hashtable<String, String> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
+        Hashtable<String, SqlOnFieldAnnotation> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
         sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class,orderCompletionMap);
     }
 }
