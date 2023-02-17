@@ -31,6 +31,9 @@ public abstract class SqlServerBascFactoryImpl {
 
     protected void executeSqlByObject(Object obj) {
         Hashtable<String, String>  table= sqlMappingMap.get(obj.getClass());
+        if(table.isEmpty()){
+            return;
+        }
         for (Map.Entry<String, String> entry : table.entrySet()) {
             String fieldName = entry.getKey();
             String sql = entry.getValue();
