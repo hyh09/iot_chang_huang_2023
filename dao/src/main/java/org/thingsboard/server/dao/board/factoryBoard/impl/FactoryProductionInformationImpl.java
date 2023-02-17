@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.SqlServerBascFactoryImpl;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
@@ -73,10 +74,16 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     @Override
     public OrderProductionVo getOrderProduction() {
         OrderProductionVo vo = new OrderProductionVo();
-        super.getOrderProductionSql(vo);
+        super.executeSqlByObject(vo);
         return vo;
     }
 
+    @Override
+    public OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() {
+        OrderCompletionRateAndYieldRateVo vo = new OrderCompletionRateAndYieldRateVo();
+        super.executeSqlByObject(vo);
+        return vo;
+    }
 
     private WorkshopAndRunRateVo getVo(Workshop t1, TenantId tenantId) {
         WorkshopAndRunRateVo vo = JacksonUtil.convertValueNoUNKNOWN(t1, WorkshopAndRunRateVo.class);
@@ -89,6 +96,8 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     @Override
     public void afterPropertiesSet() throws Exception {
         Hashtable<String, String> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
-        super.orderProductionSql = hashtable;
+        sqlMappingMap.put(OrderProductionVo.class,hashtable);
+        Hashtable<String, String> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
+        sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class,orderCompletionMap);
     }
 }

@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 
@@ -19,13 +20,17 @@ public interface FactoryProductionInformationSvc {
 
     /**
      * 查询车间的信息
-     * @param tenantId 租户id
+     *
+     * @param tenantId  租户id
      * @param factoryId 工厂id
      * @return
      */
-   List<WorkshopAndRunRateVo> queryWorkshopAndRunRate(TenantId tenantId, UUID factoryId);
+    List<WorkshopAndRunRateVo> queryWorkshopAndRunRate(TenantId tenantId, UUID factoryId);
 
 
     OrderProductionVo getOrderProduction();
+
+
+    OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate();
 
 }
