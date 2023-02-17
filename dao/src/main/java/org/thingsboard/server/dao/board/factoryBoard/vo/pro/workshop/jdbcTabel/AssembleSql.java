@@ -42,8 +42,10 @@ public class AssembleSql {
         stringBuffer.append(assembleBuildSql.selectSql).append(" ");
         stringBuffer.append(" FROM ");
         stringBuffer.append(assembleBuildSql.fromSql).append(" ");
-        stringBuffer.append(" WHERE ");
-        stringBuffer.append(assembleBuildSql.whereSql);
+        if (StringUtils.isNotEmpty(assembleBuildSql.whereSql)) {
+            stringBuffer.append(" WHERE ");
+            stringBuffer.append(assembleBuildSql.whereSql);
+        }
         return new AssembleSql(stringBuffer.toString(), assembleBuildSql.values);
     }
 
@@ -142,14 +144,11 @@ public class AssembleSql {
                         continue;
                     }
                     Object value = field.get(object);
+                    String where = sqlColumnAnnotation.queryWhere();
                     if (value != null && StringUtils.isNotEmpty(value.toString())) {
-                        if (sqlColumnAnnotation == null) {
-                            whereSqlist.add(field.getName() + " = ? ");
-                            map.put(field.getName(), value);
-                        } else {
-                            map.put(field.getName(), value);
-                            whereSqlist.add(sqlColumnAnnotation.queryWhere());
-                        }
+                        map.put(field.getName(), value);
+                        String whereValue = sqlColumnAnnotation.name() + " " + where + " :" + field.getName() + " ";
+                        whereSqlist.add(whereValue);
                     }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
