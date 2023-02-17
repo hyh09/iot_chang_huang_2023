@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.collection.onlie.DeviceStatusNumVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
-import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
@@ -53,6 +51,20 @@ public class FactoryProductionInformationController extends BaseController {
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }
+
+    @ApiOperation("订单生产情况 ")
+    @GetMapping("/getOrderProduction")
+    @ResponseBody
+    public OrderProductionVo getOrderProduction() throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            return factoryProductionInformationSvc.getOrderProduction();
+        } catch (Exception e) {
+            log.error("[工厂看板-订单生产情况 ].getOrderProduction方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
 
 
 }

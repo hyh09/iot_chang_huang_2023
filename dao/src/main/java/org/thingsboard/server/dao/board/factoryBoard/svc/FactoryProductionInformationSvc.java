@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 
 import java.util.List;
@@ -23,4 +24,8 @@ public interface FactoryProductionInformationSvc {
      * @return
      */
    List<WorkshopAndRunRateVo> queryWorkshopAndRunRate(TenantId tenantId, UUID factoryId);
+
+
+    OrderProductionVo getOrderProduction();
+
 }
