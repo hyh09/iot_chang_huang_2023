@@ -1,9 +1,12 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
+import org.thingsboard.server.dao.util.ReflectionUtils;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * @Project Name: thingsboard
@@ -14,7 +17,7 @@ import java.util.Hashtable;
  * Copyright (c) 2023,All Rights Reserved.
  */
 
-public  abstract class SqlServerBascFactoryImpl {
+public abstract class SqlServerBascFactoryImpl {
 
     protected JdbcTemplate jdbcTemplate;
 
@@ -25,13 +28,15 @@ public  abstract class SqlServerBascFactoryImpl {
     }
 
 
+    protected void getOrderProductionSql(OrderProductionVo orderProductionVo) {
+        System.out.println("打印初始化的sql:" + JacksonUtil.toString(orderProductionSql));
+        for (Map.Entry<String, String> entry : orderProductionSql.entrySet()) {
+            String fieldName = entry.getKey();
+            String sql = entry.getValue();
 
-    protected  void   getOrderProductionSql(OrderProductionVo orderProductionVo){
-//        orderProductionSql
-        //ReflectionUtils.setFieldValue(orderProductionVo,);
-
-
-//       return jdbcTemplate.queryForObject(orderProductionEnums.getSql(),String.class);
+            String value = jdbcTemplate.queryForObject(sql, String.class);
+            ReflectionUtils.setFieldValue(orderProductionVo, fieldName, value);
+        }
     }
 
 

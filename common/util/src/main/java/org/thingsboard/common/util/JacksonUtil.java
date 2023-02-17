@@ -1,12 +1,12 @@
 /**
  * Copyright © 2016-2021 The Thingsboard Authors
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ package org.thingsboard.common.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -37,6 +38,17 @@ public class JacksonUtil {
             OBJECT_MAPPER.registerModule(new JavaTimeModule());
 
             return fromValue != null ? OBJECT_MAPPER.convertValue(fromValue, toValueType) : null;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("The given object value: "
+                    + fromValue + " cannot be converted to " + toValueType, e);
+        }
+    }
+
+    public static <T> T convertValueNoUNKNOWN(Object fromValue, Class<T> toValueType) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            return fromValue != null ? objectMapper.convertValue(fromValue, toValueType) : null;
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("The given object value: "
                     + fromValue + " cannot be converted to " + toValueType, e);

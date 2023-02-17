@@ -72,12 +72,14 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
 
     @Override
     public OrderProductionVo getOrderProduction() {
-        return null;
+        OrderProductionVo vo = new OrderProductionVo();
+        super.getOrderProductionSql(vo);
+        return vo;
     }
 
 
     private WorkshopAndRunRateVo getVo(Workshop t1, TenantId tenantId) {
-        WorkshopAndRunRateVo vo = JacksonUtil.convertValue(t1, WorkshopAndRunRateVo.class);
+        WorkshopAndRunRateVo vo = JacksonUtil.convertValueNoUNKNOWN(t1, WorkshopAndRunRateVo.class);
         FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
         factoryDeviceQuery.setWorkshopId(t1.getId().toString());
         vo.setOnlineRate(factoryCollectionInformationSvc.queryDeviceStatusNum(tenantId, factoryDeviceQuery).getOnlineRate());
@@ -86,7 +88,7 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Hashtable<String,String>  hashtable =  GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
-        super.orderProductionSql=hashtable;
+        Hashtable<String, String> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
+        super.orderProductionSql = hashtable;
     }
 }
