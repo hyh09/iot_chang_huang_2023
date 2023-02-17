@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.board.factoryBoard.impl;
 
-import java.text.NumberFormat;
+import org.thingsboard.server.common.data.StringUtils;
+
+import java.math.BigDecimal;
 
 /**
  * @Project Name: thingsboard
@@ -12,11 +14,14 @@ import java.text.NumberFormat;
  */
 public class FiledNamePostfixMethodUtil {
 
+    private final  String SUFFIX_IDENTIFIER_PERCENT="%";
+
+
     public String formatPercentage(String value) {
-        NumberFormat nf = NumberFormat.getPercentInstance();
-        return nf.format(value);
-
+        if (StringUtils.isEmpty(value)) {
+            return BigDecimal.ZERO.toPlainString() +SUFFIX_IDENTIFIER_PERCENT;
+        }
+        return value + SUFFIX_IDENTIFIER_PERCENT;
     }
-
 
 }
