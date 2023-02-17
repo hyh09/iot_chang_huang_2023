@@ -28,9 +28,9 @@ public interface FactoryProductionInformationSvc {
     List<WorkshopAndRunRateVo> queryWorkshopAndRunRate(TenantId tenantId, UUID factoryId);
 
 
-    OrderProductionVo getOrderProduction();
+    OrderProductionVo getOrderProduction() throws Exception;
 
 
-    OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate();
+    OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() throws Exception;
 
 }
