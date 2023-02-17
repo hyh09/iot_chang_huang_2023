@@ -20,10 +20,10 @@ export class ProcedureProductionTableConfigResolver implements Resolve<EntityTab
     private translate: TranslateService,
     private fileService: FileService
   ) {
-    this.config.entityType = EntityType.PROCEDURE;
+    this.config.entityType = EntityType.POTENCY_PROCEDURE;
     this.config.filterComponent = ProcedureProductionFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.PROCEDURE);
-    this.config.entityResources = entityTypeResources.get(EntityType.PROCEDURE);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY_PROCEDURE);
+    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY_PROCEDURE);
 
     this.config.defaultSortOrder = null;
 

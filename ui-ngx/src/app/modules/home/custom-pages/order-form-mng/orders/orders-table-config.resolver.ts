@@ -53,7 +53,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
 
     this.config.columns.push(
       new EntityTableColumn<OrderForm>('sorderNo', 'order.order-no', '100px', (entity) => (entity.sorderNo || ''), () => ({}), false),
-      new EntityTableColumn<OrderForm>('sOrderTypeName', 'order.order-type', '100px', (entity) => (entity.sOrderTypeName || ''), () => ({}), false),
+      new EntityTableColumn<OrderForm>('sorderTypeName', 'order.order-type', '100px', (entity) => (entity.sorderTypeName || ''), () => ({}), false),
       new EntityTableColumn<OrderForm>('factoryName', 'order.factory-name', '120px', () => ('上海长胜工厂'), () => ({}), false),
       // new EntityTableColumn<OrderForm>('emergencyDegree', 'order.emergency-degree', '100px'),
       // new EntityTableColumn<OrderForm>('merchandiser', 'order.merchandiser', '100px'),
@@ -124,7 +124,7 @@ export class OrderTableConfigResolver implements Resolve<EntityTableConfig<Order
           });
           dataList.push(titleNames);
           res.data.forEach(item => {
-            dataList.push([item.sorderNo, item.sOrderTypeName, item.factoryName, item.screator, this.datePipe.transform(item.tcreateTime, 'yyyy-MM-dd HH:mm:ss')]);
+            dataList.push([item.sorderNo, item.sorderTypeName, '上海长胜工厂', item.screator, this.datePipe.transform(item.tcreateTime, 'yyyy-MM-dd HH:mm:ss')]);
           });
         }
         this.fileService.exportTable(this.translate.instant('order.orders'), dataList).subscribe();

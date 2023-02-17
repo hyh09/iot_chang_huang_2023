@@ -21,10 +21,10 @@ export class ProdSchedualTableConfigResolver implements Resolve<EntityTableConfi
     private datePipe: DatePipe,
     private translate: TranslateService
   ) {
-    this.config.entityType = EntityType.ORDER;
+    this.config.entityType = EntityType.COMMON;
     this.config.filterComponent = ProdSchedualFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.ORDER);
-    this.config.entityResources = entityTypeResources.get(EntityType.ORDER);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.COMMON);
+    this.config.entityResources = entityTypeResources.get(EntityType.COMMON);
 
     this.config.defaultSortOrder = null;
 

@@ -8,7 +8,6 @@ import { ProductionMngService } from '@app/core/http/custom/production-mng.servi
 import { TranslateService } from '@ngx-translate/core';
 import { FileService } from '@app/core/http/custom/file.service';
 import { DatePipe } from '@angular/common';
-import { updateReturn } from 'typescript';
 
 @Injectable()
 export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<ProdReport>> {
@@ -21,10 +20,10 @@ export class ProdReportTableConfigResolver implements Resolve<EntityTableConfig<
     private translate: TranslateService,
     private datePipe: DatePipe
   ) {
-    this.config.entityType = EntityType.POTENCY;
+    this.config.entityType = EntityType.COMMON;
     this.config.filterComponent = ProductionReportFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.COMMON);
+    this.config.entityResources = entityTypeResources.get(EntityType.COMMON);
 
     this.config.defaultSortOrder = null;
 

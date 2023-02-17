@@ -20,10 +20,10 @@ export class GroupProductionTableConfigResolver implements Resolve<EntityTableCo
     private translate: TranslateService,
     private fileService: FileService
   ) {
-    this.config.entityType = EntityType.POTENCY;
+    this.config.entityType = EntityType.POTENCY_GROUP;
     this.config.filterComponent = GroupProductionFilterComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY);
-    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.POTENCY_GROUP);
+    this.config.entityResources = entityTypeResources.get(EntityType.POTENCY_GROUP);
 
     this.config.defaultSortOrder = null;
 
