@@ -3,6 +3,8 @@ package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query.SqlColumnAnnotation;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query.SqlOnFromTableAnnotation;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

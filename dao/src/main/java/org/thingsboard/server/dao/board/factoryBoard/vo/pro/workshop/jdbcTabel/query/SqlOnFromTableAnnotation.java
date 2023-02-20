@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel;
+package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
