@@ -11,6 +11,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -61,6 +62,19 @@ public class FactoryProductionInformationController extends BaseController {
             return factoryProductionInformationSvc.getOrderProduction();
         } catch (Exception e) {
             log.error("[工厂看板-订单生产情况 ].getOrderProduction方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
+    @ApiOperation("订单的 完成率  和 成品率 ")
+    @GetMapping("/getOrderCompletionRateAndYieldRate")
+    @ResponseBody
+    public OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            return factoryProductionInformationSvc.getOrderCompletionRateAndYieldRate();
+        } catch (Exception e) {
+            log.error("[工厂看板-订单的 完成率  和 成品率 情况 ].getOrderCompletionRateAndYieldRate方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }

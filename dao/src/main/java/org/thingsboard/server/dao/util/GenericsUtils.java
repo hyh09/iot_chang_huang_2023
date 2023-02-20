@@ -234,16 +234,16 @@ public class GenericsUtils {
     }
 
 
-    public static Hashtable<String,String> getRowNameHashSql(Class cls)
+    public static Hashtable<String,SqlOnFieldAnnotation> getRowNameHashSql(Class cls)
     {
-        Hashtable<String,String> properties = new Hashtable<>();
+        Hashtable<String,SqlOnFieldAnnotation> properties = new Hashtable<>();
         Field[] fields = cls.getDeclaredFields();
         for (Field f : fields) {
             f.setAccessible(true);
             SqlOnFieldAnnotation rowName = f.getAnnotation(SqlOnFieldAnnotation.class);
             if(rowName != null)
             {
-                properties.put(f.getName(),rowName.value());
+                properties.put(f.getName(),rowName);
             }
 
         }
