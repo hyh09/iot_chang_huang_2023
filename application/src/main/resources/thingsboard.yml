@@ -410,7 +410,7 @@ redis:
   connection:
     type: "${REDIS_CONNECTION_TYPE:standalone}"
   standalone:
-    host: "${REDIS_HOST:192.168.110.100}"
+    host: "${REDIS_HOST:localhost}"
     port: "${REDIS_PORT:6379}"
     useDefaultClientConfig: "${REDIS_USE_DEFAULT_CLIENT_CONFIG:true}"
     # this value may be used only if you used not default ClientConfig

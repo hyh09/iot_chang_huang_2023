@@ -443,11 +443,11 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                 params.add(dto.getSOrderNo());
             }
             if (StringUtils.isNotEmpty(dto.getSColorName())) {
-                sql.append("and F.sColorName =? ");
+                sql.append("and C.sColorName =? ");
                 params.add(dto.getSColorName());
             }
             if (StringUtils.isNotEmpty(dto.getSCustomerName())) {
-                sql.append("and D.sCustomerName =? ");
+                sql.append("and E.sCustomerName =? ");
                 params.add(dto.getSCustomerName());
             }
             if (StringUtils.isNotEmpty(dto.getSCardNo())) {
@@ -497,11 +497,11 @@ public class MesOrderServiceImpl implements MesOrderService, CommonService {
                 params.add(dto.getSOrderNo());
             }
             if (StringUtils.isNotEmpty(dto.getSColorName())) {
-                sql.append("and F.sColorName =? ");
+                sql.append("and C.sColorName =? ");
                 params.add(dto.getSColorName());
             }
             if (StringUtils.isNotEmpty(dto.getSCustomerName())) {
-                sql.append("and D.sCustomerName =? ");
+                sql.append("and E.sCustomerName =? ");
                 params.add(dto.getSCustomerName());
             }
             if (StringUtils.isNotEmpty(dto.getSCardNo())) {
