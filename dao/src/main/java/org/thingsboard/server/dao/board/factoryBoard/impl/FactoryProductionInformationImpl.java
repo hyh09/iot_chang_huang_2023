@@ -13,7 +13,9 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.SqlServerBascFactoryImpl;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.GenericsUtils;
@@ -71,12 +73,18 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     }
 
     @Override
-    public OrderProductionVo getOrderProduction() {
+    public OrderProductionVo getOrderProduction() throws Exception {
         OrderProductionVo vo = new OrderProductionVo();
-        super.getOrderProductionSql(vo);
+        super.executeSqlByObject(vo);
         return vo;
     }
 
+    @Override
+    public OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() throws Exception {
+        OrderCompletionRateAndYieldRateVo vo = new OrderCompletionRateAndYieldRateVo();
+        super.executeSqlByObject(vo);
+        return vo;
+    }
 
     private WorkshopAndRunRateVo getVo(Workshop t1, TenantId tenantId) {
         WorkshopAndRunRateVo vo = JacksonUtil.convertValueNoUNKNOWN(t1, WorkshopAndRunRateVo.class);
@@ -88,7 +96,9 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Hashtable<String, String> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
-        super.orderProductionSql = hashtable;
+        Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
+        sqlMappingMap.put(OrderProductionVo.class,hashtable);
+        Hashtable<String, SqlOnFieldAnnotation> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
+        sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class,orderCompletionMap);
     }
 }
