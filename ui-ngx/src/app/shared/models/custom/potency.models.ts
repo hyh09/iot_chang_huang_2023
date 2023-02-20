@@ -93,8 +93,8 @@ export interface OrderProcessCard extends BaseData<any> {
   colorName: string;
   workerGroupName: string;
   workerName: string;
-  nTrackQty: string;
-  sRemark: string;
+  ntrackQty: string;
+  sremark: string;
 }
 
 export interface RunningState {
