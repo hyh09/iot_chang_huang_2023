@@ -1,6 +1,7 @@
 package org.thingsboard.server.dao.kanban.service.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Device;
@@ -113,7 +114,7 @@ public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
         if (mapGraph.isEmpty()) {
             return componentDataDTOList;
         }
-        return conertMapToList(componentDataDTOList, mapGraph, propertyVOList)
+        return conertMapToList(componentDataDTOList, mapGraph, propertyVOList);
 
     }
 
@@ -172,7 +173,9 @@ public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
 
 
     private List<ComponentDataDTO> conertMapToList(List<ComponentDataDTO> componentDataDTOList, Map<String, List<AttributesPropertiesGraphUnderVo>> mapGraph, List<DictDeviceGraphAndPropertyVO> propertyVOList) {
+        List<ComponentDataDTO> resultList = new ArrayList<>();
 
+        HashMap<String, String> localSimpleLockMap = new HashMap<>();
 
         for (ComponentDataDTO dto : componentDataDTOList) {
             List<DataDTO> dataDTOList = dto.getData();
@@ -181,18 +184,60 @@ public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
 
             for (DataDTO d2 : dataDTOList) {
                 DictDeviceGraphAndPropertyVO propertyVO = getChartNameAndKey(propertyVOList, d2.getKey());
-                if (propertyVO == null){
+                if (propertyVO == null) {
                     processedList.add(d2);
-                }else {
-                  String  chartName =   propertyVO.getChartName();
-
+                } else {
+                    String chartName = propertyVO.getChartName();
+                    mapGraph.get(chartName);
+                    DataDTO dataDTO = mergeField(d2, mapGraph, propertyVOList, localSimpleLockMap);
+                    if (dataDTO != null) {
+                        processedList.add(dataDTO);
+                    }
                 }
             }
             dto.setData(processedList);
+            resultList.add(dto);
 
         }
-        return
+        return resultList;
 
     }
+
+
+    private DataDTO mergeField(DataDTO d2, Map<String, List<AttributesPropertiesGraphUnderVo>> mapGraph, List<DictDeviceGraphAndPropertyVO> propertyVOList, HashMap<String, String> localSimpleLockMap) {
+        String lockKey = localSimpleLockMap.get(d2.getKey());
+        if (StringUtils.isNotEmpty(lockKey)) {
+            return null;
+        }
+        DictDeviceGraphAndPropertyVO v3 = getChartNameAndKey(propertyVOList, d2.getKey());
+        if (v3 == null) {
+            return null;
+        }
+        List<AttributesPropertiesGraphUnderVo> graphUnderVoList = mapGraph.get(v3.getChartName());
+        if (CollectionUtils.isEmpty(graphUnderVoList)) {
+            return null;
+        }
+        localSimpleLockMap.put(d2.getKey(), v3.getChartName());
+        d2.setValue(constructStringReturn(graphUnderVoList));
+        d2.setKey(d2.getKey());
+        d2.setTableName(v3.getChartName());
+        return d2;
+    }
+
+    private String constructStringReturn(List<AttributesPropertiesGraphUnderVo> graphUnderVoList) {
+        StringBuffer valueStr = new StringBuffer();
+        for (int i = 0; i < graphUnderVoList.size(); i++) {
+            AttributesPropertiesGraphUnderVo currentObject = graphUnderVoList.get(i);
+            String value = currentObject.getValue();
+            String separate = currentObject.getSuffix();
+            valueStr.append(value);
+            if (i != graphUnderVoList.size() - 1) {
+                valueStr.append(separate);
+            }
+        }
+        return valueStr.toString();
+
+    }
+
 
 }
