@@ -95,7 +95,7 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
       }).subscribe((res) => {
         const dataList = [];
         if (res.data.length > 0) {
-          const titleKeys = ['potency.customer', 'potency.material-name', 'potency.color', 'potency.order-count', 'potency.card-count','potency.arrangement-requirements',
+          const titleKeys = ['potency.order-no', 'potency.customer', 'potency.material-name', 'potency.color', 'potency.order-count', 'potency.card-count','potency.arrangement-requirements',
           'potency.duration', 'potency.water-consumption', 'potency.electric-consumption', 'potency.gas-consumption', 'common.created-time'];
           const titleNames = [];
           titleKeys.forEach(key => {
@@ -103,7 +103,7 @@ export class OrderConsumptionTableConfigResolver implements Resolve<EntityTableC
           });
           dataList.push(titleNames);
           res.data.forEach(item => {
-            dataList.push([item.customerName, item.materialName, item.colorName, item.numberOfOrder, item.numberOfCards, item.sremark,
+            dataList.push([item.orderNo, item.customerName, item.materialName, item.colorName, item.numberOfOrder, item.numberOfCards, item.sremark,
             item.duration, item.water, item.electricity, item.gas, this.datePipe.transform(item.createdTime, 'yyyy-MM-dd HH:mm:ss')]);
           });
         }
