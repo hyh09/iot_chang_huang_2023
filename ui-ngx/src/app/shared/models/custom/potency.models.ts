@@ -133,6 +133,7 @@ export interface ProcessCard extends BaseData<any> {
   sColorName: string;
   sMaterialName: string;
   sOrderNo: string;
+  tCreateTime: string;
 }
 
 export interface Procedure extends BaseData<any> {

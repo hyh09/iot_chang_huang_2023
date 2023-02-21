@@ -77,7 +77,7 @@ export class PotencyService {
                 value = 0;
               }
             } else {
-              value = 0;
+              value = parseFloat(item.value || '0');
             }
             item.value = value + '';
           });
@@ -158,7 +158,7 @@ export class PotencyService {
               });
             } else {
               valueKeys.forEach(key => {
-                value[key] = '0';
+                value[key] = item[key] || '0';
               });
             }
             Object.assign(item, value);
