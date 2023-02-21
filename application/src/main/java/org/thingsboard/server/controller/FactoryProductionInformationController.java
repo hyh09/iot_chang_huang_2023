@@ -11,10 +11,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderFulfillmentVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
@@ -90,6 +87,20 @@ public class FactoryProductionInformationController extends BaseController {
             return factoryProductionInformationSvc.queryListOrderFulfillmentVo();
         } catch (Exception e) {
             log.error("[订单完成情况 ].queryListOrderFulfillmentVo方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
+
+    @ApiOperation("工序实时产量 ")
+    @GetMapping("/queryListProcessRealTimeOutputVo")
+    @ResponseBody
+    public  List<ProcessRealTimeOutputVo>  queryListProcessRealTimeOutputVo() throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            return factoryProductionInformationSvc.queryListProcessRealTimeOutputVo();
+        } catch (Exception e) {
+            log.error("[工序实时产量 ].queryListProcessRealTimeOutputVo方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }

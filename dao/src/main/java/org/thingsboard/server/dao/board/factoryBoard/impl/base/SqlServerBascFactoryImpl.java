@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.JdbcByAssembleSqlUtil;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -24,11 +25,14 @@ public abstract class SqlServerBascFactoryImpl {
 
     protected JdbcTemplate jdbcTemplate;
 
+    protected JdbcByAssembleSqlUtil jdbcByAssembleSqlUtil;
+
     protected volatile ConcurrentMap<Class, Hashtable<String, SqlOnFieldAnnotation>> sqlMappingMap = new ConcurrentHashMap<>();
 
 
     public SqlServerBascFactoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        jdbcByAssembleSqlUtil = new JdbcByAssembleSqlUtil(jdbcTemplate);
     }
 
 
@@ -48,9 +52,9 @@ public abstract class SqlServerBascFactoryImpl {
                 Class clazz = annotation.postTargetClass();
                 Method m4 = clazz.getDeclaredMethod(methodName, String.class);
                 m4.setAccessible(true);
-                Object valuePost=   m4.invoke(clazz.getDeclaredConstructor().newInstance()
+                Object valuePost = m4.invoke(clazz.getDeclaredConstructor().newInstance()
                         , value);
-                value =valuePost;
+                value = valuePost;
             }
             ReflectionUtils.setFieldValue(obj, fieldName, value);
         }

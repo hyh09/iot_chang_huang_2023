@@ -1,6 +1,8 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -18,6 +20,8 @@ import java.util.Map;
  * Copyright (c) 2023,All Rights Reserved.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class JdbcByAssembleSqlUtil {
 
     private JdbcTemplate jdbcTemplate;

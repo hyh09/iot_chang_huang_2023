@@ -15,7 +15,6 @@ import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInform
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.JdbcByAssembleSqlUtil;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.GenericsUtils;
 import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
@@ -88,14 +87,18 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     @Override
     public List<OrderFulfillmentVo> queryListOrderFulfillmentVo() {
         OrderFulfillmentVo fulfillmentVo = new OrderFulfillmentVo();
-
-        JdbcByAssembleSqlUtil jdbcByAssembleSqlUtil = new JdbcByAssembleSqlUtil();
-        jdbcByAssembleSqlUtil.setJdbcTemplate(jdbcTemplate);
         List<OrderFulfillmentVo> fulfillmentVoList = jdbcByAssembleSqlUtil.finaListByObj(fulfillmentVo);
-       return timelineSupplement(fulfillmentVoList);
+        return timelineSupplement(fulfillmentVoList);
 
     }
 
+
+    @Override
+    public List<ProcessRealTimeOutputVo> queryListProcessRealTimeOutputVo() {
+        ProcessRealTimeOutputVo fulfillmentVo = new ProcessRealTimeOutputVo();
+        List<ProcessRealTimeOutputVo> fulfillmentVoList = jdbcByAssembleSqlUtil.finaListByObj(fulfillmentVo);
+        return fulfillmentVoList;
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -119,13 +122,13 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(7);
         List<LocalDate> localDateList = DateLocaDateAndTimeUtil.INSTANCE.getBetweenDay(startDate, endDate);
-      return   localDateList.stream().map(t1->{
-            OrderFulfillmentVo  vo = new OrderFulfillmentVo();
-            String  timeStr =ChartDateEnums.MONTHS.forMartTime(t1);
+        return localDateList.stream().map(t1 -> {
+            OrderFulfillmentVo vo = new OrderFulfillmentVo();
+            String timeStr = ChartDateEnums.MONTHS.forMartTime(t1);
             vo.setTime(timeStr);
-            Optional<OrderFulfillmentVo> optional= voList.stream().filter(vt->vt.getTime().equals(timeStr)).findFirst();
-            vo.setValue(optional.isPresent()?optional.get().getValue():"0");
-            return  vo;
+            Optional<OrderFulfillmentVo> optional = voList.stream().filter(vt -> vt.getTime().equals(timeStr)).findFirst();
+            vo.setValue(optional.isPresent() ? optional.get().getValue() : "0");
+            return vo;
         }).collect(Collectors.toList());
     }
 }

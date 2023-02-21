@@ -1,10 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.svc;
 
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderFulfillmentVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +33,9 @@ public interface FactoryProductionInformationSvc {
 
 
     List<OrderFulfillmentVo>  queryListOrderFulfillmentVo();
+
+
+    List<ProcessRealTimeOutputVo>  queryListProcessRealTimeOutputVo();
 
 
 
