@@ -13,16 +13,16 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.SqlServerBascFactoryImpl;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.JdbcByAssembleSqlUtil;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.GenericsUtils;
+import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 import org.thingsboard.server.dao.workshop.WorkshopService;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -91,9 +91,20 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
 
         JdbcByAssembleSqlUtil jdbcByAssembleSqlUtil = new JdbcByAssembleSqlUtil();
         jdbcByAssembleSqlUtil.setJdbcTemplate(jdbcTemplate);
-        return jdbcByAssembleSqlUtil.finaListByObj(fulfillmentVo);
+        List<OrderFulfillmentVo> fulfillmentVoList = jdbcByAssembleSqlUtil.finaListByObj(fulfillmentVo);
+       return timelineSupplement(fulfillmentVoList);
 
     }
+
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
+        sqlMappingMap.put(OrderProductionVo.class, hashtable);
+        Hashtable<String, SqlOnFieldAnnotation> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
+        sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class, orderCompletionMap);
+    }
+
 
     private WorkshopAndRunRateVo getVo(Workshop t1, TenantId tenantId) {
         WorkshopAndRunRateVo vo = JacksonUtil.convertValueNoUNKNOWN(t1, WorkshopAndRunRateVo.class);
@@ -103,11 +114,18 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
         return vo;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
-        sqlMappingMap.put(OrderProductionVo.class, hashtable);
-        Hashtable<String, SqlOnFieldAnnotation> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
-        sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class, orderCompletionMap);
+
+    private List<OrderFulfillmentVo> timelineSupplement(List<OrderFulfillmentVo> voList) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
+        List<LocalDate> localDateList = DateLocaDateAndTimeUtil.INSTANCE.getBetweenDay(startDate, endDate);
+      return   localDateList.stream().map(t1->{
+            OrderFulfillmentVo  vo = new OrderFulfillmentVo();
+            String  timeStr =ChartDateEnums.MONTHS.forMartTime(t1);
+            vo.setTime(timeStr);
+            Optional<OrderFulfillmentVo> optional= voList.stream().filter(vt->vt.getTime().equals(timeStr)).findFirst();
+            vo.setValue(optional.isPresent()?optional.get().getValue():"0");
+            return  vo;
+        }).collect(Collectors.toList());
     }
 }
