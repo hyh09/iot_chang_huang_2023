@@ -205,19 +205,19 @@ public class KanbanDeviceOneOutImpl implements KanbanDeviceOneOutSvc {
 
 
     private DataDTO mergeField(DataDTO d2, Map<String, List<AttributesPropertiesGraphUnderVo>> mapGraph, List<DictDeviceGraphAndPropertyVO> propertyVOList, HashMap<String, String> localSimpleLockMap) {
-        String lockKey = localSimpleLockMap.get(d2.getKey());
-        if (StringUtils.isNotEmpty(lockKey)) {
-            return null;
-        }
         DictDeviceGraphAndPropertyVO v3 = getChartNameAndKey(propertyVOList, d2.getKey());
         if (v3 == null) {
+            return null;
+        }
+        String lockKey = localSimpleLockMap.get(v3.getChartName());
+        if (StringUtils.isNotEmpty(lockKey)) {
             return null;
         }
         List<AttributesPropertiesGraphUnderVo> graphUnderVoList = mapGraph.get(v3.getChartName());
         if (CollectionUtils.isEmpty(graphUnderVoList)) {
             return null;
         }
-        localSimpleLockMap.put(d2.getKey(), v3.getChartName());
+        localSimpleLockMap.put(v3.getChartName(), v3.getChartName());
         d2.setValue(constructStringReturn(graphUnderVoList));
         d2.setKey(d2.getKey());
         d2.setTableName(v3.getChartName());
