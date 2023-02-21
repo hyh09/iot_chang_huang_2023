@@ -48,6 +48,9 @@ public class AssembleSql {
             stringBuffer.append(" WHERE ");
             stringBuffer.append(assembleBuildSql.whereSql);
         }
+        if (StringUtils.isNotEmpty(assembleBuildSql.lastGroupBy)) {
+            stringBuffer.append(" ").append(assembleBuildSql.lastGroupBy);
+        }
         return new AssembleSql(stringBuffer.toString(), assembleBuildSql.values);
     }
 
@@ -60,6 +63,9 @@ public class AssembleSql {
         private String whereSql;
 
         private boolean whereFlg;
+
+        private String lastGroupBy;
+
 
         private Map<String, ?> values;
 
@@ -83,6 +89,8 @@ public class AssembleSql {
             strSql01.append(fromSql);
             String whereSql = sqlOnFromTableAnnotation.whereValue();
             this.fromSql = fromSql;
+            this.lastGroupBy = sqlOnFromTableAnnotation.groupByLast();
+
 
             if (StringUtils.isEmpty(whereSql)) {
                 this.whereFlg = false;

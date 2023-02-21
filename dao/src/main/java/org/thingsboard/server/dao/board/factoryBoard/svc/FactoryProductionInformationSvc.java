@@ -33,4 +33,6 @@ public interface FactoryProductionInformationSvc {
 
     OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() throws Exception;
 
+
+
 }

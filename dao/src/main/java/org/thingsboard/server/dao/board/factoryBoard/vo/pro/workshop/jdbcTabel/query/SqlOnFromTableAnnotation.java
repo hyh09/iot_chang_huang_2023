@@ -19,6 +19,9 @@ public @interface SqlOnFromTableAnnotation {
 
     String from() default "";
 
+    String groupByLast() default "";
+
+
     String whereValue() default "";
 
 }
