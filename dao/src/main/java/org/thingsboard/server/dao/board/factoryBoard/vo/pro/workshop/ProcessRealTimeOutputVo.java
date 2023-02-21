@@ -22,7 +22,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.q
         "JOIN dbo.ppTrackJob B(NOLOCK) ON B.uGUID = A.uppTrackJobGUID\n" +
         "JOIN dbo.pbWorkingProcedure C(NOLOCK) ON C.uGUID=B.upbWorkingProcedureGUID ",
         whereValue = " A.tTrackTime>=CONVERT(NVARCHAR(10),GETDATE(),120)",
-        groupByLast = "C.sWorkingProcedureName"
+        groupByLast = " GROUP BY C.sWorkingProcedureName "
 
 )
 public class ProcessRealTimeOutputVo {
