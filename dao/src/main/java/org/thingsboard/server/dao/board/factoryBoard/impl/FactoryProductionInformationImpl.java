@@ -13,10 +13,8 @@ import org.thingsboard.server.common.data.workshop.Workshop;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.SqlServerBascFactoryImpl;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.JdbcByAssembleSqlUtil;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.GenericsUtils;
 import org.thingsboard.server.dao.workshop.WorkshopService;
@@ -86,6 +84,17 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
         return vo;
     }
 
+
+    @Override
+    public List<OrderFulfillmentVo> queryListOrderFulfillmentVo() {
+        OrderFulfillmentVo fulfillmentVo = new OrderFulfillmentVo();
+
+        JdbcByAssembleSqlUtil jdbcByAssembleSqlUtil = new JdbcByAssembleSqlUtil();
+        jdbcByAssembleSqlUtil.setJdbcTemplate(jdbcTemplate);
+        return jdbcByAssembleSqlUtil.finaListByObj(fulfillmentVo);
+
+    }
+
     private WorkshopAndRunRateVo getVo(Workshop t1, TenantId tenantId) {
         WorkshopAndRunRateVo vo = JacksonUtil.convertValueNoUNKNOWN(t1, WorkshopAndRunRateVo.class);
         FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
@@ -97,8 +106,8 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     @Override
     public void afterPropertiesSet() throws Exception {
         Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
-        sqlMappingMap.put(OrderProductionVo.class,hashtable);
+        sqlMappingMap.put(OrderProductionVo.class, hashtable);
         Hashtable<String, SqlOnFieldAnnotation> orderCompletionMap = GenericsUtils.getRowNameHashSql(OrderCompletionRateAndYieldRateVo.class);
-        sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class,orderCompletionMap);
+        sqlMappingMap.put(OrderCompletionRateAndYieldRateVo.class, orderCompletionMap);
     }
 }

@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
 
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderCompletionRateAndYieldRateVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderFulfillmentVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.OrderProductionVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.WorkshopAndRunRateVo;
 
@@ -32,6 +33,9 @@ public interface FactoryProductionInformationSvc {
 
 
     OrderCompletionRateAndYieldRateVo getOrderCompletionRateAndYieldRate() throws Exception;
+
+
+    List<OrderFulfillmentVo>  queryListOrderFulfillmentVo();
 
 
 
