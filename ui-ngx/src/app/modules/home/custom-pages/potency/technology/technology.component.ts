@@ -1,12 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { PotencyService } from '@app/core/http/custom/potency.service';
-import { AppState } from '@app/core/public-api';
+import { AppState, FileService } from '@app/core/public-api';
 import { DateEntityTableColumn, EntityTableColumn, EntityTableConfig } from '@app/modules/home/models/entity/entities-table-config.models';
 import { PageComponent } from '@app/shared/components/page.component';
 import { Procedure, ProcedureParam, ProcessCard, RunningState } from '@app/shared/models/custom/potency.models';
-import { EntityType, entityTypeTranslations, entityTypeResources } from '@app/shared/public-api';
+import { EntityType, entityTypeTranslations, entityTypeResources, PageLink } from '@app/shared/public-api';
 import { Store } from '@ngrx/store';
+import { TranslateService } from '@ngx-translate/core';
 import { differenceInCalendarDays } from 'date-fns';
 import { map } from 'rxjs/operators';
 
@@ -29,8 +30,8 @@ export class TechnologyComponent extends PageComponent {
     dateRange: []
   }
 
-  public readonly ProcessCardTableConfig: EntityTableConfig<ProcessCard> = new EntityTableConfig<ProcessCard>();
-  public readonly ProcedureTableConfig: EntityTableConfig<Procedure> = new EntityTableConfig<Procedure>();
+  public readonly processCardTableConfig: EntityTableConfig<ProcessCard> = new EntityTableConfig<ProcessCard>();
+  public readonly procedureTableConfig: EntityTableConfig<Procedure> = new EntityTableConfig<Procedure>();
 
   currCard: ProcessCard = null; // 当前选中的流程卡
   currProcedure: Procedure = null; // 当前选中的工序
@@ -42,7 +43,9 @@ export class TechnologyComponent extends PageComponent {
   constructor(
     protected store: Store<AppState>,
     private potencyService: PotencyService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private translate: TranslateService,
+    private fileService: FileService
   ) {
     super(store);
     this.initProcedureTableConfig();
@@ -53,21 +56,23 @@ export class TechnologyComponent extends PageComponent {
    * 初始化流程卡列表配置
    */
   initProcessCardTableConfig() {
-    this.ProcessCardTableConfig.entityType = EntityType.PROCESS_CARD;
-    this.ProcessCardTableConfig.entityTranslations = entityTypeTranslations.get(EntityType.PROCESS_CARD);
-    this.ProcessCardTableConfig.entityResources = entityTypeResources.get(EntityType.PROCESS_CARD);
+    this.processCardTableConfig.componentsData = {};
 
-    this.ProcessCardTableConfig.entityKey = 'sCardNo';
-    this.ProcessCardTableConfig.addEnabled = false;
-    this.ProcessCardTableConfig.searchEnabled = false;
-    this.ProcessCardTableConfig.refreshEnabled = false;
-    this.ProcessCardTableConfig.detailsPanelEnabled = false;
-    this.ProcessCardTableConfig.padding = '0';
-    this.ProcessCardTableConfig.titleVisible = false;
-    this.ProcessCardTableConfig.groupActionEnabled = false;
-    this.ProcessCardTableConfig.entitiesDeleteEnabled = false;
+    this.processCardTableConfig.entityType = EntityType.PROCESS_CARD;
+    this.processCardTableConfig.entityTranslations = entityTypeTranslations.get(EntityType.PROCESS_CARD);
+    this.processCardTableConfig.entityResources = entityTypeResources.get(EntityType.PROCESS_CARD);
 
-    this.ProcessCardTableConfig.columns.push(
+    this.processCardTableConfig.entityKey = 'sCardNo';
+    this.processCardTableConfig.addEnabled = false;
+    this.processCardTableConfig.searchEnabled = false;
+    this.processCardTableConfig.refreshEnabled = false;
+    this.processCardTableConfig.detailsPanelEnabled = false;
+    this.processCardTableConfig.padding = '0';
+    this.processCardTableConfig.titleVisible = false;
+    this.processCardTableConfig.groupActionEnabled = false;
+    this.processCardTableConfig.entitiesDeleteEnabled = false;
+
+    this.processCardTableConfig.columns.push(
       new EntityTableColumn<ProcessCard>('sCardNo', 'potency.process-card-no', '100px', (entity) => (entity.sCardNo || ''), () => ({}), false),
       new EntityTableColumn<ProcessCard>('sMaterialName', 'potency.material-name', '180px', (entity) => (entity.sMaterialName || ''), () => ({}), false),
       new EntityTableColumn<ProcessCard>('sColorName', 'potency.color', '80px', (entity) => (entity.sColorName || ''), () => ({}), false),
@@ -75,7 +80,7 @@ export class TechnologyComponent extends PageComponent {
       new DateEntityTableColumn<ProcessCard>('tCreateTime', 'common.created-time', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false)
     );
 
-    this.ProcessCardTableConfig.entitiesFetchFunction = pageLink => {
+    this.processCardTableConfig.entitiesFetchFunction = pageLink => {
       let dateBegin: number, dateEnd: number;
       const dateRange = this.searchForm.dateRange;
       if (dateRange && dateRange.length === 2) {
@@ -94,9 +99,38 @@ export class TechnologyComponent extends PageComponent {
       }));
     }
 
-    this.ProcessCardTableConfig.dataLoaded = () => this.selectCard();
+    // 导出功能
+    this.processCardTableConfig.componentsData.exportTableData = () => {
+      let dateBegin: number, dateEnd: number;
+      const dateRange = this.searchForm.dateRange;
+      if (dateRange && dateRange.length === 2) {
+        dateBegin = (dateRange[0] as Date).getTime();
+        dateEnd = (dateRange[1] as Date).getTime();
+      }
+      const params = JSON.parse(JSON.stringify(this.searchForm));
+      delete params.dateRange;
+      this.potencyService.getProcessCardList(new PageLink(9999999, 0), {
+        ...params, dateBegin: dateBegin || '', dateEnd: dateEnd || ''
+      }).subscribe((res) => {
+        const dataList = [];
+        if (res.data.length > 0) {
+          const titleKeys = ['potency.process-card-no', 'potency.material-name', 'potency.color', 'potency.order-no', 'common.created-time'];
+          const titleNames = [];
+          titleKeys.forEach(key => {
+            titleNames.push(this.translate.instant(key));
+          });
+          dataList.push(titleNames);
+          res.data.forEach(item => {
+            dataList.push([item.sCardNo, item.sMaterialName, item.sColorName, item.sOrderNo, this.datePipe.transform(item.tCreateTime, 'yyyy-MM-dd HH:mm:ss')]);
+          });
+        }
+        this.fileService.exportTable(this.translate.instant('potency.technology'), dataList).subscribe();
+      })
+    }
 
-    this.ProcessCardTableConfig.handleRowClick = ($event, entity) => {
+    this.processCardTableConfig.dataLoaded = () => this.selectCard();
+
+    this.processCardTableConfig.handleRowClick = ($event, entity) => {
       if ($event) {
         $event.stopPropagation();
       }
@@ -113,22 +147,22 @@ export class TechnologyComponent extends PageComponent {
    * 初始化工序列表配置
    */
   initProcedureTableConfig() {
-    this.ProcedureTableConfig.entityType = EntityType.PROCEDURE;
-    this.ProcedureTableConfig.entityTranslations = entityTypeTranslations.get(EntityType.PROCEDURE);
-    this.ProcedureTableConfig.entityResources = entityTypeResources.get(EntityType.PROCEDURE);
+    this.procedureTableConfig.entityType = EntityType.PROCEDURE;
+    this.procedureTableConfig.entityTranslations = entityTypeTranslations.get(EntityType.PROCEDURE);
+    this.procedureTableConfig.entityResources = entityTypeResources.get(EntityType.PROCEDURE);
 
-    this.ProcedureTableConfig.loadDataOnInit = false;
-    this.ProcedureTableConfig.entityKey = 'sWorkingProcedureNo';
-    this.ProcedureTableConfig.addEnabled = false;
-    this.ProcedureTableConfig.searchEnabled = false;
-    this.ProcedureTableConfig.refreshEnabled = false;
-    this.ProcedureTableConfig.detailsPanelEnabled = false;
-    this.ProcedureTableConfig.padding = '0';
-    this.ProcedureTableConfig.titleVisible = false;
-    this.ProcedureTableConfig.groupActionEnabled = false;
-    this.ProcedureTableConfig.entitiesDeleteEnabled = false;
+    this.procedureTableConfig.loadDataOnInit = false;
+    this.procedureTableConfig.entityKey = 'sWorkingProcedureNo';
+    this.procedureTableConfig.addEnabled = false;
+    this.procedureTableConfig.searchEnabled = false;
+    this.procedureTableConfig.refreshEnabled = false;
+    this.procedureTableConfig.detailsPanelEnabled = false;
+    this.procedureTableConfig.padding = '0';
+    this.procedureTableConfig.titleVisible = false;
+    this.procedureTableConfig.groupActionEnabled = false;
+    this.procedureTableConfig.entitiesDeleteEnabled = false;
 
-    this.ProcedureTableConfig.columns.push(
+    this.procedureTableConfig.columns.push(
       new EntityTableColumn<Procedure>('sWorkingProcedureNo', 'potency.procedure-no', '100px', (entity) => (entity.sWorkingProcedureNo || ''), () => ({}), false),
       new EntityTableColumn<Procedure>('sWorkingProcedureName', 'potency.procedure-name', '120px', (entity) => (entity.sWorkingProcedureName || ''), () => ({}), false),
       new EntityTableColumn<Procedure>('sWorkerGroupName', 'potency.team-name', '80px', (entity) => (entity.sWorkerGroupName || ''), () => ({}), false),
@@ -138,7 +172,7 @@ export class TechnologyComponent extends PageComponent {
       new DateEntityTableColumn<Procedure>('tEndTime', 'datetime.time-to', this.datePipe, '130px', 'yyyy-MM-dd HH:mm:ss', false)
     );
 
-    this.ProcedureTableConfig.entitiesFetchFunction = pageLink => {
+    this.procedureTableConfig.entitiesFetchFunction = pageLink => {
       return this.potencyService.getProcedureList(pageLink, {
         cardNo: this.currCard.sCardNo
       }).pipe(map((res) => {
@@ -149,9 +183,9 @@ export class TechnologyComponent extends PageComponent {
       }));
     }
 
-    this.ProcedureTableConfig.dataLoaded = () => this.selectProcedure();
+    this.procedureTableConfig.dataLoaded = () => this.selectProcedure();
 
-    this.ProcedureTableConfig.handleRowClick = ($event, entity) => {
+    this.procedureTableConfig.handleRowClick = ($event, entity) => {
       if ($event) {
         $event.stopPropagation();
       }
@@ -171,8 +205,8 @@ export class TechnologyComponent extends PageComponent {
     if (!this.currCard) {
       return;
     }
-    this.ProcessCardTableConfig.table.dataSource.selectEntity(this.currCard);
-    this.ProcedureTableConfig.table.updateData();
+    this.processCardTableConfig.table.dataSource.selectEntity(this.currCard);
+    this.procedureTableConfig.table.updateData();
   }
 
   /**
@@ -182,7 +216,7 @@ export class TechnologyComponent extends PageComponent {
     if (!this.currProcedure) {
       return;
     }
-    this.ProcedureTableConfig.table.dataSource.selectEntity(this.currProcedure);
+    this.procedureTableConfig.table.dataSource.selectEntity(this.currProcedure);
     const { uemEquipmentGUID, tStartTime, tEndTime } = this.currProcedure;
     this.potencyService.getProcedureParams({ uemEquipmentGUID, tStartTime, tEndTime }).subscribe(res => {
       this.currentTabIndex = 0;
@@ -215,7 +249,7 @@ export class TechnologyComponent extends PageComponent {
    * 查询
    */
   search() {
-    this.ProcessCardTableConfig.table.resetSortAndFilter(true);
+    this.processCardTableConfig.table.resetSortAndFilter(true);
   }
 
   /**
