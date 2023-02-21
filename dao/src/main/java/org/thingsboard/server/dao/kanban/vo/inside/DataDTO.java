@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.kanban.vo.inside;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,6 +21,12 @@ public class DataDTO {
     @ApiModelProperty(value = "部件参数")
     @JsonProperty("Key")
     private String key;
+
+    @ApiModelProperty(value = "合并后的name")
+    @JsonIgnore
+    private String tableName;
+
+
     @ApiModelProperty(value = "部件参数值")
     @JsonProperty("Value")
     private String value;
