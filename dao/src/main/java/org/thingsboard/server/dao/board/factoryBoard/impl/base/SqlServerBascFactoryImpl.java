@@ -3,7 +3,7 @@ package org.thingsboard.server.dao.board.factoryBoard.impl.base;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.SqlOnFieldAnnotation;
-import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.JdbcByAssembleSqlUtil;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.util.JdbcByAssembleSqlUtil;
 import org.thingsboard.server.dao.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
