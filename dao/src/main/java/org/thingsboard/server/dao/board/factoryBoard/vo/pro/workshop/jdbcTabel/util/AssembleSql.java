@@ -1,4 +1,4 @@
-package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel;
+package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.util;
 
 import lombok.Data;
 import lombok.ToString;
