@@ -1,5 +1,7 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query;
 
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.enums.DataBaseTypeEnums;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,5 +25,11 @@ public @interface SqlOnFromTableAnnotation {
 
 
     String whereValue() default "";
+
+
+    String orderBy() default "";
+
+
+    DataBaseTypeEnums dataBaseType() default DataBaseTypeEnums.SQLSERVER;
 
 }

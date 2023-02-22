@@ -3,10 +3,15 @@ package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.enums.DataBaseTypeEnums;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +30,32 @@ import java.util.Map;
 public class JdbcByAssembleSqlUtil {
 
     private JdbcTemplate jdbcTemplate;
+
+
+    public <T> PageData<T> pageQuery(T t, Pageable pageable) {
+        AssembleSql assembleSql = AssembleSql.buildSql(t);
+        DataBaseTypeEnums dataBaseTypeEnums = assembleSql.getDataBaseType();
+        if (dataBaseTypeEnums == DataBaseTypeEnums.SQLSERVER) {
+            return pageQuerySqlServer(t, pageable, assembleSql);
+        }
+        return null;
+    }
+
+
+    private <T> PageData<T> pageQuerySqlServer(T t, Pageable pageable, AssembleSql assembleSql) {
+        String sql = assembleSql.getSqlAll();
+        Map<String, ?> values = assembleSql.getValues();
+        String sqlCount = "select count(*) from (" + sql + ") t_count_0";
+        MapSqlParameterSource parameters = new MapSqlParameterSource(values);
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Integer count = givenParamJdbcTemp.queryForObject(sqlCount, parameters, Integer.class);
+        StringBuffer sqlQuery = new StringBuffer();
+        sqlQuery.append(" select ").append(" top(").append(pageable.getPageSize()).append(" ) *").append(" from  ( ")
+                .append(sql).append(" ) temp where rownumber > ").append((pageable.getPageNumber()) * pageable.getPageSize());
+        List<T> mapList = (List<T>) givenParamJdbcTemp.query(sqlQuery.toString(), parameters, new BeanPropertyRowMapper<>(t.getClass()));
+        Page<T> page = new PageImpl<T>(mapList, pageable, count);
+        return new PageData<T>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
 
 
     /**

@@ -3,6 +3,7 @@ package org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.enums.DataBaseTypeEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query.SqlColumnAnnotation;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query.SqlOnFromTableAnnotation;
 
@@ -26,7 +27,12 @@ public class AssembleSql {
 
     private String sqlAll;
 
+
     private Map<String, ?> values;
+
+    private String orderBy;
+
+    private DataBaseTypeEnums dataBaseType;
 
     public AssembleSql(String sqlAll) {
         this.sqlAll = sqlAll;
@@ -37,10 +43,26 @@ public class AssembleSql {
         this.values = values;
     }
 
+    public AssembleSql(String sqlAll, Map<String, ?> values, String orderBy, DataBaseTypeEnums dataBaseType) {
+        this.sqlAll = sqlAll;
+        this.values = values;
+        this.orderBy = orderBy;
+        this.dataBaseType = dataBaseType;
+    }
+
+    /**
+     * 构建Select 的查询sql
+     * 1.目前支持
+     * select  from  where group by
+     *
+     * @param t
+     * @param <T>
+     * @return
+     */
     public static <T> AssembleSql buildSql(T t) {
         AssembleSql.AssembleBuildSql assembleBuildSql = new AssembleBuildSql().assembleSqlBuilderFrom(t).assembleSqlBuilderSelect().assembleSqlBuilderWhere();
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(" SELECT ");
+        stringBuffer.append(getSelectByDataBaseType(assembleBuildSql));
         stringBuffer.append(assembleBuildSql.selectSql).append(" ");
         stringBuffer.append(" FROM ");
         stringBuffer.append(assembleBuildSql.fromSql).append(" ");
@@ -51,8 +73,22 @@ public class AssembleSql {
         if (StringUtils.isNotEmpty(assembleBuildSql.lastGroupBy)) {
             stringBuffer.append(" GROUP BY ").append(assembleBuildSql.lastGroupBy);
         }
-        return new AssembleSql(stringBuffer.toString(), assembleBuildSql.values);
+        return new AssembleSql(stringBuffer.toString(), assembleBuildSql.values, assembleBuildSql.orderBy, assembleBuildSql.dataBaseType);
     }
+
+
+    private static String getSelectByDataBaseType(AssembleSql.AssembleBuildSql assembleBuildSql) {
+        String sqlSelect = " SELECT ";
+        if (assembleBuildSql.dataBaseType == DataBaseTypeEnums.SQLSERVER) {
+            String orderBy = assembleBuildSql.orderBy;
+            return " select row_number() over(order by " + orderBy + " asc) as rownumber ,";
+        }
+        return sqlSelect;
+
+    }
+
+
+
 
 
     public static class AssembleBuildSql {
@@ -70,6 +106,10 @@ public class AssembleSql {
         private Map<String, ?> values;
 
         private Object object;
+
+        private String orderBy;
+
+        private DataBaseTypeEnums dataBaseType;
 
 
         AssembleBuildSql() {
@@ -90,6 +130,8 @@ public class AssembleSql {
             String whereSql = sqlOnFromTableAnnotation.whereValue();
             this.fromSql = fromSql;
             this.lastGroupBy = sqlOnFromTableAnnotation.groupByLast();
+            this.orderBy = sqlOnFromTableAnnotation.orderBy();
+            this.dataBaseType = sqlOnFromTableAnnotation.dataBaseType();
 
 
             if (StringUtils.isEmpty(whereSql)) {

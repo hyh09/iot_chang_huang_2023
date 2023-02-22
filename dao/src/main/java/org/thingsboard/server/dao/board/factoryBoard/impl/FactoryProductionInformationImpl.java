@@ -9,7 +9,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.workshop.Workshop;
+import org.thingsboard.server.dao.DaoUtil;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.SqlServerBascFactoryImpl;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
@@ -103,8 +106,11 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
 
     @Override
     public List<CurrentOrdersInProductionDto> queryCurrentOrdersInProductionDto() {
-        List<CurrentOrdersInProductionDto> ordersInProductionDtos = jdbcByAssembleSqlUtil.finaListByObj(new  CurrentOrdersInProductionDto());
-        return ordersInProductionDtos;
+//        List<CurrentOrdersInProductionDto> ordersInProductionDtos = jdbcByAssembleSqlUtil.finaListByObj(new CurrentOrdersInProductionDto());
+        PageLink pageLink = new PageLink(10);
+        PageData<CurrentOrdersInProductionDto> pageData = jdbcByAssembleSqlUtil.pageQuery(new CurrentOrdersInProductionDto(), DaoUtil.toPageable(pageLink));
+        List<CurrentOrdersInProductionDto> list = pageData.getData();
+        return list;
     }
 
     @Override
