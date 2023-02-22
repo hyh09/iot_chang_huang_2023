@@ -24,7 +24,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.q
         "WHERE D.uGUID IS NULL\n" +
         "GROUP BY A.sOrderNo\n" +
         "HAVING MAX(C.tUpdateTime)>=DATEADD(DAY,-7,CONVERT(NVARCHAR(10),GETDATE(),120)) \n" +
-        ") A1 " , groupByLast = " GROUP BY A1.tTime ")
+        ") A1 " , groupByLast = "A1.tTime ")
 public class OrderFulfillmentVo {
 
     /** 2022-12-16*/

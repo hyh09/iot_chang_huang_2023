@@ -34,7 +34,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.q
         "WHERE A2.sLotStatus='完成'\n" +
         "GROUP BY A2.usdOrderDtlGUID\n" +
         ") E ON E.usdOrderDtlGUID = B.uGUID",
-       groupByLast = " GROUP BY A.sOrderNo,F.sCustomerNo")
+       groupByLast = "A.sOrderNo,F.sCustomerNo")
 public class CurrentOrdersInProductionDto {
 
     @ApiModelProperty("订单编号")

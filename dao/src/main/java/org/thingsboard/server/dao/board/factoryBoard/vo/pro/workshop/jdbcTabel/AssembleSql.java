@@ -49,7 +49,7 @@ public class AssembleSql {
             stringBuffer.append(assembleBuildSql.whereSql);
         }
         if (StringUtils.isNotEmpty(assembleBuildSql.lastGroupBy)) {
-            stringBuffer.append(" ").append(assembleBuildSql.lastGroupBy);
+            stringBuffer.append(" GROUP BY ").append(assembleBuildSql.lastGroupBy);
         }
         return new AssembleSql(stringBuffer.toString(), assembleBuildSql.values);
     }
