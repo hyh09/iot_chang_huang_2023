@@ -105,6 +105,19 @@ public class FactoryProductionInformationController extends BaseController {
         }
     }
 
+    @ApiOperation("当前在产订单 ")
+    @GetMapping("/queryCurrentOrdersInProduction")
+    @ResponseBody
+    public  List<CurrentOrdersInProductionDto>  queryCurrentOrdersInProduction() throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            return factoryProductionInformationSvc.queryCurrentOrdersInProductionDto();
+        } catch (Exception e) {
+            log.error("[工序实时产量 ].queryListProcessRealTimeOutputVo方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
 
 
 }

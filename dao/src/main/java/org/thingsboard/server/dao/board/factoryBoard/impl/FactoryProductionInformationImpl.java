@@ -100,6 +100,13 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
         return fulfillmentVoList;
     }
 
+
+    @Override
+    public List<CurrentOrdersInProductionDto> queryCurrentOrdersInProductionDto() {
+        List<CurrentOrdersInProductionDto> ordersInProductionDtos = jdbcByAssembleSqlUtil.finaListByObj(new  CurrentOrdersInProductionDto());
+        return ordersInProductionDtos;
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);

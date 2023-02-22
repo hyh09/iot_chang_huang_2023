@@ -39,4 +39,9 @@ public interface FactoryProductionInformationSvc {
 
 
 
+    List<CurrentOrdersInProductionDto> queryCurrentOrdersInProductionDto();
+
+
+
+
 }
