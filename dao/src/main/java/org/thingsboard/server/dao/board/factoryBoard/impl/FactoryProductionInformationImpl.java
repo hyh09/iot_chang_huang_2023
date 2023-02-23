@@ -114,6 +114,12 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     }
 
     @Override
+    public List<CurrentOrdersInProduction07Dto> queryCurrentOrdersInProduction07Dto() {
+        CurrentOrdersInProduction07Dto  dto  = new CurrentOrdersInProduction07Dto();
+        return jdbcByAssembleSqlUtil.finaListByObj(dto);
+    }
+
+    @Override
     public void afterPropertiesSet() throws Exception {
         Hashtable<String, SqlOnFieldAnnotation> hashtable = GenericsUtils.getRowNameHashSql(OrderProductionVo.class);
         sqlMappingMap.put(OrderProductionVo.class, hashtable);
