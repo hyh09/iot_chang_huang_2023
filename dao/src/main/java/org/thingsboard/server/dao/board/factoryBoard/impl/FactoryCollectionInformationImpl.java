@@ -190,17 +190,17 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
 
     private String runRateOne(List<TrendChartRateDto> trendChartRateDtoList) {
         if (CollectionUtils.isEmpty(trendChartRateDtoList)) {
-            return "0%";
+            return "0";
         }
         TrendChartRateDto trendChartRateDto = trendChartRateDtoList.stream().findFirst().get();
         String value = trendChartRateDto.getBootTime();
         if (StringUtils.isEmpty(value)) {
-            return "0%";
+            return "0";
         }
         BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
         String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr, 100).toPlainString();
-        return resultStr + "%";
+        return resultStr ;
 
     }
 
