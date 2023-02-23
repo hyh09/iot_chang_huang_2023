@@ -70,7 +70,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         DeviceStatusNumVo deviceStatusNumVo = JacksonUtil.convertValue(deviceOnlineStatusResult, DeviceStatusNumVo.class);
         BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         BigDecimal deviceAfterResult = bigDecimalUtil.divide(deviceOnlineStatusResult.getOnLineDeviceCount(), deviceOnlineStatusResult.getAllDeviceCount());
-        String rate = BigDecimalUtil.INSTANCE.multiply(deviceAfterResult, "100").toPlainString() + "%";
+        String rate = BigDecimalUtil.INSTANCE.multiply(deviceAfterResult, "100").toPlainString();
         deviceStatusNumVo.setOnlineRate(rate);
         return deviceStatusNumVo;
     }
