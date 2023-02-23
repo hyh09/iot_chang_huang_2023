@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  */
 public class FiledNamePostfixMethodUtil {
 
-    private final  String SUFFIX_IDENTIFIER_PERCENT="%";
+    private final  String SUFFIX_IDENTIFIER_PERCENT="";
 
 
     public String formatPercentage(String value) {
