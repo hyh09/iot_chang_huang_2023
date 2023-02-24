@@ -170,17 +170,17 @@ public class MesServiceImpl implements MesService, CommonService {
     @Override
     public List<MesBoardWorkshopVO> listWorkshopsByFactoryId(TenantId tenantId, UUID factoryId) {
         return this.clientService.listWorkshopsByFactoryId(tenantId, factoryId).stream().map(v -> {
-            MesWorkshopDTO mesWorkshopDTO = null;
-            try {
-                mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, v.getId());
-            } catch (ThingsboardException ignore) {
-            }
-            return MesBoardWorkshopVO.builder()
-                    .name(v.getName())
-                    .id(v.getId())
-                    .mesId(Optional.ofNullable(mesWorkshopDTO).map(MesWorkshopDTO::getId).map(this::toUUID).orElse(null))
-                    .mesName(Optional.ofNullable(mesWorkshopDTO).map(MesWorkshopDTO::getName).orElse(null))
-                    .build();
+                    MesWorkshopDTO mesWorkshopDTO = null;
+                    try {
+                        mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, v.getId());
+                    } catch (ThingsboardException ignore) {
+                    }
+                    return MesBoardWorkshopVO.builder()
+                            .name(v.getName())
+                            .id(v.getId())
+                            .mesId(Optional.ofNullable(mesWorkshopDTO).map(MesWorkshopDTO::getId).map(this::toUUID).orElse(null))
+                            .mesName(Optional.ofNullable(mesWorkshopDTO).map(MesWorkshopDTO::getName).orElse(null))
+                            .build();
 
                 }
         ).collect(Collectors.toList());
@@ -196,17 +196,17 @@ public class MesServiceImpl implements MesService, CommonService {
     @Override
     public List<MesBoardDeviceVO> listDevicesByProductionLineId(TenantId tenantId, UUID productionLineId) {
         return this.clientService.listDevicesByQuery(tenantId, new FactoryDeviceQuery().setWorkshopId(productionLineId.toString())).stream().map(v -> {
-            MesDeviceDTO mesDeviceDTO = null;
-            try {
-                mesDeviceDTO = this.getMesDeviceByDeviceId(v.getId().getId());
-            } catch (ThingsboardException ignore) {
-            }
-            return MesBoardDeviceVO.builder()
-                    .id(v.getId().getId())
-                    .name(v.getRename())
-                    .mesId(Optional.ofNullable(mesDeviceDTO).map(MesDeviceDTO::getId).map(this::toUUID).orElse(null))
-                    .mesName(Optional.ofNullable(mesDeviceDTO).map(MesDeviceDTO::getName).orElse(null))
-                    .build();
+                    MesDeviceDTO mesDeviceDTO = null;
+                    try {
+                        mesDeviceDTO = this.getMesDeviceByDeviceId(v.getId().getId());
+                    } catch (ThingsboardException ignore) {
+                    }
+                    return MesBoardDeviceVO.builder()
+                            .id(v.getId().getId())
+                            .name(v.getRename())
+                            .mesId(Optional.ofNullable(mesDeviceDTO).map(MesDeviceDTO::getId).map(this::toUUID).orElse(null))
+                            .mesName(Optional.ofNullable(mesDeviceDTO).map(MesDeviceDTO::getName).orElse(null))
+                            .build();
                 }
         ).collect(Collectors.toList());
     }
@@ -532,5 +532,39 @@ public class MesServiceImpl implements MesService, CommonService {
         if (MesDeviceDTO == null || StringUtils.isBlank(MesDeviceDTO.getId()))
             throw new ThingsboardException("未查询到mes设备信息, mes设备Id:" + mesDeviceId.toString(), ThingsboardErrorCode.GENERAL);
         return MesDeviceDTO;
+    }
+
+    /**
+     * 查询全部Mes 设备
+     *
+     * @param mesWorkshopId mes车间Id
+     * @return Mes 设备
+     */
+    public List<MesDeviceDTO> listMesDevicesByMesWorkshopId(UUID mesWorkshopId) throws ThingsboardException {
+        return this.jdbcTemplate.query(
+                QUERY_ALL_MES_WORKSHOP_DEVICES,
+                new Object[]{mesWorkshopId},
+                (rs, rowNum) ->
+                        new MesDeviceDTO(
+                                rs.getString("uGUID"),
+                                rs.getString("设备名")
+                        )
+        );
+    }
+
+    /**
+     * 查询全部Mes 车间
+     *
+     * @return Mes 车间
+     */
+    public List<MesWorkshopDTO> listMesWorkshops() throws ThingsboardException {
+        return this.jdbcTemplate.query(
+                QUERY_ALL_MES_WORKSHOPS,
+                (rs, rowNum) ->
+                        new MesWorkshopDTO(
+                                rs.getString("uGUID"),
+                                rs.getString("车间")
+                        )
+        );
     }
 }
