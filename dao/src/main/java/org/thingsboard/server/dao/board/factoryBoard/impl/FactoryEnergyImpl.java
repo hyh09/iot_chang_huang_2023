@@ -16,10 +16,7 @@ import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.dao.board.factoryBoard.dto.ChartByChartEnumsDto;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.ChartByChartDateEnumServer;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartDataVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.CostRatioVo;
-import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.UserEveryYearCostVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.*;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
@@ -35,6 +32,7 @@ import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -130,6 +128,7 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
     public ChartResultVo queryTrendChart(QueryTsKvVo queryTsKvVo, ChartDateEnums dateEnums) {
         List<ChartByChartEnumsDto> chartByChartEnumsDtos = super.queryChartEnums(queryTsKvVo, dateEnums);
         ChartResultVo chartResultVo = convertData(chartByChartEnumsDtos, dateEnums);
+        chartResultVo.setDateEnums(dateEnums);
         return calculateTheCostRatio(chartResultVo);
     }
 
@@ -139,6 +138,24 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         List<ChartByChartEnumsDto> chartByChartEnumsDtos = super.queryChartEnums(queryTsKvVo, ChartDateEnums.YEARS);
         Map<String, BigDecimal> map = hwEnergyService.queryUnitPrice();
         return calculateMonthlyCostOnAnnulTrend(chartByChartEnumsDtos, map);
+    }
+
+    @Override
+    public ExpenseDashboardVo queryExpenseDashboard(QueryTsKvVo queryTsKvVo) {
+        List<CompletableFuture<ChartResultVo>> futureList =
+                EnumSet.allOf(ChartDateEnums.class).stream().map(day -> CompletableFuture.supplyAsync(() -> this.queryTrendChart(queryTsKvVo, day)))
+                        .collect(Collectors.toList());
+        List<ChartResultVo> resultList = futureList.stream().map(future -> future.join()).collect(Collectors.toList());
+        ExpenseDashboardVo resultVo = new ExpenseDashboardVo();
+        resultList.stream().forEach(m1 ->
+        {
+            if (m1.getDateEnums() == ChartDateEnums.YEARS) {
+                resultVo.setYear(m1.getCostRatioVo());
+            } else {
+                resultVo.setMonth(m1.getCostRatioVo());
+            }
+        });
+        return resultVo;
     }
 
     private EnergyUnitVo getEnergyUnitVo(String value, DictDeviceGroupPropertyVO deviceGroupPropertyVO) {
