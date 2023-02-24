@@ -2,6 +2,7 @@ package org.thingsboard.server.dao.board.factoryBoard.svc;
 
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.vo.CurrentOrdersInProduction07Vo;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public interface FactoryProductionInformationSvc {
 
     List<CurrentOrdersInProductionDto> queryCurrentOrdersInProductionDto();
 
-    List<CurrentOrdersInProduction07Dto> queryCurrentOrdersInProduction07Dto();
+    List<CurrentOrdersInProduction07Vo> queryCurrentOrdersInProduction07Dto();
 
 
 }

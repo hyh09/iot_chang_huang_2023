@@ -12,6 +12,7 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.vo.CurrentOrdersInProduction07Vo;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
@@ -121,7 +122,7 @@ public class FactoryProductionInformationController extends BaseController {
     @ApiOperation("当前在产订单 ")
     @GetMapping("/queryCurrentOrdersInProduction07")
     @ResponseBody
-    public  List<CurrentOrdersInProduction07Dto>  queryCurrentOrdersInProduction07Dto() throws ThingsboardException {
+    public  List<CurrentOrdersInProduction07Vo>  queryCurrentOrdersInProduction07Dto() throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             return factoryProductionInformationSvc.queryCurrentOrdersInProduction07Dto();

@@ -18,8 +18,10 @@ import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryCollectionInform
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryProductionInformationSvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.*;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.vo.CurrentOrdersInProduction07Vo;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.util.GenericsUtils;
+import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 import org.thingsboard.server.dao.workshop.WorkshopService;
 
@@ -114,9 +116,21 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
     }
 
     @Override
-    public List<CurrentOrdersInProduction07Dto> queryCurrentOrdersInProduction07Dto() {
-        CurrentOrdersInProduction07Dto  dto  = new CurrentOrdersInProduction07Dto();
-        return jdbcByAssembleSqlUtil.finaListByObj(dto);
+    public List<CurrentOrdersInProduction07Vo> queryCurrentOrdersInProduction07Dto() {
+        CurrentOrdersInProduction07Dto dto = new CurrentOrdersInProduction07Dto();
+        List<CurrentOrdersInProduction07Dto> dtoList = jdbcByAssembleSqlUtil.finaListByObj(dto);
+        if (CollectionUtils.isEmpty(dtoList)) {
+            return new ArrayList<>();
+        }
+        List<String> yieldValueList = dtoList.stream().map(CurrentOrdersInProduction07Dto::getYieldValue).collect(Collectors.toList());
+        String  total = BigDecimalUtil.INSTANCE.accumulatorStr(yieldValueList);
+      return   dtoList.stream().map(m1->{
+            CurrentOrdersInProduction07Vo  vo = new CurrentOrdersInProduction07Vo();
+            vo.setProcessName(m1.getProcessName());
+            vo.setPercentage( BigDecimalUtil.INSTANCE.divide(m1.getYieldValue(),total).toPlainString());
+            return vo;
+        }).collect(Collectors.toList());
+
     }
 
     @Override
