@@ -220,7 +220,8 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         BigDecimal electricity = getTotalValue(chartResultVo.getElectricity(), HwEnergyEnums.ELECTRICITY);
         BigDecimal gas = getTotalValue(chartResultVo.getGas(), HwEnergyEnums.GAS);
         BigDecimal denominator = BigDecimalUtil.INSTANCE.add(water, electricity, gas);
-        CostRatioVo vo = new CostRatioVo(getPercentage(water, denominator), getPercentage(electricity, denominator), getPercentage(gas, denominator), denominator);
+//        CostRatioVo vo = new CostRatioVo(getPercentage(water, denominator), getPercentage(electricity, denominator), getPercentage(gas, denominator), denominator);
+        CostRatioVo vo = new CostRatioVo(water.toPlainString(),electricity.toPlainString(),gas.toEngineeringString(), denominator);
         chartResultVo.setCostRatioVo(vo);
         return chartResultVo;
 
