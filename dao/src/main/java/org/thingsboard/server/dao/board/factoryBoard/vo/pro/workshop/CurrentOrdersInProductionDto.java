@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.enums.DataBaseTypeEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query.SqlColumnAnnotation;
 import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.query.SqlOnFromTableAnnotation;
 
@@ -34,28 +35,32 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.pro.workshop.jdbcTabel.q
         "WHERE A2.sLotStatus='完成'\n" +
         "GROUP BY A2.usdOrderDtlGUID\n" +
         ") E ON E.usdOrderDtlGUID = B.uGUID",
-       groupByLast = "A.sOrderNo,F.sCustomerNo")
+        groupByLast = "A.sOrderNo,F.sCustomerNo",
+        orderBy = "MIN(A.tCreateTime)",
+        dataBaseType = DataBaseTypeEnums.SQLSERVER
+
+)
 public class CurrentOrdersInProductionDto {
 
     @ApiModelProperty("订单编号")
     @SqlColumnAnnotation(name = "A.sOrderNo")
-    private  String orderNumber;
+    private String orderNumber;
 
     @ApiModelProperty("客户编号")
     @SqlColumnAnnotation(name = "F.sCustomerNo")
-    private  String customerNumber;
+    private String customerNumber;
 
     @ApiModelProperty("物料名")
     @SqlColumnAnnotation(name = "dbo.fnpbConcatStringEx(G.sMaterialName,',')")
-    private  String materialName;
+    private String materialName;
 
     @ApiModelProperty("下单数")
     @SqlColumnAnnotation(name = "SUM(D.nQty)")
-    private  String numberOfOrders;
+    private String numberOfOrders;
 
     @ApiModelProperty("进度百分比")
     @SqlColumnAnnotation(name = "SUM(ISNULL(E.iCount,0))*100/SUM(D.iCount)")
-    private  String progress;
+    private String progress;
 
 
 }
