@@ -1,6 +1,7 @@
 package org.thingsboard.server.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ChartResultVo;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.ExpenseDashboardVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.UserEveryYearCostVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
@@ -111,6 +113,24 @@ public class FactoryEnergyController extends BaseController {
         } catch (Exception e) {
             log.error("[工厂看板-能耗信息].queryUserEveryYearCost方法异常入参:{}", queryTsKvVo);
             log.error("[工厂看板-能耗信息].queryUserEveryYearCost方法异常:{}", e);
+            throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
+        }
+    }
+
+
+    @ApiOperation("能耗费用的仪表盘接口")
+    @GetMapping("/queryExpenseDashboard")
+    @ResponseBody
+    public ExpenseDashboardVo queryExpenseDashboardVo(
+            QueryTsKvVo queryTsKvVo) throws ThingsboardException {
+        try {
+            TenantId tenantId = getTenantId();
+            queryTsKvVo.setTenantId(tenantId.getId());
+            ExpenseDashboardVo vo = factoryEnergySvc.queryExpenseDashboard(queryTsKvVo);
+            return vo;
+        } catch (Exception e) {
+            log.error("[工厂看板-能耗信息].queryExpenseDashboard方法异常入参:{}", queryTsKvVo);
+            log.error("[工厂看板-能耗信息].queryExpenseDashboard方法异常:{}", e);
             throw new ThingsboardException(e.getMessage(), ThingsboardErrorCode.GENERAL);
         }
     }

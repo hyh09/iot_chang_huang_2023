@@ -1,9 +1,11 @@
 package org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 
 import java.util.List;
 
@@ -22,6 +24,9 @@ public class ChartResultVo {
 
     @ApiModelProperty("费用占比对象")
     private CostRatioVo costRatioVo;
+
+    @JsonIgnore
+    private ChartDateEnums dateEnums;
 
     /**
      * 水的趋势线

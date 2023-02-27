@@ -1,9 +1,9 @@
 package org.thingsboard.server.dao.kanban.service.impl;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hs.entity.vo.*;
@@ -63,7 +63,7 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
 
 
     @Override
-    public KanbanDeviceVo getRTMonitorDeviceDetail(TenantId tenantId, String id)  {
+    public KanbanDeviceVo getRTMonitorDeviceDetail(TenantId tenantId, String id) {
         DeviceDetailResult detailResult = null;
         try {
             detailResult = deviceMonitorService.getRTMonitorDeviceDetail(tenantId, id);
@@ -87,21 +87,23 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
         Boolean isOnline = detailResult.getIsOnLine();
         deviceVo.setDeviceId(detailResult.getId());
         deviceVo.setOnlineState(processingIsOnline(isOnline));
-        List<DictDeviceComponentVO> deviceComponentVOList= detailResult.getComponentList();
+        List<DictDeviceComponentVO> deviceComponentVOList = detailResult.getComponentList();
 
         List<ComponentDataDTO> componentDataList = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(deviceComponentVOList)){
+        getListByResultList(componentDataList, detailResult.getResultList());
 
-            for(DictDeviceComponentVO data:deviceComponentVOList){
-                ComponentDataDTO  componentDataDTO = new ComponentDataDTO();
+        if (!CollectionUtils.isEmpty(deviceComponentVOList)) {
+
+            for (DictDeviceComponentVO data : deviceComponentVOList) {
+                ComponentDataDTO componentDataDTO = new ComponentDataDTO();
                 componentDataDTO.setName(data.getName());
                 List<DictDeviceComponentPropertyVO> propertyVOList = data.getPropertyList();
-                if(!CollectionUtils.isEmpty(propertyVOList)){
-                    List<DataDTO>  list=   propertyVOList.stream().map(data2->{
-                        DataDTO  dataDTO = new DataDTO();
+                if (!CollectionUtils.isEmpty(propertyVOList)) {
+                    List<DataDTO> list = propertyVOList.stream().map(data2 -> {
+                        DataDTO dataDTO = new DataDTO();
                         dataDTO.setKey(data2.getName());
                         dataDTO.setValue(data2.getContent());
-                        return  dataDTO;
+                        return dataDTO;
                     }).collect(Collectors.toList());
                     componentDataDTO.setData(list);
                 }
@@ -128,13 +130,13 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
         if (entity == null) {
             return "0";
         }
-        Class<?> clazz=  entity.getClass();
+        Class<?> clazz = entity.getClass();
         try {
             Method getMethod = clazz.getMethod(str);
-         String value= (String) getMethod.invoke(entity);
-         if (StringUtils.isNotEmpty(value)) {
+            String value = (String) getMethod.invoke(entity);
+            if (StringUtils.isNotEmpty(value)) {
                 return value;
-          }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -156,5 +158,44 @@ public class KanbanDeviceOutImpl implements KanbanDeviceOutSvc {
             return "0";
         }
         return "1";
+    }
+
+
+    /**
+     * ###接口描述 2023-02-27 添加设备参数 的添加到第三方接口返回
+     *
+     * @param componentDataList 部件列表
+     * @param resultList        分组属性实时数据
+     */
+    private void getListByResultList(List<ComponentDataDTO> componentDataList, List<DictDeviceGroupVO> resultList) {
+        if (CollectionUtils.isNotEmpty(resultList)) {
+            List<ComponentDataDTO> componentDataDTOList = resultList.stream().map(m1 -> {
+                ComponentDataDTO dataDTO = new ComponentDataDTO();
+                dataDTO.setName(m1.getName());
+                List<DictDeviceGroupPropertyVO> deviceGroupPropertyVOList = m1.getGroupPropertyList();
+                List<DataDTO> dataDTOList = listToDataDtoList(deviceGroupPropertyVOList);
+                dataDTO.setData(dataDTOList);
+                return dataDTO;
+            }).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(componentDataDTOList)) {
+                componentDataList.addAll(componentDataDTOList);
+            }
+
+        }
+
+    }
+
+
+    private List<DataDTO> listToDataDtoList(List<DictDeviceGroupPropertyVO> deviceGroupPropertyVOList) {
+        List<DataDTO> dataDTOList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(deviceGroupPropertyVOList)) {
+            for (DictDeviceGroupPropertyVO v1 : deviceGroupPropertyVOList) {
+                DataDTO dataDTO = new DataDTO();
+                dataDTO.setKey(v1.getName());
+                dataDTO.setValue(v1.getContent());
+                dataDTOList.add(dataDTO);
+            }
+        }
+        return dataDTOList;
     }
 }
