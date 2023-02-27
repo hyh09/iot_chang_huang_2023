@@ -159,7 +159,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
                     ChartDataVo v1 = new ChartDataVo();
                     String timeStr = dateEnums.forMartTime(t1);
                     v1.setTime(timeStr);
-                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1));
+                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1,dateEnums));
                     v1.setValue(runRateCalculation(value, dateVoDate, trendChartRateDtoList));
                     return v1;
                 }).collect(Collectors.toList());
