@@ -23,8 +23,8 @@ public class DateLocaDateAndTimeUtil {
     public final static DateLocaDateAndTimeUtil INSTANCE = new DateLocaDateAndTimeUtil();
 
 
-    public static String formatDate(LocalDate localDate) {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(ChartDateEnums.YEARS.getPattern());
+    public static String formatDate(LocalDate localDate,ChartDateEnums dateEnums) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateEnums.getPattern());
         String dateStr = localDate.format(fmt);
         return dateStr;
     }
