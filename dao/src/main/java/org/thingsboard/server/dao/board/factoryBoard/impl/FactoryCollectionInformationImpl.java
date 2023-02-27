@@ -34,10 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -150,7 +147,13 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
     private List<ChartDataVo> getRunRate(List<TrendChartRateDto> trendChartRateDtoList, ChartDateEnums dateEnums) {
         ChartDateEnumsToLocalDateVo dateVoDate = dateEnums.currentConvert();
         List<LocalDate> localDates = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums, dateVoDate.getBeginDate(), dateVoDate.getEndDate());
-        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
+//        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
+        Map<String, String> map = new HashMap<>();
+        trendChartRateDtoList.stream().forEach(trendChartRateDto -> {
+            map.put(DateLocaDateAndTimeUtil.formatDate(trendChartRateDto.getBdate(),dateEnums),trendChartRateDto.getBootTime());
+
+        });
+
         List<ChartDataVo> list =
                 localDates.stream().map(t1 -> {
                     ChartDataVo v1 = new ChartDataVo();
