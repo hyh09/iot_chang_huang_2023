@@ -123,11 +123,12 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
             return new ArrayList<>();
         }
         List<String> yieldValueList = dtoList.stream().map(CurrentOrdersInProduction07Dto::getYieldValue).collect(Collectors.toList());
-        String  total = BigDecimalUtil.INSTANCE.accumulatorStr(yieldValueList);
-      return   dtoList.stream().map(m1->{
-            CurrentOrdersInProduction07Vo  vo = new CurrentOrdersInProduction07Vo();
+        String total = BigDecimalUtil.INSTANCE.accumulatorStr(yieldValueList);
+        return dtoList.stream().map(m1 -> {
+            CurrentOrdersInProduction07Vo vo = new CurrentOrdersInProduction07Vo();
             vo.setProcessName(m1.getProcessName());
-            vo.setPercentage( BigDecimalUtil.INSTANCE.divide(m1.getYieldValue(),total).toPlainString());
+            String molecular = BigDecimalUtil.INSTANCE.divide(m1.getYieldValue(), total).toPlainString();
+            vo.setPercentage(BigDecimalUtil.INSTANCE.multiply(molecular,"100").toPlainString());
             return vo;
         }).collect(Collectors.toList());
 
