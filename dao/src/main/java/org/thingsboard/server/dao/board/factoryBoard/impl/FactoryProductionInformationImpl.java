@@ -128,7 +128,7 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
             CurrentOrdersInProduction07Vo vo = new CurrentOrdersInProduction07Vo();
             vo.setProcessName(m1.getProcessName());
             String molecular = BigDecimalUtil.INSTANCE.divide(m1.getYieldValue(), total).toPlainString();
-            vo.setPercentage(BigDecimalUtil.INSTANCE.multiply(molecular,"100").toPlainString());
+            vo.setPercentage(BigDecimalUtil.INSTANCE.multiply(molecular, "100").toPlainString());
             return vo;
         }).collect(Collectors.toList());
 
