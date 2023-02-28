@@ -67,7 +67,7 @@ public class BigDecimalUtil {
         try {
             BigDecimal result = new BigDecimal(number1.toString());
             if (this.equalBigNum2(result, BigDecimal.ZERO)) {
-                return result.setScale(scale, roundingMode);
+                return result.setScale(scale, roundingMode).stripTrailingZeros();
             }
         } catch (NumberFormatException e) {
             return BigDecimal.ZERO;
@@ -116,19 +116,19 @@ public class BigDecimalUtil {
     /**
      * 乘法
      *
-     * @param number1 为null，按0处理
-     * @param number2 为null按0除磷
+     * @param number1   为null，按0处理
+     * @param number2   为null按0除磷
      * @param numberArr
      * @return
      */
     public BigDecimal multiply(Object number1, Object number2, Object... numberArr) {
-        if(number1 == null || number2 == null){
+        if (number1 == null || number2 == null) {
             return BigDecimal.ZERO;
         }
         BigDecimal result = new BigDecimal(number1.toString()).multiply(new BigDecimal(number2.toString()));
         for (Object number : numberArr) {
-            if(number ==null){
-                return  BigDecimal.ZERO;
+            if (number == null) {
+                return BigDecimal.ZERO;
             }
             result = result.multiply((new BigDecimal(number.toString())));
         }
