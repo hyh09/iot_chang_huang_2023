@@ -13,7 +13,7 @@ import java.time.temporal.TemporalAdjusters;
  * Copyright (c) 2023,All Rights Reserved.
  */
 public enum ChartDateEnums {
-    MONTHS("MONTHS", "yyyy-MM-dd", "day"),
+    MONTHS("MONTHS", "MM-dd", "day"),
     YEARS("YEARS", "yyyy-MM", "month"),
     ;
 
