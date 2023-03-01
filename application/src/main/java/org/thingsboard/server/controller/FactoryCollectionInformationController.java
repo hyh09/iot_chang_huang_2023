@@ -75,7 +75,13 @@ public class FactoryCollectionInformationController extends BaseController {
         }
     }
 
-
+    /**
+     * 2023-02-15 工厂看板的--开机率趋势图 （年维度和月维度）接口
+     * @param factoryId
+     * @param dimension
+     * @return
+     * @throws ThingsboardException
+     */
     @ApiOperation("开机率趋势图-月和年的维度")
     @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
     @GetMapping("/queryTrendChartOfOperatingRate")
