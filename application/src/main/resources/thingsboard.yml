@@ -19,7 +19,7 @@
 #  accessKeyId: "LTAI4G8tH2a8qNsTtz3kKZ3y"
 #  accessKeySecret: "Ec2VQIaG2cJM4oqRvGkK06SLowyhTc"
 #  bucketName: "hsyl-iot-test"
-
+ 
 hs:
   file:
     location: "${HS_FILE_LOCATION:/upload}"
