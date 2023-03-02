@@ -204,7 +204,9 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
      * @return
      */
     private List<ChartDataVo> getRunRate(List<TrendChartRateDto> trendChartRateDtoList, ChartDateEnums dateEnums) {
+        /**1 由当前的枚举入参 获取时间轴 的开始 和结束时间点*/
         ChartDateEnumsToLocalDateVo dateVoDate = dateEnums.currentConvert();
+        /**2 生成出参的 x轴 时间轴*/
         List<LocalDate> localDates = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums, dateVoDate.getBeginDate(), dateVoDate.getEndDate());
 //        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
         Map<String, String> map = new HashMap<>();
