@@ -156,7 +156,7 @@ public class MesProductionServiceImpl implements MesProductionService {
     @Override
     public PageData<MesProductionPlanVo> findPlanList(MesProductionPlanDto dto, PageLink pageLink) {
         try {
-            int rowNumber = (pageLink.getPage() ) * pageLink.getPageSize();
+            int rowNumber = (pageLink.getPage()) * pageLink.getPageSize();
             //queryTotal方法统计总数
             int total = queryPlanTotal(dto);
             //queryRecordList方法查询并转换实体类List
@@ -181,7 +181,7 @@ public class MesProductionServiceImpl implements MesProductionService {
     @Override
     public PageData<MesProductionWorkVo> findWorkList(MesProductionWorkDto dto, PageLink pageLink) {
         try {
-            int rowNumber = (pageLink.getPage() ) * pageLink.getPageSize();
+            int rowNumber = (pageLink.getPage()) * pageLink.getPageSize();
             //queryTotal方法统计总数
             int total = this.queryWorkTotal(dto);
             //queryRecordList方法查询并转换实体类List
@@ -244,10 +244,11 @@ public class MesProductionServiceImpl implements MesProductionService {
             sqlBuffer.append("?,");
             params.add(e);
         });
-        String sql = sqlBuffer.substring(0, sqlBuffer.length() ) + ")";
+        String sql = sqlBuffer.substring(0, sqlBuffer.length() - 1) + ")";
         Object[] para = params.toArray(new Object[params.size()]);
         return this.jdbcTemplate.query(sql, para, new BeanPropertyRowMapper(MesEquipmentProcedureVo.class));
     }
+
 
     @Override
     public MesEquipmentProcedureVo findEquipmentProcedureOrDefault(UUID equipmentId, MesEquipmentProcedureVo vo) {

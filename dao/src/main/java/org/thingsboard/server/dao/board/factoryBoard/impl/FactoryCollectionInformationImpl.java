@@ -142,8 +142,8 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         List<TrendChartRateDto> todayDto = startTimeOfThisDay(uuids, LocalDate.now());
         List<TrendChartRateDto> yesterdayDto = startTimeOfThisDay(uuids, yesterday);
         RatePieChartVo vo = new RatePieChartVo();
-        vo.setCurrentValue(runRateOne(todayDto));
-        vo.setYesterdayValue(runRateOne(yesterdayDto));
+        vo.setCurrentValue(runRateOne(todayDto, uuids.size()));
+        vo.setYesterdayValue(runRateOne(yesterdayDto, uuids.size()));
         return vo;
     }
 
@@ -257,7 +257,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
      * @param trendChartRateDtoList
      * @return
      */
-    private String runRateOne(List<TrendChartRateDto> trendChartRateDtoList) {
+    private String runRateOne(List<TrendChartRateDto> trendChartRateDtoList, Integer deviceCount) {
         if (CollectionUtils.isEmpty(trendChartRateDtoList)) {
             return "0";
         }
@@ -268,7 +268,8 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         }
         BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
-        String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr, 100).toPlainString();
+        String valueStr02 = decimalUtil.divide(valueStr, deviceCount).toPlainString();
+        String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr02, 100).toPlainString();
         return resultStr;
 
     }

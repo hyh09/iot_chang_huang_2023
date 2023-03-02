@@ -120,7 +120,7 @@ public class FactoryCollectionInformationController extends BaseController {
     @GetMapping("/queryPieChart")
     @ResponseBody
     public RatePieChartVo queryPieChart(@RequestParam(name = "factoryId") String factoryId
-    ) throws ThingsboardException {
+                                        ) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
