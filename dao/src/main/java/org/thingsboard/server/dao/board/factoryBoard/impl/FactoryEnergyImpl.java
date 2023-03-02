@@ -104,14 +104,14 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         resultList.addAll(setTopDataConversion(waterList));
 
         List<EnergyEffciencyNewEntity> energyEffciencyNewEntities = entityList.stream()
-                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
-                .sorted((s1, s2) -> new BigDecimal(s2.getWaterAddedValue()).compareTo(new BigDecimal(s1.getWaterAddedValue())))
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
+                .sorted((s1, s2) -> new BigDecimal(s2.getElectricAddedValue()).compareTo(new BigDecimal(s1.getElectricAddedValue())))
                 .limit(5)
                 .collect(Collectors.toList());
         resultList.addAll(setTopDataConversion(energyEffciencyNewEntities));
 
         List<EnergyEffciencyNewEntity> gasList = entityList.stream()
-                .filter(m1 -> StringUtils.isNotEmpty(m1.getWaterAddedValue()))
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
                 .sorted((s1, s2) -> new BigDecimal(s2.getGasAddedValue()).compareTo(new BigDecimal(s1.getGasAddedValue())))
                 .limit(5)
                 .collect(Collectors.toList());
