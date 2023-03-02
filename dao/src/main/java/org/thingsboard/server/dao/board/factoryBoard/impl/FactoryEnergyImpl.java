@@ -325,6 +325,7 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         BigDecimal e02 = BigDecimalUtil.INSTANCE.multiply(m1.getElectricValue(), map.get(HwEnergyEnums.ELECTRICITY.getChineseField()));
         BigDecimal gas = BigDecimalUtil.INSTANCE.multiply(m1.getGasValue(), map.get(HwEnergyEnums.GAS.getChineseField()));
         return BigDecimalUtil.INSTANCE.add(water, e02, gas).toPlainString();
+
     }
 
 }
