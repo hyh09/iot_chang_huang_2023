@@ -9,6 +9,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.UserEveryYe
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.ChartDateEnums;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.board.workshopBoard.CapacitiesTop5Vo;
 
 import java.util.List;
 
@@ -57,8 +58,16 @@ public interface FactoryEnergySvc {
      */
     List<UserEveryYearCostVo> queryUserEveryYearCost(QueryTsKvVo queryTsKvVo, TenantId tenantId);
 
-    ExpenseDashboardVo queryExpenseDashboard(QueryTsKvVo queryTsKvVo );
+    ExpenseDashboardVo queryExpenseDashboard(QueryTsKvVo queryTsKvVo);
 
+
+    /**
+     * 提供车间看板的接口 查询今日top5的产量接口
+     *
+     * @param queryTsKvVo 当前的入参
+     * @return
+     */
+    List<CapacitiesTop5Vo> queryCapacitiesTop5(QueryTsKvVo queryTsKvVo);
 
 
 }

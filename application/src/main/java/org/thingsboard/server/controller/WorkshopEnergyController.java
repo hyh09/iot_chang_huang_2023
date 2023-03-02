@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
 import org.thingsboard.server.dao.board.workshopBoard.CapacitiesTop5Vo;
+import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
 import java.util.List;
@@ -30,15 +32,29 @@ import java.util.List;
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/workshop")
-public class WorkshopEnergyController extends BaseController{
+public class WorkshopEnergyController extends BaseController {
 
     @Autowired
     private FactoryEnergySvc factoryEnergySvc;
 
 
+    /**
+     * 创建人: wb04
+     * 创建日期: 2023-03-02
+     * 接口描述: 查询当天车间下的产量的top5排名
+     *
+     * @param queryTsKvVo
+     * @return
+     * @throws ThingsboardException
+     */
     @GetMapping("/queryCapacitiesTop5")
     @ResponseBody
     public List<CapacitiesTop5Vo> queryCapacitiesTop5(QueryTsKvVo queryTsKvVo) throws ThingsboardException {
-        return  null;
+        TenantId tenantId = getTenantId();
+        if (queryTsKvVo.getStartTime() == null) {
+            queryTsKvVo.setStartTime(CommonUtils.getZero());
+            queryTsKvVo.setEndTime(CommonUtils.getNowTime());
+        }
+        return factoryEnergySvc.queryCapacitiesTop5(queryTsKvVo);
     }
 }
