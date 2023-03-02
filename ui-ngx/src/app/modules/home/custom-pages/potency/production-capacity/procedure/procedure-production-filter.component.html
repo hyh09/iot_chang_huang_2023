@@ -1,0 +1,92 @@
+<div class="potency-filter">
+  <div class="header" style="margin-bottom: 3px;">
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link (click)="onTabClick('factory')" [active]="false"> {{ 'potency.factory' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('group')" [active]="false"> {{ 'potency.group' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('procedure')" [active]="true"> {{ 'potency.procedure' | translate }} </a>
+    </nav>
+  </div>
+  <mat-form-field>
+    <mat-label>{{ 'potency.card-no' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.cardNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.cardNo"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('cardNo')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.order-no' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.orderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.orderNo"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('orderNo')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.customer' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.customerName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.customerName"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('customerName')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.material-name' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.materialName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.materialName"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('materialName')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.color' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.colorName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.colorName"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('colorName')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.procedure-name' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workingProcedureName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.workingProcedureName"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('workingProcedureName')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <nz-range-picker
+    nzFormat="yyyy/MM/dd HH:mm:ss"
+    nzShowTime
+    nzSize="large"
+    [nzDisabledDate]="disabledDate"
+    [nzAllowClear]="false"
+    [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+    (ngModelChange)="onTimeChange()"
+  ></nz-range-picker>
+  <div class="action-btns">
+    <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+      {{ 'action.search' | translate }}
+    </button>
+    <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+      {{ 'action.export' | translate }}
+    </button>
+  </div>
+</div>

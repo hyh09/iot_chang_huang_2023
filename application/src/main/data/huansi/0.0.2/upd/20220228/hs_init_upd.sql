@@ -1,0 +1,3 @@
+-- February 28, 2022 10:44:56 GMT+8
+UPDATE "public"."hs_init" SET "init_data" = '[{"id": null, "name": "能耗", "groupPropertyList": [{"id": null, "name": "water", "unit": "T", "title": "耗水量", "content": "0", "createdTime": null}, {"id": null, "name": "electric", "unit": "KWH", "title": "耗电量", "content": "0", "createdTime": null}, {"id": null, "name": "gas", "unit": "T", "title": "耗气量", "content": "0", "createdTime": null}]}, {"id": null, "name": "产量", "groupPropertyList": [{"id": null, "name": "capacities", "unit": "", "title": "总产量", "content": "0", "createdTime": null}]}]' WHERE "id" = 'a6bcd176-7538-402c-9035-5b966888faa0';
+

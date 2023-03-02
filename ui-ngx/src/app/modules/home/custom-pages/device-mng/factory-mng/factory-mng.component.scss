@@ -1,0 +1,26 @@
+@import '../../../components/entity/entities-table.component.scss';
+
+.factory-mng-table-wrapper {
+  .image-wrapper {
+    margin: 5px 0;
+    img {
+      cursor: pointer;
+      max-width: 100px;
+      max-height: 40px;
+      object-fit: contain;
+    }
+  }
+  button .mat-icon {
+    color: rgba(0, 0, 0, 0.54);
+  }
+  tr {
+    cursor: pointer;
+  }
+  td ::ng-deep .ant-checkbox-wrapper {
+    margin-top: 1px;
+    margin-right: 8px;
+  }
+  ::ng-deep .ant-table-body {
+    overflow-y: auto !important;
+  }
+}

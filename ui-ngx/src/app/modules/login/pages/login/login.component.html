@@ -1,0 +1,72 @@
+<div class="tb-login-content mat-app-background" fxFlex fxLayoutAlign="center center">
+  <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async"></mat-progress-bar>
+  <div class="mask"></div>
+  <mat-card>
+    <mat-card-content style="height: 100%; position: relative;">
+      <form class="tb-login-form" [formGroup]="loginFormGroup" (ngSubmit)="login()">
+        <fieldset [disabled]="isLoading$ | async" fxLayout="row" fxLayoutGap="112px" style="height: 100%">
+          <div fxLayoutAlign="start center" class="logo-wrapper">
+            <tb-logo class="login-logo"></tb-logo>
+          </div>
+          <div tb-toast fxFlex fxLayout="column" fxLayoutAlign="center stretch" class="form-control-wrapper">
+            <div class="oauth-container tb-default" fxLayout="column" fxLayoutGap="16px" *ngIf="oauth2Clients?.length">
+              <ng-container *ngFor="let oauth2Client of oauth2Clients">
+                <a mat-raised-button class="login-with-button" href="{{ oauth2Client.url }}">
+                  <mat-icon class="icon" svgIcon="{{ oauth2Client.icon }}"></mat-icon>
+                  {{ 'login.login-with' | translate: {name: oauth2Client.name} }}
+                </a>
+              </ng-container>
+              <div class="container-divider">
+                <div class="line"><mat-divider></mat-divider></div>
+                <div class="text mat-typography">{{ "login.or" | translate | uppercase }}</div>
+                <div class="line"><mat-divider></mat-divider></div>
+              </div>
+            </div>
+            <mat-form-field>
+              <mat-label translate>login.username</mat-label>
+              <input id="username-input" matInput type="email" autofocus formControlName="username" email required/>
+              <mat-icon matPrefix svgIcon="mdi:login-username"></mat-icon>
+              <mat-error *ngIf="loginFormGroup.get('username').hasError('email')">
+                {{ 'user.invalid-email-format' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label translate>common.password</mat-label>
+              <input id="password-input" matInput type="password" formControlName="password"/>
+              <tb-toggle-password matSuffix></tb-toggle-password>
+              <mat-icon matPrefix svgIcon="mdi:login-password"></mat-icon>
+            </mat-form-field>
+            <div fxLayoutAlign="end center" class="forgot-password">
+              <button
+                class="tb-reset-password link-button"
+                mat-button color="primary"
+                type="button"
+                routerLink="/login/resetPasswordRequest"
+                [queryParams]="{ email: loginFormGroup.get('username').value || '' }"
+              >{{ 'login.forgot-password' | translate }}</button>
+            </div>
+            <div fxLayout="column" class="tb-action-button">
+              <button mat-raised-button color="primary" [disabled]="(isLoading$ | async)" type="submit">
+                {{ 'login.login' | translate }}
+              </button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  <div class="qr-code-wrapper" fxLayout="row">
+    <div class="qr-code-item" fxFlex>
+      <div class="qr-code">
+        <img src="../../../../../assets/qrCode/Android.png" />
+      </div>
+      <div class="qr-code-name">安卓版App下载</div>
+    </div>
+    <div class="qr-code-item" fxFlex>
+      <div class="qr-code">
+        <img src="../../../../../assets/qrCode/IOS.jpg" />
+      </div>
+      <div class="qr-code-name">IOS版App下载</div>
+    </div>
+  </div>
+</div>

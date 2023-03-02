@@ -1,0 +1,11 @@
+<button
+  type="button"
+  mat-icon-button
+  class="select-city-button"
+  matTooltip="{{ 'contact.select-city' | translate }}"
+  matTooltipPosition="above"
+  [disabled]="disabled"
+  (click)="openDialog()"
+>
+  <mat-icon>place</mat-icon>
+</button>

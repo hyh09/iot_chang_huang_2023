@@ -1,0 +1,58 @@
+<div class="mat-padding" fxLayout="column" style="min-width: 500px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block" [class.mat-form-field-disabled]="!!entityForm.get('id').value">
+          <mat-label translate>auth-mng.user-code</mat-label>
+          <input matInput formControlName="userCode" required>
+          <mat-error *ngIf="entityForm.get('userCode').hasError('required')">
+            {{ 'auth-mng.user-code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
+      <mat-form-field class="mat-block">
+        <mat-label translate>auth-mng.user-name</mat-label>
+        <input matInput formControlName="userName" required>
+        <mat-error *ngIf="entityForm.get('userName').hasError('required')">
+          {{ 'auth-mng.user-name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>auth-mng.phone-number</mat-label>
+        <input matInput formControlName="phoneNumber" required>
+        <mat-error *ngIf="entityForm.get('phoneNumber').hasError('required')">
+          {{ 'auth-mng.phone-number-required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="entityForm.get('phoneNumber').hasError('pattern')">
+          {{ 'auth-mng.phone-number-invalid' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>auth-mng.email</mat-label>
+        <input matInput formControlName="email" required>
+        <mat-error *ngIf="entityForm.get('email').hasError('required')">
+          {{ 'auth-mng.email-required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="entityForm.get('email').hasError('email')">
+          {{ 'auth-mng.email-invalid' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field *ngIf="!entitiesTableConfig.componentsData.factoryId" class="mat-block">
+        <mat-label translate>auth-mng.roles</mat-label>
+        <mat-select formControlName="roleIds" multiple>
+          <mat-option
+            *ngFor="let role of entitiesTableConfig.componentsData.roleList"
+            [value]="role.id"
+          >{{ role.roleName }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>auth-mng.active-status</mat-label>
+        <mat-select formControlName="activeStatus">
+          <mat-option value="1">{{ 'auth-mng.on' | translate }}</mat-option>
+          <mat-option value="0">{{ 'auth-mng.off' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </fieldset>
+  </form>
+</div>

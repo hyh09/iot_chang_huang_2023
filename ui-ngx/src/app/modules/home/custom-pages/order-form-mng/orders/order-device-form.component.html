@@ -1,0 +1,73 @@
+<div class="order-device-wrapper" style="min-width: 360px;">
+  <mat-toolbar color="primary">
+    <h2 translate>{{ isEdit ? 'order.edit-prod-plan' : 'order.add-prod-plan' }}</h2>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="cancel()" type="button">
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <div mat-dialog-content>
+    <form [formGroup]="orderDeviceForm">
+      <div class="form-item">
+        <mat-label translate required>device.device</mat-label>
+        <nz-select nzShowSearch formControlName="deviceId">
+          <nz-option
+            *ngFor="let device of devices"
+            [nzLabel]="device.name"
+            [nzValue]="device.id"
+          ></nz-option>
+        </nz-select>
+        <mat-error *ngIf="orderDeviceForm.dirty && orderDeviceForm.get('deviceId').hasError('required')">
+          {{ 'device.device-required' | translate }}
+        </mat-error>
+      </div>
+      <div class="form-item">
+        <mat-label translate>order.intended-capacity</mat-label>
+        <input nz-input formControlName="intendedCapacity" />
+      </div>
+      <div class="form-item">
+        <mat-label translate>order.actual-capacity</mat-label>
+        <input nz-input formControlName="actualCapacity" />
+      </div>
+      <div class="form-item">
+        <mat-label translate>order.intended-time</mat-label>
+        <nz-range-picker
+          [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="intendedTime"
+          [nzDisabled]="!orderDeviceForm.get('deviceId').value"
+          [nzDisabledDate]="disabledDate"
+          [nzDisabledTime]="disabledRangeTime"
+        ></nz-range-picker>
+      </div>
+      <div class="form-item">
+        <mat-label translate>order.actual-time</mat-label>
+        <nz-range-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="actualTime"></nz-range-picker>
+      </div>
+      <div class="form-item">
+        <mat-label translate>order.maintain-time</mat-label>
+        <nz-range-picker [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" formControlName="maintainTime"></nz-range-picker>
+      </div>
+      <div class="form-item" fxLayout="row" fxLayoutGap="16px" fxLaoutAlign="start center">
+        <mat-slide-toggle formControlName="enabled">
+          {{ 'device-mng.in-calculation' | translate }}
+        </mat-slide-toggle>
+      </div>
+    </form>
+  </div>
+  <div mat-dialog-actions fxLayoutAlign="end center">
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      cdkFocusInitial
+      [disabled]="(isLoading$ | async)"
+      (click)="cancel()"
+    >{{ 'action.cancel' | translate }}</button>
+    <button
+      mat-raised-button
+      type="button"
+      color="primary"
+      [disabled]="(isLoading$ | async) || orderDeviceForm?.invalid || !orderDeviceForm?.dirty"
+      (click)="save()"
+    >{{ 'action.confirm' | translate }}</button>
+  </div>
+</div>

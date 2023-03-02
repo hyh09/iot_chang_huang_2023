@@ -1,0 +1,59 @@
+<div class="potency-filter">
+  <div class="header" style="margin-bottom: 3px;">
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link (click)="onTabClick('factory')" [active]="false"> {{ 'potency.factory' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('group')" [active]="true"> {{ 'potency.group' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('procedure')" [active]="false"> {{ 'potency.procedure' | translate }} </a>
+    </nav>
+  </div>
+  <mat-form-field>
+    <mat-label>{{ 'potency.procedure' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workingProcedureName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.workingProcedureName"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('workingProcedureName')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.team-name' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workerGroupName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.workerGroupName"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('workerGroupName')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'potency.team-members' | translate }}</mat-label>
+    <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.workerNameList" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+    <button
+      *ngIf="entitiesTableConfig.componentsData.workerNameList"
+      matSuffix mat-icon-button aria-label="Clear"
+      (click)="onClear('workerNameList')"
+    >
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-form-field>
+  <nz-range-picker
+    nzFormat="yyyy/MM/dd HH:mm:ss"
+    nzShowTime
+    nzSize="large"
+    [nzDisabledDate]="disabledDate"
+    [nzAllowClear]="false"
+    [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+    (ngModelChange)="onTimeChange()"
+  ></nz-range-picker>
+  <div class="action-btns">
+    <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+      {{ 'action.search' | translate }}
+    </button>
+    <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+      {{ 'action.export' | translate }}
+    </button>
+  </div>
+</div>

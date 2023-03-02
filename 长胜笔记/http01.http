@@ -1,0 +1,9 @@
+# curl -i http://httpbin.org/ip
+GET https://apaas-cofzqisw.huaweiapaas.com/api/v1/oauth2/token?client_id=&client_secret=
+
+
+
+
+
+###
+
