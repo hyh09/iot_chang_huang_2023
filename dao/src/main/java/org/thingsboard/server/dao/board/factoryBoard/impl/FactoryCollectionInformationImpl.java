@@ -128,13 +128,17 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
      */
     @Override
     public RatePieChartVo queryPieChart(TenantId tenantId, FactoryDeviceQuery factoryDeviceQuery) {
+        /**1 查询设备的列表信息*/
         List<DeviceEntity> deviceEntityList = deviceDao.findAllByEntity(factoryDeviceQueryConvertDeviceEntity(factoryDeviceQuery));
+        /** 2 提取设备的id 集合*/
         List<UUID> uuids = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(deviceEntityList)) {
             uuids.addAll(deviceEntityList.stream().map(DeviceEntity::getUuid).collect(Collectors.toList()));
         }
+        /** 3 今天  和昨天 */
         LocalDate localDate = LocalDate.now();
         LocalDate yesterday = localDate.plusDays(-1);
+        /**4. */
         List<TrendChartRateDto> todayDto = startTimeOfThisDay(uuids, LocalDate.now());
         List<TrendChartRateDto> yesterdayDto = startTimeOfThisDay(uuids, yesterday);
         RatePieChartVo vo = new RatePieChartVo();
@@ -205,7 +209,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
 //        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
         Map<String, String> map = new HashMap<>();
         trendChartRateDtoList.stream().forEach(trendChartRateDto -> {
-            map.put(DateLocaDateAndTimeUtil.formatDate(trendChartRateDto.getBdate(),dateEnums),trendChartRateDto.getBootTime());
+            map.put(DateLocaDateAndTimeUtil.formatDate(trendChartRateDto.getBdate(), dateEnums), trendChartRateDto.getBootTime());
 
         });
 
@@ -214,7 +218,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
                     ChartDataVo v1 = new ChartDataVo();
                     String timeStr = dateEnums.forMartTime(t1);
                     v1.setTime(timeStr);
-                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1,dateEnums));
+                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1, dateEnums));
                     v1.setValue(runRateCalculation(value, dateVoDate, trendChartRateDtoList));
                     return v1;
                 }).collect(Collectors.toList());
@@ -248,6 +252,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
     /**
      * ###2023-02-23 修改去掉 % ； 前端要求的规范
      * 饼状图的接口---计算当天 或者 昨日的 天维度的单条的开机率的 百分之比
+     * ###2023-03-02 bug修复： bootTime {总开机率时长，毫秒时间单位} ÷86400000L{1天的毫秒总时间} ➗ 设备总数 {[sql2]} 漏了除以 设备总数的逻辑
      *
      * @param trendChartRateDtoList
      * @return
@@ -264,7 +269,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
         String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr, 100).toPlainString();
-        return resultStr ;
+        return resultStr;
 
     }
 

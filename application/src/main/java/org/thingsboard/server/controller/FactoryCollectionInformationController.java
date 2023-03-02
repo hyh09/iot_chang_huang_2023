@@ -76,7 +76,18 @@ public class FactoryCollectionInformationController extends BaseController {
     }
 
 
-    @ApiOperation("开机率趋势图-月和年的维度")
+    /**
+     * 作者:wb04
+     * 日期:2023-03-02
+     * 接口描述:  运行率 select *  from  trep_day_sta_detail
+     * #############################################
+     *
+     * @param factoryId
+     * @param dimension
+     * @return
+     * @throws ThingsboardException
+     */
+    @ApiOperation("开机率运行率趋势图-月和年的维度")
     @ApiImplicitParam(name = "factoryId", value = "工厂id", dataType = "string", paramType = "query")
     @GetMapping("/queryTrendChartOfOperatingRate")
     @ResponseBody
