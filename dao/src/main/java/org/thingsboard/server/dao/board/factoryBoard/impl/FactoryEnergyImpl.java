@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.page.PageDataAndTotalValue;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.vo.QueryTsKvVo;
 import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
+import org.thingsboard.server.common.data.vo.enums.key.KeyPcNameEnums;
 import org.thingsboard.server.dao.board.factoryBoard.dto.ChartByChartEnumsDto;
 import org.thingsboard.server.dao.board.factoryBoard.impl.base.ChartByChartDateEnumServer;
 import org.thingsboard.server.dao.board.factoryBoard.svc.FactoryEnergySvc;
@@ -21,6 +22,7 @@ import org.thingsboard.server.dao.board.factoryBoard.vo.energy.chart.request.Cha
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.CurrentUtilitiesVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.current.EnergyUnitVo;
 import org.thingsboard.server.dao.board.factoryBoard.vo.energy.top.FactoryEnergyTop;
+import org.thingsboard.server.dao.board.workshopBoard.CapacitiesTop5Vo;
 import org.thingsboard.server.dao.hs.entity.vo.DictDeviceGroupPropertyVO;
 import org.thingsboard.server.dao.hs.service.DeviceDictPropertiesSvc;
 import org.thingsboard.server.dao.sql.role.dao.EffciencyAnalysisRepository;
@@ -31,7 +33,10 @@ import org.thingsboard.server.dao.sqlserver.server.vo.order.HwEnergyEnums;
 import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -101,26 +106,22 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
                 .sorted((s1, s2) -> new BigDecimal(s2.getWaterAddedValue()).compareTo(new BigDecimal(s1.getWaterAddedValue())))
                 .limit(5)
                 .collect(Collectors.toList());
-        resultList.addAll(setTopDataConversion(waterList));
+        resultList.addAll(setTopDataConversion(waterList, KeyPcNameEnums.WATER));
 
         List<EnergyEffciencyNewEntity> energyEffciencyNewEntities = entityList.stream()
                 .filter(m1 -> StringUtils.isNotEmpty(m1.getElectricAddedValue()))
                 .sorted((s1, s2) -> new BigDecimal(s2.getElectricAddedValue()).compareTo(new BigDecimal(s1.getElectricAddedValue())))
                 .limit(5)
                 .collect(Collectors.toList());
-        resultList.addAll(setTopDataConversion(energyEffciencyNewEntities));
+        resultList.addAll(setTopDataConversion(energyEffciencyNewEntities, KeyPcNameEnums.ELECTRIC));
 
         List<EnergyEffciencyNewEntity> gasList = entityList.stream()
                 .filter(m1 -> StringUtils.isNotEmpty(m1.getGasAddedValue()))
                 .sorted((s1, s2) -> new BigDecimal(s2.getGasAddedValue()).compareTo(new BigDecimal(s1.getGasAddedValue())))
                 .limit(5)
                 .collect(Collectors.toList());
-        resultList.addAll(setTopDataConversion(gasList));
-        List<FactoryEnergyTop> deduplicationResut = resultList.stream().collect(
-                Collectors.collectingAndThen(
-                        Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(FactoryEnergyTop::getDeviceId))), ArrayList::new)
-        );
-        return deduplicationResut;
+        resultList.addAll(setTopDataConversion(gasList, KeyPcNameEnums.VAPOR));
+        return resultList;
     }
 
 
@@ -158,6 +159,28 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
         return resultVo;
     }
 
+    /**
+     * 提供车间看板的接口 查询今日top5的产量接口
+     *
+     * @param queryTsKvVo 当前的入参
+     * @return
+     */
+    @Override
+    public List<CapacitiesTop5Vo> queryCapacitiesTop5(QueryTsKvVo queryTsKvVo) {
+        List<EnergyEffciencyNewEntity> entityList = effciencyAnalysisRepository.queryEnergy(queryTsKvVo);
+        if (CollectionUtils.isEmpty(entityList)) {
+            return new ArrayList<>();
+        }
+        List<EnergyEffciencyNewEntity> energyEffciencyNewEntities = entityList.stream()
+                .filter(m1 -> StringUtils.isNotEmpty(m1.getCapacityAddedValue()))
+                .sorted((s1, s2) -> new BigDecimal(s2.getCapacityAddedValue()).compareTo(new BigDecimal(s1.getCapacityAddedValue())))
+                .limit(5)
+                .collect(Collectors.toList());
+        return energyEffciencyNewEntities.stream().map(m1 -> {
+            return new CapacitiesTop5Vo(m1.getDeviceName(), m1.getCapacityAddedValue());
+        }).collect(Collectors.toList());
+    }
+
     private EnergyUnitVo getEnergyUnitVo(String value, DictDeviceGroupPropertyVO deviceGroupPropertyVO) {
         EnergyUnitVo energyUnitVo = new EnergyUnitVo();
         energyUnitVo.setActualValue(value);
@@ -170,7 +193,7 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
     }
 
 
-    private List<FactoryEnergyTop> setTopDataConversion(List<EnergyEffciencyNewEntity> energyEffciencyNewEntities) {
+    private List<FactoryEnergyTop> setTopDataConversion(List<EnergyEffciencyNewEntity> energyEffciencyNewEntities, KeyPcNameEnums enums) {
         if (CollectionUtils.isNotEmpty(energyEffciencyNewEntities)) {
             return energyEffciencyNewEntities.stream().map(m1 -> {
                 FactoryEnergyTop top = new FactoryEnergyTop();
@@ -179,6 +202,7 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
                 top.setElectricity(m1.getElectricAddedValue());
                 top.setWater(m1.getWaterAddedValue());
                 top.setGas(m1.getGasAddedValue());
+                top.setType(enums.getCode());
                 return top;
             }).collect(Collectors.toList());
         }
