@@ -1,0 +1,53 @@
+<!--
+
+    Copyright © 2016-2021 The Thingsboard Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<div class="tb-container">
+  <label class="tb-title" *ngIf="label">{{label}}</label>
+  <ng-container #flow="flow" [flowConfig]="{singleFile: true, allowDuplicateUploads: true}">
+    <div class="tb-image-select-container" [style]="{ height: size + 'px' }">
+      <div *ngIf="showPreview" class="tb-image-preview-container" [style]="{ width: size + 'px', height: size + 'px' }">
+        <div *ngIf="!safeImageUrl; else elseBlock">
+          <ng-container *ngIf="!hideEmptyText">
+            {{ (disabled || readonly ? 'dashboard.empty-image' : 'dashboard.no-image') | translate }}
+          </ng-container>
+        </div>
+        <ng-template #elseBlock>
+          <img nz-image class="tb-image-preview" [nzSrc]="imageUrl" style="cursor: pointer;" />
+        </ng-template>
+      </div>
+      <div *ngIf="showClearButton && !disabled && !readonly" class="tb-image-clear-container" [style]="{ height: size + 'px' }">
+        <button mat-button mat-icon-button color="primary"
+          type="button"
+          (click)="clearImage()"
+          class="tb-image-clear-btn"
+          matTooltip="{{ 'action.remove' | translate }}"
+          matTooltipPosition="above">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div *ngIf="!disabled && !readonly" class="drop-area tb-flow-drop"
+        [style]="{ height: size + 'px' }"
+        flowDrop
+        [flow]="flow.flowJs">
+        <label for="{{inputId}}" translate>dashboard.drop-image</label>
+        <input class="file-input" flowButton type="file" [flow]="flow.flowJs" [flowAttributes]="getAcceptImg()" id="{{inputId}}">
+<!--        <input class="file-input" flowButton type="file" [flow]="flow.flowJs" [flowAttributes]="{accept: 'image/*'}" id="{{inputId}}">-->
+      </div>
+    </div>
+  </ng-container>
+  <div class="tb-hint" *ngIf="maxSizeByte && !disabled && !readonly" translate [translateParams]="{ size: maxSizeByte | fileSize}">dashboard.maximum-upload-file-size</div>
+</div>

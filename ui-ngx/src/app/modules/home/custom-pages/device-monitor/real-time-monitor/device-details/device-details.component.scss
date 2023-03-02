@@ -1,0 +1,170 @@
+::ng-deep {
+  tb-device-details {
+    height: 100%;
+    .device-details-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+      min-height: 700px;
+      min-width: 1100px;
+      .left-content,
+      .right-content {
+        width: calc((100% - 16px) / 2);
+      }
+      .left-content {
+        .base-info {
+          min-height: 228px;
+          background-color: #fff;
+          border-radius: 4px;
+          padding: 16px;
+          box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
+          .title {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 22px;
+            margin-bottom: 16px;
+          }
+          .attribution {
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+          }
+          .image-wrapper {
+            width: 60%;
+            height: 168px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+            .status {
+              color: #fff;
+              position: absolute;
+              top: 0;
+              right: 0;
+              font-size: 16px;
+              padding: 0 12px;
+              min-width: 80px;
+              text-align: center;
+              &.online {
+                background-color: #2367fa;
+              }
+              &.offline {
+                background-color: #ff9d4d;
+              }
+              &.in-production {
+                background-color: #4de062;
+              }
+              &.stopped {
+                background-color: #ff4d4f;
+              }
+            }
+          }
+          .description {
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            padding: 13px 16px;
+            .desc-item {
+              font-size: 16px;
+              color: rgba(0,0,0,0.60);
+              font-weight: 400;
+              line-height: 22px;
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              .content {
+                flex: 1;
+                overflow: hidden;
+              }
+              + .desc-item {
+                margin-top: 8px;
+              }
+            }
+          }
+        }
+        .line-chart-wrapper {
+          .line-chart-item {
+            height: calc((100% - 16px) / 2);
+            box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
+          }
+        }
+      }
+      .right-content {
+        border-radius: 4px;
+        .real-time-data {
+          background-color: #fff;
+          border-radius: 4px;
+          height: 100%;
+          position: relative;
+          padding-top: 38px;
+          box-shadow: 0px 0px 22px 0px rgb(0 0 0 / 4%);
+          .title {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 22px;
+          }
+          .real-time-data-header {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            background-color: #fff;
+          }
+          .real-time-data-content {
+            padding: 16px;
+            overflow-y: auto;
+            .real-time-data-item {
+              padding: 16px;
+              border-radius: 4px;
+              border: 1px solid #e4e4e4;
+              .title {
+                font-size: 14px;
+                font-weight: bold;
+                line-height: 20px;
+                margin-bottom: 12px;
+              }
+              table {
+                tr {
+                  cursor: pointer;
+                  td {
+                    padding-left: 0;
+                    font-size: 12px;
+                    line-height: 17px;
+                    border: none;
+                    color: #9a9a9a;
+                    height: auto;
+                    display: inline-block;
+                    &:last-of-type {
+                      padding-right: 0;
+                    }
+                  }
+                  + tr td {
+                    margin-top: 8px;
+                  }
+                }
+              }
+              .comp-table {
+                .comp-name-row {
+                  cursor: default;
+                  td {
+                    background: none;
+                  }
+                  .comp-name {
+                    font-size: 14px;
+                    font-weight: bold;
+                    line-height: 20px;
+                    color: rgba(0, 0, 0, 0.87);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<div class="top10">
+  <div class="header">
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link (click)="onTabClick('factory')" [active]="true"> {{ 'potency.factory' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('order')" [active]="false"> {{ 'potency.order' | translate }} </a>
+    </nav>
+    <div *ngIf="top10.length > 0" fxLayout="row" fxLayoutAlign="space-between center">
+      <div class="title">{{ 'potency.today-energy-consumption-top10' | translate }}</div>
+      <nz-radio-group [(ngModel)]="keyNum" nzSize="small" (ngModelChange)="getTop10()">
+        <label nz-radio-button nzValue="1">{{ 'potency.water' | translate }}</label>
+        <label nz-radio-button nzValue="2">{{ 'potency.electric' | translate }}</label>
+        <label nz-radio-button nzValue="3">{{ 'potency.gas' | translate }}</label>
+      </nz-radio-group>
+    </div>
+  </div>
+  <div class="bar-wrapper">
+    <div *ngFor="let item of top10; let $index = index" class="bar-item">
+      <div class="device-name" [title]="item.rename">No.{{ $index + 1 }} {{ item.rename }}</div>
+      <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+        <div fxFlex>
+          <nz-progress [nzPercent]="item.percent" [nzStrokeColor]="{ '0%': '#0e4ba1', '100%': '#99d5d4' }" nzStatus="active" [nzShowInfo]="false"></nz-progress>
+        </div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<nz-range-picker
+  nzFormat="yyyy/MM/dd HH:mm:ss"
+  nzShowTime
+  nzSize="large"
+  [nzDisabledDate]="disabledDate"
+  [nzAllowClear]="false"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+  (ngModelChange)="onTimeChange()"
+></nz-range-picker>
+<div class="data-overview">
+  <div class="overview-item">{{ 'potency.total-energy-consumption' | translate }}</div>
+  <div class="overview-item">
+    {{ 'potency.total-water-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalWaterConsumption || 0 }}
+  </div>
+  <div class="overview-item">
+    {{ 'potency.total-electric-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalElectricConsumption || 0 }}
+  </div>
+  <div class="overview-item">
+    {{ 'potency.total-gas-consumption' | translate }}{{ entitiesTableConfig.componentsData.totalValue.totalGasConsumption || 0 }}
+  </div>
+</div>

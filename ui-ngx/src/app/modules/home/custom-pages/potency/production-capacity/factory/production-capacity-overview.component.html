@@ -1,0 +1,44 @@
+<div *ngIf="!isHistory" class="top10">
+  <div class="header">
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link (click)="onTabClick('factory')" [active]="true"> {{ 'potency.factory' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('group')" [active]="false"> {{ 'potency.group' | translate }} </a>
+      <a mat-tab-link (click)="onTabClick('procedure')" [active]="false"> {{ 'potency.procedure' | translate }} </a>
+    </nav>
+    <div *ngIf="top10.length > 0" class="title">{{ 'potency.today-capacity-top10' | translate }}</div>
+  </div>
+  <div class="bar-wrapper">
+    <div *ngFor="let item of top10; let $index = index" class="bar-item">
+      <div class="device-name" [title]="item.rename">No.{{ $index + 1 }} {{ item.rename }}</div>
+      <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+        <div fxFlex>
+          <nz-progress [nzPercent]="item.percent" [nzStrokeColor]="{ '0%': '#5fbc4d', '100%': '#99d5d4' }" nzStatus="active" [nzShowInfo]="false"></nz-progress>
+        </div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<nz-range-picker
+  nzFormat="yyyy/MM/dd HH:mm:ss"
+  nzShowTime
+  nzSize="large"
+  [nzDisabledDate]="disabledDate"
+  [nzAllowClear]="false"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange"
+  (ngModelChange)="onTimeChange()"
+></nz-range-picker>
+<!-- <div *ngIf="isHistory" class="action-btns" style="margin-left: 11px;">
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
+  </button>
+</div> -->
+<div *ngIf="!isHistory" class="data-overview">
+  <div class="overview-item">{{ 'potency.total-capacity' | translate }}{{ entitiesTableConfig.componentsData.totalCapacity }} (M)</div>
+</div>
+<div *ngIf="isHistory" class="interval-data-chart">
+  <div fxLayout="row" fxLayoutAlign="space-between center" class="header">
+    <div class="title">{{ 'potency.interval-capacity' | translate: { deviceName: entitiesTableConfig.componentsData.deviceName} }}</div>
+  </div>
+  <div #chartWrapper class="chart"></div>
+</div>

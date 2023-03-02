@@ -1,0 +1,142 @@
+<div class="device-comp-wrapper" style="min-width: 900px;">
+  <mat-toolbar color="primary">
+    <h2 translate>{{ isView ? 'device-mng.view-comp' : isEdit ? 'device-mng.edit-comp' : 'device-mng.add-comp' }}</h2>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="cancel()" type="button">
+      <mat-icon class="material-icons">close</mat-icon>
+    </button>
+  </mat-toolbar>
+  <div mat-dialog-content>
+    <form [formGroup]="compForm">
+      <fieldset [disabled]="isView">
+        <!--基本信息-->
+        <mat-expansion-panel [expanded]="true" style="margin-top: 0">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ 'device-mng.basic-info' | translate }}</mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.comp-name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error *ngIf="compForm.get('name').hasError('required')">
+              {{ 'device-mng.name-required' | translate }}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.comp-type</mat-label>
+            <input matInput formControlName="type">
+          </mat-form-field>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.supplier</mat-label>
+            <input matInput formControlName="supplier">
+          </mat-form-field>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.model</mat-label>
+            <input matInput formControlName="model">
+          </mat-form-field>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.version</mat-label>
+            <input matInput formControlName="version">
+          </mat-form-field>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.guarantee</mat-label>
+            <input matInput formControlName="warrantyPeriod">
+          </mat-form-field>
+          <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+            <mat-label translate>device-mng.comment</mat-label>
+            <input matInput formControlName="comment">
+          </mat-form-field>
+          <tb-image-input
+            label="{{ 'device-mng.comp-picture' | translate }}"
+            maxSizeByte="524288"
+            formControlName="picture"
+            [readonly]="isView"
+          ></tb-image-input>
+        </mat-expansion-panel>
+        <!--部件参数-->
+        <mat-expansion-panel [expanded]="compDataExpanded" (opened)="compDataExpanded = true" (closed)="compDataExpanded = false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ 'device-mng.comp-data' | translate }}</mat-panel-title>
+            <mat-panel-description fxFlex fxLayout="row" fxLayoutAlign="end center">
+              <mat-icon
+                *ngIf="!isView && compDataExpanded"
+                class="material-icons"
+                matTooltip="{{ 'device-mng.add-comp-data' | translate }}"
+                matTooltipPosition="above"
+                (click)="addCompData($event)"
+              >add</mat-icon>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div 
+            *ngFor="let item of compDataFormArray().controls; let $index = index"
+            formArrayName="propertyList"
+            fxFlex fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+          >
+            <ng-container [formGroupName]="$index">
+              <mat-form-field class="mat-block" [class.mat-form-field-disabled]="isView">
+                <mat-label translate>device-mng.device-data-name</mat-label>
+                <input matInput formControlName="name" required>
+                <mat-error *ngIf="item.get('name').hasError('required')">
+                  {{ 'device-mng.data-name-required' | translate }}
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="isView">
+                <mat-label translate>device-mng.device-data-content</mat-label>
+                <input matInput formControlName="content" required>
+                <mat-error *ngIf="item.get('content').hasError('required')">
+                  {{ 'device-mng.data-content-required' | translate }}
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field class="mat-block" fxFlex [class.mat-form-field-disabled]="isView">
+                <mat-label translate>device-mng.device-data-desc</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>{{ 'device-mng.data-dic' | translate }}</mat-label>
+                <mat-select formControlName="dictDataId">
+                  <mat-option value="">{{ 'common.none' | translate }}</mat-option>
+                  <mat-option *ngFor="let option of dataDictionaries" [value]="option.id">{{ option.name }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button
+                *ngIf="!isView"
+                mat-icon-button
+                type="button"
+                matTooltip="{{ 'action.delete' | translate }}"
+                matTooltipPosition="above"
+                (click)="removeCompData($index)"
+              >
+                <mat-icon class="material-icons" >delete</mat-icon>
+              </button>
+            </ng-container>
+          </div>
+          <div *ngIf="!isView && compDataFormArray().controls.length === 0" fxFlex fxLayoutAlign="center">
+            {{ 'device-mng.add-comp-data-tip' | translate }}
+          </div>
+          <div *ngIf="isView && compDataFormArray().controls.length === 0" fxFlex fxLayoutAlign="center center">
+            <nz-empty
+              nzNotFoundImage="../../../../../../assets/data-empty.svg"
+              nzNotFoundContent="{{ 'device-mng.comp-data-empty' | translate }}"
+            ></nz-empty>
+          </div>
+        </mat-expansion-panel>
+      </fieldset>
+    </form>
+  </div>
+  <div *ngIf="!isView" mat-dialog-actions fxLayoutAlign="end center">
+    <button
+      mat-button
+      type="button"
+      color="primary"
+      cdkFocusInitial
+      [disabled]="(isLoading$ | async)"
+      (click)="cancel()"
+    >{{ 'action.cancel' | translate }}</button>
+    <button
+      mat-raised-button
+      type="button"
+      color="primary"
+      [disabled]="(isLoading$ | async) || compForm?.invalid || !compForm?.dirty"
+      (click)="save()"
+    >{{ 'action.confirm' | translate }}</button>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+<mat-form-field>
+  <mat-label>{{ 'menu-mng.name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.name" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.name"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('name')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'menu-mng.menu-type' | translate }}</mat-label>
+  <mat-select
+    [(ngModel)]="entitiesTableConfig.componentsData.menuType"
+    (ngModelChange)="entitiesTableConfig.table.resetSortAndFilter(true)"
+  >
+    <mat-option [value]="menuType.PC">{{ 'menu-mng.pc-menu' | translate }}</mat-option>
+    <mat-option [value]="menuType.APP">{{ 'menu-mng.app-menu' | translate }}</mat-option>
+  </mat-select>
+</mat-form-field>
+<div class="action-btns">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+</div>

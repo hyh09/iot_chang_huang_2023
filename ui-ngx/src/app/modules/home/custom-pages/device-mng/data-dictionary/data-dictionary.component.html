@@ -1,0 +1,62 @@
+<div class="mat-padding" fxLayout="column" style="min-width: 550px;">
+  <form [formGroup]="entityForm">
+    <fieldset [disabled]="(isLoading$ | async) || !isEdit">
+      <fieldset [disabled]="!!entityForm.get('id').value">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-mng.code</mat-label>
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="entityForm.get('code').hasError('required')">
+            {{ 'device-mng.code-required' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </fieldset>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.name</mat-label>
+        <input matInput formControlName="name" required>
+        <mat-error *ngIf="entityForm.get('name').hasError('required')">
+          {{ 'device-mng.name-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.data-type</mat-label>
+        <mat-select formControlName="type" required>
+          <mat-option
+            *ngFor="let option of entitiesTableConfig.componentsData.dataTypeList"
+            [value]="option.code"
+          >{{ 'device-mng.' + option.name | translate }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="entityForm.get('type').hasError('required')">
+          {{ 'device-mng.data-type-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.unit</mat-label>
+        <input matInput formControlName="unit">
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-mng.comment</mat-label>
+        <input matInput formControlName="comment">
+      </mat-form-field>
+      <mat-radio-group
+        formControlName="iconStyle"
+        style="color: rgba(0, 0, 0, 0.54);display: block;margin-bottom: 10px;"
+      >
+        <mat-radio-button [value]="0" style="margin-right: 16px;">{{ 'icon.select-icon' | translate }}</mat-radio-button>
+        <mat-radio-button [value]="1">{{ 'icon.upload-icon' | translate }}</mat-radio-button>
+      </mat-radio-group>
+      <tb-material-icon-select
+        [fxShow]="entityForm.get('iconStyle').value === 0"
+        formControlName="icon"
+        (onSelect)="onChangeIconStyle(0)"
+      ></tb-material-icon-select>
+      <tb-image-input
+        [fxShow]="entityForm.get('iconStyle').value === 1"
+        maxSizeByte="524288" size="40" [hideEmptyText]="true"
+        formControlName="picture"
+        style="display: block;margin-top: -5px;"
+        [imgSuffix]="['svg']"
+        (onSelect)="onChangeIconStyle(1)"
+      ></tb-image-input> 
+    </fieldset>
+  </form>
+</div>

@@ -1,0 +1,38 @@
+<div class="factory-tree" fxLayout="column">
+  <div *ngIf="treeData.length === 0" class="empty" fxLayoutAlign="center center">
+    <nz-empty
+      nzNotFoundImage="../../../../../assets/data-empty.svg"
+      nzNotFoundContent="{{ 'common.data-empty' | translate }}"
+    ></nz-empty>
+  </div>
+  <nz-input-group [nzSuffix]="suffixIcon" class="factory-tree-search">
+    <input type="text" nz-input placeholder="{{ 'device-mng.search-name' | translate }}" [(ngModel)]="searchValue" />
+  </nz-input-group>
+  <ng-template #suffixIcon>
+    <i nz-icon nzType="search"></i>
+  </ng-template>
+  <nz-tree
+    [nzData]="treeData"
+    [nzSearchValue]="searchValue"
+    [nzHideUnMatched]="true"
+    [nzSearchFunc]="searchFunc"
+    [nzVirtualHeight]="scrollHeight"
+    [nzSelectedKeys]="selectedKeys"
+    [nzExpandedKeys]="expandedKeys"
+    [nzTreeTemplate]="treeTemplate"
+    (nzClick)="onClickNode($event)"
+  >
+    <ng-template #treeTemplate let-node let-origin="origin">
+      <div
+        *ngIf="origin.rowType === 'factory' || origin.rowType === 'device'; else defaultNode"
+        fxLayout="row" fxLayoutGap="4px" fxLayoutAlign="start center"
+      >
+        <div class="node-title">{{ node.title }}</div>
+        <div *ngIf="!origin.isOnLine" class="node-off-line">{{ 'device-monitor.offline' | translate }}</div>
+      </div>
+      <ng-template #defaultNode>
+        <div class="node-title">{{ node.title }}</div>
+      </ng-template>
+    </ng-template>
+  </nz-tree>
+</div>

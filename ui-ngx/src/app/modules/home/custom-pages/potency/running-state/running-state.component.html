@@ -1,0 +1,39 @@
+<div fxLayout="row" fxLayoutGap="16px" class="tb-running-state-wrapper">
+  <div class="left-content">
+    <tb-factory-tree [deviceOnly]="true" (clickNode)="fetchData($event)"></tb-factory-tree>
+  </div>
+  <div fxFlex fxLayout="column" fxLayoutGap="20px" class="right-content">
+    <div class="title">{{ 'potency.running-state' | translate }}</div>
+    <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start end" class="filters">
+      <mat-form-field style="width: 60%; min-width: 200px; max-width: 600px;">
+        <mat-label>{{ 'potency.property' | translate }}</mat-label>
+        <mat-select multiple [(ngModel)]="selectedProps" (ngModelChange)="onSelectedPropsChange()">
+          <mat-option *ngFor="let prop of properties" [value]="prop.name || prop.chartId">{{ prop.title || prop.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div fxFlexLayout="row" fxLayoutGap="8px" fxLayoutAlign="center center">
+        <nz-range-picker nzShowTime [(ngModel)]="rangeTime" [nzAllowClear]="false" nzSize="large" (ngModelChange)="fetchData()"></nz-range-picker>
+      </div>
+    </div>
+    <div fxFlex fxLayout="column" fxLayoutGap="16px" style="padding: 0 24px;">
+      <tb-running-state-chart
+        *ngFor="let propName of displayedProps"
+        [data]="runningStateData[propName] || {}"
+      ></tb-running-state-chart>
+      <div *ngIf="displayedProps.length === 0" fxFlex fxLayoutAlign="center center">
+        <nz-empty
+          nzNotFoundImage="../../../../../../assets/data-empty.svg"
+          nzNotFoundContent="{{ 'common.data-empty' | translate }}"
+        ></nz-empty>
+      </div>
+    </div>
+    <mat-paginator
+      [length]="selectedProps.length"
+      [pageIndex]="pageLink.page"
+      [pageSize]="pageLink.pageSize"
+      hidePageSize
+      showFirstLastButtons
+      (page)="onPageChange($event.pageIndex)"
+    ></mat-paginator>
+  </div>
+</div>

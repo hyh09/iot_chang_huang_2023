@@ -1,0 +1,57 @@
+
+<mat-form-field>
+  <mat-label>{{ 'order.order-no' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sOrderNo" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.sOrderNo"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('sOrderNo')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'order.color' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sColorName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.sColorName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('sColorName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'order.customer-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sCustomerName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.sCustomerName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('sCustomerName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>{{ 'order.product-name' | translate }}</mat-label>
+  <input type="text" matInput [(ngModel)]="entitiesTableConfig.componentsData.sMaterialName" (keyup.enter)="entitiesTableConfig.table.resetSortAndFilter(true)" />
+  <button
+    *ngIf="entitiesTableConfig.componentsData.sMaterialName"
+    matSuffix mat-icon-button aria-label="Clear"
+    (click)="onClear('sMaterialName')"
+  >
+    <mat-icon class="material-icons">close</mat-icon>
+  </button>
+</mat-form-field>
+<nz-range-picker
+  [nzShowTime]="{ nzFormat: 'HH:mm' }" nzFormat="yyyy-MM-dd HH:mm" nzSize="large"
+  [(ngModel)]="entitiesTableConfig.componentsData.dateRange" [nzAllowClear]="true"
+></nz-range-picker>
+<div class="action-btns" style="margin-left: 5px;">
+  <button mat-flat-button color="primary" (click)="entitiesTableConfig.table.resetSortAndFilter(true)">
+    {{ 'action.search' | translate }}
+  </button>
+  <button mat-flat-button color="primary" [disabled]="isLoading$ | async" (click)="entitiesTableConfig.componentsData.exportTableData()">
+    {{ 'action.export' | translate }}
+  </button>
+</div>

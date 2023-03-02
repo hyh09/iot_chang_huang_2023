@@ -1,0 +1,143 @@
+/**
+ * Copyright © 2016-2021 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@import '../../../../../scss/constants';
+
+:host {
+  width: 100%;
+  height: 100%;
+  .tb-entity-table {
+    .tb-entity-left-content {
+      background-color: #fff;
+      border-radius: 4px;
+    }
+
+    .tb-entity-table-content {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      box-shadow: 0px 0px 22px 0px rgba(0,0,0,0.04);
+      border-radius: 4px;
+      overflow: hidden;
+      .mat-toolbar-tools{
+        min-height: auto;
+      }
+
+      .title-container{
+        overflow: hidden;
+      }
+
+      .tb-entity-table-title {
+        padding-right: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .entity-filter-header {
+        padding: 0 19px;
+        ::ng-deep {
+          .mat-form-field {
+            width: 200px;
+            padding: 0 5px;
+            font-size: inherit !important;
+            &:last-of-type {
+              margin-right: 6px;
+            }
+            .mat-form-field-wrapper {
+              padding-bottom: 1.5em;
+              .mat-form-field-underline {
+                bottom: 1.25em !important;
+              }
+            }
+            &.mat-form-field-type-mat-date-range-input {
+              width: 240px;
+              .mat-date-range-input-container {
+                .mat-date-range-input-start-wrapper,
+                .mat-date-range-input-end-wrapper {
+                  width: calc((100% - 18px) / 2);
+                  text-align: center;
+                }
+              }
+            }
+            .mat-select-trigger {
+              height: 15px;
+            }
+          }
+          .action-btns {
+            display: inline-block;
+            padding: 0 5px;
+            button {
+              min-width: 84px;
+              & + button {
+                margin-left: 10px;
+              }
+            }
+          }
+          .data-overview {
+            padding: 14px 24px;
+            background: rgba(227,227,227,0.2);
+            margin: 20px -19px 0;
+            display: flex;
+            .overview-item {
+              line-height: 25px;
+              font-weight: 500;
+              color: rgba(0,0,0,0.87);
+              font-size: 18px;
+              + .overview-item {
+                margin-left: 90px;
+              }
+            }
+          }
+        }
+      }
+
+      .table-container {
+        overflow: auto;
+        &.has-detail {
+          .mat-row {
+            cursor: pointer;
+          }
+        }
+      }
+
+      .tb-entity-table-info{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      ::ng-deep .mat-paginator-container {
+        padding: 0 12px;
+      }
+    }
+  }
+
+  @media #{$mat-xs} {
+    .mat-toolbar {
+      height: auto;
+      min-height: 100px;
+
+      .tb-entity-table-title{
+        padding-bottom: 5px;
+        width: 100%;
+      }
+    }
+  }
+}
+
+:host ::ng-deep .mat-sort-header-sorted .mat-sort-header-arrow {
+  opacity: 1 !important;
+}

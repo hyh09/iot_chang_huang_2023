@@ -1,0 +1,66 @@
+.top10,
+.potency-filter {
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 400;
+  .header {
+    margin-bottom: 16px;
+    .mat-tab-nav-bar {
+      margin: 0 -19px 17px;
+      .mat-tab-link {
+        border-bottom: none;
+        font-size: 16px;
+        padding: 0 22px;
+        min-width: 0;
+        &.mat-tab-label-active {
+          color: rgba(0, 0, 0, 0.87);
+          opacity: 0.8;
+        }
+      }
+    }
+    .title {
+      font-size: 15px;
+      line-height: 21px;
+    }
+    .ant-radio-button-wrapper {
+      border-top: none;
+      border-bottom: none;
+      height: 18px;
+      line-height: 17px;
+      font-size: 15px;
+      border-color: #ccc !important;
+      &:first-child {
+        border-left: none;;
+      }
+      &:last-of-type {
+        border-right: none;
+      }
+    }
+  }
+  .action-btns {
+    margin-left: 5px;
+    // position: relative;
+    // top: -1px;
+  }
+  .bar-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -6px -20px 10px;
+    .bar-item {
+      width: 50%;
+      padding: 6px 20px;
+      .device-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+        line-height: 20px;
+      }
+      .value {
+        width: 48px;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 17px;
+      }
+    }
+  }
+}

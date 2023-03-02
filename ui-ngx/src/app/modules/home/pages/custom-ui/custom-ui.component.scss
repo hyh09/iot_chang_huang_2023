@@ -1,0 +1,16 @@
+@media screen and (min-width: 1280px){
+  .mat-card.settings-card {
+    width: 60%;
+  }
+}
+.mat-card.settings-card {
+  margin: .5rem;
+}
+.mat-headline{
+  font: 400 1.5rem/2rem Roboto,Helvetica Neue,sans-serif;
+  letter-spacing: normal;
+  margin: 0 0 1rem;
+}
+.mat-card-content{
+  padding-top: 1rem;
+}
