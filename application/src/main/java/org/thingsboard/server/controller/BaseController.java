@@ -1294,6 +1294,8 @@ public abstract class BaseController {
      * @return 是否是工厂用户
      */
     public boolean isFactoryUser() throws ThingsboardException {
-        return getCurrentUser().getUserLevel() != UserLeveEnums.TENANT_ADMIN.getCode();
+//        return getCurrentUser().getUserLevel() != UserLeveEnums.TENANT_ADMIN.getCode();  //这样可以吗？？
+        UUID factoryId = getCurrentUser().getFactoryId();
+        return factoryId != null ? true : false;
     }
 }

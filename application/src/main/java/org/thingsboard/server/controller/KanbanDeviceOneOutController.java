@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.vo.enums.key.KeyNameEnums;
 import org.thingsboard.server.dao.attribute.AttributeCullingSvc;
 import org.thingsboard.server.dao.kanban.service.svc.KanbanDeviceOneOutSvc;
 import org.thingsboard.server.dao.kanban.vo.KanbanDeviceVo;
@@ -52,8 +53,8 @@ public class KanbanDeviceOneOutController extends BaseController {
         if (kanbanDeviceVo != null && CollectionUtils.isNotEmpty(kanbanDeviceVo.getComponentData())) {
             List<ComponentDataDTO> componentDataDTOList = kanbanDeviceVo.getComponentData();
             List<ComponentDataDTO> dataDTOList = attributeCullingSvc.componentData(componentDataDTOList, getTenantId(), deviceId, isFactoryUser());
-            exchangeValue(dataDTOList);
-            kanbanDeviceVo.setComponentData(dataDTOList);
+            List<ComponentDataDTO> dataDTOList1 = exchangeValue(dataDTOList);
+            kanbanDeviceVo.setComponentData(dataDTOList1);
 
         }
         return kanbanDeviceVo;
@@ -71,7 +72,10 @@ public class KanbanDeviceOneOutController extends BaseController {
                 String tableName = m2.getTableName();
                 if (StringUtils.isNotEmpty(tableName)) {
                     m2.setKey(tableName);
+                } else {
+                    m2.setKey(KeyNameEnums.translateCode(m2.getKey()));
                 }
+
             });
             m1.setData(dataDTOList1);
             resultSet.add(m1);
