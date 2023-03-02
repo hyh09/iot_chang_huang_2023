@@ -38,7 +38,7 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         if (CollectionUtils.isEmpty(resultList)) {
             return resultList;
         }
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId, isFactoryUser);
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return resultList;
         }
@@ -69,7 +69,7 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
      */
     @Override
     public Map toMakeToMap(Map<String, List<DictDeviceDataVo>> map, TenantId tenantId, UUID deviceId, boolean isFactoryUser) {
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId, isFactoryUser);
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return map;
         }
@@ -119,7 +119,8 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
         if (CollectionUtils.isEmpty(componentDataDTOList)) {
             return componentDataDTOList;
         }
-        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId, isFactoryUser);
+
+        List<DictDevicePropertySwitchVO> devicePropertySwitchVOList = getSwitchList(tenantId, deviceId);
         if (CollectionUtils.isEmpty(devicePropertySwitchVOList)) {
             return componentDataDTOList;
         }
@@ -135,8 +136,17 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
                 dataDTOList.forEach(m1 -> {
                     m1.setFlg(isAddListStr3(m1, map1));
                 });
-                v1.setData(dataDTOList);
-                componentDataDTOListResults.add(v1);
+                if (isFactoryUser) {
+                    List<DataDTO> dataDTOList1 = dataDTOList.stream().filter(d1 -> d1.getFlg()).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(dataDTOList1)) {
+                        v1.setData(dataDTOList1);
+                        componentDataDTOListResults.add(v1);
+                    }
+                } else {
+
+                    v1.setData(dataDTOList);
+                    componentDataDTOListResults.add(v1);
+                }
             }
 
         }
@@ -150,11 +160,8 @@ public class AttributeCullingImpl implements AttributeCullingSvc {
      * @param deviceId
      * @return
      */
-    private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId, boolean isFactoryUser) {
+    private List<DictDevicePropertySwitchVO> getSwitchList(TenantId tenantId, UUID deviceId) {
         List<DictDevicePropertySwitchVO> list = new ArrayList<>();
-        if (!isFactoryUser) {
-            return list;
-        }
         try {
             list = dictDeviceService.listDictDeviceSwitches(tenantId, deviceId.toString());
         } catch (ThingsboardException e1) {
