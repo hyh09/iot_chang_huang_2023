@@ -1,5 +1,6 @@
 package org.thingsboard.server.dao.hsms.entity.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 /**
  * 产量趋势VO
@@ -25,11 +25,13 @@ public class MesBoardCapacityTrendItemVO {
      * y轴数据,产量
      */
     @ApiModelProperty(value = "y轴数据,产量")
+    @JsonProperty("yValue")
     private BigDecimal yValue;
 
     /**
      * x轴数据
      */
     @ApiModelProperty(value = "x轴数据")
+    @JsonProperty("xValue")
     private String xValue;
 }

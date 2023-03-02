@@ -73,8 +73,7 @@ public class MesServiceImpl implements MesService, CommonService {
             "FROM ( " +
             "SELECT sDate=CONVERT(NVARCHAR(10),A1.tTrackTime,120),A1.nTrackQty " +
             "FROM dbo.ppTrackOutput A1(NOLOCK) " +
-            "JOIN dbo.emEquipment B1(NOLOCK) ON B1.uGUID=A1.uemEquipmentGUID " +
-            "JOIN dbo.pbWorkCentre C1(NOLOCK) ON C1.uGUID = ? " +
+            "JOIN dbo.emEquipment B1(NOLOCK) ON B1.uGUID=A1.uemEquipmentGUID AND B1.upbWorkCentreGUID= ? " +
             "WHERE A1.tTrackTime>=DATEADD(DAY,-7,CONVERT(NVARCHAR(10),GETDATE(),120)) " +
             ") A " +
             "GROUP BY A.sDate";
