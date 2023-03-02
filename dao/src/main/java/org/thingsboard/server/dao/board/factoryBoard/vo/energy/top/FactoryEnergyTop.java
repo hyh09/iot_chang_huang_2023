@@ -19,12 +19,14 @@ public class FactoryEnergyTop {
 
     private UUID deviceId;
 
-    private  String deviceName;
+    private String deviceName;
 
     private String water;
 
     private String electricity;
 
     private String gas;
+
+    private String type;
 
 }
