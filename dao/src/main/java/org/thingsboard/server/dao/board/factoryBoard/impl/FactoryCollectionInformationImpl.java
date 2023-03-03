@@ -96,7 +96,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
             uuids.addAll(deviceEntityList.stream().map(DeviceEntity::getUuid).collect(Collectors.toList()));
         }
         List<TrendChartRateDto> trendChartRateDtoList = (dateEnums == ChartDateEnums.YEARS) ? startTimeOfThisYear(uuids) : startTimeOfThisMonth(uuids);
-        return getRunRate(trendChartRateDtoList, dateEnums);
+        return getRunRate(trendChartRateDtoList, dateEnums, deviceEntityList.size());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
     }
 
 
-    private List<ChartDataVo> getRunRate(List<TrendChartRateDto> trendChartRateDtoList, ChartDateEnums dateEnums) {
+    private List<ChartDataVo> getRunRate(List<TrendChartRateDto> trendChartRateDtoList, ChartDateEnums dateEnums, Integer deviceCount) {
         ChartDateEnumsToLocalDateVo dateVoDate = dateEnums.currentConvert();
         List<LocalDate> localDates = DateLocaDateAndTimeUtil.INSTANCE.getMiddleDate(dateEnums, dateVoDate.getBeginDate(), dateVoDate.getEndDate());
 //        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
@@ -161,7 +161,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
                     String timeStr = dateEnums.forMartTime(t1);
                     v1.setTime(timeStr);
                     String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1, dateEnums));
-                    v1.setValue(runRateCalculation(value, t1, dateEnums, trendChartRateDtoList));
+                    v1.setValue(runRateCalculation(value, t1, dateEnums, deviceCount));
                     return v1;
                 }).collect(Collectors.toList());
         return list;
@@ -177,15 +177,14 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
      * @param dateEnums
      * @return
      */
-    private String runRateCalculation(String value, LocalDate localDate, ChartDateEnums dateEnums, List<TrendChartRateDto> trendChartRateDtoList) {
+    private String runRateCalculation(String value, LocalDate localDate, ChartDateEnums dateEnums, Integer deviceSize) {
         if (StringUtils.isEmpty(value)) {
             return "0";
         }
-        Integer deviceSize = trendChartRateDtoList.size();
 
         String timeDifference = timeDifference(localDate, dateEnums);
-        /** 开机的时长 ÷ 可用时长 ÷ 设备数 */
-        String divisorResult = BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
+        BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
+        String divisorResult = decimalUtil.divide(value, timeDifference, deviceSize).toPlainString();
         String percentageOfNumber = BigDecimalUtil.INSTANCE.multiply(divisorResult, "100").toPlainString();
         return percentageOfNumber;
 
