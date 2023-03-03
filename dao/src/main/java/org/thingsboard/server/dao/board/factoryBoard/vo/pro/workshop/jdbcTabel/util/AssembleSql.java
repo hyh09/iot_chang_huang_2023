@@ -79,8 +79,8 @@ public class AssembleSql {
 
     private static String getSelectByDataBaseType(AssembleSql.AssembleBuildSql assembleBuildSql) {
         String sqlSelect = " SELECT ";
-        if (assembleBuildSql.dataBaseType == DataBaseTypeEnums.SQLSERVER) {
-            String orderBy = assembleBuildSql.orderBy;
+        String orderBy = assembleBuildSql.orderBy;
+        if (assembleBuildSql.dataBaseType == DataBaseTypeEnums.SQLSERVER && StringUtils.isNotEmpty(orderBy)) {
             return " select row_number() over(order by " + orderBy + " asc) as rownumber ,";
         }
         return sqlSelect;

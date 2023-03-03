@@ -110,8 +110,8 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         List<TrendChartRateDto> todayDto = startTimeOfThisDay(uuids, LocalDate.now());
         List<TrendChartRateDto> yesterdayDto = startTimeOfThisDay(uuids, yesterday);
         RatePieChartVo vo = new RatePieChartVo();
-        vo.setCurrentValue(runRateOne(todayDto));
-        vo.setYesterdayValue(runRateOne(yesterdayDto));
+        vo.setCurrentValue(runRateOne(todayDto, uuids.size()));
+        vo.setYesterdayValue(runRateOne(yesterdayDto, uuids.size()));
         return vo;
     }
 
@@ -150,7 +150,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
 //        Map<String, String> map = trendChartRateDtoList.stream().collect(Collectors.toMap(TrendChartRateDto::getdateStr, TrendChartRateDto::getBootTime));
         Map<String, String> map = new HashMap<>();
         trendChartRateDtoList.stream().forEach(trendChartRateDto -> {
-            map.put(DateLocaDateAndTimeUtil.formatDate(trendChartRateDto.getBdate(),dateEnums),trendChartRateDto.getBootTime());
+            map.put(DateLocaDateAndTimeUtil.formatDate(trendChartRateDto.getBdate(), dateEnums), trendChartRateDto.getBootTime());
 
         });
 
@@ -159,7 +159,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
                     ChartDataVo v1 = new ChartDataVo();
                     String timeStr = dateEnums.forMartTime(t1);
                     v1.setTime(timeStr);
-                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1,dateEnums));
+                    String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1, dateEnums));
                     v1.setValue(runRateCalculation(value, dateVoDate, trendChartRateDtoList));
                     return v1;
                 }).collect(Collectors.toList());
@@ -185,13 +185,14 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         Long startTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(startTime, LocalTime.parse("00:00:00")));
         Long endTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(endTime, LocalTime.parse("00:00:00")));
         BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong, startTimeOfLong);
-        return BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
-
+        String divisorResult = BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
+        String percentageOfNumber = BigDecimalUtil.INSTANCE.multiply(divisorResult, "100").toPlainString();
+        return percentageOfNumber;
 
     }
 
 
-    private String runRateOne(List<TrendChartRateDto> trendChartRateDtoList) {
+    private String runRateOne(List<TrendChartRateDto> trendChartRateDtoList, Integer deviceCount) {
         if (CollectionUtils.isEmpty(trendChartRateDtoList)) {
             return "0";
         }
@@ -202,8 +203,9 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         }
         BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
-        String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr, 100).toPlainString();
-        return resultStr ;
+        String valueStr02= decimalUtil.divide(valueStr, deviceCount).toPlainString();
+        String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr02, 100).toPlainString();
+        return resultStr;
 
     }
 
