@@ -277,7 +277,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         }
         BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
-        String valueStr02 = decimalUtil.divide(valueStr, deviceCount).toPlainString();
+        String valueStr02= decimalUtil.divide(valueStr, deviceCount).toPlainString();
         String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr02, 100).toPlainString();
         return resultStr;
 
