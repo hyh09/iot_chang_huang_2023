@@ -254,6 +254,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
 
     }
 
+
     /**
      * ###2023-02-23 修改去掉 % ； 前端要求的规范
      * 饼状图的接口---计算当天 或者 昨日的 天维度的单条的开机率的 百分之比
