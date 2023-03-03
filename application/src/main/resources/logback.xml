@@ -42,10 +42,10 @@
     <!--    <logger name="org.thingsboard.server.service.queue.TbMsgPackProcessingContext" level="DEBUG" /> -->
 
     <logger name="com.microsoft.azure.servicebus.primitives.CoreMessageReceiver" level="OFF"/>
-    <!--    <logger name="org.thingsboard.server.service.state.*" level="OFF"/>-->
-    <!--    <logger name="org.apache.kafka.*" level="OFF"/>-->
-    <!--    <logger name="springfox.documentation.spring.web.readers.operation.*" level="OFF"/>-->
-    <!--    <logger name="org.apache.kafka.clients.consumer.internals.AbstractCoordinator" level="OFF"/>-->
+    <logger name="org.thingsboard.server.service.state.*" level="OFF"/>
+    <logger name="org.apache.kafka.*" level="OFF"/>
+    <logger name="springfox.documentation.spring.web.readers.operation.*" level="OFF"/>
+    <logger name="org.apache.kafka.clients.consumer.internals.AbstractCoordinator" level="OFF"/>
 
 
     <root level="INFO">
