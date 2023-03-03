@@ -185,8 +185,9 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         Long startTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(startTime, LocalTime.parse("00:00:00")));
         Long endTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(endTime, LocalTime.parse("00:00:00")));
         BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong, startTimeOfLong);
-        return BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
-
+        String divisorResult = BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
+        String percentageOfNumber = BigDecimalUtil.INSTANCE.multiply(divisorResult, "100").toPlainString();
+        return percentageOfNumber;
 
     }
 
