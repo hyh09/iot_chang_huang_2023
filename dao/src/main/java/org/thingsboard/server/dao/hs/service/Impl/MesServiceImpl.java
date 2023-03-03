@@ -5,7 +5,10 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
@@ -47,6 +50,10 @@ public class MesServiceImpl implements MesService, CommonService {
 
     @Resource(name = "sqlServerTemplate")
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+//    @Qualifier("JdbcTemplate")
+    private JdbcTemplate jdbcTemplate_pg;
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -224,13 +231,21 @@ public class MesServiceImpl implements MesService, CommonService {
         if (devices.isEmpty())
             return Lists.newArrayList();
 
-        String sqlString = "SELECT t.entity_id as id, t.total_time as totalTime, t.start_time as startTime FROM trep_day_sta_detail t WHERE t.tenant_id = :tenantId AND t.entity_id in :deviceIds AND t.bdate = date(:startTime) ";
+        String sqlString = "SELECT t.entity_id as id, t.total_time as totalTime, t.start_time as startTime FROM trep_day_sta_detail t WHERE t.tenant_id = :tenantId AND t.entity_id in (:deviceIds) AND t.bdate = date(:startTime) ";
+//
+//        Query query = entityManager.createNativeQuery(sqlString)
+//                .setParameter("tenantId", tenantId.getId())
+//                .setParameter("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()))
+//                .setParameter("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+//
+//     List<DeviceHutBO> resultList=   query.getResultList();
 
-        List<DeviceHutBO> resultList = (List<DeviceHutBO>) this.entityManager.createNativeQuery(sqlString, DeviceHutBO.class)
-                .setParameter("tenantId", tenantId.getId())
-                .setParameter("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()))
-                .setParameter("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .getResultList();
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate_pg);
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("tenantId", tenantId.getId());
+        parameters.addValue("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()));
+        parameters.addValue("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        List<DeviceHutBO> resultList = givenParamJdbcTemp.query(sqlString, parameters, new BeanPropertyRowMapper<>(DeviceHutBO.class));
 
         if (!resultList.isEmpty() && resultList.get(0) != null)
             resultList = Lists.newArrayList();
