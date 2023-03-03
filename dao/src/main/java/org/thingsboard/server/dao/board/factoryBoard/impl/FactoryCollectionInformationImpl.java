@@ -296,7 +296,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         LocalDateTime currentTime = LocalDateTime.of(localDate, LocalTime.parse("00:00:00"));
         LocalDateTime firstDayOfMonth = currentTime.with(TemporalAdjusters.firstDayOfMonth());
         LocalDateTime lastDayOfMonth = currentTime.with(TemporalAdjusters.lastDayOfMonth());
-        Duration duration = Duration.between(lastDayOfMonth, firstDayOfMonth);
+        Duration duration = Duration.between(firstDayOfMonth, lastDayOfMonth);
         Long millisTime = duration.toMillis();
         return millisTime.toString();
 
