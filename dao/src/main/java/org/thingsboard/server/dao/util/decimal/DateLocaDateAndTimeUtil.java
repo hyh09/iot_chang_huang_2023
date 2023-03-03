@@ -23,10 +23,23 @@ public class DateLocaDateAndTimeUtil {
     public final static DateLocaDateAndTimeUtil INSTANCE = new DateLocaDateAndTimeUtil();
 
 
-    public static String formatDate(LocalDate localDate,ChartDateEnums dateEnums) {
+    public static String formatDate(LocalDate localDate, ChartDateEnums dateEnums) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern(dateEnums.getPattern());
         String dateStr = localDate.format(fmt);
         return dateStr;
+    }
+
+    /**
+     * 格式化当前的时间
+     *
+     * @param localDate
+     * @param pattern
+     * @return
+     */
+    public String formatDate(LocalDate localDate, String pattern) {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
+        return localDate.format(fmt);
+
     }
 
     /**
