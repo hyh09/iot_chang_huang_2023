@@ -81,6 +81,8 @@ public class FactoryCollectionInformationController extends BaseController {
      * 日期:2023-03-02
      * 接口描述:  运行率 select *  from  trep_day_sta_detail
      * #############################################
+     * 问题：年的返回的是负数为甚？
+     * 修复时间: 2023-03-03  Duration between(Temporal startInclusive, Temporal endExclusive); 自己传反了；
      *
      * @param factoryId
      * @param dimension
@@ -120,7 +122,7 @@ public class FactoryCollectionInformationController extends BaseController {
     @GetMapping("/queryPieChart")
     @ResponseBody
     public RatePieChartVo queryPieChart(@RequestParam(name = "factoryId") String factoryId
-                                        ) throws ThingsboardException {
+    ) throws ThingsboardException {
         try {
             TenantId tenantId = getTenantId();
             FactoryDeviceQuery factoryDeviceQuery = new FactoryDeviceQuery();
