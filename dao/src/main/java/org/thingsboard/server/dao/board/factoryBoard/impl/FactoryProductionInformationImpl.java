@@ -112,6 +112,12 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
         PageLink pageLink = new PageLink(10);
         PageData<CurrentOrdersInProductionDto> pageData = jdbcByAssembleSqlUtil.pageQuery(new CurrentOrdersInProductionDto(), DaoUtil.toPageable(pageLink));
         List<CurrentOrdersInProductionDto> list = pageData.getData();
+        if (CollectionUtils.isNotEmpty(list)) {
+            list.stream().forEach(m1 -> {
+                String value = m1.getNumberOfOrders();
+                m1.setNumberOfOrders(BigDecimalUtil.INSTANCE.formatByObject(value).toPlainString());
+            });
+        }
         return list;
     }
 
