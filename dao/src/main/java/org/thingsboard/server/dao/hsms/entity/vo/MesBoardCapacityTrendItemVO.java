@@ -31,7 +31,7 @@ public class MesBoardCapacityTrendItemVO {
     /**
      * x轴数据
      */
-    @ApiModelProperty(value = "x轴数据")
+    @ApiModelProperty(value = "日期")
     @JsonProperty("xValue")
     private String xValue;
 }
