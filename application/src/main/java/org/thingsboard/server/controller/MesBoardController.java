@@ -90,7 +90,12 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/device/operation/rate/top")
     public List<MesBoardDeviceOperationRateVO> getDeviceOperationRateTop(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
-        return this.mesService.getDeviceOperationRateTop(getTenantId(), workshopId);
+        try {
+            return this.mesService.getDeviceOperationRateTop(getTenantId(), workshopId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
