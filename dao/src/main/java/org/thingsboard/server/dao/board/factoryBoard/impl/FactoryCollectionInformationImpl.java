@@ -229,7 +229,7 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
     }
 
     /**
-     * 计算规则：   开机时长(毫秒数） / 可用时间 月 (开始-结束）  /设备数
+     * 计算规则：   开机时长(毫秒数） / 可用时间 月 (结束-开始）  /设备数
      *
      * @param value
      * @param dateVoDate
@@ -243,10 +243,17 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         Integer deviceSize = trendChartRateDtoList.size();
         LocalDate startTime = dateVoDate.getBeginDate();
         LocalDate endTime = dateVoDate.getEndDate();
+        /** 将开始时间 转换 Long； 由于是从当前的时间中获取的，需要将 时分秒设置00 */
         Long startTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(startTime, LocalTime.parse("00:00:00")));
+        /** 将endTime 结束时间 转换 Long； 由于是从当前的时间中获取的，需要将 时分秒设置00 */
         Long endTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(endTime, LocalTime.parse("00:00:00")));
+        /** 可用时间： 结束时间 - 开始时间*/
         BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong, startTimeOfLong);
-        return BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
+        /** 开机的时长 ÷ 可用时长 ÷ 设备数 */
+        String divisorResult = BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
+        /** 换算百分比 乘以 100 */
+        String percentageOfNumber = BigDecimalUtil.INSTANCE.multiply(divisorResult, "100").toPlainString();
+        return percentageOfNumber;
 
 
     }
