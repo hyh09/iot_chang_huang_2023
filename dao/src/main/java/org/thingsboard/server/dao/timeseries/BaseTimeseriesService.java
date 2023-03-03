@@ -136,6 +136,13 @@ public class BaseTimeseriesService implements TimeseriesService {
         return Futures.allAsList(futures);
     }
 
+    /**
+     * 查询最新遥测数据的
+     *
+     * @param tenantId
+     * @param entityId
+     * @return
+     */
     @Override
     public ListenableFuture<List<TsKvEntry>> findAllLatest(TenantId tenantId, EntityId entityId) {
         validate(entityId);
