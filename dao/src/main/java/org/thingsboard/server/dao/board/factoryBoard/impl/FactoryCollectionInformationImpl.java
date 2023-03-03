@@ -23,17 +23,18 @@ import org.thingsboard.server.dao.hs.entity.vo.DeviceOnlineStatusResult;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.hs.service.DeviceMonitorService;
 import org.thingsboard.server.dao.model.sql.DeviceEntity;
-import org.thingsboard.server.dao.util.CommonUtils;
 import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 import org.thingsboard.server.dao.util.redis.StatisticsCountRedisSvc;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -160,34 +161,34 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
                     String timeStr = dateEnums.forMartTime(t1);
                     v1.setTime(timeStr);
                     String value = map.get(DateLocaDateAndTimeUtil.formatDate(t1, dateEnums));
-                    v1.setValue(runRateCalculation(value, dateVoDate, trendChartRateDtoList));
+                    v1.setValue(runRateCalculation(value, t1, dateEnums, trendChartRateDtoList));
                     return v1;
                 }).collect(Collectors.toList());
         return list;
 
     }
 
+
     /**
      * 计算规则：   开机时长(毫秒数） / 可用时间 月 (开始-结束）  /设备数
      *
      * @param value
-     * @param dateVoDate
-     * @param trendChartRateDtoList
+     * @param localDate
+     * @param dateEnums
      * @return
      */
-    private String runRateCalculation(String value, ChartDateEnumsToLocalDateVo dateVoDate, List<TrendChartRateDto> trendChartRateDtoList) {
+    private String runRateCalculation(String value, LocalDate localDate, ChartDateEnums dateEnums, List<TrendChartRateDto> trendChartRateDtoList) {
         if (StringUtils.isEmpty(value)) {
             return "0";
         }
         Integer deviceSize = trendChartRateDtoList.size();
-        LocalDate startTime = dateVoDate.getBeginDate();
-        LocalDate endTime = dateVoDate.getEndDate();
-        Long startTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(startTime, LocalTime.parse("00:00:00")));
-        Long endTimeOfLong = CommonUtils.getTimestampOfDateTime(LocalDateTime.of(endTime, LocalTime.parse("00:00:00")));
-        BigDecimal timeDifference = BigDecimalUtil.INSTANCE.subtract(endTimeOfLong, startTimeOfLong);
+
+        String timeDifference = timeDifference(localDate, dateEnums);
+        /** 开机的时长 ÷ 可用时长 ÷ 设备数 */
         String divisorResult = BigDecimalUtil.INSTANCE.divide(value, timeDifference, deviceSize).toPlainString();
         String percentageOfNumber = BigDecimalUtil.INSTANCE.multiply(divisorResult, "100").toPlainString();
         return percentageOfNumber;
+
 
     }
 
@@ -203,10 +204,33 @@ public class FactoryCollectionInformationImpl extends TrendChartOfOperatingRateJ
         }
         BigDecimalUtil decimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
         String valueStr = decimalUtil.divide(value, HSConstants.DAY_TIME).toPlainString();
-        String valueStr02= decimalUtil.divide(valueStr, deviceCount).toPlainString();
+        String valueStr02 = decimalUtil.divide(valueStr, deviceCount).toPlainString();
         String resultStr = BigDecimalUtil.INSTANCE.multiply(valueStr02, 100).toPlainString();
         return resultStr;
 
     }
+
+    /**
+     * 可用时间 月 (开始-结束）
+     * 1.如果是月， 除以  HSConstants.DAY_TIME  24小时的毫秒数
+     * 2.如果是年， 除以这个月的结束时间 和这个月的开始时间的毫秒数
+     *
+     * @param localDate
+     * @param dateEnums 月 or 年
+     * @return
+     */
+    private String timeDifference(LocalDate localDate, ChartDateEnums dateEnums) {
+        if (dateEnums == ChartDateEnums.MONTHS) {
+            return HSConstants.DAY_TIME.toString();
+        }
+        LocalDateTime currentTime = LocalDateTime.of(localDate, LocalTime.parse("00:00:00"));
+        LocalDateTime firstDayOfMonth = currentTime.with(TemporalAdjusters.firstDayOfMonth());
+        LocalDateTime lastDayOfMonth = currentTime.with(TemporalAdjusters.lastDayOfMonth());
+        Duration duration = Duration.between(lastDayOfMonth, firstDayOfMonth);
+        Long millisTime = duration.toMillis();
+        return millisTime.toString();
+
+    }
+
 
 }
