@@ -160,7 +160,8 @@ public class FactoryProductionInformationImpl extends SqlServerBascFactoryImpl i
             OrderFulfillmentVo vo = new OrderFulfillmentVo();
             String timeStr = ChartDateEnums.MONTHS.forMartTime(t1);
             vo.setTime(timeStr);
-            Optional<OrderFulfillmentVo> optional = voList.stream().filter(vt -> vt.getTime().equals(timeStr)).findFirst();
+            String time02dd = DateLocaDateAndTimeUtil.INSTANCE.formatDate(t1, "yyyy-MM-dd");
+            Optional<OrderFulfillmentVo> optional = voList.stream().filter(vt -> vt.getTime().equals(time02dd)).findFirst();
             vo.setValue(optional.isPresent() ? optional.get().getValue() : "0");
             return vo;
         }).collect(Collectors.toList());
