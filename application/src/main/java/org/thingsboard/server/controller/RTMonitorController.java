@@ -268,6 +268,13 @@ public class RTMonitorController extends BaseController {
 
     /**
      * 查询设备详情
+     * ###2023-03-06 提出的 长亮提出 ，返回的 “产能” 改为产量
+     * ###接口返回的层次： resultList-->name
+     * 解决方案： select *  from hs_dict_device_group  where  dict_device_id='41426f11-f984-4dae-8e20-9fbd23ad60ba';
+     * create table table_2023_03_06 as (
+     * select *  from  hs_dict_device_group  where  name='产能'
+     * )
+     * update hs_dict_device_group  set name='产量' where name='产能';
      *
      * @param id 设备id
      */
