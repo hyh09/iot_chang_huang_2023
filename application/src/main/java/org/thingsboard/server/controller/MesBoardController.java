@@ -96,12 +96,7 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/device/operation/rate/top")
     public List<MesBoardDeviceOperationRateVO> getDeviceOperationRateTop(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
-        try {
-            return this.mesService.getDeviceOperationRateTop(getTenantId(), workshopId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return this.mesService.getDeviceOperationRateTop(getTenantId(), workshopId);
     }
 
     /**
@@ -113,27 +108,22 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/capacity/trend")
     public List<MesBoardCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
-        try {
             List<MesBoardCapacityTrendItemVO> mesBoardCapacityTrendItemVOS = this.mesService.getCapacityTrend(getTenantId(), workshopId);
             if (CollectionUtils.isEmpty(mesBoardCapacityTrendItemVOS)) {
                 return mesBoardCapacityTrendItemVOS;
             }
-            /**2023-03-06 修改x轴的时间返回，将返回的时间改为 mm-dd的格式，前端要求 */
-            mesBoardCapacityTrendItemVOS.stream().forEach(m1 -> {
+        /**2023-03-06 修改x轴的时间返回，将返回的时间改为 mm-dd的格式，前端要求 */
+        mesBoardCapacityTrendItemVOS.stream().forEach(m1 -> {
                 String time = m1.getXValue();
                 if (StringUtils.isNotEmpty(time)) {
                     LocalDate date = LocalDate.parse(time, DateTimeFormatter.ofPattern(PATTERN));
                     String time02dd = DateLocaDateAndTimeUtil.INSTANCE.formatDate(date, "MM-dd");
                     m1.setXValue(time02dd);
                 }
-
-
             });
             return mesBoardCapacityTrendItemVOS;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+
+
     }
 
     /**
