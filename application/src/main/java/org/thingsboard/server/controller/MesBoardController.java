@@ -102,6 +102,8 @@ public class MesBoardController extends BaseController {
     /**
      * 产量趋势
      * ###2023-03-06 测试提出来： 返回的是1个点； 需要知道后端的时间维度；
+     * #解决方法: 内部是调用的mes的接口返回的是过去7天的数据；
+     * 后端对返回的数据进行补齐；
      */
     @ApiOperation(value = "产量趋势", notes = "产量趋势")
     @ApiImplicitParams({
