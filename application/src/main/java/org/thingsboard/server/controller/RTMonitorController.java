@@ -314,6 +314,17 @@ public class RTMonitorController extends BaseController {
 
     /**
      * 查询设备详情-遥测属性历史数据图表
+     * ############################
+     * 设备监控的--设备最新的遥测数据
+     * 2023-03-06提出: 长亮提出 有的地方返回的是总产能， 有的地方返回的是总产量
+     * 解决方式： update   hs_dict_device_group_property set title='总产量'  where title='总产能';
+     *
+     * @param deviceId
+     * @param tsPropertyName
+     * @return
+     * @throws ThingsboardException
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
     @ApiOperation(value = "查询设备详情-遥测属性历史数据图表", notes = "默认一天")
     @ApiImplicitParams({

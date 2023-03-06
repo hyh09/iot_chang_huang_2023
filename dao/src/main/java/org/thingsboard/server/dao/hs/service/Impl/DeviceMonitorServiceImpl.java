@@ -1054,7 +1054,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
      *
      * @param tenantId         租户Id
      * @param deviceId         设备Id
-     * @param tsPropertyName   遥测属性名称
+     * @param tsPropertyName   遥测属性名称 比如：water
      * @param todayStartTime   开始时间
      * @param todayCurrentTime 结束时间
      * @return 遥测属性历史数据图表
@@ -1064,6 +1064,7 @@ public class DeviceMonitorServiceImpl extends AbstractEntityService implements D
             todayStartTime, Long todayCurrentTime) throws ThingsboardException {
         var historyGraphVO = new HistoryGraphVO();
         historyGraphVO.setName(tsPropertyName);
+        /** 1.先查询出设备 ，由设备id去查询 */
         var device = Optional.ofNullable(this.deviceRepository.findByTenantIdAndId(tenantId.getId(), deviceId)).map(DaoUtil::getData).orElseThrow(() -> new ThingsboardException("设备不存在", ThingsboardErrorCode.GENERAL));
         var dictDeviceId = device.getDictDeviceId();
         if (device.getDictDeviceId() != null) {
