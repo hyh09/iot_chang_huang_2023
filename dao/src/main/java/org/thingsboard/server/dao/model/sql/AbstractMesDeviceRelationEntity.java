@@ -19,12 +19,15 @@ import java.util.UUID;
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class AbstractMesDeviceRelationEntity <T extends MesDeviceRelation> {
+public abstract class AbstractMesDeviceRelationEntity<T extends MesDeviceRelation> {
     @Id
     @Column(name = "device_id", columnDefinition = "uuid")
     @JpaOperatorsType(JpaQueryHelper.Operators.eq)
     protected UUID deviceId;
 
+    /**
+     * MES的设备id
+     */
     @Column(name = "mes_device_id", columnDefinition = "uuid")
     protected UUID mesDeviceId;
 
@@ -40,17 +43,19 @@ public abstract class AbstractMesDeviceRelationEntity <T extends MesDeviceRelati
     @Column(name = "tenant_id", columnDefinition = "uuid")
     private UUID tenantId;
 
-    public AbstractMesDeviceRelationEntity(){}
+    public AbstractMesDeviceRelationEntity() {
+    }
 
-    public AbstractMesDeviceRelationEntity(MesDeviceRelation mesDeviceRelation){
-        if(mesDeviceRelation != null){
-            BeanUtils.copyProperties(mesDeviceRelation,this);
+    public AbstractMesDeviceRelationEntity(MesDeviceRelation mesDeviceRelation) {
+        if (mesDeviceRelation != null) {
+            BeanUtils.copyProperties(mesDeviceRelation, this);
         }
 
     }
-    public MesDeviceRelation toMesDeviceRelation(){
+
+    public MesDeviceRelation toMesDeviceRelation() {
         MesDeviceRelation mesDeviceRelation = new MesDeviceRelation();
-        BeanUtils.copyProperties(this,mesDeviceRelation);
+        BeanUtils.copyProperties(this, mesDeviceRelation);
         return mesDeviceRelation;
     }
 

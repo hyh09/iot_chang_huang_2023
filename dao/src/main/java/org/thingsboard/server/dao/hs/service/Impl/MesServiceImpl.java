@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -67,6 +68,10 @@ public class MesServiceImpl implements MesService, CommonService {
             "JOIN dbo.emEquipment B(NOLOCK) ON B.upbWorkCentreGUID = A.uGUID " +
             "WHERE A.uGUID= ?";
 
+    /**
+     * emEquipment：设备列表
+     * pbWorkCentre：工作中心列表
+     */
     private static final String QUERY_MES_WORKSHOP = "SELECT B.uGUID,车间=B.sWorkCentreName " +
             "FROM dbo.emEquipment A(NOLOCK) " +
             "JOIN dbo.pbWorkCentre B(NOLOCK) ON B.uGUID = A.upbWorkCentreGUID " +
@@ -76,6 +81,9 @@ public class MesServiceImpl implements MesService, CommonService {
             "FROM dbo.emEquipment A(NOLOCK) " +
             "WHERE A.uGUID= ?";
 
+    /**
+     * 过去7日的数据
+     */
     private static final String QUERY_CAPACITY_TREND = "SELECT 日期=A.sDate,产量=SUM(A.nTrackQty) " +
             "FROM ( " +
             "SELECT sDate=CONVERT(NVARCHAR(10),A1.tTrackTime,120),A1.nTrackQty " +
@@ -512,15 +520,20 @@ public class MesServiceImpl implements MesService, CommonService {
      * @return Mes车间Id
      */
     public MesWorkshopDTO getMesWorkshopByProductionLineId(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
-        var devices = this.clientService.listSimpleDevicesByQuery(tenantId, new FactoryDeviceQuery().setWorkshopId(productionLineId.toString()));
-        if (devices.isEmpty())
+        /**1 先查询设备*/
+        List<Device> devices = this.clientService.listSimpleDevicesByQuery(tenantId, new FactoryDeviceQuery().setWorkshopId(productionLineId.toString()));
+        if (devices.isEmpty()) {
             return null;
-
-        var deviceIds = devices.stream().map(v -> v.getId().getId()).collect(Collectors.toList());
-        var mesDeviceIds = this.clientService.toMesDeviceIds(deviceIds);
-        if (mesDeviceIds.isEmpty())
+        }
+        List<UUID> deviceIds = devices.stream().map(v -> v.getId().getId()).collect(Collectors.toList());
+        /** 2.iot设备Id转换到MesId */
+        List<UUID> mesDeviceIds = this.clientService.toMesDeviceIds(deviceIds);
+        if (mesDeviceIds.isEmpty()) {
             throw new ThingsboardException("未查询到对应的mes设备Id", ThingsboardErrorCode.GENERAL);
+        }
+        /** 3.取 其中一个设备id */
         var mesDeviceId = mesDeviceIds.get(0);
+        /** 4.查询 设备id所在的 车间信息 */
         var mesWorkshopDTO = this.jdbcTemplate.queryForObject(QUERY_MES_WORKSHOP, new Object[]{mesDeviceId.toString()}, (rs, rowNum) ->
                 new MesWorkshopDTO(
                         rs.getString("uGUID"),
