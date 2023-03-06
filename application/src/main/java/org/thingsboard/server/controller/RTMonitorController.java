@@ -318,6 +318,9 @@ public class RTMonitorController extends BaseController {
      * 设备监控的--设备最新的遥测数据
      * 2023-03-06提出: 长亮提出 有的地方返回的是总产能， 有的地方返回的是总产量
      * 解决方式： update   hs_dict_device_group_property set title='总产量'  where title='总产能';
+     * -------------------------------------------------------------------------------------------
+     * 2023-03-06 提出的: 长亮提出: 产量 ，产能的分类 统一显示产量
+     * 解决方式:
      *
      * @param deviceId
      * @param tsPropertyName
