@@ -101,6 +101,7 @@ public class MesBoardController extends BaseController {
 
     /**
      * 产量趋势
+     * ###2023-03-06 测试提出来： 返回的是1个点； 需要知道后端的时间维度；
      */
     @ApiOperation(value = "产量趋势", notes = "产量趋势")
     @ApiImplicitParams({
@@ -108,20 +109,20 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/capacity/trend")
     public List<MesBoardCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
-            List<MesBoardCapacityTrendItemVO> mesBoardCapacityTrendItemVOS = this.mesService.getCapacityTrend(getTenantId(), workshopId);
-            if (CollectionUtils.isEmpty(mesBoardCapacityTrendItemVOS)) {
-                return mesBoardCapacityTrendItemVOS;
-            }
+        List<MesBoardCapacityTrendItemVO> mesBoardCapacityTrendItemVOS = this.mesService.getCapacityTrend(getTenantId(), workshopId);
+        if (CollectionUtils.isEmpty(mesBoardCapacityTrendItemVOS)) {
+            return mesBoardCapacityTrendItemVOS;
+        }
         /**2023-03-06 修改x轴的时间返回，将返回的时间改为 mm-dd的格式，前端要求 */
         mesBoardCapacityTrendItemVOS.stream().forEach(m1 -> {
-                String time = m1.getXValue();
-                if (StringUtils.isNotEmpty(time)) {
-                    LocalDate date = LocalDate.parse(time, DateTimeFormatter.ofPattern(PATTERN));
-                    String time02dd = DateLocaDateAndTimeUtil.INSTANCE.formatDate(date, "MM-dd");
-                    m1.setXValue(time02dd);
-                }
-            });
-            return mesBoardCapacityTrendItemVOS;
+            String time = m1.getXValue();
+            if (StringUtils.isNotEmpty(time)) {
+                LocalDate date = LocalDate.parse(time, DateTimeFormatter.ofPattern(PATTERN));
+                String time02dd = DateLocaDateAndTimeUtil.INSTANCE.formatDate(date, "MM-dd");
+                m1.setXValue(time02dd);
+            }
+        });
+        return mesBoardCapacityTrendItemVOS;
 
 
     }
