@@ -4,16 +4,19 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.MesService;
 import org.thingsboard.server.dao.hsms.entity.vo.*;
+import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +38,7 @@ public class MesBoardController extends BaseController {
 
     @Autowired
     MesService mesService;
+    private String PATTERN = "yyyy-MM-dd";
 
 //    /**
 //     * 车间下全部产线
@@ -97,7 +101,21 @@ public class MesBoardController extends BaseController {
     })
     @GetMapping(value = "/mes/board/capacity/trend")
     public List<MesBoardCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
-        return this.mesService.getCapacityTrend(getTenantId(), workshopId);
+            List<MesBoardCapacityTrendItemVO> mesBoardCapacityTrendItemVOS = this.mesService.getCapacityTrend(getTenantId(), workshopId);
+            if (CollectionUtils.isEmpty(mesBoardCapacityTrendItemVOS)) {
+                return mesBoardCapacityTrendItemVOS;
+            }
+            mesBoardCapacityTrendItemVOS.stream().forEach(m1 -> {
+                String time = m1.getXValue();
+                if (StringUtils.isNotEmpty(time)) {
+                    LocalDate date = LocalDate.parse(time, DateTimeFormatter.ofPattern(PATTERN));
+                    String time02dd = DateLocaDateAndTimeUtil.INSTANCE.formatDate(date, "MM-dd");
+                    m1.setXValue(time02dd);
+                }
+            });
+            return mesBoardCapacityTrendItemVOS;
+
+
     }
 
     /**
