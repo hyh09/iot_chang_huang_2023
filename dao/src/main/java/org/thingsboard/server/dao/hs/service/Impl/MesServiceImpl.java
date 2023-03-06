@@ -219,6 +219,10 @@ public class MesServiceImpl implements MesService, CommonService {
 
     /**
      * 开机率分析top
+     * ###################
+     * ##修改人: wb04
+     * ##修改时间： 2023-03-06
+     * ##原接口中的sql异常，改为JdbcTemplate 调用
      *
      * @param tenantId         租户Id
      * @param productionLineId 产线Id
