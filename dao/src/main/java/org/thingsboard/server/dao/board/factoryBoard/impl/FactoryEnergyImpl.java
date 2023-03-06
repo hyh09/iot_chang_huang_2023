@@ -85,6 +85,7 @@ public class FactoryEnergyImpl extends ChartByChartDateEnumServer implements Fac
     /**
      * 1 先按照水 --- 电 --- 气 排序
      * 2. 排序之后截取前 15条数据返回
+     * 3. 排序的逻辑： 当前的能耗的值的最大的排序，（倒叙） 从大到小的排序
      *
      * @param queryTsKvVo
      * @param tenantId
