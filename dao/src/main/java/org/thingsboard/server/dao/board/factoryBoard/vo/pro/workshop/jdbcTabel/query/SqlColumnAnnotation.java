@@ -23,4 +23,6 @@ public @interface SqlColumnAnnotation {
 
     boolean ignoreField() default false;
 
+    boolean ignoreSelectField() default false;
+
 }

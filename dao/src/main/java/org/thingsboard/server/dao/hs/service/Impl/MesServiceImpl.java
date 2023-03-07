@@ -5,32 +5,34 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.DaoUtil;
+import org.thingsboard.server.dao.board.factoryBoard.dto.MesBoardDeviceOperationRateDto;
+import org.thingsboard.server.dao.board.factoryBoard.impl.base.SqlServerBascFactoryImpl;
 import org.thingsboard.server.dao.hs.HSConstants;
 import org.thingsboard.server.dao.hs.entity.vo.FactoryDeviceQuery;
 import org.thingsboard.server.dao.hs.service.ClientService;
 import org.thingsboard.server.dao.hs.service.CommonService;
 import org.thingsboard.server.dao.hs.service.MesService;
-import org.thingsboard.server.dao.hsms.entity.bo.DeviceHutBO;
 import org.thingsboard.server.dao.hsms.entity.dto.MesDeviceDTO;
 import org.thingsboard.server.dao.hsms.entity.dto.MesProductionMonitoringDTO;
 import org.thingsboard.server.dao.hsms.entity.dto.MesWorkshopDTO;
 import org.thingsboard.server.dao.hsms.entity.vo.*;
+import org.thingsboard.server.dao.util.decimal.BigDecimalUtil;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,7 +45,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Transactional(readOnly = true, rollbackFor = Exception.class)
-public class MesServiceImpl implements MesService, CommonService {
+public class MesServiceImpl extends SqlServerBascFactoryImpl implements MesService, CommonService {
 
     @Autowired
     private ClientService clientService;
@@ -51,12 +53,14 @@ public class MesServiceImpl implements MesService, CommonService {
     @Resource(name = "sqlServerTemplate")
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-//    @Qualifier("JdbcTemplate")
-    private JdbcTemplate jdbcTemplate_pg;
 
     @PersistenceContext
     protected EntityManager entityManager;
+
+    public MesServiceImpl(@Autowired JdbcTemplate jdbcTemplate) {
+        super(jdbcTemplate);
+    }
+
 
     private static final String QUERY_ALL_MES_WORKSHOPS = "SELECT A.uGUID,车间=A.sWorkCentreName " +
             "FROM dbo.pbWorkCentre A(NOLOCK) " +
@@ -153,6 +157,7 @@ public class MesServiceImpl implements MesService, CommonService {
             "FROM dbo.mnProducting A(NOLOCK) " +
             "JOIN dbo.emEquipment B(NOLOCK) ON B.uGUID=A.uemEquipmentGUID AND B.upbWorkCentreGUID= ?";
 
+
 //    /**
 //     * 车间下全部产线
 //     *
@@ -228,42 +233,63 @@ public class MesServiceImpl implements MesService, CommonService {
     @Override
     @SuppressWarnings("all")
     public List<MesBoardDeviceOperationRateVO> getDeviceOperationRateTop(TenantId tenantId, UUID productionLineId) {
-        var devices = this.listDevicesByProductionLineId(tenantId, productionLineId);
-        if (devices.isEmpty())
-            return Lists.newArrayList();
+        MesBoardDeviceOperationRateDto mesBoardDeviceOperationRateDto = new MesBoardDeviceOperationRateDto();
+        mesBoardDeviceOperationRateDto.setWorkshopId(productionLineId);
+        PageLink pageLink = new PageLink(10);
+        PageData<MesBoardDeviceOperationRateDto> fulfillmentVoList = jdbcByAssembleSqlUtil.pageQuery(mesBoardDeviceOperationRateDto, DaoUtil.toPageable(pageLink));
+        if (CollectionUtils.isEmpty(fulfillmentVoList.getData())) {
+            return new ArrayList<>();
+        }
+        return fulfillmentVoList.getData().stream().map(dto -> {
+            MesBoardDeviceOperationRateVO v1 = new MesBoardDeviceOperationRateVO();
+            v1.setId(dto.getId());
+            v1.setName(dto.getName());
+            v1.setTime(dto.getTime());
+            BigDecimalUtil bigDecimalUtil = new BigDecimalUtil(4, RoundingMode.HALF_UP);
+            String value = bigDecimalUtil.divide(dto.getTime(), HSConstants.DAY_TIME.toString()).toPlainString();
+            v1.setRate(BigDecimalUtil.INSTANCE.multiply(value, "100"));
+            return v1;
+        }).collect(Collectors.toList());
 
-        String sqlString = "SELECT t.entity_id as id, t.total_time as totalTime, t.start_time as startTime FROM trep_day_sta_detail t WHERE t.tenant_id = :tenantId AND t.entity_id in (:deviceIds) AND t.bdate = date(:startTime) ";
-//
-//        Query query = entityManager.createNativeQuery(sqlString)
-//                .setParameter("tenantId", tenantId.getId())
-//                .setParameter("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()))
-//                .setParameter("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-//
-//     List<DeviceHutBO> resultList=   query.getResultList();
 
-        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate_pg);
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("tenantId", tenantId.getId());
-        parameters.addValue("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()));
-        parameters.addValue("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        List<DeviceHutBO> resultList = givenParamJdbcTemp.query(sqlString, parameters, new BeanPropertyRowMapper<>(DeviceHutBO.class));
+        /** 查询设备 mes那边的设备*/
+        /**    var devices = this.listDevicesByProductionLineId(tenantId, productionLineId);
+         if (devices.isEmpty())
+         return Lists.newArrayList();
 
-        if (!resultList.isEmpty() && resultList.get(0) != null)
-            resultList = Lists.newArrayList();
+         String sqlString = "SELECT t.entity_id as id, t.total_time as totalTime, t.start_time as startTime FROM trep_day_sta_detail t WHERE t.tenant_id = :tenantId AND t.entity_id in (:deviceIds) AND t.bdate = date(:startTime) ";
+         //
+         //        Query query = entityManager.createNativeQuery(sqlString)
+         //                .setParameter("tenantId", tenantId.getId())
+         //                .setParameter("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()))
+         //                .setParameter("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+         //
+         //     List<DeviceHutBO> resultList=   query.getResultList();
 
-        var map = resultList.stream().collect(Collectors.toMap(k -> k.getId(), v -> {
-            var t = v.getStartTime() != null ? v.getStartTime() : 0L;
-            if (v.getStartTime() != null)
-                t += v.getStartTime();
-            return t;
-        }));
+         NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate_pg);
+         MapSqlParameterSource parameters = new MapSqlParameterSource();
+         parameters.addValue("tenantId", tenantId.getId());
+         parameters.addValue("deviceIds", devices.stream().map(MesBoardDeviceVO::getId).collect(Collectors.toList()));
+         parameters.addValue("startTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+         List<DeviceHutBO> resultList = givenParamJdbcTemp.query(sqlString, parameters, new BeanPropertyRowMapper<>(DeviceHutBO.class));
 
-        return devices.stream().map(v -> MesBoardDeviceOperationRateVO.builder()
-                .id(v.getId())
-                .name(v.getName())
-                .time(map.getOrDefault(v.getId(), 0L))
-                .rate(this.calculatePercentage(new BigDecimal(map.getOrDefault(v.getId(), 0L)), new BigDecimal(HSConstants.DAY_TIME)))
-                .build()).sorted(Comparator.comparing(MesBoardDeviceOperationRateVO::getTime).reversed()).collect(Collectors.toList());
+         if (!resultList.isEmpty() && resultList.get(0) != null)
+         resultList = Lists.newArrayList();
+
+         Map<UUID, Long> map = resultList.stream().collect(Collectors.toMap(k -> k.getId(), v -> {
+         var t = v.getStartTime() != null ? v.getStartTime() : 0L;
+         if (v.getStartTime() != null)
+         t += v.getStartTime();
+         return t;
+         }));
+
+         return devices.stream().map(v -> MesBoardDeviceOperationRateVO.builder()
+         .id(v.getId())
+         .name(v.getName())
+         .time(map.getOrDefault(v.getId(), 0L))
+         .rate(this.calculatePercentage(new BigDecimal(map.getOrDefault(v.getId(), 0L)), new BigDecimal(HSConstants.DAY_TIME)))
+         .build()).sorted(Comparator.comparing(MesBoardDeviceOperationRateVO::getTime).reversed()).collect(Collectors.toList());
+         */
 
     }
 
@@ -480,8 +506,9 @@ public class MesServiceImpl implements MesService, CommonService {
     @Override
     public List<String> getProductionTask(TenantId tenantId, UUID productionLineId) throws ThingsboardException {
         var mesWorkshopDTO = this.getMesWorkshopByProductionLineId(tenantId, productionLineId);
-        if (mesWorkshopDTO == null)
+        if (mesWorkshopDTO == null) {
             return Lists.newArrayList();
+        }
         return this.jdbcTemplate.query(
                 QUERY_PRODUCTION_TASK,
                 new Object[]{mesWorkshopDTO.getId()},
