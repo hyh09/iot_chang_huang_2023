@@ -38,7 +38,7 @@ public class JdbcByAssembleSqlUtil {
         if (dataBaseTypeEnums == DataBaseTypeEnums.SQLSERVER) {
             return pageQuerySqlServer(t, pageable, assembleSql);
         }
-        return null;
+        return pageQueryPgSqL(t, pageable, assembleSql);
     }
 
 
@@ -52,6 +52,22 @@ public class JdbcByAssembleSqlUtil {
         StringBuffer sqlQuery = new StringBuffer();
         sqlQuery.append(" select ").append(" top(").append(pageable.getPageSize()).append(" ) *").append(" from  ( ")
                 .append(sql).append(" ) temp where rownumber > ").append((pageable.getPageNumber()) * pageable.getPageSize());
+        List<T> mapList = (List<T>) givenParamJdbcTemp.query(sqlQuery.toString(), parameters, new BeanPropertyRowMapper<>(t.getClass()));
+        Page<T> page = new PageImpl<T>(mapList, pageable, count);
+        return new PageData<T>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());
+    }
+
+
+    private <T> PageData<T> pageQueryPgSqL(T t, Pageable pageable, AssembleSql assembleSql) {
+        String sql = assembleSql.getSqlAll();
+        Map<String, ?> values = assembleSql.getValues();
+        String sqlCount = "select count(*) from (" + sql + ") t_count_0";
+        MapSqlParameterSource parameters = new MapSqlParameterSource(values);
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Integer count = givenParamJdbcTemp.queryForObject(sqlCount, parameters, Integer.class);
+        StringBuffer sqlQuery = new StringBuffer();
+        sqlQuery.append(sql);
+        sqlQuery.append(" LIMIT ").append(pageable.getPageSize()).append(" OFFSET ").append((pageable.getPageNumber()) * pageable.getPageSize());
         List<T> mapList = (List<T>) givenParamJdbcTemp.query(sqlQuery.toString(), parameters, new BeanPropertyRowMapper<>(t.getClass()));
         Page<T> page = new PageImpl<T>(mapList, pageable, count);
         return new PageData<T>(mapList, page.getTotalPages(), page.getTotalElements(), page.hasNext());

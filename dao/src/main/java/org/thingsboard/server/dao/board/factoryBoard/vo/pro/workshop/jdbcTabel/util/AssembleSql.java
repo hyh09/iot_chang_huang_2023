@@ -73,6 +73,9 @@ public class AssembleSql {
         if (StringUtils.isNotEmpty(assembleBuildSql.lastGroupBy)) {
             stringBuffer.append(" GROUP BY ").append(assembleBuildSql.lastGroupBy);
         }
+        stringBuffer.append(getOrderByDataBaseType(assembleBuildSql));
+
+
         return new AssembleSql(stringBuffer.toString(), assembleBuildSql.values, assembleBuildSql.orderBy, assembleBuildSql.dataBaseType);
     }
 
@@ -87,6 +90,15 @@ public class AssembleSql {
 
     }
 
+    private static String getOrderByDataBaseType(AssembleSql.AssembleBuildSql assembleBuildSql) {
+        String sqlSelect = "";
+        String orderBy = assembleBuildSql.orderBy;
+        if (assembleBuildSql.dataBaseType == DataBaseTypeEnums.POSTGRESQL && StringUtils.isNotEmpty(orderBy)) {
+            return " ORDER BY" + orderBy;
+        }
+        return sqlSelect;
+
+    }
 
 
 
@@ -159,6 +171,9 @@ public class AssembleSql {
                 f.setAccessible(true);
                 SqlColumnAnnotation sqlColumnAnnotation = f.getAnnotation(SqlColumnAnnotation.class);
                 if (sqlColumnAnnotation == null && sqlColumnAnnotation.ignoreField()) {
+                    continue;
+                }
+                if (sqlColumnAnnotation != null && sqlColumnAnnotation.ignoreSelectField()) {
                     continue;
                 }
                 if (sqlColumnAnnotation == null && StringUtils.isEmpty(sqlColumnAnnotation.name())) {
