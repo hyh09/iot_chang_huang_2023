@@ -174,6 +174,7 @@ public class MesBoardController extends BaseController {
 
     /**
      * 生产进度跟踪
+     * #########2023-03-07 提出接口返回的重复了；
      */
     @ApiOperation(value = "生产进度跟踪", notes = "生产进度跟踪")
     @ApiImplicitParams({
