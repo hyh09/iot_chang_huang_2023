@@ -183,12 +183,22 @@ public class GatewayTimeTask {
                 endTimeDate = new Date(endTime);
                 endTimeStr = DateUtils.dateTime(endTimeDate);
             }
-            TrepDayStaDetailEntity trepDayStaDetailEntity = dayMap.get(entityId + startTimeStr + tenantId);
+            TrepDayStaDetailEntity trepDayStaDetailEntity = dayMap.get(entityId + nowStr + tenantId);
+            if (trepDayStaDetailEntity == null) {
+                Calendar instance = Calendar.getInstance();
+                instance.setTime(now);
+                instance.add(Calendar.DATE, -1);
+                trepDayStaDetailEntity = dayMap.get(entityId + DateUtils.dateTime(instance.getTime()) + tenantId);
+            }
             //新增的天统计数据
             TrepDayStaDetailEntity addEntity = new TrepDayStaDetailEntity();
             addEntity.setEntityId(entityId);
             addEntity.setBdate(now);
             addEntity.setStartTime(now.getTime() - startTime);
+            if(!startTimeStr.equals(nowStr)){
+                Date dayMin = DateUtils.getDayMin(now);
+                addEntity.setStartTime(now.getTime() - dayMin.getTime());
+            }
             addEntity.setTotalTime(0L);
             addEntity.setTenantId(tenantId);
             if (endTime != null) {
@@ -196,7 +206,7 @@ public class GatewayTimeTask {
                 addEntity.setTotalTime(endTime - startTime);
             }
             //新增
-            if (e.getId() == null && trepDayStaDetailEntity == null) {
+            if (trepDayStaDetailEntity == null) {
                 addList.add(addEntity);
             }
             //更新
@@ -216,6 +226,10 @@ public class GatewayTimeTask {
                     }
                 } else if (endTime == null) {
                     trepDayStaDetailEntity.setStartTime(now.getTime() - startTime);
+                    if(!startTimeStr.equals(nowStr)){
+                        Date dayMin = DateUtils.getDayMin(now);
+                        trepDayStaDetailEntity.setStartTime(now.getTime() - dayMin.getTime());
+                    }
                 } else {
                     trepDayStaDetailEntity.setStartTime(null);
                     trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
