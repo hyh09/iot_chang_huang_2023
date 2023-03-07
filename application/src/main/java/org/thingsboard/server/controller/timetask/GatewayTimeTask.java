@@ -166,6 +166,7 @@ public class GatewayTimeTask {
         //当日的按天累计的时间
         Date now = DateUtils.getNowDate();
         String nowStr = DateUtils.dateTime(now);
+        Date nowMin = DateUtils.getDayMin(now);
         //更新的机台已经结束的需要更新startTime为null
         List<TrepDayStaDetailEntity> nowList = trepDayStaDetailRepository.findAllByBdateEqualsOrStartTimeIsNotNull(now);
         Map<String, TrepDayStaDetailEntity> dayMap = nowList.stream().collect(Collectors.toMap(e -> e.getEntityId() + DateUtils.dateTime(e.getBdate()) + e.getTenantId(), Function.identity()));
@@ -195,15 +196,17 @@ public class GatewayTimeTask {
             addEntity.setEntityId(entityId);
             addEntity.setBdate(now);
             addEntity.setStartTime(now.getTime() - startTime);
-            if(!startTimeStr.equals(nowStr)){
-                Date dayMin = DateUtils.getDayMin(now);
-                addEntity.setStartTime(now.getTime() - dayMin.getTime());
+            if (!startTimeStr.equals(nowStr)) {
+                addEntity.setStartTime(now.getTime() - nowMin.getTime());
             }
             addEntity.setTotalTime(0L);
             addEntity.setTenantId(tenantId);
             if (endTime != null) {
                 addEntity.setStartTime(null);
                 addEntity.setTotalTime(endTime - startTime);
+                if (!startTimeStr.equals(nowStr)) {
+                    addEntity.setTotalTime(endTime - nowMin.getTime());
+                }
             }
             //新增
             if (trepDayStaDetailEntity == null) {
@@ -219,20 +222,32 @@ public class GatewayTimeTask {
                         //机台跨天
                         Date dayMax = DateUtils.getDayMax(startTimeDate);
                         trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + dayMax.getTime() - startTime);
+                        if (!startTimeStr.equals(nowStr)) {
+                            trepDayStaDetailEntity.setTotalTime(dayMax.getTime() - nowMin.getTime());
+                        } else {
+                            trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + dayMax.getTime() - startTime);
+                        }
                         addList.add(addEntity);
                     } else {
                         //结束时间未跨天，不需要新增按天统计
-                        trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + e.getEndTime() - startTime);
+                        if (!startTimeStr.equals(endTimeStr)) {
+                            trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - nowMin.getTime());
+                        } else {
+                            trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
+                        }
                     }
                 } else if (endTime == null) {
                     trepDayStaDetailEntity.setStartTime(now.getTime() - startTime);
-                    if(!startTimeStr.equals(nowStr)){
-                        Date dayMin = DateUtils.getDayMin(now);
-                        trepDayStaDetailEntity.setStartTime(now.getTime() - dayMin.getTime());
+                    if (!startTimeStr.equals(nowStr)) {
+                        trepDayStaDetailEntity.setStartTime(now.getTime() - nowMin.getTime());
                     }
                 } else {
                     trepDayStaDetailEntity.setStartTime(null);
-                    trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
+                    if (!startTimeStr.equals(endTimeStr)) {
+                        trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - nowMin.getTime());
+                    } else {
+                        trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
+                    }
                 }
             }
         });
