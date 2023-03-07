@@ -21,6 +21,18 @@ public @interface SqlColumnAnnotation {
 
     String queryWhere() default "";
 
+    /**
+     * 是否忽略字段， 忽略的化，不在select 和 where后面处理
+     *
+     * @return
+     */
     boolean ignoreField() default false;
+
+    /**
+     * 忽略select ,但是只在where 中处理
+     *
+     * @return
+     */
+    boolean ignoreSelectField() default false;
 
 }
