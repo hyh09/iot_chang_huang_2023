@@ -28,11 +28,7 @@ public @interface SqlColumnAnnotation {
      */
     boolean ignoreField() default false;
 
-    /**
-     * 忽略select ,但是只在where 中处理
-     *
-     * @return
-     */
+
     boolean ignoreSelectField() default false;
 
 }

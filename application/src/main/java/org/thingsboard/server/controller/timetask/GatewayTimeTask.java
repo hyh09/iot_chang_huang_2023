@@ -165,6 +165,7 @@ public class GatewayTimeTask {
         //当日的按天累计的时间
         Date now = DateUtils.getNowDate();
         String nowStr = DateUtils.dateTime(now);
+        //更新的机台已经结束的需要更新startTime为null
         List<TrepDayStaDetailEntity> nowList = trepDayStaDetailRepository.findAllByBdateEqualsOrStartTimeIsNotNull(now);
         Map<String, TrepDayStaDetailEntity> dayMap = nowList.stream().collect(Collectors.toMap(e -> e.getEntityId() + DateUtils.dateTime(e.getBdate()) + e.getTenantId(), Function.identity()));
         List<TrepDayStaDetailEntity> addList = new ArrayList<>();
@@ -189,6 +190,10 @@ public class GatewayTimeTask {
             addEntity.setStartTime(now.getTime() - startTime);
             addEntity.setTotalTime(0L);
             addEntity.setTenantId(tenantId);
+            if (endTime != null) {
+                addEntity.setStartTime(null);
+                addEntity.setTotalTime(endTime - startTime);
+            }
             //新增
             if (e.getId() == null && trepDayStaDetailEntity == null) {
                 addList.add(addEntity);
@@ -197,20 +202,21 @@ public class GatewayTimeTask {
             if (trepDayStaDetailEntity != null) {
                 Date bdate = trepDayStaDetailEntity.getBdate();
                 if (!nowStr.equals(DateUtils.dateTime(bdate))) {
-                    trepDayStaDetailEntity.setStartTime(0L);
+                    //按时间段统计的跨天
+                    trepDayStaDetailEntity.setStartTime(null);
                     if (endTime == null || !nowStr.equals(endTimeStr)) {
+                        //机台跨天
                         Date dayMax = DateUtils.getDayMax(startTimeDate);
                         trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + dayMax.getTime() - startTime);
-                        addEntity.setStartTime(endTime - DateUtils.getDayMin(now).getTime());
                         addList.add(addEntity);
                     } else {
+                        //结束时间未跨天，不需要新增按天统计
                         trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + e.getEndTime() - startTime);
                     }
-                }
-                if (endTime == null) {
+                } else if (endTime == null) {
                     trepDayStaDetailEntity.setStartTime(now.getTime() - startTime);
                 } else {
-                    trepDayStaDetailEntity.setStartTime(0L);
+                    trepDayStaDetailEntity.setStartTime(null);
                     trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
                 }
             }
