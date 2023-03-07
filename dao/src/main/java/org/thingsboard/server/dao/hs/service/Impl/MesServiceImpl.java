@@ -141,7 +141,11 @@ public class MesServiceImpl implements MesService, CommonService {
             "JOIN dbo.pbWorkCentre E(NOLOCK) ON E.uGUID = D.upbWorkCentreGUID AND E.uGUID= ?  " +
             "WHERE A.sType='回修'";
 
-    private static final String QUERY_PRODUCTION_PROGRESS_TRACKING = "SELECT TOP 10 卡号=A.sCardNo,客户=D.sCustomerName,色号=E.sColorNo,[超时(小时)]=CASE WHEN F.uGUID IS NULL THEN NULL WHEN F.tPlanEndTime>GETDATE() THEN 0 ELSE DATEDIFF(HOUR,F.tPlanEndTime,GETDATE()) END,当前工序=G.sWorkingProcedureName,上到工序=I.sWorkingProcedureName,上工序完成时间=H.tFactEndTime   " +
+    /**
+     * 生产进度跟踪接口
+     * 出现返回的重复的数据；剔除重复的卡片
+     */
+    private static final String QUERY_PRODUCTION_PROGRESS_TRACKING = "SELECT TOP 10 卡号=A.sCardNo,客户=max(D.sCustomerName),色号=max(E.sColorNo),[超时(小时)]=CASE WHEN max(F.uGUID) IS NULL THEN NULL WHEN max(F.tPlanEndTime)>GETDATE() THEN 0 ELSE DATEDIFF(HOUR,max(F.tPlanEndTime),GETDATE()) END,当前工序=max(G.sWorkingProcedureName),上到工序=max(I.sWorkingProcedureName),上工序完成时间=max(H.tFactEndTime)   " +
             "FROM dbo.psWorkFlowCard A(NOLOCK)    " +
             "JOIN dbo.ppTrackJob B(NOLOCK) ON B.upsWorkFlowCardGUID = A.uGUID AND B.bIsCurrent=1   " +
             "JOIN dbo.sdOrderHdr C(NOLOCK) ON C.sOrderNo = A.sOrderNo   " +
@@ -154,7 +158,7 @@ public class MesServiceImpl implements MesService, CommonService {
             "LEFT JOIN dbo.psWPP F(NOLOCK) ON F.upsWorkFlowCardGUID = A.uGUID   " +
             "LEFT JOIN dbo.ppTrackJob H(NOLOCK) ON H.upsWorkFlowCardGUID = A.uGUID AND H.iOrderProcedure=B.iOrderProcedure-1   " +
             "LEFT JOIN dbo.pbWorkingProcedure I(NOLOCK) ON I.uGUID=H.upbWorkingProcedureGUID   " +
-            "ORDER BY B.tFactStartTime desc ";
+            "  GROUP BY A.sCardNo ORDER BY max(A.tPlanEndTime) DESC ";
 
     private static final String QUERY_PRODUCTION_TASK = "SELECT DISTINCT B.sEquipmentName " +
             "FROM dbo.mnProducting A(NOLOCK) " +
