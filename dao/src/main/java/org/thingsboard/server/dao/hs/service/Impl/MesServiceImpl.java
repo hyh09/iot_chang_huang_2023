@@ -206,6 +206,7 @@ public class MesServiceImpl implements MesService, CommonService {
 
     /**
      * 产线下全部设备
+     * 查询mes那边的设备
      *
      * @param tenantId         租户Id
      * @param productionLineId 产线Id
@@ -243,6 +244,7 @@ public class MesServiceImpl implements MesService, CommonService {
     @Override
     @SuppressWarnings("all")
     public List<MesBoardDeviceOperationRateVO> getDeviceOperationRateTop(TenantId tenantId, UUID productionLineId) {
+        /** 查询设备 mes那边的设备*/
         var devices = this.listDevicesByProductionLineId(tenantId, productionLineId);
         if (devices.isEmpty())
             return Lists.newArrayList();

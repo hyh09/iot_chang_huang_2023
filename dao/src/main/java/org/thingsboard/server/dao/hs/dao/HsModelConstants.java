@@ -204,6 +204,9 @@ public class HsModelConstants {
 
     /**
      * 开机时长记录表
+     * 创建人: 范王勇
+     * 创建日期:2023-01-02
+     * 注意： sum((t1.total_time + t1.start_time))
      */
     public static final String TREP_DAY_STA_DETAIL_TABLE_NAME = "trep_day_sta_detail";
     public static final String TREP_HSTA_DETAILL_TABLE_NAME = "trep_hsta_detail";
