@@ -15,6 +15,7 @@ import org.thingsboard.server.dao.hsms.entity.vo.*;
 import org.thingsboard.server.dao.util.decimal.DateLocaDateAndTimeUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -110,13 +111,19 @@ public class MesBoardController extends BaseController {
             @ApiImplicitParam(name = "workshopId", value = "车间Id", paramType = "query", required = true),
     })
     @GetMapping(value = "/mes/board/capacity/trend")
-    public List<MesBoardCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException {
+    public List<MesBoardCapacityTrendItemVO> getCapacityTrend(@RequestParam(value = "workshopId") UUID workshopId) throws ThingsboardException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         List<MesBoardCapacityTrendItemVO> mesBoardCapacityTrendItemVOS = this.mesService.getCapacityTrend(getTenantId(), workshopId);
         if (CollectionUtils.isEmpty(mesBoardCapacityTrendItemVOS)) {
             return mesBoardCapacityTrendItemVOS;
         }
+        /** 2023-03-07 补齐时间轴 通用方法*/
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(7);
+        List<MesBoardCapacityTrendItemVO> resultList = DateLocaDateAndTimeUtil.INSTANCE.completionTime(mesBoardCapacityTrendItemVOS, startDate, endDate,
+                "0", MesBoardCapacityTrendItemVO.class,
+                "xValue", "yValue", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         /**2023-03-06 修改x轴的时间返回，将返回的时间改为 mm-dd的格式，前端要求 */
-        mesBoardCapacityTrendItemVOS.stream().forEach(m1 -> {
+        resultList.stream().forEach(m1 -> {
             String time = m1.getXValue();
             if (StringUtils.isNotEmpty(time)) {
                 LocalDate date = LocalDate.parse(time, DateTimeFormatter.ofPattern(PATTERN));
@@ -124,7 +131,7 @@ public class MesBoardController extends BaseController {
                 m1.setXValue(time02dd);
             }
         });
-        return mesBoardCapacityTrendItemVOS;
+        return resultList;
 
 
     }
