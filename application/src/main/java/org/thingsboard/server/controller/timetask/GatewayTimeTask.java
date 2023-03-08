@@ -178,7 +178,8 @@ public class GatewayTimeTask {
             Date startTimeDate = new Date(startTime);
             String startTimeStr = DateUtils.dateTime(startTimeDate);
             Long endTime = e.getEndTime();
-            Date endTimeDate;
+            Date endTimeDate = null;
+            Date endMin;
             String endTimeStr = null;
             if (endTime != null) {
                 endTimeDate = new Date(endTime);
@@ -215,23 +216,22 @@ public class GatewayTimeTask {
             //更新
             if (trepDayStaDetailEntity != null) {
                 Date bdate = trepDayStaDetailEntity.getBdate();
-                if (!nowStr.equals(DateUtils.dateTime(bdate))) {
+                String bdateStr = DateUtils.dateTime(bdate);
+                if (!nowStr.equals(bdateStr)) {
                     //按时间段统计的跨天
                     trepDayStaDetailEntity.setStartTime(null);
-                    if (endTime == null || !nowStr.equals(endTimeStr)) {
-                        //机台跨天
-                        Date dayMax = DateUtils.getDayMax(startTimeDate);
-                        trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + dayMax.getTime() - startTime);
-                        if (!startTimeStr.equals(nowStr)) {
-                            trepDayStaDetailEntity.setTotalTime(dayMax.getTime() - nowMin.getTime());
+                    if (endTime == null || nowStr.equals(endTimeStr)) {
+                        if (!startTimeStr.equals(bdateStr)) {
+                            trepDayStaDetailEntity.setTotalTime(HSConstants.DAY_TIME);
                         } else {
-                            trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + dayMax.getTime() - startTime);
+                            trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + nowMin.getTime() - startTime);
                         }
                         addList.add(addEntity);
                     } else {
                         //结束时间未跨天，不需要新增按天统计
-                        if (!startTimeStr.equals(endTimeStr)) {
-                            trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - nowMin.getTime());
+                        endMin = DateUtils.getDayMin(endTimeDate);
+                        if (!startTimeStr.equals(bdateStr)) {
+                            trepDayStaDetailEntity.setTotalTime(endTime - endMin.getTime());
                         } else {
                             trepDayStaDetailEntity.setTotalTime(trepDayStaDetailEntity.getTotalTime() + endTime - startTime);
                         }
