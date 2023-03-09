@@ -25,7 +25,7 @@
         </encoder>
     </appender>
 
-    <!--    <logger name="org.hibernate.SQL" level="DEBUG"/>-->
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
     <logger name="org.thingsboard.server" level="INFO"/>
 
     <!--    <logger name="org.thingsboard.server.service.queue" level="TRACE" />-->

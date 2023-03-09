@@ -27,3 +27,14 @@ update   user_credentials  set "password"='加密后' where  user_id=(
 select id   from tb_user  where  authority='SYS_ADMIN' and email='系统用户邮箱')
 ```
 
+
+
+
+
+
+
+# V3 
+
+##   V3 生产环境
+
+> http://iot.v3.saas.huansi.net/apiManagement
