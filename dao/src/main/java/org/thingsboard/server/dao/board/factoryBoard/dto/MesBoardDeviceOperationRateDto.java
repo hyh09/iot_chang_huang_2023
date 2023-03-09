@@ -22,7 +22,7 @@ import java.util.UUID;
 @ToString
 @ApiModel(value = "车间看板-设备开机率top10")
 @SqlOnFromTableAnnotation(from = "device d1 LEFT JOIN trep_day_sta_detail t1 on d1.id =t1.entity_id ",
-        whereValue = " ( ( t1.total_time + t1.start_time ) ) is  not null ",
+        whereValue = " ( ( t1.total_time + t1.start_time ) ) is  not null  and  t1.bdate=  current_date ",
         groupByLast = "t1.entity_id",
         orderBy = " sum((t1.total_time + t1.start_time)) DESC",
         dataBaseType = DataBaseTypeEnums.POSTGRESQL)
