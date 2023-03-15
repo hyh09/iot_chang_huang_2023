@@ -13,6 +13,15 @@ Newtech2023.
 
 # 长胜环境
 
+### 产生web
+
+```shell
+     http://iot.textile-saas.huansi.net/ 
+         测试环境系统管理员账号更新为 iot.system@huansi.net  /   sysadmin   
+```
+
+
+
 
 
 ##    二期看板的测试地址
