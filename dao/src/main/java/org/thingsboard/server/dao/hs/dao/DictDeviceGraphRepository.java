@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 @Repository
 public interface DictDeviceGraphRepository extends PagingAndSortingRepository<DictDeviceGraphEntity, UUID>, JpaSpecificationExecutor<DictDeviceGraphEntity> {
     /**
-     * 设备字典 查询 设备字典图表 ： select * from  hs_dict_device_graph
+     * 设备字典 查询 设备字典图表 ：  select *  from  hs_dict_device_graph  where  dict_device_id='';
      *
      * @param dictDeviceId
      * @return
