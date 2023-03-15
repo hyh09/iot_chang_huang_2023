@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -793,6 +794,13 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
      * 作者: wwj
      * 时间: 2022-01-26
      * 设备字典-图表-列表
+     * <p>
+     * ###########################
+     * 2023-03-15 报错：
+     * 解决方法: delete   from  hs_dict_device_graph_item  where   property_type='COMPONENT'  and property_id not in (
+     * <p>
+     * select id   from  hs_dict_device_component_property
+     * )
      *
      * @param tenantId     租户Id
      * @param dictDeviceId 设备字典Id
@@ -801,7 +809,7 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
     @Override
     @SuppressWarnings("all")
     public List<DictDeviceGraphVO> listDictDeviceGraphs(TenantId tenantId, UUID dictDeviceId) {
-        var graphs = DaoUtil.convertDataList(this.graphRepository.findAllByDictDeviceIdOrderByCreatedTimeDesc(dictDeviceId).join());
+        List<DictDeviceGraph> graphs = DaoUtil.convertDataList(this.graphRepository.findAllByDictDeviceIdOrderByCreatedTimeDesc(dictDeviceId).join());
         if (graphs.isEmpty())
             return Lists.newArrayList();
         return graphs.stream().map(v -> DictDeviceGraphVO.builder()
@@ -815,8 +823,13 @@ public class DictDeviceServiceImpl implements DictDeviceService, CommonService {
                         .thenApplyAsync(e -> DaoUtil.convertDataList(e).stream()
                                 .map(f -> {
                                     DictDeviceGraphPropertyVO graphProperty = new DictDeviceGraphPropertyVO();
-                                    var tsProperty = this.getTsPropertyByIdAndType(f.getPropertyId(), f.getPropertyType());
-                                    BeanUtils.copyProperties(tsProperty, graphProperty);
+                                    DictDeviceTsPropertyVO tsProperty = this.getTsPropertyByIdAndType(f.getPropertyId(), f.getPropertyType());
+                                    try {
+                                        BeanUtils.copyProperties(tsProperty, graphProperty);
+                                    } catch (IllegalArgumentException e1) {
+                                        log.info(JacksonUtil.toString(tsProperty));
+                                        e1.fillInStackTrace();
+                                    }
                                     graphProperty.setSuffix(f.getSuffix());
                                     return graphProperty;
                                 }).collect(Collectors.toList())).thenApplyAsync(e -> {
